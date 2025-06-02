@@ -1,11 +1,11 @@
 
 import React from 'react';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
 
 const RoleDashboardPage = () => {
-  const { user, profile, isLoading, isInitialized, isAuthenticated, isAdmin } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAuthenticated, isAdmin } = useAuth();
 
   console.log('🏠 RoleDashboardPage: State check:', {
     hasUser: !!user,
@@ -19,7 +19,6 @@ const RoleDashboardPage = () => {
     isAdminFunction: isAdmin()
   });
 
-  // Show loading during initialization
   if (!isInitialized) {
     return (
       <PageLoader 
@@ -29,13 +28,11 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {
     console.log('🔒 RoleDashboardPage: Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  // Show loading while profile loads
   if (isLoading) {
     return (
       <PageLoader 
@@ -45,10 +42,8 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Determine redirect based on user type
-  let redirectPath = '/dashboard/member'; // Default fallback
+  let redirectPath = '/dashboard/member';
   
-  // Check if user is kevinskey@mac.com (known admin)
   const isKnownAdmin = user.email === 'kevinskey@mac.com';
   const hasAdminAccess = isAdmin() || isKnownAdmin;
   

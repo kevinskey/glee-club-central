@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CalendarEvent } from '@/types/calendar';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useCalendarEvents = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user, isAuthenticated } = useSimpleAuthContext();
+  const { user, isAuthenticated } = useAuth();
 
   const fetchEvents = async () => {
     try {
@@ -17,7 +17,6 @@ export const useCalendarEvents = () => {
       
       console.log('Fetching events... Authentication status:', isAuthenticated);
       
-      // Fetch all events - we'll filter client-side for better performance
       const { data, error } = await supabase
         .from('events')
         .select('*')
@@ -59,7 +58,7 @@ export const useCalendarEvents = () => {
       }
       
       console.log('Event created successfully:', data);
-      await fetchEvents(); // Refresh the events list
+      await fetchEvents();
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create event';
@@ -90,7 +89,7 @@ export const useCalendarEvents = () => {
       }
       
       console.log('Event updated successfully:', data);
-      await fetchEvents(); // Refresh the events list
+      await fetchEvents();
       return data;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update event';
@@ -119,7 +118,7 @@ export const useCalendarEvents = () => {
       }
       
       console.log('Event deleted successfully');
-      await fetchEvents(); // Refresh the events list
+      await fetchEvents();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete event';
       console.error('Error in deleteEvent:', err);
@@ -130,7 +129,7 @@ export const useCalendarEvents = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, []); // Remove dependency on user to allow public access
+  }, []);
 
   return {
     events,

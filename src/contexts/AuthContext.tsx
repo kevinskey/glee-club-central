@@ -1,92 +1,159 @@
 
-import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { AuthUser, Profile } from '@/types/auth';
+import { getProfile, ensureProfileExists } from '@/utils/supabase/profiles';
 
 interface AuthContextType {
-  user: any;
-  loading: boolean;
+  user: AuthUser | null;
+  profile: Profile | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  isInitialized: boolean;
   login: (email: string, password: string) => Promise<{ error: any }>;
   logout: () => Promise<{ error: any }>;
-  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<{ error: any; data: any }>;
-  signOut: () => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<{ error: any; data: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   updatePassword: (password: string) => Promise<{ error: any }>;
+  isAdmin: () => boolean;
+  isMember: () => boolean;
+  getUserType: () => 'admin' | 'member';
+  refreshProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Utility functions for auth cleanup
-export const cleanupAuthState = () => {
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const refreshProfile = useCallback(async () => {
+    if (!user) {
+      setProfile(null);
+      return;
     }
-  });
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
+
+    try {
+      console.log('🔄 AuthContext: Refreshing profile for user:', user.id);
+      const userProfile = await ensureProfileExists(user.id, user.email, user.user_metadata);
+      setProfile(userProfile);
+      console.log('✅ AuthContext: Profile refreshed successfully');
+    } catch (error) {
+      console.error('❌ AuthContext: Error refreshing profile:', error);
+      setProfile(null);
     }
-  });
-};
-
-export const resetAuthSystem = async () => {
-  cleanupAuthState();
-  try {
-    await supabase.auth.signOut({ scope: 'global' });
-  } catch (err) {
-    // Continue even if this fails
-  }
-};
-
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  }, [user]);
 
   useEffect(() => {
-    const getSession = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      setUser(sessionData?.session?.user || null);
-      setLoading(false);
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        console.log('🚀 AuthContext: Initializing auth state...');
+        
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('❌ AuthContext: Session error:', error);
+        }
+
+        if (mounted) {
+          const sessionUser = session?.user ?? null;
+          setUser(sessionUser);
+          
+          if (sessionUser) {
+            const userProfile = await ensureProfileExists(sessionUser.id, sessionUser.email, sessionUser.user_metadata);
+            setProfile(userProfile);
+          } else {
+            setProfile(null);
+          }
+          
+          setIsLoading(false);
+          setIsInitialized(true);
+          console.log('✅ AuthContext: Auth initialization complete');
+        }
+      } catch (error) {
+        console.error('❌ AuthContext: Initialization error:', error);
+        if (mounted) {
+          setIsLoading(false);
+          setIsInitialized(true);
+        }
+      }
     };
 
-    getSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 AuthContext: Auth state change:', event, !!session);
+      
+      if (!mounted) return;
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      const sessionUser = session?.user ?? null;
+      setUser(sessionUser);
+      
+      if (sessionUser && event === 'SIGNED_IN') {
+        // Defer profile loading to prevent potential deadlocks
+        setTimeout(async () => {
+          if (mounted) {
+            const userProfile = await ensureProfileExists(sessionUser.id, sessionUser.email, sessionUser.user_metadata);
+            setProfile(userProfile);
+          }
+        }, 0);
+      } else {
+        setProfile(null);
+      }
+      
+      setIsLoading(false);
+      setIsInitialized(true);
     });
 
+    initializeAuth();
+
     return () => {
-      listener?.subscription?.unsubscribe?.();
+      mounted = false;
+      subscription.unsubscribe();
     };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      return { error };
+      console.log('🔐 AuthContext: Login attempt for:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email: email.trim(), 
+        password 
+      });
+      
+      if (error) {
+        console.error('❌ AuthContext: Login error:', error);
+        return { error };
+      }
+      
+      console.log('✅ AuthContext: Login successful');
+      return { error: null };
     } catch (err) {
+      console.error('💥 AuthContext: Unexpected login error:', err);
       return { error: err };
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
+      console.log('🚪 AuthContext: Logout attempt');
       const { error } = await supabase.auth.signOut();
       return { error };
     } catch (err) {
+      console.error('💥 AuthContext: Logout error:', err);
       return { error: err };
     }
-  };
+  }, []);
 
-  const signUp = async (email: string, password: string, firstName?: string, lastName?: string) => {
+  const signUp = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
     try {
+      console.log('📝 AuthContext: Sign up attempt for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.trim(),
         password,
         options: {
           data: {
@@ -95,42 +162,67 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           },
         },
       });
+      
       return { error, data };
     } catch (err) {
+      console.error('💥 AuthContext: Sign up error:', err);
       return { error: err, data: null };
     }
-  };
+  }, []);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = useCallback(async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
       return { error };
     } catch (err) {
       return { error: err };
     }
-  };
+  }, []);
 
-  const updatePassword = async (password: string) => {
+  const updatePassword = useCallback(async (password: string) => {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       return { error };
     } catch (err) {
       return { error: err };
     }
+  }, []);
+
+  const isAdmin = useCallback(() => {
+    const isKnownAdmin = user?.email === 'kevinskey@mac.com';
+    const profileAdmin = profile ? (profile.is_super_admin === true || profile.role === 'admin') : false;
+    return isKnownAdmin || profileAdmin;
+  }, [profile, user?.email]);
+
+  const isMember = useCallback(() => {
+    return !profile || profile.role === 'member' || !profile.role;
+  }, [profile]);
+
+  const getUserType = useCallback((): 'admin' | 'member' => {
+    return isAdmin() ? 'admin' : 'member';
+  }, [isAdmin]);
+
+  const contextValue: AuthContextType = {
+    user,
+    profile,
+    isAuthenticated: !!user,
+    isLoading,
+    isInitialized,
+    login,
+    logout,
+    signUp,
+    resetPassword,
+    updatePassword,
+    isAdmin,
+    isMember,
+    getUserType,
+    refreshProfile,
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      loading, 
-      isAuthenticated: !!user,
-      login,
-      logout,
-      signUp,
-      signOut: logout,
-      resetPassword,
-      updatePassword
-    }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
@@ -138,6 +230,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 };

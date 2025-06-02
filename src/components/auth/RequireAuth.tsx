@@ -2,38 +2,29 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
-import { Spinner } from '@/components/ui/spinner';
+import { PageLoader } from '@/components/ui/page-loader';
 
 interface RequireAuthProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
 }
 
-const RequireAuth: React.FC<RequireAuthProps> = ({ children, requireAdmin = false }) => {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, isAuthenticated, isInitialized, isAdmin } = useProfile();
+const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+  const { isAuthenticated, isLoading, isInitialized } = useAuth();
   const location = useLocation();
-
-  // Show loading while auth state is being determined
-  if (authLoading || !isInitialized) {
+  
+  if (!isInitialized || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Spinner size="lg" />
-      </div>
+      <PageLoader 
+        message="Checking authentication..." 
+        className="min-h-screen"
+      />
     );
   }
-
-  // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
+  
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
-  // Check admin requirement
-  if (requireAdmin && !isAdmin()) {
-    return <Navigate to="/dashboard/member" replace />;
-  }
-
+  
   return <>{children}</>;
 };
 

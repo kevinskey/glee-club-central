@@ -6,21 +6,18 @@ import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { Calendar } from 'lucide-react';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
-  const { isAuthenticated, user } = useSimpleAuthContext();
+  const { isAuthenticated, user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  // Filter events based on user authentication status
   const filteredEvents = events.filter(event => {
-    // Always show public events
     if (event.is_public) return true;
-    // Show private events only to authenticated users
     return isAuthenticated && !event.is_private;
   });
 

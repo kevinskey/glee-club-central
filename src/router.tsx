@@ -1,7 +1,7 @@
 
 import { createBrowserRouter } from "react-router-dom";
-import { SimpleAuthProviderFixed } from "@/contexts/SimpleAuthContextFixed";
-import SimpleRequireAuth from "@/components/auth/SimpleRequireAuth";
+import { AuthProvider } from "@/contexts/AuthContext";
+import RequireAuth from "@/components/auth/RequireAuth";
 import AdminRoute from "@/components/auth/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
 
@@ -29,13 +29,13 @@ import ProfilePageFixed from "./pages/profile/ProfilePageFixed";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
-  // Public routes - now wrapped with auth context for header functionality
+  // Public routes
   {
     path: "/",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
     children: [
       { index: true, element: <HomePage /> },
@@ -45,110 +45,110 @@ export const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
     ],
   },
-  // Auth routes - wrapped with SimpleAuthProviderFixed
+  // Auth routes
   {
     path: "/login",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <LoginPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/signup", 
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <SignupPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/forgot-password",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ForgotPasswordPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/reset-password",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ResetPasswordPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/update-password",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ResetPasswordPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/register",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <RegisterPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
   {
     path: "/join-glee-fam",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <JoinGleeFamPage />
         </AppLayout>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
   },
-  // Profile route - standalone profile page with fixed auth
+  // Profile route
   {
     path: "/profile",
     element: (
-      <SimpleAuthProviderFixed>
-        <SimpleRequireAuth>
+      <AuthProvider>
+        <RequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
             <ProfilePageFixed />
           </AppLayout>
-        </SimpleRequireAuth>
-      </SimpleAuthProviderFixed>
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
-  // Role dashboard - determines redirect based on user role
+  // Role dashboard
   {
     path: "/role-dashboard",
     element: (
-      <SimpleAuthProviderFixed>
-        <SimpleRequireAuth>
+      <AuthProvider>
+        <RequireAuth>
           <RoleDashboardPage />
-        </SimpleRequireAuth>
-      </SimpleAuthProviderFixed>
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
-  // Admin routes - updated to include all admin pages including members and system reset
+  // Admin routes
   {
     path: "/admin",
     element: (
-      <SimpleAuthProviderFixed>
+      <AuthProvider>
         <AdminRoute>
           <AppLayout sidebarType="admin" showHeader={false} showFooter={false} />
         </AdminRoute>
-      </SimpleAuthProviderFixed>
+      </AuthProvider>
     ),
     children: [
       { index: true, element: <AdminDashboardPage /> },
@@ -162,26 +162,26 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard/member",
     element: (
-      <SimpleAuthProviderFixed>
-        <SimpleRequireAuth>
+      <AuthProvider>
+        <RequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
             <MemberDashboardPage />
           </AppLayout>
-        </SimpleRequireAuth>
-      </SimpleAuthProviderFixed>
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
   // Fan dashboard
   {
     path: "/dashboard/fan",
     element: (
-      <SimpleAuthProviderFixed>
-        <SimpleRequireAuth>
+      <AuthProvider>
+        <RequireAuth>
           <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
             <FanDashboardPage />
           </AppLayout>
-        </SimpleRequireAuth>
-      </SimpleAuthProviderFixed>
+        </RequireAuth>
+      </AuthProvider>
     ),
   },
   // Catch-all 404 route

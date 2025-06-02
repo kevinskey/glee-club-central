@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { PageLoader } from "@/components/ui/page-loader";
 import { toast } from "sonner";
 
@@ -10,7 +10,7 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, profile, isLoading, isInitialized, isAdmin, isAuthenticated } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAdmin, isAuthenticated } = useAuth();
   
   console.log('🛡️ AdminRoute: Admin access check:', {
     hasUser: !!user,
@@ -24,7 +24,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     isInitialized
   });
   
-  // Show loading state while auth and profile are loading
   if (!isInitialized || isLoading) {
     return (
       <PageLoader 
@@ -34,13 +33,11 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Redirect unauthenticated users to login
   if (!isAuthenticated || !user) {
     console.log('🚫 AdminRoute: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
-  // Wait for profile to load
   if (!profile) {
     return (
       <PageLoader 
@@ -50,7 +47,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Check admin access using the enhanced isAdmin function
   const hasAdminAccess = isAdmin();
   
   console.log('🔍 AdminRoute: Final admin access check:', {
@@ -68,7 +64,6 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     return <Navigate to="/dashboard/member" replace />;
   }
   
-  // Render children for users with admin access
   console.log('✅ AdminRoute: Admin access granted');
   return <>{children}</>;
 };
