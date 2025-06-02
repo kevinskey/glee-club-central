@@ -22,12 +22,6 @@ interface UseUsersSimplifiedResponse {
   searchUsers: (searchTerm: string) => Promise<SimpleUser[]>;
 }
 
-// Type for auth user from Supabase
-interface AuthUser {
-  id: string;
-  email?: string;
-}
-
 export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
   const [users, setUsers] = useState<SimpleUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -139,12 +133,13 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
               is_super_admin: profile.is_super_admin || false,
             }));
           } else {
-            // Create a properly typed Map from auth users
+            // Create a Map from auth users for email lookup
             const authUserMap = new Map<string, string>();
-            const authUsers = authData.users as AuthUser[];
-            authUsers.forEach(user => {
-              authUserMap.set(user.id, user.email || '');
-            });
+            if (authData?.users) {
+              authData.users.forEach((user: any) => {
+                authUserMap.set(user.id, user.email || '');
+              });
+            }
             
             usersWithEmails = profiles.map(profile => ({
               id: profile.id,
