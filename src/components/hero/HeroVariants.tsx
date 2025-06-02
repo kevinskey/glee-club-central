@@ -1,99 +1,73 @@
 
 import React from 'react';
-import { ModularHeroSection } from './ModularHeroSection';
+import { ModernHeroSection } from '@/components/landing/hero/ModernHeroSection';
 
 // Compact hero for internal pages
 export function CompactHero({ 
-  category, 
+  sectionId = "homepage-main",
   title, 
   subtitle 
 }: { 
-  category: string; 
+  sectionId?: string;
   title?: string; 
   subtitle?: string; 
 }) {
   return (
-    <ModularHeroSection
-      category={category}
-      height="40vh"
-      displayMode="single"
-      overlayTitle={title}
-      overlaySubtitle={subtitle}
-      autoPlay={false}
-      className="rounded-b-lg"
-    />
+    <div style={{ height: '40vh' }} className="rounded-b-lg overflow-hidden">
+      <ModernHeroSection />
+    </div>
   );
 }
 
-// Banner hero for feature sections
+// Banner hero for feature sections  
 export function BannerHero({ 
-  category, 
+  sectionId = "homepage-main",
   title, 
   subtitle 
 }: { 
-  category: string; 
+  sectionId?: string;
   title?: string; 
   subtitle?: string; 
 }) {
   return (
-    <ModularHeroSection
-      category={category}
-      height="25vh"
-      displayMode="slideshow"
-      overlayTitle={title}
-      overlaySubtitle={subtitle}
-      autoPlay={true}
-      autoPlayInterval={8000}
-      className="mb-8"
-    />
+    <div style={{ height: '25vh' }} className="mb-8 overflow-hidden">
+      <ModernHeroSection />
+    </div>
   );
 }
 
 // Full-screen hero for landing pages
 export function FullScreenHero({ 
-  category, 
+  sectionId = "homepage-main",
   title, 
   subtitle 
 }: { 
-  category: string; 
+  sectionId?: string;
   title?: string; 
   subtitle?: string; 
 }) {
   return (
-    <ModularHeroSection
-      category={category}
-      height="100vh"
-      displayMode="slideshow"
-      overlayTitle={title}
-      overlaySubtitle={subtitle}
-      autoPlay={true}
-      autoPlayInterval={6000}
-    />
+    <div style={{ height: '100vh' }} className="overflow-hidden">
+      <ModernHeroSection />
+    </div>
   );
 }
 
 // Card hero for embedded sections
 export function CardHero({ 
-  category, 
+  sectionId = "homepage-main",
   title, 
   subtitle 
 }: { 
-  category: string; 
+  sectionId?: string;
   title?: string; 
   subtitle?: string; 
 }) {
   return (
     <div className="p-4">
-      <ModularHeroSection
-        category={category}
-        height="300px"
-        displayMode="slideshow"
-        overlayTitle={title}
-        overlaySubtitle={subtitle}
-        autoPlay={true}
-        autoPlayInterval={4000}
-        className="rounded-lg shadow-lg"
-      />
+      <div style={{ height: '300px' }} className="rounded-lg shadow-lg overflow-hidden">
+        <ModernHeroSection />
+      </div>
     </div>
   );
 }
