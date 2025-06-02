@@ -1,5 +1,6 @@
 
 import { createBrowserRouter } from "react-router-dom";
+import App from "./App";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -14,43 +15,49 @@ import RoleDashboardPage from "./pages/RoleDashboardPage";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomePage />,
-  },
-  {
-    path: "/about",
-    element: <AboutPage />,
-  },
-  {
-    path: "/contact",
-    element: <ContactPage />,
-  },
-  {
-    path: "/login",
-    element: <LoginPage />,
-  },
-  {
-    path: "/profile",
-    element: <ProfilePage />,
-  },
-  {
-    path: "/dashboard",
-    element: <RoleDashboardPage />,
-  },
-  {
-    path: "/attendance",
-    element: <AttendancePage />,
-  },
-  {
-    path: "/store",
-    element: <StorePage />,
-  },
-  {
-    path: "/design-studio",
-    element: <DesignStudioPage />,
-  },
-  {
-    path: "/auto-generator",
-    element: <AutoProductGeneratorPage />,
+    element: <App />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: "about",
+        element: <AboutPage />,
+      },
+      {
+        path: "contact",
+        element: <ContactPage />,
+      },
+      {
+        path: "login",
+        element: <LoginPage />,
+      },
+      {
+        path: "profile",
+        element: <ProfilePage />,
+      },
+      {
+        path: "dashboard",
+        element: <RoleDashboardPage />,
+      },
+      {
+        path: "attendance",
+        element: <AttendancePage />,
+      },
+      {
+        path: "store",
+        element: <StorePage />,
+      },
+      {
+        path: "design-studio",
+        element: <DesignStudioPage />,
+      },
+      {
+        path: "auto-generator",
+        element: <AutoProductGeneratorPage />,
+      },
+    ],
   },
 ]);
 
