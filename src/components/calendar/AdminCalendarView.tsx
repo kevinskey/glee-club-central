@@ -19,23 +19,41 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
   const { events, loading, error } = useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  console.log('AdminCalendarView: Events loaded:', events?.length || 0);
+  console.log('AdminCalendarView: Search query:', searchQuery);
+  console.log('AdminCalendarView: Selected event types:', selectedEventTypes);
+
   // Filter events based on search and event types
   const filteredEvents = events.filter(event => {
-    const matchesSearch = !searchQuery || 
-      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.short_description?.toLowerCase().includes(searchQuery.toLowerCase());
+    let matchesSearch = true;
+    let matchesType = true;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      matchesSearch = 
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (event.short_description && event.short_description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (event.location_name && event.location_name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }
     
-    const matchesType = selectedEventTypes.length === 0 || 
-      selectedEventTypes.includes(event.event_type || '');
+    // Type filter - only apply if specific types are selected (not 'all')
+    if (selectedEventTypes.length > 0) {
+      matchesType = selectedEventTypes.includes(event.event_type || '');
+    }
     
+    console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}`);
     return matchesSearch && matchesType;
   });
 
+  console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
+
   // Get events for selected date
   const getEventsForDate = (date: Date): CalendarEvent[] => {
-    return filteredEvents.filter(event => 
+    const dayEvents = filteredEvents.filter(event => 
       isSameDay(new Date(event.start_time), date)
     );
+    console.log(`Events for ${format(date, 'yyyy-MM-dd')}:`, dayEvents.length);
+    return dayEvents;
   };
 
   // Get date range based on view
@@ -117,12 +135,21 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
     return (
       <div className="text-center py-8">
         <p className="text-destructive">Error loading events: {error}</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          Check console for more details
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      {/* Debug info */}
+      <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
+        Total events: {events.length} | Filtered: {filteredEvents.length} | 
+        Search: "{searchQuery}" | Types: {selectedEventTypes.join(', ') || 'all'}
+      </div>
+
       {view === 'month' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Calendar */}
@@ -226,9 +253,16 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
             {filteredEvents.length > 0 ? (
               filteredEvents.map(renderEventCard)
             ) : (
-              <p className="text-muted-foreground text-center py-4">
-                No events found
-              </p>
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">
+                  {events.length === 0 ? 'No events found in database' : 'No events match current filters'}
+                </p>
+                {searchQuery && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Try clearing the search or adjusting filters
+                  </p>
+                )}
+              </div>
             )}
           </div>
         </CardContent>
