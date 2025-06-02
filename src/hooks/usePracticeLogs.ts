@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useProfile } from '@/contexts/ProfileContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   PracticeLog,
   fetchUserPracticeLogs,
@@ -10,7 +10,7 @@ import {
 } from '@/utils/supabase/practiceLogs';
 
 export const usePracticeLogs = () => {
-  const { isAuthenticated } = useProfile();
+  const { isAuthenticated } = useAuth();
   const [logs, setLogs] = useState<PracticeLog[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [totalMinutes, setTotalMinutes] = useState(0);

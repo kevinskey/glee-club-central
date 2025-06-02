@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthUser, Profile } from '@/types/auth';
-import { getProfile, ensureProfileExists } from '@/utils/supabase/profiles';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -26,26 +26,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  const refreshProfile = useCallback(async () => {
-    if (!user) {
-      setProfile(null);
-      return;
-    }
-
-    try {
-      console.log('🔄 AuthContext: Refreshing profile for user:', user.id);
-      const userProfile = await ensureProfileExists(user.id, user.email, user.user_metadata);
-      setProfile(userProfile);
-      console.log('✅ AuthContext: Profile refreshed successfully');
-    } catch (error) {
-      console.error('❌ AuthContext: Error refreshing profile:', error);
-      setProfile(null);
-    }
-  }, [user]);
+  // Use the consolidated profile hook
+  const { profile, refreshProfile: refreshUserProfile, updateProfile } = useUserProfile(user);
 
   useEffect(() => {
     let mounted = true;
@@ -72,12 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               user_metadata: sessionUser.user_metadata
             };
             setUser(authUser);
-            
-            const userProfile = await ensureProfileExists(sessionUser.id, sessionUser.email, sessionUser.user_metadata);
-            setProfile(userProfile);
           } else {
             setUser(null);
-            setProfile(null);
           }
           
           setIsLoading(false);
@@ -109,17 +90,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user_metadata: sessionUser.user_metadata
         };
         setUser(authUser);
-        
-        // Defer profile loading to prevent potential deadlocks
-        setTimeout(async () => {
-          if (mounted) {
-            const userProfile = await ensureProfileExists(sessionUser.id, sessionUser.email, sessionUser.user_metadata);
-            setProfile(userProfile);
-          }
-        }, 0);
       } else {
         setUser(null);
-        setProfile(null);
       }
       
       setIsLoading(false);
@@ -224,6 +196,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getUserType = useCallback((): 'admin' | 'member' => {
     return isAdmin() ? 'admin' : 'member';
   }, [isAdmin]);
+
+  const refreshProfile = useCallback(async () => {
+    await refreshUserProfile();
+  }, [refreshUserProfile]);
 
   const contextValue: AuthContextType = {
     user,
