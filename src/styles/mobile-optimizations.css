@@ -1,3 +1,4 @@
+
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -220,16 +221,16 @@ p {
   
   /* Adjust main content to account for both ticker and header */
   main {
-    margin-top: 96px !important; /* Height of ticker + header (40px + 56px) */
+    margin-top: 0 !important; /* Remove margin since hero will handle positioning */
     padding-top: 0 !important;
   }
   
-  /* Ensure hero sections sit flush under the sticky header */
+  /* Hero sections start immediately after sticky header with no gap */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: -96px !important; /* Pull hero up to sit under sticky elements */
-    padding-top: 96px !important; /* Add padding to maintain content positioning */
+    margin-top: 96px !important; /* Start exactly at bottom of sticky elements */
+    padding-top: 0 !important; /* Remove padding to eliminate gap */
   }
   
   /* Ensure page content starts below sticky elements for non-hero pages */
