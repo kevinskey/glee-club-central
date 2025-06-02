@@ -35,25 +35,31 @@ serve(async (req) => {
 
     const { userImageUrl, productType, designName, designDescription } = await req.json();
 
-    console.log('Generating mockup for:', { productType, designName });
+    console.log('Generating mockup for:', { productType, designName, designDescription });
 
-    // Create a detailed prompt for DALL-E based on the product type
+    // Create detailed prompts that incorporate the user's design and text
     const productPrompts = {
-      't-shirt': 'a high-quality product mockup of a custom t-shirt on a clean white background, front view, realistic fabric texture, professional photography style',
-      'hoodie': 'a professional product mockup of a custom hoodie on a clean white background, front view, realistic cotton blend texture, studio lighting',
-      'mug': 'a clean product mockup of a custom coffee mug on a white background, slight angle view, ceramic finish, professional product photography',
-      'tote-bag': 'a professional mockup of a custom canvas tote bag on a white background, slight angle view, natural canvas texture, clean composition',
-      'phone-case': 'a sleek product mockup of a custom phone case on a white background, slight angle view, modern design, professional photography',
-      'sticker': 'a clean mockup of custom stickers on a white background, arranged attractively, high-quality vinyl finish, professional presentation'
+      't-shirt': `a high-quality product mockup of a ${designName} custom t-shirt on a clean white background, front view, realistic fabric texture, professional photography style. The design should be prominently displayed on the chest area of the t-shirt`,
+      'hoodie': `a professional product mockup of a ${designName} custom hoodie on a clean white background, front view, realistic cotton blend texture, studio lighting. The design should be prominently displayed on the chest area of the hoodie`,
+      'mug': `a clean product mockup of a ${designName} custom coffee mug on a white background, slight angle view, ceramic finish, professional product photography. The design should be prominently displayed on the side of the mug`,
+      'tote-bag': `a professional mockup of a ${designName} custom canvas tote bag on a white background, slight angle view, natural canvas texture, clean composition. The design should be prominently displayed on the front of the bag`,
+      'phone-case': `a sleek product mockup of a ${designName} custom phone case on a white background, slight angle view, modern design, professional photography. The design should be prominently displayed on the back of the phone case`,
+      'sticker': `a clean mockup of ${designName} custom stickers on a white background, arranged attractively, high-quality vinyl finish, professional presentation. Multiple stickers showing the design clearly`
     };
 
     const basePrompt = productPrompts[productType as keyof typeof productPrompts] || productPrompts['t-shirt'];
     
-    const prompt = `Create ${basePrompt}. The design should incorporate elements that would work well with custom graphics. Style: professional product photography, clean composition, soft shadows, e-commerce ready. High resolution, photorealistic.`;
+    // Enhanced prompt that includes the design name and description
+    let enhancedPrompt = basePrompt;
+    if (designDescription) {
+      enhancedPrompt += `. Design description: ${designDescription}`;
+    }
+    enhancedPrompt += '. Style: professional product photography, clean composition, soft shadows, e-commerce ready. High resolution, photorealistic. The custom design should be clearly visible and well-integrated into the product.';
 
+    console.log('Enhanced prompt:', enhancedPrompt);
     console.log('Sending request to OpenAI...');
 
-    // Generate the mockup using DALL-E
+    // Generate the mockup using DALL-E with the enhanced prompt
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -62,7 +68,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'dall-e-3',
-        prompt: prompt,
+        prompt: enhancedPrompt,
         n: 1,
         size: '1024x1024',
         quality: 'standard',
@@ -90,8 +96,10 @@ serve(async (req) => {
 
     console.log('Uploading to Supabase storage...');
 
-    // Upload to Supabase storage
-    const fileName = `mockup-${productType}-${Date.now()}.png`;
+    // Upload to Supabase storage with better naming
+    const timestamp = Date.now();
+    const sanitizedName = designName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    const fileName = `mockup-${productType}-${sanitizedName}-${timestamp}.png`;
     const filePath = `generated-mockups/${fileName}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -115,7 +123,10 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       mockupUrl: publicUrl,
-      success: true 
+      success: true,
+      productType,
+      designName,
+      fileName
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
