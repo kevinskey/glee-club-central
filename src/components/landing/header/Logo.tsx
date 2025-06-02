@@ -9,9 +9,9 @@ export function Logo() {
   const isSmallMobile = useIsSmallMobile();
   
   return (
-    <Link to="/" className="flex items-center gap-2">
-      <Icons.logo className={isSmallMobile ? "h-6" : isMobile ? "h-7" : "h-12"} />
-      <span className={`font-semibold ${
+    <Link to="/" className="flex items-center gap-2 min-w-0">
+      <Icons.logo className={`flex-shrink-0 ${isSmallMobile ? "h-6" : isMobile ? "h-7" : "h-12"}`} />
+      <span className={`font-semibold truncate ${
         isSmallMobile ? "text-lg" : 
         isMobile ? "text-xl" : 
         "text-4xl"

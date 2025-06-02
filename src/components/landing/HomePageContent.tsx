@@ -6,6 +6,7 @@ import { AudioSection } from "@/components/landing/sections/AudioSection";
 import { StoreSection } from "@/components/landing/sections/StoreSection";
 import { FanSignupForm } from "@/components/landing/FanSignupForm";
 import { Footer } from "@/components/landing/Footer";
+import { MobileOptimizedContainer } from "@/components/mobile/MobileOptimizedContainer";
 
 interface HomePageContentProps {
   heroImages: Array<{
@@ -48,14 +49,19 @@ export const HomePageContent = ({
   audioTracks
 }: HomePageContentProps) => {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main Content - Now using extracted section components */}
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Main Content - Now using mobile-optimized layout */}
       <main className="w-full">
-        <HeroBannerSection images={heroImages} />
-        <EventsSection events={upcomingEvents} />
-        <AudioSection tracks={audioTracks} />
-        <StoreSection products={storeProducts} />
-        <FanSignupForm />
+        <MobileOptimizedContainer padding="none" className="w-full">
+          <HeroBannerSection images={heroImages} />
+        </MobileOptimizedContainer>
+        
+        <MobileOptimizedContainer padding="md" className="space-y-8 sm:space-y-12">
+          <EventsSection events={upcomingEvents} />
+          <AudioSection tracks={audioTracks} />
+          <StoreSection products={storeProducts} />
+          <FanSignupForm />
+        </MobileOptimizedContainer>
       </main>
       
       <Footer />

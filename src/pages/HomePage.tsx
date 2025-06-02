@@ -19,12 +19,14 @@ const HomePage = () => {
   }
 
   return (
-    <HomePageContent
-      heroImages={heroImages}
-      upcomingEvents={upcomingEvents}
-      storeProducts={storeProducts}
-      audioTracks={audioTracks}
-    />
+    <div className="min-h-screen overflow-x-hidden">
+      <HomePageContent
+        heroImages={heroImages}
+        upcomingEvents={upcomingEvents}
+        storeProducts={storeProducts}
+        audioTracks={audioTracks}
+      />
+    </div>
   );
 };
 

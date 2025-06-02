@@ -2,6 +2,9 @@
 import React from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card } from "@/components/ui/card";
+import { MobileOptimizedContainer } from "@/components/mobile/MobileOptimizedContainer";
+import { MobileResponsiveText } from "@/components/mobile/MobileResponsiveText";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeroImage {
   id: string;
@@ -23,6 +26,8 @@ export function HeroBanner({
   showOverlayText = true,
   className = ""
 }: HeroBannerProps) {
+  const isMobile = useIsMobile();
+  
   // Fallback image if no images provided
   const fallbackImage = {
     id: "fallback",
@@ -34,7 +39,7 @@ export function HeroBanner({
   const displayImages = images.length > 0 ? images : [fallbackImage];
 
   return (
-    <section className={`relative w-full ${className}`}>
+    <section className={`relative w-full overflow-hidden ${className}`}>
       <Carousel
         opts={{
           align: "start",
@@ -46,7 +51,7 @@ export function HeroBanner({
           {displayImages.map((image, index) => (
             <CarouselItem key={image.id || index}>
               <Card className="border-0 rounded-none">
-                <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
+                <div className={`relative overflow-hidden ${isMobile ? 'aspect-[4/3]' : 'aspect-[16/9] md:aspect-[21/9]'}`}>
                   <img
                     src={image.url}
                     alt={image.alt || image.title || "Hero image"}
@@ -59,14 +64,23 @@ export function HeroBanner({
                   {/* Text Overlay */}
                   {showOverlayText && image.title && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-center text-white px-4">
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-playfair font-bold mb-4">
+                      <MobileOptimizedContainer padding="md" className="text-center text-white w-full">
+                        <MobileResponsiveText 
+                          as="h1" 
+                          size={isMobile ? "3xl" : "5xl"} 
+                          weight="bold" 
+                          className="mb-4"
+                        >
                           {image.title}
-                        </h1>
-                        <p className="text-lg md:text-xl text-white/90 max-w-2xl">
+                        </MobileResponsiveText>
+                        <MobileResponsiveText 
+                          as="p" 
+                          size={isMobile ? "base" : "xl"} 
+                          className="text-white/90 max-w-2xl mx-auto"
+                        >
                           Spelman College Glee Club
-                        </p>
-                      </div>
+                        </MobileResponsiveText>
+                      </MobileOptimizedContainer>
                     </div>
                   )}
                 </div>
@@ -75,7 +89,7 @@ export function HeroBanner({
           ))}
         </CarouselContent>
         
-        {displayImages.length > 1 && (
+        {displayImages.length > 1 && !isMobile && (
           <>
             <CarouselPrevious className="left-4" />
             <CarouselNext className="right-4" />
