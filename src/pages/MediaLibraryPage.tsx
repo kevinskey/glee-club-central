@@ -59,22 +59,46 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
     setSelectedMediaType(activeTab);
   }, [activeTab, setSelectedMediaType]);
   
-  const handleViewPDF = (fileId: string, fileUrl: string, title: string) => {
-    console.log('Opening PDF:', { fileId, fileUrl, title });
+  const handleFileOpen = (file: any) => {
+    console.log('Opening file:', { id: file.id, type: file.file_type, url: file.file_url, title: file.title });
     
-    // Navigate to the sheet music viewer with proper state
-    navigate(`/dashboard/sheet-music/view/${fileId}`, { 
-      state: { 
-        file: {
-          id: fileId,
-          title: title,
-          url: fileUrl,
-          file_url: fileUrl,
-          sheetMusicId: fileId
-        },
-        fromMediaLibrary: true
-      } 
-    });
+    const mediaType = getMediaType(file.file_type);
+    
+    switch (mediaType) {
+      case "pdf":
+        // Navigate to the sheet music viewer for PDFs
+        navigate(`/dashboard/sheet-music/view/${file.id}`, { 
+          state: { 
+            file: {
+              id: file.id,
+              title: file.title,
+              url: file.file_url,
+              file_url: file.file_url,
+              sheetMusicId: file.id
+            },
+            fromMediaLibrary: true
+          } 
+        });
+        break;
+        
+      case "image":
+      case "video":
+      case "audio":
+        // Open media files directly in a new tab
+        window.open(file.file_url, '_blank');
+        break;
+        
+      default:
+        // For other file types, try to open in new tab or show message
+        if (file.file_url) {
+          window.open(file.file_url, '_blank');
+        } else {
+          toast.error("Unable to open file", {
+            description: "This file type is not supported for preview"
+          });
+        }
+        break;
+    }
   };
 
   const handleUploadComplete = () => {
@@ -168,13 +192,13 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
         </TabsList>
         
         <TabsContent value="all" className="w-full">
-          <MediaGrid files={sortFilesByTitle(getFilesForTab("all"))} onViewPDF={handleViewPDF} />
+          <MediaGrid files={sortFilesByTitle(getFilesForTab("all"))} onFileOpen={handleFileOpen} />
         </TabsContent>
         
         <TabsContent value="pdf" className="w-full">
           <MediaGrid 
             files={sortFilesByTitle(getFilesForTab("pdf"))}
-            onViewPDF={handleViewPDF}
+            onFileOpen={handleFileOpen}
             showPDFCount={true}
           />
         </TabsContent>
@@ -182,21 +206,21 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
         <TabsContent value="audio" className="w-full">
           <MediaGrid 
             files={sortFilesByTitle(getFilesForTab("audio"))}
-            onViewPDF={handleViewPDF}
+            onFileOpen={handleFileOpen}
           />
         </TabsContent>
         
         <TabsContent value="image" className="w-full">
           <MediaGrid 
             files={sortFilesByTitle(getFilesForTab("image"))}
-            onViewPDF={handleViewPDF}
+            onFileOpen={handleFileOpen}
           />
         </TabsContent>
         
         <TabsContent value="video" className="w-full">
           <MediaGrid 
             files={sortFilesByTitle(getFilesForTab("video"))}
-            onViewPDF={handleViewPDF}
+            onFileOpen={handleFileOpen}
           />
         </TabsContent>
       </Tabs>
@@ -216,11 +240,11 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
 // Media grid component to display files
 interface MediaGridProps {
   files: any[];
-  onViewPDF: (id: string, url: string, title: string) => void;
+  onFileOpen: (file: any) => void;
   showPDFCount?: boolean;
 }
 
-const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = false }) => {
+const MediaGrid: React.FC<MediaGridProps> = ({ files, onFileOpen, showPDFCount = false }) => {
   if (files.length === 0) {
     return (
       <div className="text-center py-12 border border-dashed rounded-lg">
@@ -301,16 +325,34 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
                     <span>{mediaType.toUpperCase()}</span>
                     <span>{formatFileSize(file.size)}</span>
                   </div>
-                  {mediaType === "pdf" && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => onViewPDF(file.id, file.file_url, file.title)}
-                    >
-                      <FileText className="mr-2 h-4 w-4" /> View Document
-                    </Button>
-                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => onFileOpen(file)}
+                  >
+                    {mediaType === "pdf" ? (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" /> View Document
+                      </>
+                    ) : mediaType === "image" ? (
+                      <>
+                        <Image className="mr-2 h-4 w-4" /> View Image
+                      </>
+                    ) : mediaType === "video" ? (
+                      <>
+                        <Video className="mr-2 h-4 w-4" /> Play Video
+                      </>
+                    ) : mediaType === "audio" ? (
+                      <>
+                        <Music className="mr-2 h-4 w-4" /> Play Audio
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" /> Open File
+                      </>
+                    )}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
