@@ -5,8 +5,8 @@
   "description": "Central digital hub for the Spelman College Glee Club",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#E6F3FF",
-  "theme_color": "#87CEEB",
+  "background_color": "#1e3a8a",
+  "theme_color": "#1e3a8a",
   "icons": [
     {
       "src": "/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png",
