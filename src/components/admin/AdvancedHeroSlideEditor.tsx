@@ -65,12 +65,20 @@ export function AdvancedHeroSlideEditor({ slide, onUpdate, onCancel }: AdvancedH
     }
   };
 
-  const handleMediaSelect = (media: { id: string; file_type: string }) => {
-    setFormData(prev => ({
-      ...prev,
-      media_id: media.id,
-      media_type: media.file_type.startsWith('video/') ? 'video' : 'image'
-    }));
+  const handleMediaSelect = (data: string | { id: string; file_type: string; file_url: string }) => {
+    if (typeof data === 'string') {
+      // Handle string URL (external URL case)
+      console.log('External URL selected:', data);
+      // For external URLs, we might need to handle this differently
+      // For now, we'll skip this case since we're using returnMediaObject=true
+    } else {
+      // Handle media object
+      setFormData(prev => ({
+        ...prev,
+        media_id: data.id,
+        media_type: data.file_type.startsWith('video/') ? 'video' : 'image'
+      }));
+    }
     setShowMediaPicker(false);
   };
 
