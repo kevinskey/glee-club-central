@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { UserPlus, Users, Search, AlertTriangle } from 'lucide-react';
 import { UserTable } from './UserTable';
 import { UserForm } from './UserForm';
+import { AddUserDialog } from './AddUserDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
 
@@ -23,7 +23,9 @@ export default function UserManagement() {
   } = useUserManagement();
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -83,6 +85,14 @@ export default function UserManagement() {
     }
   };
 
+  const handleCreateUser = () => {
+    setShowAddForm(true);
+  };
+
+  const handleImportUsers = () => {
+    setShowImportDialog(true);
+  };
+
   if (error) {
     return (
       <Card className="border-red-200">
@@ -112,7 +122,7 @@ export default function UserManagement() {
           </div>
         </div>
         
-        <Button onClick={() => setShowAddForm(true)}>
+        <Button onClick={() => setShowAddDialog(true)}>
           <UserPlus className="h-4 w-4 mr-2" />
           Add User
         </Button>
@@ -199,6 +209,14 @@ export default function UserManagement() {
         </CardContent>
       </Card>
 
+      {/* Add User Selection Dialog */}
+      <AddUserDialog
+        isOpen={showAddDialog}
+        onClose={() => setShowAddDialog(false)}
+        onCreateUser={handleCreateUser}
+        onImportUsers={handleImportUsers}
+      />
+
       {/* Add User Form */}
       {showAddForm && (
         <UserForm
@@ -216,6 +234,26 @@ export default function UserManagement() {
           onCancel={() => setEditingUser(null)}
           title="Edit User"
         />
+      )}
+
+      {/* TODO: Add import dialog component here when ready */}
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Import Users</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              CSV import functionality will be implemented here.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowImportDialog(false)}>
+                Coming Soon
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
