@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -168,6 +167,14 @@ export function UniversalHeroManager() {
     }
   };
 
+  const handleManageSection = (sectionId: string) => {
+    console.log('Manage button clicked for section:', sectionId);
+    console.log('Current active section:', activeSection);
+    setActiveSection(sectionId);
+    console.log('Setting active section to:', sectionId);
+    toast.success(`Switched to ${HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'section'} management`);
+  };
+
   const getSectionDisplayName = (sectionId: string) => {
     const section = HERO_SECTIONS.find(s => s.id === sectionId);
     return section?.name || sectionId;
@@ -191,14 +198,17 @@ export function UniversalHeroManager() {
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Hero Sections Overview</h3>
-                <Button 
-                  onClick={fetchSectionStats} 
-                  variant="outline" 
-                  size="sm"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Refreshing..." : "Refresh Stats"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Active: {getSectionDisplayName(activeSection)}</span>
+                  <Button 
+                    onClick={fetchSectionStats} 
+                    variant="outline" 
+                    size="sm"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Refreshing..." : "Refresh Stats"}
+                  </Button>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -214,7 +224,7 @@ export function UniversalHeroManager() {
                           ? 'ring-2 ring-primary bg-primary/5 shadow-md' 
                           : 'hover:bg-muted/50 hover:shadow-sm'
                       }`}
-                      onClick={() => setActiveSection(section.id)}
+                      onClick={() => handleManageSection(section.id)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
@@ -236,11 +246,11 @@ export function UniversalHeroManager() {
                             className="text-xs h-7 px-2 flex-1"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setActiveSection(section.id);
+                              handleManageSection(section.id);
                             }}
                           >
                             <Settings className="h-3 w-3 mr-1" />
-                            Manage
+                            {isActive ? 'Managing' : 'Manage'}
                           </Button>
                           
                           <Button 
