@@ -5,10 +5,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Users, Edit, Trash2, Search } from 'lucide-react';
+import { Clock, MapPin, Users, Edit, Trash2, Search, GraduationCap } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { toast } from 'sonner';
+import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
 
 interface AdminCalendarViewProps {
   view: 'month' | 'week' | 'day';
@@ -26,11 +27,39 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   console.log('AdminCalendarView: Search query:', searchQuery);
   console.log('AdminCalendarView: Selected event type:', selectedEventType);
 
+  // Get Spelman academic dates for the current year and next year
+  const currentYear = new Date().getFullYear();
+  const spelmanDates = [
+    ...getSpelmanAcademicDates(currentYear),
+    ...getSpelmanAcademicDates(currentYear + 1)
+  ];
+
+  // Convert Spelman dates to CalendarEvent format
+  const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
+    id: `spelman-${date.id}`,
+    title: date.title,
+    start_time: date.date.toISOString(),
+    end_time: date.date.toISOString(),
+    short_description: date.description,
+    full_description: date.description,
+    event_type: 'academic',
+    event_types: ['academic'],
+    is_private: true,
+    is_public: false,
+    allow_rsvp: false,
+    allow_reminders: true,
+    allow_ics_download: true,
+    allow_google_map_link: false,
+    created_at: new Date().toISOString(),
+    feature_image_url: date.imageUrl
+  }));
+
+  // Combine regular events with Spelman academic dates
+  const allEvents = [...(events || []), ...spelmanEvents];
+
   // Filter events based on search and event types
   const filteredEvents = React.useMemo(() => {
-    if (!events) return [];
-    
-    return events.filter(event => {
+    return allEvents.filter(event => {
       let matchesSearch = true;
       let matchesType = true;
 
@@ -53,12 +82,17 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
       console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}, query="${searchQuery}"`);
       return matchesSearch && matchesType;
     });
-  }, [events, searchQuery, selectedEventType]);
+  }, [allEvents, searchQuery, selectedEventType]);
 
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
 
-  // Handle edit event
+  // Handle edit event (only for non-Spelman events)
   const handleEditEvent = (event: CalendarEvent) => {
+    if (event.id.startsWith('spelman-')) {
+      toast.info('Academic dates cannot be edited');
+      return;
+    }
+    
     console.log('Opening edit dialog for event:', event);
     
     // Ensure the event has all required fields
@@ -79,8 +113,13 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     setIsEventEditorOpen(true);
   };
 
-  // Handle delete event
+  // Handle delete event (only for non-Spelman events)
   const handleDeleteEvent = async (eventId: string) => {
+    if (eventId.startsWith('spelman-')) {
+      toast.info('Academic dates cannot be deleted');
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
         await deleteEvent(eventId);
@@ -149,73 +188,87 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     }
   };
 
-  const renderEventCard = (event: CalendarEvent) => (
-    <Card key={event.id} className="mb-2">
-      <CardContent className="p-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h4 className="font-medium text-sm">{event.title}</h4>
-            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              {format(new Date(event.start_time), 'h:mm a')}
-              {event.location_name && (
-                <>
-                  <MapPin className="h-3 w-3 ml-2" />
-                  {event.location_name}
-                </>
+  const renderEventCard = (event: CalendarEvent) => {
+    const isSpelmanEvent = event.id.startsWith('spelman-');
+    
+    return (
+      <Card key={event.id} className="mb-2">
+        <CardContent className="p-3">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                {isSpelmanEvent && (
+                  <GraduationCap className="h-3 w-3 text-blue-600" />
+                )}
+                <h4 className="font-medium text-sm">{event.title}</h4>
+              </div>
+              <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {format(new Date(event.start_time), 'h:mm a')}
+                {event.location_name && (
+                  <>
+                    <MapPin className="h-3 w-3 ml-2" />
+                    {event.location_name}
+                  </>
+                )}
+              </div>
+              {event.short_description && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {event.short_description}
+                </p>
               )}
+              <div className="flex gap-1 mt-2">
+                {event.event_type && (
+                  <Badge 
+                    variant={isSpelmanEvent ? "outline" : "secondary"} 
+                    className={`text-xs ${isSpelmanEvent ? 'border-blue-500 text-blue-600' : ''}`}
+                  >
+                    {isSpelmanEvent ? 'Academic' : event.event_type}
+                  </Badge>
+                )}
+                {event.is_private && (
+                  <Badge variant="outline" className="text-xs">
+                    Private
+                  </Badge>
+                )}
+              </div>
             </div>
-            {event.short_description && (
-              <p className="text-xs text-muted-foreground mt-1">
-                {event.short_description}
-              </p>
+            {!isSpelmanEvent && (
+              <div className="flex gap-1 ml-2">
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditEvent(event);
+                  }}
+                >
+                  <Edit className="h-3 w-3" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="h-6 w-6 p-0 text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteEvent(event.id);
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
             )}
-            <div className="flex gap-1 mt-2">
-              {event.event_type && (
-                <Badge variant="secondary" className="text-xs">
-                  {event.event_type}
-                </Badge>
-              )}
-              {event.is_private && (
-                <Badge variant="outline" className="text-xs">
-                  Private
-                </Badge>
-              )}
-            </div>
           </div>
-          <div className="flex gap-1 ml-2">
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="h-6 w-6 p-0"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditEvent(event);
-              }}
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="h-6 w-6 p-0 text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteEvent(event.id);
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
       </div>
     );
   }
@@ -283,7 +336,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
       {/* Debug info - only show in development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-2 rounded border">
-          <strong>Debug:</strong> Total events: {events?.length || 0} | Filtered: {filteredEvents.length} | 
+          <strong>Debug:</strong> Total events: {events?.length || 0} | Spelman events: {spelmanEvents.length} | Filtered: {filteredEvents.length} | 
           Search: "{searchQuery}" | Type: {selectedEventType} | 
           Has Active Search: {hasActiveSearch ? 'Yes' : 'No'} | 
           Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'} |
@@ -313,7 +366,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                   }}
                   modifiersClassNames={{
                     hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full",
-                    today: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 font-semibold [&:not(.rdp-day_selected)]:bg-orange-100 [&:not(.rdp-day_selected)]:dark:bg-orange-900/30"
+                    today: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 font-semibold [&:not(.rdp-day_selected)]:bg-blue-100 [&:not(.rdp-day_selected)]:dark:bg-blue-900/30"
                   }}
                 />
               </CardContent>
@@ -362,7 +415,11 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                 <CardContent className="pt-0 px-2">
                   <div className="space-y-1">
                     {getEventsForDate(date).slice(0, 3).map(event => (
-                      <div key={event.id} className="text-xs p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
+                      <div key={event.id} className={`text-xs p-1 rounded ${
+                        event.id.startsWith('spelman-') 
+                          ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
+                          : 'bg-blue-100 dark:bg-blue-900/30'
+                      }`}>
                         {event.title}
                       </div>
                     ))}
