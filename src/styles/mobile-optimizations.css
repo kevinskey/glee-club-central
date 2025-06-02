@@ -187,7 +187,7 @@ p {
 @media (max-width: 768px) {
   header {
     position: fixed !important;
-    top: 40px !important; /* Height of news ticker */
+    top: 40px !important; /* Height of news ticker - no gap */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
@@ -220,22 +220,22 @@ p {
   
   /* Adjust main content to account for both ticker and header */
   main {
-    margin-top: 106px !important; /* Height of ticker + header + 10px gap */
+    margin-top: 96px !important; /* Height of ticker + header (40px + 56px) */
     padding-top: 0 !important;
   }
   
-  /* Ensure hero sections sit 10px below the sticky header */
+  /* Ensure hero sections sit flush under the sticky header */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: -106px !important; /* Pull hero up to sit under sticky elements */
-    padding-top: 106px !important; /* Add padding to maintain content positioning with 10px gap */
+    margin-top: -96px !important; /* Pull hero up to sit under sticky elements */
+    padding-top: 96px !important; /* Add padding to maintain content positioning */
   }
   
   /* Ensure page content starts below sticky elements for non-hero pages */
   .min-h-screen {
-    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
-    min-height: calc(100vh - 106px) !important;
+    padding-top: 96px !important; /* Height of ticker + header */
+    min-height: calc(100vh - 96px) !important;
   }
 }
 
@@ -538,7 +538,7 @@ p {
   [data-route]:not([data-route="/"]),
   .page:not(.home-page),
   .route:not(.hero-route) {
-    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
+    padding-top: 96px !important; /* Height of ticker + header */
   }
   
   /* Specific route adjustments for non-hero pages */
@@ -547,6 +547,6 @@ p {
   [data-route="/calendar"],
   [data-route="/store"],
   [data-route*="/news/"] {
-    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
+    padding-top: 96px !important; /* Height of ticker + header */
   }
 }
