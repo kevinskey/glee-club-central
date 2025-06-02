@@ -6,8 +6,7 @@ import {
   Image, 
   Settings, 
   ShoppingCart, 
-  BarChart3, 
-  Upload
+  BarChart3
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -30,11 +29,6 @@ export const adminNavItems = [
     title: "Hero Manager",
     url: "/admin/hero-manager",
     icon: Image,
-  },
-  {
-    title: "Media Uploader",
-    url: "/admin/media-uploader",
-    icon: Upload,
   },
   {
     title: "Media Library",

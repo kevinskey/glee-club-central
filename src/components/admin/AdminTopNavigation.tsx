@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,6 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  Upload,
   Settings,
   BarChart3,
   ShoppingCart,
@@ -40,7 +38,6 @@ const navigationGroups = [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
       { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
       { to: '/admin/media', icon: Image, label: 'Media Library' },
-      { to: '/admin/media-uploader', icon: Upload, label: 'Media Uploader' },
       { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
     ]
   },
