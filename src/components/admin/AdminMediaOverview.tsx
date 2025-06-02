@@ -22,6 +22,11 @@ export function AdminMediaOverview() {
 
   const recentFiles = allMediaFiles.slice(0, 5);
 
+  // Helper function to safely access filesByType properties
+  const getFileCount = (type: string): number => {
+    return (mediaStats.filesByType as Record<string, number>)?.[type] || 0;
+  };
+
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'image': return <Image className="h-4 w-4" />;
@@ -80,13 +85,13 @@ export function AdminMediaOverview() {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {mediaStats.filesByType?.image || 0}
+              {getFileCount('image')}
             </div>
             <div className="text-xs text-muted-foreground">Images</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-orange-600">
-              {(mediaStats.filesByType?.application || 0) + (mediaStats.filesByType?.audio || 0)}
+              {getFileCount('application') + getFileCount('audio')}
             </div>
             <div className="text-xs text-muted-foreground">Documents</div>
           </div>
