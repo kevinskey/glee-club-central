@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { EnhancedHeroImagesManager } from '@/components/admin/EnhancedHeroImagesManager';
+import { HeroSlidesManager } from '@/components/admin/HeroSlidesManager';
 import { PageHeader } from "@/components/ui/page-header";
 
 export default function AdminHeroManager() {
@@ -8,10 +8,10 @@ export default function AdminHeroManager() {
     <div className="space-y-6">
       <PageHeader 
         title="Hero Section Manager" 
-        description="Manage the images displayed in the hero slideshow on your homepage"
+        description="Create and manage hero slides with custom text, buttons, and links for your homepage slideshow"
       />
       
-      <EnhancedHeroImagesManager />
+      <HeroSlidesManager />
     </div>
   );
 }
