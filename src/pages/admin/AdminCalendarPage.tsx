@@ -26,6 +26,12 @@ export default function AdminCalendarPage() {
     }
   }, [user, profile]);
 
+  const handleViewChange = (view: string) => {
+    if (view === 'month' || view === 'week' || view === 'day') {
+      setSelectedView(view);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -93,7 +99,7 @@ export default function AdminCalendarPage() {
                 <div className="flex items-center gap-3">
                   <CalendarViewToggle
                     selectedView={selectedView}
-                    onViewChange={setSelectedView}
+                    onViewChange={handleViewChange}
                   />
                 </div>
               </div>
