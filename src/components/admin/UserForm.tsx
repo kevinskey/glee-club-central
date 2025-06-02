@@ -46,7 +46,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
       email: user.email || '',
       phone: user.phone || '',
       voice_part: user.voice_part || '',
-      role: user.role || 'member',
+      role: (user.role === 'admin' ? 'admin' : user.role === 'section_leader' ? 'section_leader' : 'member') as 'admin' | 'member' | 'section_leader',
       status: user.status || 'active',
       class_year: user.class_year || '',
       notes: user.notes || '',
@@ -60,7 +60,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
       email: '',
       phone: '',
       voice_part: '',
-      role: 'member',
+      role: 'member' as 'admin' | 'member' | 'section_leader',
       status: 'active',
       class_year: '',
       notes: '',
@@ -89,8 +89,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Input
                 id="first_name"
                 {...register('first_name')}
-                error={errors.first_name?.message}
               />
+              {errors.first_name && (
+                <p className="text-sm text-red-600">{errors.first_name.message}</p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -98,8 +100,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Input
                 id="last_name"
                 {...register('last_name')}
-                error={errors.last_name?.message}
               />
+              {errors.last_name && (
+                <p className="text-sm text-red-600">{errors.last_name.message}</p>
+              )}
             </div>
           </div>
 
@@ -109,8 +113,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               id="email"
               type="email"
               {...register('email')}
-              error={errors.email?.message}
             />
+            {errors.email && (
+              <p className="text-sm text-red-600">{errors.email.message}</p>
+            )}
           </div>
 
           {!user && (
@@ -120,8 +126,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
                 id="password"
                 type="password"
                 {...register('password')}
-                error={errors.password?.message}
               />
+              {errors.password && (
+                <p className="text-sm text-red-600">{errors.password.message}</p>
+              )}
             </div>
           )}
 
@@ -130,8 +138,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             <Input
               id="phone"
               {...register('phone')}
-              error={errors.phone?.message}
             />
+            {errors.phone && (
+              <p className="text-sm text-red-600">{errors.phone.message}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -170,7 +180,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Label htmlFor="role">Role</Label>
               <Select
                 value={watch('role')}
-                onValueChange={(value) => setValue('role', value)}
+                onValueChange={(value: 'admin' | 'member' | 'section_leader') => setValue('role', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
