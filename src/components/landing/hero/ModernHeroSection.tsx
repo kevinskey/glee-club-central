@@ -184,6 +184,10 @@ export function ModernHeroSection({
     return url?.startsWith('http://') || url?.startsWith('https://');
   };
 
+  const isYouTubeEmbed = (url: string) => {
+    return url?.includes('youtube.com/embed/');
+  };
+
   const renderButton = (slide: HeroSlide) => {
     if (!slide.button_text || !slide.button_link) return null;
 
@@ -206,6 +210,60 @@ export function ModernHeroSection({
         </Link>
       </Button>
     );
+  };
+
+  const renderBackgroundMedia = () => {
+    const currentSlideData = slides[currentSlide];
+    
+    // Check if media_id is a YouTube embed URL
+    if (currentSlideData.media_id && isYouTubeEmbed(currentSlideData.media_id)) {
+      return (
+        <iframe
+          key={currentSlideData.id}
+          src={currentSlideData.media_id}
+          className={cn("absolute inset-0 w-full h-full object-cover pointer-events-none", getAnimationClass())}
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          style={{ transform: 'scale(1.1)' }} // Slightly scale to hide borders
+        />
+      );
+    }
+
+    // Handle regular media files
+    const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
+    
+    if (currentMedia && currentMedia.file_url) {
+      return currentSlideData.media_type === 'video' ? (
+        <video
+          key={currentMedia.id}
+          src={currentMedia.file_url}
+          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
+          autoPlay
+          muted
+          loop
+          playsInline
+          onError={(e) => {
+            console.error('🎭 Hero: Video load error:', e);
+            console.error('🎭 Hero: Failed video URL:', currentMedia.file_url);
+          }}
+        />
+      ) : (
+        <img
+          key={currentMedia.id}
+          src={currentMedia.file_url}
+          alt={currentMedia.title}
+          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
+          onError={(e) => {
+            console.error('🎭 Hero: Image load error:', e);
+            console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
+          }}
+        />
+      );
+    }
+
+    // Fallback gradient
+    return <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>;
   };
 
   if (isLoading) {
@@ -237,7 +295,6 @@ export function ModernHeroSection({
   }
 
   const currentSlideData = slides[currentSlide];
-  const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
 
   const getPositionClasses = () => {
     const position = currentSlideData.text_position;
@@ -293,36 +350,7 @@ export function ModernHeroSection({
     >
       {/* Background Media */}
       <div className="absolute inset-0">
-        {currentMedia && currentMedia.file_url ? (
-          currentSlideData.media_type === 'video' ? (
-            <video
-              key={currentMedia.id}
-              src={currentMedia.file_url}
-              className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
-              autoPlay
-              muted
-              loop
-              playsInline
-              onError={(e) => {
-                console.error('🎭 Hero: Video load error:', e);
-                console.error('🎭 Hero: Failed video URL:', currentMedia.file_url);
-              }}
-            />
-          ) : (
-            <img
-              key={currentMedia.id}
-              src={currentMedia.file_url}
-              alt={currentMedia.title}
-              className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
-              onError={(e) => {
-                console.error('🎭 Hero: Image load error:', e);
-                console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
-              }}
-            />
-          )
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
-        )}
+        {renderBackgroundMedia()}
         
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0 bg-black/50"></div>

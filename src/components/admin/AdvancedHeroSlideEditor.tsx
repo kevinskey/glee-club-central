@@ -38,19 +38,34 @@ export function AdvancedHeroSlideEditor({ slide, onUpdate, onCancel }: AdvancedH
     text_position: slide.text_position,
     text_alignment: slide.text_alignment,
     button_text: slide.button_text || '',
-    button_link: slide.button_link || ''
+    button_link: slide.button_link || '',
+    youtube_url: ''
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
 
+  const convertYouTubeToEmbed = (url: string) => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&controls=0&showinfo=0&rel=0&modestbranding=1` : url;
+  };
+
   const handleSave = async () => {
     try {
       setIsLoading(true);
       
+      let updateData = { ...formData };
+      
+      // If YouTube URL is provided, use it as media_id and set type to video
+      if (formData.youtube_url.trim()) {
+        updateData.media_id = convertYouTubeToEmbed(formData.youtube_url.trim());
+        updateData.media_type = 'video';
+      }
+
       const { error } = await supabase
         .from('hero_slides')
-        .update(formData)
+        .update(updateData)
         .eq('id', slide.id);
 
       if (error) throw error;
@@ -67,16 +82,13 @@ export function AdvancedHeroSlideEditor({ slide, onUpdate, onCancel }: AdvancedH
 
   const handleMediaSelect = (data: string | { id: string; file_type: string; file_url: string }) => {
     if (typeof data === 'string') {
-      // Handle string URL (external URL case)
       console.log('External URL selected:', data);
-      // For external URLs, we might need to handle this differently
-      // For now, we'll skip this case since we're using returnMediaObject=true
     } else {
-      // Handle media object
       setFormData(prev => ({
         ...prev,
         media_id: data.id,
-        media_type: data.file_type.startsWith('video/') ? 'video' : 'image'
+        media_type: data.file_type.startsWith('video/') ? 'video' : 'image',
+        youtube_url: '' // Clear YouTube URL when selecting from media library
       }));
     }
     setShowMediaPicker(false);
@@ -139,16 +151,31 @@ export function AdvancedHeroSlideEditor({ slide, onUpdate, onCancel }: AdvancedH
           </div>
 
           {/* Media Selection */}
-          <div className="space-y-2">
-            <Label>Background Media</Label>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setShowMediaPicker(true)}
-              className="w-full"
-            >
-              {formData.media_id ? 'Change Media' : 'Select Media'}
-            </Button>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Background Media</Label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowMediaPicker(true)}
+                className="w-full"
+              >
+                {formData.media_id ? 'Change Media' : 'Select from Media Library'}
+              </Button>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="youtube-url">Or YouTube Video URL</Label>
+              <Input
+                id="youtube-url"
+                value={formData.youtube_url}
+                onChange={(e) => setFormData(prev => ({ ...prev, youtube_url: e.target.value, media_id: '' }))}
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Paste a YouTube URL to use as background video. This will override media library selection.
+              </p>
+            </div>
           </div>
 
           {/* Traditional Text Positioning */}
