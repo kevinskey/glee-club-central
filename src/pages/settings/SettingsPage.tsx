@@ -1,33 +1,37 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
-import { PageLoader } from '@/components/ui/page-loader';
-import { Card, CardContent } from '@/components/ui/card';
-import { Settings } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { loading } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  if (loading) {
-    return <PageLoader message="Loading settings..." />;
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your application preferences
-        </p>
-      </div>
-
+    <div className="container mx-auto py-10">
       <Card>
-        <CardContent className="text-center py-8">
-          <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Settings Coming Soon</h3>
-          <p className="text-muted-foreground">
-            Settings functionality will be implemented here.
-          </p>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input type="email" id="email" defaultValue={user?.email} disabled />
+            </div>
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input type="text" id="name" placeholder="Your Name" />
+            </div>
+            <div>
+              <Button>Update Profile</Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>

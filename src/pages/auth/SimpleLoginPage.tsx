@@ -1,20 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Music, LogIn, Eye, EyeOff } from 'lucide-react';
-import { PageLoader } from '@/components/ui/page-loader';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SimpleLoginPage() {
-  const { login, isAuthenticated, isLoading, isInitialized } = useSimpleAuthContext();
+  const { login, isAuthenticated, isLoading, isInitialized } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

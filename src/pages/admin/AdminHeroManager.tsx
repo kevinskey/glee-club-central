@@ -1,653 +1,480 @@
-
-import React, { useState, useEffect } from "react";
-import { Navigate } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Trash2, Save, Eye, GripVertical, Loader2, Plus, ArrowUp, ArrowDown, Check, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
-import { PageLoader } from "@/components/ui/page-loader";
-
-interface MediaImage {
-  id: string;
-  title: string;
-  file_url: string;
-  file_type?: string;
-  is_hero: boolean;
-  hero_tag: string | null;
-  display_order: number | null;
-}
-
-const HERO_TAG_OPTIONS = [
-  { value: "main-hero", label: "Main Hero" },
-  { value: "event-hero", label: "Event Hero" },
-  { value: "audio-hero", label: "Audio Hero" },
-  { value: "store-hero", label: "Store Hero" }
-];
-
-// Helper function to check if file is an image
-const isImageFile = (fileType: string | null | undefined): boolean => {
-  if (!fileType) return false;
-  return fileType.startsWith('image/');
-};
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, Image, Save, Trash2, Eye, Settings, Plus, Edit } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminHeroManager() {
-  const { user, profile, isAuthenticated, isLoading: authLoading } = useSimpleAuthContext();
-  const [images, setImages] = useState<MediaImage[]>([]);
-  const [filteredImages, setFilteredImages] = useState<MediaImage[]>([]);
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
-  const [previewImages, setPreviewImages] = useState<MediaImage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
-
-  // Simple admin check with enhanced fallback
-  const isAdmin = () => {
-    if (user?.email === 'kevinskey@mac.com') return true;
-    if (profile?.is_super_admin === true || profile?.role === 'admin') return true;
-    return false;
-  };
-
-  // Show loading while auth is initializing
-  if (authLoading) {
-    return <PageLoader message="Verifying admin access..." className="min-h-screen" />;
-  }
-
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  // Check admin access and redirect if not admin
-  if (!isAdmin()) {
-    toast.error("Access denied. Admin privileges required.");
-    return <Navigate to="/" replace />;
-  }
-
-  // Fetch all media images (only images, no PDFs)
-  const fetchImages = async () => {
-    setIsLoading(true);
-    try {
-      console.log('🔄 Fetching images from media_library...');
-      
-      const { data, error } = await supabase
-        .from('media_library')
-        .select('id, title, file_url, file_type, is_hero, hero_tag, display_order')
-        .not('file_url', 'is', null)
-        .like('file_type', 'image/%') // Only fetch image files
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        console.error('❌ Error fetching images:', error);
-        toast.error(`Failed to load images: ${error.message}`);
-        return;
-      }
-
-      console.log('✅ Images fetched successfully:', data?.length || 0);
-
-      const formattedImages: MediaImage[] = (data || [])
-        .filter(item => isImageFile(item.file_type)) // Double-check to ensure only images
-        .map(item => ({
-          id: item.id,
-          title: item.title || 'Untitled',
-          file_url: item.file_url,
-          file_type: item.file_type,
-          is_hero: item.is_hero || false,
-          hero_tag: item.hero_tag,
-          display_order: item.display_order || 0
-        }));
-
-      setImages(formattedImages);
-      setFilteredImages(formattedImages);
-    } catch (error) {
-      console.error('💥 Exception in fetchImages:', error);
-      toast.error("Unexpected error while loading images");
-    } finally {
-      setIsLoading(false);
+  const { user, isLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState('home');
+  const [heroes, setHeroes] = useState([
+    {
+      id: 1,
+      title: 'Welcome to Spelman College Glee Club',
+      subtitle: 'A tradition of excellence since 1925',
+      description: 'The Spelman College Glee Club has maintained a reputation of choral excellence for over 90 years.',
+      image: '/images/hero-1.jpg',
+      page: 'home',
+      active: true,
+    },
+    {
+      id: 2,
+      title: 'Upcoming Performances',
+      subtitle: 'Join us for our Spring Concert Series',
+      description: 'Experience the beauty and power of our voices at our upcoming performances.',
+      image: '/images/hero-2.jpg',
+      page: 'events',
+      active: true,
+    },
+    {
+      id: 3,
+      title: 'Our History',
+      subtitle: 'A legacy of musical excellence',
+      description: 'Learn about our rich history and the impact we\'ve made in choral music.',
+      image: '/images/hero-3.jpg',
+      page: 'about',
+      active: true,
     }
+  ]);
+  
+  const [editingHero, setEditingHero] = useState(null);
+  const [newHero, setNewHero] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+    image: '',
+    page: 'home',
+    active: true
+  });
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [previewHero, setPreviewHero] = useState(null);
+  
+  const handleEditHero = (hero) => {
+    setEditingHero({...hero});
+    setIsEditing(true);
+    setIsAdding(false);
   };
-
-  // Filter images based on selected filter
-  useEffect(() => {
-    if (selectedFilter === "all") {
-      setFilteredImages(images);
-    } else {
-      setFilteredImages(images.filter(img => img.hero_tag === selectedFilter));
-    }
-  }, [images, selectedFilter]);
-
-  // Update preview images when filter changes
-  useEffect(() => {
-    if (selectedFilter === "all") {
-      setPreviewImages(images.filter(img => img.is_hero));
-    } else {
-      setPreviewImages(images.filter(img => img.is_hero && img.hero_tag === selectedFilter));
-    }
-  }, [images, selectedFilter]);
-
-  useEffect(() => {
-    fetchImages();
-  }, []);
-
-  // Update image data
-  const updateImage = (id: string, field: keyof MediaImage, value: any) => {
-    console.log(`🔄 Updating image ${id}: ${field} = ${value}`);
-    setImages(prev => prev.map(img => 
-      img.id === id ? { ...img, [field]: value } : img
-    ));
-    setHasChanges(true);
+  
+  const handleAddHero = () => {
+    setIsAdding(true);
+    setIsEditing(false);
+    setEditingHero(null);
   };
-
-  // Batch toggle hero status
-  const batchToggleHero = (isHero: boolean) => {
-    if (selectedImages.size === 0) {
-      toast.error("Please select images first");
-      return;
-    }
-
-    setImages(prev => prev.map(img => 
-      selectedImages.has(img.id) ? { ...img, is_hero: isHero } : img
-    ));
-    setHasChanges(true);
-    setSelectedImages(new Set());
-    toast.success(`${selectedImages.size} images ${isHero ? 'added to' : 'removed from'} hero section`);
-  };
-
-  // Batch set hero tag
-  const batchSetHeroTag = (tag: string) => {
-    if (selectedImages.size === 0) {
-      toast.error("Please select images first");
-      return;
-    }
-
-    setImages(prev => prev.map(img => 
-      selectedImages.has(img.id) ? { ...img, hero_tag: tag, is_hero: true } : img
-    ));
-    setHasChanges(true);
-    setSelectedImages(new Set());
-    toast.success(`${selectedImages.size} images assigned to ${HERO_TAG_OPTIONS.find(opt => opt.value === tag)?.label}`);
-  };
-
-  // Handle drag and drop reordering
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    const newImages = Array.from(filteredImages);
-    const [reorderedItem] = newImages.splice(sourceIndex, 1);
-    newImages.splice(destinationIndex, 0, reorderedItem);
-
-    // Update display_order for reordered items
-    const updatedImages = newImages.map((img, index) => ({
-      ...img,
-      display_order: index
-    }));
-
-    // Update the main images array
-    setImages(prev => prev.map(img => {
-      const updated = updatedImages.find(u => u.id === img.id);
-      return updated || img;
-    }));
-
-    setHasChanges(true);
-  };
-
-  // Save all changes with better error handling
-  const saveChanges = async () => {
-    if (!hasChanges) {
-      toast.info("No changes to save");
-      return;
-    }
-
-    setIsSaving(true);
-    console.log('💾 Starting to save changes...');
-
-    try {
-      let successCount = 0;
-      let errorCount = 0;
-      const errors: string[] = [];
-
-      // Process images one by one for better error tracking
-      for (const img of images) {
-        try {
-          console.log(`💾 Updating image: ${img.id}`);
-          
-          const { error } = await supabase
-            .from('media_library')
-            .update({
-              is_hero: img.is_hero,
-              hero_tag: img.hero_tag,
-              display_order: img.display_order
-            })
-            .eq('id', img.id);
-
-          if (error) {
-            console.error(`❌ Error updating image ${img.id}:`, error);
-            errors.push(`${img.title}: ${error.message}`);
-            errorCount++;
-          } else {
-            console.log(`✅ Successfully updated image: ${img.id}`);
-            successCount++;
-          }
-
-          // Small delay to prevent overwhelming the database
-          await new Promise(resolve => setTimeout(resolve, 10));
-        } catch (err) {
-          console.error(`💥 Exception updating image ${img.id}:`, err);
-          errors.push(`${img.title}: Unexpected error`);
-          errorCount++;
-        }
-      }
-
-      // Show results
-      if (successCount > 0 && errorCount === 0) {
-        toast.success(`All ${successCount} changes saved successfully!`);
-        setHasChanges(false);
-      } else if (successCount > 0 && errorCount > 0) {
-        toast.warning(`${successCount} changes saved, but ${errorCount} failed. Check console for details.`);
-        console.warn('⚠️ Save errors:', errors);
-      } else {
-        toast.error(`Failed to save changes. ${errors.length > 0 ? errors[0] : 'Unknown error'}`);
-        console.error('❌ All save operations failed:', errors);
-      }
-
-      // Refresh data to ensure consistency
-      await fetchImages();
-    } catch (error) {
-      console.error('💥 Critical error in saveChanges:', error);
-      toast.error("Critical error while saving. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  // Delete image with better error handling
-  const deleteImage = async (id: string) => {
-    try {
-      console.log(`🗑️ Deleting image: ${id}`);
-      
-      const { error } = await supabase
-        .from('media_library')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('❌ Delete error:', error);
-        throw error;
-      }
-
-      console.log('✅ Image deleted successfully');
-      setImages(prev => prev.filter(img => img.id !== id));
-      setSelectedImages(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
+  
+  const handleSaveHero = () => {
+    if (isEditing && editingHero) {
+      setHeroes(heroes.map(h => h.id === editingHero.id ? editingHero : h));
+      setIsEditing(false);
+      setEditingHero(null);
+    } else if (isAdding) {
+      const newId = Math.max(...heroes.map(h => h.id)) + 1;
+      setHeroes([...heroes, {...newHero, id: newId}]);
+      setIsAdding(false);
+      setNewHero({
+        title: '',
+        subtitle: '',
+        description: '',
+        image: '',
+        page: 'home',
+        active: true
       });
-      toast.success("Image deleted successfully");
-    } catch (error: any) {
-      console.error('💥 Error deleting image:', error);
-      toast.error(`Failed to delete image: ${error.message || 'Unknown error'}`);
     }
   };
-
-  // Toggle image selection
-  const toggleImageSelection = (id: string) => {
-    setSelectedImages(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
+  
+  const handleDeleteHero = (id) => {
+    setHeroes(heroes.filter(h => h.id !== id));
+    if (editingHero && editingHero.id === id) {
+      setIsEditing(false);
+      setEditingHero(null);
+    }
   };
-
-  // Select all filtered images
-  const selectAllFiltered = () => {
-    setSelectedImages(new Set(filteredImages.map(img => img.id)));
+  
+  const handlePreviewHero = (hero) => {
+    setPreviewHero(hero);
   };
-
-  // Clear selection
-  const clearSelection = () => {
-    setSelectedImages(new Set());
+  
+  const handleClosePreview = () => {
+    setPreviewHero(null);
   };
-
-  if (isLoading) {
-    return <PageLoader message="Loading hero images..." className="min-h-screen" />;
-  }
-
+  
+  const filteredHeroes = heroes.filter(hero => hero.page === activeTab);
+  
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Hero Image Manager</h1>
-        <p className="text-muted-foreground">Manage which images appear in hero sections across the site (Images only - PDFs excluded)</p>
-      </div>
-
-      {/* Enhanced Controls Section */}
-      <div className="grid gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Quick Controls & Preview
-            </CardTitle>
-            <CardDescription>
-              Bulk actions and preview of active hero images
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Filter and Selection Controls */}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="filter">Filter:</Label>
-                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Select section" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Images</SelectItem>
-                    {HERO_TAG_OPTIONS.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={selectAllFiltered}>
-                  Select All
-                </Button>
-                <Button variant="outline" size="sm" onClick={clearSelection}>
-                  Clear
-                </Button>
-                {selectedImages.size > 0 && (
-                  <Badge variant="secondary">
-                    {selectedImages.size} selected
-                  </Badge>
-                )}
-              </div>
+    <div className="container mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl flex items-center gap-2">
+            <Image className="h-6 w-6" />
+            Hero Banner Manager
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="home" value={activeTab} onValueChange={setActiveTab}>
+            <div className="flex justify-between items-center mb-6">
+              <TabsList>
+                <TabsTrigger value="home">Home Page</TabsTrigger>
+                <TabsTrigger value="about">About Page</TabsTrigger>
+                <TabsTrigger value="events">Events Page</TabsTrigger>
+                <TabsTrigger value="contact">Contact Page</TabsTrigger>
+              </TabsList>
+              
+              <Button onClick={handleAddHero} className="gap-1">
+                <Plus className="h-4 w-4" /> Add Hero
+              </Button>
             </div>
-
-            {/* Batch Actions */}
-            {selectedImages.size > 0 && (
-              <div className="flex flex-wrap items-center gap-2 p-4 bg-muted rounded-lg">
-                <span className="text-sm font-medium">Batch Actions:</span>
-                <Button size="sm" onClick={() => batchToggleHero(true)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add to Hero
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => batchToggleHero(false)}>
-                  <X className="h-4 w-4 mr-1" />
-                  Remove from Hero
-                </Button>
-                {HERO_TAG_OPTIONS.map(option => (
-                  <Button 
-                    key={option.value}
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => batchSetHeroTag(option.value)}
-                  >
-                    Set as {option.label}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            {/* Preview Carousel */}
-            {previewImages.length > 0 && (
-              <div>
-                <Label className="mb-2 block">Active Hero Images Preview</Label>
-                <Carousel className="w-full max-w-xs mx-auto">
-                  <CarouselContent>
-                    {previewImages
-                      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
-                      .map((image) => (
-                        <CarouselItem key={image.id}>
-                          <div className="aspect-video overflow-hidden rounded-md">
-                            <img
-                              src={image.file_url}
-                              alt={image.title}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="p-2 bg-background/80 backdrop-blur-sm">
-                              <p className="text-sm font-medium truncate">{image.title}</p>
-                              <Badge variant="secondary" className="text-xs">
-                                {HERO_TAG_OPTIONS.find(opt => opt.value === image.hero_tag)?.label}
-                              </Badge>
-                            </div>
+            
+            <TabsContent value="home" className="space-y-4">
+              {filteredHeroes.length === 0 ? (
+                <Alert>
+                  <AlertDescription>No hero banners found for this page. Add one to get started.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredHeroes.map(hero => (
+                    <Card key={hero.id} className="overflow-hidden">
+                      <div className="relative h-40 bg-gray-100">
+                        {hero.image ? (
+                          <img 
+                            src={hero.image} 
+                            alt={hero.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Image className="h-12 w-12 text-gray-400" />
                           </div>
-                        </CarouselItem>
-                      ))}
-                  </CarouselContent>
-                  <CarouselPrevious />
-                  <CarouselNext />
-                </Carousel>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Enhanced Save Changes Button */}
-      {hasChanges && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Card className="shadow-lg border-orange-200">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="animate-pulse">
-                  Unsaved Changes
-                </Badge>
-                <Button 
-                  onClick={saveChanges} 
-                  disabled={isSaving}
-                  size="sm"
-                  className="bg-orange-600 hover:bg-orange-700"
-                >
-                  {isSaving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      Save All Changes
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Images Grid - Enhanced */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="images">
-          {(provided) => (
-            <div 
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="grid gap-4"
-            >
-              {filteredImages.map((image, index) => (
-                <Draggable key={image.id} draggableId={image.id} index={index}>
-                  {(provided, snapshot) => (
-                    <Card
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={`transition-all ${
-                        snapshot.isDragging ? 'shadow-lg scale-105' : ''
-                      } ${
-                        selectedImages.has(image.id) ? 'ring-2 ring-orange-500' : ''
-                      }`}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex flex-col md:flex-row gap-4">
-                          {/* Selection Checkbox, Drag Handle and Thumbnail */}
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              checked={selectedImages.has(image.id)}
-                              onChange={() => toggleImageSelection(image.id)}
-                              className="w-4 h-4"
-                            />
-                            <div 
-                              {...provided.dragHandleProps}
-                              className="cursor-grab active:cursor-grabbing"
-                            >
-                              <GripVertical className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-md overflow-hidden bg-gray-100">
-                              <img
-                                src={image.file_url}
-                                alt={image.title}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "/placeholder.svg";
-                                }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-medium truncate">{image.title}</h3>
-                              <p className="text-sm text-muted-foreground truncate">
-                                {image.file_url}
-                              </p>
-                              {image.is_hero && (
-                                <Badge variant="default" className="text-xs mt-1">
-                                  Active Hero
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Enhanced Controls */}
-                          <div className="flex flex-col md:flex-row gap-4 md:items-center">
-                            {/* Is Hero Toggle */}
-                            <div className="flex items-center space-x-2">
-                              <Switch
-                                checked={image.is_hero}
-                                onCheckedChange={(checked) => 
-                                  updateImage(image.id, 'is_hero', checked)
-                                }
-                              />
-                              <Label className="text-sm">Hero</Label>
-                            </div>
-
-                            {/* Hero Tag Dropdown */}
-                            <div className="min-w-[140px]">
-                              <Select
-                                value={image.hero_tag || ""}
-                                onValueChange={(value) => 
-                                  updateImage(image.id, 'hero_tag', value)
-                                }
-                              >
-                                <SelectTrigger className="h-8">
-                                  <SelectValue placeholder="Select tag" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {HERO_TAG_OPTIONS.map(option => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            {/* Display Order */}
-                            <div className="w-20">
-                              <Input
-                                type="number"
-                                placeholder="Order"
-                                value={image.display_order || 0}
-                                onChange={(e) => 
-                                  updateImage(image.id, 'display_order', parseInt(e.target.value) || 0)
-                                }
-                                className="h-8"
-                              />
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-1">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  const newOrder = Math.max(0, (image.display_order || 0) - 1);
-                                  updateImage(image.id, 'display_order', newOrder);
-                                }}
-                              >
-                                <ArrowUp className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  const newOrder = (image.display_order || 0) + 1;
-                                  updateImage(image.id, 'display_order', newOrder);
-                                }}
-                              >
-                                <ArrowDown className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="destructive" size="sm">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Image</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to delete "{image.title}"? This action cannot be undone.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => deleteImage(image.id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button size="sm" variant="secondary" onClick={() => handlePreviewHero(hero)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => handleEditHero(hero)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteHero(hero.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
+                        {!hero.active && (
+                          <Badge variant="secondary" className="absolute bottom-2 left-2">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold truncate">{hero.title}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hero.subtitle}</p>
                       </CardContent>
                     </Card>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="about" className="space-y-4">
+              {/* Same structure as home tab */}
+              {filteredHeroes.length === 0 ? (
+                <Alert>
+                  <AlertDescription>No hero banners found for this page. Add one to get started.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredHeroes.map(hero => (
+                    <Card key={hero.id} className="overflow-hidden">
+                      {/* Same card content as in home tab */}
+                      <div className="relative h-40 bg-gray-100">
+                        {hero.image ? (
+                          <img 
+                            src={hero.image} 
+                            alt={hero.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Image className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button size="sm" variant="secondary" onClick={() => handlePreviewHero(hero)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => handleEditHero(hero)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteHero(hero.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {!hero.active && (
+                          <Badge variant="secondary" className="absolute bottom-2 left-2">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold truncate">{hero.title}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hero.subtitle}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="events" className="space-y-4">
+              {/* Same structure as home tab */}
+              {filteredHeroes.length === 0 ? (
+                <Alert>
+                  <AlertDescription>No hero banners found for this page. Add one to get started.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredHeroes.map(hero => (
+                    <Card key={hero.id} className="overflow-hidden">
+                      {/* Same card content as in home tab */}
+                      <div className="relative h-40 bg-gray-100">
+                        {hero.image ? (
+                          <img 
+                            src={hero.image} 
+                            alt={hero.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Image className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button size="sm" variant="secondary" onClick={() => handlePreviewHero(hero)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => handleEditHero(hero)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteHero(hero.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {!hero.active && (
+                          <Badge variant="secondary" className="absolute bottom-2 left-2">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold truncate">{hero.title}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hero.subtitle}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="contact" className="space-y-4">
+              {/* Same structure as home tab */}
+              {filteredHeroes.length === 0 ? (
+                <Alert>
+                  <AlertDescription>No hero banners found for this page. Add one to get started.</AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredHeroes.map(hero => (
+                    <Card key={hero.id} className="overflow-hidden">
+                      {/* Same card content as in home tab */}
+                      <div className="relative h-40 bg-gray-100">
+                        {hero.image ? (
+                          <img 
+                            src={hero.image} 
+                            alt={hero.title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Image className="h-12 w-12 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button size="sm" variant="secondary" onClick={() => handlePreviewHero(hero)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={() => handleEditHero(hero)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteHero(hero.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {!hero.active && (
+                          <Badge variant="secondary" className="absolute bottom-2 left-2">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h3 className="font-bold truncate">{hero.title}</h3>
+                        <p className="text-sm text-gray-500 truncate">{hero.subtitle}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+          
+          {/* Edit/Add Form */}
+          {(isEditing || isAdding) && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>{isEditing ? 'Edit Hero Banner' : 'Add New Hero Banner'}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="title">Title</Label>
+                      <Input 
+                        id="title" 
+                        value={isEditing ? editingHero.title : newHero.title}
+                        onChange={(e) => isEditing 
+                          ? setEditingHero({...editingHero, title: e.target.value})
+                          : setNewHero({...newHero, title: e.target.value})
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="subtitle">Subtitle</Label>
+                      <Input 
+                        id="subtitle" 
+                        value={isEditing ? editingHero.subtitle : newHero.subtitle}
+                        onChange={(e) => isEditing 
+                          ? setEditingHero({...editingHero, subtitle: e.target.value})
+                          : setNewHero({...newHero, subtitle: e.target.value})
+                        }
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      rows={3}
+                      value={isEditing ? editingHero.description : newHero.description}
+                      onChange={(e) => isEditing 
+                        ? setEditingHero({...editingHero, description: e.target.value})
+                        : setNewHero({...newHero, description: e.target.value})
+                      }
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="image">Image URL</Label>
+                    <Input 
+                      id="image" 
+                      value={isEditing ? editingHero.image : newHero.image}
+                      onChange={(e) => isEditing 
+                        ? setEditingHero({...editingHero, image: e.target.value})
+                        : setNewHero({...newHero, image: e.target.value})
+                      }
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="page">Page</Label>
+                      <select 
+                        id="page"
+                        className="w-full p-2 border rounded"
+                        value={isEditing ? editingHero.page : newHero.page}
+                        onChange={(e) => isEditing 
+                          ? setEditingHero({...editingHero, page: e.target.value})
+                          : setNewHero({...newHero, page: e.target.value})
+                        }
+                      >
+                        <option value="home">Home</option>
+                        <option value="about">About</option>
+                        <option value="events">Events</option>
+                        <option value="contact">Contact</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center space-x-2 pt-6">
+                      <input 
+                        type="checkbox" 
+                        id="active"
+                        checked={isEditing ? editingHero.active : newHero.active}
+                        onChange={(e) => isEditing 
+                          ? setEditingHero({...editingHero, active: e.target.checked})
+                          : setNewHero({...newHero, active: e.target.checked})
+                        }
+                      />
+                      <Label htmlFor="active">Active</Label>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => {
+                      setIsEditing(false);
+                      setIsAdding(false);
+                      setEditingHero(null);
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSaveHero} className="gap-1">
+                      <Save className="h-4 w-4" /> Save
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Preview Modal */}
+          {previewHero && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
+                <div className="p-4 border-b flex justify-between items-center">
+                  <h2 className="text-xl font-bold">Hero Preview</h2>
+                  <Button variant="ghost" onClick={handleClosePreview}>
+                    ✕
+                  </Button>
+                </div>
+                <div className="p-0">
+                  <div className="relative h-64 md:h-96">
+                    {previewHero.image ? (
+                      <img 
+                        src={previewHero.image} 
+                        alt={previewHero.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full bg-gray-100">
+                        <Image className="h-24 w-24 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-6 text-white">
+                      <h1 className="text-2xl md:text-4xl font-bold mb-2">{previewHero.title}</h1>
+                      <h2 className="text-xl md:text-2xl mb-4">{previewHero.subtitle}</h2>
+                      <p className="max-w-xl">{previewHero.description}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t flex justify-end">
+                  <Button onClick={handleClosePreview}>Close Preview</Button>
+                </div>
+              </div>
             </div>
           )}
-        </Droppable>
-      </DragDropContext>
-
-      {filteredImages.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No images found for the selected filter.</p>
-        </div>
-      )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

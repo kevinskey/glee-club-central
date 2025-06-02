@@ -1,16 +1,19 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Headphones } from 'lucide-react';
+import { CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 export default function RecordingsPage() {
-  const { loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const { isAuthenticated } = useProfile();
 
-  if (loading) {
+  if (isLoading) {
     return <PageLoader message="Loading recordings..." />;
   }
 

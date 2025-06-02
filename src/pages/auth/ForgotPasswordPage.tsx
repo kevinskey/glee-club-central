@@ -1,19 +1,18 @@
-
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
 import { Music } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { resetPassword } = useSimpleAuthContext();
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

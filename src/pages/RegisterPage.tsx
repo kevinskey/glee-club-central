@@ -1,276 +1,104 @@
-import React, { useState, useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Music, AlertCircle } from "lucide-react";
-import { useMessaging } from "@/hooks/useMessaging";
-import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
-
-const registerSchema = z.object({
-  firstName: z.string().min(1, {
-    message: "First name is required.",
-  }),
-  lastName: z.string().min(1, {
-    message: "Last name is required.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  confirmPassword: z.string().min(6, {
-    message: "Please confirm your password.",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
-  const { user, loading, signUp, isAuthenticated } = useAuth();
+  const { signUp, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [registerError, setRegisterError] = useState<string | null>(null);
-  const { sendEmail } = useMessaging();
-  
-  // Initialize the form with useForm hook
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // If user is already authenticated, redirect to dashboard
-  useEffect(() => {
-    if (isAuthenticated && !loading) {
-      navigate("/dashboard");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email || !password || !firstName || !lastName) {
+      setError('All fields are required.');
+      return;
     }
-  }, [isAuthenticated, loading, navigate]);
 
-  const sendWelcomeEmail = async (email: string, firstName: string) => {
-    try {
-      console.log("Sending welcome email to:", email);
-      const emailResult = await sendEmail(
-        email,
-        "Welcome to Glee World - Please Verify Your Email",
-        `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #6d28d9; text-align: center;">Welcome to Glee World!</h2>
-          <p>Hello ${firstName},</p>
-          <p>Thank you for registering with Glee World, the central hub for the Spelman College Glee Club.</p>
-          <p>To complete your registration, please verify your email address by clicking the verification link sent to you in a separate email.</p>
-          <p>If you don't see the verification email in your inbox, please check your spam or junk folder.</p>
-          <p>Best regards,<br>The Glee World Team</p>
-        </div>
-        `
-      );
-      
-      if (emailResult.success) {
-        console.log("Welcome email sent successfully");
-      } else {
-        console.error("Failed to send welcome email:", emailResult.error);
-      }
-    } catch (error) {
-      console.error("Error sending welcome email:", error);
+    const { error: signUpError } = await signUp(email, password, firstName, lastName);
+
+    if (signUpError) {
+      setError(signUpError.message || 'Registration failed.');
+    } else {
+      setError(null);
+      navigate('/user-setup');
     }
   };
-
-  const onSubmit = async (values: RegisterFormValues) => {
-    setIsSubmitting(true);
-    setRegisterError(null);
-    
-    try {
-      console.log("Registration attempt for:", values.email);
-      
-      // Clean up any existing auth state first
-      cleanupAuthState();
-      
-      // Try to sign out first to clear any existing sessions
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-        console.log("Sign-out before registration failed, continuing anyway");
-      }
-      
-      // Pass the 'member' role as part of the user's metadata - FIXED: removed extra argument
-      const { error, data } = await signUp(
-        values.email,
-        values.password,
-        values.firstName,
-        values.lastName
-      );
-
-      if (error) {
-        console.error("Registration error:", error);
-        
-        // Check for duplicate email error
-        if (error.message?.includes("already registered")) {
-          setRegisterError("This email is already registered. Please use a different email or try logging in.");
-          toast.error("Email already registered");
-        } else {
-          setRegisterError(error.message || "Failed to register account");
-          toast.error("Registration failed", { description: error.message });
-        }
-      } else {
-        toast.success("Registration successful!", {
-          description: "Please check your email for a verification link"
-        });
-        
-        // Send a welcome email with instructions
-        await sendWelcomeEmail(values.email, values.firstName);
-        
-        navigate("/login", { 
-          state: { 
-            message: "Please check your email for a verification link to complete your registration." 
-          } 
-        });
-      }
-    } catch (error: any) {
-      console.error("Unexpected error during registration:", error);
-      setRegisterError(error.message || "An unexpected error occurred");
-      toast.error("Registration failed", { description: "An unexpected error occurred" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // If already authenticated and not loading, don't render the register form
-  if (isAuthenticated && !loading) {
-    return null; // Will redirect in the useEffect
-  }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-cover bg-center px-4" 
-         style={{ backgroundImage: "url('/lovable-uploads/b57ced8e-7ed7-405b-8302-41ab726303af.png')" }}>
-      {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/60"></div>
-      
-      <Card className="w-full max-w-md relative z-10 bg-white dark:bg-black backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Music className="h-12 w-12 text-glee-purple" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+    <div className="grid h-screen place-items-center">
+      <Card className="w-[450px]">
+        <CardHeader>
+          <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Join Glee World to access member resources
+            Enter your email and password to register.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          {registerError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="ml-2">
-                {registerError}
+        <CardContent className="grid gap-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {error}
               </AlertDescription>
             </Alert>
           )}
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Jane" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="jane.doe@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <span className="mr-2">Registering...</span>
-                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  </>
-                ) : (
-                  "Register"
-                )}
-              </Button>
-            </form>
-          </Form>
+          <div className="grid gap-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+              id="firstName"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+          </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link to="/login" className="text-glee-purple hover:underline">
-              Log in
-            </Link>
-          </p>
+        <CardFooter className="flex justify-between">
+          <Link to="/login" className="text-sm text-muted-foreground">
+            Already have an account?
+          </Link>
+          <Button onClick={handleSubmit} disabled={isLoading}>
+            Register
+          </Button>
         </CardFooter>
       </Card>
     </div>

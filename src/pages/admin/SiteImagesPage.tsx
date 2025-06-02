@@ -1,157 +1,158 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Image, Upload, Trash2, Settings } from 'lucide-react';
-import { PageLoader } from '@/components/ui/page-loader';
-import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Upload, Image, Save, Trash2, Eye, Download, Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export default function SiteImagesPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: profileLoading } = useProfile();
-  const [images, setImages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const { user, isLoading } = useAuth();
+  const { isAdmin, isLoading: profileLoading } = useProfile();
 
-  const isUserAdmin = isAdmin;
+  const [images, setImages] = useState([
+    { id: '1', name: 'Hero Image', url: '/placeholder-image.jpg', type: 'hero' },
+    { id: '2', name: 'Logo', url: '/placeholder-logo.png', type: 'logo' },
+  ]);
+  const [newImage, setNewImage] = useState({ name: '', url: '', type: 'hero' });
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
-    const loadImages = async () => {
-      setLoading(true);
-      // Mock loading delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setImages([]);
-      setLoading(false);
-    };
-
-    if (user && isUserAdmin) {
-      loadImages();
+    if (error) {
+      setTimeout(() => setError(''), 3000);
     }
-  }, [user, isUserAdmin]);
+    if (success) {
+      setTimeout(() => setSuccess(''), 3000);
+    }
+  }, [error, success]);
 
-  if (authLoading || profileLoading || loading) {
-    return <PageLoader message="Loading site images..." />;
-  }
-
-  if (!user || !isUserAdmin) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Admin Access Required</h3>
-          <p className="text-muted-foreground">
-            You must be an administrator to manage site images.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setNewImage({ ...newImage, [e.target.name]: e.target.value });
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     setUploading(true);
     try {
-      // Mock upload process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success('Image uploaded successfully!');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload image');
+      // Simulate upload
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      const imageUrl = URL.createObjectURL(file);
+      setNewImage({ ...newImage, url: imageUrl });
+      setSuccess('Image uploaded successfully (preview only)');
+    } catch (err) {
+      setError('Failed to upload image.');
     } finally {
       setUploading(false);
     }
   };
 
+  const handleAddImage = () => {
+    if (!newImage.name || !newImage.url) {
+      setError('Please provide both name and URL.');
+      return;
+    }
+
+    setImages([...images, { ...newImage, id: String(Date.now()) }]);
+    setNewImage({ name: '', url: '', type: 'hero' });
+    setSuccess('Image added successfully.');
+  };
+
+  const handleDeleteImage = (id: string) => {
+    setImages(images.filter(img => img.id !== id));
+    setSuccess('Image deleted successfully.');
+  };
+
+  if (isLoading || profileLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAdmin()) {
+    return <div>You are not authorized to view this page.</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Site Images</h1>
-        <p className="text-muted-foreground">
-          Manage images used throughout the Glee World website
-        </p>
-      </div>
-
-      {/* Upload Section */}
+    <div className="p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Upload New Image</CardTitle>
-          <CardDescription>
-            Add new images to be used on the website
-          </CardDescription>
+          <CardTitle>Site Image Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="image-upload">Select Image</Label>
-              <Input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-              />
-            </div>
-            {uploading && (
-              <Alert>
-                <Upload className="h-4 w-4" />
-                <AlertDescription>
-                  Uploading image, please wait...
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+          {success && <Alert><AlertDescription>{success}</AlertDescription></Alert>}
 
-      {/* Images Grid */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Current Site Images</CardTitle>
-          <CardDescription>
-            Manage existing images
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {images.length === 0 ? (
-            <div className="text-center py-12">
-              <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">No Images Uploaded</h3>
-              <p className="text-muted-foreground">
-                Upload your first image to get started.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {images.map((image, index) => (
-                <div key={index} className="relative group">
-                  <img
-                    src={image.url}
-                    alt={image.name}
-                    className="w-full h-40 object-cover rounded-lg border"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        // Handle image deletion
-                        toast.success('Image deleted successfully');
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="mt-2 text-sm text-center truncate">{image.name}</p>
+          <Tabs defaultValue="manage" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="manage">Manage Images</TabsTrigger>
+              <TabsTrigger value="add">Add Image</TabsTrigger>
+            </TabsList>
+            <TabsContent value="manage" className="space-y-4">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {images.map(image => (
+                  <Card key={image.id}>
+                    <CardHeader>
+                      <CardTitle>{image.name}</CardTitle>
+                      <Badge>{image.type}</Badge>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="aspect-w-16 aspect-h-9">
+                        <img src={image.url} alt={image.name} className="object-cover rounded-md" />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button variant="destructive" size="sm" onClick={() => handleDeleteImage(image.id)}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="add" className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input type="text" id="name" name="name" value={newImage.name} onChange={handleInputChange} />
                 </div>
-              ))}
-            </div>
-          )}
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <Select onValueChange={(value) => handleInputChange({ target: { name: 'type', value } } as any)}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select image type" defaultValue={newImage.type} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hero">Hero</SelectItem>
+                      <SelectItem value="logo">Logo</SelectItem>
+                      <SelectItem value="background">Background</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="image">Upload Image</Label>
+                  <Input type="file" id="image" name="image" onChange={handleImageUpload} />
+                  {uploading && <p>Uploading...</p>}
+                </div>
+                {newImage.url && (
+                  <div className="aspect-w-16 aspect-h-9">
+                    <img src={newImage.url} alt="Preview" className="object-cover rounded-md" />
+                  </div>
+                )}
+                <Button onClick={handleAddImage} disabled={uploading}>
+                  Add Image
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

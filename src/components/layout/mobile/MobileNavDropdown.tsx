@@ -1,7 +1,6 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,7 @@ import {
 } from 'lucide-react';
 
 export function MobileNavDropdown() {
-  const { isAuthenticated, profile, logout } = useSimpleAuthContext();
+  const { isAuthenticated, profile, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -46,34 +45,34 @@ export function MobileNavDropdown() {
       <DropdownMenuContent align="end" className="w-56">
         {/* Navigation Links */}
         <DropdownMenuItem asChild>
-          <Link to="/" className="flex items-center">
+          <NavLink to="/" className="flex items-center">
             <Home className="mr-2 h-4 w-4" />
             Home
-          </Link>
+          </NavLink>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/about" className="flex items-center">
+          <NavLink to="/about" className="flex items-center">
             <Info className="mr-2 h-4 w-4" />
             About
-          </Link>
+          </NavLink>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/calendar" className="flex items-center">
+          <NavLink to="/calendar" className="flex items-center">
             <Calendar className="mr-2 h-4 w-4" />
             Calendar
-          </Link>
+          </NavLink>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/store" className="flex items-center">
+          <NavLink to="/store" className="flex items-center">
             <Store className="mr-2 h-4 w-4" />
             Store
-          </Link>
+          </NavLink>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/contact" className="flex items-center">
+          <NavLink to="/contact" className="flex items-center">
             <Phone className="mr-2 h-4 w-4" />
             Contact
-          </Link>
+          </NavLink>
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
@@ -82,10 +81,10 @@ export function MobileNavDropdown() {
         {isAuthenticated ? (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/role-dashboard" className="flex items-center">
+              <NavLink to="/role-dashboard" className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
                 {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-              </Link>
+              </NavLink>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout} className="flex items-center text-red-600">
               <LogOut className="mr-2 h-4 w-4" />
@@ -95,23 +94,23 @@ export function MobileNavDropdown() {
         ) : (
           <>
             <DropdownMenuItem asChild>
-              <Link to="/signup" className="flex items-center">
+              <NavLink to="/signup" className="flex items-center">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Sign Up
-              </Link>
+              </NavLink>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/login" className="flex items-center">
+              <NavLink to="/login" className="flex items-center">
                 <LogIn className="mr-2 h-4 w-4" />
                 Login
-              </Link>
+              </NavLink>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/join-glee-fam" className="flex items-center text-glee-purple">
+              <NavLink to="/join-glee-fam" className="flex items-center text-glee-purple">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Join as Fan
-              </Link>
+              </NavLink>
             </DropdownMenuItem>
           </>
         )}

@@ -1,143 +1,113 @@
-
 import React, { useState } from 'react';
-import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
-import { EventDialog } from '@/components/calendar/EventDialog';
-import { useCalendarEvents } from '@/hooks/useCalendarEvents';
-import { useUserRole } from '@/hooks/useUserRole';
-import { CalendarEvent } from '@/types/calendar';
-import { PageHeader } from '@/components/ui/page-header';
-import { Calendar } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PageLoader } from '@/components/ui/page-loader';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, Clock, MapPin, Users, Search, Filter, Plus } from 'lucide-react';
+import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
+import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
+import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
+import { UpcomingEventsList } from '@/components/calendar/UpcomingEventsList';
+import { HolidayCard } from '@/components/calendar/HolidayCard';
+import { SpelmanDateCard } from '@/components/calendar/SpelmanDateCard';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function EnhancedCalendarPage() {
-  const { events, loading, error, fetchEvents } = useCalendarEvents();
-  const { userRole, isMember } = useUserRole();
-  const { user, loading: authLoading } = useAuth();
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [userRSVP, setUserRSVP] = useState<'going' | 'maybe' | 'not_going' | null>(null);
-  const isMobile = useIsMobile();
+  const { user, profile, isLoading } = useAuth();
 
-  // Show loading while authentication is being checked
-  if (authLoading) {
-    return <PageLoader message="Loading calendar..." />;
-  }
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  const [calendarView, setCalendarView] = useState('month');
+  const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
 
-  const handleEventClick = async (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    
-    if (event.allow_rsvp && user) {
-      try {
-        // Fetch user's current RSVP status
-        const { data } = await supabase
-          .from('event_rsvps')
-          .select('status')
-          .eq('event_id', event.id)
-          .eq('user_id', user.id)
-          .single();
-        
-        setUserRSVP(data?.status || null);
-      } catch (error) {
-        console.error('Error fetching RSVP status:', error);
-        setUserRSVP(null);
-      }
-    }
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
-  const handleRSVP = async (status: 'going' | 'maybe' | 'not_going') => {
-    if (!user || !selectedEvent) return;
-
-    try {
-      const { error } = await supabase
-        .from('event_rsvps')
-        .upsert({
-          event_id: selectedEvent.id,
-          user_id: user.id,
-          status,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-      
-      setUserRSVP(status);
-      toast.success('RSVP updated successfully');
-    } catch (error) {
-      console.error('Error updating RSVP:', error);
-      toast.error('Failed to update RSVP');
-    }
-  };
-
-  const handleAddEvent = () => {
-    // Future implementation for admin event creation
-    toast.info('Event creation coming soon!');
-  };
-
-  if (loading) {
-    return (
-      <div className={`${isMobile ? 'p-4' : 'mobile-container mobile-section-padding'}`}>
-        <PageHeader
-          title="Calendar"
-          description="View upcoming events and performances"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-        />
-        <div className="flex items-center justify-center h-48 sm:h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
-            <p className="mt-4 text-muted-foreground text-sm sm:text-base">Loading calendar...</p>
-          </div>
-        </div>
-      </div>
+  const toggleEventType = (type: string) => {
+    setSelectedEventTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
     );
-  }
+  };
 
-  if (error) {
-    return (
-      <div className={`${isMobile ? 'p-4' : 'mobile-container mobile-section-padding'}`}>
-        <PageHeader
-          title="Calendar"
-          description="View upcoming events and performances"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-        />
-        <div className="flex flex-col items-center justify-center h-48 sm:h-64 space-y-4">
-          <div className="text-red-600 text-center">
-            <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
-            <p className="text-xs sm:text-sm mt-1">{error}</p>
-          </div>
-          <Button onClick={fetchEvents} variant="outline" className={`${isMobile ? 'w-full' : 'mobile-touch-target'}`}>
-            Try Again
-          </Button>
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <div>Loading calendar...</div>;
   }
 
   return (
-    <div className={`${isMobile ? 'p-4 pb-20' : 'mobile-container mobile-section-padding'} space-y-4 sm:space-y-6 mobile-scroll`}>
-      <PageHeader
-        title="Calendar"
-        description={`View ${isMember ? 'all events and performances' : 'upcoming public events'}`}
-        icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
-      />
+    <div className="container mx-auto p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">
+            Glee Club Calendar
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="all" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all" onClick={() => setActiveTab('all')}>
+                All Events
+              </TabsTrigger>
+              <TabsTrigger value="performances" onClick={() => setActiveTab('performances')}>
+                Performances
+              </TabsTrigger>
+              <TabsTrigger value="rehearsals" onClick={() => setActiveTab('rehearsals')}>
+                Rehearsals
+              </TabsTrigger>
+              <TabsTrigger value="socials" onClick={() => setActiveTab('socials')}>
+                Social Events
+              </TabsTrigger>
+            </TabsList>
+            <div className="md:flex justify-between items-center">
+              <div className="flex-1">
+                <Input
+                  type="search"
+                  placeholder="Search events..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="max-w-md"
+                />
+              </div>
+              <div className="mt-2 md:mt-0">
+                <CalendarViewToggle view={calendarView} setView={setCalendarView} />
+              </div>
+            </div>
+            <TabsContent value="all" className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <EventTypeFilter
+                  selectedEventTypes={selectedEventTypes}
+                  toggleEventType={toggleEventType}
+                />
+              </div>
+              <EnhancedCalendarView
+                searchQuery={searchQuery}
+                activeTab={activeTab}
+                calendarView={calendarView}
+                selectedEventTypes={selectedEventTypes}
+              />
+            </TabsContent>
+            <TabsContent value="performances">
+              <div>Performances Content</div>
+            </TabsContent>
+            <TabsContent value="rehearsals">
+              <div>Rehearsals Content</div>
+            </TabsContent>
+            <TabsContent value="socials">
+              <div>Socials Content</div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-      <EnhancedCalendarView
-        events={events}
-        onEventClick={handleEventClick}
-        onAddEvent={isMember ? handleAddEvent : undefined}
-        loading={loading}
-      />
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <HolidayCard />
+        <SpelmanDateCard />
+      </div>
 
-      <EventDialog
-        event={selectedEvent}
-        isOpen={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        canRSVP={isMember}
-        userRSVP={userRSVP}
-        onRSVP={handleRSVP}
-      />
+      <div className="mt-6">
+        <UpcomingEventsList />
+      </div>
     </div>
   );
 }

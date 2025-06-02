@@ -1,189 +1,216 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { User, Save } from 'lucide-react';
-import { PageLoader } from '@/components/ui/page-loader';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { User, Mail, Phone, MapPin, Calendar, Music } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export default function UserSetupPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading } = useProfile();
+  const { user, isLoading } = useAuth();
+  const { profile, isLoading: profileLoading } = useProfile();
   const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    voicePart: '',
-    classYear: '',
-    phone: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/login');
-    }
-  }, [user, authLoading, navigate]);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [bio, setBio] = useState('');
+  const [role, setRole] = useState('member'); // Default role
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   useEffect(() => {
     if (profile) {
-      setFormData({
-        firstName: profile.first_name || '',
-        lastName: profile.last_name || '',
-        voicePart: profile.voice_part || '',
-        classYear: profile.class_year || '',
-        phone: profile.phone || ''
-      });
+      setFirstName(profile.first_name || '');
+      setLastName(profile.last_name || '');
+      setPhone(profile.phone || '');
+      setAddress(profile.address || '');
+      setBio(profile.bio || '');
+      setRole(profile.role || 'member');
+      setAvatarUrl(profile.avatar_url || '');
     }
   }, [profile]);
 
-  if (authLoading || profileLoading) {
-    return <PageLoader message="Loading user setup..." />;
-  }
-
-  if (!user) {
-    return null; // Will redirect in useEffect
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.firstName || !formData.lastName) {
-      setError('Please fill in all required fields');
+  const handleSubmit = async () => {
+    // Basic validation
+    if (!firstName || !lastName) {
+      alert('Please enter your first and last name.');
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-    
+    // Prepare the update object
+    const updates = {
+      id: user?.id,
+      first_name: firstName,
+      last_name: lastName,
+      phone: phone,
+      address: address,
+      bio: bio,
+      role: role,
+      avatar_url: avatarUrl,
+      updated_at: new Date(),
+    };
+
+    // Call the Supabase function to update the profile
     try {
-      // Mock profile setup process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast.success('Profile setup completed successfully!');
-      navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Failed to set up profile');
-    } finally {
-      setIsSubmitting(false);
+      const { error } = await supabase.from('profiles').upsert(updates, {
+        returning: 'minimal', // Don't return the value after inserting
+      });
+
+      if (error) {
+        throw error;
+      }
+      alert('Profile updated successfully!');
+      navigate('/dashboard'); // Redirect to dashboard after setup
+    } catch (error: any) {
+      console.error('Profile update error:', error.message);
+      alert(`Failed to update profile: ${error.message}`);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setError(null);
-  };
+  if (!user) {
+    return <Alert variant="destructive">
+      <AlertDescription>
+        You must be logged in to view this page.
+      </AlertDescription>
+    </Alert>;
+  }
+
+  if (isLoading || profileLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <User className="h-12 w-12 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription>
-            Let's set up your Glee Club profile
-          </CardDescription>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-md p-4 bg-white dark:bg-gray-800 shadow-md rounded-md">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">
+            <User className="mr-2 h-5 w-5 inline-block align-middle" />
+            Complete Your Profile
+          </CardTitle>
         </CardHeader>
-        
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="voicePart">Voice Part</Label>
-              <Select 
-                value={formData.voicePart} 
-                onValueChange={(value) => handleInputChange('voicePart', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your voice part" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="soprano1">Soprano 1</SelectItem>
-                  <SelectItem value="soprano2">Soprano 2</SelectItem>
-                  <SelectItem value="alto1">Alto 1</SelectItem>
-                  <SelectItem value="alto2">Alto 2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="classYear">Class Year</Label>
-              <Input
-                id="classYear"
-                placeholder="e.g., 2025"
-                value={formData.classYear}
-                onChange={(e) => handleInputChange('classYear', e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="(555) 123-4567"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Setting up...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Complete Setup
-                </>
-              )}
-            </Button>
-          </form>
+        <CardContent className="space-y-4">
+          <Alert className="mb-4">
+            <AlertDescription>
+              Welcome! Please provide some additional information to complete your profile.
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid gap-2">
+            <Label htmlFor="firstName">
+              <User className="mr-2 h-4 w-4 inline-block align-middle" />
+              First Name
+            </Label>
+            <Input
+              id="firstName"
+              type="text"
+              placeholder="Enter your first name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="lastName">
+              <User className="mr-2 h-4 w-4 inline-block align-middle" />
+              Last Name
+            </Label>
+            <Input
+              id="lastName"
+              type="text"
+              placeholder="Enter your last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="email">
+              <Mail className="mr-2 h-4 w-4 inline-block align-middle" />
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Your email"
+              value={user?.email || ''}
+              disabled
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="phone">
+              <Phone className="mr-2 h-4 w-4 inline-block align-middle" />
+              Phone Number
+            </Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="Enter your phone number"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="address">
+              <MapPin className="mr-2 h-4 w-4 inline-block align-middle" />
+              Address
+            </Label>
+            <Input
+              id="address"
+              type="text"
+              placeholder="Enter your address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="bio">
+              <Music className="mr-2 h-4 w-4 inline-block align-middle" />
+              Bio
+            </Label>
+            <Textarea
+              id="bio"
+              placeholder="Tell us about yourself"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="role">
+              <Calendar className="mr-2 h-4 w-4 inline-block align-middle" />
+              Role
+            </Label>
+            <Select value={role} onValueChange={setRole}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">Member</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="fan">Fan</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Button onClick={handleSubmit} className="w-full">
+            Update Profile
+          </Button>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
+const supabase = createClientComponentClient()

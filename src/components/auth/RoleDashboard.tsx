@@ -1,210 +1,157 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useAuthMigration } from '@/hooks/useAuthMigration';
-import { PageLoader } from '@/components/ui/page-loader';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, RefreshCw, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Users, 
+  Calendar, 
+  Music, 
+  Settings, 
+  BarChart3, 
+  UserCog,
+  BookOpen,
+  Headphones
+} from 'lucide-react';
 
-export const RoleDashboard: React.FC = () => {
-  const auth = useAuthMigration();
+export function RoleDashboard() {
+  const { user, profile, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
-  const [hasRedirected, setHasRedirected] = useState(false);
-  const [showError, setShowError] = useState(false);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const [waitTime, setWaitTime] = useState(0);
 
-  useEffect(() => {
-    console.log('🎯 RoleDashboard: AUTH STATE CHECK:', {
-      isLoading: auth.isLoading,
-      isAuthenticated: auth.isAuthenticated,
-      hasUser: !!auth.user,
-      userId: auth.user?.id,
-      userEmail: auth.user?.email,
-      hasProfile: !!auth.profile,
-      profileRole: auth.profile?.role,
-      profileIsAdmin: auth.profile?.is_super_admin,
-      isInitialized: auth.isInitialized,
-      hasRedirected
-    });
-
-    // Wait for initialization and prevent multiple redirects
-    if (!auth.isInitialized || hasRedirected) {
-      return;
-    }
-
-    // Handle unauthenticated users immediately
-    if (!auth.isAuthenticated || !auth.user) {
-      console.log('🚫 RoleDashboard: User not authenticated, redirecting to login');
-      setHasRedirected(true);
-      navigate('/login', { replace: true });
-      return;
-    }
-
-    // Route quickly if we have a profile - don't wait too long
-    if (auth.isAuthenticated && auth.user && (auth.profile || waitTime >= 5)) {
-      let targetRoute = '/dashboard/member';
-      
-      // Check if user is admin using profile data directly
-      const isUserAdmin = auth.profile?.is_super_admin === true || auth.profile?.role === 'admin';
-      
-      if (auth.profile && isUserAdmin) {
-        targetRoute = '/admin';
-        console.log('👑 RoleDashboard: Admin role detected, routing to admin dashboard');
-      } else if (auth.profile?.role === 'fan') {
-        targetRoute = '/fan-dashboard';
-        console.log('👤 RoleDashboard: Fan role detected, routing to fan dashboard');
-      } else {
-        console.log('👤 RoleDashboard: Member role detected, routing to member dashboard');
-      }
-      
-      console.log('🎯 RoleDashboard: Routing to:', targetRoute);
-      setHasRedirected(true);
-      navigate(targetRoute, { replace: true });
-      return;
-    }
-
-    // Show error if profile is missing after reasonable wait
-    if (!auth.profile && auth.isAuthenticated && auth.user && !auth.isLoading && waitTime >= 5) {
-      console.error(`❌ RoleDashboard: Profile missing for authenticated user ${auth.user.id}`);
-      setShowError(true);
-      return;
-    }
-  }, [auth.isLoading, auth.isAuthenticated, auth.user, auth.profile, navigate, auth.isInitialized, hasRedirected, showError, waitTime]);
-
-  // Quick timer for timeout handling
-  useEffect(() => {
-    if (auth.isAuthenticated && auth.user && !auth.profile && !hasRedirected && !showError) {
-      const timer = setTimeout(() => {
-        setWaitTime(prev => prev + 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [auth.isAuthenticated, auth.user, auth.profile, hasRedirected, showError, waitTime]);
-
-  const handleRetry = async () => {
-    setIsRetrying(true);
-    setShowError(false);
-    setWaitTime(0);
-    
+  const handleLogout = async () => {
     try {
-      console.log('🔄 RoleDashboard: Retrying profile resolution...');
-      
-      // First try to refresh user data
-      if (auth.refreshUserData) {
-        await auth.refreshUserData();
-      }
-      
-      // If still no profile, try to create fallback
-      setTimeout(async () => {
-        if (!auth.profile && auth.createFallbackProfile && auth.user?.id) {
-          console.log('🔧 RoleDashboard: Creating fallback profile...');
-          await auth.createFallbackProfile(auth.user.id);
-        }
-      }, 1000);
-      
+      await logout();
+      navigate('/');
     } catch (error) {
-      console.error('❌ RoleDashboard: Retry failed:', error);
-      setShowError(true);
-    } finally {
-      setIsRetrying(false);
+      console.error('Logout error:', error);
     }
   };
 
-  const handleContinueAnyway = () => {
-    console.log('🎯 RoleDashboard: User chose to continue without profile');
-    setHasRedirected(true);
-    
-    // Route based on email for admin detection
-    const targetRoute = auth.user?.email === 'kevinskey@mac.com' ? '/admin' : '/dashboard/member';
-    navigate(targetRoute, { replace: true });
-  };
-
-  // Show initialization loading
-  if (!auth.isInitialized) {
-    return (
-      <PageLoader 
-        message="Starting GleeWorld..."
-        className="min-h-screen"
-      />
-    );
-  }
-
-  // Show authentication redirect
-  if (!auth.isAuthenticated || !auth.user) {
-    return (
-      <PageLoader 
-        message="Redirecting to login..."
-        className="min-h-screen"
-      />
-    );
-  }
-
-  // Show profile loading briefly
-  if (auth.isLoading && waitTime < 3) {
-    return (
-      <PageLoader 
-        message={`Loading your profile... (${waitTime}s)`}
-        className="min-h-screen"
-      />
-    );
-  }
-
-  // Show error state with retry options
-  if (showError || (!auth.profile && !auth.isLoading && waitTime >= 5)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-            <CardTitle>Profile Setup Issue</CardTitle>
-            <CardDescription>
-              We're having trouble setting up your profile. This usually resolves quickly with a retry.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-sm text-muted-foreground bg-muted p-3 rounded">
-              <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4" />
-                <span className="font-medium">Account Details</span>
-              </div>
-              <p><strong>User ID:</strong> {auth.user?.id}</p>
-              <p><strong>Email:</strong> {auth.user?.email}</p>
-              <p><strong>Status:</strong> Profile {auth.profile ? 'Loading' : 'Missing'}</p>
-              {auth.user?.email === 'kevinskey@mac.com' && (
-                <p><strong>Expected Role:</strong> Admin</p>
-              )}
-            </div>
-            <div className="flex flex-col space-y-2">
-              <Button 
-                onClick={handleRetry} 
-                disabled={isRetrying}
-                className="w-full"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
-                {isRetrying ? 'Setting up profile...' : 'Retry Profile Setup'}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleContinueAnyway}
-                className="w-full"
-              >
-                Continue to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show final loading before dashboard redirect
   return (
-    <PageLoader 
-      message="Loading your dashboard..." 
-      className="min-h-screen"
-    />
-  );
-};
+    <div className="p-6 space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold">
+          Welcome, {profile?.first_name || user?.email}!
+        </h2>
+        <p className="text-gray-500">
+          {isAdmin() ? 'Admin Dashboard' : 'Member Dashboard'}
+        </p>
+      </div>
 
-export default RoleDashboard;
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isAdmin() ? (
+          <>
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Manage Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Create, edit, and manage user accounts.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/admin/user-management')}>
+                  Go to User Management
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Manage Calendar
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Create, edit, and manage calendar events.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/admin/calendar')}>
+                  Go to Calendar
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Site Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Manage site-wide settings and configurations.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/admin/site-settings')}>
+                  Go to Site Settings
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        ) : (
+          <>
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  Sheet Music
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Access and download sheet music for practice.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/sheet-music')}>
+                  View Sheet Music
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Headphones className="h-5 w-5" />
+                  Practice Tools
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  Access practice logs, stats, and sight reading tools.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/practice')}>
+                  Go to Practice Tools
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Calendar
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-500">
+                  View upcoming events and rehearsals.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/calendar')}>
+                  View Calendar
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
+
+      <Button variant="destructive" onClick={handleLogout}>
+        Logout
+      </Button>
+    </div>
+  );
+}

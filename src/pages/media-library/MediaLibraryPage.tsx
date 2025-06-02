@@ -1,176 +1,146 @@
-
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/contexts/ProfileContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Upload, 
   Image, 
   Video, 
   Music, 
   FileText, 
   Search, 
-  Upload, 
-  Filter,
+  Filter, 
+  Download,
+  Eye,
+  Edit,
+  Trash2,
+  Plus,
   Grid,
   List
 } from 'lucide-react';
-import { PageLoader } from '@/components/ui/page-loader';
+import { MediaLibraryPageContent } from '@/components/media/MediaLibraryPageContent';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export default function MediaLibraryPage() {
-  const { user, loading: authLoading } = useAuth();
-  const { profile, isAdmin, loading: profileLoading } = useProfile();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading } = useAuth();
+  const { isAdmin, isLoading: profileLoading } = useProfile();
 
-  const isUserAdmin = isAdmin;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   useEffect(() => {
-    const loadMedia = async () => {
-      setLoading(true);
-      // Mock loading delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setLoading(false);
-    };
+    console.log('MediaLibraryPage: User:', user, 'Is Admin:', isAdmin());
+  }, [user, isAdmin]);
 
-    if (user) {
-      loadMedia();
-    }
-  }, [user]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
-  if (authLoading || profileLoading || loading) {
-    return <PageLoader message="Loading media library..." />;
-  }
+  const handleFilterChange = (type: string) => {
+    setFilterType(type);
+  };
 
-  if (!user) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Access Restricted</h3>
-          <p className="text-muted-foreground">
-            You must be logged in to access the media library.
-          </p>
-        </CardContent>
-      </Card>
-    );
+  const handleViewModeChange = (mode: 'grid' | 'list') => {
+    setViewMode(mode);
+  };
+
+  const handleFileUpload = (files: File[]) => {
+    console.log('Uploading files:', files);
+  };
+
+  const handleFileSelect = (fileId: string) => {
+    setSelectedFiles(prev => {
+      if (prev.includes(fileId)) {
+        return prev.filter(id => id !== fileId);
+      } else {
+        return [...prev, fileId];
+      }
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    console.log('Deleting selected files:', selectedFiles);
+    setSelectedFiles([]);
+  };
+
+  if (isLoading || profileLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Media Library</h1>
-          <p className="text-muted-foreground">
-            Browse and manage choir photos, videos, and recordings
-          </p>
-        </div>
-        {isUserAdmin && (
-          <Button>
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Media
-          </Button>
-        )}
-      </div>
-
-      {/* Search and Controls */}
+    <div className="p-6 space-y-6">
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search media..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
+        <CardHeader>
+          <CardTitle className="text-2xl">Media Library</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Input
+              type="search"
+              placeholder="Search media..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="md:col-span-2"
+            />
+
+            <Tabs defaultValue="all" className="md:col-span-2 lg:col-span-1">
+              <TabsList>
+                <TabsTrigger value="all" onClick={() => handleFilterChange('all')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="images" onClick={() => handleFilterChange('images')}>
+                  <Image className="mr-2 h-4 w-4" />
+                  Images
+                </TabsTrigger>
+                <TabsTrigger value="videos" onClick={() => handleFilterChange('videos')}>
+                  <Video className="mr-2 h-4 w-4" />
+                  Videos
+                </TabsTrigger>
+                <TabsTrigger value="audio" onClick={() => handleFilterChange('audio')}>
+                  <Music className="mr-2 h-4 w-4" />
+                  Audio
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="flex items-center justify-end space-x-2 lg:col-span-1">
+              <Button variant="outline" size="sm" onClick={() => handleViewModeChange(viewMode === 'grid' ? 'list' : 'grid')}>
+                {viewMode === 'grid' ? <List className="h-4 w-4 mr-2" /> : <Grid className="h-4 w-4 mr-2" />}
+                {viewMode === 'grid' ? 'List View' : 'Grid View'}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-              >
-                {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-              </Button>
+              {isAdmin() && (
+                <Button size="sm">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Media Content */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList>
-          <TabsTrigger value="all">All Media</TabsTrigger>
-          <TabsTrigger value="photos">Photos</TabsTrigger>
-          <TabsTrigger value="videos">Videos</TabsTrigger>
-          <TabsTrigger value="audio">Audio</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-        </TabsList>
+      <MediaLibraryPageContent
+        searchTerm={searchTerm}
+        filterType={filterType}
+        viewMode={viewMode}
+        selectedFiles={selectedFiles}
+        onFileSelect={handleFileSelect}
+      />
 
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardContent className="text-center py-12">
-              <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold mb-2">No Media Found</h3>
-              <p className="text-muted-foreground mb-4">
-                The media library is empty. Upload some files to get started.
-              </p>
-              {isUserAdmin && (
-                <Button>
-                  <Upload className="mr-2 h-4 w-4" />
-                  Upload First File
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="photos">
-          <Card>
-            <CardContent className="text-center py-12">
-              <Image className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No photos available.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="videos">
-          <Card>
-            <CardContent className="text-center py-12">
-              <Video className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No videos available.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="audio">
-          <Card>
-            <CardContent className="text-center py-12">
-              <Music className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No audio files available.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="documents">
-          <Card>
-            <CardContent className="text-center py-12">
-              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No documents available.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {selectedFiles.length > 0 && (
+        <div className="flex justify-end">
+          <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Selected
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
