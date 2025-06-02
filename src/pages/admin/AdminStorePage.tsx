@@ -2,14 +2,56 @@
 import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingBag, Package, BarChart3, Settings } from 'lucide-react';
+import { ShoppingBag, Package, BarChart3, Settings, Lock } from 'lucide-react';
 import { ProductManagement } from '@/components/admin/store/ProductManagement';
 import { OrderManagement } from '@/components/admin/store/OrderManagement';
 import { StoreAnalytics } from '@/components/admin/store/StoreAnalytics';
 import { StoreSettings } from '@/components/admin/store/StoreSettings';
 import { AdminLayout } from '@/layouts/AdminLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { hasPermission } from '@/utils/permissionChecker';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function AdminStorePage() {
+  const { user, profile } = useAuth();
+
+  // Check if user has permission to manage shop
+  const canManageShop = () => {
+    if (!user || !profile) return false;
+    
+    // Create user object for permission checking
+    const currentUser = {
+      ...user,
+      role_tags: profile?.role_tags || []
+    };
+    
+    return hasPermission(currentUser, 'manage_shop') || profile?.is_super_admin;
+  };
+
+  if (!canManageShop()) {
+    return (
+      <AdminLayout>
+        <div className="space-y-6">
+          <PageHeader
+            title="Store Management"
+            description="Access restricted"
+            icon={<Lock className="h-6 w-6" />}
+          />
+          
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+              <p className="text-muted-foreground">
+                You need Treasurer, Merchandise Manager, or Admin permissions to access store management.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div className="space-y-6">

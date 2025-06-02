@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { hasPermission } from '@/utils/permissionChecker';
 
 interface StoreItem {
   id: string;
@@ -28,6 +29,7 @@ interface StoreItem {
 }
 
 export function ProductManagement() {
+  const { user, profile } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
   const [formData, setFormData] = useState({
@@ -41,6 +43,19 @@ export function ProductManagement() {
   });
 
   const queryClient = useQueryClient();
+
+  // Check if user has permission to manage shop
+  const canManageShop = () => {
+    if (!user || !profile) return false;
+    
+    // Create user object for permission checking
+    const currentUser = {
+      ...user,
+      role_tags: profile?.role_tags || []
+    };
+    
+    return hasPermission(currentUser, 'manage_shop') || profile?.is_super_admin;
+  };
 
   const { data: storeItems, isLoading } = useQuery({
     queryKey: ['admin-store-items'],
@@ -57,6 +72,10 @@ export function ProductManagement() {
 
   const createItemMutation = useMutation({
     mutationFn: async (itemData: any) => {
+      if (!canManageShop()) {
+        throw new Error('Access denied: You do not have permission to manage store items');
+      }
+      
       const { error } = await supabase
         .from('store_items')
         .insert([{
@@ -78,13 +97,17 @@ export function ProductManagement() {
       setIsCreateDialogOpen(false);
     },
     onError: (error) => {
-      toast.error('Failed to create store item');
+      toast.error(error.message || 'Failed to create store item');
       console.error(error);
     }
   });
 
   const updateItemMutation = useMutation({
     mutationFn: async ({ id, ...itemData }: any) => {
+      if (!canManageShop()) {
+        throw new Error('Access denied: You do not have permission to manage store items');
+      }
+      
       const { error } = await supabase
         .from('store_items')
         .update({
@@ -107,13 +130,17 @@ export function ProductManagement() {
       setEditingItem(null);
     },
     onError: (error) => {
-      toast.error('Failed to update store item');
+      toast.error(error.message || 'Failed to update store item');
       console.error(error);
     }
   });
 
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
+      if (!canManageShop()) {
+        throw new Error('Access denied: You do not have permission to manage store items');
+      }
+      
       const { error } = await supabase
         .from('store_items')
         .delete()
@@ -126,7 +153,7 @@ export function ProductManagement() {
       toast.success('Store item deleted successfully');
     },
     onError: (error) => {
-      toast.error('Failed to delete store item');
+      toast.error(error.message || 'Failed to delete store item');
       console.error(error);
     }
   });
@@ -159,6 +186,11 @@ export function ProductManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!canManageShop()) {
+      toast.error('Access denied: You do not have permission to manage store items');
+      return;
+    }
+    
     if (!formData.name || !formData.price || !formData.quantity_in_stock) {
       toast.error('Name, price, and quantity are required');
       return;
@@ -180,6 +212,21 @@ export function ProductManagement() {
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Loading store items...</div>;
+  }
+
+  // Show access denied message if user doesn't have permission
+  if (!canManageShop()) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
+          <p className="text-muted-foreground">
+            You need Treasurer, Merchandise Manager, or Admin permissions to manage store items.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (

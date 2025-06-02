@@ -1,4 +1,3 @@
-
 export const rolePermissions = {
   "President": ["edit_events", "send_announcement", "manage_members", "edit_budget"],
   "Secretary": ["edit_attendance", "send_announcement"],
@@ -9,7 +8,8 @@ export const rolePermissions = {
   "Road Manager": ["edit_events", "upload_docs"],
   "Chaplain": ["send_affirmation"],
   "Librarian": ["upload_docs"],
-  "Wardrobe Manager": ["edit_wardrobe"]
+  "Wardrobe Manager": ["edit_wardrobe"],
+  "Merchandise Manager": ["manage_shop"]
 };
 
 // Helper function to get permissions for a specific role
