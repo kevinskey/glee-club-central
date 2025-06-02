@@ -61,7 +61,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Sheet Music",
       description: "Manage music library",
       icon: <Music className="h-5 w-5" />,
-      action: () => navigate("/admin"),
+      action: () => navigate("/admin/media-uploader"),
       color: "bg-indigo-500",
       category: "Content Management"
     },
@@ -69,7 +69,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Announcements",
       description: "Send notifications",
       icon: <Bell className="h-5 w-5" />,
-      action: () => navigate("/admin"),
+      action: () => navigate("/admin/announcements"),
       color: "bg-red-500",
       category: "Communication"
     },
@@ -77,7 +77,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Analytics",
       description: "View reports",
       icon: <BarChart className="h-5 w-5" />,
-      action: () => navigate("/admin"),
+      action: () => navigate("/admin/analytics"),
       color: "bg-cyan-500",
       category: "Analytics"
     },
@@ -85,7 +85,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Settings",
       description: "System configuration",
       icon: <Settings className="h-5 w-5" />,
-      action: () => navigate("/admin"),
+      action: () => navigate("/admin/settings"),
       color: "bg-gray-500",
       category: "System"
     }
