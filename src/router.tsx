@@ -80,7 +80,7 @@ export const router = createBrowserRouter([
     path: "/reset-password",
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ResetPasswordPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
