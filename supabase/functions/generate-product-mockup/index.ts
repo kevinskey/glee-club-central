@@ -20,6 +20,19 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Starting mockup generation...');
+
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
+      return new Response(JSON.stringify({ 
+        error: 'OpenAI API key not configured',
+        success: false 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { userImageUrl, productType, designName, designDescription } = await req.json();
 
     console.log('Generating mockup for:', { productType, designName });
@@ -38,6 +51,8 @@ serve(async (req) => {
     
     const prompt = `Create ${basePrompt}. The design should incorporate elements that would work well with custom graphics. Style: professional product photography, clean composition, soft shadows, e-commerce ready. High resolution, photorealistic.`;
 
+    console.log('Sending request to OpenAI...');
+
     // Generate the mockup using DALL-E
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
@@ -55,15 +70,25 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error:', response.status, errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const aiData = await response.json();
     const generatedImageUrl = aiData.data[0].url;
 
+    console.log('AI image generated, downloading...');
+
     // Download the generated image
     const imageResponse = await fetch(generatedImageUrl);
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to download generated image: ${imageResponse.status}`);
+    }
+    
     const imageBlob = await imageResponse.blob();
+
+    console.log('Uploading to Supabase storage...');
 
     // Upload to Supabase storage
     const fileName = `mockup-${productType}-${Date.now()}.png`;
@@ -78,7 +103,7 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      throw uploadError;
+      throw new Error(`Storage upload failed: ${uploadError.message}`);
     }
 
     // Get the public URL

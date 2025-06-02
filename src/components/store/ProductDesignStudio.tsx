@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Wand2, Download, ShoppingCart } from 'lucide-react';
+import { Upload, Wand2, Download, ShoppingCart, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -27,6 +27,7 @@ export function ProductDesignStudio() {
   const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,6 +41,7 @@ export function ProductDesignStudio() {
         return;
       }
       setSelectedFile(file);
+      setError(null);
       toast.success('Image uploaded successfully');
     }
   };
@@ -51,22 +53,32 @@ export function ProductDesignStudio() {
     }
 
     setIsGenerating(true);
+    setError(null);
+    
     try {
+      console.log('Starting mockup generation process...');
+      
       // Upload the user's graphic to Supabase storage
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `user-designs/${fileName}`;
 
+      console.log('Uploading user design to storage...');
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('media-library')
         .upload(filePath, selectedFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw new Error(`Failed to upload design: ${uploadError.message}`);
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('media-library')
         .getPublicUrl(filePath);
 
+      console.log('Calling AI mockup generation...');
+      
       // Generate AI mockup using the uploaded image and selected product
       const { data, error } = await supabase.functions.invoke('generate-product-mockup', {
         body: {
@@ -77,13 +89,22 @@ export function ProductDesignStudio() {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(`AI generation failed: ${error.message}`);
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to generate mockup');
+      }
 
       setGeneratedMockup(data.mockupUrl);
       toast.success('Mockup generated successfully!');
     } catch (error) {
       console.error('Error generating mockup:', error);
-      toast.error('Failed to generate mockup. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate mockup. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsGenerating(false);
     }
@@ -121,6 +142,7 @@ export function ProductDesignStudio() {
       setDesignName('');
       setDesignDescription('');
       setGeneratedMockup(null);
+      setError(null);
     } catch (error) {
       console.error('Error creating product:', error);
       toast.error('Failed to create product. Please try again.');
@@ -141,6 +163,20 @@ export function ProductDesignStudio() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Error Display */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-red-800">Generation Failed</h4>
+                <p className="text-red-700 mt-1">{error}</p>
+                <p className="text-sm text-red-600 mt-2">
+                  Make sure the OpenAI API key is configured in your Supabase project settings.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Upload Section */}
           <div className="space-y-2">
             <Label htmlFor="design-upload">Upload Your Design</Label>
