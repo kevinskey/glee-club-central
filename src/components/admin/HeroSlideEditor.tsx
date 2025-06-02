@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,6 @@ import { Edit, Eye, Trash2, Save, X, Image as ImageIcon, Video } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
-import { AIHeroAssistant } from './AIHeroAssistant';
 
 interface HeroSlide {
   id: string;
