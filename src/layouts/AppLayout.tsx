@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -27,13 +26,14 @@ export default function AppLayout({
       case 'admin':
         return <AdminSidebar />;
       case 'member':
-        return <DashboardSidebar />;
+        // For now, no specific member sidebar - could add one later if needed
+        return null;
       default:
         return null;
     }
   };
 
-  const hasSidebar = sidebarType !== 'none';
+  const hasSidebar = sidebarType !== 'none' && renderSidebar() !== null;
 
   return (
     <div className="min-h-screen flex flex-col">
