@@ -16,10 +16,17 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 // Additional Pages
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import DesignStudioPage from "./pages/DesignStudioPage";
+import RoleDashboardPage from "./pages/RoleDashboardPage";
 
 const router = createBrowserRouter([
   // Public Routes
   ...publicRoutes,
+  
+  // Dashboard Route Handler - redirects to appropriate dashboard based on role
+  {
+    path: "/dashboard",
+    element: <RoleDashboardPage />,
+  },
   
   // Auth Routes
   {
