@@ -51,6 +51,10 @@ export function AdminCalendarView({
     ...getReligiousHolidays(currentYear + 1)
   ];
 
+  console.log('AdminCalendarView: National holidays loaded:', nationalHolidays.length);
+  console.log('AdminCalendarView: Religious holidays loaded:', religiousHolidays.length);
+  console.log('AdminCalendarView: Spelman dates loaded:', spelmanDates.length);
+
   // Convert Spelman dates to CalendarEvent format
   const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
     id: `spelman-${date.id}`,
@@ -113,6 +117,8 @@ export function AdminCalendarView({
 
   // Combine all events
   const allEvents = [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
+
+  console.log('AdminCalendarView: Total combined events:', allEvents.length);
 
   // Filter events based on search, event types, and enabled categories
   const filteredEvents = React.useMemo(() => {

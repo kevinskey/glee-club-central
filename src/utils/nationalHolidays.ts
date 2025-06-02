@@ -1,114 +1,169 @@
+import { Holiday } from '@/types/calendar';
 
-interface NationalHoliday {
-  id: string;
-  title: string;
-  date: Date;
-  description: string;
-  imageUrl: string;
-  isObserved: boolean;
-  category: 'federal' | 'observance';
-}
+// Helper function to get the nth day of the week in a month
+const getNthDayOfMonth = (year: number, month: number, dayOfWeek: number, n: number): Date => {
+  let count = 0;
+  let date = new Date(year, month, 1);
+  
+  while (date.getMonth() === month) {
+    if (date.getDay() === dayOfWeek) {
+      count++;
+      if (count === n) {
+        return new Date(date);
+      }
+    }
+    date.setDate(date.getDate() + 1);
+  }
+  
+  return new Date(year, month, 1); // Default to the first day of the month
+};
 
-export const getNationalHolidays = (year: number = 2025): NationalHoliday[] => {
-  return [
+// Helper function to get the second Monday of October for Columbus Day
+const getSecondMondayOfMonth = (year: number, month: number): Date => {
+  return getNthDayOfMonth(year, month, 1, 2); // 1 for Monday, 2 for the second occurrence
+};
+
+// Helper function to get the fourth Thursday of November for Thanksgiving
+const getFourthThursdayOfMonth = (year: number, month: number): Date => {
+  return getNthDayOfMonth(year, month, 4, 4); // 4 for Thursday, 4 for the fourth occurrence
+};
+
+export const getNationalHolidays = (year: number): Holiday[] => {
+  const holidays: Holiday[] = [
     {
-      id: 'new-years-day',
+      id: `new-years-day-${year}`,
       title: "New Year's Day",
-      date: new Date(year, 0, 1), // January 1
-      description: "A federal holiday celebrating the beginning of the new year.",
-      imageUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: new Date(year, 0, 1), // January 1st (month is 0-indexed)
+      description: "Celebration of the start of a new year",
+      imageUrl: "/lovable-uploads/new-years-day.jpg"
     },
     {
-      id: 'martin-luther-king-day',
+      id: `martin-luther-king-jr-day-${year}`,
       title: "Martin Luther King Jr. Day",
-      date: new Date(year, 0, 20), // Third Monday in January (approximate)
-      description: "A federal holiday honoring the civil rights leader Martin Luther King Jr.",
-      imageUrl: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: getNthDayOfMonth(year, 0, 1, 3), // 3rd Monday of January
+      description: "Honors the civil rights leader Martin Luther King Jr.",
+      imageUrl: "/lovable-uploads/martin-luther-king-jr-day.jpg"
     },
     {
-      id: 'presidents-day',
+      id: `presidents-day-${year}`,
       title: "Presidents' Day",
-      date: new Date(year, 1, 17), // Third Monday in February (approximate)
-      description: "A federal holiday honoring all American presidents, particularly George Washington and Abraham Lincoln.",
-      imageUrl: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: getNthDayOfMonth(year, 1, 1, 3), // 3rd Monday of February
+      description: "Honors all U.S. presidents",
+      imageUrl: "/lovable-uploads/presidents-day.jpg"
     },
     {
-      id: 'memorial-day',
+      id: `memorial-day-${year}`,
       title: "Memorial Day",
-      date: new Date(year, 4, 26), // Last Monday in May (approximate)
-      description: "A federal holiday honoring those who died while serving in the U.S. military.",
-      imageUrl: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: new Date(year, 4, 31), // Last Monday of May
+      description: "Honors those who have died in military service",
+      imageUrl: "/lovable-uploads/memorial-day.jpg"
     },
     {
-      id: 'independence-day',
+      id: `juneteenth-${year}`,
+      title: "Juneteenth National Independence Day",
+      date: new Date(year, 5, 19), // June 19th
+      description: "Federal holiday commemorating the end of slavery in the United States",
+      imageUrl: "/lovable-uploads/juneteenth.jpg"
+    },
+    {
+      id: `independence-day-${year}`,
       title: "Independence Day",
-      date: new Date(year, 6, 4), // July 4
-      description: "A federal holiday celebrating the Declaration of Independence and the founding of the United States.",
-      imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: new Date(year, 6, 4), // July 4th
+      description: "Celebrates the Declaration of Independence",
+      imageUrl: "/lovable-uploads/independence-day.jpg"
     },
     {
-      id: 'labor-day',
+      id: `labor-day-${year}`,
       title: "Labor Day",
-      date: new Date(year, 8, 1), // First Monday in September (approximate)
-      description: "A federal holiday celebrating the achievements of American workers.",
-      imageUrl: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: getNthDayOfMonth(year, 8, 1, 1), // 1st Monday of September
+      description: "Honors the American labor movement",
+      imageUrl: "/lovable-uploads/labor-day.jpg"
     },
     {
-      id: 'columbus-day',
+      id: `columbus-day-${year}`,
       title: "Columbus Day",
-      date: new Date(year, 9, 13), // Second Monday in October (approximate)
-      description: "A federal holiday commemorating Christopher Columbus's arrival in the Americas.",
-      imageUrl: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: getSecondMondayOfMonth(year, 9), // October
+      description: "Federal holiday commemorating Christopher Columbus's arrival in the Americas",
+      imageUrl: "/lovable-uploads/flag.jpg"
     },
+    // Black History Month (February)
     {
-      id: 'veterans-day',
+      id: `black-history-month-start-${year}`,
+      title: "Black History Month Begins",
+      date: new Date(year, 1, 1), // February 1st
+      description: "Annual observance honoring African American history and achievements",
+      imageUrl: "/lovable-uploads/black-history-month.jpg"
+    },
+    // Martin Luther King Jr. Day (already exists above)
+    // Juneteenth
+    {
+      id: `juneteenth-${year}`,
+      title: "Juneteenth National Independence Day",
+      date: new Date(year, 5, 19), // June 19th
+      description: "Federal holiday commemorating the end of slavery in the United States",
+      imageUrl: "/lovable-uploads/juneteenth.jpg"
+    },
+    // Emancipation Day
+    {
+      id: `emancipation-day-${year}`,
+      title: "Emancipation Day",
+      date: new Date(year, 3, 16), // April 16th
+      description: "Commemorates the end of slavery in Washington, D.C.",
+      imageUrl: "/lovable-uploads/emancipation-day.jpg"
+    },
+    // Malcolm X Day
+    {
+      id: `malcolm-x-day-${year}`,
+      title: "Malcolm X Day",
+      date: new Date(year, 4, 19), // May 19th
+      description: "Honors the civil rights leader Malcolm X",
+      imageUrl: "/lovable-uploads/malcolm-x.jpg"
+    },
+    // Veterans Day
+    {
+      id: `veterans-day-${year}`,
       title: "Veterans Day",
-      date: new Date(year, 10, 11), // November 11
-      description: "A federal holiday honoring military veterans who served in the U.S. Armed Forces.",
-      imageUrl: "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: new Date(year, 10, 11), // November 11th
+      description: "Federal holiday honoring military veterans",
+      imageUrl: "/lovable-uploads/veterans-day.jpg"
     },
+    // Thanksgiving
     {
-      id: 'thanksgiving',
+      id: `thanksgiving-${year}`,
       title: "Thanksgiving Day",
-      date: new Date(year, 10, 27), // Fourth Thursday in November (approximate)
-      description: "A federal holiday for giving thanks and celebrating the harvest and other blessings of the past year.",
-      imageUrl: "https://images.unsplash.com/photo-1500673922987-e212871fec22?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: getFourthThursdayOfMonth(year, 10), // November
+      description: "Federal holiday for giving thanks",
+      imageUrl: "/lovable-uploads/thanksgiving.jpg"
     },
+    // Christmas
     {
-      id: 'christmas',
+      id: `christmas-${year}`,
       title: "Christmas Day",
-      date: new Date(year, 11, 25), // December 25
-      description: "A federal holiday celebrating the birth of Jesus Christ.",
-      imageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&h=600&fit=crop",
-      isObserved: true,
-      category: 'federal'
+      date: new Date(year, 11, 25), // December 25th
+      description: "Federal holiday celebrating the birth of Jesus Christ",
+      imageUrl: "/lovable-uploads/christmas.jpg"
     }
   ];
+
+  return holidays.sort((a, b) => a.date.getTime() - b.date.getTime());
 };
 
-export const getHolidayByDate = (date: Date): NationalHoliday | null => {
-  const holidays = getNationalHolidays(date.getFullYear());
-  return holidays.find(holiday => 
-    holiday.date.getDate() === date.getDate() &&
-    holiday.date.getMonth() === date.getMonth() &&
-    holiday.date.getFullYear() === date.getFullYear()
-  ) || null;
-};
+// Function to calculate the date of Easter Sunday
+function getEaster(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1; // Month (0-indexed)
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+  return new Date(year, month, day);
+}
