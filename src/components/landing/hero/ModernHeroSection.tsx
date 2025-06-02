@@ -225,7 +225,6 @@ export function ModernHeroSection({
           frameBorder="0"
           allow="autoplay; encrypted-media"
           allowFullScreen
-          style={{ transform: 'scale(1.1)' }} // Slightly scale to hide borders
         />
       );
     }
