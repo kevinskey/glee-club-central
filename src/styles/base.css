@@ -3,69 +3,70 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 100% 97%;  /* Light blue background */
     --foreground: 240 10% 3.9%;
 
-    --card: 0 0% 100%;
+    --card: 220 100% 98%;  /* Very light blue for cards */
     --card-foreground: 240 10% 3.9%;
 
-    --popover: 0 0% 100%;
+    --popover: 220 100% 98%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 211 84% 61%;  /* Carolina blue */
+    --primary: 200 100% 70%;  /* Light blue primary */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 4.8% 95.9%;
+    --secondary: 220 60% 95%;  /* Light blue secondary */
     --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 240 4.8% 95.9%;
+    --muted: 220 60% 95%;  /* Light blue muted */
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 211 84% 61%;  /* Carolina blue instead of purple */
+    --accent: 200 100% 70%;  /* Light blue accent */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 211 84% 61%;  /* Carolina blue */
+    --border: 220 40% 85%;  /* Light blue border */
+    --input: 220 40% 92%;  /* Light blue input */
+    --ring: 200 100% 70%;  /* Light blue ring */
 
     --radius: 0.5rem;
     
-    --glee-purple: 211 84% 61%;  /* Changed to Carolina blue */
-    --glee-spelman: 211 84% 61%;  /* Carolina blue */
-    --glee-columbia: 211 84% 61%;  /* Carolina blue */
+    /* Glee Club Brand Colors - Light blue theme */
+    --glee-purple: 200 100% 70%;  /* Light blue */
+    --glee-spelman: 200 100% 70%;  /* Light blue */
+    --glee-columbia: 200 100% 70%;  /* Light blue */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 215 28% 17%;  /* Dark blue-gray background */
+    --foreground: 210 40% 98%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 215 28% 17%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 215 28% 17%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 211 100% 70%;  /* Slightly lighter Carolina blue for dark mode */
-    --primary-foreground: 0 0% 98%;
+    --primary: 200 100% 75%;  /* Lighter blue for dark mode */
+    --primary-foreground: 220 14% 11%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 215 28% 22%;  /* Dark blue secondary */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 215 28% 22%;
+    --muted-foreground: 217 10% 64.9%;
 
-    --accent: 211 100% 70%;  /* Carolina blue for dark mode */
-    --accent-foreground: 0 0% 98%;
+    --accent: 200 100% 75%;  /* Light blue accent for dark mode */
+    --accent-foreground: 220 14% 11%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 211 100% 70%;  /* Carolina blue */
+    --border: 215 28% 22%;
+    --input: 215 28% 22%;
+    --ring: 200 100% 75%;  /* Light blue ring */
   }
 
   * {

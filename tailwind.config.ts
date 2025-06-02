@@ -58,21 +58,27 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#4F9EE8", // Carolina blue
-          carolina: "#4F9EE8", // Carolina blue
-          purple: "#4F9EE8", // Changed from purple to Carolina blue
-          darkPurple: "#3A7BC8", // Darker Carolina blue
-          lightPurple: "#87CEEB", // Light Carolina blue (sky blue)
+          orange: "#87CEEB", // Sky blue
+          carolina: "#87CEEB", // Sky blue
+          purple: "#87CEEB", // Sky blue
+          darkPurple: "#4169E1", // Royal blue
+          lightPurple: "#B0E0E6", // Powder blue
           gray: "#8E9196",
-          columbia: "#4F9EE8", // Carolina blue
+          columbia: "#87CEEB", // Sky blue
         },
-        'glee-spelman': "#4F9EE8", // Carolina blue
-        'glee-columbia': "#4F9EE8", // Carolina blue
-        'columbia-blue': "#4F9EE8", // Carolina blue
+        'glee-spelman': "#87CEEB", // Sky blue
+        'glee-columbia': "#87CEEB", // Sky blue
+        'columbia-blue': "#87CEEB", // Sky blue
         'blue': {
-          800: "#1E3A8A", // Navy blue
-          700: "#1D4ED8", // Darker blue
-          600: "#2563EB", // Medium blue
+          100: "#E6F3FF", // Very light blue
+          200: "#CCE7FF", // Light blue
+          300: "#99D6FF", // Medium light blue
+          400: "#66C2FF", // Medium blue
+          500: "#33AAFF", // Default blue
+          600: "#0088FF", // Bright blue
+          700: "#0066CC", // Darker blue
+          800: "#004499", // Dark blue
+          900: "#002266", // Very dark blue
         }
       },
       borderRadius: {
