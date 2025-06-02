@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Images, Loader2, Plus, ArrowUp, ArrowDown } from "lucide-react";
+import { Images, Loader2, Plus, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -32,12 +32,14 @@ interface HeroSlide {
 interface SectionSpecificHeroManagerProps {
   sectionId: string;
   sectionName?: string;
+  onUpdate?: () => void;
 }
 
-export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSpecificHeroManagerProps) {
+export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }: SectionSpecificHeroManagerProps) {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectImageDialogOpen, setSelectImageDialogOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   
   const { filteredMediaFiles, fetchAllMedia } = useMediaLibrary();
 
@@ -65,9 +67,35 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
     }
   };
 
+  const handleSlidesUpdate = async () => {
+    await fetchSlides();
+    if (onUpdate) {
+      onUpdate();
+    }
+  };
+
+  const refreshData = async () => {
+    setIsRefreshing(true);
+    await Promise.all([fetchSlides(), fetchAllMedia()]);
+    setIsRefreshing(false);
+    toast.success('Data refreshed successfully');
+  };
+
   const createSlideFromImage = async (mediaFile: any) => {
     try {
-      const nextOrder = slides.length;
+      // Get the next order number
+      const { data: existingSlides, error: fetchError } = await supabase
+        .from('hero_slides')
+        .select('slide_order')
+        .eq('section_id', sectionId)
+        .order('slide_order', { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      const nextOrder = existingSlides && existingSlides.length > 0 
+        ? (existingSlides[0].slide_order || 0) + 1 
+        : 0;
       
       const { error } = await supabase
         .from('hero_slides')
@@ -76,7 +104,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
           media_id: mediaFile.id,
           media_type: mediaFile.file_type.startsWith('video/') ? 'video' : 'image',
           title: `${sectionName || 'Section'} Slide`,
-          description: 'Your slide description here.',
+          description: mediaFile.title || 'Your slide description here.',
           text_position: 'center',
           text_alignment: 'center',
           visible: false,
@@ -87,7 +115,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
       
       toast.success("New slide created successfully");
       setSelectImageDialogOpen(false);
-      await fetchSlides();
+      await handleSlidesUpdate();
     } catch (error) {
       console.error("Error creating slide:", error);
       toast.error("Failed to create slide");
@@ -96,7 +124,19 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
 
   const createEmptySlide = async () => {
     try {
-      const nextOrder = slides.length;
+      // Get the next order number
+      const { data: existingSlides, error: fetchError } = await supabase
+        .from('hero_slides')
+        .select('slide_order')
+        .eq('section_id', sectionId)
+        .order('slide_order', { ascending: false })
+        .limit(1);
+
+      if (fetchError) throw fetchError;
+
+      const nextOrder = existingSlides && existingSlides.length > 0 
+        ? (existingSlides[0].slide_order || 0) + 1 
+        : 0;
       
       const { error } = await supabase
         .from('hero_slides')
@@ -114,7 +154,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
       if (error) throw error;
       
       toast.success("New slide created successfully");
-      await fetchSlides();
+      await handleSlidesUpdate();
     } catch (error) {
       console.error("Error creating slide:", error);
       toast.error("Failed to create slide");
@@ -148,6 +188,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
 
       setSlides(newSlides);
       toast.success("Slide order updated");
+      if (onUpdate) onUpdate();
     } catch (error) {
       console.error("Error updating slide order:", error);
       toast.error("Failed to update slide order");
@@ -156,6 +197,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
 
   const handleSlideDelete = (slideId: string) => {
     setSlides(slides.filter(slide => slide.id !== slideId));
+    if (onUpdate) onUpdate();
   };
 
   const imageLibrary = filteredMediaFiles.filter(file => 
@@ -238,6 +280,11 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
             </DialogContent>
           </Dialog>
         </div>
+        
+        <Button onClick={refreshData} variant="outline" disabled={isRefreshing}>
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
+        </Button>
       </div>
 
       <Separator />
@@ -285,6 +332,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
                       className="h-8 w-8"
                       onClick={() => moveSlide(index, 'up')}
                       disabled={index === 0}
+                      title="Move slide up"
                     >
                       <ArrowUp className="h-4 w-4" />
                     </Button>
@@ -294,6 +342,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
                       className="h-8 w-8"
                       onClick={() => moveSlide(index, 'down')}
                       disabled={index === slides.length - 1}
+                      title="Move slide down"
                     >
                       <ArrowDown className="h-4 w-4" />
                     </Button>
@@ -301,7 +350,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName }: SectionSp
                   
                   <HeroSlideEditor
                     slide={slide}
-                    onUpdate={fetchSlides}
+                    onUpdate={handleSlidesUpdate}
                     onDelete={handleSlideDelete}
                   />
                 </div>

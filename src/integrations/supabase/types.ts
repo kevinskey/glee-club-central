@@ -434,6 +434,7 @@ export type Database = {
           id: string
           media_id: string | null
           media_type: string | null
+          section_id: string | null
           slide_order: number | null
           text_alignment: string | null
           text_position: string | null
@@ -449,6 +450,7 @@ export type Database = {
           id?: string
           media_id?: string | null
           media_type?: string | null
+          section_id?: string | null
           slide_order?: number | null
           text_alignment?: string | null
           text_position?: string | null
@@ -464,6 +466,7 @@ export type Database = {
           id?: string
           media_id?: string | null
           media_type?: string | null
+          section_id?: string | null
           slide_order?: number | null
           text_alignment?: string | null
           text_position?: string | null
