@@ -2,6 +2,7 @@
 import React, { createContext, useContext } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Profile } from '@/types/auth';
+import { updateProfile } from '@/utils/supabase/profiles';
 
 interface ProfileContextType {
   profile: Profile | null;
@@ -14,6 +15,7 @@ interface ProfileContextType {
   getUserType: () => 'admin' | 'member';
   permissions: { [key: string]: boolean };
   createFallbackProfile: () => Promise<void>;
+  updateUserProfile: (profileData: Partial<Profile>) => Promise<void>;
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
@@ -31,6 +33,23 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const createFallbackProfile = async () => {
     await refreshProfile();
   };
+
+  const updateUserProfile = async (profileData: Partial<Profile>) => {
+    if (!profile?.id) {
+      throw new Error('No profile ID available');
+    }
+    
+    const { success, error } = await updateProfile({
+      ...profileData,
+      id: profile.id
+    });
+    
+    if (!success) {
+      throw error;
+    }
+    
+    await refreshProfile();
+  };
   
   return (
     <ProfileContext.Provider value={{ 
@@ -43,7 +62,8 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isMember,
       getUserType,
       permissions,
-      createFallbackProfile
+      createFallbackProfile,
+      updateUserProfile
     }}>
       {children}
     </ProfileContext.Provider>

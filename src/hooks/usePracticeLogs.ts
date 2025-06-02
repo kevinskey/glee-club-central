@@ -1,22 +1,19 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/contexts/ProfileContext';
-import { toast } from 'sonner';
-
-export interface PracticeLog {
-  id: string;
-  user_id: string;
-  song_title?: string;
-  notes?: string;
-  duration?: number;
-  created_at: string;
-  practice_type?: string;
-}
+import { 
+  PracticeLog,
+  fetchUserPracticeLogs,
+  logPracticeSession,
+  deletePracticeLog as deletePracticeLogUtil,
+  getPracticeStatsByCategory
+} from '@/utils/supabase/practiceLogs';
 
 export const usePracticeLogs = () => {
   const { isAuthenticated } = useProfile();
   const [logs, setLogs] = useState<PracticeLog[]>([]);
+  const [stats, setStats] = useState<Record<string, number>>({});
+  const [totalMinutes, setTotalMinutes] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const fetchLogs = async () => {
@@ -24,39 +21,66 @@ export const usePracticeLogs = () => {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('practice_logs')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setLogs(data || []);
+      const data = await fetchUserPracticeLogs();
+      setLogs(data);
+      
+      // Calculate total minutes
+      const total = data.reduce((sum, log) => sum + log.minutes_practiced, 0);
+      setTotalMinutes(total);
+      
+      // Get stats by category
+      const categoryStats = await getPracticeStatsByCategory();
+      setStats(categoryStats);
     } catch (error) {
       console.error('Error fetching practice logs:', error);
-      toast.error('Failed to fetch practice logs');
     } finally {
       setLoading(false);
     }
   };
 
-  const addLog = async (log: Omit<PracticeLog, 'id' | 'created_at'>) => {
+  const logPractice = async (
+    minutes: number, 
+    category: string, 
+    description: string | null = null, 
+    date?: string
+  ): Promise<boolean> => {
     if (!isAuthenticated) return false;
     
     try {
-      const { error } = await supabase
-        .from('practice_logs')
-        .insert(log);
-
-      if (error) throw error;
-      
-      toast.success('Practice log added successfully');
-      fetchLogs(); // Refresh the list
-      return true;
+      const result = await logPracticeSession(minutes, category, description, date);
+      if (result) {
+        await fetchLogs(); // Refresh the list
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error('Error adding practice log:', error);
-      toast.error('Failed to add practice log');
+      console.error('Error logging practice:', error);
       return false;
     }
+  };
+
+  const deletePracticeLog = async (id: string): Promise<boolean> => {
+    if (!isAuthenticated) return false;
+    
+    try {
+      const success = await deletePracticeLogUtil(id);
+      if (success) {
+        await fetchLogs(); // Refresh the list
+      }
+      return success;
+    } catch (error) {
+      console.error('Error deleting practice log:', error);
+      return false;
+    }
+  };
+
+  const addLog = async (log: Omit<PracticeLog, 'id' | 'created_at' | 'updated_at' | 'user_id'>): Promise<boolean> => {
+    return await logPractice(
+      log.minutes_practiced,
+      log.category,
+      log.description,
+      log.date
+    );
   };
 
   useEffect(() => {
@@ -65,8 +89,12 @@ export const usePracticeLogs = () => {
 
   return {
     logs,
+    stats,
+    totalMinutes,
     loading,
     fetchLogs,
-    addLog
+    addLog,
+    logPractice,
+    deletePracticeLog
   };
 };
