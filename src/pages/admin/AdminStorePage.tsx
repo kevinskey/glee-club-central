@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingBag, Package, BarChart3, Settings, Lock } from 'lucide-react';
 import { ProductManagement } from '@/components/admin/store/ProductManagement';
+import { InventoryManager } from '@/components/admin/store/InventoryManager';
 import { OrderManagement } from '@/components/admin/store/OrderManagement';
 import { StoreAnalytics } from '@/components/admin/store/StoreAnalytics';
 import { StoreSettings } from '@/components/admin/store/StoreSettings';
@@ -61,8 +62,12 @@ export default function AdminStorePage() {
           icon={<ShoppingBag className="h-6 w-6" />}
         />
 
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="inventory" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="inventory" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Inventory
+            </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -80,6 +85,10 @@ export default function AdminStorePage() {
               Settings
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="inventory">
+            <InventoryManager />
+          </TabsContent>
 
           <TabsContent value="products">
             <ProductManagement />
