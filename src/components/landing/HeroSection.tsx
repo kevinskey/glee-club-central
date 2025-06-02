@@ -12,9 +12,6 @@ export function HeroSection() {
         sectionId="homepage-main"
         height="standard"
         showNavigation={true}
-        showPlayPause={true}
-        showCounter={true}
-        showDots={true}
         enableAutoplay={true}
       />
       

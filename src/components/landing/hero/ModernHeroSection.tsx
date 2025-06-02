@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronRight, ChevronLeft, Play, Pause } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -38,18 +39,12 @@ interface MediaFile {
 interface ModernHeroSectionProps {
   sectionId?: string;
   showNavigation?: boolean;
-  showPlayPause?: boolean;
-  showCounter?: boolean;
-  showDots?: boolean;
   enableAutoplay?: boolean;
 }
 
 export function ModernHeroSection({ 
   sectionId = "homepage-main",
   showNavigation = true,
-  showPlayPause = true,
-  showCounter = true,
-  showDots = true,
   enableAutoplay = true
 }: ModernHeroSectionProps) {
   const isMobile = useIsMobile();
@@ -162,10 +157,6 @@ export function ModernHeroSection({
       }
       return newIndex;
     });
-  };
-
-  const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
   };
 
   const handleMouseEnter = () => {
@@ -382,61 +373,26 @@ export function ModernHeroSection({
         </div>
       </div>
 
-      {/* Navigation Controls (only show if multiple slides and features enabled) */}
-      {slides.length > 1 && (
+      {/* Navigation Controls (only show if multiple slides and navigation enabled) */}
+      {slides.length > 1 && showNavigation && !isMobile && (
         <>
-          {/* Previous/Next Buttons */}
-          {showNavigation && !isMobile && (
-            <>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
-                onClick={goToPrevSlide}
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Button>
-              
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
-                onClick={goToNextSlide}
-              >
-                <ChevronRight className="h-6 w-6" />
-              </Button>
-            </>
-          )}
-
-          {/* Play/Pause Button */}
-          {showPlayPause && enableAutoplay && (
-            <Button
-              variant="secondary"
-              size="icon"
-              className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
-              onClick={togglePlayPause}
-            >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-          )}
-
-          {/* Dots Indicator */}
-          {showDots && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full transition-all",
-                    index === currentSlide 
-                      ? "bg-white" 
-                      : "bg-white/50 hover:bg-white/70"
-                  )}
-                  onClick={() => goToSlide(index)}
-                />
-              ))}
-            </div>
-          )}
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
+            onClick={goToPrevSlide}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
+            onClick={goToNextSlide}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
         </>
       )}
     </section>

@@ -6,9 +6,6 @@ interface UniversalHeroProps {
   sectionId?: string;
   height?: 'compact' | 'banner' | 'standard' | 'fullscreen';
   showNavigation?: boolean;
-  showPlayPause?: boolean;
-  showCounter?: boolean;
-  showDots?: boolean;
   enableAutoplay?: boolean;
   className?: string;
 }
@@ -17,9 +14,6 @@ export function UniversalHero({
   sectionId = "homepage-main",
   height = 'standard',
   showNavigation = true,
-  showPlayPause = true,
-  showCounter = true,
-  showDots = true,
   enableAutoplay = true,
   className = ""
 }: UniversalHeroProps) {
@@ -41,7 +35,11 @@ export function UniversalHero({
       style={{ height: getHeightStyle() }} 
       className={`overflow-hidden ${className}`}
     >
-      <ModernHeroSection />
+      <ModernHeroSection 
+        sectionId={sectionId}
+        showNavigation={showNavigation}
+        enableAutoplay={enableAutoplay}
+      />
     </div>
   );
 }
