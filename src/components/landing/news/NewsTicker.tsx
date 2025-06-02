@@ -27,7 +27,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   autoHide = false, 
   hideAfter = 8000 
 }) => {
-  const [isVisible, setIsVisible] = useState(true);
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -192,12 +191,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
       window.open(link, '_blank', 'noopener,noreferrer');
     }
   };
-  
-  // If not visible, don't render
-  if (!isVisible) {
-    console.log('NewsTicker: Not visible, not rendering');
-    return null;
-  }
   
   // Display loading animation while fetching
   if (loading) {
