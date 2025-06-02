@@ -624,6 +624,51 @@ export type Database = {
           },
         ]
       }
+      news_items: {
+        Row: {
+          active: boolean
+          ai_prompt: string | null
+          content: string | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          generated_by_ai: boolean
+          headline: string
+          id: string
+          priority: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          ai_prompt?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          generated_by_ai?: boolean
+          headline: string
+          id?: string
+          priority?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          ai_prompt?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          generated_by_ai?: boolean
+          headline?: string
+          id?: string
+          priority?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           amount: number

@@ -3,45 +3,35 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface SiteSetting {
-  id: string;
-  key: string;
-  value: any;
-  updated_by?: string;
-  updated_at: string;
+interface SiteSettings {
+  [key: string]: any;
 }
 
 export const useSiteSettings = () => {
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [settings, setSettings] = useState<SiteSettings>({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const fetchSettings = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      
       const { data, error } = await supabase
         .from('site_settings')
-        .select('*');
+        .select('key, value');
 
-      if (error) {
-        console.error('Error fetching site settings:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      // Convert array to key-value object
-      const settingsMap = (data || []).reduce((acc, setting) => {
-        acc[setting.key] = setting.value;
-        return acc;
-      }, {} as Record<string, any>);
+      const settingsObj: SiteSettings = {};
+      data?.forEach(setting => {
+        settingsObj[setting.key] = setting.value;
+      });
 
-      setSettings(settingsMap);
-    } catch (err) {
-      console.error('Error fetching site settings:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch settings';
-      setError(errorMessage);
-      toast.error(errorMessage);
+      setSettings(settingsObj);
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      toast.error('Failed to load site settings');
     } finally {
       setLoading(false);
     }
@@ -57,32 +47,25 @@ export const useSiteSettings = () => {
           updated_at: new Date().toISOString()
         });
 
-      if (error) {
-        console.error('Error updating setting:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      setSettings(prev => ({ ...prev, [key]: value }));
-      toast.success('Setting updated successfully');
-      
-      return { success: true };
-    } catch (err) {
-      console.error('Error updating setting:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update setting';
-      toast.error(errorMessage);
-      throw err;
+      setSettings(prev => ({
+        ...prev,
+        [key]: value
+      }));
+
+      return true;
+    } catch (error) {
+      console.error('Error updating setting:', error);
+      toast.error('Failed to update setting');
+      return false;
     }
   };
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
   return {
     settings,
-    loading,
-    error,
     updateSetting,
+    loading,
     refetch: fetchSettings
   };
 };

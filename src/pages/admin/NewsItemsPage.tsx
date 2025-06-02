@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import {
@@ -31,10 +30,22 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { AlertTriangle, Calendar, Edit, Plus, Trash } from "lucide-react";
+import { 
+  AlertTriangle, 
+  Calendar, 
+  Edit, 
+  Plus, 
+  Trash, 
+  Bot,
+  Sparkles
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { AINewsGenerator } from "@/components/admin/AINewsGenerator";
+import { AINewsContent } from "@/hooks/useAINewsGeneration";
 
 interface NewsItem {
   id: string;
@@ -44,6 +55,8 @@ interface NewsItem {
   start_date: string;
   end_date?: string;
   priority: number;
+  generated_by_ai: boolean;
+  ai_prompt?: string;
   created_at: string;
 }
 
@@ -52,6 +65,7 @@ export default function NewsItemsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<NewsItem | null>(null);
   
   // Form state
@@ -106,6 +120,10 @@ export default function NewsItemsPage() {
     setCurrentItem(item);
     setIsDeleteDialogOpen(true);
   };
+
+  const handleOpenAIDialog = () => {
+    setIsAIDialogOpen(true);
+  };
   
   const resetForm = () => {
     setHeadline("");
@@ -114,6 +132,28 @@ export default function NewsItemsPage() {
     setStartDate(format(new Date(), "yyyy-MM-dd"));
     setEndDate("");
     setPriority(1);
+  };
+
+  const handleAIGenerated = (aiContent: AINewsContent) => {
+    // Auto-fill form with AI generated content
+    setHeadline(aiContent.headline);
+    setContent(aiContent.content);
+    setActive(true);
+    setStartDate(format(new Date(), "yyyy-MM-dd"));
+    setPriority(1);
+    
+    // Close AI dialog and open regular form dialog
+    setIsAIDialogOpen(false);
+    setCurrentItem(null);
+    setIsDialogOpen(true);
+    
+    toast.success("Form filled with AI-generated content");
+  };
+
+  const handleAISaved = () => {
+    // Refresh the news items list when AI saves directly
+    fetchNewsItems();
+    setIsAIDialogOpen(false);
   };
   
   const handleSave = async () => {
@@ -156,7 +196,8 @@ export default function NewsItemsPage() {
             active,
             start_date: startDate,
             end_date: endDate || null,
-            priority
+            priority,
+            generated_by_ai: false
           });
           
         if (error) throw error;
@@ -201,7 +242,6 @@ export default function NewsItemsPage() {
         
       if (error) throw error;
       
-      // Update local state
       setNewsItems(prev => 
         prev.map(i => i.id === item.id ? { ...i, active: newActiveState } : i)
       );
@@ -238,9 +278,16 @@ export default function NewsItemsPage() {
                 Currently Active Items: {newsItems.filter(item => item.active).length}
               </h3>
             </div>
-            <Button onClick={handleOpenAddDialog}>
-              <Plus className="mr-2 h-4 w-4" /> Add News Item
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleOpenAIDialog} variant="outline">
+                <Bot className="mr-2 h-4 w-4" /> 
+                Generate with AI
+              </Button>
+              <Button onClick={handleOpenAddDialog}>
+                <Plus className="mr-2 h-4 w-4" /> 
+                Add Manually
+              </Button>
+            </div>
           </div>
           
           {isLoading ? (
@@ -256,9 +303,16 @@ export default function NewsItemsPage() {
               <p className="text-sm text-muted-foreground mt-1 mb-4">
                 Add your first news item to display in the ticker.
               </p>
-              <Button onClick={handleOpenAddDialog}>
-                <Plus className="mr-2 h-4 w-4" /> Add News Item
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button onClick={handleOpenAIDialog} variant="outline">
+                  <Bot className="mr-2 h-4 w-4" /> 
+                  Generate with AI
+                </Button>
+                <Button onClick={handleOpenAddDialog}>
+                  <Plus className="mr-2 h-4 w-4" /> 
+                  Add Manually
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="border rounded-md">
@@ -266,6 +320,7 @@ export default function NewsItemsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Headline</TableHead>
+                    <TableHead>Source</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead>Priority</TableHead>
                     <TableHead>Active</TableHead>
@@ -276,6 +331,16 @@ export default function NewsItemsPage() {
                   {newsItems.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.headline}</TableCell>
+                      <TableCell>
+                        {item.generated_by_ai ? (
+                          <Badge variant="secondary" className="gap-1">
+                            <Sparkles className="h-3 w-3" />
+                            AI Generated
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">Manual</Badge>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
@@ -320,6 +385,26 @@ export default function NewsItemsPage() {
           )}
         </CardContent>
       </Card>
+      
+      {/* AI Generation Dialog */}
+      <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-blue-500" />
+              Generate News with AI
+            </DialogTitle>
+            <DialogDescription>
+              Use AI to generate compelling news headlines and content for your ticker.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <AINewsGenerator 
+            onNewsGenerated={handleAIGenerated}
+            onNewsSaved={handleAISaved}
+          />
+        </DialogContent>
+      </Dialog>
       
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

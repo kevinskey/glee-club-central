@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface NewsItem {
   id: string;
@@ -16,6 +17,7 @@ export interface NewsItem {
   active: boolean;
   content: string;
   date: string;
+  generated_by_ai?: boolean;
 }
 
 interface NewsTickerProps {
@@ -29,36 +31,99 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('fast');
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { isAdmin } = useAuth();
-  
-  // Simple predefined news items with content
-  const newsItems: NewsItem[] = [
+
+  // Fetch news items from database
+  useEffect(() => {
+    const fetchNewsItems = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('news_items')
+          .select('id, headline, content, start_date, end_date, active, generated_by_ai')
+          .eq('active', true)
+          .order('priority', { ascending: false })
+          .limit(10);
+
+        if (error) {
+          console.error('Error fetching news items:', error);
+          // Fallback to static items
+          setNewsItems(getStaticNewsItems());
+        } else if (data && data.length > 0) {
+          const formattedItems: NewsItem[] = data.map(item => ({
+            id: item.id,
+            headline: item.headline,
+            active: item.active,
+            content: item.content || '',
+            date: item.start_date,
+            generated_by_ai: item.generated_by_ai
+          }));
+          setNewsItems(formattedItems);
+        } else {
+          // No items in database, use static fallback
+          setNewsItems(getStaticNewsItems());
+        }
+      } catch (error) {
+        console.error('Error fetching news items:', error);
+        setNewsItems(getStaticNewsItems());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNewsItems();
+
+    // Set up real-time subscription for news items
+    const channel = supabase
+      .channel('news-items-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'news_items'
+        },
+        () => {
+          console.log('News items updated, refetching...');
+          fetchNewsItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Static fallback news items
+  const getStaticNewsItems = (): NewsItem[] => [
     {
-      id: "1",
+      id: "static-1",
       headline: "🎵 Spelman College Glee Club announces Spring Concert series",
       active: true,
-      content: "The Spelman College Glee Club is proud to announce our Spring Concert series, featuring performances across Atlanta throughout April and May. Join us for a celebration of choral excellence as we showcase a diverse repertoire of classical, spiritual, and contemporary works.",
+      content: "The Spelman College Glee Club is proud to announce our Spring Concert series, featuring performances across Atlanta throughout April and May.",
       date: "May 1, 2025"
     },
     {
-      id: "2", 
+      id: "static-2", 
       headline: "🏛️ HBCU Choir Festival featuring top collegiate ensembles",
       active: true,
-      content: "Spelman College Glee Club will be participating in the annual HBCU Choir Festival this June, joining forces with top collegiate ensembles from across the country. This collaborative event showcases the rich choral traditions of Historically Black Colleges and Universities, highlighting our shared musical heritage and contemporary innovations.",
+      content: "Spelman College Glee Club will be participating in the annual HBCU Choir Festival this June, joining forces with top collegiate ensembles from across the country.",
       date: "May 5, 2025"
     },
     {
-      id: "3",
+      id: "static-3",
       headline: "🎓 New scholarship opportunities available for music students",
       active: true,
-      content: "We're pleased to announce several new scholarship opportunities for exceptional music students at Spelman College. These scholarships aim to support talented vocalists pursuing excellence in choral music and solo performance. Applications are now open for the 2025-2026 academic year.",
+      content: "We're pleased to announce several new scholarship opportunities for exceptional music students at Spelman College.",
       date: "May 8, 2025"
     },
     {
-      id: "4",
+      id: "static-4",
       headline: "📰 Glee Club wins national recognition for excellence in choral music",
       active: true,
-      content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition held last month. Our ensemble was praised for outstanding musicianship, innovative programming, and cultural authenticity in performance.",
+      content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition.",
       date: "May 12, 2025"
     }
   ];
@@ -96,6 +161,18 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   const newsContent = newsItems.map(item => item.headline).join(' • ');
   // Repeat the content multiple times to ensure seamless infinite scroll
   const repeatedContent = Array(10).fill(newsContent).join(' • ');
+
+  if (isLoading) {
+    return (
+      <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
+        <div className="w-full px-4 flex items-center justify-center">
+          <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
+            Loading news...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
