@@ -3,21 +3,18 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { X, ArrowUp, ArrowDown, Images, Loader2, Plus, Upload, Eye } from "lucide-react";
+import { Images, Loader2, Plus, Upload } from "lucide-react";
 import { useSiteImageManager } from "@/hooks/useSiteImageManager";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { HeroImageCard } from "./HeroImageCard";
 
 export function EnhancedHeroImagesManager() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectImageDialogOpen, setSelectImageDialogOpen] = useState(false);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   
   const {
     images,
@@ -36,19 +33,6 @@ export function EnhancedHeroImagesManager() {
     fetchImages();
     fetchAllMedia();
   }, []);
-  
-  const confirmDeleteImage = (id: string) => {
-    setSelectedImage(id);
-    setDeleteDialogOpen(true);
-  };
-  
-  const handleDeleteImage = async () => {
-    if (!selectedImage) return;
-    
-    await removeImage(selectedImage);
-    setDeleteDialogOpen(false);
-    setSelectedImage(null);
-  };
   
   const handleMoveImage = (index: number, direction: 'up' | 'down') => {
     if (
@@ -94,8 +78,8 @@ export function EnhancedHeroImagesManager() {
     }
   };
 
-  const handlePreviewImage = (imageUrl: string) => {
-    setPreviewImageUrl(imageUrl);
+  const handleDeleteImage = async (imageId: string) => {
+    await removeImage(imageId);
   };
 
   const imageLibrary = filteredMediaFiles.filter(file => file.file_type?.startsWith('image/'));
@@ -114,7 +98,7 @@ export function EnhancedHeroImagesManager() {
             )}
           </CardTitle>
           <CardDescription>
-            Manage which images are displayed in the hero section slideshow. Images will rotate automatically on the homepage.
+            Manage hero section images individually. Each image can be edited, reordered, or removed separately.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -210,88 +194,24 @@ export function EnhancedHeroImagesManager() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h4 className="text-lg font-medium">
-                    Current Hero Images ({images.length})
+                    Hero Images ({images.length})
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Images will display in this order on the homepage
+                    Click any image to edit individually
                   </p>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {images.map((image, index) => (
-                    <Card key={image.id} className="group overflow-hidden">
-                      <div className="relative">
-                        <AspectRatio ratio={16/9}>
-                          <img
-                            src={image.file_url}
-                            alt={`Hero image ${index + 1}`}
-                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "https://via.placeholder.com/640x360?text=Image+Not+Found";
-                            }}
-                          />
-                        </AspectRatio>
-                        
-                        {/* Image controls overlay */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-200">
-                          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button 
-                              variant="secondary" 
-                              size="icon" 
-                              className="h-8 w-8 bg-white/90 hover:bg-white" 
-                              onClick={() => handlePreviewImage(image.file_url)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="destructive" 
-                              size="icon" 
-                              className="h-8 w-8" 
-                              onClick={() => confirmDeleteImage(image.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          
-                          <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button 
-                              variant="secondary" 
-                              size="icon" 
-                              className="h-8 w-8 bg-white/90 hover:bg-white" 
-                              onClick={() => handleMoveImage(index, 'up')}
-                              disabled={index === 0}
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="secondary" 
-                              size="icon" 
-                              className="h-8 w-8 bg-white/90 hover:bg-white" 
-                              onClick={() => handleMoveImage(index, 'down')}
-                              disabled={index === images.length - 1}
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {/* Position indicator */}
-                        <div className="absolute bottom-2 left-2">
-                          <Badge variant="secondary" className="bg-black/70 text-white border-0">
-                            #{index + 1}
-                          </Badge>
-                        </div>
-                      </div>
-                      
-                      <CardContent className="p-4">
-                        <h5 className="font-medium truncate">{image.name}</h5>
-                        {image.description && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                            {image.description}
-                          </p>
-                        )}
-                      </CardContent>
-                    </Card>
+                    <HeroImageCard
+                      key={image.id}
+                      image={image}
+                      index={index}
+                      totalImages={images.length}
+                      onMove={handleMoveImage}
+                      onDelete={handleDeleteImage}
+                      onUpdate={fetchImages}
+                    />
                   ))}
                 </div>
               </div>
@@ -299,45 +219,6 @@ export function EnhancedHeroImagesManager() {
           </div>
         </CardContent>
       </Card>
-      
-      {/* Delete confirmation dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Hero Image</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the image from the hero slideshow. The image will remain in your media library and can be re-added later.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteImage} 
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remove from Hero
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Image preview dialog */}
-      <Dialog open={!!previewImageUrl} onOpenChange={() => setPreviewImageUrl(null)}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Hero Image Preview</DialogTitle>
-          </DialogHeader>
-          {previewImageUrl && (
-            <div className="aspect-video overflow-hidden rounded-lg border">
-              <img
-                src={previewImageUrl}
-                alt="Hero image preview"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
