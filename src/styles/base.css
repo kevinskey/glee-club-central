@@ -1,41 +1,42 @@
+
 @tailwind base;
 
 @layer base {
   :root {
-    --background: 220 100% 97%;  /* Light background */
+    --background: 220 100% 97%;  /* Light blue background */
     --foreground: 240 10% 3.9%;
 
-    --card: 220 100% 98%;  /* Very light for cards */
+    --card: 220 100% 98%;  /* Very light blue for cards */
     --card-foreground: 240 10% 3.9%;
 
     --popover: 220 100% 98%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 210 100% 12%;  /* Spelman navy blue primary */
+    --primary: 200 100% 70%;  /* Light blue primary */
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 50% 90%;  /* Light navy secondary */
-    --secondary-foreground: 210 100% 12%;
+    --secondary: 220 60% 95%;  /* Light blue secondary */
+    --secondary-foreground: 240 5.9% 10%;
 
-    --muted: 210 50% 95%;  /* Light navy muted */
+    --muted: 220 60% 95%;  /* Light blue muted */
     --muted-foreground: 240 3.8% 46.1%;
 
-    --accent: 210 100% 12%;  /* Navy blue accent */
+    --accent: 200 100% 70%;  /* Light blue accent */
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 40% 85%;  /* Light navy border */
-    --input: 210 40% 92%;  /* Light navy input */
-    --ring: 210 100% 12%;  /* Navy blue ring */
+    --border: 220 40% 85%;  /* Light blue border */
+    --input: 220 40% 92%;  /* Light blue input */
+    --ring: 200 100% 70%;  /* Light blue ring */
 
     --radius: 0.5rem;
     
-    /* Glee Club Brand Colors - Navy blue theme */
-    --glee-purple: 210 100% 12%;  /* Spelman navy blue */
-    --glee-spelman: 210 100% 12%;  /* Spelman navy blue */
-    --glee-columbia: 210 100% 12%;  /* Spelman navy blue */
+    /* Glee Club Brand Colors - Light blue theme */
+    --glee-purple: 200 100% 70%;  /* Light blue */
+    --glee-spelman: 200 100% 70%;  /* Light blue */
+    --glee-columbia: 200 100% 70%;  /* Light blue */
   }
 
   .dark {
@@ -48,24 +49,24 @@
     --popover: 215 28% 17%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 100% 25%;  /* Lighter navy for dark mode */
-    --primary-foreground: 210 40% 98%;
+    --primary: 200 100% 75%;  /* Lighter blue for dark mode */
+    --primary-foreground: 220 14% 11%;
 
-    --secondary: 215 28% 22%;  /* Dark secondary */
+    --secondary: 215 28% 22%;  /* Dark blue secondary */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 215 28% 22%;
     --muted-foreground: 217 10% 64.9%;
 
-    --accent: 210 100% 25%;  /* Navy accent for dark mode */
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 100% 75%;  /* Light blue accent for dark mode */
+    --accent-foreground: 220 14% 11%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 215 28% 22%;
     --input: 215 28% 22%;
-    --ring: 210 100% 25%;  /* Navy ring */
+    --ring: 200 100% 75%;  /* Light blue ring */
   }
 
   * {

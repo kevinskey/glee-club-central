@@ -58,27 +58,27 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         glee: {
-          orange: "#1e3a8a", // Navy blue
-          carolina: "#1e3a8a", // Navy blue
-          purple: "#1e3a8a", // Navy blue
-          darkPurple: "#1e40af", // Slightly lighter navy
-          lightPurple: "#dbeafe", // Very light navy
+          orange: "#87CEEB", // Sky blue
+          carolina: "#87CEEB", // Sky blue
+          purple: "#87CEEB", // Sky blue
+          darkPurple: "#4169E1", // Royal blue
+          lightPurple: "#B0E0E6", // Powder blue
           gray: "#8E9196",
-          columbia: "#1e3a8a", // Navy blue
+          columbia: "#87CEEB", // Sky blue
         },
-        'glee-spelman': "#1e3a8a", // Navy blue
-        'glee-columbia': "#1e3a8a", // Navy blue
-        'columbia-blue': "#1e3a8a", // Navy blue
+        'glee-spelman': "#87CEEB", // Sky blue
+        'glee-columbia': "#87CEEB", // Sky blue
+        'columbia-blue': "#87CEEB", // Sky blue
         'blue': {
-          100: "#dbeafe", // Very light navy
-          200: "#bfdbfe", // Light navy
-          300: "#93c5fd", // Medium light navy
-          400: "#60a5fa", // Medium navy
-          500: "#3b82f6", // Default navy
-          600: "#2563eb", // Bright navy
-          700: "#1d4ed8", // Darker navy
-          800: "#1e40af", // Dark navy
-          900: "#1e3a8a", // Very dark navy (Spelman navy)
+          100: "#E6F3FF", // Very light blue
+          200: "#CCE7FF", // Light blue
+          300: "#99D6FF", // Medium light blue
+          400: "#66C2FF", // Medium blue
+          500: "#33AAFF", // Default blue
+          600: "#0088FF", // Bright blue
+          700: "#0066CC", // Darker blue
+          800: "#004499", // Dark blue
+          900: "#002266", // Very dark blue
         }
       },
       borderRadius: {
