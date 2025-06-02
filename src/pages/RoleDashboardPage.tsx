@@ -7,19 +7,22 @@ import { PageLoader } from '@/components/ui/page-loader';
 const RoleDashboardPage = () => {
   const { user, profile, isLoading, isInitialized, isAuthenticated, isAdmin } = useAuth();
 
-  console.log('🏠 RoleDashboardPage: State check:', {
+  console.log('🏠 RoleDashboardPage: DASHBOARD ASSIGNMENT STATE:', {
     hasUser: !!user,
     userEmail: user?.email,
     hasProfile: !!profile,
+    profileRole: profile?.role,
+    profileIsAdmin: profile?.is_super_admin,
     isLoading,
     isInitialized,
     isAuthenticated,
-    profileRole: profile?.role,
-    profileIsAdmin: profile?.is_super_admin,
-    isAdminFunction: isAdmin()
+    isAdminFunction: isAdmin(),
+    timestamp: new Date().toISOString()
   });
 
+  // Wait for initialization
   if (!isInitialized) {
+    console.log('⏳ RoleDashboardPage: Waiting for auth initialization...');
     return (
       <PageLoader 
         message="Starting GleeWorld..." 
@@ -28,12 +31,15 @@ const RoleDashboardPage = () => {
     );
   }
 
+  // Check authentication
   if (!isAuthenticated || !user) {
-    console.log('🔒 RoleDashboardPage: Not authenticated, redirecting to login');
+    console.log('🔒 RoleDashboardPage: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  // Wait for profile loading
   if (isLoading) {
+    console.log('⏳ RoleDashboardPage: Loading user profile...');
     return (
       <PageLoader 
         message="Loading your profile..." 
@@ -42,22 +48,34 @@ const RoleDashboardPage = () => {
     );
   }
 
-  let redirectPath = '/dashboard/member';
+  // Determine dashboard assignment
+  let redirectPath = '/dashboard/member'; // Default fallback
+  let assignmentReason = 'default member assignment';
   
+  // Check for admin access
   const isKnownAdmin = user.email === 'kevinskey@mac.com';
   const hasAdminAccess = isAdmin() || isKnownAdmin;
   
   if (hasAdminAccess) {
     redirectPath = '/admin';
-    console.log('🎯 RoleDashboardPage: Admin user detected, redirecting to admin dashboard');
+    assignmentReason = `admin access (isAdmin: ${isAdmin()}, knownAdmin: ${isKnownAdmin})`;
   } else if (profile?.role === 'fan') {
     redirectPath = '/dashboard/fan';
-    console.log('🎯 RoleDashboardPage: Fan user detected, redirecting to fan dashboard');
+    assignmentReason = 'fan role detected';
   } else {
-    console.log('🎯 RoleDashboardPage: Regular member, redirecting to member dashboard');
+    assignmentReason = `member role (role: ${profile?.role || 'undefined'})`;
   }
   
-  console.log('🎯 RoleDashboardPage: Redirecting to:', redirectPath);
+  console.log('🎯 RoleDashboardPage: DASHBOARD ASSIGNMENT DECISION:', {
+    finalPath: redirectPath,
+    reason: assignmentReason,
+    userEmail: user.email,
+    profileRole: profile?.role,
+    isAdminResult: isAdmin(),
+    isKnownAdmin,
+    hasAdminAccess,
+    timestamp: new Date().toISOString()
+  });
   
   return <Navigate to={redirectPath} replace />;
 };
