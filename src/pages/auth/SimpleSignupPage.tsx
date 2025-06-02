@@ -12,7 +12,7 @@ import { Music, Eye, EyeOff, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SimpleSignupPage() {
-  const { signup, user } = useAuth();
+  const { signUp, user } = useAuth(); // Changed from signup to signUp
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({
@@ -66,10 +66,10 @@ export default function SimpleSignupPage() {
 
     setLoading(true);
     try {
-      await signup(formData.email, formData.password, {
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      });
+      const { error } = await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
+      if (error) {
+        throw error;
+      }
       toast.success('Account created successfully! Please check your email to verify your account.');
       navigate('/login');
     } catch (error: any) {

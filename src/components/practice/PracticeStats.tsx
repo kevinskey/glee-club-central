@@ -5,11 +5,11 @@ import { Headphones, Book, MusicIcon, Clock, BarChart } from "lucide-react";
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface PracticeStatsProps {
-  stats: Record<string, number>;
-  totalMinutes: number;
+  stats?: Record<string, number>;
+  totalMinutes?: number;
 }
 
-export function PracticeStats({ stats, totalMinutes }: PracticeStatsProps) {
+export function PracticeStats({ stats = {}, totalMinutes = 0 }: PracticeStatsProps) {
   const chartData = Object.entries(stats).map(([category, minutes]) => {
     let name: string;
     let color: string;

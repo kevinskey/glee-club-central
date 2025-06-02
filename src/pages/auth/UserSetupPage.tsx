@@ -23,7 +23,7 @@ interface ProfileData {
 export default function UserSetupPage() {
   const navigate = useNavigate();
   const { user, isLoading } = useAuth();
-  const { profile, isLoading: profileLoading, updateProfile } = useProfile();
+  const { profile, isLoading: profileLoading, updateUserProfile } = useProfile(); // Changed from updateProfile
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileData>({
     first_name: '',
@@ -52,7 +52,7 @@ export default function UserSetupPage() {
     setLoading(true);
 
     try {
-      await updateProfile({
+      await updateUserProfile({
         first_name: formData.first_name,
         last_name: formData.last_name,
         phone: formData.phone,

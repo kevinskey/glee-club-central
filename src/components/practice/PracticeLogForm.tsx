@@ -11,7 +11,7 @@ import { Headphones, Book, MusicIcon, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 interface PracticeLogFormProps {
-  onSubmit: (minutes: number, category: string, description: string | null, date?: string) => Promise<boolean>;
+  onSubmit?: (minutes: number, category: string, description: string | null, date?: string) => Promise<boolean>;
   defaultValues?: {
     minutes?: number;
     category?: string;
@@ -30,7 +30,7 @@ interface FormValues {
 }
 
 export function PracticeLogForm({ 
-  onSubmit, 
+  onSubmit = async () => true, // Default implementation
   defaultValues = {}, 
   isEditing = false,
   onCancel

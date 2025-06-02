@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,28 +25,48 @@ import { PracticeStats } from '@/components/practice/PracticeStats';
 import { SightReadingEmbed } from '@/components/practice/SightReadingEmbed';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
+import { usePracticeLogs } from '@/hooks/usePracticeLogs';
 
 export default function PracticePage() {
   const { user, isLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
+  const { logs, stats, totalMinutes, logPractice, deletePracticeLog } = usePracticeLogs();
 
   const [currentTab, setCurrentTab] = useState('practice-log');
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768); // Adjust breakpoint as needed
+      setIsMobile(window.innerWidth < 768);
     };
 
-    // Set initial value
     handleResize();
-
-    // Add event listener
     window.addEventListener('resize', handleResize);
-
-    // Clean up event listener
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const handlePracticeSubmit = async (minutes: number, category: string, description: string | null, date?: string) => {
+    try {
+      await logPractice(minutes, category, description, date);
+      return true;
+    } catch (error) {
+      console.error('Failed to log practice:', error);
+      return false;
+    }
+  };
+
+  const handleDeleteLog = async (id: string) => {
+    try {
+      await deletePracticeLog(id);
+    } catch (error) {
+      console.error('Failed to delete practice log:', error);
+    }
+  };
+
+  const handleUpdateLog = (log: any) => {
+    // TODO: Implement update functionality
+    console.log('Update log:', log);
+  };
 
   if (isLoading || profileLoading) {
     return <div>Loading...</div>;
@@ -76,23 +97,26 @@ export default function PracticePage() {
                 <Headphones className="mr-2 h-4 w-4" />
                 Practice Tunes
               </TabsTrigger>
-              {/* Add more tabs as needed */}
             </TabsList>
             <TabsContent value="practice-log">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Log New Practice Session</h3>
-                  <PracticeLogForm />
+                  <PracticeLogForm onSubmit={handlePracticeSubmit} />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Recent Practice Logs</h3>
-                  <PracticeLogsList />
+                  <PracticeLogsList 
+                    logs={logs}
+                    onDelete={handleDeleteLog}
+                    onUpdate={handleUpdateLog}
+                  />
                 </div>
               </div>
             </TabsContent>
             <TabsContent value="practice-stats">
               <h3 className="text-xl font-semibold mb-2">Your Practice Stats</h3>
-              <PracticeStats />
+              <PracticeStats stats={stats} totalMinutes={totalMinutes} />
             </TabsContent>
             <TabsContent value="sight-reading">
               <h3 className="text-xl font-semibold mb-2">Sight Reading Exercises</h3>
