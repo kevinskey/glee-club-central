@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -134,8 +133,10 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
             }));
           } else {
             // Create a properly typed Map from auth users
-            const authUserEntries: [string, string][] = authUsers.users.map(user => [user.id, user.email || '']);
-            const authUserMap = new Map(authUserEntries);
+            const authUserMap = new Map<string, string>();
+            authUsers.users.forEach(user => {
+              authUserMap.set(user.id, user.email || '');
+            });
             
             usersWithEmails = profiles.map(profile => ({
               id: profile.id,
