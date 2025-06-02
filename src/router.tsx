@@ -1,3 +1,4 @@
+
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -27,7 +28,6 @@ import UserSystemResetPage from "./pages/admin/UserSystemResetPage";
 import AdminMediaLibraryPage from "./pages/admin/AdminMediaLibraryPage";
 import AdminMediaUploaderPage from "./pages/admin/AdminMediaUploaderPage";
 import NewsTickerSettingsPage from "./pages/admin/NewsTickerSettingsPage";
-import AdminModularHeroPage from "./pages/admin/AdminModularHeroPage";
 import AnnouncementsPage from "./pages/announcements/AnnouncementsPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import OrdersPage from "./pages/admin/OrdersPage";
@@ -176,7 +176,6 @@ export const router = createBrowserRouter([
       { path: "events/:id/rsvps", element: withErrorBoundary(<EventRSVPsPage />) },
       { path: "members", element: withErrorBoundary(<UserManagementPage />) },
       { path: "hero-manager", element: withErrorBoundary(<AdminHeroManager />) },
-      { path: "modular-hero", element: withErrorBoundary(<AdminModularHeroPage />) },
       { path: "media", element: withErrorBoundary(<AdminMediaLibraryPage />) },
       { path: "media-uploader", element: withErrorBoundary(<AdminMediaUploaderPage />) },
       { path: "news-ticker", element: withErrorBoundary(<NewsTickerSettingsPage />) },
