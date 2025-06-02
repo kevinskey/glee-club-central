@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays, X } from 'lucide-react';
 import { AdminCalendarView } from '@/components/calendar/AdminCalendarView';
 import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
 import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
@@ -30,6 +31,17 @@ export default function AdminCalendarPage() {
       setSelectedView(view);
     }
   };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedEventType('all');
+  };
+
+  const hasActiveFilters = searchQuery.trim() !== '' || selectedEventType !== 'all';
 
   if (isLoading) {
     return (
@@ -71,36 +83,90 @@ export default function AdminCalendarPage() {
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Controls Bar */}
+          {/* Enhanced Search and Filters Bar */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                {/* Search and Filters */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      type="search"
-                      placeholder="Search events..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
-                    />
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {/* Search Section */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        type="search"
+                        placeholder="Search events by title, description, or location..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 pr-10 h-12 text-base"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={clearSearch}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                   
-                  <EventTypeFilter
-                    selectedEventType={selectedEventType}
-                    onEventTypeChange={setSelectedEventType}
-                  />
+                  {/* Filter and View Controls */}
+                  <div className="flex items-center gap-3">
+                    <EventTypeFilter
+                      selectedEventType={selectedEventType}
+                      onEventTypeChange={setSelectedEventType}
+                    />
+                    
+                    <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
+                    
+                    <CalendarViewToggle
+                      selectedView={selectedView}
+                      onViewChange={handleViewChange}
+                    />
+                  </div>
                 </div>
 
-                {/* View Controls */}
-                <div className="flex items-center gap-3">
-                  <CalendarViewToggle
-                    selectedView={selectedView}
-                    onViewChange={handleViewChange}
-                  />
-                </div>
+                {/* Active Filters Display */}
+                {hasActiveFilters && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Active filters:
+                    </span>
+                    
+                    {searchQuery.trim() && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        Search: "{searchQuery.trim()}"
+                        <button
+                          onClick={clearSearch}
+                          className="ml-1 hover:text-red-600 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    
+                    {selectedEventType !== 'all' && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        Type: {selectedEventType}
+                        <button
+                          onClick={() => setSelectedEventType('all')}
+                          className="ml-1 hover:text-red-600 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    )}
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="text-xs text-gray-500 hover:text-gray-700"
+                    >
+                      Clear all
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
