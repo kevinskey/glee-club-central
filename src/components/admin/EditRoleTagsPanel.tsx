@@ -11,18 +11,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getAllRoles } from '@/utils/permissionsMap';
 
-interface User {
+interface UserSearchResult {
   id: string;
   first_name: string;
   last_name: string;
-  email?: string;
+  email: string;
   role_tags: string[];
 }
 
 export function EditRoleTagsPanel() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
   const [availableRoles] = useState(getAllRoles());
   const [selectedRoleTags, setSelectedRoleTags] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -52,28 +52,41 @@ export function EditRoleTagsPanel() {
         console.error('Could not fetch user emails:', authError);
       }
 
-      const usersWithEmails = profiles?.map(profile => ({
-        ...profile,
-        email: authUsers?.users?.find(u => u.id === profile.id)?.email || 'No email'
-      })) || [];
+      const usersWithEmails: UserSearchResult[] = profiles?.map(profile => {
+        const authUser = authUsers?.users?.find(u => u.id === profile.id);
+        return {
+          id: profile.id,
+          first_name: profile.first_name || '',
+          last_name: profile.last_name || '',
+          email: authUser?.email || 'No email',
+          role_tags: profile.role_tags || []
+        };
+      }) || [];
 
       // Also search by email if we have auth access
-      const emailMatches = authUsers?.users?.filter(user => 
-        user.email?.toLowerCase().includes(query.toLowerCase())
-      ).map(user => {
-        const profile = profiles?.find(p => p.id === user.id);
-        return profile ? {
-          ...profile,
-          email: user.email
-        } : null;
-      }).filter((user): user is User => user !== null) || [];
+      const emailMatches: UserSearchResult[] = authUsers?.users
+        ?.filter(user => user.email?.toLowerCase().includes(query.toLowerCase()))
+        .map(user => {
+          const profile = profiles?.find(p => p.id === user.id);
+          if (profile) {
+            return {
+              id: profile.id,
+              first_name: profile.first_name || '',
+              last_name: profile.last_name || '',
+              email: user.email || 'No email',
+              role_tags: profile.role_tags || []
+            };
+          }
+          return null;
+        })
+        .filter((user): user is UserSearchResult => user !== null) || [];
 
       // Combine and deduplicate results
       const allResults = [...usersWithEmails, ...emailMatches].filter((user, index, self) => 
-        index === self.findIndex(u => u?.id === user?.id)
+        index === self.findIndex(u => u.id === user.id)
       );
 
-      setSearchResults(allResults as User[]);
+      setSearchResults(allResults);
     } catch (error) {
       console.error('Error searching users:', error);
       toast.error('Failed to search users');
@@ -82,7 +95,7 @@ export function EditRoleTagsPanel() {
     }
   };
 
-  const selectUser = (user: User) => {
+  const selectUser = (user: UserSearchResult) => {
     setSelectedUser(user);
     setSelectedRoleTags(user.role_tags || []);
     setSearchResults([]);
