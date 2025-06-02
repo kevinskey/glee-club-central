@@ -50,17 +50,29 @@ export const EventPerformers: React.FC<EventPerformersProps> = ({
 
       if (error) throw error;
 
-      const performersData = data
-        ?.map(assignment => assignment.profiles)
-        .filter((profile): profile is Performer => {
-          return profile !== null && 
-                 profile !== undefined &&
-                 typeof profile === 'object' &&
-                 'id' in profile &&
-                 'first_name' in profile &&
-                 'last_name' in profile &&
-                 'voice_part' in profile;
-        }) || [];
+      // Process the nested data structure
+      const performersData: Performer[] = [];
+      
+      if (data) {
+        for (const assignment of data) {
+          const profile = assignment.profiles;
+          if (profile && 
+              typeof profile === 'object' && 
+              'id' in profile && 
+              'first_name' in profile && 
+              'last_name' in profile && 
+              'voice_part' in profile) {
+            
+            performersData.push({
+              id: profile.id,
+              first_name: profile.first_name || '',
+              last_name: profile.last_name || '',
+              voice_part: profile.voice_part || '',
+              avatar_url: profile.avatar_url || undefined
+            });
+          }
+        }
+      }
 
       setPerformers(performersData);
     } catch (error) {

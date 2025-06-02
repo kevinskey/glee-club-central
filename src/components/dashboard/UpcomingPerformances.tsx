@@ -52,17 +52,36 @@ export const UpcomingPerformances: React.FC = () => {
 
       if (error) throw error;
 
-      const upcomingPerformances = data
-        ?.map(assignment => assignment.events)
-        .filter((event): event is UpcomingPerformance => {
-          return event !== null && 
-                 event !== undefined && 
-                 typeof event === 'object' &&
-                 'start_time' in event &&
-                 typeof event.start_time === 'string' &&
-                 isFuture(new Date(event.start_time));
-        })
-        .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()) || [];
+      // Process the nested data structure
+      const upcomingPerformances: UpcomingPerformance[] = [];
+      
+      if (data) {
+        for (const assignment of data) {
+          const event = assignment.events;
+          if (event && 
+              typeof event === 'object' && 
+              'id' in event && 
+              'start_time' in event && 
+              typeof event.start_time === 'string' &&
+              isFuture(new Date(event.start_time))) {
+            
+            upcomingPerformances.push({
+              id: event.id,
+              title: event.title || '',
+              start_time: event.start_time,
+              end_time: event.end_time || '',
+              location_name: event.location_name || undefined,
+              event_types: event.event_types || [],
+              short_description: event.short_description || undefined
+            });
+          }
+        }
+      }
+
+      // Sort by start time
+      upcomingPerformances.sort((a, b) => 
+        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      );
 
       setPerformances(upcomingPerformances);
     } catch (error) {
