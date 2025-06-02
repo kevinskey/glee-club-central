@@ -160,9 +160,52 @@ p {
   box-sizing: border-box;
 }
 
-/* Mobile Navigation - Fixed positioning */
+/* Mobile Navigation - Sticky Header */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  height: 56px;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(12px, 3vw, 16px);
+  box-sizing: border-box;
+}
+
+.mobile-nav-dark {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* Sticky Header for Mobile */
 @media (max-width: 768px) {
-  /* News Ticker - Fixed at top */
+  header {
+    position: fixed !important;
+    top: 40px !important; /* Height of news ticker - no gap */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    z-index: 100 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+  
+  .dark header {
+    background: rgba(0, 0, 0, 0.95) !important;
+  }
+  
+  /* News Ticker Sticky Positioning - Above Header */
   .news-ticker,
   .bg-glee-columbia {
     position: fixed !important;
@@ -171,66 +214,48 @@ p {
     right: 0 !important;
     width: 100% !important;
     max-width: 100vw !important;
-    height: 32px !important;
     overflow-x: hidden;
     box-sizing: border-box;
     z-index: 101 !important;
   }
   
-  /* Header - Fixed below news ticker */
-  header {
-    position: fixed !important;
-    top: 32px !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    height: 56px !important;
-    overflow-x: hidden;
-    box-sizing: border-box;
-    z-index: 100 !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .dark header {
-    background: rgba(0, 0, 0, 0.95) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-  }
-  
-  /* Main content - Start below fixed elements */
+  /* Adjust main content to account for both ticker and header */
   main {
-    margin-top: 0 !important;
+    margin-top: 0 !important; /* Remove margin since hero will handle positioning */
     padding-top: 0 !important;
   }
   
-  /* Hero sections - Account for fixed elements */
+  /* Hero sections start immediately after sticky header with no gap */
   .hero-section,
   [class*="hero"],
-  section[style*="50vh"],
-  section[style*="70vh"] {
-    margin-top: 88px !important; /* News ticker (32px) + Header (56px) */
-    min-height: calc(50vh - 44px) !important;
+  .enhanced-hero-section {
+    margin-top: 96px !important; /* Start exactly at bottom of sticky elements */
+    padding-top: 0 !important; /* Remove padding to eliminate gap */
   }
   
-  /* Non-hero pages - Add top padding */
-  .min-h-screen:not(:has(.hero-section)):not(:has([class*="hero"])) {
-    padding-top: 88px !important;
-    min-height: calc(100vh - 88px) !important;
+  /* Ensure page content starts below sticky elements for non-hero pages */
+  .min-h-screen {
+    padding-top: 96px !important; /* Height of ticker + header */
+    min-height: calc(100vh - 96px) !important;
   }
 }
 
-/* News Ticker Mobile Specific Styling */
+/* News Ticker Mobile Fixes - Enhanced Sticky */
+.news-ticker {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 @media (max-width: 768px) {
   .news-ticker {
-    padding: 4px 8px !important;
-    font-size: 12px !important;
-  }
-  
-  .news-ticker .whitespace-nowrap {
-    font-size: 12px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 101 !important;
+    height: 40px !important;
   }
 }
 
@@ -271,6 +296,24 @@ p {
   width: 100%;
 }
 
+.pdf-page-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  z-index: 5;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pdf-page-tap-left {
+  left: 0;
+}
+
+.pdf-page-tap-right {
+  right: 0;
+}
+
 /* Calendar Mobile Optimizations */
 .calendar-mobile-container {
   padding: clamp(0.5rem, 2vw, 1rem);
@@ -288,6 +331,24 @@ p {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.calendar-mobile-event-time {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+
+.calendar-mobile-event-title {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.calendar-mobile-event-location {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
 }
 
 /* Dashboard Mobile Optimizations */
@@ -316,28 +377,62 @@ p {
   box-sizing: border-box;
 }
 
-/* Home Page Content Mobile Fixes */
+.dashboard-mobile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  width: 100%;
+  max-width: 100%;
+}
+
+.dashboard-mobile-stat-card {
+  text-align: center;
+  padding: clamp(0.75rem, 3vw, 1rem);
+  background: hsl(var(--muted/30));
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dashboard-mobile-stat-value {
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.dashboard-mobile-stat-label {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
+}
+
+/* Specific Mobile Viewport Fixes */
 @media (max-width: 768px) {
-  .home-page-content,
-  .landing-content {
+  .container {
     width: 100% !important;
     max-width: 100vw !important;
-    overflow-x: hidden;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
   
-  /* Section containers */
-  .events-section,
-  .audio-section,
-  .store-section,
-  .signup-section {
-    width: 100% !important;
-    max-width: 100vw !important;
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-bottom: 24px;
-    box-sizing: border-box;
+  /* Fix any flex containers that might overflow */
+  .flex {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  
+  /* Fix grid containers */
+  .grid {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Adjust all page content for sticky elements on non-hero pages */
+  .page-content,
+  .main-content,
+  [class*="content"]:not([class*="hero"]) {
+    padding-top: 16px !important;
   }
 }
 
@@ -345,6 +440,17 @@ p {
 .dark .pdf-mobile-toolbar {
   background: rgba(0, 0, 0, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: hsl(var(--foreground));
+}
+
+.dark .calendar-mobile-event {
+  background: hsl(var(--muted/10));
+  border-left-color: hsl(var(--primary));
+}
+
+.dark .mobile-nav {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
   color: hsl(var(--foreground));
 }
 
@@ -368,7 +474,7 @@ p {
   }
 }
 
-/* Accessibility and Performance */
+/* Accessibility Improvements */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -377,19 +483,71 @@ p {
   }
 }
 
-/* Very small mobile devices */
+@media (prefers-contrast: high) {
+  .dashboard-mobile-card,
+  .calendar-mobile-event {
+    border-width: 2px;
+  }
+}
+
+/* Viewport Meta Fixes */
 @media (max-width: 320px) {
   .container {
     padding-left: 8px;
     padding-right: 8px;
   }
   
+  .dashboard-mobile-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Large touch targets for very small screens */
+@media (max-width: 375px) {
   .mobile-button {
     min-height: 48px;
     padding: 12px 16px;
   }
+}
+
+/* Home Page Content Mobile Fixes */
+@media (max-width: 768px) {
+  .home-page-content,
+  .landing-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
   
-  .news-ticker {
-    font-size: 11px !important;
+  /* Section containers */
+  .events-section,
+  .audio-section,
+  .store-section {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+}
+
+/* Ensure sticky elements work across all pages - but not hero sections */
+@media (max-width: 768px) {
+  /* Apply to all pages and routes that don't have hero sections */
+  [data-route]:not([data-route="/"]),
+  .page:not(.home-page),
+  .route:not(.hero-route) {
+    padding-top: 96px !important; /* Height of ticker + header */
+  }
+  
+  /* Specific route adjustments for non-hero pages */
+  [data-route="/about"],
+  [data-route="/contact"],
+  [data-route="/calendar"],
+  [data-route="/store"],
+  [data-route*="/news/"] {
+    padding-top: 96px !important; /* Height of ticker + header */
   }
 }
