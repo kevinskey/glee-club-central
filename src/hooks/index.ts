@@ -52,7 +52,6 @@ export { usePDFAnnotations } from './usePDFAnnotations';
 // UI Utility Hooks (re-exported from ui folder)
 export { useToast } from './use-toast';
 export { useMedia, useIsMobile } from './use-mobile';
-export { useSidebar } from './use-sidebar';
 export { useIntersection } from './use-intersection';
 
 // Re-export PageLoader component for convenience
