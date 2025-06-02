@@ -19,6 +19,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   hideAfter = 8000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   
   // Simple predefined news items
   const newsItems: NewsItem[] = [
@@ -44,6 +45,15 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   ];
 
+  // Cycle through news items every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % newsItems.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [newsItems.length]);
+
   // Auto-hide functionality
   useEffect(() => {
     if (autoHide && hideAfter) {
@@ -60,31 +70,19 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return null;
   }
 
+  const currentItem = newsItems[currentIndex];
+
   return (
     <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
       <div className="w-full px-4 flex items-center justify-center text-sm font-medium">
-        <div className="flex-1 overflow-hidden flex items-center">
-          <div className="flex whitespace-nowrap animate-marquee-slower">
-            {newsItems.map((item, index) => (
-              <span 
-                key={item.id} 
-                className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
-                title="Latest news from Spelman Glee Club"
-              >
-                {item.headline}
-              </span>
-            ))}
-            
-            {/* Repeat items to create continuous scroll effect */}
-            {newsItems.map((item, index) => (
-              <span 
-                key={`repeat-${item.id}`} 
-                className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
-                title="Latest news from Spelman Glee Club"
-              >
-                {item.headline}
-              </span>
-            ))}
+        <div className="flex-1 overflow-hidden flex items-center justify-center">
+          <div className="whitespace-nowrap animate-marquee">
+            <span 
+              className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
+              title="Latest news from Spelman Glee Club"
+            >
+              {currentItem.headline}
+            </span>
           </div>
         </div>
       </div>
