@@ -15,8 +15,9 @@ export function AdminDashboardContent({ isMobile = false }: AdminDashboardConten
   
   console.log('AdminDashboardContent: Rendering with isMobile:', isMobile);
   
-  // Get the user's first name
+  // Get the user's first name with better fallback logic
   const firstName = profile?.first_name || 
+                   user?.user_metadata?.first_name ||
                    user?.email?.split('@')[0] || 
                    'Admin';
   

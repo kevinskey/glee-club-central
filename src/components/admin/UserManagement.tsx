@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +26,6 @@ export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showImportDialog, setShowImportDialog] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -87,10 +87,6 @@ export default function UserManagement() {
 
   const handleCreateUser = () => {
     setShowAddForm(true);
-  };
-
-  const handleImportUsers = () => {
-    setShowImportDialog(true);
   };
 
   if (error) {
@@ -214,7 +210,10 @@ export default function UserManagement() {
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
         onCreateUser={handleCreateUser}
-        onImportUsers={handleImportUsers}
+        onImportUsers={() => {
+          setShowAddDialog(false);
+          toast.info('CSV import functionality will be available soon');
+        }}
       />
 
       {/* Add User Form */}
@@ -234,26 +233,6 @@ export default function UserManagement() {
           onCancel={() => setEditingUser(null)}
           title="Edit User"
         />
-      )}
-
-      {/* TODO: Add import dialog component here when ready */}
-      {showImportDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Import Users</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              CSV import functionality will be implemented here.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => setShowImportDialog(false)}>
-                Coming Soon
-              </Button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );
