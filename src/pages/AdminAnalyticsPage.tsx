@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -14,6 +13,8 @@ import {
 import { PageHeader } from '@/components/ui/page-header';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { Badge } from '@/components/ui/badge';
+import { hasPermission } from '@/utils/permissionChecker';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AnalyticsData {
   totalMembers: number;
@@ -26,10 +27,20 @@ interface AnalyticsData {
 
 export default function AdminAnalyticsPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuthMigration();
+  const { user, profile } = useAuth();
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAdminUser = isAdmin();
+  
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
+  
+  // Check if user has permission to view budget/analytics
+  const canViewAnalytics = isAdminUser || hasPermission(currentUser, 'view_budget');
 
   useEffect(() => {
     // Simulate loading analytics data
@@ -48,10 +59,10 @@ export default function AdminAnalyticsPage() {
       setLoading(false);
     };
 
-    if (isAuthenticated && isAdminUser) {
+    if (isAuthenticated && canViewAnalytics) {
       loadAnalytics();
     }
-  }, [isAuthenticated, isAdminUser]);
+  }, [isAuthenticated, canViewAnalytics]);
 
   if (isLoading) {
     return (
@@ -64,14 +75,14 @@ export default function AdminAnalyticsPage() {
     );
   }
 
-  if (!isAuthenticated || !isAdminUser) {
+  if (!isAuthenticated || !canViewAnalytics) {
     return (
       <Card>
         <CardContent className="text-center py-8">
           <BarChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Admin Access Required</h3>
+          <h3 className="font-semibold mb-2">Access Restricted</h3>
           <p className="text-muted-foreground">
-            You must be an administrator to view analytics.
+            You don't have permission to view analytics data.
           </p>
         </CardContent>
       </Card>

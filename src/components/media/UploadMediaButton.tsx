@@ -2,14 +2,26 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { hasPermission } from "@/utils/permissionChecker";
 
 interface UploadMediaButtonProps {
   onClick: () => void;
-  canUpload: boolean;
   label?: string;
 }
 
-export function UploadMediaButton({ onClick, canUpload, label = "Upload Media" }: UploadMediaButtonProps) {
+export function UploadMediaButton({ onClick, label = "Upload Media" }: UploadMediaButtonProps) {
+  const { user, profile } = useAuth();
+  
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
+  
+  // Check if user has permission to upload media
+  const canUpload = !!user && hasPermission(currentUser, 'upload_media');
+  
   if (!canUpload) {
     return null;
   }

@@ -3,6 +3,7 @@ import React from 'react';
 import { dashboardModules, getModulesByRole, DashboardModule } from '@/utils/dashboardModules';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { hasPermission } from '@/utils/permissionChecker';
 import { 
   CreditCard, DollarSign, FileText, CheckSquare, Shirt, Scissors,
   Upload, Map, Layout, Heart, Bell, Calendar, Users, Settings,
@@ -38,6 +39,15 @@ interface GroupedModules {
   [category: string]: DashboardModule[];
 }
 
+// Map dashboard modules to required permissions
+const modulePermissions: Record<string, string> = {
+  "media_manager": "upload_media",
+  "event_manager": "edit_events",
+  "user_management": "manage_members",
+  "analytics": "view_budget",
+  "settings": "manage_members"
+};
+
 // Group modules by category
 const groupModulesByCategory = (modules: DashboardModule[]): GroupedModules => {
   return modules.reduce<GroupedModules>((acc, module) => {
@@ -51,10 +61,34 @@ const groupModulesByCategory = (modules: DashboardModule[]): GroupedModules => {
 };
 
 export function DashboardModules() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user, profile } = useAuth();
+  
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
   
   const availableModules = getModulesByRole(isAdmin());
-  const groupedModules = groupModulesByCategory(availableModules);
+  
+  // Filter modules based on permissions
+  const permissionFilteredModules = availableModules.filter(module => {
+    // Admin-only modules require admin access
+    if (module.adminOnly && !isAdmin()) {
+      return false;
+    }
+    
+    // Check specific permissions for certain modules
+    const requiredPermission = modulePermissions[module.id];
+    if (requiredPermission) {
+      return hasPermission(currentUser, requiredPermission);
+    }
+    
+    // Allow all other modules by default
+    return true;
+  });
+  
+  const groupedModules = groupModulesByCategory(permissionFilteredModules);
   
   return (
     <div className="space-y-6">

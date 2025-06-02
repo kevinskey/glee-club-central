@@ -14,6 +14,7 @@ import { MediaUploadForm } from "@/components/media/MediaUploadForm";
 import { useMediaUpload } from "@/hooks/useMediaUpload";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
+import { hasPermission } from "@/utils/permissionChecker";
 
 interface UploadMediaModalProps {
   onUploadComplete: () => void;
@@ -30,10 +31,16 @@ export function UploadMediaModal({
 }: UploadMediaModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   
-  // Allow any authenticated user to upload media
-  const canUpload = !!user;
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
+  
+  // Check if user has permission to upload media
+  const canUpload = !!user && hasPermission(currentUser, 'upload_media');
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;

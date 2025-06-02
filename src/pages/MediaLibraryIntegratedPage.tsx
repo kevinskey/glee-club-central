@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { useMediaLibrary } from "@/hooks/useMediaLibrary";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import { hasPermission } from "@/utils/permissionChecker";
 import { UploadMediaModal } from "@/components/UploadMediaModal";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
@@ -21,16 +22,23 @@ import { supabase } from "@/integrations/supabase/client";
 
 const MediaLibraryIntegratedPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { hasPermission } = usePermissions();
+  const { user, profile } = useAuth();
+  const { hasPermission: legacyHasPermission } = usePermissions();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [targetSection, setTargetSection] = useState<string | null>(null);
   
-  // Check permissions - use user instead of isLoggedIn
-  const canUpload = !!user;
-  const canEdit = hasPermission('can_edit_media');
-  const canDelete = hasPermission('can_delete_media');
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
+  
+  // Check permissions - use new permission system
+  const canUpload = !!user && hasPermission(currentUser, 'upload_media');
+  const canEdit = legacyHasPermission('can_edit_media');
+  const canDelete = legacyHasPermission('can_delete_media');
+  const canEditSite = legacyHasPermission('can_edit_site');
   
   const {
     filteredMediaFiles,
@@ -135,13 +143,14 @@ const MediaLibraryIntegratedPage = () => {
       <div className="mt-6 space-y-6">
         {/* Upload and view controls */}
         <div className="flex flex-col md:flex-row justify-between gap-4">
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="bg-glee-purple hover:bg-glee-purple/90"
-            disabled={!canUpload}
-          >
-            Upload New Media
-          </Button>
+          {canUpload && (
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="bg-glee-purple hover:bg-glee-purple/90"
+            >
+              Upload New Media
+            </Button>
+          )}
           
           <div className="flex gap-2">
             <Button 
@@ -178,7 +187,7 @@ const MediaLibraryIntegratedPage = () => {
         />
 
         {/* Site Integration Section */}
-        {canUpload && hasPermission('can_edit_site') && (
+        {canUpload && canEditSite && (
           <Card className="p-4">
             <h2 className="text-lg font-medium mb-2">Site Integration</h2>
             <p className="text-sm text-muted-foreground mb-4">
@@ -264,11 +273,13 @@ const MediaLibraryIntegratedPage = () => {
       </div>
       
       {/* Upload Modal */}
-      <UploadMediaModal
-        open={isUploadModalOpen}
-        onOpenChange={setIsUploadModalOpen}
-        onUploadComplete={handleUploadComplete}
-      />
+      {canUpload && (
+        <UploadMediaModal
+          open={isUploadModalOpen}
+          onOpenChange={setIsUploadModalOpen}
+          onUploadComplete={handleUploadComplete}
+        />
+      )}
     </div>
   );
 };

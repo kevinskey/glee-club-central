@@ -1,9 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useAuth } from '@/contexts/AuthContext';
+import { hasPermission } from '@/utils/permissionChecker';
 import { 
   DollarSign, 
   TrendingUp, 
@@ -25,10 +26,21 @@ interface FinancialData {
 
 export default function AdminFinancesPage() {
   const { isAdmin, isLoading, isAuthenticated } = useAuthMigration();
+  const { user, profile } = useAuth();
   const [financialData, setFinancialData] = useState<FinancialData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAdminUser = isAdmin();
+  
+  // Create user object for permission checking
+  const currentUser = {
+    ...user,
+    role_tags: profile?.role_tags || []
+  };
+  
+  // Check permissions for different actions
+  const canViewBudget = isAdminUser || hasPermission(currentUser, 'view_budget');
+  const canEditBudget = isAdminUser || hasPermission(currentUser, 'edit_budget');
 
   useEffect(() => {
     const loadFinancialData = async () => {
@@ -47,10 +59,10 @@ export default function AdminFinancesPage() {
       setLoading(false);
     };
 
-    if (isAuthenticated && isAdminUser) {
+    if (isAuthenticated && canViewBudget) {
       loadFinancialData();
     }
-  }, [isAuthenticated, isAdminUser]);
+  }, [isAuthenticated, canViewBudget]);
 
   if (isLoading) {
     return (
@@ -63,14 +75,14 @@ export default function AdminFinancesPage() {
     );
   }
 
-  if (!isAuthenticated || !isAdminUser) {
+  if (!isAuthenticated || !canViewBudget) {
     return (
       <Card>
         <CardContent className="text-center py-8">
           <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Admin Access Required</h3>
+          <h3 className="font-semibold mb-2">Access Restricted</h3>
           <p className="text-muted-foreground">
-            You must be an administrator to view financial information.
+            You don't have permission to view financial information.
           </p>
         </CardContent>
       </Card>
@@ -91,10 +103,12 @@ export default function AdminFinancesPage() {
             <Download className="mr-2 h-4 w-4" />
             Export Report
           </Button>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Transaction
-          </Button>
+          {canEditBudget && (
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Transaction
+            </Button>
+          )}
         </div>
       </div>
 
