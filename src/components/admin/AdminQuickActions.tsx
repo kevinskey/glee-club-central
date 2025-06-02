@@ -51,7 +51,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Upload Media",
       description: "Add media files",
       icon: <Upload className="h-5 w-5" />,
-      action: () => navigate("/admin/hero-manager"),
+      action: () => navigate("/admin/media"),
       color: "bg-orange-500",
       category: "Content Management"
     },

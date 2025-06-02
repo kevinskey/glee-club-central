@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { FileImage, Upload } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { MediaLibraryPageContent } from '@/components/media/MediaLibraryPageContent';
+import { EnhancedMediaLibrary } from '@/components/media/EnhancedMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 
 const AdminMediaLibraryPage = () => {
@@ -12,6 +12,8 @@ const AdminMediaLibraryPage = () => {
   const handleUploadComplete = () => {
     console.log("Admin: Upload complete");
     setIsUploadModalOpen(false);
+    // Trigger refresh of media library
+    window.location.reload();
   };
   
   return (
@@ -31,7 +33,7 @@ const AdminMediaLibraryPage = () => {
       />
       
       <div className="mt-8">
-        <MediaLibraryPageContent isAdminView={true} />
+        <EnhancedMediaLibrary isAdminView={true} />
       </div>
       
       <UploadMediaModal
