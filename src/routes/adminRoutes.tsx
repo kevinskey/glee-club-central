@@ -3,26 +3,37 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
 
-// Import existing admin pages
+// Admin Pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
-import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
-import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage';
 import SettingsPage from '@/pages/admin/SettingsPage';
-import OrdersPage from '@/pages/admin/OrdersPage';
-import AnalyticsPage from '@/pages/admin/AnalyticsPage';
-import EventDetailsPage from '@/pages/events/EventDetailsPage';
+import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
-
-// Import additional admin pages
-import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
-import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
+import OrdersPage from '@/pages/admin/OrdersPage';
+import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
+import LandingPageSettingsPage from '@/pages/admin/LandingPageSettingsPage';
+import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
+import NewsItemsPage from '@/pages/admin/NewsItemsPage';
+import AdminHeroManager from '@/pages/admin/AdminHeroManager';
+import SiteImagesPage from '@/pages/admin/SiteImagesPage';
+import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
+import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
+import AnalyticsPage from '@/pages/admin/AnalyticsPage';
+import FanTagManagerPage from '@/pages/admin/FanTagManagerPage';
+import SectionManagerPage from '@/pages/admin/SectionManagerPage';
+import FinancialRecords from '@/pages/admin/FinancialRecords';
+import UserSystemResetPage from '@/pages/admin/UserSystemResetPage';
+import TourMerchPage from '@/pages/admin/TourMerchPage';
+
+// Events
+import EventsListPage from '@/pages/events/EventsListPage';
+import EventDetailsPage from '@/pages/events/EventDetailsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
-    path: '/admin',
+    path: '/dashboard',
     element: (
       <AdminRoute>
         <AdminDashboard />
@@ -30,31 +41,15 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/calendar',
+    path: '/dashboard/home',
     element: (
       <AdminRoute>
-        <AdminCalendarPage />
+        <AdminDashboardPage />
       </AdminRoute>
     ),
   },
   {
-    path: '/admin/events/:id',
-    element: (
-      <AdminRoute>
-        <EventDetailsPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/events/:id/rsvps',
-    element: (
-      <AdminRoute>
-        <EventRSVPsPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/members',
+    path: '/dashboard/users',
     element: (
       <AdminRoute>
         <UserManagementPage />
@@ -62,31 +57,63 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/media-uploader',
+    path: '/dashboard/settings',
     element: (
       <AdminRoute>
-        <AdminMediaUploaderPage />
+        <SettingsPage />
       </AdminRoute>
     ),
   },
   {
-    path: '/admin/media',
+    path: '/dashboard/calendar',
     element: (
       <AdminRoute>
-        <AdminMediaLibraryPage />
+        <AdminCalendarPage />
       </AdminRoute>
     ),
   },
   {
-    path: '/admin/news-ticker',
+    path: '/dashboard/events',
     element: (
       <AdminRoute>
-        <NewsTickerSettingsPage />
+        <EventsListPage />
       </AdminRoute>
     ),
   },
   {
-    path: '/admin/store',
+    path: '/dashboard/events/:eventId',
+    element: (
+      <AdminRoute>
+        <EventDetailsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/events/:eventId/tour-merch',
+    element: (
+      <AdminRoute>
+        <TourMerchPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/tour-merch/:eventId',
+    element: (
+      <AdminRoute>
+        <TourMerchPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/event-rsvps',
+    element: (
+      <AdminRoute>
+        <EventRSVPsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/store',
     element: (
       <AdminRoute>
         <AdminStorePage />
@@ -94,7 +121,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/orders',
+    path: '/dashboard/orders',
     element: (
       <AdminRoute>
         <OrdersPage />
@@ -102,7 +129,71 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/analytics',
+    path: '/dashboard/site-settings',
+    element: (
+      <AdminRoute>
+        <SiteSettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/landing-settings',
+    element: (
+      <AdminRoute>
+        <LandingPageSettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/news-ticker',
+    element: (
+      <AdminRoute>
+        <NewsTickerSettingsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/news-items',
+    element: (
+      <AdminRoute>
+        <NewsItemsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/hero-manager',
+    element: (
+      <AdminRoute>
+        <AdminHeroManager />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/site-images',
+    element: (
+      <AdminRoute>
+        <SiteImagesPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/media-library',
+    element: (
+      <AdminRoute>
+        <AdminMediaLibraryPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/media-uploader',
+    element: (
+      <AdminRoute>
+        <AdminMediaUploaderPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/analytics',
     element: (
       <AdminRoute>
         <AnalyticsPage />
@@ -110,18 +201,34 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/announcements',
+    path: '/dashboard/fan-tags',
     element: (
       <AdminRoute>
-        <AnnouncementsPage />
+        <FanTagManagerPage />
       </AdminRoute>
     ),
   },
   {
-    path: '/admin/settings',
+    path: '/dashboard/sections',
     element: (
       <AdminRoute>
-        <SettingsPage />
+        <SectionManagerPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/finances',
+    element: (
+      <AdminRoute>
+        <FinancialRecords />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/dashboard/user-reset',
+    element: (
+      <AdminRoute>
+        <UserSystemResetPage />
       </AdminRoute>
     ),
   },

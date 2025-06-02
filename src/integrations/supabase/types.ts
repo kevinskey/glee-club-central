@@ -1481,6 +1481,68 @@ export type Database = {
           },
         ]
       }
+      tour_merch_assignments: {
+        Row: {
+          assigned_quantity: number
+          created_at: string
+          created_by: string | null
+          event_id: string | null
+          id: string
+          item_id: string | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_quantity?: number
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          item_id?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_quantity?: number
+          created_at?: string
+          created_by?: string | null
+          event_id?: string | null
+          id?: string
+          item_id?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_merch_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_merch_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_merch_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_merch_assignments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "store_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tours: {
         Row: {
           created_at: string | null

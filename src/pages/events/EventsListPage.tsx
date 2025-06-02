@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, parseISO } from "date-fns";
@@ -7,7 +6,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, Plus, Search, Edit, Trash2, FileText, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar, Plus, Search, Edit, Trash2, FileText, Calendar as CalendarIcon, Package } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -179,6 +178,9 @@ export default function EventsListPage() {
             ) : (
               filteredEvents.map((event: any) => {
                 const eventDetails = event.event_details || {};
+                const isPerformanceEvent = event.event_types?.some((type: string) => 
+                  ['performance', 'concert', 'tour_concert'].includes(type)
+                );
                 
                 return (
                   <TableRow key={event.id}>
@@ -201,6 +203,16 @@ export default function EventsListPage() {
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
+                      {isPerformanceEvent && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigate(`/dashboard/tour-merch/${event.id}`)}
+                          title="Tour Merch Assignment"
+                        >
+                          <Package className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
