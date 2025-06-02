@@ -129,6 +129,17 @@ export const router = createBrowserRouter([
       </AuthProvider>
     ),
   },
+  // Dashboard redirect route - redirects /dashboard to role-based dashboard
+  {
+    path: "/dashboard",
+    element: (
+      <AuthProvider>
+        <RequireAuth>
+          <RoleDashboardPage />
+        </RequireAuth>
+      </AuthProvider>
+    ),
+  },
   // Role dashboard
   {
     path: "/role-dashboard",
