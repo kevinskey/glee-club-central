@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, MapPin, Users, Edit, Trash2, Search } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { EventEditor } from '@/components/admin/EventEditor';
+import { toast } from 'sonner';
 
 interface AdminCalendarViewProps {
   view: 'month' | 'week' | 'day';
@@ -16,8 +18,10 @@ interface AdminCalendarViewProps {
 }
 
 export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 'all' }: AdminCalendarViewProps) {
-  const { events, loading, error } = useCalendarEvents();
+  const { events, loading, error, updateEvent, deleteEvent } = useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [isEventEditorOpen, setIsEventEditorOpen] = useState(false);
 
   console.log('AdminCalendarView: Raw events:', events?.length || 0);
   console.log('AdminCalendarView: Search query:', searchQuery);
@@ -53,6 +57,46 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   }, [events, searchQuery, selectedEventType]);
 
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
+
+  // Handle edit event
+  const handleEditEvent = (event: CalendarEvent) => {
+    setEditingEvent(event);
+    setIsEventEditorOpen(true);
+  };
+
+  // Handle delete event
+  const handleDeleteEvent = async (eventId: string) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await deleteEvent(eventId);
+        toast.success('Event deleted successfully');
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.error('Failed to delete event');
+      }
+    }
+  };
+
+  // Handle save event
+  const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
+    if (!editingEvent) return;
+    
+    try {
+      await updateEvent(editingEvent.id, eventData);
+      toast.success('Event updated successfully');
+      setIsEventEditorOpen(false);
+      setEditingEvent(null);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      toast.error('Failed to update event');
+    }
+  };
+
+  // Handle close editor
+  const handleCloseEditor = () => {
+    setIsEventEditorOpen(false);
+    setEditingEvent(null);
+  };
 
   // Get events for selected date
   const getEventsForDate = (date: Date): CalendarEvent[] => {
@@ -123,10 +167,20 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
             </div>
           </div>
           <div className="flex gap-1 ml-2">
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="h-6 w-6 p-0"
+              onClick={() => handleEditEvent(event)}
+            >
               <Edit className="h-3 w-3" />
             </Button>
-            <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-destructive">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="h-6 w-6 p-0 text-destructive"
+              onClick={() => handleDeleteEvent(event.id)}
+            >
               <Trash2 className="h-3 w-3" />
             </Button>
           </div>
@@ -334,6 +388,14 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
           </CardContent>
         </Card>
       )}
+
+      {/* Event Editor Dialog */}
+      <EventEditor
+        event={editingEvent}
+        isOpen={isEventEditorOpen}
+        onClose={handleCloseEditor}
+        onSave={handleSaveEvent}
+      />
     </div>
   );
 }
