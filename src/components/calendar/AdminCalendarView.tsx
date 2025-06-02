@@ -19,31 +19,38 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   const { events, loading, error } = useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  console.log('AdminCalendarView: Events loaded:', events?.length || 0);
+  console.log('AdminCalendarView: Raw events:', events?.length || 0);
   console.log('AdminCalendarView: Search query:', searchQuery);
   console.log('AdminCalendarView: Selected event type:', selectedEventType);
 
   // Filter events based on search and event types
-  const filteredEvents = events.filter(event => {
-    let matchesSearch = true;
-    let matchesType = true;
+  const filteredEvents = React.useMemo(() => {
+    if (!events) return [];
+    
+    return events.filter(event => {
+      let matchesSearch = true;
+      let matchesType = true;
 
-    // Search filter
-    if (searchQuery.trim()) {
-      matchesSearch = 
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (event.short_description && event.short_description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (event.location_name && event.location_name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }
-    
-    // Type filter - only apply if not 'all'
-    if (selectedEventType && selectedEventType !== 'all') {
-      matchesType = event.event_type === selectedEventType;
-    }
-    
-    console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}`);
-    return matchesSearch && matchesType;
-  });
+      // Search filter - check if search query exists and is not empty
+      if (searchQuery && searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase().trim();
+        matchesSearch = 
+          event.title.toLowerCase().includes(query) ||
+          (event.short_description && event.short_description.toLowerCase().includes(query)) ||
+          (event.full_description && event.full_description.toLowerCase().includes(query)) ||
+          (event.location_name && event.location_name.toLowerCase().includes(query)) ||
+          (event.event_host_name && event.event_host_name.toLowerCase().includes(query));
+      }
+      
+      // Type filter - only apply if not 'all'
+      if (selectedEventType && selectedEventType !== 'all') {
+        matchesType = event.event_type === selectedEventType;
+      }
+      
+      console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}, query="${searchQuery}"`);
+      return matchesSearch && matchesType;
+    });
+  }, [events, searchQuery, selectedEventType]);
 
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
 
@@ -52,7 +59,6 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     const dayEvents = filteredEvents.filter(event => 
       isSameDay(new Date(event.start_time), date)
     );
-    console.log(`Events for ${format(date, 'yyyy-MM-dd')}:`, dayEvents.length);
     return dayEvents;
   };
 
@@ -148,15 +154,24 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     );
   }
 
+  const hasActiveSearch = searchQuery && searchQuery.trim() !== '';
+  const hasActiveFilter = selectedEventType && selectedEventType !== 'all';
+
   return (
     <div className="space-y-4">
-      {/* Search Results Section - Only show when there's a search query */}
-      {searchQuery.trim() && (
-        <Card className="border-blue-200 bg-blue-50/50">
+      {/* Search/Filter Results Section - Show when there's an active search or filter */}
+      {(hasActiveSearch || hasActiveFilter) && (
+        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-600" />
-              Search Results for "{searchQuery}"
+              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              {hasActiveSearch && hasActiveFilter ? (
+                <>Search & Filter Results</>
+              ) : hasActiveSearch ? (
+                <>Search Results for "{searchQuery}"</>
+              ) : (
+                <>Filter Results: {selectedEventType}</>
+              )}
               <Badge variant="secondary" className="ml-2">
                 {filteredEvents.length} found
               </Badge>
@@ -165,21 +180,21 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
           <CardContent>
             <div className="max-h-64 overflow-y-auto space-y-2">
               {filteredEvents.length > 0 ? (
-                filteredEvents.slice(0, 5).map(renderEventCard)
+                filteredEvents.slice(0, 8).map(renderEventCard)
               ) : (
-                <div className="text-center py-4">
+                <div className="text-center py-6">
                   <p className="text-muted-foreground">
-                    No events match your search criteria
+                    No events match your {hasActiveSearch && hasActiveFilter ? 'search and filter' : hasActiveSearch ? 'search' : 'filter'} criteria
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Try adjusting your search terms or filters
                   </p>
                 </div>
               )}
-              {filteredEvents.length > 5 && (
+              {filteredEvents.length > 8 && (
                 <div className="pt-2 border-t text-center">
                   <p className="text-sm text-muted-foreground">
-                    Showing first 5 results. {filteredEvents.length - 5} more events match your search.
+                    Showing first 8 results. {filteredEvents.length - 8} more events match your criteria.
                   </p>
                 </div>
               )}
@@ -188,12 +203,17 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
         </Card>
       )}
 
-      {/* Debug info */}
-      <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
-        Total events: {events.length} | Filtered: {filteredEvents.length} | 
-        Search: "{searchQuery}" | Type: {selectedEventType}
-      </div>
+      {/* Debug info - only show in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-2 rounded border">
+          <strong>Debug:</strong> Total events: {events?.length || 0} | Filtered: {filteredEvents.length} | 
+          Search: "{searchQuery}" | Type: {selectedEventType} | 
+          Has Active Search: {hasActiveSearch ? 'Yes' : 'No'} | 
+          Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'}
+        </div>
+      )}
 
+      {/* Calendar Views */}
       {view === 'month' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Calendar */}
@@ -252,7 +272,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                 <CardContent className="pt-0 px-2">
                   <div className="space-y-1">
                     {getEventsForDate(date).slice(0, 3).map(event => (
-                      <div key={event.id} className="text-xs p-1 bg-blue-100 rounded">
+                      <div key={event.id} className="text-xs p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
                         {event.title}
                       </div>
                     ))}
@@ -290,8 +310,8 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
         </Card>
       )}
 
-      {/* All Events List - Only show when no search query */}
-      {!searchQuery.trim() && (
+      {/* All Events List - Only show when no active search or filter */}
+      {!hasActiveSearch && !hasActiveFilter && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
@@ -306,13 +326,8 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               ) : (
                 <div className="text-center py-4">
                   <p className="text-muted-foreground">
-                    {events.length === 0 ? 'No events found in database' : 'No events match current filters'}
+                    No events found in database
                   </p>
-                  {selectedEventType !== 'all' && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Try clearing the event type filter
-                    </p>
-                  )}
                 </div>
               )}
             </div>
