@@ -51,7 +51,7 @@ export const HomePageContent = ({
     <div className="min-h-screen bg-background w-full overflow-x-hidden">
       {/* Hero Section - Full width, no padding or margin */}
       <div className="w-full overflow-x-hidden m-0 p-0">
-        <HeroBannerSection images={heroImages} />
+        <HeroBannerSection />
       </div>
       
       {/* Main Content Sections */}
