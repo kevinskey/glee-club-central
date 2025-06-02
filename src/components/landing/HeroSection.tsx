@@ -3,12 +3,20 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Music } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ModernHeroSection } from '@/components/landing/hero/ModernHeroSection';
+import { UniversalHero } from '@/components/hero/UniversalHero';
 
 export function HeroSection() {
   return (
     <section className="relative">
-      <ModernHeroSection />
+      <UniversalHero 
+        sectionId="homepage-main"
+        height="standard"
+        showNavigation={true}
+        showPlayPause={true}
+        showCounter={true}
+        showDots={true}
+        enableAutoplay={true}
+      />
       
       {/* Action Buttons Overlay */}
       <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">

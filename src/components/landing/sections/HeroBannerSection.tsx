@@ -1,11 +1,19 @@
 
 import React from "react";
-import { ModernHeroSection } from "@/components/landing/hero/ModernHeroSection";
+import { UniversalHero } from "@/components/hero/UniversalHero";
 
 export function HeroBannerSection() {
   return (
     <section className="w-full">
-      <ModernHeroSection />
+      <UniversalHero 
+        sectionId="homepage-main"
+        height="standard"
+        showNavigation={true}
+        showPlayPause={true}
+        showCounter={true}
+        showDots={true}
+        enableAutoplay={true}
+      />
     </section>
   );
 }

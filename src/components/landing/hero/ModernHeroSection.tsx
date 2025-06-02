@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -19,6 +18,7 @@ interface HeroSlide {
   text_alignment: 'left' | 'center' | 'right';
   visible: boolean;
   slide_order: number;
+  section_id?: string;
 }
 
 interface HeroSettings {
@@ -35,21 +35,37 @@ interface MediaFile {
   title: string;
 }
 
-export function ModernHeroSection() {
+interface ModernHeroSectionProps {
+  sectionId?: string;
+  showNavigation?: boolean;
+  showPlayPause?: boolean;
+  showCounter?: boolean;
+  showDots?: boolean;
+  enableAutoplay?: boolean;
+}
+
+export function ModernHeroSection({ 
+  sectionId = "homepage-main",
+  showNavigation = true,
+  showPlayPause = true,
+  showCounter = true,
+  showDots = true,
+  enableAutoplay = true
+}: ModernHeroSectionProps) {
   const isMobile = useIsMobile();
   const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [settings, setSettings] = useState<HeroSettings | null>(null);
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(enableAutoplay);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchHeroData();
-  }, []);
+  }, [sectionId]);
 
   useEffect(() => {
-    if (slides.length > 1 && isPlaying && settings?.scroll_interval) {
+    if (slides.length > 1 && isPlaying && settings?.scroll_interval && enableAutoplay) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => {
           const nextSlide = prev + 1;
@@ -62,7 +78,7 @@ export function ModernHeroSection() {
 
       return () => clearInterval(interval);
     }
-  }, [slides.length, isPlaying, settings?.scroll_interval, settings?.loop]);
+  }, [slides.length, isPlaying, settings?.scroll_interval, settings?.loop, enableAutoplay]);
 
   const fetchHeroData = async () => {
     try {
@@ -73,6 +89,7 @@ export function ModernHeroSection() {
         supabase
           .from('hero_slides')
           .select('*')
+          .eq('section_id', sectionId)
           .eq('visible', true)
           .order('slide_order', { ascending: true }),
         supabase
@@ -102,7 +119,8 @@ export function ModernHeroSection() {
         text_position: 'center',
         text_alignment: 'center',
         visible: true,
-        slide_order: 0
+        slide_order: 0,
+        section_id: sectionId
       }]);
     } finally {
       setIsLoading(false);
@@ -179,7 +197,7 @@ export function ModernHeroSection() {
 
   if (isLoading) {
     return (
-      <section className="relative w-full overflow-hidden m-0 p-0" style={{ height: isMobile ? '40vh' : '60vh' }}>
+      <section className="relative w-full h-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-white text-center">
@@ -193,7 +211,7 @@ export function ModernHeroSection() {
 
   if (slides.length === 0) {
     return (
-      <section className="relative w-full overflow-hidden m-0 p-0" style={{ height: isMobile ? '40vh' : '60vh' }}>
+      <section className="relative w-full h-full overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-white text-center max-w-2xl mx-auto px-4">
@@ -256,8 +274,7 @@ export function ModernHeroSection() {
 
   return (
     <section 
-      className="relative w-full overflow-hidden m-0 p-0" 
-      style={{ height: isMobile ? '40vh' : '60vh' }}
+      className="relative w-full h-full overflow-hidden" 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -317,11 +334,11 @@ export function ModernHeroSection() {
         </div>
       </div>
 
-      {/* Navigation Controls (only show if multiple slides) */}
+      {/* Navigation Controls (only show if multiple slides and features enabled) */}
       {slides.length > 1 && (
         <>
           {/* Previous/Next Buttons */}
-          {!isMobile && (
+          {showNavigation && !isMobile && (
             <>
               <Button
                 variant="secondary"
@@ -344,35 +361,41 @@ export function ModernHeroSection() {
           )}
 
           {/* Play/Pause Button */}
-          <Button
-            variant="secondary"
-            size="icon"
-            className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
-            onClick={togglePlayPause}
-          >
-            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-          </Button>
+          {showPlayPause && enableAutoplay && (
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-4 left-4 bg-white/20 hover:bg-white/30 text-white border-0 z-20"
+              onClick={togglePlayPause}
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
+          )}
 
           {/* Dots Indicator */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={cn(
-                  "w-3 h-3 rounded-full transition-all",
-                  index === currentSlide 
-                    ? "bg-white" 
-                    : "bg-white/50 hover:bg-white/70"
-                )}
-                onClick={() => goToSlide(index)}
-              />
-            ))}
-          </div>
+          {showDots && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  className={cn(
+                    "w-3 h-3 rounded-full transition-all",
+                    index === currentSlide 
+                      ? "bg-white" 
+                      : "bg-white/50 hover:bg-white/70"
+                  )}
+                  onClick={() => goToSlide(index)}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Slide Counter */}
-          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-20">
-            {currentSlide + 1} / {slides.length}
-          </div>
+          {showCounter && (
+            <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-20">
+              {currentSlide + 1} / {slides.length}
+            </div>
+          )}
         </>
       )}
     </section>
