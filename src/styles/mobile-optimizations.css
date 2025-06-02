@@ -1,4 +1,3 @@
-
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -221,22 +220,22 @@ p {
   
   /* Adjust main content to account for both ticker and header */
   main {
-    margin-top: 96px !important; /* Height of ticker + header */
+    margin-top: 106px !important; /* Height of ticker + header + 10px gap */
     padding-top: 0 !important;
   }
   
-  /* Ensure hero sections sit flush under the sticky header */
+  /* Ensure hero sections sit 10px below the sticky header */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: -96px !important; /* Pull hero up to sit under sticky elements */
-    padding-top: 96px !important; /* Add padding to maintain content positioning */
+    margin-top: -106px !important; /* Pull hero up to sit under sticky elements */
+    padding-top: 106px !important; /* Add padding to maintain content positioning with 10px gap */
   }
   
   /* Ensure page content starts below sticky elements for non-hero pages */
   .min-h-screen {
-    padding-top: 96px !important;
-    min-height: calc(100vh - 96px) !important;
+    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
+    min-height: calc(100vh - 106px) !important;
   }
 }
 
@@ -539,7 +538,7 @@ p {
   [data-route]:not([data-route="/"]),
   .page:not(.home-page),
   .route:not(.hero-route) {
-    padding-top: 96px !important;
+    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
   }
   
   /* Specific route adjustments for non-hero pages */
@@ -548,6 +547,6 @@ p {
   [data-route="/calendar"],
   [data-route="/store"],
   [data-route*="/news/"] {
-    padding-top: 96px !important;
+    padding-top: 106px !important; /* Height of ticker + header + 10px gap */
   }
 }
