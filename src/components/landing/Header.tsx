@@ -31,7 +31,7 @@ export function Header() {
   
   return (
     <>
-      {showNewsTicker && <NewsTicker onClose={() => setShowNewsTicker(false)} />}
+      {showNewsTicker && <NewsTicker />}
       
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full">
         <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between">
