@@ -12,6 +12,7 @@ interface Product {
   price: number;
   image_url?: string;
   featured?: boolean;
+  is_active?: boolean;
 }
 
 interface ProductCardProps {

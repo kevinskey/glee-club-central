@@ -24,7 +24,10 @@ export interface Product {
   id: string;
   name: string;
   price: number;
-  imageUrl?: string;
+  image_url?: string;
+  is_active: boolean;
+  featured?: boolean;
+  imageUrl?: string; // Keep for backwards compatibility
   isNew?: boolean;
   isSale?: boolean;
   originalPrice?: number;
