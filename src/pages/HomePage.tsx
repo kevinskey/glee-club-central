@@ -3,6 +3,7 @@ import React from "react";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
+import { EnhancedHeroSection } from "@/components/landing/hero/EnhancedHeroSection";
 
 const HomePage = () => {
   const {
@@ -20,6 +21,9 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      {/* Additional Hero Section at the top */}
+      <EnhancedHeroSection />
+      
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
