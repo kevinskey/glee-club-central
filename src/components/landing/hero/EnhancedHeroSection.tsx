@@ -23,7 +23,7 @@ export function EnhancedHeroSection() {
   }, [images]);
 
   return (
-    <section className="relative w-full max-w-[90vw] mx-auto overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
+    <section className="relative w-full max-w-[100vw] mx-auto overflow-hidden" style={{ height: isMobile ? '40vh' : '60vh' }}>
       {/* Single Hero Image */}
       {heroImage ? (
         <BackgroundSlideshow 
@@ -50,13 +50,13 @@ export function EnhancedHeroSection() {
             )}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size={isMobile ? "default" : "lg"} asChild className="bg-indigo-500 hover:bg-indigo-600 text-white mobile-button">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Button size={isMobile ? "default" : "lg"} asChild className="bg-indigo-500 hover:bg-indigo-600 text-white w-auto px-6">
                 <Link to="/events">
                   Upcoming Performances <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
               </Button>
-              <Button size={isMobile ? "default" : "lg"} variant="outline" asChild className="bg-background/20 backdrop-blur border-white/40 text-white hover:bg-background/30 mobile-button">
+              <Button size={isMobile ? "default" : "lg"} variant="outline" asChild className="bg-background/20 backdrop-blur border-white/40 text-white hover:bg-background/30 w-auto px-6">
                 <Link to="/press-kit">
                   Press Kit
                 </Link>
