@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -8,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, MapPin, Users, Edit, Trash2, Search } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { toast } from 'sonner';
 
@@ -310,10 +308,12 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                   onSelect={(date) => date && setSelectedDate(date)}
                   className="rounded-md border"
                   modifiers={{
-                    hasEvents: filteredEvents.map(event => new Date(event.start_time))
+                    hasEvents: filteredEvents.map(event => new Date(event.start_time)),
+                    today: new Date()
                   }}
                   modifiersClassNames={{
-                    hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full"
+                    hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full",
+                    today: "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 font-semibold [&:not(.rdp-day_selected)]:bg-orange-100 [&:not(.rdp-day_selected)]:dark:bg-orange-900/30"
                   }}
                 />
               </CardContent>
@@ -326,6 +326,11 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               <CardHeader>
                 <CardTitle className="text-lg">
                   {format(selectedDate, 'MMM d, yyyy')}
+                  {isToday(selectedDate) && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      Today
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -430,4 +435,3 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     </div>
   );
 }
-
