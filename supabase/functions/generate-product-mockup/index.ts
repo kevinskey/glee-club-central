@@ -37,29 +37,35 @@ serve(async (req) => {
 
     console.log('Generating mockup for:', { productType, designName, designDescription });
 
-    // Create detailed prompts that incorporate the user's design and text
+    // Enhanced product-specific prompts with better detail and context
     const productPrompts = {
-      't-shirt': `a high-quality product mockup of a ${designName} custom t-shirt on a clean white background, front view, realistic fabric texture, professional photography style. The design should be prominently displayed on the chest area of the t-shirt`,
-      'hoodie': `a professional product mockup of a ${designName} custom hoodie on a clean white background, front view, realistic cotton blend texture, studio lighting. The design should be prominently displayed on the chest area of the hoodie`,
-      'mug': `a clean product mockup of a ${designName} custom coffee mug on a white background, slight angle view, ceramic finish, professional product photography. The design should be prominently displayed on the side of the mug`,
-      'tote-bag': `a professional mockup of a ${designName} custom canvas tote bag on a white background, slight angle view, natural canvas texture, clean composition. The design should be prominently displayed on the front of the bag`,
-      'phone-case': `a sleek product mockup of a ${designName} custom phone case on a white background, slight angle view, modern design, professional photography. The design should be prominently displayed on the back of the phone case`,
-      'sticker': `a clean mockup of ${designName} custom stickers on a white background, arranged attractively, high-quality vinyl finish, professional presentation. Multiple stickers showing the design clearly`
+      't-shirt': `Professional product photography of a ${designName} design printed on a premium cotton t-shirt. The shirt should be displayed on a clean white studio background with soft, even lighting. Show the t-shirt from a slight front angle to showcase the design clearly. The design should be prominently placed on the chest area with realistic fabric printing texture. Use professional e-commerce photography style with subtle shadows and highlights that emphasize the quality of both the garment and the printed design.`,
+      
+      'hoodie': `High-quality product mockup of a ${designName} design on a premium pullover hoodie. Professional studio photography on a clean white background. The hoodie should be displayed flat or on a hanger, front-facing view. The design should be centered on the chest area with realistic screen-printing or embroidered appearance. Show the hoodie's texture, drawstrings, and kangaroo pocket. Use soft, diffused lighting with minimal shadows for an e-commerce ready appearance.`,
+      
+      'mug': `Clean, professional product photography of a white ceramic coffee mug featuring the ${designName} design. Place the mug at a 3/4 angle on a pure white background. The design should wrap around the visible side of the mug with realistic printing quality - crisp edges and vibrant colors that look professionally applied. Use studio lighting with soft shadows to create depth. The mug should appear premium quality with a smooth, glossy finish.`,
+      
+      'tote-bag': `Professional product mockup of a natural canvas tote bag featuring the ${designName} design. Show the bag from a slight front angle on a clean white background. The design should be prominently displayed on the front center of the bag with realistic screen-printing texture. Include the bag's handles and show its natural canvas texture. Use soft, even lighting typical of e-commerce product photography.`,
+      
+      'phone-case': `Clean product photography of a modern smartphone case featuring the ${designName} design on the back. Show the case at a slight angle on a white background to display the design clearly. The case should appear to be made of quality materials (plastic, silicone, or clear) with the design printed or embedded professionally. Use studio lighting with minimal shadows to highlight both the case design and the printed artwork.`,
+      
+      'sticker': `Professional product photography showing multiple ${designName} vinyl stickers arranged attractively on a white background. Display 3-5 stickers of the same design in a scattered but organized layout. The stickers should have a glossy, high-quality vinyl finish with vibrant colors and sharp edges. Show realistic printing quality with slight reflections from studio lighting to emphasize the premium vinyl material.`
     };
 
-    const basePrompt = productPrompts[productType as keyof typeof productPrompts] || productPrompts['t-shirt'];
+    let enhancedPrompt = productPrompts[productType as keyof typeof productPrompts] || productPrompts['t-shirt'];
     
-    // Enhanced prompt that includes the design name and description
-    let enhancedPrompt = basePrompt;
+    // Add design description context if provided
     if (designDescription) {
-      enhancedPrompt += `. Design description: ${designDescription}`;
+      enhancedPrompt += ` Design context: ${designDescription}.`;
     }
-    enhancedPrompt += '. Style: professional product photography, clean composition, soft shadows, e-commerce ready. High resolution, photorealistic. The custom design should be clearly visible and well-integrated into the product.';
+    
+    // Add specific styling and quality instructions
+    enhancedPrompt += ` Technical requirements: 1024x1024 resolution, photorealistic rendering, professional commercial photography quality, accurate color reproduction, sharp details, clean composition suitable for online retail. The final image should look like a professional product photo ready for an e-commerce website.`;
 
     console.log('Enhanced prompt:', enhancedPrompt);
     console.log('Sending request to OpenAI...');
 
-    // Generate the mockup using DALL-E with the enhanced prompt
+    // Generate the mockup using DALL-E with enhanced parameters
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -71,7 +77,8 @@ serve(async (req) => {
         prompt: enhancedPrompt,
         n: 1,
         size: '1024x1024',
-        quality: 'standard',
+        quality: 'hd', // Use HD quality for better results
+        style: 'natural', // Natural style for product photography
       }),
     });
 
