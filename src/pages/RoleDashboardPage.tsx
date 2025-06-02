@@ -50,7 +50,7 @@ const RoleDashboardPage = () => {
   }
 
   // Determine dashboard assignment with fallbacks
-  let redirectPath = '/member/dashboard'; // Default fallback
+  let redirectPath = '/dashboard/member'; // Default fallback
   let assignmentReason = 'default member assignment';
   
   // Check for admin access
@@ -58,10 +58,10 @@ const RoleDashboardPage = () => {
   const hasAdminAccess = isAdmin() || isKnownAdmin;
   
   if (hasAdminAccess) {
-    redirectPath = '/admin/dashboard';
+    redirectPath = '/admin';
     assignmentReason = `admin access (isAdmin: ${isAdmin()}, knownAdmin: ${isKnownAdmin})`;
   } else if (profile?.role === 'fan') {
-    redirectPath = '/member/dashboard';
+    redirectPath = '/dashboard/fan';
     assignmentReason = 'fan role detected';
   } else {
     // Default to member dashboard even if profile is still loading

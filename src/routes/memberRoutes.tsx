@@ -13,7 +13,7 @@ import ProfilePage from '@/pages/ProfilePage';
 
 export const memberRoutes: RouteObject[] = [
   {
-    path: 'dashboard',
+    path: '/dashboard',
     element: (
       <AuthRoute>
         <MemberDashboardPage />
@@ -21,7 +21,7 @@ export const memberRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'sheet-music',
+    path: '/sheet-music',
     element: (
       <AuthRoute>
         <SheetMusicPage />
@@ -29,7 +29,7 @@ export const memberRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'recording-studio',
+    path: '/recording-studio',
     element: (
       <AuthRoute>
         <RecordingStudioPage />
@@ -37,7 +37,7 @@ export const memberRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'my-orders',
+    path: '/my-orders',
     element: (
       <AuthRoute>
         <MyOrdersPage />
@@ -45,7 +45,7 @@ export const memberRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'checkout',
+    path: '/checkout',
     element: (
       <AuthRoute>
         <CheckoutPage />
@@ -53,7 +53,7 @@ export const memberRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'profile',
+    path: '/profile',
     element: (
       <AuthRoute>
         <ProfilePage />

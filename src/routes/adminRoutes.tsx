@@ -32,7 +32,7 @@ import EventDetailsPage from '@/pages/events/EventDetailsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
-    path: 'dashboard',
+    path: '/dashboard',
     element: (
       <AdminRoute>
         <AdminDashboard />
@@ -40,7 +40,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/home',
+    path: '/dashboard/home',
     element: (
       <AdminRoute>
         <AdminDashboardPage />
@@ -48,7 +48,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/users',
+    path: '/dashboard/users',
     element: (
       <AdminRoute>
         <UserManagementPage />
@@ -56,7 +56,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/settings',
+    path: '/dashboard/settings',
     element: (
       <AdminRoute>
         <SettingsPage />
@@ -64,7 +64,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/calendar',
+    path: '/dashboard/calendar',
     element: (
       <AdminRoute>
         <AdminCalendarPage />
@@ -72,7 +72,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/events',
+    path: '/dashboard/events',
     element: (
       <AdminRoute>
         <EventsListPage />
@@ -80,7 +80,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/events/:eventId',
+    path: '/dashboard/events/:eventId',
     element: (
       <AdminRoute>
         <EventDetailsPage />
@@ -88,7 +88,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/events/:eventId/tour-merch',
+    path: '/dashboard/events/:eventId/tour-merch',
     element: (
       <AdminRoute>
         <TourMerchPage />
@@ -96,7 +96,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/tour-merch/:eventId',
+    path: '/dashboard/tour-merch/:eventId',
     element: (
       <AdminRoute>
         <TourMerchPage />
@@ -104,7 +104,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/event-rsvps',
+    path: '/dashboard/event-rsvps',
     element: (
       <AdminRoute>
         <EventRSVPsPage />
@@ -112,7 +112,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/store',
+    path: '/dashboard/store',
     element: (
       <AdminRoute>
         <AdminStorePage />
@@ -120,7 +120,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/orders',
+    path: '/dashboard/orders',
     element: (
       <AdminRoute>
         <OrdersPage />
@@ -128,7 +128,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/site-settings',
+    path: '/dashboard/site-settings',
     element: (
       <AdminRoute>
         <SiteSettingsPage />
@@ -136,7 +136,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/landing-settings',
+    path: '/dashboard/landing-settings',
     element: (
       <AdminRoute>
         <LandingPageSettingsPage />
@@ -144,7 +144,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/news-ticker',
+    path: '/dashboard/news-ticker',
     element: (
       <AdminRoute>
         <NewsTickerSettingsPage />
@@ -152,7 +152,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/news-items',
+    path: '/dashboard/news-items',
     element: (
       <AdminRoute>
         <NewsItemsPage />
@@ -160,7 +160,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/hero-manager',
+    path: '/dashboard/hero-manager',
     element: (
       <AdminRoute>
         <AdminHeroManager />
@@ -168,7 +168,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/site-images',
+    path: '/dashboard/site-images',
     element: (
       <AdminRoute>
         <SiteImagesPage />
@@ -176,7 +176,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/media-library',
+    path: '/dashboard/media-library',
     element: (
       <AdminRoute>
         <AdminMediaLibraryPage />
@@ -184,7 +184,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/analytics',
+    path: '/dashboard/analytics',
     element: (
       <AdminRoute>
         <AnalyticsPage />
@@ -192,7 +192,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/fan-tags',
+    path: '/dashboard/fan-tags',
     element: (
       <AdminRoute>
         <FanTagManagerPage />
@@ -200,7 +200,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/sections',
+    path: '/dashboard/sections',
     element: (
       <AdminRoute>
         <SectionManagerPage />
@@ -208,7 +208,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/finances',
+    path: '/dashboard/finances',
     element: (
       <AdminRoute>
         <FinancialRecords />
@@ -216,7 +216,7 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'dashboard/user-reset',
+    path: '/dashboard/user-reset',
     element: (
       <AdminRoute>
         <UserSystemResetPage />
