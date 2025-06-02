@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -5,7 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Users, Edit, Trash2 } from 'lucide-react';
+import { Clock, MapPin, Users, Edit, Trash2, Search } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 
 interface AdminCalendarViewProps {
@@ -149,6 +150,44 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
   return (
     <div className="space-y-4">
+      {/* Search Results Section - Only show when there's a search query */}
+      {searchQuery.trim() && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Search className="h-5 w-5 text-blue-600" />
+              Search Results for "{searchQuery}"
+              <Badge variant="secondary" className="ml-2">
+                {filteredEvents.length} found
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {filteredEvents.length > 0 ? (
+                filteredEvents.slice(0, 5).map(renderEventCard)
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">
+                    No events match your search criteria
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Try adjusting your search terms or filters
+                  </p>
+                </div>
+              )}
+              {filteredEvents.length > 5 && (
+                <div className="pt-2 border-t text-center">
+                  <p className="text-sm text-muted-foreground">
+                    Showing first 5 results. {filteredEvents.length - 5} more events match your search.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Debug info */}
       <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
         Total events: {events.length} | Filtered: {filteredEvents.length} | 
@@ -172,26 +211,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                   hasEvents: getDatesWithEvents()
                 }}
                 modifiersClassNames={{
-                  hasEvents: "relative"
-                }}
-                components={{
-                  Day: ({ date, ...props }) => {
-                    const hasEvents = getDatesWithEvents().some(eventDate => 
-                      isSameDay(eventDate, date)
-                    );
-                    return (
-                      <div className="relative w-full h-full">
-                        <div {...props}>
-                          {format(date, 'd')}
-                          {hasEvents && (
-                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  }
+                  hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full"
                 }}
               />
             </CardContent>
@@ -270,33 +290,35 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
         </Card>
       )}
 
-      {/* All Events List */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            All Events ({filteredEvents.length})
-            <Badge variant="outline">{view} view</Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="max-h-64 overflow-y-auto space-y-2">
-            {filteredEvents.length > 0 ? (
-              filteredEvents.map(renderEventCard)
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-muted-foreground">
-                  {events.length === 0 ? 'No events found in database' : 'No events match current filters'}
-                </p>
-                {(searchQuery || selectedEventType !== 'all') && (
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Try clearing the search or adjusting filters
+      {/* All Events List - Only show when no search query */}
+      {!searchQuery.trim() && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              All Events ({filteredEvents.length})
+              <Badge variant="outline">{view} view</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-64 overflow-y-auto space-y-2">
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map(renderEventCard)
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-muted-foreground">
+                    {events.length === 0 ? 'No events found in database' : 'No events match current filters'}
                   </p>
-                )}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                  {selectedEventType !== 'all' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Try clearing the event type filter
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
