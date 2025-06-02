@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -60,7 +59,23 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
   // Handle edit event
   const handleEditEvent = (event: CalendarEvent) => {
-    setEditingEvent(event);
+    console.log('Opening edit dialog for event:', event);
+    
+    // Ensure the event has all required fields
+    const eventToEdit: CalendarEvent = {
+      ...event,
+      // Ensure boolean fields have default values
+      is_private: event.is_private ?? false,
+      is_public: event.is_public ?? true,
+      allow_rsvp: event.allow_rsvp ?? true,
+      allow_reminders: event.allow_reminders ?? true,
+      allow_ics_download: event.allow_ics_download ?? true,
+      allow_google_map_link: event.allow_google_map_link ?? true,
+      // Ensure array fields exist
+      event_types: event.event_types || (event.event_type ? [event.event_type] : [])
+    };
+    
+    setEditingEvent(eventToEdit);
     setIsEventEditorOpen(true);
   };
 
@@ -82,6 +97,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     if (!editingEvent) return;
     
     try {
+      console.log('Saving event data:', eventData);
       await updateEvent(editingEvent.id, eventData);
       toast.success('Event updated successfully');
       setIsEventEditorOpen(false);
@@ -94,6 +110,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
   // Handle close editor
   const handleCloseEditor = () => {
+    console.log('Closing event editor');
     setIsEventEditorOpen(false);
     setEditingEvent(null);
   };
@@ -171,7 +188,10 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               size="sm" 
               variant="ghost" 
               className="h-6 w-6 p-0"
-              onClick={() => handleEditEvent(event)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditEvent(event);
+              }}
             >
               <Edit className="h-3 w-3" />
             </Button>
@@ -179,7 +199,10 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               size="sm" 
               variant="ghost" 
               className="h-6 w-6 p-0 text-destructive"
-              onClick={() => handleDeleteEvent(event.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteEvent(event.id);
+              }}
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -263,7 +286,9 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
           <strong>Debug:</strong> Total events: {events?.length || 0} | Filtered: {filteredEvents.length} | 
           Search: "{searchQuery}" | Type: {selectedEventType} | 
           Has Active Search: {hasActiveSearch ? 'Yes' : 'No'} | 
-          Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'}
+          Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'} |
+          Editor Open: {isEventEditorOpen ? 'Yes' : 'No'} |
+          Editing Event: {editingEvent?.title || 'None'}
         </div>
       )}
 
@@ -282,7 +307,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                 onSelect={(date) => date && setSelectedDate(date)}
                 className="rounded-md border"
                 modifiers={{
-                  hasEvents: getDatesWithEvents()
+                  hasEvents: filteredEvents.map(event => new Date(event.start_time))
                 }}
                 modifiersClassNames={{
                   hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full"
@@ -300,8 +325,12 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
             </CardHeader>
             <CardContent>
               <div className="max-h-96 overflow-y-auto">
-                {getEventsForDate(selectedDate).length > 0 ? (
-                  getEventsForDate(selectedDate).map(renderEventCard)
+                {filteredEvents.filter(event => 
+                  isSameDay(new Date(event.start_time), selectedDate)
+                ).length > 0 ? (
+                  filteredEvents.filter(event => 
+                    isSameDay(new Date(event.start_time), selectedDate)
+                  ).map(renderEventCard)
                 ) : (
                   <p className="text-muted-foreground text-center py-4">
                     No events scheduled for this date
