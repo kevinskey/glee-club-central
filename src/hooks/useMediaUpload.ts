@@ -55,6 +55,8 @@ export function useMediaUpload(
       
       // Process each file
       for (const [index, file] of files.entries()) {
+        console.log(`Processing file ${index + 1}/${totalFiles}: ${file.name} (${file.size} bytes)`);
+        
         // Create a unique file path
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
@@ -79,7 +81,7 @@ export function useMediaUpload(
           
         if (!publicURLData) throw new Error("Failed to get public URL");
         
-        // Store media metadata in database
+        // Store media metadata in database with file size
         const { error: dbError } = await supabase
           .from('media_library')
           .insert({
@@ -91,7 +93,7 @@ export function useMediaUpload(
             uploaded_by: user.id,
             folder: category,
             tags,
-            size: file.size
+            size: file.size // Explicitly store the file size
           });
           
         if (dbError) throw dbError;
@@ -99,6 +101,8 @@ export function useMediaUpload(
         // Update progress
         completedFiles++;
         setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+        
+        console.log(`Successfully uploaded ${file.name} with size ${file.size} bytes`);
       }
       
       toast.success(`Successfully uploaded ${files.length} file(s)`);

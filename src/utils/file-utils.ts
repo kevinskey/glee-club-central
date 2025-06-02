@@ -1,65 +1,57 @@
 
-import { FileMusic, FileText, FileImage, FileVideo, File } from "lucide-react";
-
 /**
- * Format a file size in bytes to a human-readable string
+ * Format file size in bytes to human readable format
  */
-export function formatFileSize(bytes: number): string {
+export function formatFileSize(bytes: number | null | undefined): string {
+  // Handle null, undefined, or 0 bytes
+  if (bytes === null || bytes === undefined || bytes === 0) {
+    return "Unknown size";
+  }
+  
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  
   if (bytes === 0) return '0 Bytes';
   
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = bytes / Math.pow(1024, i);
   
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return `${size.toFixed(i === 0 ? 0 : 1)} ${sizes[i]}`;
 }
 
 /**
- * Get file extension from a file name or path
+ * Get file extension from filename or file path
  */
 export function getFileExtension(filename: string): string {
-  return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2).toLowerCase();
+  return filename.split('.').pop()?.toLowerCase() || '';
 }
 
 /**
- * Generate a unique filename based on original name
+ * Check if file is a valid image type
  */
-export function generateUniqueFileName(originalName: string): string {
-  const ext = getFileExtension(originalName);
-  const baseName = originalName.substring(0, originalName.lastIndexOf('.'));
-  const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 10);
-  
-  return `${baseName}-${timestamp}-${randomString}.${ext}`;
+export function isImageFile(filename: string): boolean {
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+  return imageExtensions.includes(getFileExtension(filename));
 }
 
 /**
- * Convert a File object to a data URL
+ * Check if file is a valid video type
  */
-export function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
+export function isVideoFile(filename: string): boolean {
+  const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi'];
+  return videoExtensions.includes(getFileExtension(filename));
 }
 
 /**
- * Get appropriate icon component for file type
+ * Check if file is a valid audio type
  */
-export function getFileTypeIcon(fileType: string) {
-  if (fileType.startsWith('image/')) {
-    return FileImage;
-  } else if (fileType.startsWith('video/')) {
-    return FileVideo;
-  } else if (fileType.startsWith('audio/')) {
-    return FileMusic;
-  } else if (fileType === 'application/pdf' || fileType.includes('pdf')) {
-    return FileText; // Using FileText for PDF files instead of FilePdf
-  } else if (fileType.startsWith('text/')) {
-    return FileText;
-  } else {
-    return File;
-  }
+export function isAudioFile(filename: string): boolean {
+  const audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a'];
+  return audioExtensions.includes(getFileExtension(filename));
+}
+
+/**
+ * Check if file is a PDF
+ */
+export function isPDFFile(filename: string): boolean {
+  return getFileExtension(filename) === 'pdf';
 }

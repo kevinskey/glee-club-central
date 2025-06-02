@@ -17,6 +17,8 @@ export const uploadMediaFile = async (
   }
 ) => {
   try {
+    console.log(`Uploading file: ${file.name}, size: ${file.size} bytes`);
+    
     // Upload file to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('media-library')
@@ -34,7 +36,7 @@ export const uploadMediaFile = async (
 
     if (!publicURLData) throw new Error("Failed to get public URL");
 
-    // Insert record in database
+    // Insert record in database with file size
     const { data, error: dbError } = await supabase
       .from('media_library')
       .insert({
@@ -46,7 +48,7 @@ export const uploadMediaFile = async (
         uploaded_by: metadata.uploadedBy,
         folder: metadata.category || 'general',
         tags: metadata.tags || [],
-        size: file.size
+        size: file.size // Ensure file size is stored
       })
       .select()
       .single();
@@ -56,6 +58,7 @@ export const uploadMediaFile = async (
       throw dbError;
     }
 
+    console.log(`Successfully uploaded ${file.name} with size ${file.size} bytes`);
     return data;
   } catch (error) {
     console.error("Upload media file error:", error);
