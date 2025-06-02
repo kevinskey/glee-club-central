@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
@@ -294,51 +295,51 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
       {/* Calendar Views */}
       {view === 'month' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Calendar */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Calendar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(date) => date && setSelectedDate(date)}
-                className="rounded-md border"
-                modifiers={{
-                  hasEvents: filteredEvents.map(event => new Date(event.start_time))
-                }}
-                modifiersClassNames={{
-                  hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full"
-                }}
-              />
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar - takes up 2 columns */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Calendar</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  className="rounded-md border"
+                  modifiers={{
+                    hasEvents: filteredEvents.map(event => new Date(event.start_time))
+                  }}
+                  modifiersClassNames={{
+                    hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full"
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Events for selected date */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                Events for {format(selectedDate, 'MMMM d, yyyy')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-96 overflow-y-auto">
-                {filteredEvents.filter(event => 
-                  isSameDay(new Date(event.start_time), selectedDate)
-                ).length > 0 ? (
-                  filteredEvents.filter(event => 
-                    isSameDay(new Date(event.start_time), selectedDate)
-                  ).map(renderEventCard)
-                ) : (
-                  <p className="text-muted-foreground text-center py-4">
-                    No events scheduled for this date
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Events for selected date - takes up 1 column */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {format(selectedDate, 'MMM d, yyyy')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-96 overflow-y-auto">
+                  {getEventsForDate(selectedDate).length > 0 ? (
+                    getEventsForDate(selectedDate).map(renderEventCard)
+                  ) : (
+                    <p className="text-muted-foreground text-center py-4">
+                      No events scheduled for this date
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
 
@@ -390,7 +391,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               )}
             </div>
           </CardContent>
-        </Card>
+        </div>
       )}
 
       {/* All Events List - Only show when no active search or filter */}
