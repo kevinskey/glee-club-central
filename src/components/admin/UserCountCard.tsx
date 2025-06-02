@@ -1,23 +1,16 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
 import { useUserManagement } from "@/hooks/user/useUserManagement";
 import { Spinner } from "@/components/ui/spinner";
 
 export function UserCountCard() {
-  const { getUserCount, userCount } = useUserManagement();
-  const [isLoading, setIsLoading] = useState(true);
+  const { users, isLoading, refreshUsers } = useUserManagement();
 
   useEffect(() => {
-    const fetchUserCount = async () => {
-      setIsLoading(true);
-      await getUserCount();
-      setIsLoading(false);
-    };
-    
-    fetchUserCount();
-  }, [getUserCount]);
+    refreshUsers();
+  }, [refreshUsers]);
 
   return (
     <Card>
@@ -32,7 +25,7 @@ export function UserCountCard() {
           </div>
         ) : (
           <>
-            <div className="text-2xl font-bold">{userCount}</div>
+            <div className="text-2xl font-bold">{users.length}</div>
             <p className="text-xs text-muted-foreground">
               Total registered members
             </p>
