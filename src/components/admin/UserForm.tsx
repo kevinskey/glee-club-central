@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -21,9 +20,11 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { userFormSchema, UserFormValues } from '@/components/members/form/userFormSchema';
 import { User } from '@/hooks/user/types';
 import { z } from 'zod';
+import { Upload } from 'lucide-react';
 
 interface UserFormProps {
   user?: User;
@@ -33,9 +34,13 @@ interface UserFormProps {
 }
 
 export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
-  // Create a schema that makes password optional for editing
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatar_url || '');
+
+  // Create a schema that makes password and email optional for editing
   const editUserSchema = userFormSchema.extend({
-    password: user ? z.string().optional() : z.string().min(6, "Password must be at least 6 characters")
+    password: user ? z.string().optional() : z.string().min(6, "Password must be at least 6 characters"),
+    email: user ? z.string().email("Invalid email address").optional() : z.string().email("Invalid email address")
   });
 
   const {
@@ -59,6 +64,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
       dues_paid: user.dues_paid || false,
       is_admin: user.is_super_admin || user.role === 'admin',
       join_date: user.join_date || new Date().toISOString().split('T')[0],
+      avatar_url: user.avatar_url || '',
       password: '' // Password not required for editing
     } : {
       first_name: '',
@@ -73,9 +79,28 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
       dues_paid: false,
       is_admin: false,
       join_date: new Date().toISOString().split('T')[0],
+      avatar_url: '',
       password: ''
     }
   });
+
+  const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setAvatarPreview(result);
+        setValue('avatar_url', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
 
   const handleFormSubmit = (data: UserFormValues) => {
     // If editing and password is empty, remove it from the data
@@ -87,6 +112,9 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
     }
   };
 
+  const firstName = watch('first_name') || '';
+  const lastName = watch('last_name') || '';
+
   return (
     <Dialog open={true} onOpenChange={onCancel}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -95,6 +123,37 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
         </DialogHeader>
         
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          {/* Avatar Section */}
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={avatarPreview} alt="User avatar" />
+              <AvatarFallback className="text-lg">
+                {getInitials(firstName, lastName) || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-2">
+              <Label htmlFor="avatar">Profile Picture</Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="avatar"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById('avatar')?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Photo
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name *</Label>
@@ -120,7 +179,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email {!user && '*'}</Label>
             <Input
               id="email"
               type="email"

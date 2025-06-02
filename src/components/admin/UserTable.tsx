@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Edit, Trash2, Shield, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { User } from '@/hooks/user/types';
 
@@ -42,6 +43,10 @@ export function UserTable({ users, isLoading, onEdit, onDelete }: UserTableProps
       return <ArrowUpDown className="h-4 w-4" />;
     }
     return sortDirection === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
   };
 
   const sortedUsers = [...users].sort((a, b) => {
@@ -134,7 +139,7 @@ export function UserTable({ users, isLoading, onEdit, onDelete }: UserTableProps
                 className="h-auto p-0 font-medium"
                 onClick={() => handleSort('name')}
               >
-                Name
+                User
                 {getSortIcon('name')}
               </Button>
             </TableHead>
@@ -200,7 +205,15 @@ export function UserTable({ users, isLoading, onEdit, onDelete }: UserTableProps
           {sortedUsers.map((user) => (
             <TableRow key={user.id}>
               <TableCell className="font-medium">
-                {user.first_name} {user.last_name}
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.avatar_url || undefined} alt={`${user.first_name} ${user.last_name}`} />
+                    <AvatarFallback className="text-xs">
+                      {getInitials(user.first_name || '', user.last_name || '')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span>{user.first_name} {user.last_name}</span>
+                </div>
               </TableCell>
               <TableCell>{user.email || 'No email'}</TableCell>
               <TableCell>

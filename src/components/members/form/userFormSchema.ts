@@ -5,7 +5,7 @@ export const userFormSchema = z.object({
   title: z.string().optional(),
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
   phone: z.string().optional(),
   voice_part: z.string().default(""),
