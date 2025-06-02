@@ -59,6 +59,7 @@ export const UpcomingPerformances: React.FC = () => {
                  event !== undefined && 
                  typeof event === 'object' &&
                  'start_time' in event &&
+                 typeof event.start_time === 'string' &&
                  isFuture(new Date(event.start_time));
         })
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()) || [];

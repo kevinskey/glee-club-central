@@ -56,7 +56,10 @@ export const EventPerformers: React.FC<EventPerformersProps> = ({
           return profile !== null && 
                  profile !== undefined &&
                  typeof profile === 'object' &&
-                 'id' in profile;
+                 'id' in profile &&
+                 'first_name' in profile &&
+                 'last_name' in profile &&
+                 'voice_part' in profile;
         }) || [];
 
       setPerformers(performersData);
