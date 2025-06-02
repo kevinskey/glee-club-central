@@ -49,20 +49,21 @@ export const HomePageContent = ({
   audioTracks
 }: HomePageContentProps) => {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
-      {/* Main Content - Now using mobile-optimized layout */}
-      <main className="w-full">
-        <MobileOptimizedContainer padding="none" className="w-full">
-          <HeroBannerSection images={heroImages} />
-        </MobileOptimizedContainer>
-        
-        <MobileOptimizedContainer padding="md" className="space-y-8 sm:space-y-12">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
+      {/* Hero Section - Full width but contained */}
+      <div className="w-full overflow-x-hidden">
+        <HeroBannerSection images={heroImages} />
+      </div>
+      
+      {/* Main Content Sections - Mobile optimized with consistent padding */}
+      <div className="w-full overflow-x-hidden">
+        <MobileOptimizedContainer padding="md" maxWidth="full" className="space-y-8 sm:space-y-12">
           <EventsSection events={upcomingEvents} />
           <AudioSection tracks={audioTracks} />
           <StoreSection products={storeProducts} />
           <FanSignupForm />
         </MobileOptimizedContainer>
-      </main>
+      </div>
       
       <Footer />
     </div>
