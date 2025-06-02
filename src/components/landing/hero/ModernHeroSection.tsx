@@ -83,6 +83,7 @@ export function ModernHeroSection({
   const fetchHeroData = async () => {
     try {
       setIsLoading(true);
+      console.log('🎭 Hero: Fetching hero data for section:', sectionId);
       
       // Fetch slides, settings, and media files in parallel
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([
@@ -101,15 +102,34 @@ export function ModernHeroSection({
           .select('id, file_url, file_type, title')
       ]);
 
-      if (slidesResult.error) throw slidesResult.error;
-      if (settingsResult.error) throw settingsResult.error;
-      if (mediaResult.error) throw mediaResult.error;
+      console.log('🎭 Hero: Slides result:', slidesResult);
+      console.log('🎭 Hero: Settings result:', settingsResult);
+      console.log('🎭 Hero: Media result:', mediaResult);
 
-      setSlides(slidesResult.data || []);
+      if (slidesResult.error) {
+        console.error('🎭 Hero: Error fetching slides:', slidesResult.error);
+        throw slidesResult.error;
+      }
+      if (settingsResult.error) {
+        console.error('🎭 Hero: Error fetching settings:', settingsResult.error);
+        throw settingsResult.error;
+      }
+      if (mediaResult.error) {
+        console.error('🎭 Hero: Error fetching media:', mediaResult.error);
+        throw mediaResult.error;
+      }
+
+      const fetchedSlides = slidesResult.data || [];
+      const fetchedMedia = mediaResult.data || [];
+      
+      console.log('🎭 Hero: Fetched slides:', fetchedSlides);
+      console.log('🎭 Hero: Fetched media files:', fetchedMedia);
+
+      setSlides(fetchedSlides);
       setSettings(settingsResult.data);
-      setMediaFiles(mediaResult.data || []);
+      setMediaFiles(fetchedMedia);
     } catch (error) {
-      console.error('Error fetching hero data:', error);
+      console.error('🎭 Hero: Error fetching hero data:', error);
       // Fallback to default content
       setSlides([{
         id: 'fallback',
@@ -226,6 +246,11 @@ export function ModernHeroSection({
   const currentSlideData = slides[currentSlide];
   const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
 
+  console.log('🎭 Hero: Current slide data:', currentSlideData);
+  console.log('🎭 Hero: Current media:', currentMedia);
+  console.log('🎭 Hero: Media ID:', currentSlideData.media_id);
+  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, title: m.title, url: m.file_url })));
+
   const getPositionClasses = () => {
     const position = currentSlideData.text_position;
     const alignment = currentSlideData.text_alignment;
@@ -290,6 +315,9 @@ export function ModernHeroSection({
               muted
               loop
               playsInline
+              onError={(e) => console.error('🎭 Hero: Video load error:', e)}
+              onLoadStart={() => console.log('🎭 Hero: Video loading started for:', currentMedia.file_url)}
+              onLoadedData={() => console.log('🎭 Hero: Video loaded successfully for:', currentMedia.file_url)}
             />
           ) : (
             <img
@@ -297,10 +325,14 @@ export function ModernHeroSection({
               src={currentMedia.file_url}
               alt={currentMedia.title}
               className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
+              onError={(e) => console.error('🎭 Hero: Image load error:', e, 'URL:', currentMedia.file_url)}
+              onLoad={() => console.log('🎭 Hero: Image loaded successfully for:', currentMedia.file_url)}
             />
           )
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900">
+            {console.log('🎭 Hero: No media found, showing gradient background')}
+          </div>
         )}
         
         {/* Dark overlay for better text readability */}
