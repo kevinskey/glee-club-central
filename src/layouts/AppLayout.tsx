@@ -5,19 +5,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { FloatingThemeToggle } from '@/components/ui/floating-theme-toggle';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
   sidebarType?: 'none' | 'admin' | 'member';
   showHeader?: boolean;
   showFooter?: boolean;
+  showFloatingThemeToggle?: boolean;
 }
 
 export default function AppLayout({ 
   children, 
   sidebarType = 'none', 
   showHeader = true, 
-  showFooter = true 
+  showFooter = true,
+  showFloatingThemeToggle = false
 }: AppLayoutProps) {
   const { isAdmin } = useAuth();
 
@@ -48,6 +51,11 @@ export default function AppLayout({
       </div>
       
       {showFooter && <Footer />}
+      
+      {/* Show floating theme toggle if requested and no header/sidebar theme toggle is present */}
+      {showFloatingThemeToggle && !showHeader && !hasSidebar && (
+        <FloatingThemeToggle position="top-right" />
+      )}
     </div>
   );
 }

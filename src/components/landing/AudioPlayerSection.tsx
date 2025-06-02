@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Play, Pause, Volume2 } from "lucide-react";
 
 interface AudioTrack {
@@ -59,9 +60,14 @@ export function AudioPlayerSection({
   if (tracks.length === 0) {
     return (
       <section className={`py-12 bg-muted/50 ${className}`}>
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-playfair font-bold mb-4">{title}</h2>
-          <p className="text-muted-foreground">No recordings available at this time.</p>
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-center flex-1">
+              <h2 className="text-3xl font-playfair font-bold mb-4">{title}</h2>
+              <p className="text-muted-foreground">No recordings available at this time.</p>
+            </div>
+            <ThemeToggle />
+          </div>
         </div>
       </section>
     );
@@ -70,9 +76,12 @@ export function AudioPlayerSection({
   return (
     <section className={`py-12 bg-muted/50 ${className}`}>
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-playfair font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground">{subtitle}</p>
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1">
+            <h2 className="text-3xl font-playfair font-bold mb-2">{title}</h2>
+            <p className="text-muted-foreground">{subtitle}</p>
+          </div>
+          <ThemeToggle />
         </div>
 
         <div className="grid gap-4 md:gap-6 max-w-4xl mx-auto">
