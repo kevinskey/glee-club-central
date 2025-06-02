@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
 
 export interface NewsItem {
   id: string;
@@ -187,31 +186,12 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     fetchGoogleNews();
   }, []);
   
-  const handleClose = () => {
-    console.log('NewsTicker: Closing ticker');
-    setIsVisible(false);
-    if (onClose) onClose();
-  };
-  
   const handleArticleClick = (link: string, title: string) => {
     console.log('NewsTicker: Clicked article:', title, 'Link:', link);
     if (link !== "#") {
       window.open(link, '_blank', 'noopener,noreferrer');
     }
   };
-  
-  // Auto-hide after specified duration if autoHide is true
-  useEffect(() => {
-    if (isVisible && autoHide) {
-      console.log('NewsTicker: Setting auto-hide timer for', hideAfter, 'ms');
-      const timer = setTimeout(() => {
-        console.log('NewsTicker: Auto-hiding ticker');
-        setIsVisible(false);
-      }, hideAfter);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, autoHide, hideAfter]);
   
   // If not visible, don't render
   if (!isVisible) {
@@ -223,10 +203,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (loading) {
     console.log('NewsTicker: Showing loading state');
     return (
-      <div className="bg-glee-columbia text-white py-1 relative">
-        <div className="container flex items-center justify-center text-sm">
+      <div className="bg-glee-columbia text-white py-0.5 relative">
+        <div className="container flex items-center justify-center text-xs">
           <div className="flex-1 overflow-hidden flex items-center">
-            <div className="w-full animate-pulse h-4 bg-white/20 rounded"></div>
+            <div className="w-full animate-pulse h-3 bg-white/20 rounded"></div>
           </div>
         </div>
       </div>
@@ -237,16 +217,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (error && newsArticles.length === 0) {
     console.log('NewsTicker: Showing error state');
     return (
-      <div className="bg-red-600 text-white py-1 relative">
-        <div className="container flex items-center justify-center text-sm">
+      <div className="bg-red-600 text-white py-0.5 relative">
+        <div className="container flex items-center justify-center text-xs">
           <span>📰 Unable to load news at this time</span>
-          <button 
-            onClick={handleClose} 
-            className="p-1 rounded-full hover:bg-white/10 transition-colors ml-4"
-            aria-label="Close news ticker"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
       </div>
     );
@@ -255,8 +228,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   console.log('NewsTicker: Rendering with', newsArticles.length, 'articles');
   
   return (
-    <div className="bg-glee-columbia text-white py-1 relative">
-      <div className="container flex items-center justify-center text-sm">
+    <div className="bg-glee-columbia text-white py-0.5 relative">
+      <div className="container flex items-center justify-center text-xs">
         <div className="flex-1 overflow-hidden flex items-center">
           <div className="flex whitespace-nowrap animate-marquee-slow">
             {newsArticles.map((article, index) => {
@@ -307,13 +280,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             })}
           </div>
         </div>
-        <button 
-          onClick={handleClose} 
-          className="p-1 rounded-full hover:bg-white/10 transition-colors ml-4"
-          aria-label="Close news ticker"
-        >
-          <X className="h-4 w-4" />
-        </button>
       </div>
     </div>
   );
