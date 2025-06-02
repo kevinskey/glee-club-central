@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays } from 'lucide-react';
 import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView';
 import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
 import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
@@ -26,68 +27,147 @@ export default function AdminCalendarPage() {
   }, [user, profile]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading calendar...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">
-            Admin Calendar
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            {/* Top Controls */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Input
-                  type="search"
-                  placeholder="Search events..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="md:w-64"
-                />
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <CalendarViewToggle
-                  selectedView={selectedView}
-                  onViewChange={setSelectedView}
-                />
-                <EventTypeFilter
-                  selectedEventType={selectedEventType}
-                  onEventTypeChange={setSelectedEventType}
-                />
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Event
-                </Button>
-              </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-glee-spelman/10 rounded-lg">
+              <CalendarDays className="h-6 w-6 text-glee-spelman" />
             </div>
-
-            {/* Calendar View */}
-            <EnhancedCalendarView view={selectedView} />
-
-            {/* Bottom Controls - Example Actions */}
-            <div className="flex items-center justify-end space-x-2">
-              <Button variant="ghost" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button variant="ghost" size="sm" className="text-red-500">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Event Calendar
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage events, performances, and rehearsals
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          <Button className="bg-glee-spelman hover:bg-glee-spelman/90 text-white">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Event
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Controls Bar */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                {/* Search and Filters */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="search"
+                      placeholder="Search events..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 w-full sm:w-64"
+                    />
+                  </div>
+                  
+                  <EventTypeFilter
+                    selectedEventType={selectedEventType}
+                    onEventTypeChange={setSelectedEventType}
+                  />
+                </div>
+
+                {/* View Controls */}
+                <div className="flex items-center gap-3">
+                  <CalendarViewToggle
+                    selectedView={selectedView}
+                    onViewChange={setSelectedView}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Calendar View */}
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Calendar className="h-5 w-5 text-glee-spelman" />
+                Calendar View
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="min-h-[600px]">
+                <EnhancedCalendarView 
+                  view={selectedView}
+                  searchQuery={searchQuery}
+                  selectedEventTypes={selectedEventType === 'all' ? [] : [selectedEventType]}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">This Month</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
+                    <p className="text-xs text-gray-500">Events scheduled</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Upcoming</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
+                    <p className="text-xs text-gray-500">Performances</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                    <Clock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">This Week</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">3</p>
+                    <p className="text-xs text-gray-500">Rehearsals</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
