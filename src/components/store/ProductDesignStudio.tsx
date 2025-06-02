@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Wand2, Download, ShoppingCart, AlertCircle, Type } from 'lucide-react';
+import { Upload, Wand2, Download, ShoppingCart, AlertCircle, Type, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { BrandSelector } from './BrandSelector';
@@ -25,11 +24,32 @@ const BRAND_PRICING = {
   comfortcolors: 28.00,
 };
 
+const DESIGN_COLORS = [
+  { name: 'Black', hex: '#000000' },
+  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Navy', hex: '#1F2937' },
+  { name: 'Spelman Blue', hex: '#0066CC' },
+  { name: 'Gold', hex: '#FFD700' },
+  { name: 'Silver', hex: '#C0C0C0' },
+  { name: 'Red', hex: '#DC2626' },
+  { name: 'Purple', hex: '#7C3AED' },
+];
+
+const DESIGN_PLACEMENTS = [
+  { id: 'full-front', name: 'Full Front', description: 'Large center chest design' },
+  { id: 'full-back', name: 'Full Back', description: 'Large back design' },
+  { id: 'left-chest', name: 'Left Chest', description: 'Small logo placement' },
+  { id: 'pocket', name: 'Pocket Design', description: 'Small pocket-sized design' },
+  { id: 'sleeve', name: 'Sleeve/Arm', description: 'Sleeve placement' },
+];
+
 export function ProductDesignStudio() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string>('');
   const [selectedBrand, setSelectedBrand] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string; code: string } | null>(null);
+  const [selectedDesignColor, setSelectedDesignColor] = useState(DESIGN_COLORS[0]);
+  const [selectedPlacement, setSelectedPlacement] = useState('full-front');
   const [designName, setDesignName] = useState('');
   const [designDescription, setDesignDescription] = useState('');
   const [designText, setDesignText] = useState('');
@@ -112,6 +132,8 @@ export function ProductDesignStudio() {
             brand: selectedBrand,
             color: selectedColor
           },
+          designColor: selectedDesignColor,
+          placement: selectedPlacement,
           amazonStyle: true,
           singleMockup: true
         }
@@ -198,7 +220,7 @@ export function ProductDesignStudio() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5" />
-            AI Product Design Studio - Amazon Ready
+            AI Product Design Studio - Custom Design
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -256,10 +278,68 @@ export function ProductDesignStudio() {
             </div>
           )}
 
-          {/* Step 4: Design Method Selection */}
-          {selectedColor && !designMode && (
+          {/* Step 4: Design Color Selection */}
+          {selectedColor && (
             <div className="space-y-3">
-              <Label>Step 4: How would you like to add your design?</Label>
+              <Label className="flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                Step 4: Choose Design Color
+              </Label>
+              <div className="flex gap-2">
+                {DESIGN_COLORS.map((color) => (
+                  <button
+                    key={color.name}
+                    onClick={() => setSelectedDesignColor(color)}
+                    className={`
+                      relative w-8 h-8 rounded-full border-2 transition-all hover:scale-110
+                      ${selectedDesignColor.name === color.name 
+                        ? 'border-gray-900 ring-2 ring-gray-400' 
+                        : 'border-gray-300 hover:border-gray-400'
+                      }
+                    `}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  >
+                    {color.hex === '#FFFFFF' && (
+                      <div className="absolute inset-0 rounded-full border border-gray-200" />
+                    )}
+                    {selectedDesignColor.name === color.name && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className={`w-2 h-2 rounded-full ${
+                          color.hex === '#FFFFFF' ? 'bg-gray-800' : 'bg-white'
+                        }`} />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">Selected: {selectedDesignColor.name}</p>
+            </div>
+          )}
+
+          {/* Step 5: Design Placement */}
+          {selectedDesignColor && (
+            <div className="space-y-3">
+              <Label>Step 5: Choose Design Placement</Label>
+              <Select value={selectedPlacement} onValueChange={setSelectedPlacement}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select design placement" />
+                </SelectTrigger>
+                <SelectContent>
+                  {DESIGN_PLACEMENTS.map(placement => (
+                    <SelectItem key={placement.id} value={placement.id}>
+                      {placement.name} - {placement.description}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Step 6: Design Method Selection */}
+          {selectedPlacement && !designMode && (
+            <div className="space-y-3">
+              <Label>Step 6: How would you like to add your design?</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
                   variant="outline"

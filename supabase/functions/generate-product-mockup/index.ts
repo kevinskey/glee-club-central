@@ -40,6 +40,8 @@ serve(async (req) => {
       designName, 
       designDescription,
       brandInfo,
+      designColor,
+      placement = 'full-front',
       amazonStyle = true,
       singleMockup = true 
     } = await req.json();
@@ -49,32 +51,49 @@ serve(async (req) => {
       designName, 
       designDescription, 
       brandInfo,
+      designColor,
+      placement,
       hasImage: !!userImageUrl,
       hasText: !!designText,
       amazonStyle,
       singleMockup 
     });
 
+    // Enhanced placement descriptions for better AI understanding
+    const placementDescriptions = {
+      'full-front': 'large design covering most of the front chest area',
+      'full-back': 'large design covering most of the back area',
+      'left-chest': 'small logo-sized design on the left chest area (3-4 inches)',
+      'pocket': 'small design in the pocket area or where a pocket would be',
+      'sleeve': 'design placed on the sleeve or arm area'
+    };
+
+    const placementDesc = placementDescriptions[placement as keyof typeof placementDescriptions] || placementDescriptions['full-front'];
+
     // Amazon-style product photography prompts for text-based designs
     const textDesignPrompts = {
-      't-shirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} t-shirt with the text "${designText}" printed on the front center chest area. Pure white background, studio lighting with soft shadows. The t-shirt should be laid flat or displayed on an invisible mannequin in a front-facing view. Text should be clearly visible with realistic fabric printing texture showing screen-printing quality. Professional e-commerce photography style with even lighting, sharp focus, and high contrast. No wrinkles, perfect presentation suitable for Amazon product listing.`,
+      't-shirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} t-shirt with the text "${designText}" printed as a ${placementDesc}. The text should be in ${designColor?.name || 'black'} color. Pure white background, studio lighting with soft shadows. The t-shirt should be laid flat or displayed on an invisible mannequin in a front-facing view. Text should be clearly visible with realistic fabric printing texture showing screen-printing quality. Professional e-commerce photography style with even lighting, sharp focus, and high contrast. No wrinkles, perfect presentation suitable for Amazon product listing.`,
       
-      'hoodie': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} pullover hoodie featuring the text "${designText}" printed on the front chest area. Clean white studio background with professional lighting. Display the hoodie front-facing, showing the text clearly with realistic embroidered or screen-printed texture. Include hoodie details like drawstrings and kangaroo pocket. Studio photography with soft, even lighting and minimal shadows for e-commerce use.`,
+      'hoodie': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} pullover hoodie featuring the text "${designText}" printed as a ${placementDesc}. The text should be in ${designColor?.name || 'black'} color. Clean white studio background with professional lighting. Display the hoodie front-facing, showing the text clearly with realistic embroidered or screen-printed texture. Include hoodie details like drawstrings and kangaroo pocket. Studio photography with soft, even lighting and minimal shadows for e-commerce use.`,
       
-      'tank-top': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} tank top with the text "${designText}" printed on the front center. Pure white background, professional studio lighting. Front-facing view showing the text with realistic printing quality. Clean, minimalist e-commerce photography suitable for Amazon product listing with sharp details and professional presentation.`,
+      'sweatshirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} sweatshirt featuring the text "${designText}" printed as a ${placementDesc}. The text should be in ${designColor?.name || 'black'} color. Clean white studio background with professional lighting. Front-facing display showing text clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`,
+
+      'tank-top': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} tank top with the text "${designText}" printed as a ${placementDesc}. The text should be in ${designColor?.name || 'black'} color. Pure white background, professional studio lighting. Front-facing view showing the text with realistic printing quality. Clean, minimalist e-commerce photography suitable for Amazon product listing with sharp details and professional presentation.`,
       
-      'long-sleeve': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} long sleeve shirt featuring the text "${designText}" printed on the front chest. Clean white studio background with professional lighting. Front-facing display showing text clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`
+      'long-sleeve': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} long sleeve shirt featuring the text "${designText}" printed as a ${placementDesc}. The text should be in ${designColor?.name || 'black'} color. Clean white studio background with professional lighting. Front-facing display showing text clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`
     };
 
     // Amazon-style product photography prompts for image-based designs
     const imageDesignPrompts = {
-      't-shirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} t-shirt with "${designName}" design printed on the front center chest area. Pure white background, studio lighting with soft shadows. The t-shirt should be laid flat or displayed on an invisible mannequin in a front-facing view. Design should be clearly visible with realistic fabric printing texture showing screen-printing quality. Professional e-commerce photography style with even lighting, sharp focus, and high contrast. No wrinkles, perfect presentation suitable for Amazon product listing.`,
+      't-shirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} t-shirt with "${designName}" design printed as a ${placementDesc}. The design should be rendered in ${designColor?.name || 'black'} color scheme. Pure white background, studio lighting with soft shadows. The t-shirt should be laid flat or displayed on an invisible mannequin in a front-facing view. Design should be clearly visible with realistic fabric printing texture showing screen-printing quality. Professional e-commerce photography style with even lighting, sharp focus, and high contrast. No wrinkles, perfect presentation suitable for Amazon product listing.`,
       
-      'hoodie': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} pullover hoodie featuring "${designName}" design on the front chest area. Clean white studio background with professional lighting. Display the hoodie front-facing, showing the design clearly with realistic embroidered or screen-printed texture. Include hoodie details like drawstrings and kangaroo pocket. Studio photography with soft, even lighting and minimal shadows for e-commerce use.`,
+      'hoodie': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} pullover hoodie featuring "${designName}" design as a ${placementDesc}. The design should be rendered in ${designColor?.name || 'black'} color scheme. Clean white studio background with professional lighting. Display the hoodie front-facing, showing the design clearly with realistic embroidered or screen-printed texture. Include hoodie details like drawstrings and kangaroo pocket. Studio photography with soft, even lighting and minimal shadows for e-commerce use.`,
       
-      'tank-top': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} tank top with "${designName}" design on the front center. Pure white background, professional studio lighting. Front-facing view showing the design with realistic printing quality. Clean, minimalist e-commerce photography suitable for Amazon product listing with sharp details and professional presentation.`,
+      'sweatshirt': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} sweatshirt featuring "${designName}" design as a ${placementDesc}. The design should be rendered in ${designColor?.name || 'black'} color scheme. Clean white studio background with professional lighting. Front-facing display showing design clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`,
+
+      'tank-top': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} tank top with "${designName}" design as a ${placementDesc}. The design should be rendered in ${designColor?.name || 'black'} color scheme. Pure white background, professional studio lighting. Front-facing view showing the design with realistic printing quality. Clean, minimalist e-commerce photography suitable for Amazon product listing with sharp details and professional presentation.`,
       
-      'long-sleeve': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} long sleeve shirt featuring "${designName}" design on the front chest. Clean white studio background with professional lighting. Front-facing display showing design clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`
+      'long-sleeve': `Professional Amazon product photography of a ${brandInfo?.color?.name || 'colored'} ${brandInfo?.brand || 'premium'} long sleeve shirt featuring "${designName}" design as a ${placementDesc}. The design should be rendered in ${designColor?.name || 'black'} color scheme. Clean white studio background with professional lighting. Front-facing display showing design clarity with realistic screen-printing texture. E-commerce quality photography with even lighting and sharp focus.`
     };
 
     let enhancedPrompt;
@@ -94,6 +113,10 @@ serve(async (req) => {
     
     if (brandInfo?.color) {
       enhancedPrompt += ` The garment color is ${brandInfo.color.name} (${brandInfo.color.hex}).`;
+    }
+
+    if (designColor) {
+      enhancedPrompt += ` The design/text color is ${designColor.name} (${designColor.hex}).`;
     }
     
     // Add Amazon-specific technical requirements
@@ -144,8 +167,9 @@ serve(async (req) => {
     const timestamp = Date.now();
     const sanitizedName = designName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
     const colorName = brandInfo?.color?.name?.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'default';
+    const designColorName = designColor?.name?.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase() || 'black';
     const designType = designText ? 'text' : 'image';
-    const fileName = `amazon-mockup-${productType}-${designType}-${sanitizedName}-${colorName}-${timestamp}.png`;
+    const fileName = `amazon-mockup-${productType}-${designType}-${sanitizedName}-${colorName}-${designColorName}-${placement}-${timestamp}.png`;
     const filePath = `generated-mockups/${fileName}`;
 
     const { data: uploadData, error: uploadError } = await supabase.storage
@@ -174,6 +198,8 @@ serve(async (req) => {
       designName,
       designText,
       brandInfo,
+      designColor,
+      placement,
       fileName,
       amazonStyle: true
     }), {
