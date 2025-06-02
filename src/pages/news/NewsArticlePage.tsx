@@ -43,7 +43,7 @@ const NewsArticlePage: React.FC = () => {
   const newsItem = NEWS_ITEMS.find(item => item.id === id);
   
   const handleGoBack = () => {
-    navigate(-1);
+    navigate("/");
   };
   
   if (!newsItem) {
@@ -71,7 +71,6 @@ const NewsArticlePage: React.FC = () => {
         <div className="bg-card p-6 rounded-lg shadow-sm border">
           <p className="whitespace-pre-line text-lg">{newsItem.content}</p>
           
-          {/* Add more paragraphs of content here */}
           <p className="mt-6">
             For more information about Spelman College Glee Club events and performances, 
             please visit our Events page or contact the Music Department.
