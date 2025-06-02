@@ -403,7 +403,7 @@ export function ModernHeroSection({
                 <button
                   key={index}
                   className={cn(
-                    "w-3 h-3 rounded-full transition-all",
+                    "w-1.5 h-1.5 rounded-full transition-all",
                     index === currentSlide 
                       ? "bg-white" 
                       : "bg-white/50 hover:bg-white/70"
