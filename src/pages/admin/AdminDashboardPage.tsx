@@ -8,7 +8,7 @@ import AdminDashboard from "./AdminDashboard";
 export default function AdminDashboardPage() {
   const { user, profile, isLoading, isInitialized, isAdmin } = useAuth();
 
-  console.log('🏛️ AdminDashboardPage: ADMIN DASHBOARD STATE:', {
+  console.log('🏛️ AdminDashboardPage: COMPLETE RENDER STATE:', {
     hasUser: !!user,
     userId: user?.id,
     userEmail: user?.email,
@@ -19,7 +19,8 @@ export default function AdminDashboardPage() {
     profileStatus: profile?.status,
     isLoading,
     isInitialized,
-    isAdminFunction: isAdmin()
+    isAdminFunction: isAdmin(),
+    timestamp: new Date().toISOString()
   });
 
   // Wait for initialization only
@@ -42,6 +43,13 @@ export default function AdminDashboardPage() {
   // Check admin access immediately - don't wait for profile if user email is admin
   const isKnownAdmin = user.email === 'kevinskey@mac.com';
   const hasAdminAccess = isKnownAdmin || (profile && isAdmin());
+  
+  console.log('🔍 AdminDashboardPage: ADMIN ACCESS CHECK:', {
+    isKnownAdmin,
+    hasProfileAccess: profile && isAdmin(),
+    hasAdminAccess,
+    willRenderDashboard: hasAdminAccess || isKnownAdmin
+  });
   
   // If we know the user is admin by email, don't wait for profile
   if (isKnownAdmin) {
@@ -66,6 +74,6 @@ export default function AdminDashboardPage() {
     return <Navigate to="/dashboard/member" replace />;
   }
 
-  console.log('🏛️ AdminDashboardPage: Rendering AdminDashboard component');
+  console.log('🏛️ AdminDashboardPage: All checks passed, rendering AdminDashboard component');
   return <AdminDashboard />;
 }
