@@ -125,9 +125,24 @@ export function ModernHeroSection({
       console.log('🎭 Hero: Fetched slides:', fetchedSlides);
       console.log('🎭 Hero: Fetched media files:', fetchedMedia);
 
+      // If no media files found, try fetching with different approach
+      if (fetchedMedia.length === 0) {
+        console.log('🎭 Hero: No media files found, trying alternative query...');
+        const alternativeMediaResult = await supabase
+          .from('media_library')
+          .select('*');
+        
+        console.log('🎭 Hero: Alternative media query result:', alternativeMediaResult);
+        
+        if (alternativeMediaResult.data && alternativeMediaResult.data.length > 0) {
+          setMediaFiles(alternativeMediaResult.data);
+        }
+      } else {
+        setMediaFiles(fetchedMedia);
+      }
+
       setSlides(fetchedSlides);
       setSettings(settingsResult.data);
-      setMediaFiles(fetchedMedia);
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       // Fallback to default content
@@ -330,9 +345,11 @@ export function ModernHeroSection({
             />
           )
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900">
-            {console.log('🎭 Hero: No media found, showing gradient background')}
-          </div>
+          // Fixed: Removed console.log from JSX and added it before the JSX block
+          (() => {
+            console.log('🎭 Hero: No media found, showing gradient background');
+            return <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>;
+          })()
         )}
         
         {/* Dark overlay for better text readability */}
