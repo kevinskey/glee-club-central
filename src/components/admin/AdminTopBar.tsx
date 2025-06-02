@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/providers/ThemeProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,7 +19,7 @@ interface AdminTopBarProps {
 }
 
 export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps) {
-  const { user, logout, profile } = useSimpleAuthContext();
+  const { user, logout, profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const handleSignOut = async () => {

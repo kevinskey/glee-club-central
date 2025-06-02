@@ -1,8 +1,8 @@
 
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const usePermissions = () => {
-  const { user, profile, isAdmin } = useSimpleAuthContext();
+  const { user, profile, isAdmin } = useAuth();
 
   const hasPermission = (permission: string): boolean => {
     // Basic permissions for authenticated users

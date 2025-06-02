@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSimpleAuthContext } from './SimpleAuthContext';
+import { useAuth } from './AuthContext';
 
 interface RolePermissionContextType {
   userRole: string | null;
@@ -11,7 +11,7 @@ interface RolePermissionContextType {
 const RolePermissionContext = createContext<RolePermissionContextType | undefined>(undefined);
 
 export const RolePermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, profile, isAuthenticated, isInitialized } = useSimpleAuthContext();
+  const { user, profile, isAuthenticated, isInitialized } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

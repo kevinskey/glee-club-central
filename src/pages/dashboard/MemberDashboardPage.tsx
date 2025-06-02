@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Navigate } from "react-router-dom";
 import { PageLoader } from "@/components/ui/page-loader";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -8,7 +8,7 @@ import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function MemberDashboardPage() {
-  const { user, profile, isLoading, isInitialized, isAuthenticated } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   console.log('📊 MemberDashboard: State check:', {

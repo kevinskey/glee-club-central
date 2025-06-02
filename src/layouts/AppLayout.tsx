@@ -1,90 +1,53 @@
 
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
-import { ConsolidatedHeader } from '@/components/layout/ConsolidatedHeader';
+import { Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
-import { Sidebar } from '@/components/layout/Sidebar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
-import { HeroImageInitializer } from '@/components/landing/HeroImageInitializer';
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar';
 
 interface AppLayoutProps {
-  sidebarType?: 'member' | 'admin' | 'fan' | 'none';
+  children?: React.ReactNode;
+  sidebarType?: 'none' | 'admin' | 'member';
   showHeader?: boolean;
   showFooter?: boolean;
-  children?: React.ReactNode;
 }
 
-const AppLayout: React.FC<AppLayoutProps> = ({ 
+export default function AppLayout({ 
+  children, 
   sidebarType = 'none', 
   showHeader = true, 
-  showFooter = false,
-  children 
-}) => {
-  const location = useLocation();
-  
-  // Safely get auth context - handle case where it might not be available
-  let isAuthenticated = false;
-  let isAdmin = false;
-  
-  try {
-    const auth = useSimpleAuthContext();
-    isAuthenticated = auth.isAuthenticated;
-    isAdmin = auth.isAdmin ? auth.isAdmin() : false;
-  } catch (error) {
-    // If useSimpleAuthContext fails, we're outside SimpleAuthProvider - that's ok for public routes
-    console.log('AppLayout: Auth context not available, treating as unauthenticated');
-  }
+  showFooter = true 
+}: AppLayoutProps) {
+  const { isAdmin } = useAuth();
 
-  // Check if we're on an admin route - if so, don't render any sidebar here
-  // The admin routes will handle their own AdminSidebar
-  const isAdminRoute = location.pathname.startsWith('/admin');
-  
-  // Determine if sidebar should be shown
-  const shouldShowSidebar = sidebarType !== 'none' && isAuthenticated && !isAdminRoute;
-  
-  // Select the appropriate sidebar component
-  const getSidebarComponent = () => {
-    if (sidebarType === 'admin') {
-      return AdminSidebar;
+  const renderSidebar = () => {
+    switch (sidebarType) {
+      case 'admin':
+        return <AdminSidebar />;
+      case 'member':
+        return <DashboardSidebar />;
+      default:
+        return null;
     }
-    // Both 'member' and 'fan' use the regular Sidebar component
-    // The Sidebar component itself will handle different content based on user role
-    return Sidebar;
   };
 
-  const SidebarComponent = getSidebarComponent();
+  const hasSidebar = sidebarType !== 'none';
 
   return (
-    <div className="min-h-screen bg-background">
-      <HeroImageInitializer />
+    <div className="min-h-screen flex flex-col">
+      {showHeader && <Header />}
       
-      {showHeader && <ConsolidatedHeader />}
-      
-      <div className="flex">
-        {shouldShowSidebar && (
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <SidebarComponent />
-          </div>
-        )}
+      <div className="flex-1 flex">
+        {renderSidebar()}
         
-        <main className="flex-1 min-h-screen">
-          {shouldShowSidebar && (
-            <div className="lg:hidden">
-              <MobileBottomNav />
-            </div>
-          )}
-          
-          <div className={`${shouldShowSidebar ? 'p-6' : ''}`}>
-            {children || <Outlet />}
-          </div>
+        <main className={`flex-1 ${hasSidebar ? 'lg:ml-64' : ''}`}>
+          {children || <Outlet />}
         </main>
       </div>
       
       {showFooter && <Footer />}
     </div>
   );
-};
-
-export default AppLayout;
+}

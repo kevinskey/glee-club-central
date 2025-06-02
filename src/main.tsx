@@ -6,8 +6,8 @@ import { router } from "./router";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import { SimpleAuthProvider } from "./contexts/SimpleAuthContext";
-import { RolePermissionProvider } from "./contexts/RolePermissionContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProfileProvider } from "./contexts/ProfileContext";
 import "./index.css";
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
@@ -44,12 +44,12 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <SimpleAuthProvider>
-          <RolePermissionProvider>
+        <AuthProvider>
+          <ProfileProvider>
             <RouterProvider router={router} />
             <Toaster />
-          </RolePermissionProvider>
-        </SimpleAuthProvider>
+          </ProfileProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </React.StrictMode>

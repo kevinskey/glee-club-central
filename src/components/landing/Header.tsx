@@ -6,14 +6,14 @@ import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { Button } from "@/components/ui/button";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const navigate = useNavigate();
   const [showNewsTicker, setShowNewsTicker] = React.useState(true);
-  const { isAuthenticated, profile, logout } = useSimpleAuthContext();
+  const { isAuthenticated, profile, logout } = useAuth();
   const isMobile = useIsMobile();
   
   const handleDashboardClick = () => {

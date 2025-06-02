@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Music, Calendar, Heart } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 
 export default function FanDashboardPage() {
-  const { user, profile, isLoading, isInitialized, isAuthenticated } = useSimpleAuthContext();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
 
   // Show loading during auth initialization
   if (!isInitialized || isLoading) {

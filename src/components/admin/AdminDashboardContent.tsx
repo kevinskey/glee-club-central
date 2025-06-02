@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useSimpleAuthContext } from "@/contexts/SimpleAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { AdminStatsCards } from "./AdminStatsCards";
 import { AdminQuickActions } from "./AdminQuickActions";
 import { AdminRecentActivity } from "./AdminRecentActivity";
@@ -11,7 +11,7 @@ interface AdminDashboardContentProps {
 }
 
 export function AdminDashboardContent({ isMobile = false }: AdminDashboardContentProps) {
-  const { user, profile } = useSimpleAuthContext();
+  const { user, profile } = useAuth();
   
   console.log('AdminDashboardContent: Rendering with isMobile:', isMobile);
   

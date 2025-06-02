@@ -1,8 +1,8 @@
 
-import { useSimpleAuthContext } from '@/contexts/SimpleAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useNotifications = () => {
-  const { user } = useSimpleAuthContext();
+  const { user } = useAuth();
 
   // Mock notification data for now
   const notifications = [
