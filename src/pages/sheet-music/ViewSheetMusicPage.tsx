@@ -25,14 +25,14 @@ const ViewSheetMusicPage = () => {
   }, [id, allMediaFiles]);
 
   const loadPDFData = () => {
-    // First try to get from location state
+    // First try to get from location state (from media library)
     if (location.state?.file) {
       setPdfData(location.state.file);
       setLoading(false);
       return;
     }
 
-    // Try to find in media library
+    // Try to find in media library first
     const mediaFile = allMediaFiles.find(file => file.id === id);
     if (mediaFile && getMediaType(mediaFile.file_type) === 'pdf') {
       setPdfData({
@@ -46,18 +46,50 @@ const ViewSheetMusicPage = () => {
       return;
     }
 
-    // Fallback to demo PDF if nothing found
-    setPdfData({
-      id: id || '1',
-      title: location.state?.title || 'Sheet Music',
-      url: location.state?.url || 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-      sheetMusicId: id || '1'
-    });
-    setLoading(false);
+    // Fallback: try to load from sheet music database
+    loadFromSheetMusicDatabase();
+  };
+
+  const loadFromSheetMusicDatabase = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('sheet_music')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setPdfData({
+          id: data.id,
+          title: data.title || 'Untitled PDF',
+          url: data.file_url,
+          file_url: data.file_url,
+          sheetMusicId: data.id
+        });
+      }
+    } catch (error) {
+      console.error('Error loading sheet music:', error);
+      // If all else fails, use a demo PDF
+      setPdfData({
+        id: id || '1',
+        title: 'PDF Document',
+        url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+        sheetMusicId: id || '1'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
-    navigate('/dashboard/sheet-music');
+    // Check if we came from media library
+    if (location.state?.file) {
+      navigate('/dashboard/media-library');
+    } else {
+      navigate('/dashboard/sheet-music');
+    }
   };
 
   if (loading) {

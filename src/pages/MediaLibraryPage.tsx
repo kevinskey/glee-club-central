@@ -60,8 +60,17 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
   }, [activeTab, setSelectedMediaType]);
   
   const handleViewPDF = (fileId: string, fileUrl: string, title: string) => {
-    navigate(`/dashboard/media/pdf/${fileId}`, { 
-      state: { url: fileUrl, title } 
+    // Navigate to the sheet music viewer and pass the media file data
+    navigate(`/dashboard/sheet-music/${fileId}`, { 
+      state: { 
+        file: {
+          id: fileId,
+          title: title,
+          url: fileUrl,
+          file_url: fileUrl,
+          sheetMusicId: fileId
+        }
+      } 
     });
   };
 
