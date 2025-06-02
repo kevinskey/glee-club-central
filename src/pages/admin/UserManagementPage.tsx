@@ -1,17 +1,18 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Upload, Download, UserPlus, Heart } from 'lucide-react';
+import { Users, Upload, Download, UserPlus, Heart, TestTube } from 'lucide-react';
 import { UserManagementSimplified } from '@/components/admin/UserManagementSimplified';
 import { MemberCSVUpload } from '@/components/members/MemberCSVUpload';
 import { MemberCSVDownload } from '@/components/members/MemberCSVDownload';
 import { CreateUserModal } from '@/components/members/CreateUserModal';
 import { Button } from '@/components/ui/button';
+import { createTestUsers } from '@/utils/createTestUsers';
 
 export default function UserManagementPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isCreatingTestUsers, setIsCreatingTestUsers] = useState(false);
 
   const handleUserCreated = () => {
     setShowCreateModal(false);
@@ -22,16 +23,42 @@ export default function UserManagementPage() {
     setRefreshKey(prev => prev + 1);
   };
 
+  const handleCreateTestUsers = async () => {
+    setIsCreatingTestUsers(true);
+    try {
+      await createTestUsers();
+      // Refresh the user list after creation
+      setRefreshKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error creating test users:', error);
+    } finally {
+      setIsCreatingTestUsers(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
-          <Users className="h-8 w-8" />
-          Member Management
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Manage all member-related functions including registration, bulk uploads, and data export.
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <Users className="h-8 w-8" />
+              Member Management
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Manage all member-related functions including registration, bulk uploads, and data export.
+            </p>
+          </div>
+          <Button 
+            onClick={handleCreateTestUsers} 
+            disabled={isCreatingTestUsers}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <TestTube className="h-4 w-4" />
+            {isCreatingTestUsers ? 'Creating...' : 'Create Test Users'}
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="members" className="w-full">
