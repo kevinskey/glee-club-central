@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +8,7 @@ import { MemberCSVUpload } from '@/components/members/MemberCSVUpload';
 import { MemberCSVDownload } from '@/components/members/MemberCSVDownload';
 import { CreateUserModal } from '@/components/members/CreateUserModal';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { createTestUsers } from '@/utils/createTestUsers';
 
 export default function UserManagementPage() {
@@ -49,15 +51,18 @@ export default function UserManagementPage() {
               Manage all member-related functions including registration, bulk uploads, and data export.
             </p>
           </div>
-          <Button 
-            onClick={handleCreateTestUsers} 
-            disabled={isCreatingTestUsers}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <TestTube className="h-4 w-4" />
-            {isCreatingTestUsers ? 'Creating...' : 'Create Test Users'}
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button 
+              onClick={handleCreateTestUsers} 
+              disabled={isCreatingTestUsers}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <TestTube className="h-4 w-4" />
+              {isCreatingTestUsers ? 'Creating...' : 'Create Test Users'}
+            </Button>
+          </div>
         </div>
       </div>
 

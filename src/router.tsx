@@ -60,7 +60,7 @@ export const router = createBrowserRouter([
     path: "/signup", 
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <SignupPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
     path: "/update-password",
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <ResetPasswordPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
@@ -100,7 +100,7 @@ export const router = createBrowserRouter([
     path: "/register",
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <RegisterPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
@@ -110,7 +110,7 @@ export const router = createBrowserRouter([
     path: "/join-glee-fam",
     element: (
       <SimpleAuthProviderFixed>
-        <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+        <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
           <JoinGleeFamPage />
         </AppLayout>
       </SimpleAuthProviderFixed>
@@ -177,7 +177,7 @@ export const router = createBrowserRouter([
     element: (
       <SimpleAuthProviderFixed>
         <SimpleRequireAuth>
-          <AppLayout sidebarType="none" showHeader={false} showFooter={false">
+          <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
             <FanDashboardPage />
           </AppLayout>
         </SimpleRequireAuth>
