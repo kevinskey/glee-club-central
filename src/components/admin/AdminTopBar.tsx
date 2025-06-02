@@ -44,7 +44,7 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
             onClick={onMenuClick}
             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-7 w-7" />
           </Button>
         )}
         

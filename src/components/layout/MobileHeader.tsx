@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -15,7 +16,7 @@ export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-14 flex items-center justify-between px-4">
       {/* Menu Button */}
       <Button variant="ghost" size="sm" onClick={onMenuClick}>
-        <Menu className="h-5 w-5" />
+        <Menu className="h-7 w-7" />
       </Button>
 
       {/* Title */}

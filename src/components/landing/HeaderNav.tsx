@@ -66,7 +66,7 @@ export function HeaderNav({
             className="md:hidden"
             onClick={onMobileMenuToggle}
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-7 w-7" />
           </Button>
         </div>
       </div>
