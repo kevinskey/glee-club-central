@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 
 export interface NewsItem {
@@ -203,10 +202,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (loading) {
     console.log('NewsTicker: Showing loading state');
     return (
-      <div className="bg-glee-columbia text-white py-0.5 relative">
-        <div className="container flex items-center justify-center text-xs">
+      <div className="bg-glee-columbia text-white py-1 relative">
+        <div className="container flex items-center justify-center text-sm font-medium">
           <div className="flex-1 overflow-hidden flex items-center">
-            <div className="w-full animate-pulse h-3 bg-white/20 rounded"></div>
+            <div className="w-full animate-pulse h-4 bg-white/30 rounded"></div>
           </div>
         </div>
       </div>
@@ -217,8 +216,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (error && newsArticles.length === 0) {
     console.log('NewsTicker: Showing error state');
     return (
-      <div className="bg-red-600 text-white py-0.5 relative">
-        <div className="container flex items-center justify-center text-xs">
+      <div className="bg-red-600 text-white py-1 relative">
+        <div className="container flex items-center justify-center text-sm font-medium">
           <span>📰 Unable to load news at this time</span>
         </div>
       </div>
@@ -228,8 +227,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   console.log('NewsTicker: Rendering with', newsArticles.length, 'articles');
   
   return (
-    <div className="bg-glee-columbia text-white py-0.5 relative">
-      <div className="container flex items-center justify-center text-xs">
+    <div className="bg-glee-columbia text-white py-1 relative shadow-sm">
+      <div className="container flex items-center justify-center text-sm font-medium">
         <div className="flex-1 overflow-hidden flex items-center">
           <div className="flex whitespace-nowrap animate-marquee-slow">
             {newsArticles.map((article, index) => {
@@ -246,7 +245,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
               return (
                 <span 
                   key={index} 
-                  className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors"
+                  className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
                   onClick={() => handleArticleClick(article.link, article.title)}
                   title="Click to read full article"
                 >
@@ -270,7 +269,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
               return (
                 <span 
                   key={`repeat-${index}`} 
-                  className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors"
+                  className="mx-6 cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm"
                   onClick={() => handleArticleClick(article.link, article.title)}
                   title="Click to read full article"
                 >
