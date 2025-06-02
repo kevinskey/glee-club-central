@@ -1,17 +1,15 @@
 
 import React from 'react';
 import { AdminDashboardContent } from "@/components/admin/AdminDashboardContent";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { AdminLayout } from '@/layouts/AdminLayout';
 
 const AdminDashboard: React.FC = () => {
-  const isMobile = useIsMobile();
-  
-  console.log('🏛️ AdminDashboard: Component rendering, isMobile:', isMobile);
+  console.log('🏛️ AdminDashboard: Component rendering with new layout');
 
   return (
-    <div className="flex-1 overflow-auto min-h-screen bg-background">
+    <AdminLayout>
       <AdminDashboardContent />
-    </div>
+    </AdminLayout>
   );
 };
 
