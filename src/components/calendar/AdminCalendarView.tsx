@@ -5,11 +5,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Clock, MapPin, Users, Edit, Trash2, Search, GraduationCap } from 'lucide-react';
+import { Clock, MapPin, Users, Edit, Trash2, Search, GraduationCap, Flag, Church } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { toast } from 'sonner';
 import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
+import { getNationalHolidays } from '@/utils/nationalHolidays';
+import { getReligiousHolidays } from '@/utils/religiousHolidays';
 
 interface AdminCalendarViewProps {
   view: 'month' | 'week' | 'day';
@@ -27,11 +29,19 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   console.log('AdminCalendarView: Search query:', searchQuery);
   console.log('AdminCalendarView: Selected event type:', selectedEventType);
 
-  // Get Spelman academic dates for the current year and next year
+  // Get all holiday data for the current year and next year
   const currentYear = new Date().getFullYear();
   const spelmanDates = [
     ...getSpelmanAcademicDates(currentYear),
     ...getSpelmanAcademicDates(currentYear + 1)
+  ];
+  const nationalHolidays = [
+    ...getNationalHolidays(currentYear),
+    ...getNationalHolidays(currentYear + 1)
+  ];
+  const religiousHolidays = [
+    ...getReligiousHolidays(currentYear),
+    ...getReligiousHolidays(currentYear + 1)
   ];
 
   // Convert Spelman dates to CalendarEvent format
@@ -54,8 +64,48 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     feature_image_url: date.imageUrl
   }));
 
-  // Combine regular events with Spelman academic dates
-  const allEvents = [...(events || []), ...spelmanEvents];
+  // Convert national holidays to CalendarEvent format
+  const nationalHolidayEvents: CalendarEvent[] = nationalHolidays.map(holiday => ({
+    id: `national-${holiday.id}`,
+    title: holiday.title,
+    start_time: holiday.date.toISOString(),
+    end_time: holiday.date.toISOString(),
+    short_description: holiday.description,
+    full_description: holiday.description,
+    event_type: 'holiday',
+    event_types: ['holiday'],
+    is_private: true,
+    is_public: false,
+    allow_rsvp: false,
+    allow_reminders: true,
+    allow_ics_download: true,
+    allow_google_map_link: false,
+    created_at: new Date().toISOString(),
+    feature_image_url: holiday.imageUrl
+  }));
+
+  // Convert religious holidays to CalendarEvent format
+  const religiousHolidayEvents: CalendarEvent[] = religiousHolidays.map(holiday => ({
+    id: `religious-${holiday.id}`,
+    title: holiday.title,
+    start_time: holiday.date.toISOString(),
+    end_time: holiday.date.toISOString(),
+    short_description: holiday.description,
+    full_description: holiday.description,
+    event_type: 'religious',
+    event_types: ['religious'],
+    is_private: true,
+    is_public: false,
+    allow_rsvp: false,
+    allow_reminders: true,
+    allow_ics_download: true,
+    allow_google_map_link: false,
+    created_at: new Date().toISOString(),
+    feature_image_url: holiday.imageUrl
+  }));
+
+  // Combine all events
+  const allEvents = [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
 
   // Filter events based on search and event types
   const filteredEvents = React.useMemo(() => {
@@ -86,10 +136,10 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
 
-  // Handle edit event (only for non-Spelman events)
+  // Handle edit event (only for non-system events)
   const handleEditEvent = (event: CalendarEvent) => {
-    if (event.id.startsWith('spelman-')) {
-      toast.info('Academic dates cannot be edited');
+    if (event.id.startsWith('spelman-') || event.id.startsWith('national-') || event.id.startsWith('religious-')) {
+      toast.info('System dates cannot be edited');
       return;
     }
     
@@ -113,10 +163,10 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     setIsEventEditorOpen(true);
   };
 
-  // Handle delete event (only for non-Spelman events)
+  // Handle delete event (only for non-system events)
   const handleDeleteEvent = async (eventId: string) => {
-    if (eventId.startsWith('spelman-')) {
-      toast.info('Academic dates cannot be deleted');
+    if (eventId.startsWith('spelman-') || eventId.startsWith('national-') || eventId.startsWith('religious-')) {
+      toast.info('System dates cannot be deleted');
       return;
     }
     
@@ -190,6 +240,9 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
 
   const renderEventCard = (event: CalendarEvent) => {
     const isSpelmanEvent = event.id.startsWith('spelman-');
+    const isNationalHoliday = event.id.startsWith('national-');
+    const isReligiousHoliday = event.id.startsWith('religious-');
+    const isSystemEvent = isSpelmanEvent || isNationalHoliday || isReligiousHoliday;
     
     return (
       <Card key={event.id} className="mb-2">
@@ -199,6 +252,12 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               <div className="flex items-center gap-2">
                 {isSpelmanEvent && (
                   <GraduationCap className="h-3 w-3 text-blue-600" />
+                )}
+                {isNationalHoliday && (
+                  <Flag className="h-3 w-3 text-red-600" />
+                )}
+                {isReligiousHoliday && (
+                  <Church className="h-3 w-3 text-purple-600" />
                 )}
                 <h4 className="font-medium text-sm">{event.title}</h4>
               </div>
@@ -220,10 +279,17 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
               <div className="flex gap-1 mt-2">
                 {event.event_type && (
                   <Badge 
-                    variant={isSpelmanEvent ? "outline" : "secondary"} 
-                    className={`text-xs ${isSpelmanEvent ? 'border-blue-500 text-blue-600' : ''}`}
+                    variant="outline" 
+                    className={`text-xs ${
+                      isSpelmanEvent ? 'border-blue-500 text-blue-600' : 
+                      isNationalHoliday ? 'border-red-500 text-red-600' :
+                      isReligiousHoliday ? 'border-purple-500 text-purple-600' : ''
+                    }`}
                   >
-                    {isSpelmanEvent ? 'Academic' : event.event_type}
+                    {isSpelmanEvent ? 'Academic' : 
+                     isNationalHoliday ? 'National Holiday' :
+                     isReligiousHoliday ? 'Religious Holiday' : 
+                     event.event_type}
                   </Badge>
                 )}
                 {event.is_private && (
@@ -233,7 +299,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
                 )}
               </div>
             </div>
-            {!isSpelmanEvent && (
+            {!isSystemEvent && (
               <div className="flex gap-1 ml-2">
                 <Button 
                   size="sm" 
