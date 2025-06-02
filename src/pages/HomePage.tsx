@@ -3,7 +3,6 @@ import React from "react";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
-import { EnhancedHeroSection } from "@/components/landing/hero/EnhancedHeroSection";
 
 const HomePage = () => {
   const {
@@ -21,11 +20,6 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen overflow-x-hidden m-0 p-0">
-      {/* Hero Section at the very top with no spacing */}
-      <div className="w-full m-0 p-0">
-        <EnhancedHeroSection />
-      </div>
-      
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
