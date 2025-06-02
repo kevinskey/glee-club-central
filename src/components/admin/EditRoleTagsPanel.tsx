@@ -66,7 +66,7 @@ export function EditRoleTagsPanel() {
           ...profile,
           email: user.email
         } : null;
-      }).filter(Boolean) || [];
+      }).filter((user): user is User => user !== null) || [];
 
       // Combine and deduplicate results
       const allResults = [...usersWithEmails, ...emailMatches].filter((user, index, self) => 
