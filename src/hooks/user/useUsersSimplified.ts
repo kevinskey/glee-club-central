@@ -123,29 +123,42 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
             console.warn('Could not fetch auth users:', authError);
             // Fallback to profiles only
             usersWithEmails = profiles.map(profile => ({
-              ...profile,
-              email: profile.id === currentUser.id ? currentUser.email || '' : '',
+              id: profile.id,
               first_name: profile.first_name || 'Unknown',
               last_name: profile.last_name || 'User',
+              email: profile.id === currentUser.id ? currentUser.email || '' : '',
+              voice_part: profile.voice_part || undefined,
+              status: profile.status || undefined,
+              role: profile.role || undefined,
+              is_super_admin: profile.is_super_admin || false,
             }));
           } else {
-            // Map profiles with auth user emails
-            const authUserMap = new Map(authUsers.users.map(user => [user.id, user.email]));
+            // Create a properly typed Map from auth users
+            const authUserEntries: [string, string][] = authUsers.users.map(user => [user.id, user.email || '']);
+            const authUserMap = new Map(authUserEntries);
             
             usersWithEmails = profiles.map(profile => ({
-              ...profile,
-              email: authUserMap.get(profile.id) || '',
+              id: profile.id,
               first_name: profile.first_name || 'Unknown',
               last_name: profile.last_name || 'User',
+              email: authUserMap.get(profile.id) || '',
+              voice_part: profile.voice_part || undefined,
+              status: profile.status || undefined,
+              role: profile.role || undefined,
+              is_super_admin: profile.is_super_admin || false,
             }));
           }
         } catch (authFetchError) {
           console.warn('Auth fetch failed:', authFetchError);
           usersWithEmails = profiles.map(profile => ({
-            ...profile,
-            email: profile.id === currentUser.id ? currentUser.email || '' : '',
+            id: profile.id,
             first_name: profile.first_name || 'Unknown',
             last_name: profile.last_name || 'User',
+            email: profile.id === currentUser.id ? currentUser.email || '' : '',
+            voice_part: profile.voice_part || undefined,
+            status: profile.status || undefined,
+            role: profile.role || undefined,
+            is_super_admin: profile.is_super_admin || false,
           }));
         }
       } else {
@@ -153,10 +166,14 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
         usersWithEmails = profiles
           .filter(profile => profile.id === currentUser.id)
           .map(profile => ({
-            ...profile,
-            email: currentUser.email || '',
+            id: profile.id,
             first_name: profile.first_name || 'Unknown',
             last_name: profile.last_name || 'User',
+            email: currentUser.email || '',
+            voice_part: profile.voice_part || undefined,
+            status: profile.status || undefined,
+            role: profile.role || undefined,
+            is_super_admin: profile.is_super_admin || false,
           }));
       }
 
