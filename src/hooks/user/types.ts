@@ -1,5 +1,4 @@
 
-
 export interface User {
   id: string;
   first_name?: string;
@@ -22,5 +21,5 @@ export interface User {
   role_tags?: string[];
   personal_title?: string;
   title?: string;
+  special_roles?: string[];
 }
-
