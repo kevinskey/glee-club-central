@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -6,10 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Package, Save, Download, FileText } from 'lucide-react';
+import { AlertTriangle, Package, Save, Download, FileText, Sparkles, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasPermission } from '@/utils/permissionChecker';
+import { generatePackingSheetHTML, downloadPDF, type PackingSheetData } from '@/utils/pdfGenerator';
 
 interface StoreItem {
   id: string;
@@ -30,6 +30,14 @@ interface TourMerchAssignment {
   created_at: string;
 }
 
+interface AISuggestion {
+  itemId: string;
+  suggestedQuantity: number;
+  confidence: string;
+  reasoning: string;
+  riskLevel: string;
+}
+
 interface TourMerchAssignmentProps {
   eventId: string;
   eventTitle?: string;
@@ -48,8 +56,10 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
   const [assignments, setAssignments] = useState<TourMerchAssignment[]>([]);
   const [editingQuantities, setEditingQuantities] = useState<{[key: string]: number}>({});
   const [editingNotes, setEditingNotes] = useState<{[key: string]: string}>({});
+  const [aiSuggestions, setAiSuggestions] = useState<{[key: string]: AISuggestion}>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
 
   // Check permissions
   const canManageTourMerch = () => {
@@ -113,6 +123,75 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getAISuggestions = async () => {
+    setIsLoadingAI(true);
+    try {
+      const response = await supabase.functions.invoke('ai-merch-suggester', {
+        body: {
+          eventId,
+          items: storeItems,
+          eventDetails: {
+            expectedAttendance,
+            venueType,
+            eventTitle
+          }
+        }
+      });
+
+      if (response.error) throw response.error;
+
+      const suggestions: {[key: string]: AISuggestion} = {};
+      response.data.suggestions.forEach((suggestion: AISuggestion) => {
+        suggestions[suggestion.itemId] = suggestion;
+      });
+
+      setAiSuggestions(suggestions);
+      toast.success('AI suggestions loaded successfully');
+    } catch (error) {
+      console.error('Error getting AI suggestions:', error);
+      toast.error('Failed to get AI suggestions');
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
+
+  const applyAISuggestion = (itemId: string) => {
+    const suggestion = aiSuggestions[itemId];
+    if (suggestion) {
+      setEditingQuantities(prev => ({
+        ...prev,
+        [itemId]: suggestion.suggestedQuantity
+      }));
+      toast.success('AI suggestion applied');
+    }
+  };
+
+  const exportPackingSheet = () => {
+    const assignedItems = storeItems
+      .filter(item => (editingQuantities[item.id] || 0) > 0)
+      .map(item => ({
+        id: item.id,
+        name: item.name,
+        assignedQuantity: editingQuantities[item.id] || 0,
+        price: item.price,
+        tags: item.tags,
+        notes: editingNotes[item.id] || ''
+      }));
+
+    const packingData: PackingSheetData = {
+      eventTitle,
+      eventDate: new Date().toLocaleDateString(),
+      eventLocation: 'Venue Location', // You might want to fetch this from event data
+      expectedAttendance,
+      items: assignedItems,
+      totalItems: assignedItems.reduce((sum, item) => sum + item.assignedQuantity, 0),
+      totalValue: assignedItems.reduce((sum, item) => sum + (item.assignedQuantity * item.price), 0)
+    };
+
+    const htmlContent = generatePackingSheetHTML(packingData);
+    downloadPDF(htmlContent, `packing-sheet-${eventTitle.replace(/\s+/g, '-')}.pdf`);
   };
 
   const calculateSuggestedQuantity = (item: StoreItem): number => {
@@ -336,14 +415,25 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
 
           <div className="flex gap-2 mb-4">
             {canEdit && (
-              <Button 
-                onClick={saveAllAssignments} 
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Save All Assignments
-              </Button>
+              <>
+                <Button 
+                  onClick={saveAllAssignments} 
+                  disabled={isSaving}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  Save All Assignments
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={getAISuggestions}
+                  disabled={isLoadingAI}
+                  className="flex items-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {isLoadingAI ? 'Getting AI Suggestions...' : 'Get AI Suggestions'}
+                </Button>
+              </>
             )}
             <Button 
               variant="outline" 
@@ -352,6 +442,14 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
             >
               <Download className="h-4 w-4" />
               Export CSV
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={exportPackingSheet}
+              className="flex items-center gap-2"
+            >
+              <Printer className="h-4 w-4" />
+              Packing Sheet
             </Button>
           </div>
 
@@ -362,6 +460,7 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
                   <th className="text-left p-2">Item Name</th>
                   <th className="text-left p-2">Current Stock</th>
                   <th className="text-left p-2">Suggested</th>
+                  <th className="text-left p-2">AI Suggestion</th>
                   <th className="text-left p-2">Assigned</th>
                   <th className="text-left p-2">Notes</th>
                   {canEdit && <th className="text-left p-2">Actions</th>}
@@ -371,6 +470,7 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
                 {storeItems.map(item => {
                   const suggestedQty = calculateSuggestedQuantity(item);
                   const assignedQty = editingQuantities[item.id] || 0;
+                  const aiSuggestion = aiSuggestions[item.id];
                   const isLowStock = item.quantity_in_stock < 10;
                   
                   return (
@@ -396,6 +496,30 @@ export const TourMerchAssignment: React.FC<TourMerchAssignmentProps> = ({
                       </td>
                       <td className="p-2">
                         <Badge variant="outline">{suggestedQty}</Badge>
+                      </td>
+                      <td className="p-2">
+                        {aiSuggestion ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">{aiSuggestion.suggestedQuantity}</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {aiSuggestion.confidence}
+                              </Badge>
+                            </div>
+                            {canEdit && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => applyAISuggestion(item.id)}
+                                className="text-xs h-6 px-2"
+                              >
+                                Apply
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
                       </td>
                       <td className="p-2">
                         <Input
