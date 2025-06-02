@@ -5,32 +5,45 @@ import { Button } from "@/components/ui/button";
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
   error: Error | null;
+  errorInfo: ErrorInfo | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
+    error: null,
+    errorInfo: null
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    console.error("ErrorBoundary caught an error:", error);
-    // Update state so the next render will show the fallback UI.
-    return { hasError: true, error };
+    console.error("🚨 ErrorBoundary: Error caught:", error);
+    return { hasError: true, error, errorInfo: null };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error);
-    console.error("Component stack:", errorInfo.componentStack);
+    console.error("🚨 ErrorBoundary: Component stack trace:", {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack
+    });
+
+    this.setState({ errorInfo });
+    
+    // Call optional error handler
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   public resetError = () => {
-    this.setState({ hasError: false, error: null });
+    console.log("🔄 ErrorBoundary: Resetting error state");
+    this.setState({ hasError: false, error: null, errorInfo: null });
     window.location.href = '/';
   };
 
@@ -45,9 +58,18 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="w-full max-w-md space-y-6 text-center">
             <h1 className="text-3xl font-bold text-glee-purple">Something went wrong</h1>
             <div className="p-4 bg-destructive/10 text-destructive rounded-md">
-              <p className="font-mono text-sm overflow-auto max-h-40 text-left">
-                {this.state.error?.toString() || "Unknown error occurred"}
+              <p className="font-semibold mb-2">Error Details:</p>
+              <p className="font-mono text-sm text-left mb-2">
+                {this.state.error?.message || "Unknown error occurred"}
               </p>
+              {this.state.errorInfo && (
+                <details className="text-xs">
+                  <summary className="cursor-pointer">Component Stack</summary>
+                  <pre className="mt-2 whitespace-pre-wrap">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                </details>
+              )}
             </div>
             <div className="space-y-4">
               <p className="text-muted-foreground">

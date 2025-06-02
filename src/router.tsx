@@ -1,8 +1,10 @@
+
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
 import AdminRoute from "@/components/auth/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Import pages
 import HomePage from "./pages/HomePage";
@@ -27,6 +29,11 @@ import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+// Error boundary wrapper for critical routes
+const withErrorBoundary = (element: React.ReactElement) => (
+  <ErrorBoundary>{element}</ErrorBoundary>
+);
+
 export const router = createBrowserRouter([
   // Public routes
   {
@@ -36,6 +43,7 @@ export const router = createBrowserRouter([
         <AppLayout sidebarType="none" showHeader={true} showFooter={true} />
       </AuthProvider>
     ),
+    errorElement: withErrorBoundary(<NotFoundPage />),
     children: [
       { index: true, element: <HomePage /> },
       { path: "about", element: <AboutPage /> },
@@ -44,23 +52,23 @@ export const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
     ],
   },
-  // Auth routes
+  // Auth routes with error boundaries
   {
     path: "/login",
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <LoginPage />
+          {withErrorBoundary(<LoginPage />)}
         </AppLayout>
       </AuthProvider>
     ),
   },
   {
-    path: "/signup", 
+    path: "/signup",
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <SignupPage />
+          {withErrorBoundary(<SignupPage />)}
         </AppLayout>
       </AuthProvider>
     ),
@@ -70,7 +78,7 @@ export const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <ForgotPasswordPage />
+          {withErrorBoundary(<ForgotPasswordPage />)}
         </AppLayout>
       </AuthProvider>
     ),
@@ -80,7 +88,7 @@ export const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <ResetPasswordPage />
+          {withErrorBoundary(<ResetPasswordPage />)}
         </AppLayout>
       </AuthProvider>
     ),
@@ -90,7 +98,7 @@ export const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <ResetPasswordPage />
+          {withErrorBoundary(<ResetPasswordPage />)}
         </AppLayout>
       </AuthProvider>
     ),
@@ -100,7 +108,7 @@ export const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <RegisterPage />
+          {withErrorBoundary(<RegisterPage />)}
         </AppLayout>
       </AuthProvider>
     ),
@@ -110,47 +118,36 @@ export const router = createBrowserRouter([
     element: (
       <AuthProvider>
         <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-          <JoinGleeFamPage />
+          {withErrorBoundary(<JoinGleeFamPage />)}
         </AppLayout>
       </AuthProvider>
     ),
   },
-  // Profile route - updated to use correct import
+  // Protected routes with error boundaries
   {
     path: "/profile",
     element: (
       <AuthProvider>
         <RequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
-            <ProfilePage />
+            {withErrorBoundary(<ProfilePage />)}
           </AppLayout>
         </RequireAuth>
       </AuthProvider>
     ),
   },
-  // Main dashboard route - handles role-based redirection
+  // Dashboard routing
   {
     path: "/dashboard",
     element: (
       <AuthProvider>
         <RequireAuth>
-          <RoleDashboardPage />
+          {withErrorBoundary(<RoleDashboardPage />)}
         </RequireAuth>
       </AuthProvider>
     ),
   },
-  // Legacy route redirect - redirect /role-dashboard to /dashboard
-  {
-    path: "/role-dashboard",
-    element: (
-      <AuthProvider>
-        <RequireAuth>
-          <RoleDashboardPage />
-        </RequireAuth>
-      </AuthProvider>
-    ),
-  },
-  // Admin routes
+  // Admin routes with error boundaries
   {
     path: "/admin",
     element: (
@@ -160,43 +157,43 @@ export const router = createBrowserRouter([
         </AdminRoute>
       </AuthProvider>
     ),
+    errorElement: withErrorBoundary(<NotFoundPage />),
     children: [
-      { index: true, element: <AdminDashboardPage /> },
-      { path: "calendar", element: <AdminCalendarPage /> },
-      { path: "hero-manager", element: <AdminHeroManager /> },
-      { path: "members", element: <UserManagementPage /> },
-      { path: "system-reset", element: <UserSystemResetPage /> },
+      { index: true, element: withErrorBoundary(<AdminDashboardPage />) },
+      { path: "calendar", element: withErrorBoundary(<AdminCalendarPage />) },
+      { path: "hero-manager", element: withErrorBoundary(<AdminHeroManager />) },
+      { path: "members", element: withErrorBoundary(<UserManagementPage />) },
+      { path: "system-reset", element: withErrorBoundary(<UserSystemResetPage />) },
     ],
   },
-  // Member dashboard
+  // Specific dashboard routes with error boundaries
   {
     path: "/dashboard/member",
     element: (
       <AuthProvider>
         <RequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
-            <MemberDashboardPage />
+            {withErrorBoundary(<MemberDashboardPage />)}
           </AppLayout>
         </RequireAuth>
       </AuthProvider>
     ),
   },
-  // Fan dashboard
   {
     path: "/dashboard/fan",
     element: (
       <AuthProvider>
         <RequireAuth>
           <AppLayout sidebarType="none" showHeader={false} showFooter={false}>
-            <FanDashboardPage />
+            {withErrorBoundary(<FanDashboardPage />)}
           </AppLayout>
         </RequireAuth>
       </AuthProvider>
     ),
   },
-  // Catch-all 404 route
+  // 404 route
   {
     path: "*",
-    element: <NotFoundPage />,
+    element: withErrorBoundary(<NotFoundPage />),
   },
 ]);

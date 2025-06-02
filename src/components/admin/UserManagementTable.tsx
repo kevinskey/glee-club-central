@@ -44,6 +44,7 @@ export function UserManagementTable({
       await onRoleUpdate(userId, newRole);
       toast.success('User role updated successfully');
     } catch (error) {
+      console.error('🚨 UserManagementTable: Role update failed', { userId, newRole, error });
       toast.error('Failed to update user role');
     } finally {
       setUpdatingUsers(prev => {
@@ -60,6 +61,7 @@ export function UserManagementTable({
       await onStatusToggle(userId, !currentDisabled);
       toast.success(`User ${!currentDisabled ? 'disabled' : 'enabled'} successfully`);
     } catch (error) {
+      console.error('🚨 UserManagementTable: Status toggle failed', { userId, currentDisabled, error });
       toast.error('Failed to update user status');
     } finally {
       setUpdatingUsers(prev => {
@@ -148,7 +150,6 @@ export function UserManagementTable({
                     size="sm"
                     disabled={isUpdating}
                     onClick={() => {
-                      // TODO: Implement password reset functionality
                       toast.info('Password reset functionality coming soon');
                     }}
                   >
