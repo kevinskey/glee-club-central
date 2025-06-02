@@ -21,5 +21,6 @@ export interface User {
   notes?: string;
   role_tags?: string[];
   personal_title?: string;
+  title?: string;
 }
 
