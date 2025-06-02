@@ -2,73 +2,117 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Settings, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function NewsTickerSettingsPage() {
   const { user, isLoading } = useAuth();
-  const [tickerText, setTickerText] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [settings, setSettings] = useState({
+    enabled: true,
+    message: '',
+    speed: 50,
+    color: '#000000'
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate fetching existing ticker text from a database or API
-    const fetchTickerText = async () => {
+    const fetchSettings = async () => {
       // Replace this with your actual data fetching logic
       await new Promise(resolve => setTimeout(resolve, 500));
-      setTickerText('Breaking News: Glee Club wins national award!');
+      setSettings({
+        enabled: true,
+        message: 'Breaking News: Glee Club wins national award!',
+        speed: 50,
+        color: '#000000'
+      });
     };
 
-    fetchTickerText();
+    fetchSettings();
   }, []);
 
   const handleSave = async () => {
-    setIsSaving(true);
-    setSuccessMessage(null);
-    setErrorMessage(null);
-
     try {
-      // Simulate saving the ticker text to a database or API
-      // Replace this with your actual data saving logic
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { error } = await supabase
+        .from('site_settings')
+        .upsert({
+          key: 'news_ticker',
+          value: settings,
+          updated_by: user?.id
+        });
 
-      setSuccessMessage('Ticker text saved successfully!');
-    } catch (error: any) {
-      setErrorMessage(`Failed to save ticker text: ${error.message}`);
-    } finally {
-      setIsSaving(false);
+      if (error) throw error;
+      toast.success('News ticker settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>News Ticker Settings</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            News Ticker Settings
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {successMessage && (
-            <div className="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-              <span className="font-medium">Success!</span> {successMessage}
-            </div>
-          )}
-          {errorMessage && (
-            <div className="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
-              <span className="font-medium">Error!</span> {errorMessage}
-            </div>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="tickerText">Ticker Text</Label>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="enabled"
+              checked={settings.enabled}
+              onCheckedChange={(checked) => setSettings({...settings, enabled: checked})}
+            />
+            <Label htmlFor="enabled">Enable News Ticker</Label>
+          </div>
+
+          <div>
+            <Label htmlFor="message">Ticker Message</Label>
             <Textarea
-              id="tickerText"
-              placeholder="Enter news ticker text"
-              value={tickerText}
-              onChange={(e) => setTickerText(e.target.value)}
+              id="message"
+              value={settings.message}
+              onChange={(e) => setSettings({...settings, message: e.target.value})}
+              placeholder="Enter the news ticker message"
+              rows={3}
             />
           </div>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save'}
+
+          <div>
+            <Label htmlFor="speed">Speed (pixels per second)</Label>
+            <Input
+              id="speed"
+              type="number"
+              value={settings.speed}
+              onChange={(e) => setSettings({...settings, speed: parseInt(e.target.value)})}
+              min="10"
+              max="200"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="color">Text Color</Label>
+            <Input
+              id="color"
+              type="color"
+              value={settings.color}
+              onChange={(e) => setSettings({...settings, color: e.target.value})}
+            />
+          </div>
+
+          <Button onClick={handleSave} className="w-full">
+            <Save className="mr-2 h-4 w-4" />
+            Save Settings
           </Button>
         </CardContent>
       </Card>

@@ -1,266 +1,216 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Users, 
-  UserPlus, 
-  Search, 
-  Filter,
-  Download,
-  Upload,
-  Trash2,
-  Edit,
-  AlertCircle
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { UserPlus, Edit, Trash2, Users, AlertCircle, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface User {
+interface UserProfile {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   role: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: string;
+  created_at: string;
+  is_super_admin: boolean;
+  disabled: boolean;
+  voice_part?: string;
+  class_year?: string;
+  phone?: string;
 }
 
-export function UserManagementSimplified() {
-  const { user, profile, isAdmin, signUp } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState('all');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+export default function UserManagementSimplified() {
+  const { user, isLoading } = useAuth();
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Mock data loading - replace with actual API call
-    setLoading(true);
-    setTimeout(() => {
-      const mockUsers: User[] = [
-        { id: '1', email: 'kevin@example.com', firstName: 'Kevin', lastName: 'Key', role: 'admin', status: 'active' },
-        { id: '2', email: 'member1@example.com', firstName: 'Alice', lastName: 'Smith', role: 'member', status: 'active' },
-        { id: '3', email: 'member2@example.com', firstName: 'Bob', lastName: 'Johnson', role: 'member', status: 'inactive' },
-        { id: '4', email: 'pending@example.com', firstName: 'Eve', lastName: 'Williams', role: 'member', status: 'pending' },
-      ];
-      setUsers(mockUsers);
-      setLoading(false);
-    }, 500);
+    fetchUsers();
   }, []);
 
-  const handleCreateUser = async (email: string, firstName: string, lastName: string) => {
+  const fetchUsers = async () => {
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null);
-  
     try {
-      // Basic email validation
-      if (!email.includes('@')) {
-        throw new Error('Invalid email format.');
-      }
-  
-      // Generate a random password for the user
-      const randomPassword = Math.random().toString(36).slice(-8);
-  
-      // Call the signUp function from AuthContext
-      const { error, data } = await signUp(email, randomPassword, firstName, lastName);
-  
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+
       if (error) {
-        console.error('Signup error:', error.message);
-        setError(`Failed to create user: ${error.message}`);
-      } else {
-        console.log('User created successfully:', data);
-        setSuccessMessage('User created successfully. Temporary password sent to user.');
-        // Refresh user list or add the new user to the state
-        setUsers(prevUsers => [...prevUsers, {
-          id: data.user.id,
-          email: data.user.email || email,
-          firstName: firstName,
-          lastName: lastName,
-          role: 'member', // Default role
-          status: 'pending', // Or 'active' if you auto-activate
-        }]);
+        console.error('Error fetching users:', error);
+        toast.error('Failed to fetch users');
+        return;
       }
-    } catch (err: any) {
-      console.error('Error creating user:', err);
-      setError(`Error creating user: ${err.message}`);
+
+      if (data) {
+        const userProfiles: UserProfile[] = data.map(profile => ({
+          id: profile.id,
+          email: profile.email,
+          first_name: profile.first_name || 'N/A',
+          last_name: profile.last_name || 'N/A',
+          role: profile.role || 'member',
+          status: profile.status || 'active',
+          created_at: profile.created_at,
+          is_super_admin: profile.is_super_admin || false,
+          disabled: profile.disabled || false,
+          voice_part: profile.voice_part,
+          class_year: profile.class_year,
+          phone: profile.phone,
+        }));
+        setUsers(userProfiles);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    const searchMatch = searchTerm ? 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) : 
-      true;
-    const roleMatch = filterRole === 'all' || user.role === filterRole;
-    return searchMatch && roleMatch;
-  });
+  const handleEditUser = async (updatedUser: UserProfile) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: updatedUser.first_name,
+          last_name: updatedUser.last_name,
+          role: updatedUser.role,
+        })
+        .eq('id', updatedUser.id);
+
+      if (error) {
+        console.error('Error updating user:', error);
+        toast.error('Failed to update user');
+        return;
+      }
+
+      toast.success('User updated successfully');
+      setIsEditDialogOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
+    }
+  };
+
+  const renderEditDialog = () => (
+    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit User</DialogTitle>
+        </DialogHeader>
+        {selectedUser && (
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="first_name">First Name</Label>
+              <Input
+                id="first_name"
+                value={selectedUser.first_name}
+                onChange={(e) => setSelectedUser({...selectedUser, first_name: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="last_name">Last Name</Label>
+              <Input
+                id="last_name"
+                value={selectedUser.last_name}
+                onChange={(e) => setSelectedUser({...selectedUser, last_name: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <Select value={selectedUser.role} onValueChange={(value) => setSelectedUser({...selectedUser, role: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="section_leader">Section Leader</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={() => handleEditUser(selectedUser)}>Save Changes</Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
-    <div className="p-4 md:p-6 space-y-4">
+    <div className="container mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">User Management</h1>
+        <Button onClick={() => setIsInviteDialogOpen(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Invite User
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">
-            User Management
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            All Users ({users.length})
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search and Filter */}
-          <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4">
-            <Input
-              type="search"
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="md:w-1/2"
-            />
-            <select
-              value={filterRole}
-              onChange={e => setFilterRole(e.target.value)}
-              className="border rounded px-3 py-2 md:w-1/4"
-            >
-              <option value="all">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="member">Member</option>
-            </select>
-          </div>
-
-          {/* User List */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-800">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                {filteredUsers.map(user => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.firstName} {user.lastName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="secondary">{user.role}</Badge>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {user.status}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
+        <CardContent>
+          {loading ? (
+            <div>Loading users...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>{user.first_name} {user.last_name}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                        {user.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
+                        <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-500">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Create User Form */}
-          <div className="border-t pt-4 mt-4">
-            <CardTitle className="text-lg font-semibold">Create New User</CardTitle>
-            <CreateUserForm onCreate={handleCreateUser} loading={loading} error={error} successMessage={successMessage} />
-          </div>
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+
+      {renderEditDialog()}
     </div>
   );
 }
-
-interface CreateUserFormProps {
-  onCreate: (email: string, firstName: string, lastName: string) => void;
-  loading: boolean;
-  error: string | null;
-  successMessage: string | null;
-}
-
-const CreateUserForm: React.FC<CreateUserFormProps> = ({ onCreate, loading, error, successMessage }) => {
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onCreate(email, firstName, lastName);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert>
-          <AlertDescription>{successMessage}</AlertDescription>
-        </Alert>
-      )}
-      <div>
-        <Label htmlFor="email">Email</Label>
-        <Input
-          type="email"
-          id="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          disabled={loading}
-        />
-      </div>
-      <div>
-        <Label htmlFor="firstName">First Name</Label>
-        <Input
-          type="text"
-          id="firstName"
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-          required
-          disabled={loading}
-        />
-      </div>
-      <div>
-        <Label htmlFor="lastName">Last Name</Label>
-        <Input
-          type="text"
-          id="lastName"
-          value={lastName}
-          onChange={e => setLastName(e.target.value)}
-          required
-          disabled={loading}
-        />
-      </div>
-      <Button type="submit" disabled={loading}>
-        {loading ? "Creating..." : "Create User"}
-      </Button>
-    </form>
-  );
-};
