@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,9 +52,12 @@ export const EventPerformers: React.FC<EventPerformersProps> = ({
 
       const performersData = data
         ?.map(assignment => assignment.profiles)
-        .filter((profile): profile is Performer => 
-          profile !== null && profile !== undefined
-        ) || [];
+        .filter((profile): profile is Performer => {
+          return profile !== null && 
+                 profile !== undefined &&
+                 typeof profile === 'object' &&
+                 'id' in profile;
+        }) || [];
 
       setPerformers(performersData);
     } catch (error) {
