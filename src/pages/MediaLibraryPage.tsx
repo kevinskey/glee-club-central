@@ -239,7 +239,7 @@ const MediaGrid: React.FC<MediaGridProps> = ({ files, onViewPDF, showPDFCount = 
             <Card key={file.id} className="overflow-hidden h-full flex flex-col">
               <div className="relative aspect-video bg-muted flex items-center justify-center">
                 {mediaType === "pdf" ? (
-                  <div className="w-full h-full bg-white relative overflow-hidden">
+                  <div className="w-full h-full bg-white relative overflow-hidden border rounded-t-lg">
                     <PDFThumbnail
                       url={file.file_url}
                       title={file.title}

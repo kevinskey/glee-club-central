@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 // Initialize pdfjs worker
@@ -23,16 +23,19 @@ export const PDFThumbnail = ({
 }: PDFThumbnailProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [containerWidth, setContainerWidth] = useState<number>(200);
+  const [numPages, setNumPages] = useState<number | null>(null);
 
   // Reset loading state when URL changes
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setNumPages(null);
   }, [url]);
 
-  const handleLoadSuccess = () => {
+  const handleLoadSuccess = ({ numPages }: { numPages: number }) => {
     setLoading(false);
+    setNumPages(numPages);
+    console.log(`PDF loaded successfully: ${title} (${numPages} pages)`);
   };
 
   const handleLoadError = (err: Error) => {
@@ -42,47 +45,48 @@ export const PDFThumbnail = ({
   };
 
   return (
-    <div className={`bg-muted flex items-start justify-center overflow-hidden relative ${className}`}>
+    <div className={`bg-muted flex items-start justify-center overflow-hidden relative ${className}`} data-pdf-url={url}>
       <AspectRatio ratio={aspectRatio} className="w-full">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <span className="text-xs text-muted-foreground">Loading PDF...</span>
+            </div>
           </div>
         )}
         
         {error ? (
-          <div className="text-red-500 flex items-center justify-center h-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-            </svg>
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground bg-muted/50">
+            <FileText className="h-12 w-12 mb-2" />
+            <span className="text-xs text-center px-2">PDF Preview Unavailable</span>
           </div>
         ) : (
-          <div className="h-full w-full flex items-start justify-center overflow-hidden">
+          <div className="h-full w-full flex items-start justify-center overflow-hidden bg-white">
             <Document
               file={url}
               onLoadSuccess={handleLoadSuccess}
               onLoadError={handleLoadError}
               loading={null}
+              error={null}
               className="flex items-start justify-center h-full w-full"
+              options={{
+                cMapUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/cmaps/',
+                cMapPacked: true,
+                standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.4.120/standard_fonts/',
+              }}
             >
-              <Page 
-                pageNumber={1} 
-                width={containerWidth}
-                height={undefined}
-                scale={undefined}
-                className="overflow-hidden flex items-start justify-center"
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                loading={null}
-                onRenderSuccess={(page) => {
-                  // Get the container width to scale the PDF appropriately
-                  const container = document.querySelector(`[data-pdf-url="${url}"]`);
-                  if (container) {
-                    const rect = container.getBoundingClientRect();
-                    setContainerWidth(rect.width);
-                  }
-                }}
-              />
+              {numPages && (
+                <Page 
+                  pageNumber={1} 
+                  className="overflow-hidden flex items-start justify-center max-w-full max-h-full"
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  loading={null}
+                  error={null}
+                  width={200}
+                />
+              )}
             </Document>
           </div>
         )}
