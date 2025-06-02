@@ -88,6 +88,15 @@
   }
 }
 
+@keyframes marquee-slower {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 .animate-marquee {
   animation: marquee 337.5s linear infinite;
 }
@@ -104,10 +113,15 @@
   animation: marquee-slow 337.5s linear infinite;
 }
 
+.animate-marquee-slower {
+  animation: marquee-slower 388.125s linear infinite;
+}
+
 /* Pause animation on hover */
 .animate-marquee:hover,
 .animate-marquee-fast:hover,
 .animate-marquee-normal:hover,
-.animate-marquee-slow:hover {
+.animate-marquee-slow:hover,
+.animate-marquee-slower:hover {
   animation-play-state: paused;
 }
