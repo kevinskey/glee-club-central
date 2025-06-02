@@ -18,17 +18,23 @@ interface MediaItem {
 }
 
 interface MediaPickerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSelect: (imageUrl: string) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onSelect: (data: string | { id: string; file_type: string; file_url: string }) => void;
   currentImageUrl?: string;
+  allowedTypes?: string[];
+  showUpload?: boolean;
+  returnMediaObject?: boolean; // New prop to determine return type
 }
 
 export const MediaPicker: React.FC<MediaPickerProps> = ({
-  isOpen,
-  onClose,
+  isOpen = true,
+  onClose = () => {},
   onSelect,
-  currentImageUrl = ''
+  currentImageUrl = '',
+  allowedTypes = ['image'],
+  showUpload = true,
+  returnMediaObject = false
 }) => {
   const { user } = useAuth();
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -37,6 +43,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [externalUrl, setExternalUrl] = useState(currentImageUrl);
   const [selectedImageUrl, setSelectedImageUrl] = useState(currentImageUrl);
+  const [selectedMediaItem, setSelectedMediaItem] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,10 +56,13 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
   const fetchMediaItems = async () => {
     setLoading(true);
     try {
+      const typeFilter = allowedTypes.includes('image') ? 'image%' : 
+                        allowedTypes.includes('video') ? 'video%' : '%';
+      
       const { data, error } = await supabase
         .from('media_library')
         .select('id, title, file_url, file_type')
-        .like('file_type', 'image%')
+        .like('file_type', typeFilter)
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -91,7 +101,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
         .getPublicUrl(filePath);
 
       // Save to media_library table with proper uploaded_by field
-      const { error: dbError } = await supabase
+      const { data: dbData, error: dbError } = await supabase
         .from('media_library')
         .insert({
           title: selectedFile.name,
@@ -99,13 +109,21 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
           file_url: urlData.publicUrl,
           file_type: selectedFile.type,
           folder: 'events',
-          uploaded_by: user.id // Fix: Ensure uploaded_by is set
-        });
+          uploaded_by: user.id
+        })
+        .select('id, title, file_url, file_type')
+        .single();
 
       if (dbError) throw dbError;
 
       toast.success('Image uploaded successfully');
-      onSelect(urlData.publicUrl);
+      
+      if (returnMediaObject && dbData) {
+        onSelect({ id: dbData.id, file_type: dbData.file_type, file_url: dbData.file_url });
+      } else {
+        onSelect(urlData.publicUrl);
+      }
+      
       onClose();
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -115,12 +133,21 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     }
   };
 
-  const handleSelectImage = (imageUrl: string) => {
-    setSelectedImageUrl(imageUrl);
+  const handleSelectImage = (item: MediaItem) => {
+    setSelectedImageUrl(item.file_url);
+    setSelectedMediaItem(item);
   };
 
   const handleConfirmSelection = () => {
-    onSelect(selectedImageUrl);
+    if (returnMediaObject && selectedMediaItem) {
+      onSelect({
+        id: selectedMediaItem.id,
+        file_type: selectedMediaItem.file_type,
+        file_url: selectedMediaItem.file_url
+      });
+    } else {
+      onSelect(selectedImageUrl);
+    }
     onClose();
   };
 
@@ -135,19 +162,19 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Select Event Image</DialogTitle>
+          <DialogTitle>Select Media</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="library" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="library">Media Library</TabsTrigger>
-            <TabsTrigger value="upload">Upload New</TabsTrigger>
+            {showUpload && <TabsTrigger value="upload">Upload New</TabsTrigger>}
             <TabsTrigger value="url">External URL</TabsTrigger>
           </TabsList>
 
           <TabsContent value="library" className="space-y-4">
             {loading ? (
-              <div className="text-center py-8">Loading images...</div>
+              <div className="text-center py-8">Loading media...</div>
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -159,13 +186,21 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
                           ? 'border-primary ring-2 ring-primary/20'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => handleSelectImage(item.file_url)}
+                      onClick={() => handleSelectImage(item)}
                     >
-                      <img
-                        src={item.file_url}
-                        alt={item.title}
-                        className="w-full h-32 object-cover"
-                      />
+                      {item.file_type.startsWith('video/') ? (
+                        <video
+                          src={item.file_url}
+                          className="w-full h-32 object-cover"
+                          muted
+                        />
+                      ) : (
+                        <img
+                          src={item.file_url}
+                          alt={item.title}
+                          className="w-full h-32 object-cover"
+                        />
+                      )}
                       <div className="p-2">
                         <p className="text-xs text-gray-600 truncate">{item.title}</p>
                       </div>
@@ -176,17 +211,17 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
                 {mediaItems.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <ImageIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>No images in media library</p>
+                    <p>No media files found</p>
                   </div>
                 )}
 
-                {selectedImageUrl && (
+                {(selectedImageUrl || selectedMediaItem) && (
                   <div className="flex justify-end gap-2 pt-4">
                     <Button variant="outline" onClick={onClose}>
                       Cancel
                     </Button>
                     <Button onClick={handleConfirmSelection}>
-                      Use Selected Image
+                      Use Selected Media
                     </Button>
                   </div>
                 )}
@@ -194,46 +229,48 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
             )}
           </TabsContent>
 
-          <TabsContent value="upload" className="space-y-4">
-            <div>
-              <Label htmlFor="file-upload">Choose Image File</Label>
-              <Input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-              />
-            </div>
-
-            {selectedFile && (
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <p className="text-sm text-gray-600">Selected: {selectedFile.name}</p>
-                  <p className="text-xs text-gray-500">
-                    Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={onClose}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleFileUpload} disabled={uploading || !user}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {uploading ? 'Uploading...' : 'Upload & Use'}
-                  </Button>
-                </div>
+          {showUpload && (
+            <TabsContent value="upload" className="space-y-4">
+              <div>
+                <Label htmlFor="file-upload">Choose Media File</Label>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  accept={allowedTypes.includes('video') ? 'image/*,video/*' : 'image/*'}
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                />
               </div>
-            )}
-          </TabsContent>
+
+              {selectedFile && (
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-4">
+                    <p className="text-sm text-gray-600">Selected: {selectedFile.name}</p>
+                    <p className="text-xs text-gray-500">
+                      Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={onClose}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleFileUpload} disabled={uploading || !user}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      {uploading ? 'Uploading...' : 'Upload & Use'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          )}
 
           <TabsContent value="url" className="space-y-4">
             <div>
-              <Label htmlFor="external-url">Image URL</Label>
+              <Label htmlFor="external-url">Media URL</Label>
               <Input
                 id="external-url"
                 type="url"
-                placeholder="https://example.com/image.jpg"
+                placeholder="https://example.com/media.jpg"
                 value={externalUrl}
                 onChange={(e) => setExternalUrl(e.target.value)}
               />

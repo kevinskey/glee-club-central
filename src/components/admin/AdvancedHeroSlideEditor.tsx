@@ -229,24 +229,14 @@ export function AdvancedHeroSlideEditor({ slide, onUpdate, onCancel }: AdvancedH
 
       {/* Media Picker Modal */}
       {showMediaPicker && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl max-h-[80vh] overflow-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Select Media</h3>
-              <Button 
-                variant="ghost" 
-                onClick={() => setShowMediaPicker(false)}
-              >
-                ×
-              </Button>
-            </div>
-            <MediaPicker
-              onSelect={handleMediaSelect}
-              allowedTypes={['image', 'video']}
-              showUpload={true}
-            />
-          </div>
-        </div>
+        <MediaPicker
+          isOpen={showMediaPicker}
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={handleMediaSelect}
+          allowedTypes={['image', 'video']}
+          showUpload={true}
+          returnMediaObject={true}
+        />
       )}
     </div>
   );
