@@ -55,7 +55,7 @@ export const EventPerformers: React.FC<EventPerformersProps> = ({
       
       if (data) {
         for (const assignment of data) {
-          const profile = assignment.profiles;
+          const profile = assignment.profiles as any;
           if (profile && 
               typeof profile === 'object' && 
               'id' in profile && 
@@ -64,11 +64,11 @@ export const EventPerformers: React.FC<EventPerformersProps> = ({
               'voice_part' in profile) {
             
             performersData.push({
-              id: profile.id,
-              first_name: profile.first_name || '',
-              last_name: profile.last_name || '',
-              voice_part: profile.voice_part || '',
-              avatar_url: profile.avatar_url || undefined
+              id: String(profile.id),
+              first_name: String(profile.first_name || ''),
+              last_name: String(profile.last_name || ''),
+              voice_part: String(profile.voice_part || ''),
+              avatar_url: profile.avatar_url ? String(profile.avatar_url) : undefined
             });
           }
         }

@@ -57,7 +57,7 @@ export const UpcomingPerformances: React.FC = () => {
       
       if (data) {
         for (const assignment of data) {
-          const event = assignment.events;
+          const event = assignment.events as any;
           if (event && 
               typeof event === 'object' && 
               'id' in event && 
@@ -66,13 +66,13 @@ export const UpcomingPerformances: React.FC = () => {
               isFuture(new Date(event.start_time))) {
             
             upcomingPerformances.push({
-              id: event.id,
-              title: event.title || '',
-              start_time: event.start_time,
-              end_time: event.end_time || '',
-              location_name: event.location_name || undefined,
-              event_types: event.event_types || [],
-              short_description: event.short_description || undefined
+              id: String(event.id),
+              title: String(event.title || ''),
+              start_time: String(event.start_time),
+              end_time: String(event.end_time || ''),
+              location_name: event.location_name ? String(event.location_name) : undefined,
+              event_types: Array.isArray(event.event_types) ? event.event_types : [],
+              short_description: event.short_description ? String(event.short_description) : undefined
             });
           }
         }
