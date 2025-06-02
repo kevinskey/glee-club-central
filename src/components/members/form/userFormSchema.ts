@@ -2,6 +2,7 @@
 import { z } from "zod";
 
 export const userFormSchema = z.object({
+  title: z.string().optional(),
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
@@ -20,6 +21,8 @@ export const userFormSchema = z.object({
   ecommerce_enabled: z.boolean().default(false),
   account_balance: z.number().min(0).default(0),
   default_shipping_address: z.string().optional(),
+  design_history_ids: z.array(z.string()).optional(),
+  current_cart_id: z.string().optional(),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

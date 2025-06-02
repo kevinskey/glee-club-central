@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const handleLogout = async () => {
-    return await signOut();
+    await signOut();
   };
 
   const getUserType = (): UserType => {

@@ -42,6 +42,10 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // The actual update logic is handled in the useUserProfile hook
     await auth.refreshProfile();
   };
+
+  const getUserType = (): 'admin' | 'member' => {
+    return auth.isAdmin() ? 'admin' : 'member';
+  };
   
   return (
     <ProfileContext.Provider value={{ 
@@ -52,7 +56,7 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
       isInitialized: auth.isInitialized,
       isAdmin: auth.isAdmin,
       isMember: auth.isMember,
-      getUserType: auth.getUserType,
+      getUserType,
       permissions,
       createFallbackProfile,
       updateUserProfile

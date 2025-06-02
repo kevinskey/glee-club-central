@@ -87,14 +87,19 @@ export function AddMemberDialog({
       password: '',
       phone: initialValues?.phone || '',
       role: initialValues?.role || 'member',
-      voice_part: initialValues?.voice_part || '',
+      voice_part: initialValues?.voice_part || null,
       status: initialValues?.status || 'active',
       join_date: initialValues?.join_date || format(new Date(), 'yyyy-MM-dd'),
       class_year: initialValues?.class_year || '',
       notes: initialValues?.notes || '',
       dues_paid: initialValues?.dues_paid || false,
       is_admin: initialValues?.is_admin || false,
-      avatar_url: initialValues?.avatar_url || ''
+      avatar_url: initialValues?.avatar_url || '',
+      ecommerce_enabled: initialValues?.ecommerce_enabled || false,
+      account_balance: initialValues?.account_balance || 0,
+      default_shipping_address: initialValues?.default_shipping_address || '',
+      design_history_ids: initialValues?.design_history_ids || [],
+      current_cart_id: initialValues?.current_cart_id || ''
     },
   });
 
@@ -387,7 +392,65 @@ export function AddMemberDialog({
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="ecommerce_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          E-commerce Access
+                        </FormLabel>
+                      </div>
+                    </FormItem>
+                  )}
+                />
               </div>
+
+              <FormField
+                control={form.control}
+                name="account_balance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Account Balance</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="default_shipping_address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Default Shipping Address</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter default shipping address..."
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
               <FormField
                 control={form.control}

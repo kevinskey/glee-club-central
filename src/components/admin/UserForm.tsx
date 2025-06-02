@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,34 +53,46 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   } = useForm<UserFormValues>({
     resolver: zodResolver(editUserSchema),
     defaultValues: user ? {
+      title: user.title || '',
       first_name: user.first_name || '',
       last_name: user.last_name || '',
       email: user.email || '',
       phone: user.phone || '',
-      voice_part: user.voice_part || '',
+      voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
       role: (user.role === 'admin' ? 'admin' : user.role === 'section_leader' ? 'section_leader' : 'member') as 'admin' | 'member' | 'section_leader',
-      status: user.status || 'active',
+      status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
       class_year: user.class_year || '',
       notes: user.notes || '',
       dues_paid: user.dues_paid || false,
       is_admin: user.is_super_admin || user.role === 'admin',
       join_date: user.join_date || new Date().toISOString().split('T')[0],
       avatar_url: user.avatar_url || '',
+      ecommerce_enabled: user.ecommerce_enabled || false,
+      account_balance: user.account_balance || 0,
+      default_shipping_address: user.default_shipping_address || '',
+      design_history_ids: user.design_history_ids || [],
+      current_cart_id: user.current_cart_id || '',
       password: '' // Password not required for editing
     } : {
+      title: '',
       first_name: '',
       last_name: '',
       email: '',
       phone: '',
-      voice_part: '',
+      voice_part: null,
       role: 'member' as 'admin' | 'member' | 'section_leader',
-      status: 'active',
+      status: 'active' as "active" | "pending" | "inactive" | "alumni",
       class_year: '',
       notes: '',
       dues_paid: false,
       is_admin: false,
       join_date: new Date().toISOString().split('T')[0],
       avatar_url: '',
+      ecommerce_enabled: false,
+      account_balance: 0,
+      default_shipping_address: '',
+      design_history_ids: [],
+      current_cart_id: '',
       password: ''
     }
   });
@@ -219,8 +232,8 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
               <Select
-                value={watch('voice_part')}
-                onValueChange={(value) => setValue('voice_part', value)}
+                value={watch('voice_part') || ''}
+                onValueChange={(value: "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director") => setValue('voice_part', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
@@ -268,7 +281,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={watch('status')}
-                onValueChange={(value) => setValue('status', value)}
+                onValueChange={(value: "active" | "pending" | "inactive" | "alumni") => setValue('status', value)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -277,6 +290,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="alumni">Alumni</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -305,6 +319,33 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               onCheckedChange={(checked) => setValue('is_admin', checked)}
             />
             <Label>Admin Privileges</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={watch('ecommerce_enabled')}
+              onCheckedChange={(checked) => setValue('ecommerce_enabled', checked)}
+            />
+            <Label>E-commerce Access</Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="account_balance">Account Balance</Label>
+            <Input
+              id="account_balance"
+              type="number"
+              step="0.01"
+              {...register('account_balance', { valueAsNumber: true })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="default_shipping_address">Default Shipping Address</Label>
+            <Textarea
+              id="default_shipping_address"
+              {...register('default_shipping_address')}
+              placeholder="Enter default shipping address..."
+            />
           </div>
 
           <div className="space-y-2">
