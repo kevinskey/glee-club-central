@@ -1,12 +1,12 @@
+
 import React from 'react';
 import { Route } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
 import MemberDashboardPage from '@/pages/dashboard/MemberDashboardPage';
 import FanDashboardPage from '@/pages/dashboard/FanDashboardPage';
 import PracticePage from '@/pages/practice/PracticePage';
-import ProfilePage from '@/pages/profile/ProfilePage';
+import ProfilePage from '@/pages/ProfilePage';
 import RecordingsPage from '@/pages/RecordingsPage';
-import SettingsPage from '@/pages/settings/SettingsPage';
 import EnhancedCalendarPage from '@/pages/EnhancedCalendarPage';
 import MediaLibraryPage from '@/pages/media-library/MediaLibraryPage';
 
@@ -31,9 +31,6 @@ const memberRoutes = (
 
     {/* Recordings route */}
     <Route path="/recordings" element={<RecordingsPage />} />
-
-    {/* Settings route */}
-    <Route path="/settings" element={<SettingsPage />} />
 
     {/* Calendar route */}
     <Route path="/calendar" element={<EnhancedCalendarPage />} />

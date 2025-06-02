@@ -1,4 +1,3 @@
-
 import { createBrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import RequireAuth from "@/components/auth/RequireAuth";
@@ -25,7 +24,7 @@ import UserManagementPage from "./pages/admin/UserManagementPage";
 import UserSystemResetPage from "./pages/admin/UserSystemResetPage";
 import MemberDashboardPage from "./pages/dashboard/MemberDashboardPage";
 import FanDashboardPage from "./pages/dashboard/FanDashboardPage";
-import ProfilePageFixed from "./pages/profile/ProfilePageFixed";
+import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export const router = createBrowserRouter([
@@ -116,14 +115,14 @@ export const router = createBrowserRouter([
       </AuthProvider>
     ),
   },
-  // Profile route
+  // Profile route - updated to use correct import
   {
     path: "/profile",
     element: (
       <AuthProvider>
         <RequireAuth>
           <AppLayout sidebarType="member" showHeader={false} showFooter={false}>
-            <ProfilePageFixed />
+            <ProfilePage />
           </AppLayout>
         </RequireAuth>
       </AuthProvider>
