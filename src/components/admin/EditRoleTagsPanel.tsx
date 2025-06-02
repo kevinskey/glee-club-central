@@ -19,6 +19,18 @@ interface UserSearchResult {
   role_tags: string[];
 }
 
+interface ProfileData {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  role_tags: string[] | null;
+}
+
+interface AuthUser {
+  id: string;
+  email?: string;
+}
+
 export function EditRoleTagsPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
@@ -46,14 +58,14 @@ export function EditRoleTagsPanel() {
 
       // Get emails from auth.users for matching profiles
       const userIds = profiles?.map(p => p.id) || [];
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
       
       if (authError) {
         console.error('Could not fetch user emails:', authError);
       }
 
-      const usersWithEmails: UserSearchResult[] = profiles?.map(profile => {
-        const authUser = authUsers?.users?.find(u => u.id === profile.id);
+      const usersWithEmails: UserSearchResult[] = (profiles as ProfileData[] || []).map(profile => {
+        const authUser = authData?.users?.find((u: AuthUser) => u.id === profile.id);
         return {
           id: profile.id,
           first_name: profile.first_name || '',
@@ -61,13 +73,13 @@ export function EditRoleTagsPanel() {
           email: authUser?.email || 'No email',
           role_tags: profile.role_tags || []
         };
-      }) || [];
+      });
 
       // Also search by email if we have auth access
-      const emailMatches: UserSearchResult[] = authUsers?.users
-        ?.filter(user => user.email?.toLowerCase().includes(query.toLowerCase()))
-        .map(user => {
-          const profile = profiles?.find(p => p.id === user.id);
+      const emailMatches: UserSearchResult[] = authData?.users
+        ?.filter((user: AuthUser) => user.email?.toLowerCase().includes(query.toLowerCase()))
+        .map((user: AuthUser) => {
+          const profile = (profiles as ProfileData[] || []).find(p => p.id === user.id);
           if (profile) {
             return {
               id: profile.id,
