@@ -1132,11 +1132,16 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_balance: number | null
           avatar_url: string | null
           class_year: string | null
           created_at: string
+          current_cart_id: string | null
+          default_shipping_address: string | null
+          design_history_ids: string[] | null
           disabled: boolean | null
           dues_paid: boolean | null
+          ecommerce_enabled: boolean | null
           first_name: string | null
           id: string
           is_super_admin: boolean | null
@@ -1153,11 +1158,16 @@ export type Database = {
           voice_part: string | null
         }
         Insert: {
+          account_balance?: number | null
           avatar_url?: string | null
           class_year?: string | null
           created_at?: string
+          current_cart_id?: string | null
+          default_shipping_address?: string | null
+          design_history_ids?: string[] | null
           disabled?: boolean | null
           dues_paid?: boolean | null
+          ecommerce_enabled?: boolean | null
           first_name?: string | null
           id: string
           is_super_admin?: boolean | null
@@ -1174,11 +1184,16 @@ export type Database = {
           voice_part?: string | null
         }
         Update: {
+          account_balance?: number | null
           avatar_url?: string | null
           class_year?: string | null
           created_at?: string
+          current_cart_id?: string | null
+          default_shipping_address?: string | null
+          design_history_ids?: string[] | null
           disabled?: boolean | null
           dues_paid?: boolean | null
+          ecommerce_enabled?: boolean | null
           first_name?: string | null
           id?: string
           is_super_admin?: boolean | null

@@ -16,14 +16,19 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Create a properly typed default profile
+  // Create a properly typed default profile with e-commerce fields
   const defaultProfile: Partial<Profile> = {
     first_name: '',
     last_name: '',
     phone: '',
     voice_part: '',
     class_year: '',
-    notes: ''
+    notes: '',
+    ecommerce_enabled: false,
+    design_history_ids: [],
+    current_cart_id: '',
+    default_shipping_address: '',
+    account_balance: 0.00
   };
   
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(profile || defaultProfile);
@@ -82,7 +87,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean | number) => {
     setEditedProfile(prev => ({
       ...prev,
       [field]: value

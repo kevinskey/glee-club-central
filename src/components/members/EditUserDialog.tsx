@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Select, 
   SelectContent, 
@@ -32,7 +33,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart, CreditCard } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
 interface EditUserDialogProps {
@@ -62,7 +63,10 @@ export function EditUserDialog({
       class_year: user?.class_year || '',
       notes: user?.notes || '',
       dues_paid: user?.dues_paid || false,
-      is_admin: user?.is_super_admin || false
+      is_admin: user?.is_super_admin || false,
+      ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
+      account_balance: (user as any)?.account_balance || 0,
+      default_shipping_address: (user as any)?.default_shipping_address || ''
     }
   });
 
@@ -79,7 +83,10 @@ export function EditUserDialog({
         class_year: user.class_year || '',
         notes: user.notes || '',
         dues_paid: user.dues_paid || false,
-        is_admin: user.is_super_admin || false
+        is_admin: user.is_super_admin || false,
+        ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
+        account_balance: (user as any)?.account_balance || 0,
+        default_shipping_address: (user as any)?.default_shipping_address || ''
       });
     }
   }, [user, isOpen, form]);
@@ -92,7 +99,7 @@ export function EditUserDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User Details</DialogTitle>
           <DialogDescription>
@@ -102,6 +109,7 @@ export function EditUserDialog({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -166,6 +174,7 @@ export function EditUserDialog({
               )}
             />
 
+            {/* Role and Access */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -255,6 +264,82 @@ export function EditUserDialog({
               />
             </div>
 
+            {/* E-commerce Settings */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                E-commerce Settings
+              </h3>
+              
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="ecommerce_enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          Enable E-commerce Access
+                        </FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Allows access to design studio and store features
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="account_balance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" />
+                        Account Balance
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          min="0"
+                          {...field}
+                          value={field.value || 0}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="default_shipping_address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Default Shipping Address</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          value={field.value || ''} 
+                          rows={3}
+                          placeholder="Enter default shipping address..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
               name="notes"
@@ -262,7 +347,7 @@ export function EditUserDialog({
                 <FormItem>
                   <FormLabel>Notes (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ''} />
+                    <Textarea {...field} value={field.value || ''} rows={2} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
