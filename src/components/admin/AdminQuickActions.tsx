@@ -46,14 +46,14 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       title: "Upload Media",
       description: "Add new media files",
       icon: <Upload className="h-5 w-5" />,
-      action: () => navigate("/admin/media-uploader"),
+      action: () => navigate("/admin/hero-manager"),
       color: "bg-orange-500"
     },
     {
       title: "Settings",
       description: "Configure system settings",
       icon: <Settings className="h-5 w-5" />,
-      action: () => navigate("/admin/settings"),
+      action: () => navigate("/admin"),
       color: "bg-gray-500"
     }
   ];

@@ -18,7 +18,7 @@ export function QuickActions() {
     {
       title: "Add Member",
       icon: Users,
-      action: () => navigate("/dashboard/members"),
+      action: () => navigate("/admin/members"),
       color: "bg-blue-500"
     },
     {
@@ -30,25 +30,25 @@ export function QuickActions() {
     {
       title: "Send Announcement",
       icon: Bell,
-      action: () => navigate("/dashboard/announcements"),
+      action: () => navigate("/admin"),
       color: "bg-red-500"
     },
     {
       title: "Upload Music",
       icon: Music,
-      action: () => navigate("/dashboard/sheet-music"),
+      action: () => navigate("/admin"),
       color: "bg-purple-500"
     },
     {
       title: "Upload Media",
       icon: Upload,
-      action: () => navigate("/dashboard/media-library"),
+      action: () => navigate("/admin/hero-manager"),
       color: "bg-pink-500"
     },
     {
       title: "Update Handbook",
       icon: FileText,
-      action: () => navigate("/dashboard/handbook"),
+      action: () => navigate("/admin"),
       color: "bg-amber-500"
     },
   ];
