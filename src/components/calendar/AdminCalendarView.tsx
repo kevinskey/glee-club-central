@@ -17,9 +17,15 @@ interface AdminCalendarViewProps {
   view: 'month' | 'week' | 'day';
   searchQuery?: string;
   selectedEventType?: string;
+  enabledCategories?: string[];
 }
 
-export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 'all' }: AdminCalendarViewProps) {
+export function AdminCalendarView({ 
+  view, 
+  searchQuery = '', 
+  selectedEventType = 'all',
+  enabledCategories = ['rehearsal', 'performance', 'meeting', 'event', 'academic', 'holiday', 'religious', 'travel']
+}: AdminCalendarViewProps) {
   const { events, loading, error, updateEvent, deleteEvent } = useCalendarEvents();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
@@ -28,6 +34,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   console.log('AdminCalendarView: Raw events:', events?.length || 0);
   console.log('AdminCalendarView: Search query:', searchQuery);
   console.log('AdminCalendarView: Selected event type:', selectedEventType);
+  console.log('AdminCalendarView: Enabled categories:', enabledCategories);
 
   // Get all holiday data for the current year and next year
   const currentYear = new Date().getFullYear();
@@ -107,11 +114,12 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
   // Combine all events
   const allEvents = [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
 
-  // Filter events based on search and event types
+  // Filter events based on search, event types, and enabled categories
   const filteredEvents = React.useMemo(() => {
     return allEvents.filter(event => {
       let matchesSearch = true;
       let matchesType = true;
+      let matchesCategory = true;
 
       // Search filter - check if search query exists and is not empty
       if (searchQuery && searchQuery.trim() !== '') {
@@ -128,11 +136,16 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
       if (selectedEventType && selectedEventType !== 'all') {
         matchesType = event.event_type === selectedEventType;
       }
+
+      // Category filter - check if event's category is enabled
+      if (event.event_type) {
+        matchesCategory = enabledCategories.includes(event.event_type);
+      }
       
-      console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}, query="${searchQuery}"`);
-      return matchesSearch && matchesType;
+      console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}, category=${matchesCategory}, query="${searchQuery}"`);
+      return matchesSearch && matchesType && matchesCategory;
     });
-  }, [allEvents, searchQuery, selectedEventType]);
+  }, [allEvents, searchQuery, selectedEventType, enabledCategories]);
 
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
 
@@ -238,6 +251,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
     }
   };
 
+  // Render event card
   const renderEventCard = (event: CalendarEvent) => {
     const isSpelmanEvent = event.id.startsWith('spelman-');
     const isNationalHoliday = event.id.startsWith('national-');
@@ -404,6 +418,7 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventType = 
         <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-2 rounded border">
           <strong>Debug:</strong> Total events: {events?.length || 0} | Spelman events: {spelmanEvents.length} | Filtered: {filteredEvents.length} | 
           Search: "{searchQuery}" | Type: {selectedEventType} | 
+          Categories: {enabledCategories.join(', ')} |
           Has Active Search: {hasActiveSearch ? 'Yes' : 'No'} | 
           Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'} |
           Editor Open: {isEventEditorOpen ? 'Yes' : 'No'} |

@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays, X } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Search, Filter, Plus, Edit, Trash2, CalendarDays, X, Settings } from 'lucide-react';
 import { AdminCalendarView } from '@/components/calendar/AdminCalendarView';
 import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
 import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
+import { EventCategoryFilter } from '@/components/calendar/EventCategoryFilter';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function AdminCalendarPage() {
@@ -17,6 +18,12 @@ export default function AdminCalendarPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedView, setSelectedView] = useState<'month' | 'week' | 'day'>('month');
   const [selectedEventType, setSelectedEventType] = useState('all');
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
+  
+  // Category filter state - all enabled by default
+  const [enabledCategories, setEnabledCategories] = useState([
+    'rehearsal', 'performance', 'meeting', 'event', 'academic', 'holiday', 'religious', 'travel'
+  ]);
 
   useEffect(() => {
     if (user && profile) {
@@ -30,6 +37,14 @@ export default function AdminCalendarPage() {
     if (view === 'month' || view === 'week' || view === 'day') {
       setSelectedView(view);
     }
+  };
+
+  const handleCategoryToggle = (categoryId: string, enabled: boolean) => {
+    setEnabledCategories(prev => 
+      enabled 
+        ? [...prev, categoryId]
+        : prev.filter(id => id !== categoryId)
+    );
   };
 
   const clearSearch = () => {
@@ -73,16 +88,34 @@ export default function AdminCalendarPage() {
             </div>
           </div>
           
-          <Button className="bg-glee-spelman hover:bg-glee-spelman/90 text-white">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Event
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+              className="flex items-center gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Categories
+            </Button>
+            <Button className="bg-glee-spelman hover:bg-glee-spelman/90 text-white">
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
+          {/* Category Filter Panel */}
+          {showCategoryFilter && (
+            <EventCategoryFilter
+              enabledCategories={enabledCategories}
+              onCategoryToggle={handleCategoryToggle}
+            />
+          )}
+
           {/* Enhanced Search and Filters Bar */}
           <Card>
             <CardContent className="p-6">
@@ -177,6 +210,11 @@ export default function AdminCalendarPage() {
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Calendar className="h-5 w-5 text-glee-spelman" />
                 Calendar View - {selectedView.charAt(0).toUpperCase() + selectedView.slice(1)}
+                {enabledCategories.length < 8 && (
+                  <Badge variant="outline" className="text-xs ml-2">
+                    {8 - enabledCategories.length} categories hidden
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -184,6 +222,7 @@ export default function AdminCalendarPage() {
                 view={selectedView}
                 searchQuery={searchQuery}
                 selectedEventType={selectedEventType}
+                enabledCategories={enabledCategories}
               />
             </CardContent>
           </Card>
