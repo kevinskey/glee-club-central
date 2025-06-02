@@ -32,7 +32,8 @@ export function MobileOptimizedContainer({
 
   return (
     <div className={cn(
-      'w-full mx-auto overflow-x-hidden',
+      'w-full mx-auto overflow-x-hidden box-border',
+      'max-w-[100vw]', // Ensure container never exceeds viewport width
       paddingClasses[padding],
       maxWidthClasses[maxWidth],
       className
