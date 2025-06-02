@@ -1,12 +1,20 @@
 
 import React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { AdminStatsCards } from "./AdminStatsCards";
 import { AdminQuickActions } from "./AdminQuickActions";
 import { AdminRecentActivity } from "./AdminRecentActivity";
 import { AdminAnalyticsChart } from "./AdminAnalyticsChart";
 import { AdminMediaOverview } from "./AdminMediaOverview";
+import { MobileAdminDashboard } from "./MobileAdminDashboard";
 
 export function AdminDashboardContent() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileAdminDashboard />;
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}

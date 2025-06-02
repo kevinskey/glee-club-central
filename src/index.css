@@ -6,6 +6,7 @@
 @import "./styles/dashboard-transitions.css";
 @import "./styles/pdf-viewer-optimizations.css";
 @import "./styles/pdf-viewer-mobile.css";
+@import "./styles/mobile-optimizations.css";
 
 @tailwind base;
 @tailwind components;

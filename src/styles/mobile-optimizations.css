@@ -1,0 +1,328 @@
+
+/* Mobile-First Design System Optimizations */
+
+/* Global Mobile Fixes */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  font-size: clamp(14px, 2.5vw, 16px);
+  line-height: 1.5;
+}
+
+/* Container and Layout Fixes */
+.container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
+  max-width: 100% !important;
+  padding-left: clamp(12px, 3vw, 24px);
+  padding-right: clamp(12px, 3vw, 24px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Typography Scaling */
+h1 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1.2;
+  margin-bottom: clamp(0.5rem, 2vw, 1rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 3.5vw, 2rem);
+  line-height: 1.3;
+  margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
+}
+
+h3 {
+  font-size: clamp(1.125rem, 3vw, 1.5rem);
+  line-height: 1.4;
+  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+}
+
+p {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  line-height: 1.6;
+  margin-bottom: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+/* Reduced Padding System */
+.mobile-padding-sm {
+  padding: clamp(0.5rem, 2vw, 0.75rem);
+}
+
+.mobile-padding-md {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.mobile-padding-lg {
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+/* Mobile Card System */
+.mobile-card {
+  border-radius: 8px;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile Grid System */
+.mobile-grid {
+  display: grid;
+  gap: clamp(0.75rem, 2vw, 1rem);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .mobile-grid-sm\:2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-grid-md\:3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Button Optimizations */
+.mobile-button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  border-radius: 6px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(12px, 3vw, 16px);
+}
+
+.mobile-nav-dark {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* PDF Viewer Mobile Optimizations */
+.pdf-mobile-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: hsl(var(--background));
+  z-index: 40;
+  overflow: hidden;
+}
+
+.pdf-mobile-toolbar {
+  height: 56px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(12px, 3vw, 16px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pdf-mobile-content {
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.pdf-page-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 25%;
+  z-index: 5;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pdf-page-tap-left {
+  left: 0;
+}
+
+.pdf-page-tap-right {
+  right: 0;
+}
+
+/* Calendar Mobile Optimizations */
+.calendar-mobile-container {
+  padding: clamp(0.5rem, 2vw, 1rem);
+}
+
+.calendar-mobile-event {
+  padding: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(4px, 1vw, 8px);
+  border-radius: 6px;
+  border-left: 3px solid hsl(var(--primary));
+  background: hsl(var(--muted/20));
+}
+
+.calendar-mobile-event-time {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+
+.calendar-mobile-event-title {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.calendar-mobile-event-location {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
+}
+
+/* Dashboard Mobile Optimizations */
+.dashboard-mobile-container {
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dashboard-mobile-section {
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.dashboard-mobile-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
+}
+
+.dashboard-mobile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: clamp(0.5rem, 2vw, 1rem);
+  margin-bottom: clamp(1rem, 3vw, 1.5rem);
+}
+
+.dashboard-mobile-stat-card {
+  text-align: center;
+  padding: clamp(0.75rem, 3vw, 1rem);
+  background: hsl(var(--muted/30));
+  border-radius: 6px;
+}
+
+.dashboard-mobile-stat-value {
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.dashboard-mobile-stat-label {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  color: hsl(var(--muted-foreground));
+  margin-top: 2px;
+}
+
+/* Dark Mode Optimizations */
+.dark .pdf-mobile-toolbar {
+  background: rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: hsl(var(--foreground));
+}
+
+.dark .calendar-mobile-event {
+  background: hsl(var(--muted/10));
+  border-left-color: hsl(var(--primary));
+}
+
+.dark .mobile-nav {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+/* Touch Optimizations */
+@media (hover: none) and (pointer: coarse) {
+  button, .btn, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  .hover\:scale-105:hover {
+    transform: none;
+  }
+  
+  .hover\:scale-105:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .dashboard-mobile-card,
+  .calendar-mobile-event {
+    border-width: 2px;
+  }
+}
+
+/* Viewport Meta Fixes */
+@media (max-width: 320px) {
+  .container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .dashboard-mobile-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Large touch targets for very small screens */
+@media (max-width: 375px) {
+  .mobile-button {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+}

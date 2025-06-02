@@ -1,62 +1,23 @@
 
-import { useState, useEffect } from 'react';
+import * as React from "react"
 
-export function useIsMobile(breakpoint: number = 768) {
-  const [isMobile, setIsMobile] = useState(false);
+const MOBILE_BREAKPOINT = 768
 
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean>(false)
 
-    // Check on mount
-    checkIsMobile();
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    
+    // Set initial value
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    
+    mql.addEventListener("change", onChange)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
 
-    // Add event listener
-    window.addEventListener('resize', checkIsMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, [breakpoint]);
-
-  return isMobile;
-}
-
-export function useIsSmallMobile(breakpoint: number = 480) {
-  const [isSmallMobile, setIsSmallMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsSmallMobile = () => {
-      setIsSmallMobile(window.innerWidth < breakpoint);
-    };
-
-    // Check on mount
-    checkIsSmallMobile();
-
-    // Add event listener
-    window.addEventListener('resize', checkIsSmallMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkIsSmallMobile);
-  }, [breakpoint]);
-
-  return isSmallMobile;
-}
-
-export function useMedia(query: string) {
-  const [matches, setMatches] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(query);
-    setMatches(mediaQuery.matches);
-
-    const handler = (event: MediaQueryListEvent) => {
-      setMatches(event.matches);
-    };
-
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [query]);
-
-  return matches;
+  return isMobile
 }
