@@ -140,6 +140,17 @@ export const router = createBrowserRouter([
       </AuthProvider>
     ),
   },
+  // Legacy route redirect - redirect /role-dashboard to /dashboard
+  {
+    path: "/role-dashboard",
+    element: (
+      <AuthProvider>
+        <RequireAuth>
+          <RoleDashboardPage />
+        </RequireAuth>
+      </AuthProvider>
+    ),
+  },
   // Admin routes
   {
     path: "/admin",
