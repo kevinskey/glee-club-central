@@ -56,6 +56,12 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
     return dayEvents;
   };
 
+  // Get dates that have events for the calendar modifiers
+  const getDatesWithEvents = () => {
+    const datesWithEvents = filteredEvents.map(event => new Date(event.start_time));
+    return datesWithEvents;
+  };
+
   // Get date range based on view
   const getDateRange = () => {
     switch (view) {
@@ -163,6 +169,33 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
                 selected={selectedDate}
                 onSelect={(date) => date && setSelectedDate(date)}
                 className="rounded-md border"
+                modifiers={{
+                  hasEvents: getDatesWithEvents()
+                }}
+                modifiersStyles={{
+                  hasEvents: {
+                    position: 'relative'
+                  }
+                }}
+                components={{
+                  Day: ({ date, ...props }) => {
+                    const hasEvents = getDatesWithEvents().some(eventDate => 
+                      isSameDay(eventDate, date)
+                    );
+                    return (
+                      <div className="relative w-full h-full">
+                        <button {...props} className={props.className}>
+                          {format(date, 'd')}
+                          {hasEvents && (
+                            <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                            </div>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  }
+                }}
               />
             </CardContent>
           </Card>
