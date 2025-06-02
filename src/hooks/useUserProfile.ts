@@ -17,6 +17,7 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
   const [error, setError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
   const mountedRef = useRef(true);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Create profile if it doesn't exist
   const createProfile = useCallback(async (userId: string, userEmail?: string): Promise<Profile | null> => {
@@ -56,12 +57,39 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
 
   // Fetch profile from database
   const fetchProfile = useCallback(async (userId: string, userEmail?: string): Promise<void> => {
-    if (!userId || fetchingRef.current || !mountedRef.current) return;
+    if (!userId || fetchingRef.current || !mountedRef.current) {
+      return;
+    }
 
     console.log('📡 useUserProfile: Fetching profile for user:', userId);
     fetchingRef.current = true;
     setIsLoading(true);
     setError(null);
+
+    // Set a timeout to prevent infinite loading
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      if (mountedRef.current && fetchingRef.current) {
+        console.log('⏰ useUserProfile: Profile fetch timeout, creating fallback');
+        const isAdminUser = userEmail === 'kevinskey@mac.com';
+        const fallbackProfile: Profile = {
+          id: userId,
+          first_name: userEmail?.split('@')[0] || 'User',
+          last_name: '',
+          role: isAdminUser ? 'admin' : 'member',
+          status: 'active',
+          is_super_admin: isAdminUser,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setProfile(fallbackProfile);
+        setIsLoading(false);
+        fetchingRef.current = false;
+      }
+    }, 5000); // 5 second timeout
 
     try {
       // First, try to get existing profile
@@ -71,9 +99,19 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
         .eq('id', userId)
         .maybeSingle();
 
+      // Clear timeout since we got a response
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
       if (fetchError) {
         console.error('❌ useUserProfile: Error fetching profile:', fetchError);
-        setError(fetchError.message);
+        if (mountedRef.current) {
+          setError(fetchError.message);
+          setIsLoading(false);
+        }
+        fetchingRef.current = false;
         return;
       }
 
@@ -85,13 +123,25 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
         finalProfile = await createProfile(userId, userEmail);
       }
 
-      if (mountedRef.current && finalProfile) {
-        setProfile(finalProfile as Profile);
-        console.log('✅ useUserProfile: Profile set successfully:', finalProfile.role);
+      if (mountedRef.current) {
+        if (finalProfile) {
+          setProfile(finalProfile as Profile);
+          console.log('✅ useUserProfile: Profile set successfully:', finalProfile.role);
+        } else {
+          setError('Failed to create profile');
+        }
+        setIsLoading(false);
       }
 
     } catch (err) {
       console.error('💥 useUserProfile: Unexpected error:', err);
+      
+      // Clear timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      
       if (mountedRef.current) {
         setError(err instanceof Error ? err.message : 'Unknown error');
         
@@ -109,12 +159,10 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
         };
         
         setProfile(fallbackProfile);
+        setIsLoading(false);
         console.log('🆘 useUserProfile: Using emergency fallback profile');
       }
     } finally {
-      if (mountedRef.current) {
-        setIsLoading(false);
-      }
       fetchingRef.current = false;
     }
   }, [createProfile]);
@@ -169,9 +217,17 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
     if (user?.id) {
       fetchProfile(user.id, user.email);
     } else {
+      // Clear everything when no user
       setProfile(null);
       setError(null);
       setIsLoading(false);
+      fetchingRef.current = false;
+      
+      // Clear any pending timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     }
   }, [user?.id, user?.email, fetchProfile]);
 
@@ -179,6 +235,11 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
   useEffect(() => {
     return () => {
       mountedRef.current = false;
+      
+      // Clear timeout on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     };
   }, []);
 

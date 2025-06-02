@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Use the consolidated profile hook
-  const { profile, refreshProfile: refreshUserProfile } = useUserProfile(user);
+  const { profile, refreshProfile: refreshUserProfile, isLoading: profileLoading } = useUserProfile(user);
 
   useEffect(() => {
     let mounted = true;
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(null);
           }
           
-          // Set loading to false and initialized to true regardless of session
+          // Auth initialization is complete
           setIsLoading(false);
           setIsInitialized(true);
           console.log('✅ AuthContext: Auth initialization complete');
@@ -94,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
       }
       
-      // Ensure loading stops after any auth state change
+      // Ensure auth loading stops after any auth state change
       setIsLoading(false);
       setIsInitialized(true);
     });
@@ -206,7 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     profile,
     isAuthenticated: !!user,
-    isLoading,
+    isLoading: isLoading || profileLoading, // Combine auth and profile loading
     isInitialized,
     login,
     logout,
