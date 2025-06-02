@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,7 +55,11 @@ export const UpcomingPerformances: React.FC = () => {
 
       const upcomingPerformances = data
         ?.map(assignment => assignment.events)
-        .filter(event => event && isFuture(new Date(event.start_time)))
+        .filter((event): event is UpcomingPerformance => 
+          event !== null && 
+          event !== undefined && 
+          isFuture(new Date(event.start_time))
+        )
         .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()) || [];
 
       setPerformances(upcomingPerformances);
