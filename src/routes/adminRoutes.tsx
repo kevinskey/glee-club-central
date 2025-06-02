@@ -7,7 +7,7 @@ import AdminRoute from '@/components/auth/AdminRoute';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
-import MediaLibraryPage from '@/pages/admin/MediaLibraryPage';
+import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage';
 import SettingsPage from '@/pages/admin/SettingsPage';
 import OrdersPage from '@/pages/admin/OrdersPage';
@@ -16,7 +16,7 @@ import EventDetailsPage from '@/pages/events/EventDetailsPage';
 import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 
 // Import additional admin pages
-import AdminHeroManager from '@/pages/admin/AdminHeroManager';
+import AdminModularHeroPage from '@/pages/admin/AdminModularHeroPage';
 import AdminMediaUploaderPage from '@/pages/admin/AdminMediaUploaderPage';
 import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
 
@@ -65,7 +65,7 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin/hero-manager',
     element: (
       <AdminRoute>
-        <AdminHeroManager />
+        <AdminModularHeroPage />
       </AdminRoute>
     ),
   },
@@ -81,7 +81,7 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin/media',
     element: (
       <AdminRoute>
-        <MediaLibraryPage />
+        <AdminMediaLibraryPage />
       </AdminRoute>
     ),
   },
