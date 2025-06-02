@@ -172,10 +172,8 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
                 modifiers={{
                   hasEvents: getDatesWithEvents()
                 }}
-                modifiersStyles={{
-                  hasEvents: {
-                    position: 'relative'
-                  }
+                modifiersClassNames={{
+                  hasEvents: "relative"
                 }}
                 components={{
                   Day: ({ date, ...props }) => {
@@ -184,14 +182,14 @@ export function AdminCalendarView({ view, searchQuery = '', selectedEventTypes =
                     );
                     return (
                       <div className="relative w-full h-full">
-                        <button {...props} className={props.className}>
+                        <div {...props}>
                           {format(date, 'd')}
                           {hasEvents && (
                             <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
                               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                             </div>
                           )}
-                        </button>
+                        </div>
                       </div>
                     );
                   }
