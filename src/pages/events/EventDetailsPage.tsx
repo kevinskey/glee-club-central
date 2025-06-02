@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,9 +22,14 @@ interface EventDetails {
   full_description?: string;
   event_types: string[];
   is_public: boolean;
+  is_private: boolean;
   allow_rsvp: boolean;
+  allow_reminders: boolean;
+  allow_ics_download: boolean;
+  allow_google_map_link: boolean;
   image_url?: string;
   event_details?: any;
+  created_at: string;
 }
 
 export default function EventDetailsPage() {
@@ -50,7 +54,19 @@ export default function EventDetailsPage() {
         .single();
 
       if (error) throw error;
-      setEvent(data);
+      
+      // Transform the data to match our interface
+      const transformedEvent: EventDetails = {
+        ...data,
+        is_private: data.is_private || false,
+        allow_reminders: data.allow_reminders || false,
+        allow_ics_download: data.allow_ics_download || true,
+        allow_google_map_link: data.allow_google_map_link || true,
+        created_at: data.created_at || new Date().toISOString(),
+        event_types: data.event_types || []
+      };
+      
+      setEvent(transformedEvent);
     } catch (error) {
       console.error('Error fetching event details:', error);
       toast.error('Failed to load event details');
