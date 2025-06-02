@@ -10,18 +10,21 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { HeroSlideEditor } from "./HeroSlideEditor";
+import { HeroGlobalSettings } from "./HeroGlobalSettings";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface HeroSlide {
   id: string;
-  image_url: string;
+  media_id?: string;
+  media_type: 'image' | 'video';
   title: string;
-  subtitle: string;
-  button_text: string;
-  button_link: string;
-  secondary_button_text?: string;
-  secondary_button_link?: string;
-  position: number;
+  description: string;
+  button_text?: string;
+  button_link?: string;
+  text_position: 'top' | 'center' | 'bottom';
+  text_alignment: 'left' | 'center' | 'right';
+  visible: boolean;
+  slide_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -44,7 +47,7 @@ export function HeroSlidesManager() {
       const { data, error } = await supabase
         .from('hero_slides')
         .select('*')
-        .order('position', { ascending: true });
+        .order('slide_order', { ascending: true });
 
       if (error) throw error;
       setSlides(data || []);
@@ -58,23 +61,51 @@ export function HeroSlidesManager() {
 
   const createSlideFromImage = async (mediaFile: any) => {
     try {
-      const nextPosition = slides.length;
+      const nextOrder = slides.length;
       
       const { error } = await supabase
         .from('hero_slides')
         .insert({
-          image_url: mediaFile.file_url,
-          title: `Spelman College Glee Club`,
-          subtitle: `A distinguished ensemble with a rich heritage of musical excellence`,
-          button_text: `Learn More`,
-          button_link: `/about`,
-          position: nextPosition
+          media_id: mediaFile.id,
+          media_type: mediaFile.file_type.startsWith('video/') ? 'video' : 'image',
+          title: 'Your Slide Title',
+          description: 'Your slide description here.',
+          text_position: 'center',
+          text_alignment: 'center',
+          visible: false,
+          slide_order: nextOrder
         });
 
       if (error) throw error;
       
       toast.success("New slide created successfully");
       setSelectImageDialogOpen(false);
+      await fetchSlides();
+    } catch (error) {
+      console.error("Error creating slide:", error);
+      toast.error("Failed to create slide");
+    }
+  };
+
+  const createEmptySlide = async () => {
+    try {
+      const nextOrder = slides.length;
+      
+      const { error } = await supabase
+        .from('hero_slides')
+        .insert({
+          media_type: 'image',
+          title: 'Your Slide Title',
+          description: 'Your slide description here.',
+          text_position: 'center',
+          text_alignment: 'center',
+          visible: false,
+          slide_order: nextOrder
+        });
+
+      if (error) throw error;
+      
+      toast.success("New slide created successfully");
       await fetchSlides();
     } catch (error) {
       console.error("Error creating slide:", error);
@@ -96,15 +127,15 @@ export function HeroSlidesManager() {
     // Swap positions
     [newSlides[index], newSlides[newIndex]] = [newSlides[newIndex], newSlides[index]];
     
-    // Update position values
-    newSlides[index].position = index;
-    newSlides[newIndex].position = newIndex;
+    // Update slide_order values
+    newSlides[index].slide_order = index;
+    newSlides[newIndex].slide_order = newIndex;
 
     try {
       // Update positions in database
       await Promise.all([
-        supabase.from('hero_slides').update({ position: newSlides[index].position }).eq('id', newSlides[index].id),
-        supabase.from('hero_slides').update({ position: newSlides[newIndex].position }).eq('id', newSlides[newIndex].id)
+        supabase.from('hero_slides').update({ slide_order: newSlides[index].slide_order }).eq('id', newSlides[index].id),
+        supabase.from('hero_slides').update({ slide_order: newSlides[newIndex].slide_order }).eq('id', newSlides[newIndex].id)
       ]);
 
       setSlides(newSlides);
@@ -119,7 +150,9 @@ export function HeroSlidesManager() {
     setSlides(slides.filter(slide => slide.id !== slideId));
   };
 
-  const imageLibrary = filteredMediaFiles.filter(file => file.file_type?.startsWith('image/'));
+  const imageLibrary = filteredMediaFiles.filter(file => 
+    file.file_type?.startsWith('image/') || file.file_type?.startsWith('video/')
+  );
 
   return (
     <div className="space-y-6">
@@ -140,59 +173,79 @@ export function HeroSlidesManager() {
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex flex-col sm:flex-row justify-between gap-4">
-            <Dialog open={selectImageDialogOpen} onOpenChange={setSelectImageDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-glee-purple hover:bg-glee-purple/90">
-                  <Plus className="mr-2 h-4 w-4" /> Create New Slide
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-6xl max-h-[80vh]">
-                <DialogHeader>
-                  <DialogTitle>Select Image for New Hero Slide</DialogTitle>
-                  <DialogDescription>
-                    Choose an image from your media library to create a new hero slide.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="max-h-96 overflow-y-auto">
-                  {imageLibrary.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-                      {imageLibrary.map((mediaFile) => (
-                        <div
-                          key={mediaFile.id}
-                          className="relative cursor-pointer border rounded-lg overflow-hidden hover:border-primary hover:shadow-md transition-all duration-200"
-                          onClick={() => createSlideFromImage(mediaFile)}
-                        >
-                          <AspectRatio ratio={16/9}>
-                            <img
-                              src={mediaFile.file_url}
-                              alt={mediaFile.title}
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://via.placeholder.com/640x360?text=Image+Not+Found";
-                              }}
-                            />
-                          </AspectRatio>
-                          <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
-                            <div className="opacity-0 hover:opacity-100 transition-opacity duration-200">
-                              <Plus className="h-8 w-8 text-white" />
+            <div className="flex gap-2">
+              <Button onClick={createEmptySlide} variant="outline">
+                <Plus className="mr-2 h-4 w-4" /> Add Empty Slide
+              </Button>
+              
+              <Dialog open={selectImageDialogOpen} onOpenChange={setSelectImageDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-glee-purple hover:bg-glee-purple/90">
+                    <Plus className="mr-2 h-4 w-4" /> Add from Media Library
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-6xl max-h-[80vh]">
+                  <DialogHeader>
+                    <DialogTitle>Select Media for New Hero Slide</DialogTitle>
+                    <DialogDescription>
+                      Choose an image or video from your media library to create a new hero slide.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="max-h-96 overflow-y-auto">
+                    {imageLibrary.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+                        {imageLibrary.map((mediaFile) => (
+                          <div
+                            key={mediaFile.id}
+                            className="relative cursor-pointer border rounded-lg overflow-hidden hover:border-primary hover:shadow-md transition-all duration-200"
+                            onClick={() => createSlideFromImage(mediaFile)}
+                          >
+                            <AspectRatio ratio={16/9}>
+                              {mediaFile.file_type?.startsWith('video/') ? (
+                                <video
+                                  src={mediaFile.file_url}
+                                  className="w-full h-full object-cover"
+                                  muted
+                                  onError={(e) => {
+                                    (e.target as HTMLVideoElement).style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <img
+                                  src={mediaFile.file_url}
+                                  alt={mediaFile.title}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "https://via.placeholder.com/640x360?text=Media+Not+Found";
+                                  }}
+                                />
+                              )}
+                            </AspectRatio>
+                            <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-200 flex items-center justify-center">
+                              <div className="opacity-0 hover:opacity-100 transition-opacity duration-200">
+                                <Plus className="h-8 w-8 text-white" />
+                              </div>
+                            </div>
+                            <div className="p-2 bg-background/95 backdrop-blur">
+                              <p className="text-sm font-medium truncate">{mediaFile.title}</p>
+                              <Badge variant="outline" className="text-xs">
+                                {mediaFile.file_type?.startsWith('video/') ? 'Video' : 'Image'}
+                              </Badge>
                             </div>
                           </div>
-                          <div className="p-2 bg-background/95 backdrop-blur">
-                            <p className="text-sm font-medium truncate">{mediaFile.title}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <Images className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium mb-2">No images found in media library</p>
-                      <p className="text-sm">Upload some images to the media library first</p>
-                    </div>
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-muted-foreground">
+                        <Images className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg font-medium mb-2">No media found in library</p>
+                        <p className="text-sm">Upload some images or videos to the media library first</p>
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           <Separator className="mb-6" />
@@ -210,9 +263,14 @@ export function HeroSlidesManager() {
                 <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                   Create hero slides with custom text, buttons, and links for your homepage slideshow.
                 </p>
-                <Button onClick={() => setSelectImageDialogOpen(true)} size="lg">
-                  <Plus className="mr-2 h-5 w-5" /> Create Your First Hero Slide
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={createEmptySlide} size="lg" variant="outline">
+                    <Plus className="mr-2 h-5 w-5" /> Add Empty Slide
+                  </Button>
+                  <Button onClick={() => setSelectImageDialogOpen(true)} size="lg">
+                    <Plus className="mr-2 h-5 w-5" /> Add from Media Library
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="space-y-6">
@@ -221,7 +279,7 @@ export function HeroSlidesManager() {
                     Hero Slides ({slides.length})
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Click edit on any slide to customize text and buttons
+                    Click edit on any slide to customize content and settings
                   </p>
                 </div>
                 
@@ -262,6 +320,8 @@ export function HeroSlidesManager() {
           </div>
         </CardContent>
       </Card>
+      
+      <HeroGlobalSettings />
     </div>
   );
 }

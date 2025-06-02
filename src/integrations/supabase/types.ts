@@ -395,6 +395,92 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_settings: {
+        Row: {
+          animation_style: string | null
+          created_at: string | null
+          id: string
+          loop: boolean | null
+          pause_on_hover: boolean | null
+          scroll_interval: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          animation_style?: string | null
+          created_at?: string | null
+          id?: string
+          loop?: boolean | null
+          pause_on_hover?: boolean | null
+          scroll_interval?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          animation_style?: string | null
+          created_at?: string | null
+          id?: string
+          loop?: boolean | null
+          pause_on_hover?: boolean | null
+          scroll_interval?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      hero_slides: {
+        Row: {
+          button_link: string | null
+          button_text: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          media_id: string | null
+          media_type: string | null
+          slide_order: number | null
+          text_alignment: string | null
+          text_position: string | null
+          title: string
+          updated_at: string | null
+          visible: boolean | null
+        }
+        Insert: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          media_id?: string | null
+          media_type?: string | null
+          slide_order?: number | null
+          text_alignment?: string | null
+          text_position?: string | null
+          title?: string
+          updated_at?: string | null
+          visible?: boolean | null
+        }
+        Update: {
+          button_link?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          media_id?: string | null
+          media_type?: string | null
+          slide_order?: number | null
+          text_alignment?: string | null
+          text_position?: string | null
+          title?: string
+          updated_at?: string | null
+          visible?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hero_slides_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_library: {
         Row: {
           created_at: string
