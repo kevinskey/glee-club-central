@@ -1,9 +1,10 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, Bell, Search, Sun, Moon } from "lucide-react";
+import { Menu, Bell, Search, Sun, Moon, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,6 +22,7 @@ interface AdminTopBarProps {
 export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps) {
   const { user, logout, profile } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     try {
@@ -37,6 +39,17 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
   return (
     <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 transition-colors duration-200">
       <div className="flex items-center gap-4">
+        {/* Home Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/")}
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          title="Go to Public Homepage"
+        >
+          <Home className="h-5 w-5" />
+        </Button>
+
         {isMobile && onMenuClick && (
           <Button
             variant="ghost"
