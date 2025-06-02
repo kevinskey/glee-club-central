@@ -39,7 +39,10 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       console.log('✅ Current user authenticated:', currentUser?.email);
       
       if (!currentUser) {
-        throw new Error('User not authenticated');
+        console.log('❌ No authenticated user found');
+        setUsers([]);
+        setIsLoading(false);
+        return;
       }
 
       // Fetch profiles using the fixed RLS policies
@@ -66,50 +69,17 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       if (profilesError) {
         console.error('❌ Error fetching profiles:', profilesError);
         setError(profilesError.message);
-        
-        // Fallback: create a minimal user list with just the current user if admin
-        if (currentUser.email === 'kevinskey@mac.com') {
-          const fallbackUsers: SimpleUser[] = [
-            {
-              id: currentUser.id,
-              first_name: 'Admin',
-              last_name: 'User',
-              email: currentUser.email || '',
-              role: 'admin',
-              status: 'active',
-              is_super_admin: true
-            }
-          ];
-          setUsers(fallbackUsers);
-        } else {
-          setUsers([]);
-        }
+        setUsers([]);
         return;
       }
 
       if (!profiles || profiles.length === 0) {
         console.log('ℹ️ No profiles found');
-        // If admin and no profiles, create a fallback
-        if (currentUser.email === 'kevinskey@mac.com') {
-          const fallbackUsers: SimpleUser[] = [
-            {
-              id: currentUser.id,
-              first_name: 'Admin',
-              last_name: 'User',
-              email: currentUser.email || '',
-              role: 'admin',
-              status: 'active',
-              is_super_admin: true
-            }
-          ];
-          setUsers(fallbackUsers);
-        } else {
-          setUsers([]);
-        }
+        setUsers([]);
         return;
       }
 
-      // Get emails for users by querying auth.users (admin only)
+      // Get emails for users if admin
       const isCurrentUserAdmin = currentUser.email === 'kevinskey@mac.com';
       
       let usersWithEmails: SimpleUser[];
@@ -204,7 +174,7 @@ export const useUsersSimplified = (): UseUsersSimplifiedResponse => {
       
       const searchTermLower = searchTerm.toLowerCase();
       
-      // Search in current users list first (client-side filtering)
+      // Search in current users list (client-side filtering)
       const clientSideResults = users.filter(user => {
         const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
         const email = (user.email || '').toLowerCase();

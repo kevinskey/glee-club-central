@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ export function UserManagementSimplified() {
   // Auto-refresh users when component mounts and when authenticated
   useEffect(() => {
     if (isAuthenticated && isAdminUser) {
+      console.log('🔄 Auto-refreshing users...');
       refreshUsers();
     }
   }, [isAuthenticated, isAdminUser, refreshUsers]);
