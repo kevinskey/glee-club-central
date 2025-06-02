@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Wand2, Download, ShoppingCart, AlertCircle } from 'lucide-react';
+import { Upload, Wand2, Download, ShoppingCart, AlertCircle, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { BrandSelector } from './BrandSelector';
@@ -32,6 +32,8 @@ export function ProductDesignStudio() {
   const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string; code: string } | null>(null);
   const [designName, setDesignName] = useState('');
   const [designDescription, setDesignDescription] = useState('');
+  const [designText, setDesignText] = useState('');
+  const [designMode, setDesignMode] = useState<'upload' | 'text' | null>(null);
   const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
@@ -55,8 +57,13 @@ export function ProductDesignStudio() {
   };
 
   const generateMockup = async () => {
-    if (!selectedFile || !selectedProduct || !selectedBrand || !selectedColor) {
-      toast.error('Please complete all selections: upload image, select product type, brand, and color');
+    if (!selectedProduct || !selectedBrand || !selectedColor) {
+      toast.error('Please complete all selections: product type, brand, and color');
+      return;
+    }
+
+    if (!selectedFile && !designText) {
+      toast.error('Please either upload an image or enter text for your design');
       return;
     }
 
@@ -66,31 +73,38 @@ export function ProductDesignStudio() {
     try {
       console.log('Starting Amazon-style mockup generation process...');
       
-      // Upload the user's graphic to Supabase storage
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `user-designs/${fileName}`;
+      let userImageUrl = null;
+      
+      // Upload the user's graphic to Supabase storage if they uploaded a file
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `user-designs/${fileName}`;
 
-      console.log('Uploading user design to storage...');
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media-library')
-        .upload(filePath, selectedFile);
+        console.log('Uploading user design to storage...');
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('media-library')
+          .upload(filePath, selectedFile);
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw new Error(`Failed to upload design: ${uploadError.message}`);
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Failed to upload design: ${uploadError.message}`);
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('media-library')
+          .getPublicUrl(filePath);
+        
+        userImageUrl = publicUrl;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('media-library')
-        .getPublicUrl(filePath);
 
       console.log('Calling AI mockup generation...');
       
       // Generate AI mockup with enhanced Amazon-style parameters
       const { data, error } = await supabase.functions.invoke('generate-product-mockup', {
         body: {
-          userImageUrl: publicUrl,
+          userImageUrl,
+          designText: designText || null,
           productType: selectedProduct,
           designName,
           designDescription,
@@ -98,8 +112,8 @@ export function ProductDesignStudio() {
             brand: selectedBrand,
             color: selectedColor
           },
-          amazonStyle: true, // New flag for Amazon-style product photography
-          singleMockup: true // Ensure only one mockup per request
+          amazonStyle: true,
+          singleMockup: true
         }
       });
 
@@ -144,7 +158,7 @@ export function ProductDesignStudio() {
           price: totalPrice,
           image_url: generatedMockup,
           tags: ['custom', 'ai-generated', selectedProduct, selectedBrand, selectedColor.name.toLowerCase()],
-          quantity_in_stock: 999, // Custom products are made on demand
+          quantity_in_stock: 999,
           is_active: true
         });
 
@@ -159,6 +173,8 @@ export function ProductDesignStudio() {
       setSelectedColor(null);
       setDesignName('');
       setDesignDescription('');
+      setDesignText('');
+      setDesignMode(null);
       setGeneratedMockup(null);
       setError(null);
     } catch (error) {
@@ -200,30 +216,9 @@ export function ProductDesignStudio() {
             </div>
           )}
 
-          {/* Upload Section */}
+          {/* Step 1: Product Selection */}
           <div className="space-y-2">
-            <Label htmlFor="design-upload">Upload Your Design</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                id="design-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <label htmlFor="design-upload" className="cursor-pointer">
-                <Upload className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  {selectedFile ? selectedFile.name : 'Click to upload your design (PNG, JPG, SVG)'}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">Max file size: 10MB</p>
-              </label>
-            </div>
-          </div>
-
-          {/* Product Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="product-type">Choose Product Type</Label>
+            <Label htmlFor="product-type">Step 1: Choose Product Type</Label>
             <Select value={selectedProduct} onValueChange={setSelectedProduct}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a product to customize" />
@@ -238,45 +233,135 @@ export function ProductDesignStudio() {
             </Select>
           </div>
 
-          {/* Brand Selection */}
+          {/* Step 2: Brand Selection */}
           {selectedProduct && (
-            <BrandSelector 
-              selectedBrand={selectedBrand}
-              onBrandSelect={setSelectedBrand}
-            />
+            <div className="space-y-2">
+              <Label>Step 2: Choose Quality Tier</Label>
+              <BrandSelector 
+                selectedBrand={selectedBrand}
+                onBrandSelect={setSelectedBrand}
+              />
+            </div>
           )}
 
-          {/* Color Selection */}
+          {/* Step 3: Color Selection */}
           {selectedBrand && (
-            <ColorSelector
-              selectedBrand={selectedBrand}
-              selectedColor={selectedColor}
-              onColorSelect={setSelectedColor}
-            />
+            <div className="space-y-2">
+              <Label>Step 3: Select Garment Color</Label>
+              <ColorSelector
+                selectedBrand={selectedBrand}
+                selectedColor={selectedColor}
+                onColorSelect={setSelectedColor}
+              />
+            </div>
+          )}
+
+          {/* Step 4: Design Method Selection */}
+          {selectedColor && !designMode && (
+            <div className="space-y-3">
+              <Label>Step 4: How would you like to add your design?</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col gap-2"
+                  onClick={() => setDesignMode('upload')}
+                >
+                  <Upload className="h-6 w-6" />
+                  Upload Image
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-20 flex flex-col gap-2"
+                  onClick={() => setDesignMode('text')}
+                >
+                  <Type className="h-6 w-6" />
+                  Create Text Design
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Design Upload Section */}
+          {designMode === 'upload' && (
+            <div className="space-y-2">
+              <Label htmlFor="design-upload">Upload Your Design</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <input
+                  id="design-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <label htmlFor="design-upload" className="cursor-pointer">
+                  <Upload className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-600">
+                    {selectedFile ? selectedFile.name : 'Click to upload your design (PNG, JPG, SVG)'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Max file size: 10MB</p>
+                </label>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDesignMode(null);
+                  setSelectedFile(null);
+                }}
+              >
+                ← Choose different design method
+              </Button>
+            </div>
+          )}
+
+          {/* Text Design Section */}
+          {designMode === 'text' && (
+            <div className="space-y-2">
+              <Label htmlFor="design-text">Enter Your Text Design</Label>
+              <Textarea
+                id="design-text"
+                value={designText}
+                onChange={(e) => setDesignText(e.target.value)}
+                placeholder="Enter the text you want on your product..."
+                rows={3}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDesignMode(null);
+                  setDesignText('');
+                }}
+              >
+                ← Choose different design method
+              </Button>
+            </div>
           )}
 
           {/* Design Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="design-name">Product Name</Label>
-              <Input
-                id="design-name"
-                value={designName}
-                onChange={(e) => setDesignName(e.target.value)}
-                placeholder="e.g., Spelman Glee Custom Tee"
-              />
+          {(selectedFile || designText) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="design-name">Product Name</Label>
+                <Input
+                  id="design-name"
+                  value={designName}
+                  onChange={(e) => setDesignName(e.target.value)}
+                  placeholder="e.g., Spelman Glee Custom Tee"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="design-description">Description (Optional)</Label>
+                <Textarea
+                  id="design-description"
+                  value={designDescription}
+                  onChange={(e) => setDesignDescription(e.target.value)}
+                  placeholder="Describe your custom product..."
+                  rows={3}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="design-description">Description (Optional)</Label>
-              <Textarea
-                id="design-description"
-                value={designDescription}
-                onChange={(e) => setDesignDescription(e.target.value)}
-                placeholder="Describe your custom product..."
-                rows={3}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Price Display */}
           {selectedProduct && selectedBrand && (
@@ -292,23 +377,25 @@ export function ProductDesignStudio() {
           )}
 
           {/* Generate Button */}
-          <Button
-            onClick={generateMockup}
-            disabled={!selectedFile || !selectedProduct || !selectedBrand || !selectedColor || isGenerating}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <Wand2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating Amazon-Style Mockup...
-              </>
-            ) : (
-              <>
-                <Wand2 className="h-4 w-4 mr-2" />
-                Generate Amazon-Style Mockup
-              </>
-            )}
-          </Button>
+          {(selectedFile || designText) && selectedProduct && selectedBrand && selectedColor && (
+            <Button
+              onClick={generateMockup}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <Wand2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating Amazon-Style Mockup...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Generate Amazon-Style Mockup
+                </>
+              )}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
