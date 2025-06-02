@@ -48,10 +48,23 @@ export const useAuthManager = () => {
     try {
       logAuthEvent('Loading profile for user', { userId: user.id, email: user.email });
       
-      // Try to get or create profile with timeout
+      // For known admin, use fallback immediately
+      if (user.email === 'kevinskey@mac.com') {
+        const fallbackProfile = createFallbackProfile(user);
+        setState(prev => ({ 
+          ...prev, 
+          profile: fallbackProfile, 
+          isLoading: false,
+          error: null
+        }));
+        logAuthEvent('Using admin fallback profile', { role: fallbackProfile.role });
+        return;
+      }
+      
+      // Try to get profile with shorter timeout for non-admin users
       const profilePromise = ensureProfileExists(user.id, user.email, user.user_metadata);
       const timeoutPromise = new Promise<Profile>((_, reject) => 
-        setTimeout(() => reject(new Error('Profile loading timeout')), 5000)
+        setTimeout(() => reject(new Error('Profile loading timeout')), 3000)
       );
 
       const profile = await Promise.race([profilePromise, timeoutPromise]);
@@ -105,12 +118,8 @@ export const useAuthManager = () => {
         error: null
       }));
       
-      // Load profile with a small delay to prevent auth deadlocks
-      setTimeout(() => {
-        if (mountedRef.current) {
-          loadUserProfile(session.user);
-        }
-      }, 100);
+      // Load profile immediately
+      loadUserProfile(session.user);
     } else {
       setState({
         user: null,
