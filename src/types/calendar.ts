@@ -24,6 +24,14 @@ export interface CalendarEvent {
   created_at: string;
 }
 
+export interface Holiday {
+  id: string;
+  title: string;
+  date: Date;
+  description: string;
+  imageUrl?: string;
+}
+
 export interface EventRSVP {
   id: string;
   event_id: string;
