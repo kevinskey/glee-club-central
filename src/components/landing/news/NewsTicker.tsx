@@ -202,8 +202,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (loading) {
     console.log('NewsTicker: Showing loading state');
     return (
-      <div className="bg-glee-columbia text-white py-1 relative">
-        <div className="container flex items-center justify-center text-sm font-medium">
+      <div className="bg-glee-columbia text-white py-2 relative">
+        <div className="container flex items-center justify-center text-sm font-medium pt-1">
           <div className="flex-1 overflow-hidden flex items-center">
             <div className="w-full animate-pulse h-4 bg-white/30 rounded"></div>
           </div>
@@ -216,8 +216,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   if (error && newsArticles.length === 0) {
     console.log('NewsTicker: Showing error state');
     return (
-      <div className="bg-red-600 text-white py-1 relative">
-        <div className="container flex items-center justify-center text-sm font-medium">
+      <div className="bg-red-600 text-white py-2 relative">
+        <div className="container flex items-center justify-center text-sm font-medium pt-1">
           <span>📰 Unable to load news at this time</span>
         </div>
       </div>
@@ -227,8 +227,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   console.log('NewsTicker: Rendering with', newsArticles.length, 'articles');
   
   return (
-    <div className="bg-glee-columbia text-white py-1 relative shadow-sm">
-      <div className="container flex items-center justify-center text-sm font-medium">
+    <div className="bg-glee-columbia text-white py-2 relative shadow-sm">
+      <div className="container flex items-center justify-center text-sm font-medium pt-1">
         <div className="flex-1 overflow-hidden flex items-center">
           <div className="flex whitespace-nowrap animate-marquee-slow">
             {newsArticles.map((article, index) => {
