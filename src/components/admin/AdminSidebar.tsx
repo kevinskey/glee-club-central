@@ -12,10 +12,12 @@ import {
   ShoppingCart,
   Megaphone,
   Image,
-  ImageIcon
+  ImageIcon,
+  Home
 } from 'lucide-react';
 
 const navItems = [
+  { to: '/', icon: Home, label: 'Back to Site' },
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/admin/members', icon: Users, label: 'Members' },
