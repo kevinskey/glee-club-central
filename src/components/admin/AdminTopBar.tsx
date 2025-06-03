@@ -180,8 +180,8 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
         </div>
       </div>
 
-      {/* Navigation Bar */}
-      <div className="px-4 py-1.5 border-t border-gray-200 dark:border-gray-700">
+      {/* Navigation Bar - Made Sticky */}
+      <div className="sticky top-0 z-40 px-4 py-1.5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <h1 className="text-sm font-semibold text-gray-900 dark:text-white">
             Admin Panel
