@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -138,6 +137,10 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     return VOICE_PART_MAPPING[normalized] || section;
   };
 
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -147,8 +150,8 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       return;
     }
 
-    const text = await file.text();
     try {
+      const text = await file.text();
       const parsed = parseCSV(text);
       setCsvData(parsed);
       
@@ -168,13 +171,15 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
       setCsvColumns(columns);
       
-      // Auto-map obvious columns
+      // Auto-map obvious columns with more flexible matching
       const autoMapping: ColumnMapping = {};
       columns.forEach(col => {
-        const header = col.header.toLowerCase();
-        if (header.includes('first') && header.includes('name')) {
+        const header = col.header.toLowerCase().trim();
+        
+        // Map common variations
+        if (header.includes('first') && header.includes('name') || header === 'first name') {
           autoMapping[col.header] = 'first_name';
-        } else if (header.includes('last') && header.includes('name')) {
+        } else if (header.includes('last') && header.includes('name') || header === 'last name') {
           autoMapping[col.header] = 'last_name';
         } else if (header === 'email') {
           autoMapping[col.header] = 'email';
@@ -396,21 +401,35 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
               </Button>
             </div>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="space-y-4">
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv"
+                accept=".csv,text/csv"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="csv-upload"
               />
-              <label htmlFor="csv-upload" className="cursor-pointer">
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">
-                  Click to select your CSV file
-                </p>
-              </label>
+              
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                onClick={handleFileSelect}
+              >
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <div className="space-y-2">
+                  <p className="text-lg font-medium">Click to select your CSV file</p>
+                  <p className="text-sm text-gray-500">
+                    Supports files with columns like: First name, Last name, Email, Number, Section, etc.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Button onClick={handleFileSelect} className="w-full max-w-sm">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Choose CSV File
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
