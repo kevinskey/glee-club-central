@@ -1,3 +1,4 @@
+
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
@@ -15,6 +16,7 @@ import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
 import TreasurerDashboard from "./pages/dashboard/TreasurerDashboard";
 import LibrarianDashboard from "./pages/dashboard/LibrarianDashboard";
 import HistorianDashboard from "./pages/dashboard/HistorianDashboard";
+import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
 
@@ -62,6 +64,10 @@ const router = createBrowserRouter([
       {
         path: "exec/historian",
         element: <HistorianDashboard />,
+      },
+      {
+        path: "admin/csv-upload",
+        element: <MemberCSVUploadPage />,
       },
       {
         path: "attendance",
