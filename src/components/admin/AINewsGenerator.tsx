@@ -16,7 +16,8 @@ import {
   GraduationCap, 
   Music, 
   Award,
-  Building
+  Building,
+  Wand2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,7 +29,9 @@ interface AINewsGeneratorProps {
 export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGeneratorProps) {
   const { generateNewsContent, saveGeneratedNews, isGenerating, lastGenerated } = useAINewsGeneration();
   const [customPrompt, setCustomPrompt] = useState('');
+  const [userHeadline, setUserHeadline] = useState('');
   const [isCustomMode, setIsCustomMode] = useState(false);
+  const [isHeadlineMode, setIsHeadlineMode] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<AINewsContent | null>(null);
 
   // Predefined news categories with their prompts
@@ -90,6 +93,32 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
     }
   };
 
+  const handleHeadlineGenerate = async () => {
+    if (!userHeadline.trim()) {
+      toast.error('Please enter a headline');
+      return;
+    }
+
+    const prompt = `Generate compelling news content for this headline: "${userHeadline}". 
+    Create a brief but informative content piece (2-3 sentences, max 300 characters) that supports and expands on this headline. 
+    Make it appropriate for a college glee club website and ensure it's engaging for both current members and fans.
+    
+    Return the response in this exact JSON format:
+    {
+      "headline": "${userHeadline}",
+      "content": "Your generated content here"
+    }`;
+
+    const content = await generateNewsContent({ 
+      customPrompt: prompt 
+    });
+    
+    if (content) {
+      setGeneratedContent(content);
+      onNewsGenerated?.(content);
+    }
+  };
+
   const handleSaveNews = async () => {
     if (!generatedContent) {
       toast.error('No content to save');
@@ -97,22 +126,37 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
     }
 
     const success = await saveGeneratedNews(generatedContent, {
-      aiPrompt: isCustomMode ? customPrompt : 'AI Generated from category'
+      aiPrompt: isHeadlineMode 
+        ? `AI generated content for headline: "${userHeadline}"` 
+        : isCustomMode 
+          ? customPrompt 
+          : 'AI Generated from category'
     });
 
     if (success) {
       setGeneratedContent(null);
+      setUserHeadline('');
+      setCustomPrompt('');
       onNewsSaved?.();
     }
   };
 
   const handleRegenerate = () => {
-    if (isCustomMode) {
+    if (isHeadlineMode) {
+      handleHeadlineGenerate();
+    } else if (isCustomMode) {
       handleCustomGenerate();
     } else {
       // Re-run the last category if available
       handleCategoryGenerate('general');
     }
+  };
+
+  const resetModes = () => {
+    setIsCustomMode(false);
+    setIsHeadlineMode(false);
+    setUserHeadline('');
+    setCustomPrompt('');
   };
 
   return (
@@ -139,7 +183,10 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
                   key={category.id}
                   variant="outline"
                   className="h-auto p-3 flex flex-col items-start gap-2"
-                  onClick={() => handleCategoryGenerate(category.id)}
+                  onClick={() => {
+                    resetModes();
+                    handleCategoryGenerate(category.id);
+                  }}
                   disabled={isGenerating}
                 >
                   <div className="flex items-center gap-2 w-full">
@@ -159,6 +206,35 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
 
         <Separator />
 
+        {/* Headline Mode */}
+        <div className="space-y-3">
+          <Label className="text-sm font-medium">Generate Content from Headline</Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Enter your headline..."
+              value={userHeadline}
+              onChange={(e) => {
+                setUserHeadline(e.target.value);
+                setIsHeadlineMode(true);
+                setIsCustomMode(false);
+              }}
+            />
+            <Button
+              onClick={handleHeadlineGenerate}
+              disabled={isGenerating || !userHeadline.trim()}
+              variant="outline"
+            >
+              <Wand2 className="h-4 w-4 mr-2" />
+              Generate
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Enter a headline and AI will create supporting content for your news item.
+          </p>
+        </div>
+
+        <Separator />
+
         {/* Custom Prompt */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Custom Prompt</Label>
@@ -168,6 +244,7 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
             onChange={(e) => {
               setCustomPrompt(e.target.value);
               setIsCustomMode(true);
+              setIsHeadlineMode(false);
             }}
             rows={3}
           />
@@ -227,7 +304,10 @@ export function AINewsGenerator({ onNewsGenerated, onNewsSaved }: AINewsGenerato
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setGeneratedContent(null)}
+                  onClick={() => {
+                    setGeneratedContent(null);
+                    resetModes();
+                  }}
                 >
                   Clear
                 </Button>
