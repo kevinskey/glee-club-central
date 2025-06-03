@@ -162,6 +162,8 @@ export default function NewsItemsPage() {
   };
   
   const handleSave = async () => {
+    console.log('🔄 Starting manual news item save...');
+    
     if (!headline) {
       toast.error("Headline is required");
       return;
@@ -173,9 +175,37 @@ export default function NewsItemsPage() {
     }
     
     try {
+      console.log('📝 Preparing news item data:', {
+        headline,
+        content,
+        active,
+        start_date: startDate,
+        end_date: endDate || null,
+        priority,
+        generated_by_ai: false,
+        isUpdate: !!currentItem
+      });
+
+      // Get current user session
+      console.log('🔍 Getting user session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+
+      if (!session?.user) {
+        console.error('❌ No authenticated user found');
+        throw new Error('User not authenticated. Please log in and try again.');
+      }
+
+      console.log('✅ User authenticated:', session.user.id);
+      
       let result;
       
       if (currentItem) {
+        console.log('📝 Updating existing news item:', currentItem.id);
         // Update existing
         const { data, error } = await supabase
           .from('news_items')
@@ -187,25 +217,53 @@ export default function NewsItemsPage() {
             end_date: endDate || null,
             priority
           })
-          .eq('id', currentItem.id);
+          .eq('id', currentItem.id)
+          .select();
           
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Update error:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+          throw error;
+        }
+        
+        console.log('✅ News item updated successfully:', data);
         result = "updated";
       } else {
+        console.log('📝 Creating new news item...');
         // Create new
+        const newsData = {
+          headline,
+          content,
+          active,
+          start_date: startDate,
+          end_date: endDate || null,
+          priority,
+          generated_by_ai: false,
+          created_by: session.user.id
+        };
+        
+        console.log('📝 Inserting news data:', newsData);
+        
         const { data, error } = await supabase
           .from('news_items')
-          .insert({
-            headline,
-            content,
-            active,
-            start_date: startDate,
-            end_date: endDate || null,
-            priority,
-            generated_by_ai: false
-          });
+          .insert(newsData)
+          .select();
           
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Insert error:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+          throw error;
+        }
+        
+        console.log('✅ News item created successfully:', data);
         result = "created";
       }
       
@@ -213,8 +271,9 @@ export default function NewsItemsPage() {
       setIsDialogOpen(false);
       fetchNewsItems();
     } catch (error) {
-      console.error("Error saving news item:", error);
-      toast.error("Failed to save news item");
+      console.error("💥 Error saving news item:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to save news item: ${errorMessage}`);
     }
   };
   
