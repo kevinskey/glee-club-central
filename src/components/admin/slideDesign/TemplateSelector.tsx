@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -153,13 +152,17 @@ export function TemplateSelector({
     onSelectTemplate(blankTemplate);
   };
 
+  const handleTemplateDoubleClick = (template: SlideTemplate) => {
+    onSelectTemplate(template);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div>
           <h3 className="text-base sm:text-lg font-semibold">Choose a Template</h3>
           <p className="text-xs sm:text-sm text-muted-foreground">
-            Select a layout template to start designing your slide. Gray areas are reserved for other content.
+            Select a layout template to start designing your slide. Gray areas are reserved for other content. Double-click to start editing.
           </p>
         </div>
         <Button onClick={handleCreateBlank} variant="outline" className="w-full sm:w-auto">
@@ -177,6 +180,7 @@ export function TemplateSelector({
                 : ''
             }`}
             onClick={() => onSelectTemplate(template)}
+            onDoubleClick={() => handleTemplateDoubleClick(template)}
           >
             <CardHeader className="p-3 sm:pb-3">
               <div className="flex items-center justify-between">
