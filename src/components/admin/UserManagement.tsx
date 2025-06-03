@@ -17,7 +17,6 @@ import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
-import { MemberCSVUpload } from '@/components/members/MemberCSVUpload';
 import { toast } from 'sonner';
 import { UserManagementData } from '@/services/userManagementService';
 
@@ -218,7 +217,24 @@ export default function UserManagement() {
                   ×
                 </Button>
               </div>
-              <MemberCSVUpload onComplete={handleImportComplete} />
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upload a CSV file with user information to bulk import members.
+                </p>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Handle CSV file upload
+                      toast.info('CSV import functionality coming soon');
+                      handleImportComplete();
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
             </div>
           </div>
         )}

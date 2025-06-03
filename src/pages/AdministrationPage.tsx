@@ -12,7 +12,8 @@ import {
   Music, 
   DollarSign,
   Shield,
-  Bell
+  Bell,
+  Layout
 } from 'lucide-react';
 
 export default function AdministrationPage() {
@@ -36,6 +37,13 @@ export default function AdministrationPage() {
       icon: <Users className="h-8 w-8" />,
       href: '/admin/members',
       color: 'bg-blue-500'
+    },
+    {
+      title: 'Slide Designer',
+      description: 'Create and manage custom slides for the homepage',
+      icon: <Layout className="h-8 w-8" />,
+      href: '/admin/slide-design',
+      color: 'bg-purple-500'
     },
     {
       title: 'Analytics Dashboard',
