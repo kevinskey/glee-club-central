@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,7 +19,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
-import { User } from "@/hooks/user/useUserManagement";
+import { UnifiedUser } from "@/hooks/user/useUnifiedUserManagement";
 import { formatPhoneNumber } from "@/utils/formatters";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserFormValues, userFormSchema } from "@/components/members/form/userFormSchema";
@@ -41,7 +40,7 @@ interface EditUserDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: UserFormValues) => Promise<void>;
   isSubmitting: boolean;
-  user: User | null;
+  user: UnifiedUser | null;
 }
 
 export function EditUserDialog({
@@ -65,8 +64,8 @@ export function EditUserDialog({
       notes: user?.notes || '',
       dues_paid: user?.dues_paid || false,
       is_admin: user?.is_super_admin || false,
-      title: user?.title || '',
-      join_date: user?.join_date || '',
+      title: (user as any)?.title || '',
+      join_date: (user as any)?.join_date || '',
       ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
       account_balance: (user as any)?.account_balance || 0,
       default_shipping_address: (user as any)?.default_shipping_address || ''
@@ -87,8 +86,8 @@ export function EditUserDialog({
         notes: user.notes || '',
         dues_paid: user.dues_paid || false,
         is_admin: user.is_super_admin || false,
-        title: user.title || '',
-        join_date: user.join_date || '',
+        title: (user as any)?.title || '',
+        join_date: (user as any)?.join_date || '',
         ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
         account_balance: (user as any)?.account_balance || 0,
         default_shipping_address: (user as any)?.default_shipping_address || ''
