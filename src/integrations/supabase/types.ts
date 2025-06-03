@@ -1394,6 +1394,117 @@ export type Database = {
         }
         Relationships: []
       }
+      slide_designs: {
+        Row: {
+          animation_settings: Json | null
+          background_color: string | null
+          background_image_url: string | null
+          background_media_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          design_data: Json
+          display_order: number
+          id: string
+          is_active: boolean
+          layout_type: string
+          link_url: string | null
+          template_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          animation_settings?: Json | null
+          background_color?: string | null
+          background_image_url?: string | null
+          background_media_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          design_data?: Json
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          layout_type: string
+          link_url?: string | null
+          template_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          animation_settings?: Json | null
+          background_color?: string | null
+          background_image_url?: string | null
+          background_media_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          design_data?: Json
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          layout_type?: string
+          link_url?: string | null
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_designs_background_media_id_fkey"
+            columns: ["background_media_id"]
+            isOneToOne: false
+            referencedRelation: "media_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slide_designs_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "slide_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slide_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          layout_type: string
+          name: string
+          template_data: Json
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          layout_type: string
+          name: string
+          template_data?: Json
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          layout_type?: string
+          name?: string
+          template_data?: Json
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       store_items: {
         Row: {
           created_at: string
