@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, HeroSettings, MediaFile } from '../types';
@@ -15,7 +16,7 @@ export function useHeroData(sectionId: string) {
       setError(null);
       console.log('🎭 Hero: Fetching data for section:', sectionId);
       
-      // Fetch slides without automatic cleanup to prevent loops
+      // Fetch slides, settings, and media in parallel
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([
         supabase
           .from('hero_slides')
@@ -27,7 +28,7 @@ export function useHeroData(sectionId: string) {
           .from('hero_settings')
           .select('*')
           .limit(1)
-          .single(),
+          .maybeSingle(),
         supabase
           .from('media_library')
           .select('id, file_url, file_type, title')
@@ -49,50 +50,32 @@ export function useHeroData(sectionId: string) {
           loop: true
         });
       } else {
-        setSettings(settingsResult.data);
+        setSettings(settingsResult.data || {
+          animation_style: 'fade',
+          scroll_interval: 5000,
+          pause_on_hover: true,
+          loop: true
+        });
       }
       
       if (mediaResult.error) {
         console.error('🎭 Hero: Error fetching media:', mediaResult.error);
-        throw mediaResult.error;
+        // Don't throw here, just log and continue with empty media
+        setMediaFiles([]);
+      } else {
+        setMediaFiles(mediaResult.data || []);
       }
 
       const fetchedSlides = slidesResult.data || [];
-      const fetchedMedia = mediaResult.data || [];
-
-      console.log('🎭 Hero: Raw slides fetched:', fetchedSlides.length);
-      console.log('🎭 Hero: Media library count:', fetchedMedia.length);
-      console.log('🎭 Hero: Slide details:', fetchedSlides.map(s => ({
-        id: s.id,
-        title: s.title,
-        media_id: s.media_id,
-        section_id: s.section_id,
-        visible: s.visible
-      })));
-
-      // Instead of filtering out slides with missing media, keep them and handle gracefully
-      const allSlides = fetchedSlides.map(slide => {
-        if (!slide.media_id) {
-          console.log('🎭 Hero: Slide has no media_id:', slide.id);
-          return slide;
-        }
-        
-        if (slide.media_id.includes('youtube.com/embed/')) {
-          console.log('🎭 Hero: YouTube embed slide:', slide.id);
-          return slide;
-        }
-        
-        const mediaExists = fetchedMedia.some(media => media.id === slide.media_id);
-        if (!mediaExists) {
-          console.warn(`🎭 Hero: Slide ${slide.id} (${slide.title}) has missing media ${slide.media_id} - will show with fallback`);
-        }
-        return slide;
+      console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
+      console.log('🎭 Hero: Media library count:', mediaResult.data?.length || 0);
+      
+      // Log slide details for debugging
+      fetchedSlides.forEach(slide => {
+        console.log(`🎭 Hero: Slide "${slide.title}" - visible: ${slide.visible}, media_id: ${slide.media_id}, section: ${slide.section_id}`);
       });
 
-      console.log('🎭 Hero: All slides to display:', allSlides.length);
-
-      setMediaFiles(fetchedMedia);
-      setSlides(allSlides); // Show all slides, even those with missing media
+      setSlides(fetchedSlides);
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load hero data');
@@ -103,6 +86,33 @@ export function useHeroData(sectionId: string) {
 
   useEffect(() => {
     fetchHeroData();
+  }, [sectionId]);
+
+  // Set up real-time subscription for slides changes
+  useEffect(() => {
+    console.log('🎭 Hero: Setting up real-time subscription for section:', sectionId);
+    
+    const channel = supabase
+      .channel('hero-slides-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'hero_slides',
+          filter: `section_id=eq.${sectionId}`
+        },
+        (payload) => {
+          console.log('🎭 Hero: Real-time update received:', payload);
+          fetchHeroData(); // Refetch data when changes occur
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🎭 Hero: Cleaning up real-time subscription');
+      supabase.removeChannel(channel);
+    };
   }, [sectionId]);
 
   return {

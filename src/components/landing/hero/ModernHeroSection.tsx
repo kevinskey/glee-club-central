@@ -21,7 +21,7 @@ export function ModernHeroSection({
   isResponsive = false
 }: ModernHeroSectionProps) {
   const isMobile = useIsMobile();
-  const { slides, settings, mediaFiles, isLoading, error } = useHeroData(sectionId);
+  const { slides, settings, mediaFiles, isLoading, error, refetch } = useHeroData(sectionId);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(enableAutoplay);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -29,13 +29,19 @@ export function ModernHeroSection({
 
   // Initialize only when we have valid data
   useEffect(() => {
-    if (!isLoading && slides.length >= 0) {
+    if (!isLoading) {
       setIsInitialized(true);
       hasValidSlidesRef.current = slides.length > 0;
-      console.log('🎭 Hero: Initialized with slides:', slides.length);
+      console.log(`🎭 Hero: Initialized section "${sectionId}" with ${slides.length} slides`);
+      
+      // Reset to first slide when slides change
+      if (slides.length > 0) {
+        setCurrentSlide(0);
+      }
     }
-  }, [isLoading, slides.length]);
+  }, [isLoading, slides.length, sectionId]);
 
+  // Auto-advance slides
   useEffect(() => {
     if (slides.length > 1 && isPlaying && settings?.scroll_interval && enableAutoplay && isInitialized) {
       const interval = setInterval(() => {
@@ -52,13 +58,7 @@ export function ModernHeroSection({
     }
   }, [slides.length, isPlaying, settings?.scroll_interval, settings?.loop, enableAutoplay, isInitialized]);
 
-  // Reset current slide if we have slides
-  useEffect(() => {
-    if (slides.length > 0 && isInitialized) {
-      setCurrentSlide(0);
-    }
-  }, [slides.length, isInitialized]);
-
+  // Manual navigation functions
   const goToPrevSlide = () => {
     setCurrentSlide((prev) => {
       const newIndex = prev - 1;
@@ -79,6 +79,7 @@ export function ModernHeroSection({
     });
   };
 
+  // Pause/resume on hover
   const handleMouseEnter = () => {
     if (settings?.pause_on_hover) {
       setIsPlaying(false);
@@ -91,6 +92,7 @@ export function ModernHeroSection({
     }
   };
 
+  // Responsive classes
   const getResponsiveClasses = () => {
     if (!isResponsive) return '';
     return 'responsive-hero';
@@ -150,7 +152,7 @@ export function ModernHeroSection({
 
   // Show loading state only initially
   if (isLoading && !isInitialized) {
-    console.log('🎭 Hero: Showing loading state');
+    console.log(`🎭 Hero: Showing loading state for section "${sectionId}"`);
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
@@ -159,7 +161,7 @@ export function ModernHeroSection({
         <div className="relative z-10 h-full flex items-center justify-center">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-            <p className="mt-2">Loading hero section...</p>
+            <p className="mt-2">Loading {sectionId} hero section...</p>
           </div>
         </div>
       </section>
@@ -168,7 +170,7 @@ export function ModernHeroSection({
 
   // Show error state with fallback content
   if (error && isInitialized) {
-    console.log('🎭 Hero: Showing error state with fallback');
+    console.log(`🎭 Hero: Showing error state for section "${sectionId}":`, error);
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -180,6 +182,12 @@ export function ModernHeroSection({
             <p className={cn("mb-6", getTextSizeClasses().description)}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
+            <button 
+              onClick={refetch}
+              className="text-sm text-white/80 hover:text-white underline"
+            >
+              Try reloading content
+            </button>
           </div>
         </div>
       </section>
@@ -188,7 +196,7 @@ export function ModernHeroSection({
 
   // Show slides or default content when initialized
   if (!isInitialized || slides.length === 0) {
-    console.log('🎭 Hero: Showing default content - no slides available');
+    console.log(`🎭 Hero: Showing default content for section "${sectionId}" - no slides available`);
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -199,6 +207,9 @@ export function ModernHeroSection({
             </h1>
             <p className={cn("mb-6", getTextSizeClasses().description)}>
               A distinguished ensemble with a rich heritage of musical excellence
+            </p>
+            <p className="text-sm text-white/60 mt-4">
+              No hero slides configured for this section. Use the admin panel to add content.
             </p>
           </div>
         </div>
@@ -209,7 +220,7 @@ export function ModernHeroSection({
   const currentSlideData = slides[currentSlide];
   const textSizes = getTextSizeClasses();
 
-  console.log('🎭 Hero: Rendering slide', currentSlide + 1, 'of', slides.length, ':', currentSlideData.title);
+  console.log(`🎭 Hero: Rendering section "${sectionId}", slide ${currentSlide + 1} of ${slides.length}: "${currentSlideData.title}"`);
 
   return (
     <section 

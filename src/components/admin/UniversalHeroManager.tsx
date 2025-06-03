@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { HeroSlidesManager } from "./HeroSlidesManager";
 import { HeroGlobalSettings } from "./HeroGlobalSettings";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Image, Layout, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Plus, Settings, Image, Layout, Eye, EyeOff, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -69,6 +69,8 @@ export function UniversalHeroManager() {
   const fetchSectionStats = async () => {
     try {
       setIsLoading(true);
+      console.log('🎯 UniversalHeroManager: Fetching section stats...');
+      
       const stats: Record<string, number> = {};
       
       for (const section of HERO_SECTIONS) {
@@ -79,16 +81,18 @@ export function UniversalHeroManager() {
           .eq('visible', true);
 
         if (error) {
-          console.error(`Error fetching stats for ${section.id}:`, error);
+          console.error(`🎯 Error fetching stats for ${section.id}:`, error);
           stats[section.id] = 0;
         } else {
           stats[section.id] = count || 0;
+          console.log(`🎯 Section ${section.id}: ${count} visible slides`);
         }
       }
       
       setSectionStats(stats);
+      console.log('🎯 UniversalHeroManager: Final stats:', stats);
     } catch (error) {
-      console.error('Error fetching section stats:', error);
+      console.error('🎯 Error fetching section stats:', error);
       toast.error('Failed to load section statistics');
     } finally {
       setIsLoading(false);
@@ -98,6 +102,7 @@ export function UniversalHeroManager() {
   const createQuickSlide = async (sectionId: string) => {
     try {
       setIsLoading(true);
+      console.log(`🎯 Creating quick slide for section: ${sectionId}`);
       
       // Get the next order number for this section
       const { data: existingSlides, error: fetchError } = await supabase
@@ -115,7 +120,7 @@ export function UniversalHeroManager() {
 
       const sectionName = HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'Section';
       
-      const { error } = await supabase
+      const { data: newSlide, error } = await supabase
         .from('hero_slides')
         .insert({
           section_id: sectionId,
@@ -124,16 +129,19 @@ export function UniversalHeroManager() {
           description: 'Edit this slide to customize your hero section content and appearance.',
           text_position: 'center',
           text_alignment: 'center',
-          visible: false,
+          visible: true, // Make slides visible by default
           slide_order: nextOrder
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
       
+      console.log(`🎯 Created new slide:`, newSlide);
       toast.success(`Quick slide created for ${sectionName}`);
       await fetchSectionStats();
     } catch (error) {
-      console.error("Error creating quick slide:", error);
+      console.error("🎯 Error creating quick slide:", error);
       toast.error("Failed to create quick slide");
     } finally {
       setIsLoading(false);
@@ -143,6 +151,7 @@ export function UniversalHeroManager() {
   const toggleAllSlidesVisibility = async (sectionId: string, visible: boolean) => {
     try {
       setIsLoading(true);
+      console.log(`🎯 Setting all slides visibility to ${visible} for section: ${sectionId}`);
       
       const { error } = await supabase
         .from('hero_slides')
@@ -155,7 +164,7 @@ export function UniversalHeroManager() {
       toast.success(`All slides ${visible ? 'enabled' : 'disabled'} for ${sectionName}`);
       await fetchSectionStats();
     } catch (error) {
-      console.error("Error toggling slides visibility:", error);
+      console.error("🎯 Error toggling slides visibility:", error);
       toast.error("Failed to update slide visibility");
     } finally {
       setIsLoading(false);
@@ -163,6 +172,7 @@ export function UniversalHeroManager() {
   };
 
   const handleManageSection = (sectionId: string) => {
+    console.log(`🎯 Switching to manage section: ${sectionId}`);
     setActiveSection(sectionId);
     const sectionName = HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'section';
     toast.success(`Switched to ${sectionName} management`);
@@ -171,6 +181,51 @@ export function UniversalHeroManager() {
   const getSectionDisplayName = (sectionId: string) => {
     const section = HERO_SECTIONS.find(s => s.id === sectionId);
     return section?.name || sectionId;
+  };
+
+  const debugSection = async (sectionId: string) => {
+    try {
+      console.log(`🔍 DEBUGGING SECTION: ${sectionId}`);
+      
+      // Fetch all slides for this section (including hidden ones)
+      const { data: allSlides, error: slidesError } = await supabase
+        .from('hero_slides')
+        .select('*')
+        .eq('section_id', sectionId)
+        .order('slide_order');
+
+      if (slidesError) {
+        console.error('🔍 Error fetching slides:', slidesError);
+        return;
+      }
+
+      console.log(`🔍 Total slides in ${sectionId}:`, allSlides?.length || 0);
+      allSlides?.forEach((slide, index) => {
+        console.log(`🔍 Slide ${index + 1}:`, {
+          id: slide.id,
+          title: slide.title,
+          visible: slide.visible,
+          media_id: slide.media_id,
+          slide_order: slide.slide_order
+        });
+      });
+
+      // Check media library
+      const { data: mediaFiles, error: mediaError } = await supabase
+        .from('media_library')
+        .select('id, title, file_url, is_public')
+        .eq('is_public', true);
+
+      if (mediaError) {
+        console.error('🔍 Error fetching media:', mediaError);
+      } else {
+        console.log(`🔍 Public media files available:`, mediaFiles?.length || 0);
+      }
+
+      toast.info(`Debug info logged to console for ${getSectionDisplayName(sectionId)}`);
+    } catch (error) {
+      console.error('🔍 Debug error:', error);
+    }
   };
 
   if (isLoading && Object.keys(sectionStats).length === 0) {
@@ -226,7 +281,10 @@ export function UniversalHeroManager() {
                           Refreshing...
                         </>
                       ) : (
-                        "Refresh"
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Refresh
+                        </>
                       )}
                     </Button>
                   </div>
@@ -276,6 +334,19 @@ export function UniversalHeroManager() {
                                 Add
                               </Button>
                               
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs px-2 py-1 h-6"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  debugSection(section.id);
+                                }}
+                                disabled={isLoading}
+                              >
+                                🔍
+                              </Button>
+                              
                               {slideCount > 0 && (
                                 <>
                                   <Button
@@ -320,11 +391,12 @@ export function UniversalHeroManager() {
                       {getSectionDisplayName(activeSection)} Slides
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      Manage slides for the selected hero section
+                      Manage slides for the selected hero section. Changes will be reflected on the live website.
                     </p>
                   </div>
                   
                   <HeroSlidesManager 
+                    key={activeSection} // Force re-render when section changes
                     sectionId={activeSection}
                     sectionName={getSectionDisplayName(activeSection)}
                     onUpdate={fetchSectionStats}
