@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { HeroSlidesManager } from "./HeroSlidesManager";
 import { HeroGlobalSettings } from "./HeroGlobalSettings";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings, Image, Layout, Eye, EyeOff } from "lucide-react";
+import { Plus, Settings, Image, Layout, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -168,17 +169,24 @@ export function UniversalHeroManager() {
   };
 
   const handleManageSection = (sectionId: string) => {
-    console.log('Manage button clicked for section:', sectionId);
-    console.log('Current active section:', activeSection);
     setActiveSection(sectionId);
-    console.log('Setting active section to:', sectionId);
-    toast.success(`Switched to ${HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'section'} management`);
+    const sectionName = HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'section';
+    toast.success(`Switched to ${sectionName} management`);
   };
 
   const getSectionDisplayName = (sectionId: string) => {
     const section = HERO_SECTIONS.find(s => s.id === sectionId);
     return section?.name || sectionId;
   };
+
+  if (isLoading && Object.keys(sectionStats).length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading hero manager...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -199,14 +207,23 @@ export function UniversalHeroManager() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Hero Sections Overview</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Active: {getSectionDisplayName(activeSection)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    Active: {getSectionDisplayName(activeSection)}
+                  </span>
                   <Button 
                     onClick={fetchSectionStats} 
                     variant="outline" 
                     size="sm"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Refreshing..." : "Refresh Stats"}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Refreshing...
+                      </>
+                    ) : (
+                      "Refresh Stats"
+                    )}
                   </Button>
                 </div>
               </div>
@@ -236,27 +253,14 @@ export function UniversalHeroManager() {
                             {slideCount} slide{slideCount !== 1 ? 's' : ''}
                           </Badge>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-2">{section.description}</p>
-                        <p className="text-xs text-muted-foreground font-mono mb-3">{section.location}</p>
+                        <p className="text-xs text-muted-foreground mb-3">{section.description}</p>
+                        <p className="text-xs text-muted-foreground mb-3 font-mono">{section.location}</p>
                         
-                        <div className="flex flex-wrap gap-1">
-                          <Button 
-                            size="sm" 
-                            variant={isActive ? "default" : "outline"}
-                            className="text-xs h-7 px-2 flex-1"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleManageSection(section.id);
-                            }}
-                          >
-                            <Settings className="h-3 w-3 mr-1" />
-                            {isActive ? 'Managing' : 'Manage'}
-                          </Button>
-                          
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-xs h-7 px-2"
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2 py-1 h-6"
                             onClick={(e) => {
                               e.stopPropagation();
                               createQuickSlide(section.id);
@@ -269,32 +273,32 @@ export function UniversalHeroManager() {
                           
                           {slideCount > 0 && (
                             <>
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="text-xs h-7 px-2"
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs px-2 py-1 h-6"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleAllSlidesVisibility(section.id, true);
                                 }}
                                 disabled={isLoading}
-                                title="Enable all slides"
                               >
-                                <Eye className="h-3 w-3" />
+                                <Eye className="h-3 w-3 mr-1" />
+                                Show
                               </Button>
                               
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="text-xs h-7 px-2"
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs px-2 py-1 h-6"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleAllSlidesVisibility(section.id, false);
                                 }}
                                 disabled={isLoading}
-                                title="Disable all slides"
                               >
-                                <EyeOff className="h-3 w-3" />
+                                <EyeOff className="h-3 w-3 mr-1" />
+                                Hide
                               </Button>
                             </>
                           )}
@@ -306,65 +310,31 @@ export function UniversalHeroManager() {
               </div>
             </div>
 
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 mb-6">
-              {HERO_SECTIONS.map((section) => (
-                <TabsTrigger 
-                  key={section.id} 
-                  value={section.id}
-                  className="text-xs relative"
-                >
-                  <div className="flex items-center gap-1">
-                    <Image className="h-3 w-3" />
-                    <span className="hidden sm:inline truncate">
-                      {section.name.split(' ')[0]}
-                    </span>
-                    {sectionStats[section.id] > 0 && (
-                      <Badge variant="secondary" className="text-xs ml-1 h-4 px-1">
-                        {sectionStats[section.id]}
-                      </Badge>
-                    )}
-                  </div>
-                </TabsTrigger>
-              ))}
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="slides" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Manage Slides
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Global Settings
+              </TabsTrigger>
             </TabsList>
 
-            {HERO_SECTIONS.map((section) => (
-              <TabsContent key={section.id} value={section.id} className="space-y-6">
-                <div className="border-l-4 border-primary pl-4 mb-6 bg-muted/30 p-4 rounded-r-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">{section.name}</h3>
-                      <p className="text-sm text-muted-foreground">{section.description}</p>
-                      <p className="text-xs text-muted-foreground font-mono mt-1">
-                        Location: {section.location}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => createQuickSlide(section.id)}
-                        disabled={isLoading}
-                        size="sm"
-                        variant="outline"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Quick Add Slide
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                
-                <HeroSlidesManager 
-                  sectionId={section.id} 
-                  sectionName={section.name}
-                  onUpdate={fetchSectionStats}
-                />
-              </TabsContent>
-            ))}
+            <TabsContent value="slides" className="mt-6">
+              <HeroSlidesManager 
+                sectionId={activeSection}
+                sectionName={getSectionDisplayName(activeSection)}
+                onUpdate={fetchSectionStats}
+              />
+            </TabsContent>
+
+            <TabsContent value="settings" className="mt-6">
+              <HeroGlobalSettings />
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-      
-      <HeroGlobalSettings />
     </div>
   );
 }
