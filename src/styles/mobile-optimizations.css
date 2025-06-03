@@ -48,7 +48,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Hero Section Mobile Fixes - Position after sticky header with no gap */
+/* Hero Section Mobile Fixes - Position directly under sticky header */
 .hero-section, [class*="hero"] {
   width: 100% !important;
   max-width: 100vw !important;
@@ -186,11 +186,11 @@ p {
   color: hsl(var(--foreground));
 }
 
-/* Sticky Header for Mobile - NO GAP */
+/* Sticky Header for Mobile - NO GAP - Hero starts directly under header */
 @media (max-width: 768px) {
   header {
     position: fixed !important;
-    top: 40px !important; /* Height of news ticker - seamlessly connected */
+    top: 40px !important; /* Height of news ticker */
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
@@ -209,7 +209,7 @@ p {
     background: rgba(0, 0, 0, 0.95) !important;
   }
   
-  /* News Ticker Sticky Positioning - NO GAP */
+  /* News Ticker Sticky Positioning */
   .news-ticker,
   .bg-glee-columbia {
     position: fixed !important;
@@ -225,24 +225,24 @@ p {
     border-bottom: none !important;
   }
   
-  /* Main content positioned directly after sticky elements - NO GAP */
+  /* Main content - NO margin, hero starts directly under header */
   main {
-    margin-top: 96px !important; /* Ticker (40px) + Header (~56px) = 96px */
-    padding-top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 96px !important; /* Ticker (40px) + Header (~56px) = 96px */
   }
   
-  /* Hero sections positioned immediately after main - NO GAP */
+  /* Hero sections positioned to start immediately after header */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    margin-top: -96px !important; /* Negative margin to pull hero up under header */
+    padding-top: 96px !important; /* Padding to push content down so it's not hidden */
     margin-left: 0 !important;
     margin-right: 0 !important;
     margin-bottom: 0 !important;
   }
   
-  /* Ensure no extra spacing in non-hero content */
+  /* Non-hero content keeps normal spacing */
   .page-content:not(.hero-page),
   .main-content:not(.hero-content),
   [class*="content"]:not([class*="hero"]) {
@@ -251,7 +251,7 @@ p {
   }
 }
 
-/* News Ticker Mobile Fixes - Seamless Connection */
+/* News Ticker Mobile Fixes */
 .news-ticker {
   width: 100% !important;
   max-width: 100vw !important;
