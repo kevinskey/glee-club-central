@@ -24,21 +24,11 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     isInitialized
   });
   
-  // Wait for initialization to complete
-  if (!isInitialized) {
+  // Show loader during initialization
+  if (!isInitialized || isLoading) {
     return (
       <PageLoader 
-        message="Starting up..." 
-        className="min-h-screen"
-      />
-    );
-  }
-  
-  // If still loading after initialization, show brief loader
-  if (isLoading && !user) {
-    return (
-      <PageLoader 
-        message="Checking authentication..." 
+        message="Loading application..." 
         className="min-h-screen"
       />
     );
@@ -47,20 +37,21 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   // Check authentication
   if (!isAuthenticated || !user) {
     console.log('🚫 AdminRoute: User not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/auth/login" replace />;
   }
   
-  // Check admin access - prioritize known admin email
-  const isKnownAdmin = user.email === 'kevinskey@mac.com';
-  const hasAdminAccess = isKnownAdmin || isAdmin();
+  // Wait for profile to load before checking admin status
+  if (!profile) {
+    return (
+      <PageLoader 
+        message="Loading profile..." 
+        className="min-h-screen"
+      />
+    );
+  }
   
-  console.log('🔍 AdminRoute: Final admin access check:', {
-    userEmail: user?.email,
-    isKnownAdmin,
-    hasAdminAccess,
-    profileRole: profile?.role,
-    profileIsAdmin: profile?.is_super_admin
-  });
+  // Check admin access
+  const hasAdminAccess = isAdmin();
   
   if (!hasAdminAccess) {
     console.log('🚫 AdminRoute: User does not have admin access, redirecting to member dashboard');
