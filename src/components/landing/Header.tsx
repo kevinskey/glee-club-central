@@ -13,11 +13,19 @@ import { useIsMobile } from "@/hooks/use-mobile";
 export function Header() {
   const navigate = useNavigate();
   const [showNewsTicker, setShowNewsTicker] = React.useState(true);
-  const { isAuthenticated, profile, logout } = useAuth();
+  const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
   const isMobile = useIsMobile();
   
   const handleDashboardClick = () => {
-    navigate("/role-dashboard");
+    // Check if user is known admin or has admin role
+    const isKnownAdmin = user?.email === 'kevinskey@mac.com';
+    const hasAdminRole = isAdmin();
+    
+    if (isKnownAdmin || hasAdminRole) {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
   };
   
   const handleLogout = async () => {
