@@ -61,7 +61,7 @@ const router = createBrowserRouter([
       },
       // Include dashboard routes
       ...dashboardRoutes,
-      // Include all admin routes
+      // Include all admin routes (using the new unified dashboard)
       ...adminRoutes,
     ],
   },

@@ -3,9 +3,8 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
 
-// Admin Pages
+// Admin Pages - Using the new unified dashboard
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
 import SettingsPage from '@/pages/admin/SettingsPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
@@ -39,14 +38,7 @@ export const adminRoutes: RouteObject[] = [
       </AdminRoute>
     ),
   },
-  {
-    path: '/admin/home',
-    element: (
-      <AdminRoute>
-        <AdminDashboardPage />
-      </AdminRoute>
-    ),
-  },
+  // Remove the old /admin/home route that was pointing to AdminDashboardPage
   {
     path: '/admin/users',
     element: (
