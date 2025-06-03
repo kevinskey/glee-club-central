@@ -1,220 +1,110 @@
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { PageLoader } from '@/components/ui/page-loader';
-import { Music, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 export default function SimpleSignupPage() {
-  const { signUp, user } = useAuth(); // Changed from signup to signUp
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      navigate('/dashboard', { replace: true });
-    }
-  }, [user, navigate]);
-
-  const validateForm = () => {
-    const newErrors: string[] = [];
-    
-    if (!formData.email || !formData.email.includes('@')) {
-      newErrors.push('Please enter a valid email address');
-    }
-    
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.push('Password must be at least 6 characters long');
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.push('Passwords do not match');
-    }
-    
-    if (!formData.firstName || !formData.lastName) {
-      newErrors.push('Please enter your first and last name');
-    }
-    
-    setErrors(newErrors);
-    return newErrors.length === 0;
-  };
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      toast.error('Please fix the errors below');
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error('Password must be at least 6 characters');
       return;
     }
 
     setLoading(true);
     try {
-      const { error } = await signUp(formData.email, formData.password, formData.firstName, formData.lastName);
+      const { error } = await signUp(email, password);
+      
       if (error) {
-        throw error;
+        console.error('Signup error:', error);
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and confirm your account before signing in.');
+        } else if (error.message.includes('already registered')) {
+          toast.error('An account with this email already exists. Please sign in instead.');
+        } else {
+          toast.error(error.message || 'Failed to create account');
+        }
+      } else {
+        toast.success('Account created! Please check your email to verify your account.');
+        navigate('/auth/login');
       }
-      toast.success('Account created successfully! Please check your email to verify your account.');
-      navigate('/login');
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      toast.error(error.message || 'Failed to create account');
+    } catch (error) {
+      console.error('Unexpected signup error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors.length > 0) {
-      setErrors([]);
-    }
-  };
-
-  if (loading) {
-    return <PageLoader message="Creating your account..." />;
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="h-12 w-12 bg-glee-purple rounded-full flex items-center justify-center">
-              <Music className="h-6 w-6 text-white" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl text-center">Join Glee World</CardTitle>
-          <CardDescription className="text-center">
-            Create your account to access the Spelman Glee Club community
-          </CardDescription>
+        <CardHeader>
+          <CardTitle className="text-center">Join Glee Club</CardTitle>
         </CardHeader>
         <CardContent>
-          {errors.length > 0 && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>
-                {errors.map((error, index) => (
-                  <div key={index}>{error}</div>
-                ))}
-              </AlertDescription>
-            </Alert>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              <div>
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
             <div>
               <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
                 required
-                disabled={loading}
               />
             </div>
-
             <div>
               <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter a secure password"
+                required
+                minLength={6}
+              />
             </div>
-
             <div>
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                required
+              />
             </div>
-
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating Account...' : (
-                <>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Create Account
-                </>
-              )}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </form>
-
-          <div className="mt-4 text-center space-y-2">
-            <div>
-              <span className="text-sm text-muted-foreground">Already have an account? </span>
-              <Link to="/login" className="text-sm text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
+          <div className="mt-4 text-center text-sm">
+            <span className="text-gray-600">Already have an account? </span>
+            <Link to="/auth/login" className="text-blue-600 hover:underline font-medium">
+              Sign in here
+            </Link>
           </div>
         </CardContent>
       </Card>

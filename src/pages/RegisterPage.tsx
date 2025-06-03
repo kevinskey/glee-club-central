@@ -1,105 +1,89 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
-  const { signUp, isLoading } = useAuth();
-  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !password || !firstName || !lastName) {
-      setError('All fields are required.');
+    
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
       return;
     }
 
-    const { error: signUpError } = await signUp(email, password, firstName, lastName);
-
-    if (signUpError) {
-      setError(signUpError.message || 'Registration failed.');
+    setLoading(true);
+    const { error } = await signUp(email, password);
+    
+    if (error) {
+      toast.error(error.message);
     } else {
-      setError(null);
-      navigate('/user-setup');
+      toast.success('Please check your email to verify your account');
+      navigate('/auth/login');
     }
+    setLoading(false);
   };
 
   return (
-    <div className="grid h-screen place-items-center">
-      <Card className="w-[450px]">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>
-            Enter your email and password to register.
-          </CardDescription>
+          <CardTitle>Create Account</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>
-                {error}
-              </AlertDescription>
-            </Alert>
-          )}
-          <div className="grid gap-2">
-            <Label htmlFor="firstName">First Name</Label>
-            <Input
-              id="firstName"
-              type="text"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Enter your first name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="lastName">Last Name</Label>
-            <Input
-              id="lastName"
-              type="text"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Enter your last name"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-            />
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </Button>
+          </form>
+          <div className="mt-4 text-center">
+            <Link to="/auth/login" className="text-blue-600 hover:underline">
+              Already have an account? Sign in
+            </Link>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Link to="/login" className="text-sm text-muted-foreground">
-            Already have an account?
-          </Link>
-          <Button onClick={handleSubmit} disabled={isLoading}>
-            Register
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   );
