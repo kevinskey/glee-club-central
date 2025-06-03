@@ -48,7 +48,7 @@ export const useAuthManager = () => {
     try {
       logAuthEvent('Loading profile for user', { userId: user.id, email: user.email });
       
-      // For known admin, use fallback immediately
+      // For known admin, use fallback immediately to avoid delays
       if (user.email === 'kevinskey@mac.com') {
         const fallbackProfile = createFallbackProfile(user);
         setState(prev => ({ 
@@ -61,10 +61,10 @@ export const useAuthManager = () => {
         return;
       }
       
-      // Try to get profile with shorter timeout for non-admin users
+      // Try to get profile with timeout for non-admin users
       const profilePromise = ensureProfileExists(user.id, user.email, user.user_metadata);
       const timeoutPromise = new Promise<Profile>((_, reject) => 
-        setTimeout(() => reject(new Error('Profile loading timeout')), 3000)
+        setTimeout(() => reject(new Error('Profile loading timeout')), 2000)
       );
 
       const profile = await Promise.race([profilePromise, timeoutPromise]);
@@ -108,7 +108,7 @@ export const useAuthManager = () => {
   const handleAuthStateChange = useCallback((event: string, session: any) => {
     if (!mountedRef.current) return;
 
-    logAuthEvent('Auth state change', { event, hasSession: !!session });
+    logAuthEvent('Auth state change', { event, hasSession: !!session, userId: session?.user?.id });
 
     if (session?.user) {
       setState(prev => ({ 
@@ -118,8 +118,12 @@ export const useAuthManager = () => {
         error: null
       }));
       
-      // Load profile immediately
-      loadUserProfile(session.user);
+      // Load profile in next tick to avoid blocking
+      setTimeout(() => {
+        if (mountedRef.current) {
+          loadUserProfile(session.user);
+        }
+      }, 0);
     } else {
       setState({
         user: null,
@@ -128,7 +132,7 @@ export const useAuthManager = () => {
         isInitialized: true,
         error: null
       });
-      logAuthEvent('User signed out');
+      logAuthEvent('User signed out or no session');
     }
   }, [loadUserProfile, logAuthEvent]);
 
@@ -146,25 +150,75 @@ export const useAuthManager = () => {
 
     logAuthEvent('Initializing auth manager');
 
-    // Set up auth listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+    let timeoutId: NodeJS.Timeout;
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (error) {
-        logAuthEvent('Session check failed', { error: error.message });
-      }
-      
-      if (mountedRef.current) {
-        handleAuthStateChange('INITIAL_SESSION', session);
-      }
-    });
+    const initAuth = async () => {
+      try {
+        // Set a maximum timeout for initialization
+        timeoutId = setTimeout(() => {
+          if (mountedRef.current && !state.isInitialized) {
+            logAuthEvent('Auth initialization timeout, forcing completion');
+            setState(prev => ({
+              ...prev,
+              isLoading: false,
+              isInitialized: true
+            }));
+          }
+        }, 5000);
 
-    return () => {
-      subscription.unsubscribe();
-      initializingRef.current = false;
+        // Set up auth listener first
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+        // Check for existing session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          logAuthEvent('Session check failed', { error: error.message });
+          if (mountedRef.current) {
+            setState({
+              user: null,
+              profile: null,
+              isLoading: false,
+              isInitialized: true,
+              error: error.message
+            });
+          }
+        } else {
+          logAuthEvent('Session check completed', { hasSession: !!session });
+          if (mountedRef.current) {
+            handleAuthStateChange('INITIAL_SESSION', session);
+          }
+        }
+
+        // Clean up timeout if we got here
+        if (timeoutId) clearTimeout(timeoutId);
+
+        return () => {
+          subscription.unsubscribe();
+          if (timeoutId) clearTimeout(timeoutId);
+        };
+      } catch (error) {
+        logAuthEvent('Auth initialization error', { error: error.message });
+        if (timeoutId) clearTimeout(timeoutId);
+        if (mountedRef.current) {
+          setState({
+            user: null,
+            profile: null,
+            isLoading: false,
+            isInitialized: true,
+            error: error.message
+          });
+        }
+      }
     };
-  }, [handleAuthStateChange, logAuthEvent]);
+
+    const cleanup = initAuth();
+    
+    return () => {
+      initializingRef.current = false;
+      cleanup?.then(fn => fn?.());
+    };
+  }, [handleAuthStateChange]);
 
   // Cleanup
   useEffect(() => {
@@ -178,11 +232,14 @@ export const useAuthManager = () => {
     refreshProfile,
     isAuthenticated: !!state.user,
     isAdmin: () => {
-      if (!state.profile) return false;
+      if (!state.profile) {
+        // For known admin email, return true even without profile
+        return state.user?.email === 'kevinskey@mac.com';
+      }
       return state.profile.is_super_admin || state.profile.role === 'admin' || state.user?.email === 'kevinskey@mac.com';
     },
     isMember: () => {
-      if (!state.profile) return false;
+      if (!state.profile) return !!state.user;
       return ['member', 'admin'].includes(state.profile.role || '');
     }
   };
