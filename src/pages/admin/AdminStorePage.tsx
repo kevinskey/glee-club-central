@@ -33,7 +33,7 @@ export default function AdminStorePage() {
   if (!canManageShop()) {
     return (
       <AdminLayout>
-        <div className="space-y-1">
+        <div className="space-y-4">
           <Card>
             <CardContent className="p-6 text-center">
               <Lock className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
@@ -50,58 +50,58 @@ export default function AdminStorePage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-1">
-        <Tabs defaultValue="inventory" className="space-y-1">
-          <TabsList className="grid w-full grid-cols-6 h-7">
-            <TabsTrigger value="inventory" className="flex items-center gap-1 text-xs px-2">
-              <Package className="h-3 w-3" />
+      <div className="space-y-4">
+        <Tabs defaultValue="inventory" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="inventory" className="flex items-center gap-2 text-sm">
+              <Package className="h-4 w-4" />
               Inventory
             </TabsTrigger>
-            <TabsTrigger value="products" className="flex items-center gap-1 text-xs px-2">
-              <Package className="h-3 w-3" />
+            <TabsTrigger value="products" className="flex items-center gap-2 text-sm">
+              <Package className="h-4 w-4" />
               Products
             </TabsTrigger>
-            <TabsTrigger value="designer" className="flex items-center gap-1 text-xs px-2">
-              <Palette className="h-3 w-3" />
+            <TabsTrigger value="designer" className="flex items-center gap-2 text-sm">
+              <Palette className="h-4 w-4" />
               Designer
             </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-1 text-xs px-2">
-              <ShoppingBag className="h-3 w-3" />
+            <TabsTrigger value="orders" className="flex items-center gap-2 text-sm">
+              <ShoppingBag className="h-4 w-4" />
               Orders
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs px-2">
-              <BarChart3 className="h-3 w-3" />
+            <TabsTrigger value="analytics" className="flex items-center gap-2 text-sm">
+              <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs px-2">
-              <Settings className="h-3 w-3" />
+            <TabsTrigger value="settings" className="flex items-center gap-2 text-sm">
+              <Settings className="h-4 w-4" />
               Settings
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="inventory" className="mt-1">
+          <TabsContent value="inventory">
             <InventoryManager />
           </TabsContent>
 
-          <TabsContent value="products" className="mt-1">
+          <TabsContent value="products">
             <ProductManagement />
           </TabsContent>
 
-          <TabsContent value="designer" className="mt-1">
+          <TabsContent value="designer">
             <div className="bg-white rounded-lg shadow-sm border">
               <DesignStudio />
             </div>
           </TabsContent>
 
-          <TabsContent value="orders" className="mt-1">
+          <TabsContent value="orders">
             <OrderManagement />
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-1">
+          <TabsContent value="analytics">
             <StoreAnalytics />
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-1">
+          <TabsContent value="settings">
             <StoreSettings />
           </TabsContent>
         </Tabs>
