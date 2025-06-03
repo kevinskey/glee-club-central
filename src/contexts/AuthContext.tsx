@@ -8,8 +8,13 @@ interface Profile {
   id: string;
   email: string;
   full_name?: string;
+  first_name?: string;
+  last_name?: string;
+  avatar_url?: string;
   role?: string;
+  role_tags?: string[];
   is_super_admin?: boolean;
+  ecommerce_enabled?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -22,8 +27,14 @@ interface AuthContextType {
   isInitialized: boolean;
   isAuthenticated: boolean;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
+  login: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (password: string) => Promise<{ error: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
+  getUserType: () => string;
   refreshProfile: () => Promise<void>;
 }
 
@@ -78,6 +89,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return !!user && !!profile;
   };
 
+  const getUserType = () => {
+    if (!user || !profile) return 'guest';
+    if (isAdmin()) return 'admin';
+    return profile.role || 'member';
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
+      });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       setIsLoading(true);
@@ -107,66 +171,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const logout = signOut; // Alias for consistency
+
   useEffect(() => {
     console.log('🔐 AuthManager: Initializing auth manager');
+    
+    let mounted = true;
     
     // Get initial session
     const initializeAuth = async () => {
       try {
+        // Set up auth listener first
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event: AuthChangeEvent, session: Session | null) => {
+            if (!mounted) return;
+            
+            console.log('🔐 Auth state change:', event, { hasSession: !!session });
+            
+            setSession(session);
+            setUser(session?.user ?? null);
+            
+            if (session?.user) {
+              // Defer profile fetching to avoid deadlocks
+              setTimeout(async () => {
+                if (mounted) {
+                  const profileData = await fetchProfile(session.user.id);
+                  if (mounted) {
+                    setProfile(profileData);
+                  }
+                }
+              }, 100);
+            } else {
+              setProfile(null);
+            }
+            
+            if (mounted) {
+              setIsLoading(false);
+            }
+          }
+        );
+
+        // Then get initial session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
         }
         
-        console.log('🔐 AuthManager: Session check completed', {
-          hasSession: !!initialSession
-        });
-        
-        if (initialSession) {
-          setSession(initialSession);
-          setUser(initialSession.user);
+        if (mounted) {
+          console.log('🔐 AuthManager: Session check completed', {
+            hasSession: !!initialSession
+          });
           
-          // Fetch profile
-          const profileData = await fetchProfile(initialSession.user.id);
-          setProfile(profileData);
+          if (initialSession) {
+            setSession(initialSession);
+            setUser(initialSession.user);
+            
+            // Fetch profile
+            const profileData = await fetchProfile(initialSession.user.id);
+            if (mounted) {
+              setProfile(profileData);
+            }
+          }
+          
+          setIsInitialized(true);
+          setIsLoading(false);
         }
-        
-        setIsInitialized(true);
-        setIsLoading(false);
+
+        return () => {
+          mounted = false;
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error('Error initializing auth:', error);
-        setIsInitialized(true);
-        setIsLoading(false);
+        if (mounted) {
+          setIsInitialized(true);
+          setIsLoading(false);
+        }
       }
     };
 
-    initializeAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        console.log('🔐 Auth state change:', event, { hasSession: !!session });
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer profile fetching slightly to avoid potential deadlocks
-          setTimeout(async () => {
-            const profileData = await fetchProfile(session.user.id);
-            setProfile(profileData);
-          }, 100);
-        } else {
-          setProfile(null);
-        }
-        
-        setIsLoading(false);
-      }
-    );
+    const cleanup = initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
   }, []);
 
@@ -178,8 +267,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInitialized,
     isAuthenticated: !!user,
     signOut,
+    logout,
+    login,
+    signUp,
+    resetPassword,
+    updatePassword,
     isAdmin,
     isMember,
+    getUserType,
     refreshProfile,
   };
 
