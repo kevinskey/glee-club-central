@@ -6,10 +6,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { SlideTemplate, SlideDesign, TextElement, BackgroundElement } from '@/types/slideDesign';
-import { Type, Palette, Image, Link, Save, Eye, MousePointer } from 'lucide-react';
+import { SlideTemplate, SlideDesign, TextElement } from '@/types/slideDesign';
+import { Type, Palette, Image, Link, Save, Eye, Plus } from 'lucide-react';
 import { MediaLibrarySelector } from './MediaLibrarySelector';
 import { TextToolbar } from './TextToolbar';
+import { AIDesignAssistant } from './AIDesignAssistant';
+import { DraggableElement } from './DraggableElement';
+import { BorderSettings } from './BorderSettings';
+import { ImageDropZone } from './ImageDropZone';
 import { toast } from 'sonner';
 
 interface WYSIWYGEditorProps {
@@ -31,6 +35,13 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     design?.layout_type || template?.layout_type || 'full'
   );
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  
+  const [showBorders, setShowBorders] = useState(false);
+  const [borderStyle, setBorderStyle] = useState({
+    width: 2,
+    color: '#3b82f6',
+    style: 'solid' as const
+  });
   
   const [textElements, setTextElements] = useState<TextElement[]>(
     design?.design_data?.textElements || 
@@ -95,6 +106,46 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     toast.success('Background image updated');
   };
 
+  const handleImageUpload = (imageUrl: string) => {
+    setBackgroundImage(imageUrl);
+    setBackgroundMediaId('');
+  };
+
+  const handleRemoveImage = () => {
+    setBackgroundImage('');
+    setBackgroundMediaId('');
+    toast.success('Background image removed');
+  };
+
+  const handleAISuggestion = (suggestion: any) => {
+    if (suggestion.type === 'text' && suggestion.data) {
+      if (selectedElementId) {
+        updateTextElement(selectedElementId, {
+          text: suggestion.content,
+          style: { ...textElements.find(el => el.id === selectedElementId)?.style, ...suggestion.data }
+        });
+      } else {
+        const newElement: TextElement = {
+          id: `ai-text-${Date.now()}`,
+          type: 'paragraph',
+          text: suggestion.content,
+          position: { x: 50, y: 30 },
+          style: { fontSize: '1rem', color: '#FFFFFF', textAlign: 'center' as const, ...suggestion.data }
+        };
+        setTextElements(prev => [...prev, newElement]);
+        setSelectedElementId(newElement.id);
+      }
+    } else if (suggestion.type === 'color' && suggestion.data) {
+      setBackgroundColor(suggestion.data.background);
+    }
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setSelectedElementId(null);
+    }
+  };
+
   const handleSave = () => {
     if (!title.trim()) {
       toast.error('Please enter a title for your slide');
@@ -133,12 +184,10 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
   const selectedElement = textElements.find(el => el.id === selectedElementId);
 
-  // Function to render non-designable areas - FIXED orientations
   const renderNonDesignableAreas = () => {
     const areas = [];
     
     if (layoutType === 'half_horizontal') {
-      // Bottom half is non-designable (horizontal split = top/bottom)
       areas.push(
         <div
           key="non-designable-bottom"
@@ -151,7 +200,6 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </div>
       );
     } else if (layoutType === 'half_vertical') {
-      // Right half is non-designable (vertical split = left/right)
       areas.push(
         <div
           key="non-designable-right"
@@ -164,9 +212,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </div>
       );
     } else if (layoutType === 'quarter') {
-      // Top right, bottom left, and bottom right quarters are non-designable
       areas.push(
-        // Top right quarter
         <div
           key="non-designable-top-right"
           className="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
@@ -176,7 +222,6 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             <div className="text-xs opacity-75">Reserved</div>
           </div>
         </div>,
-        // Bottom left quarter
         <div
           key="non-designable-bottom-left"
           className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
@@ -186,7 +231,6 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             <div className="text-xs opacity-75">Reserved</div>
           </div>
         </div>,
-        // Bottom right quarter
         <div
           key="non-designable-bottom-right"
           className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
@@ -204,8 +248,8 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
   return (
     <div className="flex flex-col space-y-4 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-4">
-      {/* Canvas Area - Full width on mobile, spans 7 columns on desktop */}
-      <div className="lg:col-span-7 order-1">
+      {/* Canvas Area - Full width on mobile, spans 6 columns on desktop */}
+      <div className="lg:col-span-6 order-1">
         <Card className="h-full">
           <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
             <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm sm:text-base">
@@ -227,40 +271,27 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               ref={canvasRef}
               className="relative w-full bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair mx-auto"
               style={{
-                aspectRatio: '8.5 / 11', // US Letter paper ratio
+                aspectRatio: '8.5 / 11',
                 maxWidth: '100%',
                 backgroundColor,
                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
               }}
+              onClick={handleCanvasClick}
             >
-              {/* Text Elements */}
+              {/* Text Elements with Drag & Drop */}
               {textElements.map((element) => (
-                <div
+                <DraggableElement
                   key={element.id}
-                  className={`absolute cursor-pointer select-none border-2 transition-all ${
-                    selectedElementId === element.id 
-                      ? 'border-blue-400 bg-blue-400/20' 
-                      : 'border-transparent hover:border-white/50'
-                  }`}
-                  style={{
-                    left: `${element.position.x}%`,
-                    top: `${element.position.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                    ...element.style,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                    padding: '8px',
-                    borderRadius: '4px',
-                    fontSize: `clamp(0.75rem, ${element.style.fontSize || '1rem'}, 3rem)` // Responsive text size
-                  }}
-                  onClick={() => handleElementClick(element.id)}
-                >
-                  {element.text}
-                  {selectedElementId === element.id && (
-                    <MousePointer className="absolute -top-2 -right-2 h-4 w-4 text-blue-400" />
-                  )}
-                </div>
+                  element={element}
+                  isSelected={selectedElementId === element.id}
+                  onSelect={() => handleElementClick(element.id)}
+                  onUpdate={(updates) => updateTextElement(element.id, updates)}
+                  containerRef={canvasRef}
+                  showBorders={showBorders}
+                  borderStyle={borderStyle}
+                />
               ))}
               
               {/* Layout grid overlay */}
@@ -281,10 +312,20 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
               {/* Non-designable areas */}
               {renderNonDesignableAreas()}
+              
+              {/* Add Text Button */}
+              <Button
+                onClick={addTextElement}
+                size="sm"
+                className="absolute top-2 right-2 h-8 opacity-70 hover:opacity-100"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Text
+              </Button>
             </div>
             
             <div className="mt-2 text-xs text-muted-foreground space-y-1">
-              <p>💡 Click on text elements to select and edit them</p>
+              <p>💡 Click elements to select, double-click to edit, drag to move</p>
               <p>📄 Canvas represents standard US Letter size (8.5" × 11")</p>
               {layoutType !== 'full' && (
                 <p>🚫 Grayed areas are reserved for other content and cannot be designed</p>
@@ -294,7 +335,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </Card>
       </div>
 
-      {/* Properties Panel - Full width on mobile, spans 3 columns on desktop */}
+      {/* Properties Panel - spans 3 columns */}
       <div className="lg:col-span-3 order-2 space-y-3">
         <Card>
           <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
@@ -398,22 +439,34 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
             <div className="space-y-2">
               <Label className="text-sm">Background Image</Label>
-              <div className="space-y-2">
-                <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
-                <Input
-                  value={backgroundImage}
-                  onChange={(e) => setBackgroundImage(e.target.value)}
-                  placeholder="Or enter image URL directly"
-                  className="h-8 text-sm"
-                />
-              </div>
+              <ImageDropZone
+                onImageUpload={handleImageUpload}
+                currentImage={backgroundImage}
+                onRemoveImage={handleRemoveImage}
+              />
+              <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
+              <Input
+                value={backgroundImage}
+                onChange={(e) => setBackgroundImage(e.target.value)}
+                placeholder="Or enter image URL directly"
+                className="h-8 text-sm"
+              />
             </div>
           </CardContent>
         </Card>
+
+        <BorderSettings
+          showBorders={showBorders}
+          onShowBordersChange={setShowBorders}
+          borderStyle={borderStyle}
+          onBorderStyleChange={setBorderStyle}
+        />
       </div>
 
-      {/* Text Tools Panel - Full width on mobile, spans 2 columns on desktop */}
-      <div className="lg:col-span-2 order-3 lg:order-3">
+      {/* AI Assistant & Text Tools Panel - spans 3 columns */}
+      <div className="lg:col-span-3 order-3 space-y-3">
+        <AIDesignAssistant onApplySuggestion={handleAISuggestion} />
+        
         <TextToolbar
           selectedElement={selectedElement}
           onUpdateElement={updateTextElement}
