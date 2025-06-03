@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Type, Image, Palette, Users } from 'lucide-react';
+import { Upload, Type, Image, Palette, Users, Wand2 } from 'lucide-react';
 import { useDesign } from './DesignContext';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const FONTS = ['Montserrat', 'Courier', 'Poppins', 'Playfair Display', 'Anton'];
 const COLORS = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
@@ -21,6 +22,7 @@ export const LeftSidebar = () => {
   const [fontSize, setFontSize] = useState(24);
   const [textColor, setTextColor] = useState('#000000');
   const [aiPrompt, setAiPrompt] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -64,6 +66,53 @@ export const LeftSidebar = () => {
       height: 100,
       placement: currentView
     });
+  };
+
+  const handleGenerateWithAI = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error('Please enter a description for what you want to create');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    
+    try {
+      console.log('Generating design with AI prompt:', aiPrompt);
+      
+      const { data, error } = await supabase.functions.invoke('generate-design-image', {
+        body: { 
+          prompt: `Create a design for apparel/merchandise: ${aiPrompt}. Make it suitable for printing on clothing with clear, bold graphics.`,
+          style: 'design'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.imageUrl) {
+        // Add the generated image as an element
+        addElement({
+          type: 'image',
+          content: data.imageUrl,
+          x: 150,
+          y: 150,
+          width: 200,
+          height: 200,
+          placement: currentView
+        });
+        
+        toast.success('AI design generated successfully!');
+        setAiPrompt('');
+      } else {
+        throw new Error('No image generated');
+      }
+    } catch (error) {
+      console.error('AI generation error:', error);
+      toast.error(`Failed to generate design: ${error.message}`);
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const tabs = [
@@ -125,13 +174,28 @@ export const LeftSidebar = () => {
               <Label htmlFor="ai-prompt">Generate with AI</Label>
               <Textarea
                 id="ai-prompt"
-                placeholder="Describe what you want to create..."
+                placeholder="Describe what you want to create (e.g., 'a minimalist glee club logo with musical notes')"
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 className="bg-gray-700 border-gray-600 text-white"
+                rows={3}
               />
-              <Button className="w-full bg-orange-600 hover:bg-orange-700">
-                Generate with AI
+              <Button 
+                className="w-full bg-orange-600 hover:bg-orange-700"
+                onClick={handleGenerateWithAI}
+                disabled={isGeneratingAI || !aiPrompt.trim()}
+              >
+                {isGeneratingAI ? (
+                  <>
+                    <Wand2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Generate with AI
+                  </>
+                )}
               </Button>
             </div>
           </div>
