@@ -9,6 +9,7 @@ import { Calendar, ShoppingBag, Phone, ExternalLink, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { NewsTicker } from '@/components/landing/news/NewsTicker';
+import { Header } from '@/components/landing/Header';
 import { Link } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +32,7 @@ export default function EnhancedCalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
+        <Header />
         <NewsTicker />
         <div className="mobile-container mobile-section-padding">
           <PageHeader
@@ -52,6 +54,7 @@ export default function EnhancedCalendarPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
+        <Header />
         <NewsTicker />
         <div className="mobile-container mobile-section-padding">
           <PageHeader
@@ -77,6 +80,9 @@ export default function EnhancedCalendarPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header Navigation */}
+      <Header />
+      
       {/* News Ticker */}
       <NewsTicker />
       
