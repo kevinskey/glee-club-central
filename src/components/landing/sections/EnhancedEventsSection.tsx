@@ -37,9 +37,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             <Sparkles className="h-4 w-4 text-blue-500" />
             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Upcoming Performances</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-playfair font-bold mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Join Us for Musical Excellence
-          </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Experience the harmonious blend of tradition and innovation with the Spelman College Glee Club
           </p>
