@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { 
@@ -12,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Users, Search, Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { UserManagementTable } from './UserManagementTable';
+import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
@@ -33,6 +35,12 @@ export default function UserManagement() {
   useEffect(() => {
     refreshUsers();
   }, [refreshUsers]);
+
+  // Transform User[] to UserManagementData[] format
+  const transformedUsers = users.map(user => ({
+    ...user,
+    full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User'
+  }));
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     const success = await handleUpdateUser(userId, { role: newRole });
@@ -58,6 +66,7 @@ export default function UserManagement() {
 
   const handleUserAdded = () => {
     refreshUsers();
+    setShowAddDialog(false);
   };
 
   const handleRefresh = async () => {
@@ -136,20 +145,39 @@ export default function UserManagement() {
                 <p className="mt-2 text-muted-foreground">Loading members...</p>
               </div>
             ) : (
-              <UserManagementTable
-                users={filteredUsers}
-                onRoleUpdate={handleRoleUpdate}
-                onStatusToggle={handleStatusToggle}
-                isLoading={isLoading}
-              />
+              <>
+                {/* Desktop Table */}
+                <div className="hidden lg:block">
+                  <UserManagementTable
+                    users={filteredUsers}
+                    onRoleUpdate={handleRoleUpdate}
+                    onStatusToggle={handleStatusToggle}
+                    isLoading={isLoading}
+                  />
+                </div>
+                
+                {/* Mobile Table for medium screens */}
+                <div className="block lg:hidden">
+                  <UserManagementTableMobile
+                    users={transformedUsers.filter(user => 
+                      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                    )}
+                    onRoleUpdate={handleRoleUpdate}
+                    onStatusToggle={handleStatusToggle}
+                    isLoading={isLoading}
+                  />
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
         
         {/* Add User Dialog */}
         <AddUserDialog 
-          open={showAddDialog} 
-          onOpenChange={setShowAddDialog}
+          isOpen={showAddDialog} 
+          onClose={() => setShowAddDialog(false)}
           onUserAdded={handleUserAdded}
         />
       </div>

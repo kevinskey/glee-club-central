@@ -6,6 +6,7 @@ import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { FloatingThemeToggle } from '@/components/ui/floating-theme-toggle';
+import { MobileHeader } from '@/components/layout/MobileHeader';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -40,12 +41,18 @@ export default function AppLayout({
 
   return (
     <div className="min-h-screen flex flex-col">
-      {showHeader && <Header />}
+      {/* Desktop Header */}
+      {showHeader && <div className="hidden md:block"><Header /></div>}
+      
+      {/* Mobile Header */}
+      <div className="block md:hidden">
+        <MobileHeader />
+      </div>
       
       <div className="flex-1 flex">
         {renderSidebar()}
         
-        <main className={`flex-1 ${hasSidebar ? 'lg:ml-64' : ''}`}>
+        <main className={`flex-1 ${hasSidebar ? 'lg:ml-64' : ''} pt-14 md:pt-0`}>
           {children || <Outlet />}
         </main>
       </div>
