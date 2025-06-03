@@ -26,12 +26,6 @@ const HERO_SECTIONS = [
     location: "HomePage - Primary Banner"
   },
   {
-    id: "homepage-enhanced", 
-    name: "Enhanced Hero",
-    description: "Enhanced hero section with advanced features",
-    location: "HomePage - Enhanced Section"
-  },
-  {
     id: "about-hero",
     name: "About Page Hero",
     description: "Hero section for the about page",
