@@ -44,7 +44,7 @@ const getYouTubeVideoId = (url: string): string | null => {
 export function TopSlider({ 
   autoPlay = true, 
   interval = 5000, 
-  height = "120px",
+  height = "200px", // Increased from 120px to 200px
   className = ""
 }: TopSliderProps) {
   const [slides, setSlides] = useState<TopSliderItem[]>([]);
@@ -216,7 +216,7 @@ export function TopSlider({
       <div className="relative z-10 h-full flex items-center justify-center px-4">
         <div className="text-center max-w-4xl">
           <h2 
-            className="text-lg md:text-xl font-semibold mb-1"
+            className="text-xl md:text-2xl lg:text-3xl font-semibold mb-2"
             style={{ color: currentSlideData.text_color || '#FFFFFF' }}
           >
             {currentSlideData.link_url ? (
@@ -234,7 +234,7 @@ export function TopSlider({
           </h2>
           {currentSlideData.description && (
             <p 
-              className="text-sm md:text-base opacity-90"
+              className="text-base md:text-lg opacity-90"
               style={{ color: currentSlideData.text_color || '#FFFFFF' }}
             >
               {currentSlideData.description}
@@ -249,28 +249,28 @@ export function TopSlider({
           <Button
             variant="ghost"
             size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-8 w-8 z-20"
+            className="absolute left-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-10 w-10 z-20"
             onClick={goToPrevSlide}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5" />
           </Button>
           
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-8 w-8 z-20"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-10 w-10 z-20"
             onClick={goToNextSlide}
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-5 w-5" />
           </Button>
 
           {/* Dots indicator */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, index) => (
               <button
                 key={index}
                 className={cn(
-                  "w-2 h-2 rounded-full transition-all",
+                  "w-3 h-3 rounded-full transition-all",
                   index === currentSlide 
                     ? "bg-white" 
                     : "bg-white/50 hover:bg-white/75"
