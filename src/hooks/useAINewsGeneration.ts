@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -75,37 +74,13 @@ export const useAINewsGeneration = () => {
     try {
       console.log('💾 Saving generated news to database:', content);
 
-      // First, let's test a simple query to see if we can access the profiles table
-      console.log('🔍 Testing profiles table access...');
-      const { data: testProfile, error: testError } = await supabase
-        .from('profiles')
-        .select('id, role, is_super_admin')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
-        .maybeSingle();
-
-      console.log('🧪 Test query result:', { testProfile, testError });
-
       // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError) {
-        console.error('❌ Session error:', sessionError);
-        throw new Error('Failed to get user session');
-      }
-
-      if (!session?.user) {
-        console.error('❌ No authenticated user found');
+      if (sessionError || !session?.user) {
+        console.error('❌ Authentication error');
         throw new Error('User not authenticated');
       }
-
-      console.log('👤 Current user from session:', {
-        id: session.user.id,
-        email: session.user.email,
-        role: session.user.role
-      });
-
-      // Let's try a direct insert without checking permissions first to isolate the issue
-      console.log('🚀 Attempting direct insert to news_items table...');
 
       const newsItem = {
         headline: content.headline,
@@ -119,7 +94,7 @@ export const useAINewsGeneration = () => {
         created_by: session.user.id
       };
 
-      console.log('📝 Inserting news item with data:', newsItem);
+      console.log('📝 Inserting news item:', newsItem);
 
       const { data: insertedNews, error } = await supabase
         .from('news_items')
@@ -128,20 +103,7 @@ export const useAINewsGeneration = () => {
         .single();
 
       if (error) {
-        console.error('❌ Insert error details:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          table: 'news_items',
-          operation: 'INSERT'
-        });
-
-        // Let's also check what RLS policies are currently active
-        console.log('🔒 Checking current user auth context...');
-        const { data: authUser } = await supabase.auth.getUser();
-        console.log('👤 Auth user details:', authUser);
-
+        console.error('❌ Insert error:', error);
         throw error;
       }
 
