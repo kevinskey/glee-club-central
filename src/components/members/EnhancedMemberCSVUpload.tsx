@@ -256,6 +256,10 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             value = 'active';
           } else if (systemField === 'role' && !value) {
             value = 'member';
+          } else if (systemField === 'email') {
+            // Ensure email is properly formatted and normalized
+            value = value.toLowerCase().trim();
+            console.log('Processing email:', value);
           }
           
           mapped[systemField] = value;
@@ -263,11 +267,26 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       }
     });
 
+    // Validate required fields
+    if (!mapped.email || !mapped.first_name || !mapped.last_name) {
+      console.error('Missing required fields for row:', mapped);
+      return null;
+    }
+
+    console.log('Mapped row data:', mapped);
     return mapped as MappedRow;
   };
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
+      console.log('Creating user with email:', userData.email);
+      
+      // Validate email format before proceeding
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(userData.email)) {
+        throw new Error(`Invalid email format: ${userData.email}`);
+      }
+
       // Validate and transform voice_part to match enum
       const validVoicePart = userData.voice_part && 
         ['soprano_1', 'soprano_2', 'alto_1', 'alto_2', 'tenor', 'bass', 'director'].includes(userData.voice_part) 
@@ -288,7 +307,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
       // Transform the data to match UserFormValues interface
       const userFormData: UserFormValues = {
-        email: userData.email,
+        email: userData.email.toLowerCase().trim(), // Ensure email is normalized
         password: `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`,
         first_name: userData.first_name,
         last_name: userData.last_name,
@@ -303,6 +322,8 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         is_admin: validRole === 'admin'
       };
 
+      console.log('Submitting user form data:', userFormData);
+
       // Create user using the existing hook
       const success = await addUser(userFormData);
       
@@ -310,6 +331,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error('Failed to create user');
       }
     } catch (error: any) {
+      console.error('Error in createUser:', error);
       throw error;
     }
   };

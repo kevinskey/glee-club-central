@@ -27,6 +27,14 @@ export const useUserCreate = (
           toast.error('Email and password are required');
           return false;
         }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(userData.email)) {
+          console.error('Invalid email format:', userData.email);
+          toast.error('Invalid email format');
+          return false;
+        }
         
         // Check if user already exists in profiles table
         const { data: existingProfile } = await supabase
@@ -44,15 +52,16 @@ export const useUserCreate = (
         // Determine admin status from role
         const isAdmin = userData.role === 'admin' || userData.is_admin;
         
-        // Create the user in auth with metadata
+        // Create the user in auth with metadata - ensure email is included
         const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: userData.email,
+          email: userData.email.trim().toLowerCase(), // Normalize email
           password: userData.password,
           options: {
             data: {
               first_name: userData.first_name,
               last_name: userData.last_name,
-              role: isAdmin ? 'admin' : 'member'
+              role: isAdmin ? 'admin' : 'member',
+              email: userData.email.trim().toLowerCase() // Include in metadata too
             }
           }
         });
@@ -87,6 +96,8 @@ export const useUserCreate = (
           toast.error('Failed to create user');
           return false;
         }
+        
+        console.log('Auth user created with ID:', authData.user.id, 'Email:', authData.user.email);
         
         // Wait a moment to ensure the trigger has fired
         await sleep(1500);
@@ -123,7 +134,7 @@ export const useUserCreate = (
         if (setUsers) {
           const newUser: User = {
             id: authData.user.id,
-            email: userData.email,
+            email: userData.email.trim().toLowerCase(), // Ensure email is saved
             first_name: userData.first_name,
             last_name: userData.last_name,
             phone: userData.phone || null,
