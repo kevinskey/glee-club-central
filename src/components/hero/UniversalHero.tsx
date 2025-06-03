@@ -35,7 +35,7 @@ export function UniversalHero({
   return (
     <div 
       style={{ height: getHeightStyle() }} 
-      className={`overflow-hidden w-full bg-gray-900 ${className}`}
+      className={`overflow-hidden w-full ${className}`}
     >
       <ModernHeroSection 
         sectionId={sectionId}
