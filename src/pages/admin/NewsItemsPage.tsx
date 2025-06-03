@@ -50,6 +50,7 @@ import { format } from "date-fns";
 import { AINewsGenerator } from "@/components/admin/AINewsGenerator";
 import { EnhancedNewsSourceManager } from "@/components/admin/EnhancedNewsSourceManager";
 import { AINewsContent } from "@/hooks/useAINewsGeneration";
+import { AdminLayout } from '@/layouts/AdminLayout';
 
 interface NewsItem {
   id: string;
@@ -64,7 +65,7 @@ interface NewsItem {
   created_at: string;
 }
 
-export default function NewsItemsPage() {
+function NewsItemsPageContent() {
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -322,13 +323,13 @@ export default function NewsItemsPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-6xl">
+    <div className="space-y-6">
       <PageHeader 
         title="News Ticker Manager" 
         description="Manage news headlines and configure news sources for the scrolling ticker."
       />
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="manage">Manage Items</TabsTrigger>
           <TabsTrigger value="sources">News Sources</TabsTrigger>
@@ -652,5 +653,13 @@ export default function NewsItemsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function NewsItemsPage() {
+  return (
+    <AdminLayout>
+      <NewsItemsPageContent />
+    </AdminLayout>
   );
 }
