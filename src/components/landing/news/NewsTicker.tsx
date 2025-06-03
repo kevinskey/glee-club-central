@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { NewsService, NewsItem } from "@/services/newsService";
+import { NewsService } from "@/services/newsService";
+import type { NewsItem } from "@/services/newsService";
 
 interface NewsTickerProps {
   autoHide?: boolean;

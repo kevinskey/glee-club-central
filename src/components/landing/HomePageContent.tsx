@@ -1,5 +1,6 @@
+
 import React from "react";
-import { EventsSection } from "./sections/EventsSection";
+import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { AudioSection } from "./sections/AudioSection";
 
@@ -45,7 +46,7 @@ export function HomePageContent({
 }: HomePageContentProps) {
   return (
     <main className="w-full">
-      <EventsSection events={upcomingEvents} />
+      <EnhancedEventsSection events={upcomingEvents} />
       <StoreSection products={storeProducts} />
       <AudioSection tracks={audioTracks} />
     </main>
