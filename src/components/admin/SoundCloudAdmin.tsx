@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,8 +15,10 @@ import {
   Eye,
   Plus,
   Download,
-  BarChart3
+  BarChart3,
+  ExternalLink
 } from 'lucide-react';
+import { SoundCloudUrlImport } from './SoundCloudUrlImport';
 
 interface Track {
   id: string;
@@ -165,6 +166,7 @@ export function SoundCloudAdmin() {
       <Tabs defaultValue="tracks" className="space-y-6">
         <TabsList>
           <TabsTrigger value="tracks">Track Management</TabsTrigger>
+          <TabsTrigger value="import">Import from URL</TabsTrigger>
           <TabsTrigger value="upload">Upload New</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
@@ -240,6 +242,10 @@ export function SoundCloudAdmin() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="import" className="space-y-4">
+          <SoundCloudUrlImport />
         </TabsContent>
 
         <TabsContent value="upload" className="space-y-4">
