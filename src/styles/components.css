@@ -1,5 +1,6 @@
 
 
+
 /* News Ticker Animations */
 @keyframes marquee-slow {
   0% {
@@ -29,7 +30,7 @@
 }
 
 .animate-marquee-slow {
-  animation: marquee-slow 60s linear infinite; /* Much slower: increased from 34s to 60s */
+  animation: marquee-slow 50s linear infinite; /* Set to 50 seconds */
 }
 
 .animate-marquee-normal {
@@ -39,4 +40,5 @@
 .animate-marquee-fast {
   animation: marquee-fast 25s linear infinite; /* Slower: increased from 14s to 25s */
 }
+
 
