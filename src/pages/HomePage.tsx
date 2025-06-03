@@ -34,7 +34,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden m-0 p-0 bg-white dark:bg-gray-900">
+    <div className="min-h-screen overflow-x-hidden m-0 p-0" style={{ backgroundColor: '#F9F9F9' }}>
       <Header />
       <HeroSection />
       <HomePageContent

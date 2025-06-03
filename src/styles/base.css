@@ -3,13 +3,13 @@
 
 @layer base {
   :root {
-    --background: 220 100% 97%;  /* Light blue background */
+    --background: 0 0% 97.6%;  /* #F9F9F9 instead of pure white */
     --foreground: 240 10% 3.9%;
 
-    --card: 220 100% 98%;  /* Very light blue for cards */
+    --card: 0 0% 98%;  /* Slightly lighter than background for cards */
     --card-foreground: 240 10% 3.9%;
 
-    --popover: 220 100% 98%;
+    --popover: 0 0% 98%;
     --popover-foreground: 240 10% 3.9%;
 
     --primary: 200 100% 70%;  /* Light blue primary */
