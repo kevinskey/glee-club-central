@@ -93,25 +93,36 @@ export const useUserList = (): UseUserListResponse => {
         return;
       }
 
-      // Check if current user is admin to determine email access
+      // Check if current user is admin to determine what data to show
+      const currentUserProfile = profiles.find(p => p.id === currentUser.id);
       const isAdmin = currentUser.email === 'kevinskey@mac.com' || 
-        profiles.find(p => p.id === currentUser.id)?.is_super_admin;
+        currentUserProfile?.is_super_admin || 
+        currentUserProfile?.role === 'admin';
+
+      console.log('👤 Admin check:', {
+        currentUserEmail: currentUser.email,
+        isKnownAdmin: currentUser.email === 'kevinskey@mac.com',
+        profileIsAdmin: currentUserProfile?.is_super_admin,
+        profileRole: currentUserProfile?.role,
+        finalIsAdmin: isAdmin
+      });
 
       let usersWithEmails: SimpleUser[];
 
       if (isAdmin) {
-        // Admin can see all users with emails
+        // Admin can see all users - try to get emails
         try {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (authError || !authData?.users) {
-            console.warn('Could not fetch auth users, showing profiles only:', authError);
+            console.warn('Could not fetch auth users, showing profiles with current user email:', authError);
+            // Fallback: show all profiles, but only show email for current user
             usersWithEmails = profiles.map(profile => ({
               ...profile,
-              email: profile.id === currentUser.id ? currentUser.email || '' : 'Hidden'
+              email: profile.id === currentUser.id ? currentUser.email || '' : 'Email access limited'
             }));
           } else {
-            // Map emails from auth data
+            // Success: map emails from auth data
             const emailMap = new Map<string, string>();
             authData.users.forEach((user: any) => {
               emailMap.set(user.id, user.email || '');
@@ -119,14 +130,15 @@ export const useUserList = (): UseUserListResponse => {
             
             usersWithEmails = profiles.map(profile => ({
               ...profile,
-              email: emailMap.get(profile.id) || 'Unknown'
+              email: emailMap.get(profile.id) || 'No email found'
             }));
           }
         } catch (err) {
           console.warn('Auth admin call failed:', err);
+          // Fallback: show all profiles with limited email access
           usersWithEmails = profiles.map(profile => ({
             ...profile,
-            email: profile.id === currentUser.id ? currentUser.email || '' : 'Hidden'
+            email: profile.id === currentUser.id ? currentUser.email || '' : 'Email access limited'
           }));
         }
       } else {
@@ -139,7 +151,12 @@ export const useUserList = (): UseUserListResponse => {
           }));
       }
 
-      console.log('✅ Successfully processed users:', usersWithEmails.length);
+      console.log('✅ Successfully processed users:', {
+        totalUsers: usersWithEmails.length,
+        isAdmin,
+        sampleUser: usersWithEmails[0]
+      });
+      
       setUsers(usersWithEmails);
       
     } catch (err) {
