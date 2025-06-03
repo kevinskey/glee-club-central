@@ -120,7 +120,7 @@ export const dashboardModules: DashboardModule[] = [
     description: "Manage audio tracks and streaming content",
     icon: "Music",
     color: "bg-orange-600",
-    path: "/dashboard/admin/soundcloud",
+    path: "/admin/soundcloud",
     adminOnly: true,
     category: "Administration"
   },
