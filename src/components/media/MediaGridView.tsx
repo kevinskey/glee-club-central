@@ -33,103 +33,109 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
     }
   };
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const renderMediaPreview = (file: MediaFile) => {
+    const mediaType = getMediaType(file.file_type);
     
-    if (confirm("Are you sure you want to delete this file?")) {
-      await onDelete(id);
+    switch (mediaType) {
+      case "image":
+        return (
+          <img 
+            src={file.file_url} 
+            alt={file.title} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.innerHTML = `<div class="w-full h-full flex items-center justify-center">${getMediaIcon(mediaType)}</div>`;
+              }
+            }}
+          />
+        );
+      
+      case "pdf":
+        return (
+          <PDFThumbnail 
+            url={file.file_url} 
+            title={file.title} 
+            className="w-full h-full"
+            aspectRatio={1}
+          />
+        );
+      
+      default:
+        return (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            {getMediaIcon(mediaType)}
+          </div>
+        );
     }
   };
 
+  if (mediaFiles.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-medium mb-2">No media files found</h3>
+        <p className="text-muted-foreground">Try adjusting your search or filter settings</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {mediaFiles.map((file) => {
         const mediaType = getMediaType(file.file_type);
-        const isImage = mediaType === "image";
-        const isPdf = mediaType === "pdf";
         
         return (
-          <Card key={file.id} className="overflow-hidden group">
-            <div className="relative">
-              <AspectRatio ratio={16/9} className="bg-muted/40">
-                {isImage ? (
-                  <img 
-                    src={file.file_url} 
-                    alt={file.title}
-                    className="object-cover w-full h-full"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/placeholder-image.svg";
-                    }}
-                  />
-                ) : isPdf ? (
-                  <div className="w-full h-full">
-                    <PDFThumbnail 
-                      url={file.file_url} 
-                      title={file.title}
-                      className="w-full h-full"
-                      aspectRatio={16/9}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full">
-                    {getMediaIcon(mediaType)}
-                  </div>
-                )}
-                
-                {/* Overlay with actions */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="secondary"
-                      onClick={() => window.open(file.file_url, '_blank')}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button 
-                      size="sm" 
-                      variant="secondary"
-                      onClick={() => {
-                        const a = document.createElement('a');
-                        a.href = file.file_url;
-                        a.download = file.title;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                      }}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    
-                    {canDelete && (
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={(e) => handleDelete(file.id, e)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </AspectRatio>
+          <Card key={file.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <div className="aspect-square bg-muted relative overflow-hidden">
+              {renderMediaPreview(file)}
             </div>
             
-            <CardContent className="p-3">
-              <div className="mb-1 flex items-start justify-between">
-                <h3 className="font-medium text-sm truncate mr-2" title={file.title}>
-                  {file.title}
-                </h3>
-                <span className="bg-muted text-muted-foreground text-xs px-1.5 py-0.5 rounded">
-                  {mediaType}
-                </span>
+            <CardContent className="p-4">
+              <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+              
+              {file.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                  {file.description}
+                </p>
+              )}
+              
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
+                <span className="uppercase font-medium">{mediaType}</span>
+                <span>{formatFileSize(file.size || 0)}</span>
               </div>
               
-              <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
-                <span>{formatFileSize(file.size || 0)}</span>
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-3">
                 <span>{format(new Date(file.created_at), 'MMM d, yyyy')}</span>
+                {file.folder && (
+                  <span className="bg-muted px-2 py-1 rounded">{file.folder}</span>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => window.open(file.file_url, '_blank')}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  View
+                </Button>
+                
+                {canDelete && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDelete(file.id)}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
