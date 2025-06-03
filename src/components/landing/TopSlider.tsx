@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface MediaLibraryItem {
   id: string;
@@ -51,6 +51,9 @@ export function TopSlider({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
+  
+  // Use media query to detect mobile devices
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const fetchSlides = async () => {
     try {
@@ -167,13 +170,23 @@ export function TopSlider({
       {/* Background */}
       <div className="absolute inset-0">
         {youtubeVideoId ? (
-          // YouTube video background
+          // YouTube video background - mobile-optimized
           <div className="relative w-full h-full">
             <iframe
               src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
-              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-              style={{
-                transform: 'scale(1.2)', // Scale to hide controls
+              className={cn(
+                "absolute inset-0 w-full h-full object-cover pointer-events-none",
+                // Remove scale transform on mobile to prevent cropping
+                isMobile ? "" : "scale-110"
+              )}
+              style={isMobile ? {
+                // On mobile, use aspect-ratio to maintain proportions without cropping
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              } : {
+                // On desktop, keep the scale transform to hide controls
+                transform: 'scale(1.2)',
                 transformOrigin: 'center center'
               }}
               allow="autoplay; encrypted-media"
