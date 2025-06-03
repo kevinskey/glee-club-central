@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Package, Lock, Image, Wand2, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Lock, Image, Wand2, Loader2, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasPermission } from '@/utils/permissionChecker';
@@ -35,7 +35,9 @@ export function ProductManagement() {
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [aiImagePrompt, setAiImagePrompt] = useState('');
+  const [aiDescriptionPrompt, setAiDescriptionPrompt] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -201,6 +203,47 @@ export function ProductManagement() {
     }
   };
 
+  const generateProductDescription = async () => {
+    if (!aiDescriptionPrompt.trim()) {
+      toast.error('Please enter some details about the product');
+      return;
+    }
+
+    setIsGeneratingDescription(true);
+    
+    try {
+      console.log('Generating product description with AI:', aiDescriptionPrompt);
+      
+      const enhancedPrompt = `Write a compelling product description for e-commerce for: ${aiDescriptionPrompt}. The description should be professional, engaging, highlight key features and benefits, and encourage purchases. Keep it concise but informative, suitable for online store listings.`;
+      
+      const { data, error } = await supabase.functions.invoke('generate-design-image', {
+        body: { 
+          prompt: enhancedPrompt,
+          style: 'text'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.generatedText || data?.imageUrl) {
+        // For text generation, we might get the response in different formats
+        const description = data.generatedText || data.description || 'Generated description';
+        setFormData(prev => ({ ...prev, description }));
+        toast.success('Product description generated successfully!');
+        setAiDescriptionPrompt('');
+      } else {
+        throw new Error('No description generated');
+      }
+    } catch (error) {
+      console.error('AI description generation error:', error);
+      toast.error(`Failed to generate description: ${error.message}`);
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       name: '',
@@ -320,16 +363,54 @@ export function ProductManagement() {
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="description">Description</Label>
+              
+              <div className="space-y-4">
+                <Label>Product Description</Label>
+                
+                {/* AI Description Generation Section */}
+                <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <Label className="font-medium text-green-800">Generate Description with AI</Label>
+                    </div>
+                    <Textarea
+                      placeholder="Describe your product briefly (e.g., 'blue hoodie with Spelman logo, soft cotton material, available in sizes S-XL')"
+                      value={aiDescriptionPrompt}
+                      onChange={(e) => setAiDescriptionPrompt(e.target.value)}
+                      className="bg-white border-green-200"
+                      rows={2}
+                    />
+                    <Button
+                      type="button"
+                      onClick={generateProductDescription}
+                      disabled={isGeneratingDescription || !aiDescriptionPrompt.trim()}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      {isGeneratingDescription ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating Description...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="h-4 w-4 mr-2" />
+                          Generate Product Description
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter item description"
+                  placeholder="Enter item description or generate one with AI above"
                   rows={3}
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="quantity_in_stock">Quantity in Stock</Label>
@@ -572,16 +653,54 @@ export function ProductManagement() {
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="edit-description">Description</Label>
+            
+            <div className="space-y-4">
+              <Label>Product Description</Label>
+              
+              {/* AI Description Generation Section for Edit */}
+              <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    <Label className="font-medium text-green-800">Generate New Description with AI</Label>
+                  </div>
+                  <Textarea
+                    placeholder="Describe your product briefly (e.g., 'blue hoodie with Spelman logo, soft cotton material, available in sizes S-XL')"
+                    value={aiDescriptionPrompt}
+                    onChange={(e) => setAiDescriptionPrompt(e.target.value)}
+                    className="bg-white border-green-200"
+                    rows={2}
+                  />
+                  <Button
+                    type="button"
+                    onClick={generateProductDescription}
+                    disabled={isGeneratingDescription || !aiDescriptionPrompt.trim()}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    {isGeneratingDescription ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating Description...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Generate Product Description
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
               <Textarea
                 id="edit-description"
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter item description"
+                placeholder="Enter item description or generate one with AI above"
                 rows={3}
               />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="edit-quantity_in_stock">Quantity in Stock</Label>
