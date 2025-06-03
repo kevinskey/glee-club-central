@@ -326,35 +326,62 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     setUploadResult(null);
 
     const result: UploadResult = { success: 0, errors: [] };
+    const batchSize = 3; // Process 3 users at a time
+    const batchDelay = 10000; // 10 second delay between batches
+    const userDelay = 2000; // 2 second delay between individual users
 
-    for (let i = 0; i < dataRows.length; i++) {
-      const row = dataRows[i];
-      setUploadProgress(((i + 1) / dataRows.length) * 100);
+    console.log(`Starting batch upload of ${dataRows.length} users in batches of ${batchSize}`);
 
-      try {
-        const mappedData = transformRow(row, i);
-        if (!mappedData || !mappedData.email || !mappedData.first_name || !mappedData.last_name) {
+    // Process users in batches
+    for (let batchStart = 0; batchStart < dataRows.length; batchStart += batchSize) {
+      const batchEnd = Math.min(batchStart + batchSize, dataRows.length);
+      const batch = dataRows.slice(batchStart, batchEnd);
+      
+      console.log(`Processing batch ${Math.floor(batchStart / batchSize) + 1}: users ${batchStart + 1}-${batchEnd}`);
+
+      // Process each user in the current batch
+      for (let i = 0; i < batch.length; i++) {
+        const globalIndex = batchStart + i;
+        const row = batch[i];
+        setUploadProgress(((globalIndex + 1) / dataRows.length) * 100);
+
+        try {
+          const mappedData = transformRow(row, globalIndex);
+          if (!mappedData || !mappedData.email || !mappedData.first_name || !mappedData.last_name) {
+            result.errors.push({
+              row: globalIndex + 2,
+              email: mappedData?.email || 'Unknown',
+              error: 'Missing required fields'
+            });
+            continue;
+          }
+
+          await createUser(mappedData);
+          result.success++;
+          console.log(`Successfully created user ${result.success}: ${mappedData.email}`);
+        } catch (error: any) {
+          console.error(`Failed to create user in row ${globalIndex + 2}:`, error);
           result.errors.push({
-            row: i + 2,
-            email: mappedData?.email || 'Unknown',
-            error: 'Missing required fields'
+            row: globalIndex + 2,
+            email: row[csvColumns.find(c => columnMapping[c.header] === 'email')?.index || 0] || 'Unknown',
+            error: error.message || 'Unknown error'
           });
-          continue;
         }
 
-        await createUser(mappedData);
-        result.success++;
-      } catch (error: any) {
-        result.errors.push({
-          row: i + 2,
-          email: row[csvColumns.find(c => columnMapping[c.header] === 'email')?.index || 0] || 'Unknown',
-          error: error.message || 'Unknown error'
-        });
+        // Delay between individual users within the batch
+        if (i < batch.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, userDelay));
+        }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Longer delay between batches (except for the last batch)
+      if (batchEnd < dataRows.length) {
+        console.log(`Batch complete. Waiting ${batchDelay}ms before next batch to avoid rate limits...`);
+        await new Promise(resolve => setTimeout(resolve, batchDelay));
+      }
     }
 
+    console.log('Upload completed:', result);
     setUploadResult(result);
     setIsUploading(false);
     setStep('complete');

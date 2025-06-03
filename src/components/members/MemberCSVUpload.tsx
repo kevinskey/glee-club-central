@@ -79,81 +79,113 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
   };
 
   const createUser = async (userData: CSVRow): Promise<void> => {
-    try {
-      console.log('Creating user:', userData.email);
-      
-      // Generate a secure temporary password
-      const tempPassword = `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`;
-      
-      // Create auth user using admin API
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: userData.email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          first_name: userData.first_name,
-          last_name: userData.last_name
-        }
-      });
-
-      if (authError) {
-        console.error('Auth creation error:', authError);
-        throw new Error(`Failed to create auth user: ${authError.message}`);
-      }
-      
-      if (!authData.user?.id) {
-        throw new Error('User creation failed - no user ID returned');
-      }
-
-      console.log('Auth user created:', authData.user.id);
-
-      // Parse boolean and date values
-      const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
-      const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
-
-      // Create/update profile with additional data
-      const profileData = {
-        id: authData.user.id,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        phone: userData.phone || null,
-        voice_part: userData.voice_part || null,
-        status: userData.status || 'active',
-        class_year: userData.class_year || null,
-        notes: userData.notes || null,
-        dues_paid: duesPaid,
-        join_date: joinDate,
-        role: userData.role || 'member',
-        is_super_admin: userData.role === 'admin',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      console.log('Creating profile with data:', profileData);
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert(profileData, { 
-          onConflict: 'id',
-          ignoreDuplicates: false 
+    const maxRetries = 3;
+    let attempt = 0;
+    
+    while (attempt < maxRetries) {
+      try {
+        console.log(`Creating user (attempt ${attempt + 1}):`, userData.email);
+        
+        // Generate a secure temporary password
+        const tempPassword = `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`;
+        
+        // Create auth user using admin API
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: userData.email,
+          password: tempPassword,
+          email_confirm: true,
+          user_metadata: {
+            first_name: userData.first_name,
+            last_name: userData.last_name
+          }
         });
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
-        // Try to clean up the auth user if profile creation fails
-        try {
-          await supabase.auth.admin.deleteUser(authData.user.id);
-        } catch (cleanupError) {
-          console.error('Failed to cleanup auth user:', cleanupError);
+        if (authError) {
+          console.error('Auth creation error:', authError);
+          
+          // Check if it's a rate limit error
+          if (authError.message.includes('rate limit') || authError.message.includes('429')) {
+            attempt++;
+            if (attempt < maxRetries) {
+              const delay = Math.pow(2, attempt) * 2000; // Exponential backoff
+              console.log(`Rate limit hit, retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+              continue;
+            }
+          }
+          
+          throw new Error(`Failed to create auth user: ${authError.message}`);
         }
-        throw new Error(`Failed to create profile: ${profileError.message}`);
-      }
+        
+        if (!authData.user?.id) {
+          throw new Error('User creation failed - no user ID returned');
+        }
 
-      console.log('Profile created successfully for:', userData.email);
-    } catch (error: any) {
-      console.error('User creation failed:', error);
-      throw error;
+        console.log('Auth user created:', authData.user.id);
+
+        // Parse boolean and date values
+        const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
+        const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
+
+        // Create/update profile with additional data
+        const profileData = {
+          id: authData.user.id,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone: userData.phone || null,
+          voice_part: userData.voice_part || null,
+          status: userData.status || 'active',
+          class_year: userData.class_year || null,
+          notes: userData.notes || null,
+          dues_paid: duesPaid,
+          join_date: joinDate,
+          role: userData.role || 'member',
+          is_super_admin: userData.role === 'admin',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        console.log('Creating profile with data:', profileData);
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert(profileData, { 
+            onConflict: 'id',
+            ignoreDuplicates: false 
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          // Try to clean up the auth user if profile creation fails
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+          } catch (cleanupError) {
+            console.error('Failed to cleanup auth user:', cleanupError);
+          }
+          throw new Error(`Failed to create profile: ${profileError.message}`);
+        }
+
+        console.log('Profile created successfully for:', userData.email);
+        return; // Success, exit retry loop
+      } catch (error: any) {
+        console.error('User creation failed:', error);
+        
+        // Check if it's a rate limit related error
+        if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+          attempt++;
+          if (attempt < maxRetries) {
+            const delay = Math.pow(2, attempt) * 2000;
+            console.log(`Rate limit error, retrying in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+        }
+        
+        throw error;
+      }
     }
+    
+    throw new Error('Failed to create user after multiple attempts due to rate limiting');
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,41 +223,63 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       errors: []
     };
 
-    console.log(`Starting upload of ${csvData.length} users`);
+    const batchSize = 3; // Process 3 users at a time
+    const batchDelay = 10000; // 10 second delay between batches
+    const userDelay = 2000; // 2 second delay between individual users
 
-    for (let i = 0; i < csvData.length; i++) {
-      const row = csvData[i];
-      setUploadProgress(((i + 1) / csvData.length) * 100);
+    console.log(`Starting batch upload of ${csvData.length} users in batches of ${batchSize}`);
 
-      console.log(`Processing row ${i + 1}/${csvData.length}:`, row.email);
+    // Process users in batches
+    for (let batchStart = 0; batchStart < csvData.length; batchStart += batchSize) {
+      const batchEnd = Math.min(batchStart + batchSize, csvData.length);
+      const batch = csvData.slice(batchStart, batchEnd);
+      
+      console.log(`Processing batch ${Math.floor(batchStart / batchSize) + 1}: users ${batchStart + 1}-${batchEnd}`);
 
-      // Validate row
-      const validationError = validateRow(row, i);
-      if (validationError) {
-        console.log('Validation error:', validationError);
-        result.errors.push({
-          row: i + 2,
-          email: row.email,
-          error: validationError
-        });
-        continue;
+      // Process each user in the current batch
+      for (let i = 0; i < batch.length; i++) {
+        const globalIndex = batchStart + i;
+        const row = batch[i];
+        setUploadProgress(((globalIndex + 1) / csvData.length) * 100);
+
+        console.log(`Processing row ${globalIndex + 1}/${csvData.length}:`, row.email);
+
+        // Validate row
+        const validationError = validateRow(row, globalIndex);
+        if (validationError) {
+          console.log('Validation error:', validationError);
+          result.errors.push({
+            row: globalIndex + 2,
+            email: row.email,
+            error: validationError
+          });
+          continue;
+        }
+
+        try {
+          await createUser(row);
+          result.success++;
+          console.log(`Successfully created user ${result.success}:`, row.email);
+        } catch (error: any) {
+          console.error(`Failed to create user ${row.email}:`, error);
+          result.errors.push({
+            row: globalIndex + 2,
+            email: row.email,
+            error: error.message || 'Unknown error occurred'
+          });
+        }
+
+        // Delay between individual users within the batch
+        if (i < batch.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, userDelay));
+        }
       }
 
-      try {
-        await createUser(row);
-        result.success++;
-        console.log(`Successfully created user ${result.success}:`, row.email);
-      } catch (error: any) {
-        console.error(`Failed to create user ${row.email}:`, error);
-        result.errors.push({
-          row: i + 2,
-          email: row.email,
-          error: error.message || 'Unknown error occurred'
-        });
+      // Longer delay between batches (except for the last batch)
+      if (batchEnd < csvData.length) {
+        console.log(`Batch complete. Waiting ${batchDelay}ms before next batch to avoid rate limits...`);
+        await new Promise(resolve => setTimeout(resolve, batchDelay));
       }
-
-      // Small delay to prevent overwhelming the server
-      await new Promise(resolve => setTimeout(resolve, 200));
     }
 
     console.log('Upload completed:', result);
