@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
   const { filteredMediaFiles, fetchAllMedia } = useMediaLibrary();
 
   useEffect(() => {
+    console.log(`📋 SectionSpecificHeroManager: Initializing for section ${sectionId}`);
     fetchSlides();
     fetchAllMedia();
   }, [sectionId]);
@@ -51,13 +51,20 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
   const fetchSlides = async () => {
     try {
       setIsLoading(true);
+      console.log(`📋 Fetching slides for section: ${sectionId}`);
+      
       const { data, error } = await supabase
         .from('hero_slides')
         .select('*')
         .eq('section_id', sectionId)
         .order('slide_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`📋 Error fetching slides for ${sectionId}:`, error);
+        throw error;
+      }
+      
+      console.log(`📋 Fetched ${data?.length || 0} slides for ${sectionId}:`, data);
       setSlides(data || []);
     } catch (error) {
       console.error('Error fetching hero slides:', error);
@@ -68,6 +75,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
   };
 
   const handleSlidesUpdate = async () => {
+    console.log(`📋 Updating slides for section: ${sectionId}`);
     await fetchSlides();
     if (onUpdate) {
       onUpdate();
@@ -76,6 +84,7 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
 
   const refreshData = async () => {
     setIsRefreshing(true);
+    console.log(`📋 Refreshing data for section: ${sectionId}`);
     await Promise.all([fetchSlides(), fetchAllMedia()]);
     setIsRefreshing(false);
     toast.success('Data refreshed successfully');
@@ -83,6 +92,8 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
 
   const createSlideFromImage = async (mediaFile: any) => {
     try {
+      console.log(`📋 Creating slide from media file:`, mediaFile);
+      
       // Get the next order number
       const { data: existingSlides, error: fetchError } = await supabase
         .from('hero_slides')
@@ -91,39 +102,52 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
         .order('slide_order', { ascending: false })
         .limit(1);
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error(`📋 Error fetching existing slides:`, fetchError);
+        throw fetchError;
+      }
 
       const nextOrder = existingSlides && existingSlides.length > 0 
         ? (existingSlides[0].slide_order || 0) + 1 
         : 0;
       
+      const slideData = {
+        section_id: sectionId,
+        media_id: mediaFile.id,
+        media_type: mediaFile.file_type.startsWith('video/') ? 'video' : 'image',
+        title: `${sectionName || 'Section'} Slide`,
+        description: mediaFile.title || 'Your slide description here.',
+        text_position: 'center',
+        text_alignment: 'center',
+        visible: true, // Make new slides visible by default
+        slide_order: nextOrder
+      };
+      
+      console.log(`📋 Inserting slide with data:`, slideData);
+
       const { error } = await supabase
         .from('hero_slides')
-        .insert({
-          section_id: sectionId,
-          media_id: mediaFile.id,
-          media_type: mediaFile.file_type.startsWith('video/') ? 'video' : 'image',
-          title: `${sectionName || 'Section'} Slide`,
-          description: mediaFile.title || 'Your slide description here.',
-          text_position: 'center',
-          text_alignment: 'center',
-          visible: false,
-          slide_order: nextOrder
-        });
+        .insert(slideData);
 
-      if (error) throw error;
+      if (error) {
+        console.error(`📋 Error inserting slide:`, error);
+        throw error;
+      }
       
+      console.log(`📋 Successfully created slide from media`);
       toast.success("New slide created successfully");
       setSelectImageDialogOpen(false);
       await handleSlidesUpdate();
     } catch (error) {
       console.error("Error creating slide:", error);
-      toast.error("Failed to create slide");
+      toast.error(`Failed to create slide: ${error.message || 'Unknown error'}`);
     }
   };
 
   const createEmptySlide = async () => {
     try {
+      console.log(`📋 Creating empty slide for section: ${sectionId}`);
+      
       // Get the next order number
       const { data: existingSlides, error: fetchError } = await supabase
         .from('hero_slides')
@@ -132,32 +156,43 @@ export function SectionSpecificHeroManager({ sectionId, sectionName, onUpdate }:
         .order('slide_order', { ascending: false })
         .limit(1);
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error(`📋 Error fetching existing slides:`, fetchError);
+        throw fetchError;
+      }
 
       const nextOrder = existingSlides && existingSlides.length > 0 
         ? (existingSlides[0].slide_order || 0) + 1 
         : 0;
       
+      const slideData = {
+        section_id: sectionId,
+        media_type: 'image',
+        title: `${sectionName || 'Section'} Slide`,
+        description: 'Your slide description here.',
+        text_position: 'center',
+        text_alignment: 'center',
+        visible: true, // Make new slides visible by default
+        slide_order: nextOrder
+      };
+      
+      console.log(`📋 Inserting empty slide with data:`, slideData);
+
       const { error } = await supabase
         .from('hero_slides')
-        .insert({
-          section_id: sectionId,
-          media_type: 'image',
-          title: `${sectionName || 'Section'} Slide`,
-          description: 'Your slide description here.',
-          text_position: 'center',
-          text_alignment: 'center',
-          visible: false,
-          slide_order: nextOrder
-        });
+        .insert(slideData);
 
-      if (error) throw error;
+      if (error) {
+        console.error(`📋 Error inserting empty slide:`, error);
+        throw error;
+      }
       
+      console.log(`📋 Successfully created empty slide`);
       toast.success("New slide created successfully");
       await handleSlidesUpdate();
     } catch (error) {
       console.error("Error creating slide:", error);
-      toast.error("Failed to create slide");
+      toast.error(`Failed to create slide: ${error.message || 'Unknown error'}`);
     }
   };
 

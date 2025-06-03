@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -112,7 +111,10 @@ export function UniversalHeroManager() {
         .order('slide_order', { ascending: false })
         .limit(1);
 
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error(`🎯 Error fetching existing slides for ${sectionId}:`, fetchError);
+        throw fetchError;
+      }
 
       const nextOrder = existingSlides && existingSlides.length > 0 
         ? (existingSlides[0].slide_order || 0) + 1 
@@ -120,29 +122,49 @@ export function UniversalHeroManager() {
 
       const sectionName = HERO_SECTIONS.find(s => s.id === sectionId)?.name || 'Section';
       
+      console.log(`🎯 Creating slide with order ${nextOrder} for ${sectionName}`);
+      
+      const slideData = {
+        section_id: sectionId,
+        media_type: 'image',
+        title: `New ${sectionName} Slide`,
+        description: 'Edit this slide to customize your hero section content and appearance.',
+        text_position: 'center',
+        text_alignment: 'center',
+        visible: true, // Make slides visible by default
+        slide_order: nextOrder
+      };
+      
+      console.log(`🎯 Inserting slide data:`, slideData);
+
       const { data: newSlide, error } = await supabase
         .from('hero_slides')
-        .insert({
-          section_id: sectionId,
-          media_type: 'image',
-          title: `New ${sectionName} Slide`,
-          description: 'Edit this slide to customize your hero section content and appearance.',
-          text_position: 'center',
-          text_alignment: 'center',
-          visible: true, // Make slides visible by default
-          slide_order: nextOrder
-        })
+        .insert(slideData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error(`🎯 Error inserting slide for ${sectionId}:`, error);
+        throw error;
+      }
       
-      console.log(`🎯 Created new slide:`, newSlide);
+      console.log(`🎯 Successfully created new slide:`, newSlide);
       toast.success(`Quick slide created for ${sectionName}`);
+      
+      // Force refresh stats
       await fetchSectionStats();
+      
+      // If this is the currently active section, trigger a refresh in the slides manager
+      if (sectionId === activeSection) {
+        console.log(`🎯 Triggering refresh for active section: ${sectionId}`);
+        // This will trigger a re-render of the HeroSlidesManager component
+        setActiveSection('');
+        setTimeout(() => setActiveSection(sectionId), 100);
+      }
+      
     } catch (error) {
       console.error("🎯 Error creating quick slide:", error);
-      toast.error("Failed to create quick slide");
+      toast.error(`Failed to create quick slide: ${error.message || 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +228,8 @@ export function UniversalHeroManager() {
           title: slide.title,
           visible: slide.visible,
           media_id: slide.media_id,
-          slide_order: slide.slide_order
+          slide_order: slide.slide_order,
+          section_id: slide.section_id
         });
       });
 
@@ -220,6 +243,18 @@ export function UniversalHeroManager() {
         console.error('🔍 Error fetching media:', mediaError);
       } else {
         console.log(`🔍 Public media files available:`, mediaFiles?.length || 0);
+      }
+
+      // Check hero_settings table
+      const { data: settings, error: settingsError } = await supabase
+        .from('hero_settings')
+        .select('*')
+        .limit(1);
+
+      if (settingsError) {
+        console.error('🔍 Error fetching hero settings:', settingsError);
+      } else {
+        console.log(`🔍 Hero settings:`, settings);
       }
 
       toast.info(`Debug info logged to console for ${getSectionDisplayName(sectionId)}`);
@@ -395,12 +430,14 @@ export function UniversalHeroManager() {
                     </p>
                   </div>
                   
-                  <HeroSlidesManager 
-                    key={activeSection} // Force re-render when section changes
-                    sectionId={activeSection}
-                    sectionName={getSectionDisplayName(activeSection)}
-                    onUpdate={fetchSectionStats}
-                  />
+                  {activeSection && (
+                    <HeroSlidesManager 
+                      key={activeSection} // Force re-render when section changes
+                      sectionId={activeSection}
+                      sectionName={getSectionDisplayName(activeSection)}
+                      onUpdate={fetchSectionStats}
+                    />
+                  )}
                 </div>
               </div>
             </TabsContent>
