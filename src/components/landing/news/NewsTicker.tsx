@@ -162,10 +162,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create seamless infinite scroll by repeating content multiple times with visible separators
-  const newsContent = newsItems.map(item => removeIconsFromHeadline(item.headline)).join(' • '); // Use bullet separator
+  // Create seamless infinite scroll by repeating content multiple times with 9 spaces spacing
+  const newsContent = newsItems.map(item => removeIconsFromHeadline(item.headline)).join('         '); // 9 spaces
   // Repeat the content multiple times to ensure seamless infinite scroll
-  const repeatedContent = Array(6).fill(newsContent).join(' • '); // Use bullet separator between repeats
+  const repeatedContent = Array(6).fill(newsContent).join('         '); // 9 spaces between repeats
 
   if (isLoading) {
     return (
