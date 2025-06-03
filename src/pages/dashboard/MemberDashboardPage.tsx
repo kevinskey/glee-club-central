@@ -5,6 +5,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { PageLoader } from "@/components/ui/page-loader";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { Header } from "@/components/landing/Header";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function MemberDashboardPage() {
@@ -48,9 +49,12 @@ export default function MemberDashboardPage() {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-6">
-        <DashboardHeader user={user} profile={profile} />
-        <DashboardContent />
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto px-4 py-8 space-y-6">
+          <DashboardHeader user={user} profile={profile} />
+          <DashboardContent />
+        </div>
       </div>
     </ErrorBoundary>
   );

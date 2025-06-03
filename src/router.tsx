@@ -12,6 +12,7 @@ import DesignStudioPage from "./pages/DesignStudioPage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import { adminRoutes } from "./routes/adminRoutes";
+import { dashboardRoutes } from "./routes/dashboardRoutes";
 
 const router = createBrowserRouter([
   {
@@ -58,6 +59,8 @@ const router = createBrowserRouter([
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
       },
+      // Include dashboard routes
+      ...dashboardRoutes,
       // Include all admin routes
       ...adminRoutes,
     ],
