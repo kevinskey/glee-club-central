@@ -13,7 +13,8 @@ import {
   Bell,
   BarChart,
   LayoutDashboard,
-  ImageIcon
+  ImageIcon,
+  ShoppingBag
 } from "lucide-react";
 
 interface AdminQuickActionsProps {
@@ -35,6 +36,12 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       icon: <ImageIcon className="h-4 w-4" />,
       action: () => navigate("/admin/hero-manager"),
       color: "bg-purple-500"
+    },
+    {
+      title: "Store",
+      icon: <ShoppingBag className="h-4 w-4" />,
+      action: () => navigate("/admin/store"),
+      color: "bg-emerald-500"
     },
     {
       title: "Add Member",
