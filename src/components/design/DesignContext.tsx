@@ -15,17 +15,19 @@ interface DesignElement {
   placement: 'front' | 'back' | 'left-chest' | 'right-chest' | 'sleeve';
 }
 
+interface Garment {
+  brand: string;
+  style: string;
+  color: string;
+}
+
 interface DesignContextType {
   elements: DesignElement[];
   addElement: (element: Omit<DesignElement, 'id'>) => void;
   updateElement: (id: string, updates: Partial<DesignElement>) => void;
   deleteElement: (id: string) => void;
-  selectedGarment: {
-    brand: string;
-    style: string;
-    color: string;
-  };
-  updateGarment: (updates: Partial<typeof selectedGarment>) => void;
+  selectedGarment: Garment;
+  updateGarment: (updates: Partial<Garment>) => void;
   currentView: 'front' | 'back' | 'sleeve';
   setCurrentView: (view: 'front' | 'back' | 'sleeve') => void;
   zoom: number;
@@ -36,7 +38,7 @@ const DesignContext = createContext<DesignContextType | undefined>(undefined);
 
 export const DesignProvider = ({ children }: { children: ReactNode }) => {
   const [elements, setElements] = useState<DesignElement[]>([]);
-  const [selectedGarment, setSelectedGarment] = useState({
+  const [selectedGarment, setSelectedGarment] = useState<Garment>({
     brand: 'Gildan',
     style: 'Softstyle Jersey T-shirt',
     color: 'White'
@@ -62,7 +64,7 @@ export const DesignProvider = ({ children }: { children: ReactNode }) => {
     setElements(prev => prev.filter(el => el.id !== id));
   };
 
-  const updateGarment = (updates: Partial<typeof selectedGarment>) => {
+  const updateGarment = (updates: Partial<Garment>) => {
     setSelectedGarment(prev => ({ ...prev, ...updates }));
   };
 
