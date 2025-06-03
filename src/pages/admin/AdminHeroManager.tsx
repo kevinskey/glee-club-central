@@ -1,13 +1,15 @@
 
 import React, { useState } from 'react';
 import { UniversalHeroManager } from '@/components/admin/UniversalHeroManager';
+import { MediaMigrationManager } from '@/components/admin/MediaMigrationManager';
 import { PageHeader } from "@/components/ui/page-header";
 import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
 import { AdminTopBar } from "@/components/admin/AdminTopBar";
 import { UploadMediaModal } from "@/components/UploadMediaModal";
 import { UploadMediaButton } from "@/components/media/UploadMediaButton";
 import { Button } from "@/components/ui/button";
-import { Wrench, AlertTriangle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Wrench, AlertTriangle, Database } from "lucide-react";
 import { validateHeroSlideMedia, forceCleanupOrphanedSlides } from "@/utils/heroMediaSync";
 import { toast } from "sonner";
 
@@ -86,7 +88,7 @@ export default function AdminHeroManager() {
         <div className="flex justify-between items-start">
           <PageHeader 
             title="Universal Hero Section Manager" 
-            description="Manage all hero sections across your entire application from one central location"
+            description="Manage all hero sections and media across your entire application"
           />
           
           <div className="flex gap-2">
@@ -115,7 +117,23 @@ export default function AdminHeroManager() {
           </div>
         </div>
         
-        <UniversalHeroManager />
+        <Tabs defaultValue="hero-manager" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="hero-manager">Hero Manager</TabsTrigger>
+            <TabsTrigger value="media-migration" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Media Migration
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="hero-manager" className="space-y-6">
+            <UniversalHeroManager />
+          </TabsContent>
+          
+          <TabsContent value="media-migration" className="space-y-6">
+            <MediaMigrationManager />
+          </TabsContent>
+        </Tabs>
         
         <FloatingThemeToggle position="bottom-right" />
       </div>
