@@ -46,13 +46,27 @@ export async function migrateMediaIds(): Promise<MediaMigrationResult> {
       const oldFile = mediaFiles[i];
       const oldId = oldFile.id;
       
-      // Generate new ID with index for easy identification
-      const newId = `media-${String(i + 1).padStart(3, '0')}-${Date.now()}`;
+      // Generate proper UUID for new ID
+      const { data: uuidData, error: uuidError } = await supabase
+        .rpc('gen_random_uuid');
+      
+      let newId: string;
+      if (uuidError || !uuidData) {
+        // Fallback to crypto.randomUUID if available, otherwise skip
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+          newId = crypto.randomUUID();
+        } else {
+          result.errors.push(`Could not generate UUID for ${oldFile.title}`);
+          continue;
+        }
+      } else {
+        newId = uuidData;
+      }
       
       console.log(`🔄 Migrating media ${i + 1}/${mediaFiles.length}: ${oldFile.title}`);
       console.log(`   Old ID: ${oldId} -> New ID: ${newId}`);
 
-      // Create new media record with new ID
+      // Create new media record with new UUID
       const { error: insertError } = await supabase
         .from('media_library')
         .insert({
