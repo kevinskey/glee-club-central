@@ -38,8 +38,8 @@ export function UniversalHero({
   const getContainerClasses = () => {
     if (height === 'responsive') {
       return `w-full overflow-hidden relative 
-        max-h-[500px] sm:max-h-[500px] md:max-h-[700px] 
-        h-[80vh] sm:h-[500px] md:h-[700px]
+        max-h-[400px] sm:max-h-[450px] md:max-h-[700px] 
+        h-[50vh] sm:h-[450px] md:h-[700px]
         ${className}`;
     }
     if (height === 'auto') {

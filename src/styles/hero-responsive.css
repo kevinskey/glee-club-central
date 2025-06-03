@@ -6,17 +6,17 @@
   overflow: hidden;
 }
 
-/* Default responsive behavior */
+/* Default responsive behavior - Reduced mobile height */
 .responsive-hero {
-  height: 80vh;
-  max-height: 500px;
+  height: 50vh;
+  max-height: 400px;
 }
 
 /* Tablet and larger */
 @media (min-width: 640px) {
   .responsive-hero {
-    height: 500px;
-    max-height: 500px;
+    height: 450px;
+    max-height: 450px;
   }
 }
 
@@ -31,8 +31,8 @@
 /* Test Mode Styles */
 .test-mode-mobile {
   width: 375px !important;
-  height: 80vh !important;
-  max-height: 500px !important;
+  height: 50vh !important;
+  max-height: 400px !important;
   margin: 0 auto;
   border: 2px solid #3b82f6;
   border-radius: 12px;
@@ -40,8 +40,8 @@
 
 .test-mode-tablet {
   width: 768px !important;
-  height: 500px !important;
-  max-height: 500px !important;
+  height: 450px !important;
+  max-height: 450px !important;
   margin: 0 auto;
   border: 2px solid #10b981;
   border-radius: 12px;
