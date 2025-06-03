@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,9 +30,12 @@ import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
 import { EditUserDialog } from './EditUserDialog';
 import { MemberFiltersAdvanced, MemberFilters } from './MemberFiltersAdvanced';
+import { MembersPagination } from './MembersPagination';
 import { UserFormValues } from './form/userFormSchema';
 import { useUserCreate } from '@/hooks/user/useUserCreate';
 import { toast } from 'sonner';
+
+const USERS_PER_PAGE = 6;
 
 export function MembersPageRefactor() {
   const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuthMigration();
@@ -51,6 +53,7 @@ export function MembersPageRefactor() {
     isAdmin: 'all'
   });
   
+  const [currentPage, setCurrentPage] = useState(1);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -125,6 +128,17 @@ export function MembersPageRefactor() {
     return true;
   });
 
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredMembers.length / USERS_PER_PAGE);
+  const startIndex = (currentPage - 1) * USERS_PER_PAGE;
+  const endIndex = startIndex + USERS_PER_PAGE;
+  const paginatedMembers = filteredMembers.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
   // Count active filters
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
     if (key === 'search') return value !== '';
@@ -198,6 +212,10 @@ export function MembersPageRefactor() {
   const handleRefresh = async () => {
     console.log('🔄 Manual refresh triggered');
     await refetch();
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   if (authLoading) {
@@ -281,36 +299,16 @@ export function MembersPageRefactor() {
         </Card>
       )}
 
-      {/* Debug Info (only in development) */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm">Debug Info</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs">
-            <p>Total users: {users.length}</p>
-            <p>Filtered: {filteredMembers.length}</p>
-            <p>Active filters: {activeFilterCount}</p>
-            <p>Auth: {isAuthenticated ? 'Yes' : 'No'}</p>
-            <p>Admin: {isAdminUser ? 'Yes' : 'No'}</p>
-            <p>Loading: {usersLoading ? 'Yes' : 'No'}</p>
-            <p>Error: {error || 'None'}</p>
-            {users.length > 0 && (
-              <p>Sample user: {users[0].first_name} {users[0].last_name} ({users[0].email})</p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
       {/* Main Content */}
       {!usersLoading && (
         <>
           {/* Results Summary */}
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <p>
-              Showing {filteredMembers.length} of {users.length} members
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredMembers.length)} of {filteredMembers.length} members
               {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
             </p>
+            <p>Page {currentPage} of {totalPages}</p>
           </div>
 
           {/* Member List */}
@@ -336,95 +334,104 @@ export function MembersPageRefactor() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4">
-              {filteredMembers.map((member) => (
-                <Card 
-                  key={member.id} 
-                  className={`transition-all duration-200 ${
-                    isAdminUser 
-                      ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50' 
-                      : ''
-                  }`}
-                  onClick={() => handleUserCardClick(member)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <Avatar>
-                          <AvatarImage src={member.avatar_url} />
-                          <AvatarFallback>
-                            {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold">
-                            {member.first_name} {member.last_name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground flex items-center">
-                            <Mail className="mr-1 h-3 w-3" />
-                            {member.email || 'No email'}
-                          </p>
-                          {member.phone && (
+            <>
+              <div className="grid gap-4">
+                {paginatedMembers.map((member) => (
+                  <Card 
+                    key={member.id} 
+                    className={`transition-all duration-200 ${
+                      isAdminUser 
+                        ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50' 
+                        : ''
+                    }`}
+                    onClick={() => handleUserCardClick(member)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <Avatar>
+                            <AvatarImage src={member.avatar_url} />
+                            <AvatarFallback>
+                              {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-semibold">
+                              {member.first_name} {member.last_name}
+                            </h3>
                             <p className="text-sm text-muted-foreground flex items-center">
-                              <Phone className="mr-1 h-3 w-3" />
-                              {member.phone}
+                              <Mail className="mr-1 h-3 w-3" />
+                              {member.email || 'No email'}
                             </p>
+                            {member.phone && (
+                              <p className="text-sm text-muted-foreground flex items-center">
+                                <Phone className="mr-1 h-3 w-3" />
+                                {member.phone}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {member.role && (
+                            <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                              {member.role}
+                            </Badge>
+                          )}
+                          {member.voice_part && (
+                            <Badge variant="outline">
+                              <Music className="mr-1 h-3 w-3" />
+                              {member.voice_part.replace('_', ' ')}
+                            </Badge>
+                          )}
+                          <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                            {member.status || 'active'}
+                          </Badge>
+                          {member.dues_paid && (
+                            <Badge variant="default" className="bg-green-600">
+                              Dues Paid
+                            </Badge>
+                          )}
+                          {member.class_year && (
+                            <Badge variant="outline">
+                              Class {member.class_year}
+                            </Badge>
+                          )}
+                          {isAdminUser && (
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditUser(member);
+                                }}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Member
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        {member.role && (
-                          <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
-                            {member.role}
-                          </Badge>
-                        )}
-                        {member.voice_part && (
-                          <Badge variant="outline">
-                            <Music className="mr-1 h-3 w-3" />
-                            {member.voice_part.replace('_', ' ')}
-                          </Badge>
-                        )}
-                        <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                          {member.status || 'active'}
-                        </Badge>
-                        {member.dues_paid && (
-                          <Badge variant="default" className="bg-green-600">
-                            Dues Paid
-                          </Badge>
-                        )}
-                        {member.class_year && (
-                          <Badge variant="outline">
-                            Class {member.class_year}
-                          </Badge>
-                        )}
-                        {isAdminUser && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditUser(member);
-                              }}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit Member
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Member
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              <MembersPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </>
           )}
         </>
       )}
