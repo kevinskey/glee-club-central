@@ -68,8 +68,22 @@ export function useHeroData(sectionId: string) {
       console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
       console.log('🎭 Hero: Fetched media files:', fetchedMedia.length);
 
+      // Filter out slides that still have invalid media references
+      const validSlides = fetchedSlides.filter(slide => {
+        if (!slide.media_id) return true; // Allow slides without media
+        if (slide.media_id.includes('youtube.com/embed/')) return true; // Allow YouTube embeds
+        
+        const mediaExists = fetchedMedia.some(media => media.id === slide.media_id);
+        if (!mediaExists) {
+          console.warn(`🎭 Hero: Filtering out slide ${slide.id} with invalid media reference ${slide.media_id}`);
+        }
+        return mediaExists;
+      });
+
+      console.log('🎭 Hero: Valid slides after filtering:', validSlides.length);
+
       setMediaFiles(fetchedMedia);
-      setSlides(fetchedSlides);
+      setSlides(validSlides);
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load hero data');
@@ -87,6 +101,7 @@ export function useHeroData(sectionId: string) {
     settings,
     mediaFiles,
     isLoading,
-    error
+    error,
+    refetch: fetchHeroData
   };
 }

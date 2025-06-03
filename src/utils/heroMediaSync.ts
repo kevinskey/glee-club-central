@@ -46,7 +46,7 @@ export async function cleanupOrphanedHeroSlides() {
       return { cleaned: 0, checked: heroSlides.length };
     }
 
-    // Clean up orphaned slides by setting media_id to null instead of deleting
+    // Clean up orphaned slides by setting media_id to null
     const orphanedIds = orphanedSlides.map(s => s.id);
     const { error: updateError } = await supabase
       .from('hero_slides')
@@ -59,6 +59,13 @@ export async function cleanupOrphanedHeroSlides() {
     if (updateError) throw updateError;
 
     console.log(`🧹 Cleaned up ${orphanedSlides.length} orphaned hero slides`);
+    
+    // Force a page refresh to reload the hero data immediately
+    if (orphanedSlides.length > 0) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
     
     return { 
       cleaned: orphanedSlides.length, 
@@ -122,8 +129,12 @@ export async function validateHeroSlideMedia() {
     const result = await cleanupOrphanedHeroSlides();
     
     if (result.cleaned > 0) {
-      toast.success(`Cleaned up ${result.cleaned} broken hero slide references`, {
-        description: `Checked ${result.checked} slides and fixed broken media links`
+      toast.success(`Fixed ${result.cleaned} broken hero slide references`, {
+        description: `Checked ${result.checked} slides and cleaned up broken media links. Page will refresh automatically.`
+      });
+    } else {
+      toast.success(`All hero slides are properly linked`, {
+        description: `Checked ${result.checked} slides - no issues found`
       });
     }
     
@@ -131,6 +142,79 @@ export async function validateHeroSlideMedia() {
   } catch (error) {
     console.error('🧹 Error validating hero slide media:', error);
     toast.error('Failed to validate hero slide media references');
+    throw error;
+  }
+}
+
+/**
+ * Emergency cleanup - forces removal of ALL orphaned hero slide references
+ */
+export async function forceCleanupOrphanedSlides() {
+  try {
+    console.log('🚨 FORCE CLEANUP: Removing all orphaned hero slide references...');
+    
+    // Get ALL hero slides
+    const { data: allSlides, error: allSlidesError } = await supabase
+      .from('hero_slides')
+      .select('*');
+
+    if (allSlidesError) throw allSlidesError;
+
+    if (!allSlides || allSlides.length === 0) {
+      return { cleaned: 0, total: 0 };
+    }
+
+    // Get all existing media files
+    const { data: mediaFiles, error: mediaError } = await supabase
+      .from('media_library')
+      .select('id');
+
+    if (mediaError) throw mediaError;
+
+    const existingMediaIds = new Set(mediaFiles?.map(m => m.id) || []);
+    
+    // Find ALL slides with invalid media references
+    const problematicSlides = allSlides.filter(slide => {
+      if (!slide.media_id) return false; // Skip slides with no media
+      if (slide.media_id.includes('youtube.com/embed/')) return false; // Skip YouTube embeds
+      return !existingMediaIds.has(slide.media_id);
+    });
+
+    if (problematicSlides.length === 0) {
+      return { cleaned: 0, total: allSlides.length };
+    }
+
+    console.log(`🚨 FORCE CLEANUP: Found ${problematicSlides.length} problematic slides:`, 
+      problematicSlides.map(s => ({ id: s.id, title: s.title, media_id: s.media_id })));
+
+    // Update ALL problematic slides
+    const { error: updateError } = await supabase
+      .from('hero_slides')
+      .update({ 
+        media_id: null,
+        updated_at: new Date().toISOString()
+      })
+      .in('id', problematicSlides.map(s => s.id));
+
+    if (updateError) throw updateError;
+
+    toast.success(`Force cleanup completed: Fixed ${problematicSlides.length} slides`, {
+      description: 'All broken media references have been removed. Page will refresh.'
+    });
+
+    // Force page refresh
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+
+    return { 
+      cleaned: problematicSlides.length, 
+      total: allSlides.length 
+    };
+
+  } catch (error) {
+    console.error('🚨 Error in force cleanup:', error);
+    toast.error('Force cleanup failed');
     throw error;
   }
 }
