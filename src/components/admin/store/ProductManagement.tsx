@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Package, Lock, Image } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Lock, Image, Wand2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasPermission } from '@/utils/permissionChecker';
@@ -34,6 +34,8 @@ export function ProductManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [aiImagePrompt, setAiImagePrompt] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -159,6 +161,45 @@ export function ProductManagement() {
       console.error(error);
     }
   });
+
+  const generateProductImage = async () => {
+    if (!aiImagePrompt.trim()) {
+      toast.error('Please enter a description for the product image');
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    
+    try {
+      console.log('Generating product image with AI:', aiImagePrompt);
+      
+      const enhancedPrompt = `Professional product photography of ${aiImagePrompt}. Clean white background, studio lighting, high quality, commercial photography style, centered composition, sharp focus, professional e-commerce product shot.`;
+      
+      const { data, error } = await supabase.functions.invoke('generate-design-image', {
+        body: { 
+          prompt: enhancedPrompt,
+          style: 'product'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.imageUrl) {
+        setFormData(prev => ({ ...prev, image_url: data.imageUrl }));
+        toast.success('Product image generated successfully!');
+        setAiImagePrompt('');
+      } else {
+        throw new Error('No image generated');
+      }
+    } catch (error) {
+      console.error('AI image generation error:', error);
+      toast.error(`Failed to generate image: ${error.message}`);
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   const resetForm = () => {
     setFormData({
@@ -312,34 +353,77 @@ export function ProductManagement() {
                   />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label>Product Image</Label>
-                <div className="flex items-center gap-4">
-                  {formData.image_url && (
+                
+                {/* AI Image Generation Section */}
+                <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Wand2 className="h-5 w-5 text-blue-600" />
+                      <Label className="font-medium text-blue-800">Generate with AI</Label>
+                    </div>
+                    <Textarea
+                      placeholder="Describe your product (e.g., 'blue hoodie with Spelman logo', 'coffee mug with musical notes')"
+                      value={aiImagePrompt}
+                      onChange={(e) => setAiImagePrompt(e.target.value)}
+                      className="bg-white border-blue-200"
+                      rows={2}
+                    />
+                    <Button
+                      type="button"
+                      onClick={generateProductImage}
+                      disabled={isGeneratingImage || !aiImagePrompt.trim()}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isGeneratingImage ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating Image...
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="h-4 w-4 mr-2" />
+                          Generate Product Image
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </Card>
+
+                {/* Current Image Preview */}
+                {formData.image_url && (
+                  <div className="flex items-center gap-4">
                     <img
                       src={formData.image_url}
                       alt="Product preview"
-                      className="w-20 h-20 object-cover rounded border"
+                      className="w-24 h-24 object-cover rounded border"
                     />
-                  )}
+                    <div className="space-y-2">
+                      <p className="text-sm text-gray-600">Current product image</p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                      >
+                        Remove Image
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Alternative Options */}
+                <div className="flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setShowMediaPicker(true)}
+                    className="flex-1"
                   >
                     <Image className="h-4 w-4 mr-2" />
-                    {formData.image_url ? 'Change Image' : 'Select Image'}
+                    Choose from Library
                   </Button>
-                  {formData.image_url && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                    >
-                      Remove
-                    </Button>
-                  )}
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -521,34 +605,77 @@ export function ProductManagement() {
                 />
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label>Product Image</Label>
-              <div className="flex items-center gap-4">
-                {formData.image_url && (
+              
+              {/* AI Image Generation Section for Edit */}
+              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="h-5 w-5 text-blue-600" />
+                    <Label className="font-medium text-blue-800">Generate New Image with AI</Label>
+                  </div>
+                  <Textarea
+                    placeholder="Describe your product (e.g., 'blue hoodie with Spelman logo', 'coffee mug with musical notes')"
+                    value={aiImagePrompt}
+                    onChange={(e) => setAiImagePrompt(e.target.value)}
+                    className="bg-white border-blue-200"
+                    rows={2}
+                  />
+                  <Button
+                    type="button"
+                    onClick={generateProductImage}
+                    disabled={isGeneratingImage || !aiImagePrompt.trim()}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    {isGeneratingImage ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating Image...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="h-4 w-4 mr-2" />
+                        Generate Product Image
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Current Image Preview for Edit */}
+              {formData.image_url && (
+                <div className="flex items-center gap-4">
                   <img
                     src={formData.image_url}
                     alt="Product preview"
-                    className="w-20 h-20 object-cover rounded border"
+                    className="w-24 h-24 object-cover rounded border"
                   />
-                )}
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">Current product image</p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Alternative Options for Edit */}
+              <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowMediaPicker(true)}
+                  className="flex-1"
                 >
                   <Image className="h-4 w-4 mr-2" />
-                  {formData.image_url ? 'Change Image' : 'Select Image'}
+                  Choose from Library
                 </Button>
-                {formData.image_url && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                  >
-                    Remove
-                  </Button>
-                )}
               </div>
             </div>
             <div className="flex items-center space-x-2">
