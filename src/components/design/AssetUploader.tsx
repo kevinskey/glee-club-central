@@ -29,10 +29,10 @@ export function AssetUploader() {
   const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Check file size (4GB = 4 * 1024 * 1024 * 1024 bytes)
-      const maxSize = 4 * 1024 * 1024 * 1024;
+      // Check file size (5GB = 5 * 1024 * 1024 * 1024 bytes)
+      const maxSize = 5 * 1024 * 1024 * 1024;
       if (file.size > maxSize) {
-        toast.error('File size exceeds 4GB limit');
+        toast.error('File size exceeds 5GB limit');
         return;
       }
       setSelectedFile(file);
@@ -53,18 +53,43 @@ export function AssetUploader() {
       const fileName = `${Date.now()}-${selectedFile.name}`;
       const filePath = `uploads/${user.id}/${fileName}`;
 
-      // Upload to Supabase Storage with progress tracking
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('design-assets')
-        .upload(filePath, selectedFile, {
-          onUploadProgress: (progress) => {
-            const percent = (progress.loaded / progress.total) * 100;
-            setUploadProgress(percent);
-          }
-        });
+      // Upload to Supabase Storage with chunked upload for large files
+      const chunkSize = 6 * 1024 * 1024; // 6MB chunks
+      const totalChunks = Math.ceil(selectedFile.size / chunkSize);
+      
+      if (selectedFile.size <= chunkSize) {
+        // Simple upload for smaller files
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('design-assets')
+          .upload(filePath, selectedFile);
 
-      if (uploadError) {
-        throw uploadError;
+        if (uploadError) {
+          throw uploadError;
+        }
+        
+        setUploadProgress(100);
+      } else {
+        // Chunked upload for large files
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+          const start = chunkIndex * chunkSize;
+          const end = Math.min(start + chunkSize, selectedFile.size);
+          const chunk = selectedFile.slice(start, end);
+          
+          const chunkPath = chunkIndex === 0 ? filePath : `${filePath}.part.${chunkIndex}`;
+          
+          const { error: chunkError } = await supabase.storage
+            .from('design-assets')
+            .upload(chunkPath, chunk, {
+              upsert: chunkIndex > 0
+            });
+
+          if (chunkError) {
+            throw chunkError;
+          }
+
+          const progress = ((chunkIndex + 1) / totalChunks) * 100;
+          setUploadProgress(progress);
+        }
       }
 
       // Create database record
@@ -190,7 +215,7 @@ export function AssetUploader() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="asset-file">Select File (Max 4GB)</Label>
+            <Label htmlFor="asset-file">Select File (Max 5GB)</Label>
             <Input
               id="asset-file"
               type="file"
