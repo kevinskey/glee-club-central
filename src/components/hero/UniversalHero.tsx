@@ -30,6 +30,8 @@ export function UniversalHero({
     }
   };
 
+  console.log('🎭 UniversalHero: Rendering with sectionId:', sectionId);
+
   return (
     <div 
       style={{ height: getHeightStyle() }} 

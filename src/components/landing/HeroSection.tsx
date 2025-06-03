@@ -6,6 +6,8 @@ import { Link } from 'react-router-dom';
 import { UniversalHero } from '@/components/hero/UniversalHero';
 
 export function HeroSection() {
+  console.log('🎭 HeroSection: Rendering homepage hero');
+  
   return (
     <section className="relative">
       <UniversalHero 

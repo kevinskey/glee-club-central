@@ -54,6 +54,7 @@ export function ModernHeroSection({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(enableAutoplay);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHeroData();
@@ -78,6 +79,8 @@ export function ModernHeroSection({
   const fetchHeroData = async () => {
     try {
       setIsLoading(true);
+      setError(null);
+      console.log('🎭 Hero: Fetching data for section:', sectionId);
       
       // Fetch slides, settings, and media files in parallel
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([
@@ -90,6 +93,7 @@ export function ModernHeroSection({
         supabase
           .from('hero_settings')
           .select('*')
+          .limit(1)
           .single(),
         supabase
           .from('media_library')
@@ -101,10 +105,20 @@ export function ModernHeroSection({
         console.error('🎭 Hero: Error fetching slides:', slidesResult.error);
         throw slidesResult.error;
       }
+      
+      // Settings error is not critical, use defaults
       if (settingsResult.error) {
-        console.error('🎭 Hero: Error fetching settings:', settingsResult.error);
-        throw settingsResult.error;
+        console.warn('🎭 Hero: Error fetching settings, using defaults:', settingsResult.error);
+        setSettings({
+          animation_style: 'fade',
+          scroll_interval: 5000,
+          pause_on_hover: true,
+          loop: true
+        });
+      } else {
+        setSettings(settingsResult.data);
       }
+      
       if (mediaResult.error) {
         console.error('🎭 Hero: Error fetching media:', mediaResult.error);
         throw mediaResult.error;
@@ -113,23 +127,20 @@ export function ModernHeroSection({
       const fetchedSlides = slidesResult.data || [];
       const fetchedMedia = mediaResult.data || [];
 
+      console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
+      console.log('🎭 Hero: Fetched media files:', fetchedMedia.length);
+
       setMediaFiles(fetchedMedia);
       setSlides(fetchedSlides);
-      setSettings(settingsResult.data);
+      
+      // Reset current slide if we have slides
+      if (fetchedSlides.length > 0) {
+        setCurrentSlide(0);
+      }
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
-      // Fallback to default content
-      setSlides([{
-        id: 'fallback',
-        media_type: 'image',
-        title: 'Spelman College Glee Club',
-        description: 'A distinguished ensemble with a rich heritage of musical excellence',
-        text_position: 'center',
-        text_alignment: 'center',
-        visible: true,
-        slide_order: 0,
-        section_id: sectionId
-      }]);
+      setError(error instanceof Error ? error.message : 'Failed to load hero data');
+      // Don't set fallback slides here, let the component show the error state
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +193,7 @@ export function ModernHeroSection({
   const renderButton = (slide: HeroSlide) => {
     if (!slide.button_text || !slide.button_link) return null;
 
-    const buttonClasses = "bg-indigo-500 hover:bg-indigo-600 text-white w-auto px-6";
+    const buttonClasses = "bg-glee-spelman hover:bg-glee-spelman/90 text-white w-auto px-6";
 
     if (isExternalLink(slide.button_link)) {
       return (
@@ -252,41 +263,18 @@ export function ModernHeroSection({
       );
     }
 
-    // Fallback gradient
-    return <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>;
+    // Fallback gradient background
+    return (
+      <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+        <div className="absolute inset-0 bg-black/20"></div>
+      </div>
+    );
   };
 
-  if (isLoading) {
-    return (
-      <section className="relative w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
-        <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="text-white text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-            <p className="mt-2">Loading...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (slides.length === 0) {
-    return (
-      <section className="relative w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-purple-900"></div>
-        <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="text-white text-center max-w-2xl mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
-            <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const currentSlideData = slides[currentSlide];
-
   const getPositionClasses = () => {
+    if (slides.length === 0) return 'items-center justify-center';
+    
+    const currentSlideData = slides[currentSlide];
     const position = currentSlideData.text_position;
     const alignment = currentSlideData.text_alignment;
     
@@ -332,6 +320,58 @@ export function ModernHeroSection({
     }
   };
 
+  if (isLoading) {
+    return (
+      <section className="relative w-full h-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+            <p className="mt-2">Loading hero section...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="relative w-full h-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-white text-center max-w-2xl mx-auto px-4">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
+            <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
+            <p className="text-sm opacity-75">Error loading hero content: {error}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) {
+    return (
+      <section className="relative w-full h-full overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+          <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <div className="text-white text-center max-w-2xl mx-auto px-4">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
+            <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
+            <p className="text-sm opacity-75">No hero slides configured for {sectionId}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const currentSlideData = slides[currentSlide];
+
   return (
     <section 
       className="relative w-full h-full overflow-hidden" 
@@ -343,7 +383,7 @@ export function ModernHeroSection({
         {renderBackgroundMedia()}
         
         {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
       
       {/* Content overlay */}
@@ -393,6 +433,23 @@ export function ModernHeroSection({
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
+
+          {/* Slide indicators */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={cn(
+                  "w-3 h-3 rounded-full transition-all duration-200",
+                  index === currentSlide 
+                    ? "bg-white" 
+                    : "bg-white/50 hover:bg-white/75"
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
         </>
       )}
     </section>
