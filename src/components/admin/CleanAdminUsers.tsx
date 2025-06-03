@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from "@/components/ui/page-header";
@@ -24,6 +23,8 @@ import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
 
 const CleanAdminUsers: React.FC = () => {
+  console.log('🔧 CleanAdminUsers: Component rendering started');
+  
   const { isAdmin } = useAuthMigration();
   const {
     filteredUsers,
@@ -39,6 +40,15 @@ const CleanAdminUsers: React.FC = () => {
     addUser,
     updateUser
   } = useUnifiedUserManagement();
+
+  console.log('🔧 CleanAdminUsers: Data state:', {
+    filteredUsersCount: filteredUsers.length,
+    paginatedUsersCount: paginatedUsers.length,
+    isLoading,
+    error,
+    currentPage,
+    totalPages
+  });
 
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -100,11 +110,11 @@ const CleanAdminUsers: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    // TODO: Implement delete confirmation dialog
     console.log('Delete user:', userId);
   };
 
   if (isLoading) {
+    console.log('🔄 CleanAdminUsers: Showing loading state');
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-8">
@@ -114,6 +124,8 @@ const CleanAdminUsers: React.FC = () => {
       </div>
     );
   }
+
+  console.log('🔧 CleanAdminUsers: Rendering main UI with', filteredUsers.length, 'filtered users');
 
   return (
     <div className="container mx-auto px-4 py-8">
