@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { BorderAll } from 'lucide-react';
+import { Square } from 'lucide-react';
 
 interface BorderSettingsProps {
   showBorders: boolean;
@@ -34,7 +34,7 @@ export function BorderSettings({
     <Card>
       <CardHeader className="p-3 pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <BorderAll className="h-4 w-4" />
+          <Square className="h-4 w-4" />
           Element Borders
         </CardTitle>
       </CardHeader>

@@ -37,10 +37,14 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   
   const [showBorders, setShowBorders] = useState(false);
-  const [borderStyle, setBorderStyle] = useState({
+  const [borderStyle, setBorderStyle] = useState<{
+    width: number;
+    color: string;
+    style: 'solid' | 'dashed' | 'dotted';
+  }>({
     width: 2,
     color: '#3b82f6',
-    style: 'solid' as const
+    style: 'solid'
   });
   
   const [textElements, setTextElements] = useState<TextElement[]>(
