@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { SlideTemplate, SlideDesign, TextElement, BackgroundElement } from '@/types/slideDesign';
-import { Type, Palette, Image, Link, Save, Eye } from 'lucide-react';
+import { Type, Palette, Image, Link, Save, Eye, MousePointer } from 'lucide-react';
 import { MediaLibrarySelector } from './MediaLibrarySelector';
+import { TextToolbar } from './TextToolbar';
 import { toast } from 'sonner';
 
 interface WYSIWYGEditorProps {
@@ -30,6 +30,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const [layoutType, setLayoutType] = useState<'full' | 'half_horizontal' | 'half_vertical' | 'quarter'>(
     design?.layout_type || template?.layout_type || 'full'
   );
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   
   const [textElements, setTextElements] = useState<TextElement[]>(
     design?.design_data?.textElements || 
@@ -63,6 +64,29 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     setTextElements(prev => 
       prev.map(el => el.id === id ? { ...el, ...updates } : el)
     );
+  };
+
+  const addTextElement = () => {
+    const newElement: TextElement = {
+      id: `text-${Date.now()}`,
+      type: 'paragraph',
+      text: 'New Text',
+      position: { x: 50, y: 50 },
+      style: { fontSize: '1rem', color: '#FFFFFF', textAlign: 'center' as const }
+    };
+    setTextElements(prev => [...prev, newElement]);
+    setSelectedElementId(newElement.id);
+  };
+
+  const deleteTextElement = (id: string) => {
+    setTextElements(prev => prev.filter(el => el.id !== id));
+    if (selectedElementId === id) {
+      setSelectedElementId(null);
+    }
+  };
+
+  const handleElementClick = (elementId: string) => {
+    setSelectedElementId(elementId);
   };
 
   const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
@@ -107,8 +131,10 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     onSave(designData);
   };
 
+  const selectedElement = textElements.find(el => el.id === selectedElementId);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Canvas Area */}
       <div className="lg:col-span-2">
         <Card>
@@ -130,7 +156,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
           <CardContent>
             <div
               ref={canvasRef}
-              className="relative w-full aspect-video bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border"
+              className="relative w-full aspect-video bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair"
               style={{
                 backgroundColor,
                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
@@ -141,16 +167,26 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               {textElements.map((element) => (
                 <div
                   key={element.id}
-                  className="absolute cursor-move select-none"
+                  className={`absolute cursor-pointer select-none border-2 transition-all ${
+                    selectedElementId === element.id 
+                      ? 'border-blue-400 bg-blue-400/20' 
+                      : 'border-transparent hover:border-white/50'
+                  }`}
                   style={{
                     left: `${element.position.x}%`,
                     top: `${element.position.y}%`,
                     transform: 'translate(-50%, -50%)',
                     ...element.style,
-                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                    padding: '8px',
+                    borderRadius: '4px'
                   }}
+                  onClick={() => handleElementClick(element.id)}
                 >
                   {element.text}
+                  {selectedElementId === element.id && (
+                    <MousePointer className="absolute -top-2 -right-2 h-4 w-4 text-blue-400" />
+                  )}
                 </div>
               ))}
               
@@ -169,6 +205,10 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                   </>
                 )}
               </div>
+            </div>
+            
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p>💡 Click on text elements to select and edit them</p>
             </div>
           </CardContent>
         </Card>
@@ -285,41 +325,16 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Text Elements</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {textElements.map((element, index) => (
-              <div key={element.id} className="space-y-2 p-3 border rounded">
-                <Label className="text-sm font-medium">{element.id}</Label>
-                <Input
-                  value={element.text}
-                  onChange={(e) => updateTextElement(element.id, { text: e.target.value })}
-                  placeholder="Enter text"
-                />
-                <div className="grid grid-cols-2 gap-2">
-                  <Input
-                    type="color"
-                    value={element.style.color}
-                    onChange={(e) => updateTextElement(element.id, { 
-                      style: { ...element.style, color: e.target.value }
-                    })}
-                    className="h-8"
-                  />
-                  <Input
-                    value={element.style.fontSize}
-                    onChange={(e) => updateTextElement(element.id, { 
-                      style: { ...element.style, fontSize: e.target.value }
-                    })}
-                    placeholder="24px"
-                  />
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+      {/* Text Tools Panel */}
+      <div>
+        <TextToolbar
+          selectedElement={selectedElement}
+          onUpdateElement={updateTextElement}
+          onAddElement={addTextElement}
+          onDeleteElement={deleteTextElement}
+        />
       </div>
     </div>
   );

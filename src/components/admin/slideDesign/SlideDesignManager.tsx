@@ -8,7 +8,7 @@ import { useSlideDesigns } from '@/hooks/useSlideDesigns';
 import { TemplateSelector } from './TemplateSelector';
 import { WYSIWYGEditor } from './WYSIWYGEditor';
 import { SlideTemplate, SlideDesign } from '@/types/slideDesign';
-import { Layout, Plus, Edit, Eye, Trash2, Loader2 } from 'lucide-react';
+import { Layout, Plus, Edit, Eye, Trash2, Loader2, Image } from 'lucide-react';
 import { toast } from 'sonner';
 
 type EditorMode = 'select' | 'edit' | 'preview';
@@ -106,30 +106,61 @@ export function SlideDesignManager() {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {designs.map((design) => (
-                  <Card key={design.id} className="relative">
-                    <CardHeader>
+                  <Card key={design.id} className="relative overflow-hidden">
+                    <div className="relative">
+                      {design.background_image_url ? (
+                        <div className="w-full h-48 relative">
+                          <img
+                            src={design.background_image_url}
+                            alt={design.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          {/* Text overlay preview */}
+                          <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-4">
+                            {design.design_data?.textElements?.map((element, index) => (
+                              <div
+                                key={element.id}
+                                className="mb-2"
+                                style={{
+                                  fontSize: index === 0 ? '1rem' : '0.75rem',
+                                  fontWeight: index === 0 ? 'bold' : 'normal',
+                                  opacity: 0.9
+                                }}
+                              >
+                                {element.text.length > 30 ? `${element.text.substring(0, 30)}...` : element.text}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div 
+                          className="w-full h-48 flex items-center justify-center"
+                          style={{ backgroundColor: design.background_color }}
+                        >
+                          <div className="text-center text-white">
+                            <Image className="h-12 w-12 mx-auto mb-2 opacity-60" />
+                            <p className="text-sm opacity-80">No Background Image</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{design.title}</CardTitle>
-                        <Badge variant="outline">
+                        <CardTitle className="text-base truncate">{design.title}</CardTitle>
+                        <Badge variant="outline" className="ml-2 shrink-0">
                           {design.layout_type.replace('_', ' ')}
                         </Badge>
                       </div>
                       {design.description && (
-                        <CardDescription>{design.description}</CardDescription>
+                        <CardDescription className="text-sm line-clamp-2">{design.description}</CardDescription>
                       )}
                     </CardHeader>
-                    <CardContent>
-                      <div 
-                        className="w-full h-20 rounded border mb-4"
-                        style={{ 
-                          backgroundColor: design.background_color,
-                          backgroundImage: design.background_image_url ? `url(${design.background_image_url})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
-                        }}
-                      />
+                    
+                    <CardContent className="pt-0">
                       <div className="flex gap-2">
                         <Button
                           size="sm"
