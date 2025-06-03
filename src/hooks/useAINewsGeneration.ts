@@ -75,18 +75,33 @@ export const useAINewsGeneration = () => {
     try {
       console.log('💾 Saving generated news to database:', content);
 
+      // Get current user to ensure we have proper authentication
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.error('❌ Authentication error:', userError);
+        throw new Error('User not authenticated');
+      }
+
+      console.log('👤 Current user:', user.id);
+
+      const newsItem = {
+        headline: content.headline,
+        content: content.content,
+        generated_by_ai: true,
+        ai_prompt: options.aiPrompt || 'AI Generated',
+        priority: options.priority || 1,
+        start_date: options.startDate || new Date().toISOString().split('T')[0],
+        end_date: options.endDate || null,
+        active: options.active !== false,
+        created_by: user.id
+      };
+
+      console.log('📝 Inserting news item:', newsItem);
+
       const { error } = await supabase
         .from('news_items')
-        .insert({
-          headline: content.headline,
-          content: content.content,
-          generated_by_ai: true,
-          ai_prompt: options.aiPrompt || 'AI Generated',
-          priority: options.priority || 1,
-          start_date: options.startDate || new Date().toISOString().split('T')[0],
-          end_date: options.endDate || null,
-          active: options.active !== false
-        });
+        .insert(newsItem);
 
       if (error) {
         console.error('❌ Error saving news item:', error);
