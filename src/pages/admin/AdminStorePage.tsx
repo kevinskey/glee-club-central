@@ -2,12 +2,13 @@
 import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ShoppingBag, Package, BarChart3, Settings, Lock } from 'lucide-react';
+import { ShoppingBag, Package, BarChart3, Settings, Lock, Palette } from 'lucide-react';
 import { ProductManagement } from '@/components/admin/store/ProductManagement';
 import { InventoryManager } from '@/components/admin/store/InventoryManager';
 import { OrderManagement } from '@/components/admin/store/OrderManagement';
 import { StoreAnalytics } from '@/components/admin/store/StoreAnalytics';
 import { StoreSettings } from '@/components/admin/store/StoreSettings';
+import { DesignStudio } from '@/components/design/DesignStudio';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasPermission } from '@/utils/permissionChecker';
@@ -63,7 +64,7 @@ export default function AdminStorePage() {
         />
 
         <Tabs defaultValue="inventory" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="inventory" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Inventory
@@ -71,6 +72,10 @@ export default function AdminStorePage() {
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
+            </TabsTrigger>
+            <TabsTrigger value="designer" className="flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              Designer
             </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
@@ -92,6 +97,12 @@ export default function AdminStorePage() {
 
           <TabsContent value="products">
             <ProductManagement />
+          </TabsContent>
+
+          <TabsContent value="designer">
+            <div className="bg-white rounded-lg shadow-sm border">
+              <DesignStudio />
+            </div>
           </TabsContent>
 
           <TabsContent value="orders">
