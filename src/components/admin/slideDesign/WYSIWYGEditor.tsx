@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -134,25 +133,12 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
   const selectedElement = textElements.find(el => el.id === selectedElementId);
 
-  // Function to render non-designable areas
+  // Function to render non-designable areas - FIXED orientations
   const renderNonDesignableAreas = () => {
     const areas = [];
     
     if (layoutType === 'half_horizontal') {
-      // Right half is non-designable
-      areas.push(
-        <div
-          key="non-designable-right"
-          className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-sm font-medium">
-            <div className="mb-1">Non-Designable Area</div>
-            <div className="text-xs opacity-75">Reserved for other content</div>
-          </div>
-        </div>
-      );
-    } else if (layoutType === 'half_vertical') {
-      // Bottom half is non-designable
+      // Bottom half is non-designable (horizontal split = top/bottom)
       areas.push(
         <div
           key="non-designable-bottom"
@@ -164,13 +150,26 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
           </div>
         </div>
       );
-    } else if (layoutType === 'quarter') {
-      // Right half and bottom half of left side are non-designable
+    } else if (layoutType === 'half_vertical') {
+      // Right half is non-designable (vertical split = left/right)
       areas.push(
-        // Right half
         <div
-          key="non-designable-right-quarter"
+          key="non-designable-right"
           className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable Area</div>
+            <div className="text-xs opacity-75">Reserved for other content</div>
+          </div>
+        </div>
+      );
+    } else if (layoutType === 'quarter') {
+      // Top right, bottom left, and bottom right quarters are non-designable
+      areas.push(
+        // Top right quarter
+        <div
+          key="non-designable-top-right"
+          className="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
         >
           <div className="text-center text-gray-600 text-sm font-medium">
             <div className="mb-1">Non-Designable</div>
@@ -181,6 +180,16 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         <div
           key="non-designable-bottom-left"
           className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable</div>
+            <div className="text-xs opacity-75">Reserved</div>
+          </div>
+        </div>,
+        // Bottom right quarter
+        <div
+          key="non-designable-bottom-right"
+          className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
         >
           <div className="text-center text-gray-600 text-sm font-medium">
             <div className="mb-1">Non-Designable</div>
@@ -257,10 +266,10 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               {/* Layout grid overlay */}
               <div className="absolute inset-0 pointer-events-none">
                 {layoutType === 'half_horizontal' && (
-                  <div className="w-full h-full border-r border-white/30" style={{ width: '50%' }} />
+                  <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
                 )}
                 {layoutType === 'half_vertical' && (
-                  <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
+                  <div className="h-full border-r border-white/30" style={{ width: '50%' }} />
                 )}
                 {layoutType === 'quarter' && (
                   <>

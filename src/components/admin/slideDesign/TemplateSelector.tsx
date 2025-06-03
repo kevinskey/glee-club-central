@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,9 +17,9 @@ const getLayoutIcon = (layoutType: string) => {
     case 'full':
       return <Layout className="h-4 w-4" />;
     case 'half_horizontal':
-      return <Columns className="h-4 w-4" />;
-    case 'half_vertical':
       return <Rows className="h-4 w-4" />;
+    case 'half_vertical':
+      return <Columns className="h-4 w-4" />;
     case 'quarter':
       return <Grid className="h-4 w-4" />;
     default:
@@ -60,21 +59,6 @@ const renderLayoutPreview = (layoutType: string) => {
   if (layoutType === 'half_horizontal') {
     return (
       <div className={baseClasses} style={paperStyle}>
-        {/* Left half - designable */}
-        <div className="absolute left-0 top-0 w-1/2 h-full flex items-center justify-center border-r border-blue-300">
-          <span className="text-xs text-blue-600 font-medium text-center">Designable</span>
-        </div>
-        {/* Right half - non-designable */}
-        <div className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
-          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
-        </div>
-      </div>
-    );
-  }
-  
-  if (layoutType === 'half_vertical') {
-    return (
-      <div className={baseClasses} style={paperStyle}>
         {/* Top half - designable */}
         <div className="absolute top-0 left-0 w-full h-1/2 flex items-center justify-center border-b border-blue-300">
           <span className="text-xs text-blue-600 font-medium">Designable</span>
@@ -87,6 +71,21 @@ const renderLayoutPreview = (layoutType: string) => {
     );
   }
   
+  if (layoutType === 'half_vertical') {
+    return (
+      <div className={baseClasses} style={paperStyle}>
+        {/* Left half - designable */}
+        <div className="absolute left-0 top-0 w-1/2 h-full flex items-center justify-center border-r border-blue-300">
+          <span className="text-xs text-blue-600 font-medium text-center">Designable</span>
+        </div>
+        {/* Right half - non-designable */}
+        <div className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
+        </div>
+      </div>
+    );
+  }
+  
   if (layoutType === 'quarter') {
     return (
       <div className={baseClasses} style={paperStyle}>
@@ -94,12 +93,16 @@ const renderLayoutPreview = (layoutType: string) => {
         <div className="absolute top-0 left-0 w-1/2 h-1/2 flex items-center justify-center border-r border-b border-blue-300">
           <span className="text-xs text-blue-600 font-medium text-center leading-tight">Design Area</span>
         </div>
-        {/* Top right half - non-designable */}
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+        {/* Top right quarter - non-designable */}
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
           <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
         </div>
         {/* Bottom left quarter - non-designable */}
         <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
+        </div>
+        {/* Bottom right quarter - non-designable */}
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
           <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
         </div>
       </div>
