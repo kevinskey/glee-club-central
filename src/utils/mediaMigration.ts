@@ -109,10 +109,23 @@ export async function migrateMediaIds(): Promise<MediaMigrationResult> {
     console.log(`✅ Migrated ${result.migratedCount} media files`);
 
     // Step 3: Update hero slides with new media IDs
+    // First, clean up any slides with string "null" values
+    console.log('🔄 Cleaning up slides with invalid media_id values...');
+    
+    const { error: cleanupError } = await supabase
+      .from('hero_slides')
+      .update({ media_id: null })
+      .eq('media_id', 'null');
+
+    if (cleanupError) {
+      console.warn(`⚠️ Warning cleaning up null media_id values: ${cleanupError.message}`);
+    }
+
+    // Now get slides that have valid media_id references
     const { data: heroSlides, error: slidesError } = await supabase
       .from('hero_slides')
       .select('*')
-      .neq('media_id', null);
+      .not('media_id', 'is', null);
 
     if (slidesError) {
       result.errors.push(`Error fetching hero slides: ${slidesError.message}`);
