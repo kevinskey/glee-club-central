@@ -336,7 +336,7 @@ export function EditUserDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Executive Title</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select executive title" />
