@@ -38,10 +38,13 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
     );
   }
 
-  console.log('🎭 Hero: Current slide:', currentSlide);
-  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, url: m.file_url, title: m.title })));
-  console.log('🎭 Hero: Looking for media with ID:', currentSlide.media_id);
-  
+  console.log('🎭 Hero: Processing slide:', {
+    slideId: currentSlide.id,
+    mediaId: currentSlide.media_id,
+    mediaType: currentSlide.media_type,
+    title: currentSlide.title
+  });
+
   // Handle YouTube embeds
   if (currentSlide.media_id && isYouTubeEmbed(currentSlide.media_id)) {
     console.log('🎭 Hero: Rendering YouTube embed:', currentSlide.media_id);
@@ -63,12 +66,40 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
   // Find the media file
   const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
   
-  console.log('🎭 Hero: Found media:', currentMedia);
+  // Enhanced debugging for missing media
+  if (currentSlide.media_id && !currentMedia) {
+    console.error('🎭 Hero: MISSING MEDIA FILE!');
+    console.error('🎭 Hero: Looking for media ID:', currentSlide.media_id);
+    console.error('🎭 Hero: Available media IDs:', mediaFiles.map(m => m.id));
+    console.error('🎭 Hero: This slide references a media file that no longer exists.');
+    console.error('🎭 Hero: Please update the slide to use an existing media file or upload a new one.');
+    
+    // Show fallback with error message
+    return (
+      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-red-600 to-red-700">
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-white text-center p-8 bg-black/50 rounded-lg">
+            <h3 className="text-xl font-bold mb-2">Media File Missing</h3>
+            <p className="text-sm opacity-90">
+              This slide references a media file that no longer exists.
+            </p>
+            <p className="text-xs opacity-75 mt-2">
+              Media ID: {currentSlide.media_id}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   if (currentMedia && currentMedia.file_url) {
-    console.log('🎭 Hero: Rendering media with URL:', currentMedia.file_url);
-    console.log('🎭 Hero: Media type:', currentSlide.media_type);
-    console.log('🎭 Hero: File type:', currentMedia.file_type);
+    console.log('🎭 Hero: Rendering media:', {
+      mediaId: currentMedia.id,
+      title: currentMedia.title,
+      url: currentMedia.file_url,
+      type: currentMedia.file_type
+    });
     
     return currentSlide.media_type === 'video' || currentMedia.file_type?.startsWith('video/') ? (
       <video
@@ -108,17 +139,14 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
         onError={(e) => {
           console.error('🎭 Hero: Image failed to load:', currentMedia.file_url);
           console.error('🎭 Hero: Error details:', e);
-          console.error('🎭 Hero: Image element:', e.target);
         }}
       />
     );
   }
 
-  console.log('🎭 Hero: No media found or no file URL, using fallback background');
-  console.log('🎭 Hero: Media ID:', currentSlide.media_id);
-  console.log('🎭 Hero: Media files count:', mediaFiles.length);
+  console.log('🎭 Hero: No valid media found, using default background');
 
-  // Default placeholder background with fixed SVG
+  // Default placeholder background
   return (
     <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
       <div className="absolute inset-0 bg-black/20"></div>
