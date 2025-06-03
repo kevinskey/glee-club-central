@@ -5,6 +5,7 @@ import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
 import { AdminQuickActions } from '@/components/admin/AdminQuickActions';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
+import { HeroTestButton } from '@/components/admin/HeroTestButton';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function AdminDashboardContent() {
@@ -19,6 +20,9 @@ export function AdminDashboardContent() {
       
       {/* Quick Actions */}
       <AdminQuickActions />
+      
+      {/* Hero System Test */}
+      <HeroTestButton />
       
       {/* Edit Role Tags Panel - Only for Admin users */}
       {isAdminRole && (
