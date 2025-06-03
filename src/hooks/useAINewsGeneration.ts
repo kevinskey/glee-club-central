@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -74,12 +75,33 @@ export const useAINewsGeneration = () => {
     try {
       console.log('💾 Saving generated news to database:', content);
 
-      // Get current user session
+      // Get current user session with better error handling
+      console.log('🔍 Getting user session...');
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (sessionError || !session?.user) {
-        console.error('❌ Authentication error');
-        throw new Error('User not authenticated');
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        throw new Error(`Authentication error: ${sessionError.message}`);
+      }
+
+      if (!session?.user) {
+        console.error('❌ No authenticated user found');
+        throw new Error('User not authenticated. Please log in and try again.');
+      }
+
+      console.log('✅ User authenticated:', session.user.id);
+
+      // Check if we can access the profiles table
+      console.log('🔍 Checking user profile...');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, role, is_super_admin')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      console.log('👤 User profile:', profile);
+      if (profileError) {
+        console.error('❌ Profile error:', profileError);
       }
 
       const newsItem = {
@@ -94,7 +116,7 @@ export const useAINewsGeneration = () => {
         created_by: session.user.id
       };
 
-      console.log('📝 Inserting news item:', newsItem);
+      console.log('📝 Attempting to insert news item:', newsItem);
 
       const { data: insertedNews, error } = await supabase
         .from('news_items')
@@ -103,8 +125,13 @@ export const useAINewsGeneration = () => {
         .single();
 
       if (error) {
-        console.error('❌ Insert error:', error);
-        throw error;
+        console.error('❌ Insert error:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw new Error(`Database error: ${error.message}`);
       }
 
       console.log('✅ News item saved successfully:', insertedNews);
