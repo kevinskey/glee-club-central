@@ -36,5 +36,5 @@
 }
 
 .animate-marquee-fast {
-  animation: marquee-fast 20s linear infinite; /* Faster: decreased from 25s to 20s */
+  animation: marquee-fast 25s linear infinite; /* Set to 25 seconds */
 }
