@@ -43,6 +43,77 @@ const getLayoutLabel = (layoutType: string) => {
   }
 };
 
+const renderLayoutPreview = (layoutType: string) => {
+  const baseClasses = "w-full h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded border-2 border-dashed border-blue-300 relative overflow-hidden";
+  
+  if (layoutType === 'full') {
+    return (
+      <div className={baseClasses}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xs text-blue-600 font-medium">Full Designable Area</span>
+        </div>
+      </div>
+    );
+  }
+  
+  if (layoutType === 'half_horizontal') {
+    return (
+      <div className={baseClasses}>
+        {/* Left half - designable */}
+        <div className="absolute left-0 top-0 w-1/2 h-full flex items-center justify-center border-r border-blue-300">
+          <span className="text-xs text-blue-600 font-medium text-center">Designable</span>
+        </div>
+        {/* Right half - non-designable */}
+        <div className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
+        </div>
+      </div>
+    );
+  }
+  
+  if (layoutType === 'half_vertical') {
+    return (
+      <div className={baseClasses}>
+        {/* Top half - designable */}
+        <div className="absolute top-0 left-0 w-full h-1/2 flex items-center justify-center border-b border-blue-300">
+          <span className="text-xs text-blue-600 font-medium">Designable</span>
+        </div>
+        {/* Bottom half - non-designable */}
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium">Reserved</span>
+        </div>
+      </div>
+    );
+  }
+  
+  if (layoutType === 'quarter') {
+    return (
+      <div className={baseClasses}>
+        {/* Top left quarter - designable */}
+        <div className="absolute top-0 left-0 w-1/2 h-1/2 flex items-center justify-center border-r border-b border-blue-300">
+          <span className="text-xs text-blue-600 font-medium text-center leading-tight">Design Area</span>
+        </div>
+        {/* Top right half - non-designable */}
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
+        </div>
+        {/* Bottom left quarter - non-designable */}
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/40 border-2 border-dashed border-gray-500/50 flex items-center justify-center">
+          <span className="text-xs text-gray-600 font-medium text-center">Reserved</span>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className={baseClasses}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xs text-blue-600 font-medium">Template Preview</span>
+      </div>
+    </div>
+  );
+};
+
 export function TemplateSelector({ 
   templates, 
   selectedTemplate, 
@@ -55,7 +126,7 @@ export function TemplateSelector({
         <div>
           <h3 className="text-lg font-semibold">Choose a Template</h3>
           <p className="text-sm text-muted-foreground">
-            Select a layout template to start designing your slide
+            Select a layout template to start designing your slide. Gray areas are reserved for other content.
           </p>
         </div>
         <Button onClick={onCreateNew} variant="outline">
@@ -91,9 +162,7 @@ export function TemplateSelector({
               )}
             </CardHeader>
             <CardContent>
-              <div className="w-full h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded border-2 border-dashed border-blue-300 flex items-center justify-center">
-                <span className="text-xs text-blue-600 font-medium">Template Preview</span>
-              </div>
+              {renderLayoutPreview(template.layout_type)}
             </CardContent>
           </Card>
         ))}
