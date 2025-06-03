@@ -109,63 +109,67 @@ export function PhotoUploadTool() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Image className="h-5 w-5" />
+        <CardHeader className="pb-3 px-4 sm:px-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Image className="h-4 w-4 sm:h-5 sm:w-5" />
             Upload Photos (JPG, PNG)
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Photo Title *</label>
+              <label className="text-sm font-medium block mb-1">Photo Title *</label>
               <Input
                 value={form.title}
                 onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., Spring Concert 2024"
                 required
+                className="w-full"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-sm font-medium block mb-1">Description</label>
               <Textarea
                 value={form.description}
                 onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Description of the photos..."
+                className="w-full min-h-[80px]"
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Tags (comma-separated)</label>
+                <label className="text-sm font-medium block mb-1">Tags (comma-separated)</label>
                 <Input
                   value={form.tags}
                   onChange={(e) => setForm(prev => ({ ...prev, tags: e.target.value }))}
                   placeholder="concert, performance, rehearsal"
+                  className="w-full"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Event Date</label>
+                <label className="text-sm font-medium block mb-1">Event Date</label>
                 <Input
                   type="date"
                   value={form.event_date}
                   onChange={(e) => setForm(prev => ({ ...prev, event_date: e.target.value }))}
+                  className="w-full"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium">Select Photos *</label>
+              <label className="text-sm font-medium block mb-1">Select Photos *</label>
               <Input
                 id="photo-upload"
                 type="file"
                 accept=".jpg,.jpeg,.png"
                 multiple
                 onChange={handleFileSelect}
-                className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-glee-spelman file:text-white hover:file:bg-glee-spelman/90"
+                className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-glee-spelman file:text-white hover:file:bg-glee-spelman/90"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Select one or more JPG/PNG files. Multiple files will be numbered automatically.
@@ -178,7 +182,7 @@ export function PhotoUploadTool() {
               </div>
             )}
 
-            <Button type="submit" disabled={uploading} className="w-full">
+            <Button type="submit" disabled={uploading} className="w-full" size="default">
               <Upload className="h-4 w-4 mr-2" />
               {uploading ? 'Uploading...' : 'Upload Photos'}
             </Button>

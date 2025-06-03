@@ -36,7 +36,7 @@ export default function HistorianDashboard() {
 
   if (isLoading) {
     return (
-      <MobileOptimizedContainer className="py-6">
+      <MobileOptimizedContainer className="pt-4 pb-12">
         <div className="flex items-center justify-center h-40">
           <div className="text-muted-foreground">Loading...</div>
         </div>
@@ -49,15 +49,15 @@ export default function HistorianDashboard() {
   }
 
   return (
-    <MobileOptimizedContainer className="py-6">
+    <MobileOptimizedContainer className="pt-4 pb-12 px-3 sm:px-6">
       <PageHeader
         title="Historian Dashboard"
         description="Manage photo archives, videos, scrapbooks, and event documentation"
-        icon={<Camera className="h-8 w-8 text-glee-spelman" />}
+        icon={<Camera className="h-6 w-6 sm:h-8 sm:w-8 text-glee-spelman" />}
       />
 
       {!profile?.role_tags?.includes('Historian') && !profile?.is_super_admin && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-4 sm:mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             You do not have Historian privileges. Please contact an administrator.
@@ -65,40 +65,40 @@ export default function HistorianDashboard() {
         </Alert>
       )}
 
-      <div className="space-y-6">
-        <Accordion type="multiple" defaultValue={["photos", "videos", "scrapbook", "archive"]}>
-          <AccordionItem value="photos">
-            <AccordionTrigger className="text-lg font-semibold">
+      <div className="space-y-4 sm:space-y-6">
+        <Accordion type="multiple" defaultValue={["photos", "videos", "scrapbook", "archive"]} className="w-full">
+          <AccordionItem value="photos" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               📸 Photo Upload Tool
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <PhotoUploadTool />
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="videos">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="videos" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               🎥 Video Manager
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <VideoManager />
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="scrapbook">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="scrapbook" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               📖 Scrapbook Builder
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <ScrapbookBuilder />
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="archive">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="archive" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               🗂️ Archive Registry
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <ArchiveRegistry />
             </AccordionContent>
           </AccordionItem>

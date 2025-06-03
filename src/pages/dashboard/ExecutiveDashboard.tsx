@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ExecutiveModuleCard } from '@/components/dashboard/ExecutiveModuleCard';
 import { PageHeader } from '@/components/ui/page-header';
 import { MobileOptimizedContainer } from '@/components/mobile/MobileOptimizedContainer';
-import { MobileCardGrid } from '@/components/mobile/MobileCardGrid';
 import { Badge } from '@/components/ui/badge';
 import { 
   DollarSign, 
@@ -127,33 +126,33 @@ export default function ExecutiveDashboard() {
   const hasExecRoles = availableModules.length > 0;
 
   return (
-    <MobileOptimizedContainer className="py-6">
+    <MobileOptimizedContainer className="pt-4 pb-12 px-3 sm:px-6">
       <PageHeader
         title="Executive Dashboard"
         description="Welcome to your personalized executive tools and management center"
-        icon={<Crown className="h-8 w-8 text-glee-spelman" />}
+        icon={<Crown className="h-6 w-6 sm:h-8 sm:w-8 text-glee-spelman" />}
       />
       
       {/* Welcome Section */}
-      <div className="mb-8 p-6 bg-gradient-to-r from-glee-spelman/10 to-blue-50 dark:from-glee-spelman/5 dark:to-gray-800 rounded-lg border">
-        <h2 className="text-xl font-semibold mb-2">
+      <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-glee-spelman/10 to-blue-50 dark:from-glee-spelman/5 dark:to-gray-800 rounded-lg border">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">
           Welcome, {profile?.first_name || 'Executive Member'}! 👋
         </h2>
-        <p className="text-muted-foreground mb-3">
+        <p className="text-sm sm:text-base text-muted-foreground mb-3">
           You currently hold the following executive positions:
         </p>
         <div className="flex flex-wrap gap-2">
           {roleTags.length > 0 ? (
             roleTags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="bg-glee-spelman/10 text-glee-spelman">
+              <Badge key={index} variant="secondary" className="bg-glee-spelman/10 text-glee-spelman text-xs">
                 {tag}
               </Badge>
             ))
           ) : (
-            <Badge variant="outline">No executive roles assigned</Badge>
+            <Badge variant="outline" className="text-xs">No executive roles assigned</Badge>
           )}
           {isAdmin() && (
-            <Badge variant="default" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+            <Badge variant="default" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 text-xs">
               <Shield className="h-3 w-3 mr-1" />
               Admin
             </Badge>
@@ -161,12 +160,12 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      {/* Executive Tools Grid */}
+      {/* Executive Tools Grid - Fully Responsive */}
       {hasExecRoles || isAdmin() ? (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Your Executive Tools</h3>
-            <MobileCardGrid columns={3} gap="md">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">Your Executive Tools</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {availableModules.map((module, index) => (
                 <ExecutiveModuleCard
                   key={index}
@@ -186,20 +185,20 @@ export default function ExecutiveDashboard() {
                   icon={Shield}
                 />
               )}
-            </MobileCardGrid>
+            </div>
           </div>
         </div>
       ) : (
         /* Fallback for users with no executive roles */
-        <div className="text-center py-12">
-          <MobileCardGrid columns={1} className="max-w-md mx-auto">
+        <div className="text-center py-8 sm:py-12">
+          <div className="max-w-md mx-auto">
             <ExecutiveModuleCard
               title="No Executive Tools Available"
               description="You currently don't have any Executive Board tools assigned. Contact your administrator if you believe this is an error."
               to="#"
               variant="secondary"
             />
-          </MobileCardGrid>
+          </div>
         </div>
       )}
     </MobileOptimizedContainer>

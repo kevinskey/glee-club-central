@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/ui/page-header';
 import { MobileOptimizedContainer } from '@/components/mobile/MobileOptimizedContainer';
 import { DuesTracker } from '@/components/treasurer/DuesTracker';
@@ -35,10 +34,9 @@ export default function TreasurerDashboard() {
     }
   }, [profile, isLoading]);
 
-  // Show loading state
   if (isLoading) {
     return (
-      <MobileOptimizedContainer className="py-6">
+      <MobileOptimizedContainer className="pt-4 pb-12">
         <div className="flex items-center justify-center h-40">
           <div className="text-muted-foreground">Loading...</div>
         </div>
@@ -46,22 +44,20 @@ export default function TreasurerDashboard() {
     );
   }
 
-  // Redirect if not authorized
   if (!isAuthorized) {
     return <Navigate to="/dashboard" replace />;
   }
 
   return (
-    <MobileOptimizedContainer className="py-6">
+    <MobileOptimizedContainer className="pt-4 pb-12 px-3 sm:px-6">
       <PageHeader
         title="Treasurer Dashboard"
         description="Manage Glee Club finances, dues, and budget"
-        icon={<DollarSign className="h-8 w-8 text-glee-spelman" />}
+        icon={<DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-glee-spelman" />}
       />
 
-      {/* Warning for unauthorized users */}
       {!profile?.role_tags?.includes('Treasurer') && !profile?.is_super_admin && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-4 sm:mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             You do not have Treasurer privileges. Please contact an administrator.
@@ -69,44 +65,40 @@ export default function TreasurerDashboard() {
         </Alert>
       )}
 
-      <div className="space-y-6">
-        <Accordion type="multiple" defaultValue={["dues", "budget", "cashbox", "notes"]}>
-          {/* Dues Tracker */}
-          <AccordionItem value="dues">
-            <AccordionTrigger className="text-lg font-semibold">
+      <div className="space-y-4 sm:space-y-6">
+        <Accordion type="multiple" defaultValue={["dues", "budget", "cashbox", "notes"]} className="w-full">
+          <AccordionItem value="dues" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               📋 Dues Tracker
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <DuesTracker />
             </AccordionContent>
           </AccordionItem>
 
-          {/* Budget Overview */}
-          <AccordionItem value="budget">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="budget" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               💰 Budget Overview
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <BudgetOverview />
             </AccordionContent>
           </AccordionItem>
 
-          {/* Cashbox Log */}
-          <AccordionItem value="cashbox">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="cashbox" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               🧾 Cashbox Log
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <CashboxLog />
             </AccordionContent>
           </AccordionItem>
 
-          {/* Treasurer Notes */}
-          <AccordionItem value="notes">
-            <AccordionTrigger className="text-lg font-semibold">
+          <AccordionItem value="notes" className="border rounded-lg px-4 sm:px-6">
+            <AccordionTrigger className="text-sm sm:text-lg font-semibold py-3 sm:py-4">
               📝 Treasurer Notes
             </AccordionTrigger>
-            <AccordionContent className="pt-4">
+            <AccordionContent className="pt-2 sm:pt-4 pb-4 sm:pb-6">
               <TreasurerNotes />
             </AccordionContent>
           </AccordionItem>
