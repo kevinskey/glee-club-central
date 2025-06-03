@@ -37,9 +37,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             <Sparkles className="h-4 w-4 text-blue-500" />
             <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Upcoming Performances</span>
           </div>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Experience the harmonious blend of tradition and innovation with the Spelman College Glee Club
-          </p>
         </div>
 
         {/* Events Grid with Enhanced Design */}
