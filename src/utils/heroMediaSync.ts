@@ -12,7 +12,7 @@ export async function cleanupOrphanedHeroSlides() {
     // Get all hero slides that have media_id
     const { data: heroSlides, error: slidesError } = await supabase
       .from('hero_slides')
-      .select('id, media_id, title')
+      .select('id, media_id, title, section_id, visible')
       .not('media_id', 'is', null);
 
     if (slidesError) throw slidesError;
@@ -22,6 +22,14 @@ export async function cleanupOrphanedHeroSlides() {
       return { cleaned: 0, checked: 0 };
     }
 
+    console.log('🧹 Found hero slides with media_id:', heroSlides.map(s => ({
+      id: s.id,
+      title: s.title,
+      media_id: s.media_id,
+      section_id: s.section_id,
+      visible: s.visible
+    })));
+
     // Get all existing media files
     const { data: mediaFiles, error: mediaError } = await supabase
       .from('media_library')
@@ -30,14 +38,21 @@ export async function cleanupOrphanedHeroSlides() {
     if (mediaError) throw mediaError;
 
     const existingMediaIds = new Set(mediaFiles?.map(m => m.id) || []);
+    console.log('🧹 Existing media IDs in library:', Array.from(existingMediaIds));
     
     // Find orphaned slides (slides that reference non-existent media)
     const orphanedSlides = heroSlides.filter(slide => {
       // Skip YouTube embeds (they contain URLs, not UUIDs)
       if (slide.media_id?.includes('youtube.com/embed/')) {
+        console.log('🧹 Skipping YouTube embed:', slide.media_id);
         return false;
       }
-      return !existingMediaIds.has(slide.media_id);
+      
+      const isOrphaned = !existingMediaIds.has(slide.media_id);
+      if (isOrphaned) {
+        console.log(`🧹 ORPHANED SLIDE FOUND: ${slide.id} (${slide.title}) references missing media ${slide.media_id}`);
+      }
+      return isOrphaned;
     });
 
     console.log(`🧹 Found ${orphanedSlides.length} orphaned slides out of ${heroSlides.length} total`);
@@ -48,6 +63,8 @@ export async function cleanupOrphanedHeroSlides() {
 
     // Clean up orphaned slides by setting media_id to null
     const orphanedIds = orphanedSlides.map(s => s.id);
+    console.log('🧹 Cleaning up orphaned slide IDs:', orphanedIds);
+    
     const { error: updateError } = await supabase
       .from('hero_slides')
       .update({ 
@@ -58,14 +75,7 @@ export async function cleanupOrphanedHeroSlides() {
 
     if (updateError) throw updateError;
 
-    console.log(`🧹 Cleaned up ${orphanedSlides.length} orphaned hero slides`);
-    
-    // Force a page refresh to reload the hero data immediately
-    if (orphanedSlides.length > 0) {
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    }
+    console.log(`🧹 Successfully cleaned up ${orphanedSlides.length} orphaned hero slides`);
     
     return { 
       cleaned: orphanedSlides.length, 
@@ -130,7 +140,7 @@ export async function validateHeroSlideMedia() {
     
     if (result.cleaned > 0) {
       toast.success(`Fixed ${result.cleaned} broken hero slide references`, {
-        description: `Checked ${result.checked} slides and cleaned up broken media links. Page will refresh automatically.`
+        description: `Checked ${result.checked} slides and cleaned up broken media links.`
       });
     } else {
       toast.success(`All hero slides are properly linked`, {
@@ -151,7 +161,7 @@ export async function validateHeroSlideMedia() {
  */
 export async function forceCleanupOrphanedSlides() {
   try {
-    console.log('🚨 FORCE CLEANUP: Removing all orphaned hero slide references...');
+    console.log('🚨 FORCE CLEANUP: Starting emergency cleanup of all orphaned hero slide references...');
     
     // Get ALL hero slides
     const { data: allSlides, error: allSlidesError } = await supabase
@@ -161,8 +171,18 @@ export async function forceCleanupOrphanedSlides() {
     if (allSlidesError) throw allSlidesError;
 
     if (!allSlides || allSlides.length === 0) {
+      console.log('🚨 FORCE CLEANUP: No slides found in database');
       return { cleaned: 0, total: 0 };
     }
+
+    console.log('🚨 FORCE CLEANUP: Found total slides:', allSlides.length);
+    console.log('🚨 FORCE CLEANUP: All slides:', allSlides.map(s => ({
+      id: s.id,
+      title: s.title,
+      media_id: s.media_id,
+      section_id: s.section_id,
+      visible: s.visible
+    })));
 
     // Get all existing media files
     const { data: mediaFiles, error: mediaError } = await supabase
@@ -172,6 +192,7 @@ export async function forceCleanupOrphanedSlides() {
     if (mediaError) throw mediaError;
 
     const existingMediaIds = new Set(mediaFiles?.map(m => m.id) || []);
+    console.log('🚨 FORCE CLEANUP: Available media IDs:', Array.from(existingMediaIds));
     
     // Find ALL slides with invalid media references
     const problematicSlides = allSlides.filter(slide => {
@@ -181,6 +202,7 @@ export async function forceCleanupOrphanedSlides() {
     });
 
     if (problematicSlides.length === 0) {
+      console.log('🚨 FORCE CLEANUP: No problematic slides found');
       return { cleaned: 0, total: allSlides.length };
     }
 
@@ -199,13 +221,10 @@ export async function forceCleanupOrphanedSlides() {
     if (updateError) throw updateError;
 
     toast.success(`Force cleanup completed: Fixed ${problematicSlides.length} slides`, {
-      description: 'All broken media references have been removed. Page will refresh.'
+      description: 'All broken media references have been removed.'
     });
 
-    // Force page refresh
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
+    console.log('🚨 FORCE CLEANUP: Successfully updated problematic slides');
 
     return { 
       cleaned: problematicSlides.length, 
