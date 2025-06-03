@@ -342,7 +342,7 @@ export function MembersPageRefactor() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <Avatar>
-                          <AvatarImage src={undefined} />
+                          <AvatarImage src={member.avatar_url} />
                           <AvatarFallback>
                             {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
                           </AvatarFallback>
@@ -410,14 +410,13 @@ export function MembersPageRefactor() {
         </>
       )}
 
-      {/* Create User Modal */}
+      {/* Modals */}
       <CreateUserModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onUserCreated={handleUserCreated}
       />
 
-      {/* Add Member Dialog */}
       <AddMemberDialog
         isOpen={showAddMemberDialog}
         onOpenChange={setShowAddMemberDialog}
@@ -425,7 +424,6 @@ export function MembersPageRefactor() {
         isSubmitting={isSubmitting}
       />
 
-      {/* Edit User Dialog */}
       <EditUserDialog
         isOpen={showEditDialog}
         onOpenChange={(open) => {

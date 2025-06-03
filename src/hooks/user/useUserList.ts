@@ -18,7 +18,7 @@ export interface SimpleUser {
   notes?: string;
   created_at?: string;
   updated_at?: string;
-  avatar_url?: string; // Add this property
+  avatar_url?: string;
 }
 
 interface UseUserListResponse {
