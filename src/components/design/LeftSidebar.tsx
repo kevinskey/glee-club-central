@@ -5,10 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Type, Image, Palette, Users, Wand2 } from 'lucide-react';
+import { Upload, Type, Image, Palette, Users, Wand2, FolderOpen } from 'lucide-react';
 import { useDesign } from './DesignContext';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useDesignAssets } from '@/hooks/useDesignAssets';
 
 const FONTS = ['Montserrat', 'Courier', 'Poppins', 'Playfair Display', 'Anton'];
 const COLORS = ['#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
@@ -16,6 +17,7 @@ const CLIPART_OPTIONS = ['Star', 'Heart', 'Arrow', 'Circle', 'Square', 'Triangle
 
 export const LeftSidebar = () => {
   const { addElement, currentView } = useDesign();
+  const { completedAssets, getAssetUrl } = useDesignAssets();
   const [activeTab, setActiveTab] = useState('upload');
   const [textContent, setTextContent] = useState('');
   const [selectedFont, setSelectedFont] = useState('Montserrat');
@@ -37,6 +39,28 @@ export const LeftSidebar = () => {
         height: 200,
         placement: currentView
       });
+    }
+  };
+
+  const handleAssetSelect = async (asset: any, extractedFile: any) => {
+    try {
+      const baseUrl = await getAssetUrl(asset.file_path);
+      const imageUrl = `${baseUrl}/${extractedFile.path}`;
+      
+      addElement({
+        type: 'image',
+        content: imageUrl,
+        x: 150,
+        y: 150,
+        width: 200,
+        height: 200,
+        placement: currentView
+      });
+      
+      toast.success('Asset added to design');
+    } catch (error) {
+      console.error('Error adding asset:', error);
+      toast.error('Failed to add asset to design');
     }
   };
 
@@ -117,6 +141,7 @@ export const LeftSidebar = () => {
 
   const tabs = [
     { id: 'upload', label: 'Upload', icon: Upload },
+    { id: 'assets', label: 'Assets', icon: FolderOpen },
     { id: 'text', label: 'Add Text', icon: Type },
     { id: 'clipart', label: 'Add Clipart', icon: Image },
     { id: 'colors', label: 'Product Colors', icon: Palette },
@@ -198,6 +223,47 @@ export const LeftSidebar = () => {
                 )}
               </Button>
             </div>
+          </div>
+        )}
+
+        {activeTab === 'assets' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Design Assets</h3>
+            
+            {completedAssets.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <FolderOpen className="w-12 h-12 mx-auto mb-2" />
+                <p>No extracted assets available</p>
+                <p className="text-sm">Upload and extract assets to use them</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {completedAssets.map((asset) => (
+                  <Card key={asset.id} className="p-3 bg-gray-700 border-gray-600">
+                    <h4 className="font-medium mb-2 text-white">{asset.file_name}</h4>
+                    <div className="space-y-2">
+                      {asset.extracted_files.map((file: any, index: number) => {
+                        // Only show image files
+                        if (!file.type?.startsWith('image/')) return null;
+                        
+                        return (
+                          <button
+                            key={index}
+                            onClick={() => handleAssetSelect(asset, file)}
+                            className="w-full p-2 text-left bg-gray-600 hover:bg-gray-500 rounded transition-colors text-white text-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Image className="w-4 h-4" />
+                              <span>{file.name}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
