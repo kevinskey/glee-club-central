@@ -18,6 +18,7 @@ export interface SimpleUser {
   notes?: string;
   created_at?: string;
   updated_at?: string;
+  avatar_url?: string; // Add this property
 }
 
 interface UseUserListResponse {
@@ -67,7 +68,8 @@ export const useUserList = (): UseUserListResponse => {
           dues_paid,
           notes,
           created_at,
-          updated_at
+          updated_at,
+          avatar_url
         `)
         .order('last_name', { ascending: true });
 

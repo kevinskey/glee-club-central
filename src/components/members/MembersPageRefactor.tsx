@@ -53,7 +53,7 @@ import { toast } from 'sonner';
 export function MembersPageRefactor() {
   const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuthMigration();
   const { users, isLoading: usersLoading, error, refetch } = useUserList();
-  const { createUser } = useUserCreate();
+  const { addUser } = useUserCreate();
   const { updateUser } = useUserUpdate(refetch);
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,7 +98,7 @@ export function MembersPageRefactor() {
   const handleAddMember = async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
-      const success = await createUser(data);
+      const success = await addUser(data);
       if (success) {
         setShowAddMemberDialog(false);
         refetch();
@@ -342,7 +342,7 @@ export function MembersPageRefactor() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <Avatar>
-                          <AvatarImage src={member.avatar_url} />
+                          <AvatarImage src={undefined} />
                           <AvatarFallback>
                             {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
                           </AvatarFallback>
