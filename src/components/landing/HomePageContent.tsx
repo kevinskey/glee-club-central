@@ -1,6 +1,5 @@
 
 import React from "react";
-import { HeroBannerSection } from "@/components/landing/sections/HeroBannerSection";
 import { EventsSection } from "@/components/landing/sections/EventsSection";
 import { AudioSection } from "@/components/landing/sections/AudioSection";
 import { StoreSection } from "@/components/landing/sections/StoreSection";
@@ -49,13 +48,8 @@ export const HomePageContent = ({
 }: HomePageContentProps) => {
   return (
     <div className="min-h-screen bg-background w-full overflow-x-hidden">
-      {/* Hero Section - Full width, no padding or margin */}
-      <div className="w-full overflow-x-hidden m-0 p-0">
-        <HeroBannerSection />
-      </div>
-      
       {/* Main Content Sections */}
-      <div className="w-full overflow-x-hidden space-y-3 sm:space-y-4">
+      <div className="w-full overflow-x-hidden space-y-3 sm:space-y-4 pt-6">
         <div className="events-section w-full px-4 sm:px-6 lg:px-8">
           <EventsSection events={upcomingEvents} />
         </div>
