@@ -9,6 +9,31 @@ export interface MediaValidationResult {
   errors: string[];
 }
 
+export async function removeMediaFromHeroSlides(mediaId: string): Promise<boolean> {
+  try {
+    console.log(`🔧 MediaSync: Removing media_id ${mediaId} from hero slides`);
+    
+    const { error } = await supabase
+      .from('hero_slides')
+      .update({ 
+        media_id: null,
+        media_type: 'image' // Reset to default
+      })
+      .eq('media_id', mediaId);
+
+    if (error) {
+      console.error(`🔧 MediaSync: Error removing media ${mediaId} from hero slides:`, error);
+      return false;
+    }
+    
+    console.log(`🔧 MediaSync: ✅ Successfully removed media ${mediaId} from hero slides`);
+    return true;
+  } catch (error) {
+    console.error(`🔧 MediaSync: Unexpected error removing media ${mediaId}:`, error);
+    return false;
+  }
+}
+
 export async function validateHeroSlideMedia(): Promise<MediaValidationResult> {
   const result: MediaValidationResult = {
     checked: 0,
