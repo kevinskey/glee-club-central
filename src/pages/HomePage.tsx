@@ -6,6 +6,7 @@ import { HomePageContent } from "@/components/landing/HomePageContent";
 import { Header } from "@/components/landing/Header";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { migrateHeroImages } from "@/utils/heroMigration";
+import { deleteAllHeroSlides } from "@/utils/deleteAllHeroSlides";
 
 const HomePage = () => {
   const {
@@ -16,16 +17,18 @@ const HomePage = () => {
     isLoading
   } = useHomePageData();
 
-  // Run hero migration on first load
+  // Delete all hero slides on first load
   useEffect(() => {
-    const runMigration = async () => {
-      const result = await migrateHeroImages();
-      if (result.success && result.migrated > 0) {
-        console.log(`✅ Migrated ${result.migrated} hero images to new system`);
+    const runCleanup = async () => {
+      try {
+        await deleteAllHeroSlides();
+        console.log('✅ All hero slides deleted');
+      } catch (error) {
+        console.error('❌ Failed to delete hero slides:', error);
       }
     };
     
-    runMigration();
+    runCleanup();
   }, []);
 
   // Show loader while data is being fetched
