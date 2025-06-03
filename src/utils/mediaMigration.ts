@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -47,20 +46,18 @@ export async function migrateMediaIds(): Promise<MediaMigrationResult> {
       const oldId = oldFile.id;
       
       // Generate proper UUID for new ID
-      const { data: uuidData, error: uuidError } = await supabase
-        .rpc('gen_random_uuid');
-      
       let newId: string;
-      if (uuidError || !uuidData) {
-        // Fallback to crypto.randomUUID if available, otherwise skip
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-          newId = crypto.randomUUID();
-        } else {
-          result.errors.push(`Could not generate UUID for ${oldFile.title}`);
-          continue;
-        }
+      
+      // Use crypto.randomUUID() directly for reliable UUID generation
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        newId = crypto.randomUUID();
       } else {
-        newId = uuidData;
+        // Fallback: generate a simple UUID format
+        newId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
       }
       
       console.log(`🔄 Migrating media ${i + 1}/${mediaFiles.length}: ${oldFile.title}`);
