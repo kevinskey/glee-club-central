@@ -35,7 +35,7 @@ export function UniversalHero({
 
   const getContainerClasses = () => {
     if (height === 'auto') {
-      return `min-h-[50vh] w-full overflow-hidden ${className}`;
+      return `w-full overflow-hidden ${className}`;
     }
     return `overflow-hidden w-full ${className}`;
   };
