@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,10 +9,15 @@ import { AdminCalendarView } from '@/components/calendar/AdminCalendarView';
 import { CalendarViewToggle } from '@/components/calendar/CalendarViewToggle';
 import { EventTypeFilter } from '@/components/calendar/EventTypeFilter';
 import { EventCategoryFilter } from '@/components/calendar/EventCategoryFilter';
+import { EventEditor } from '@/components/admin/EventEditor';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCalendarEvents } from '@/hooks/useCalendarEvents';
+import { CalendarEvent } from '@/types/calendar';
+import { toast } from 'sonner';
 
 export default function AdminCalendarPage() {
   const { user, profile, isLoading } = useAuth();
+  const { createEvent } = useCalendarEvents();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedView, setSelectedView] = useState<'month' | 'week' | 'day'>('month');
@@ -24,6 +28,10 @@ export default function AdminCalendarPage() {
   const [enabledCategories, setEnabledCategories] = useState([
     'rehearsal', 'performance', 'meeting', 'event', 'academic', 'holiday', 'religious', 'travel'
   ]);
+
+  // Event creation state
+  const [isEventEditorOpen, setIsEventEditorOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
 
   useEffect(() => {
     if (user && profile) {
@@ -54,6 +62,34 @@ export default function AdminCalendarPage() {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedEventType('all');
+  };
+
+  // Handle create new event
+  const handleCreateEvent = () => {
+    console.log('Opening event editor for new event');
+    setEditingEvent(null); // Clear any existing event
+    setIsEventEditorOpen(true);
+  };
+
+  // Handle save new event
+  const handleSaveNewEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
+    try {
+      console.log('Creating new event:', eventData);
+      await createEvent(eventData);
+      toast.success('Event created successfully');
+      setIsEventEditorOpen(false);
+      setEditingEvent(null);
+    } catch (error) {
+      console.error('Error creating event:', error);
+      toast.error('Failed to create event');
+    }
+  };
+
+  // Handle close editor
+  const handleCloseEditor = () => {
+    console.log('Closing event editor');
+    setIsEventEditorOpen(false);
+    setEditingEvent(null);
   };
 
   const hasActiveFilters = searchQuery.trim() !== '' || selectedEventType !== 'all';
@@ -97,7 +133,10 @@ export default function AdminCalendarPage() {
               <Settings className="h-4 w-4" />
               Categories
             </Button>
-            <Button className="bg-glee-spelman hover:bg-glee-spelman/90 text-white">
+            <Button 
+              onClick={handleCreateEvent}
+              className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Event
             </Button>
@@ -276,6 +315,14 @@ export default function AdminCalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Event Editor Dialog */}
+      <EventEditor
+        event={editingEvent}
+        isOpen={isEventEditorOpen}
+        onClose={handleCloseEditor}
+        onSave={handleSaveNewEvent}
+      />
     </div>
   );
 }
