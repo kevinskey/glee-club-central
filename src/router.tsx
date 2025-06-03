@@ -1,4 +1,5 @@
 
+import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
 import HomePage from "./pages/HomePage";
@@ -12,6 +13,7 @@ import DesignStudioPage from "./pages/DesignStudioPage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
+import TreasurerDashboard from "./pages/dashboard/TreasurerDashboard";
 import { adminRoutes } from "./routes/adminRoutes";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
 
@@ -50,7 +52,7 @@ const router = createBrowserRouter([
       },
       {
         path: "exec/treasurer",
-        element: React.lazy(() => import("./pages/dashboard/TreasurerDashboard")),
+        element: <TreasurerDashboard />,
       },
       {
         path: "attendance",
