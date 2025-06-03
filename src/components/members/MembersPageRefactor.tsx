@@ -39,7 +39,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
-import { useUserManagement, User } from '@/hooks/user/useUserManagement';
+import { useUserList } from '@/hooks/user/useUserList';
 import { useUserUpdate } from '@/hooks/user/useUserUpdate';
 import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
@@ -51,10 +51,10 @@ import { useUserCreate } from '@/hooks/user/useUserCreate';
 import { toast } from 'sonner';
 
 export function MembersPageRefactor() {
-  const { isAdmin, isLoading: authLoading, isAuthenticated, profile } = useAuthMigration();
-  const { users, isLoading: usersLoading, error, refreshUsers } = useUserManagement();
-  const { addUser } = useUserCreate();
-  const { updateUser } = useUserUpdate(refreshUsers);
+  const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuthMigration();
+  const { users, isLoading: usersLoading, error, refetch } = useUserList();
+  const { createUser } = useUserCreate();
+  const { updateUser } = useUserUpdate(refetch);
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState('all');
@@ -62,17 +62,10 @@ export function MembersPageRefactor() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAdminUser = isAdmin();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('🔄 MembersPageRefactor: User authenticated, fetching users...');
-      refreshUsers();
-    }
-  }, [isAuthenticated, refreshUsers]);
 
   // Debug logging
   useEffect(() => {
@@ -82,9 +75,10 @@ export function MembersPageRefactor() {
       usersLoading,
       usersCount: users.length,
       error,
-      isAdminUser
+      isAdminUser,
+      users: users.slice(0, 3) // Show first 3 users for debugging
     });
-  }, [isAuthenticated, authLoading, usersLoading, users.length, error, isAdminUser]);
+  }, [isAuthenticated, authLoading, usersLoading, users.length, error, isAdminUser, users]);
 
   const filteredMembers = users.filter(user => {
     const searchTermLower = searchTerm.toLowerCase();
@@ -98,30 +92,32 @@ export function MembersPageRefactor() {
   });
 
   const handleUserCreated = () => {
-    refreshUsers();
+    refetch();
   };
 
   const handleAddMember = async (data: UserFormValues) => {
     setIsSubmitting(true);
     try {
-      const success = await addUser(data);
+      const success = await createUser(data);
       if (success) {
         setShowAddMemberDialog(false);
-        refreshUsers();
+        refetch();
+        toast.success('Member added successfully');
       }
     } catch (error) {
       console.error('Error adding member:', error);
+      toast.error('Failed to add member');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleEditUser = (user: User) => {
+  const handleEditUser = (user: any) => {
     setSelectedUser(user);
     setShowEditDialog(true);
   };
 
-  const handleUserCardClick = (user: User) => {
+  const handleUserCardClick = (user: any) => {
     if (isAdminUser) {
       handleEditUser(user);
     }
@@ -132,8 +128,7 @@ export function MembersPageRefactor() {
     
     setIsSubmitting(true);
     try {
-      // Convert form data to User update format
-      const updateData: Partial<User> = {
+      const updateData: any = {
         first_name: data.first_name,
         last_name: data.last_name,
         phone: data.phone,
@@ -162,7 +157,7 @@ export function MembersPageRefactor() {
 
   const handleRefresh = async () => {
     console.log('🔄 Manual refresh triggered');
-    await refreshUsers();
+    await refetch();
   };
 
   if (authLoading) {
@@ -252,6 +247,9 @@ export function MembersPageRefactor() {
             <p>Admin: {isAdminUser ? 'Yes' : 'No'}</p>
             <p>Loading: {usersLoading ? 'Yes' : 'No'}</p>
             <p>Error: {error || 'None'}</p>
+            {users.length > 0 && (
+              <p>Sample user: {users[0].first_name} {users[0].last_name} ({users[0].email})</p>
+            )}
           </CardContent>
         </Card>
       )}
@@ -308,159 +306,107 @@ export function MembersPageRefactor() {
             </CardContent>
           </Card>
 
-          {/* Tabs for different views */}
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="list">Member List ({filteredMembers.length})</TabsTrigger>
-              <TabsTrigger value="create">Create User</TabsTrigger>
-              <TabsTrigger value="upload">Batch Upload</TabsTrigger>
-              <TabsTrigger value="export">Export Data</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="list" className="space-y-4">
-              {filteredMembers.length === 0 && !usersLoading ? (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="font-semibold mb-2">No Members Found</h3>
-                    <p className="text-muted-foreground mb-4">
-                      {users.length === 0 
-                        ? 'No members have been added yet.' 
-                        : 'No members match your search criteria.'
-                      }
-                    </p>
-                    {isAdminUser && users.length === 0 && (
-                      <Button onClick={() => setShowAddMemberDialog(true)}>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Add Your First Member
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid gap-4">
-                  {filteredMembers.map((member) => (
-                    <Card 
-                      key={member.id} 
-                      className={`transition-all duration-200 ${
-                        isAdminUser 
-                          ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50' 
-                          : ''
-                      }`}
-                      onClick={() => handleUserCardClick(member)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <Avatar>
-                              <AvatarImage src={member.avatar_url} />
-                              <AvatarFallback>
-                                {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h3 className="font-semibold">
-                                {member.first_name} {member.last_name}
-                              </h3>
-                              <p className="text-sm text-muted-foreground flex items-center">
-                                <Mail className="mr-1 h-3 w-3" />
-                                {member.email || 'No email'}
-                              </p>
-                              {member.phone && (
-                                <p className="text-sm text-muted-foreground flex items-center">
-                                  <Phone className="mr-1 h-3 w-3" />
-                                  {member.phone}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {member.role && (
-                              <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
-                                {member.role}
-                              </Badge>
-                            )}
-                            {member.voice_part && (
-                              <Badge variant="outline">
-                                <Music className="mr-1 h-3 w-3" />
-                                {member.voice_part.replace('_', ' ')}
-                              </Badge>
-                            )}
-                            <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                              {member.status || 'active'}
-                            </Badge>
-                            {isAdminUser && (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                  <Button variant="ghost" size="sm">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditUser(member);
-                                  }}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit Member
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive">
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Delete Member
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            )}
-                          </div>
+          {/* Member List */}
+          {filteredMembers.length === 0 && !usersLoading ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">No Members Found</h3>
+                <p className="text-muted-foreground mb-4">
+                  {users.length === 0 
+                    ? 'No members have been added yet.' 
+                    : 'No members match your search criteria.'
+                  }
+                </p>
+                {isAdminUser && users.length === 0 && (
+                  <Button onClick={() => setShowAddMemberDialog(true)}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add Your First Member
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {filteredMembers.map((member) => (
+                <Card 
+                  key={member.id} 
+                  className={`transition-all duration-200 ${
+                    isAdminUser 
+                      ? 'cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50' 
+                      : ''
+                  }`}
+                  onClick={() => handleUserCardClick(member)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <Avatar>
+                          <AvatarImage src={member.avatar_url} />
+                          <AvatarFallback>
+                            {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold">
+                            {member.first_name} {member.last_name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground flex items-center">
+                            <Mail className="mr-1 h-3 w-3" />
+                            {member.email || 'No email'}
+                          </p>
+                          {member.phone && (
+                            <p className="text-sm text-muted-foreground flex items-center">
+                              <Phone className="mr-1 h-3 w-3" />
+                              {member.phone}
+                            </p>
+                          )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="create">
-              {isAdminUser ? (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Create Individual User</CardTitle>
-                    <CardDescription>
-                      Add a single new member to the system.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Button onClick={() => setShowCreateModal(true)} className="w-full">
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Open Create User Form
-                    </Button>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {member.role && (
+                          <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                            {member.role}
+                          </Badge>
+                        )}
+                        {member.voice_part && (
+                          <Badge variant="outline">
+                            <Music className="mr-1 h-3 w-3" />
+                            {member.voice_part.replace('_', ' ')}
+                          </Badge>
+                        )}
+                        <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
+                          {member.status || 'active'}
+                        </Badge>
+                        {isAdminUser && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditUser(member);
+                              }}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Member
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Member
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
-              ) : (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-muted-foreground">Admin access required to create users.</p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="upload">
-              {isAdminUser ? (
-                <MemberCSVUpload />
-              ) : (
-                <Card>
-                  <CardContent className="text-center py-8">
-                    <p className="text-muted-foreground">Admin access required for batch uploads.</p>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="export">
-              <MemberCSVDownload />
-            </TabsContent>
-          </Tabs>
+              ))}
+            </div>
+          )}
         </>
       )}
 
