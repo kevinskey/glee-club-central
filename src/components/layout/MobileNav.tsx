@@ -11,7 +11,8 @@ import {
   Users, 
   Settings, 
   LogOut,
-  Shield
+  Shield,
+  LayoutDashboard
 } from 'lucide-react';
 
 export function MobileNav() {
@@ -25,7 +26,7 @@ export function MobileNav() {
   };
 
   const navigation = [
-    { name: 'Home', href: '/dashboard', icon: Home },
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Music', href: '/dashboard/sheet-music', icon: Music },
     { name: 'Calendar', href: '/dashboard/calendar', icon: Calendar },
     { name: 'Members', href: '/dashboard/members', icon: Users },
