@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HeroSlide } from './types';
+import { HeroSlide, MediaFile } from './types';
 
 interface HeroContentProps {
   slide: HeroSlide;
@@ -14,9 +14,10 @@ interface HeroContentProps {
   };
   positionClasses: string;
   isMobile: boolean;
+  mediaFiles: MediaFile[];
 }
 
-export function HeroContent({ slide, textSizes, positionClasses, isMobile }: HeroContentProps) {
+export function HeroContent({ slide, textSizes, positionClasses, isMobile, mediaFiles }: HeroContentProps) {
   const isExternalLink = (url: string) => {
     return url?.startsWith('http://') || url?.startsWith('https://');
   };
@@ -48,8 +49,16 @@ export function HeroContent({ slide, textSizes, positionClasses, isMobile }: Her
   // If there's a button link but no button text, make the entire slide clickable
   const hasClickableSlide = slide.button_link && !slide.button_text;
   
+  // Get the current media file to use its title as fallback
+  const currentMedia = slide.media_id ? mediaFiles.find(m => m.id === slide.media_id) : null;
+  
+  // Use slide title if provided, otherwise use media title, otherwise use empty string
+  const displayTitle = slide.title && slide.title.trim() !== '' 
+    ? slide.title 
+    : currentMedia?.title || '';
+  
   // Check if we have any content to show
-  const hasTitle = slide.title && slide.title.trim() !== '';
+  const hasTitle = displayTitle.trim() !== '';
   const hasDescription = slide.description && slide.description.trim() !== '';
   const hasButton = slide.button_text && slide.button_link;
   
@@ -87,7 +96,7 @@ export function HeroContent({ slide, textSizes, positionClasses, isMobile }: Her
               "font-bold text-white mb-2 md:mb-4 leading-tight",
               textSizes.title
             )}>
-              {slide.title}
+              {displayTitle}
             </h1>
           )}
           {hasDescription && (

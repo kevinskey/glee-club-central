@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -218,6 +217,7 @@ export function ModernHeroSection({
         textSizes={textSizes}
         positionClasses={getPositionClasses()}
         isMobile={isMobile}
+        mediaFiles={mediaFiles}
       />
 
       {/* Navigation Controls */}
