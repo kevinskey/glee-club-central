@@ -71,22 +71,48 @@ export function useHeroData(sectionId: string) {
       const fetchedSlides = slidesResult.data || [];
       console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
       
-      // Log slide details for debugging and check for media connectivity
-      fetchedSlides.forEach(slide => {
+      // Validate media connectivity and auto-clean broken references
+      const availableMediaIds = new Set((mediaResult.data || []).map(m => m.id));
+      const validSlides = [];
+      let hasOrphanedMedia = false;
+      
+      for (const slide of fetchedSlides) {
         console.log(`🎭 Hero: Slide "${slide.title}" - visible: ${slide.visible}, media_id: ${slide.media_id}, section: ${slide.section_id}`);
         
-        if (slide.media_id) {
-          const foundMedia = (mediaResult.data || []).find(m => m.id === slide.media_id);
-          if (foundMedia) {
-            console.log(`🎭 Hero: ✅ Media found for slide "${slide.title}":`, foundMedia.title, foundMedia.file_url);
-          } else {
-            console.warn(`🎭 Hero: ❌ Media NOT found for slide "${slide.title}" with media_id: ${slide.media_id}`);
-            console.log('🎭 Hero: Available media IDs:', (mediaResult.data || []).map(m => m.id));
+        if (slide.media_id && !availableMediaIds.has(slide.media_id)) {
+          console.warn(`🎭 Hero: ❌ Media NOT found for slide "${slide.title}" with media_id: ${slide.media_id}`);
+          console.log('🎭 Hero: Available media IDs:', Array.from(availableMediaIds));
+          hasOrphanedMedia = true;
+          
+          // Auto-clean this slide's broken media reference
+          try {
+            await supabase
+              .from('hero_slides')
+              .update({ media_id: null })
+              .eq('id', slide.id);
+            
+            console.log(`🎭 Hero: ✅ Auto-cleaned broken media reference for slide "${slide.title}"`);
+            // Add the cleaned slide to our list
+            validSlides.push({ ...slide, media_id: null });
+          } catch (cleanError) {
+            console.error(`🎭 Hero: Failed to clean slide "${slide.title}":`, cleanError);
+            validSlides.push(slide); // Keep the slide as-is if cleanup fails
           }
+        } else {
+          if (slide.media_id) {
+            const foundMedia = (mediaResult.data || []).find(m => m.id === slide.media_id);
+            console.log(`🎭 Hero: ✅ Media found for slide "${slide.title}":`, foundMedia?.title, foundMedia?.file_url);
+          }
+          validSlides.push(slide);
         }
-      });
+      }
 
-      setSlides(fetchedSlides);
+      setSlides(validSlides);
+      
+      if (hasOrphanedMedia) {
+        console.log('🎭 Hero: Auto-cleaned orphaned media references');
+      }
+      
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load hero data');
