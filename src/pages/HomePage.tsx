@@ -21,7 +21,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-blue-50">
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#F9F9F9' }}>
       <Header />
       
       {/* Top Slider - No spacing needed as it sits flush with header */}
