@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -217,6 +218,7 @@ export function ModernHeroSection({
     
     console.log('🎭 Hero: Rendering background for slide:', currentSlideData);
     console.log('🎭 Hero: Current slide media_id:', currentSlideData?.media_id);
+    console.log('🎭 Hero: Available media files:', mediaFiles);
     
     // Check if media_id is a YouTube embed URL
     if (currentSlideData.media_id && isYouTubeEmbed(currentSlideData.media_id)) {
@@ -237,13 +239,15 @@ export function ModernHeroSection({
     const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
     
     console.log('🎭 Hero: Found media file:', currentMedia);
+    console.log('🎭 Hero: Media file URL:', currentMedia?.file_url);
+    console.log('🎭 Hero: Slide media type:', currentSlideData.media_type);
     
     if (currentMedia && currentMedia.file_url) {
       return currentSlideData.media_type === 'video' ? (
         <video
           key={currentMedia.id}
           src={currentMedia.file_url}
-          className={cn("absolute inset-0 w-full h-full object-contain", getAnimationClass())}
+          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
           autoPlay
           muted
           loop
@@ -252,22 +256,30 @@ export function ModernHeroSection({
             console.error('🎭 Hero: Video load error:', e);
             console.error('🎭 Hero: Failed video URL:', currentMedia.file_url);
           }}
+          onLoad={() => {
+            console.log('🎭 Hero: Video loaded successfully:', currentMedia.file_url);
+          }}
         />
       ) : (
         <img
           key={currentMedia.id}
           src={currentMedia.file_url}
           alt={currentMedia.title}
-          className={cn("absolute inset-0 w-full h-full object-contain", getAnimationClass())}
+          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
           onError={(e) => {
             console.error('🎭 Hero: Image load error:', e);
             console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
+          }}
+          onLoad={() => {
+            console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
           }}
         />
       );
     }
 
     console.log('🎭 Hero: No media found, using fallback gradient');
+    console.log('🎭 Hero: Slide has media_id but no matching file found');
+    
     // Fallback gradient background
     return (
       <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
