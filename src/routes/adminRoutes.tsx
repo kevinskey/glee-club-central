@@ -24,6 +24,7 @@ import SectionManagerPage from '@/pages/admin/SectionManagerPage';
 import FinancialRecords from '@/pages/admin/FinancialRecords';
 import UserSystemResetPage from '@/pages/admin/UserSystemResetPage';
 import TourMerchPage from '@/pages/admin/TourMerchPage';
+import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
 
 // Events
 import EventsListPage from '@/pages/events/EventsListPage';
@@ -172,6 +173,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminMediaLibraryPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/soundcloud',
+    element: (
+      <AdminRoute>
+        <SoundCloudAdminPage />
       </AdminRoute>
     ),
   },

@@ -1,3 +1,4 @@
+
 // Define the dashboard module interface
 export interface DashboardModule {
   id: string;
@@ -110,6 +111,16 @@ export const dashboardModules: DashboardModule[] = [
     icon: "CalendarPlus",
     color: "bg-yellow-500",
     path: "/dashboard/admin/events",
+    adminOnly: true,
+    category: "Administration"
+  },
+  {
+    id: "soundcloud_admin",
+    title: "SoundCloud Admin",
+    description: "Manage audio tracks and streaming content",
+    icon: "Music",
+    color: "bg-orange-600",
+    path: "/dashboard/admin/soundcloud",
     adminOnly: true,
     category: "Administration"
   },
