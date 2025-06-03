@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { 
   AlertTriangle, 
@@ -40,11 +41,14 @@ import {
   Plus, 
   Trash, 
   Bot,
-  Sparkles
+  Sparkles,
+  Rss,
+  Settings
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { AINewsGenerator } from "@/components/admin/AINewsGenerator";
+import { EnhancedNewsSourceManager } from "@/components/admin/EnhancedNewsSourceManager";
 import { AINewsContent } from "@/hooks/useAINewsGeneration";
 
 interface NewsItem {
@@ -67,6 +71,7 @@ export default function NewsItemsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<NewsItem | null>(null);
+  const [activeTab, setActiveTab] = useState("manage");
   
   // Form state
   const [headline, setHeadline] = useState("");
@@ -261,130 +266,194 @@ export default function NewsItemsPage() {
     <div className="container mx-auto p-4 max-w-6xl">
       <PageHeader 
         title="News Ticker Manager" 
-        description="Manage news headlines displayed in the scrolling ticker on the landing page."
+        description="Manage news headlines and configure news sources for the scrolling ticker."
       />
       
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>News Items</CardTitle>
-          <CardDescription>
-            Create and manage headlines that appear in the scrolling news ticker.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 flex justify-between items-center">
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Currently Active Items: {newsItems.filter(item => item.active).length}
-              </h3>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleOpenAIDialog} variant="outline">
-                <Bot className="mr-2 h-4 w-4" /> 
-                Generate with AI
-              </Button>
-              <Button onClick={handleOpenAddDialog}>
-                <Plus className="mr-2 h-4 w-4" /> 
-                Add Manually
-              </Button>
-            </div>
-          </div>
-          
-          {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-12 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />
-              ))}
-            </div>
-          ) : newsItems.length === 0 ? (
-            <div className="text-center py-8 border-2 border-dashed rounded-lg">
-              <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
-              <h3 className="text-lg font-medium">No news items found</h3>
-              <p className="text-sm text-muted-foreground mt-1 mb-4">
-                Add your first news item to display in the ticker.
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button onClick={handleOpenAIDialog} variant="outline">
-                  <Bot className="mr-2 h-4 w-4" /> 
-                  Generate with AI
-                </Button>
-                <Button onClick={handleOpenAddDialog}>
-                  <Plus className="mr-2 h-4 w-4" /> 
-                  Add Manually
-                </Button>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="manage">Manage Items</TabsTrigger>
+          <TabsTrigger value="sources">News Sources</TabsTrigger>
+          <TabsTrigger value="settings">Ticker Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="manage" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>News Items</CardTitle>
+              <CardDescription>
+                Create and manage headlines that appear in the scrolling news ticker.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Currently Active Items: {newsItems.filter(item => item.active).length}
+                  </h3>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={handleOpenAIDialog} variant="outline">
+                    <Bot className="mr-2 h-4 w-4" /> 
+                    Generate with AI
+                  </Button>
+                  <Button onClick={handleOpenAddDialog}>
+                    <Plus className="mr-2 h-4 w-4" /> 
+                    Add Manually
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Headline</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead>Dates</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Active</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {newsItems.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.headline}</TableCell>
-                      <TableCell>
-                        {item.generated_by_ai ? (
-                          <Badge variant="secondary" className="gap-1">
-                            <Sparkles className="h-3 w-3" />
-                            AI Generated
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline">Manual</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                          <span>{formatDate(item.start_date)}</span>
-                          {item.end_date && (
-                            <>
-                              <span className="mx-1">-</span>
-                              <span>{formatDate(item.end_date)}</span>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>{item.priority}</TableCell>
-                      <TableCell>
-                        <Switch 
-                          checked={item.active}
-                          onCheckedChange={(checked) => toggleActive(item, checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenEditDialog(item)}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                          onClick={() => handleOpenDeleteDialog(item)}
-                        >
-                          <Trash className="h-3.5 w-3.5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
+              
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-12 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" />
                   ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </div>
+              ) : newsItems.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                  <AlertTriangle className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+                  <h3 className="text-lg font-medium">No news items found</h3>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    Add your first news item to display in the ticker.
+                  </p>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={handleOpenAIDialog} variant="outline">
+                      <Bot className="mr-2 h-4 w-4" /> 
+                      Generate with AI
+                    </Button>
+                    <Button onClick={handleOpenAddDialog}>
+                      <Plus className="mr-2 h-4 w-4" /> 
+                      Add Manually
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="border rounded-md">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Headline</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>Dates</TableHead>
+                        <TableHead>Priority</TableHead>
+                        <TableHead>Active</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {newsItems.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.headline}</TableCell>
+                          <TableCell>
+                            {item.generated_by_ai ? (
+                              <Badge variant="secondary" className="gap-1">
+                                <Sparkles className="h-3 w-3" />
+                                AI Generated
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline">Manual</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                              <span>{formatDate(item.start_date)}</span>
+                              {item.end_date && (
+                                <>
+                                  <span className="mx-1">-</span>
+                                  <span>{formatDate(item.end_date)}</span>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>{item.priority}</TableCell>
+                          <TableCell>
+                            <Switch 
+                              checked={item.active}
+                              onCheckedChange={(checked) => toggleActive(item, checked)}
+                            />
+                          </TableCell>
+                          <TableCell className="text-right space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenEditDialog(item)}
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => handleOpenDeleteDialog(item)}
+                            >
+                              <Trash className="h-3.5 w-3.5" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sources" className="space-y-6">
+          <EnhancedNewsSourceManager />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Ticker Display Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Scroll Speed</Label>
+                  <select className="w-full p-2 border rounded">
+                    <option value="slow">Slow (30s)</option>
+                    <option value="normal">Normal (25s)</option>
+                    <option value="fast">Fast (20s)</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Maximum Items</Label>
+                  <Input type="number" defaultValue="5" min="1" max="20" />
+                </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Auto-hide Ticker</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically hide ticker after specified time
+                  </p>
+                </div>
+                <Switch />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Hide After (seconds)</Label>
+                  <Input type="number" defaultValue="8" min="1" max="60" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Background Color</Label>
+                  <Input type="color" defaultValue="#6B46C1" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
       
       {/* AI Generation Dialog */}
       <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
