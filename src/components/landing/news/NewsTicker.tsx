@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -156,28 +155,17 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create ticker items with clickable headlines
-  const tickerItems = newsItems.map((item, index) => (
-    <span key={`${item.id}-${index}`} className="ticker-item flex items-center">
-      <span 
-        className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
-        title="Click to read more"
-        onClick={() => handleNewsClick(item)}
-      >
-        {removeIconsFromHeadline(item.headline)}
-      </span>
-      {index < newsItems.length - 1 && (
-        <span className="mx-8 flex items-center">
-          <div className="w-2 h-2 bg-red-300 rounded-full animate-pulse"></div>
-          <div className="w-1 h-1 bg-red-200 rounded-full mx-2 opacity-60"></div>
-          <div className="w-2 h-2 bg-red-300 rounded-full animate-pulse"></div>
-        </span>
-      )}
-    </span>
-  ));
+  // Create a single continuous ticker with proper spacing
+  const createTickerContent = () => {
+    const cleanHeadlines = newsItems.map(item => removeIconsFromHeadline(item.headline));
+    const separator = '   •   ';
+    const singlePass = cleanHeadlines.join(separator);
+    
+    // Repeat the content multiple times for seamless scrolling
+    return Array(6).fill(singlePass).join(separator);
+  };
 
-  // Repeat the content for seamless scroll
-  const repeatedContent = Array(4).fill(tickerItems).flat();
+  const tickerContent = createTickerContent();
 
   if (isLoading) {
     return (
@@ -204,8 +192,14 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className={`flex whitespace-nowrap ${getAnimationClass()}`}>
-            {repeatedContent}
+          <div className={`whitespace-nowrap ${getAnimationClass()}`}>
+            <span 
+              className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
+              title="Click to read more"
+              onClick={() => newsItems.length > 0 && handleNewsClick(newsItems[0])}
+            >
+              {tickerContent}
+            </span>
           </div>
         </div>
         
