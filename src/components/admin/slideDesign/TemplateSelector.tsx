@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -121,20 +122,20 @@ export function TemplateSelector({
   onCreateNew 
 }: TemplateSelectorProps) {
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
         <div>
-          <h3 className="text-lg font-semibold">Choose a Template</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className="text-base sm:text-lg font-semibold">Choose a Template</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Select a layout template to start designing your slide. Gray areas are reserved for other content.
           </p>
         </div>
-        <Button onClick={onCreateNew} variant="outline">
+        <Button onClick={onCreateNew} variant="outline" className="w-full sm:w-auto">
           Create Blank Slide
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {templates.map((template) => (
           <Card
             key={template.id}
@@ -145,24 +146,26 @@ export function TemplateSelector({
             }`}
             onClick={() => onSelectTemplate(template)}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="p-3 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
+                <CardTitle className="text-sm sm:text-base flex items-center gap-2">
                   {getLayoutIcon(template.layout_type)}
-                  {template.name}
+                  <span className="truncate">{template.name}</span>
                 </CardTitle>
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs shrink-0">
                   {getLayoutLabel(template.layout_type)}
                 </Badge>
               </div>
               {template.description && (
-                <CardDescription className="text-sm">
+                <CardDescription className="text-xs sm:text-sm">
                   {template.description}
                 </CardDescription>
               )}
             </CardHeader>
-            <CardContent>
-              {renderLayoutPreview(template.layout_type)}
+            <CardContent className="p-3 pt-0">
+              <div className="max-w-full overflow-hidden">
+                {renderLayoutPreview(template.layout_type)}
+              </div>
             </CardContent>
           </Card>
         ))}

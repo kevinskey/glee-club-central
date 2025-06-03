@@ -30,15 +30,15 @@ export function MediaLibrarySelector({ onSelectMedia, triggerText = "Select from
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" type="button">
+        <Button variant="outline" type="button" className="w-full text-xs sm:text-sm">
           <Image className="h-4 w-4 mr-2" />
-          {triggerText}
+          <span className="truncate">{triggerText}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-xs sm:max-w-4xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Select Image from Media Library</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base sm:text-lg">Select Image from Media Library</DialogTitle>
+          <DialogDescription className="text-sm">
             Choose an image from your media library to use in your slide design
           </DialogDescription>
         </DialogHeader>
@@ -59,7 +59,7 @@ export function MediaLibrarySelector({ onSelectMedia, triggerText = "Select from
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
               {imageFiles.map((media) => (
                 <div
                   key={media.id}
@@ -69,10 +69,10 @@ export function MediaLibrarySelector({ onSelectMedia, triggerText = "Select from
                   <img
                     src={media.file_url}
                     alt={media.title}
-                    className="w-full h-32 object-cover"
+                    className="w-full h-20 sm:h-32 object-cover"
                   />
-                  <div className="p-2">
-                    <p className="text-sm font-medium truncate">{media.title}</p>
+                  <div className="p-1 sm:p-2">
+                    <p className="text-xs sm:text-sm font-medium truncate">{media.title}</p>
                     {media.description && (
                       <p className="text-xs text-gray-500 truncate">{media.description}</p>
                     )}
@@ -84,10 +84,10 @@ export function MediaLibrarySelector({ onSelectMedia, triggerText = "Select from
 
           {!isLoading && imageFiles.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              <Image className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No images found in media library</p>
+              <Image className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm sm:text-base">No images found in media library</p>
               {searchTerm && (
-                <p className="text-sm">Try adjusting your search terms</p>
+                <p className="text-xs sm:text-sm">Try adjusting your search terms</p>
               )}
             </div>
           )}

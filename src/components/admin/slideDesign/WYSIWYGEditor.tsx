@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -193,31 +194,32 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-      {/* Canvas Area */}
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader className="p-4 pb-3">
-            <CardTitle className="flex items-center justify-between text-base">
+    <div className="flex flex-col space-y-4 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-4">
+      {/* Canvas Area - Full width on mobile, spans 7 columns on desktop */}
+      <div className="lg:col-span-7 order-1">
+        <Card className="h-full">
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm sm:text-base">
               <span>Design Canvas (8.5" × 11")</span>
-              <div className="flex gap-2">
-                <Button onClick={onPreview} variant="outline" size="sm" className="h-8">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button onClick={onPreview} variant="outline" size="sm" className="h-8 flex-1 sm:flex-none">
                   <Eye className="h-3 w-3 mr-1" />
-                  Preview
+                  <span className="hidden xs:inline">Preview</span>
                 </Button>
-                <Button onClick={handleSave} size="sm" className="h-8">
+                <Button onClick={handleSave} size="sm" className="h-8 flex-1 sm:flex-none">
                   <Save className="h-3 w-3 mr-1" />
-                  Save Design
+                  <span className="hidden xs:inline">Save </span>Design
                 </Button>
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0">
+          <CardContent className="p-3 sm:p-4 pt-0">
             <div
               ref={canvasRef}
-              className="relative w-full bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair"
+              className="relative w-full bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair mx-auto"
               style={{
                 aspectRatio: '8.5 / 11', // US Letter paper ratio
+                maxWidth: '100%',
                 backgroundColor,
                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                 backgroundSize: 'cover',
@@ -240,7 +242,8 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                     ...element.style,
                     textShadow: '0 2px 4px rgba(0,0,0,0.3)',
                     padding: '8px',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    fontSize: `clamp(0.75rem, ${element.style.fontSize || '1rem'}, 3rem)` // Responsive text size
                   }}
                   onClick={() => handleElementClick(element.id)}
                 >
@@ -271,7 +274,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               {renderNonDesignableAreas()}
             </div>
             
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-xs text-muted-foreground space-y-1">
               <p>💡 Click on text elements to select and edit them</p>
               <p>📄 Canvas represents standard US Letter size (8.5" × 11")</p>
               {layoutType !== 'full' && (
@@ -282,16 +285,16 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </Card>
       </div>
 
-      {/* Properties Panel */}
-      <div className="space-y-3">
+      {/* Properties Panel - Full width on mobile, spans 3 columns on desktop */}
+      <div className="lg:col-span-3 order-2 space-y-3">
         <Card>
-          <CardHeader className="p-4 pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Type className="h-4 w-4" />
               Slide Properties
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0 space-y-3">
+          <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
             <div className="space-y-1">
               <Label htmlFor="title" className="text-sm">Title</Label>
               <Input
@@ -311,7 +314,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter slide description"
                 rows={2}
-                className="text-sm"
+                className="text-sm resize-none"
               />
             </div>
 
@@ -358,13 +361,13 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </Card>
 
         <Card>
-          <CardHeader className="p-4 pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Palette className="h-4 w-4" />
               Background
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0 space-y-3">
+          <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
             <div className="space-y-1">
               <Label htmlFor="backgroundColor" className="text-sm">Background Color</Label>
               <div className="flex gap-2">
@@ -400,8 +403,8 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         </Card>
       </div>
 
-      {/* Text Tools Panel */}
-      <div>
+      {/* Text Tools Panel - Full width on mobile, spans 2 columns on desktop */}
+      <div className="lg:col-span-2 order-3 lg:order-3">
         <TextToolbar
           selectedElement={selectedElement}
           onUpdateElement={updateTextElement}
