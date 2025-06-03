@@ -14,7 +14,8 @@ import {
   BarChart,
   LayoutDashboard,
   ImageIcon,
-  ShoppingBag
+  ShoppingBag,
+  Layout
 } from "lucide-react";
 
 interface AdminQuickActionsProps {
@@ -30,6 +31,12 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       icon: <LayoutDashboard className="h-4 w-4" />,
       action: () => navigate("/admin"),
       color: "bg-glee-spelman"
+    },
+    {
+      title: "Slide Designer",
+      icon: <Layout className="h-4 w-4" />,
+      action: () => navigate("/admin/slide-design"),
+      color: "bg-purple-500"
     },
     {
       title: "Edit Hero",
