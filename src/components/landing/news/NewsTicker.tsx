@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -139,7 +140,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   const handleNewsClick = (item: NewsItem) => {
-    window.location.href = `/news/${item.id}`;
+    window.open(`/news/${item.id}`, '_blank', 'noopener,noreferrer');
   };
 
   const getAnimationClass = () => {
@@ -155,10 +156,28 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create a single scrolling text string
-  const tickerText = newsItems
-    .map(item => removeIconsFromHeadline(item.headline))
-    .join(' • ');
+  // Create ticker items with clickable headlines
+  const tickerItems = newsItems.map((item, index) => (
+    <span key={`${item.id}-${index}`} className="ticker-item flex items-center">
+      <span 
+        className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
+        title="Click to read more"
+        onClick={() => handleNewsClick(item)}
+      >
+        {removeIconsFromHeadline(item.headline)}
+      </span>
+      {index < newsItems.length - 1 && (
+        <span className="mx-8 flex items-center">
+          <div className="w-2 h-2 bg-red-300 rounded-full animate-pulse"></div>
+          <div className="w-1 h-1 bg-red-200 rounded-full mx-2 opacity-60"></div>
+          <div className="w-2 h-2 bg-red-300 rounded-full animate-pulse"></div>
+        </span>
+      )}
+    </span>
+  ));
+
+  // Repeat the content for seamless scroll
+  const repeatedContent = Array(4).fill(tickerItems).flat();
 
   if (isLoading) {
     return (
@@ -185,13 +204,8 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className={`whitespace-nowrap ${getAnimationClass()}`}>
-            <span 
-              className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
-              title="Click to read more"
-            >
-              {tickerText}
-            </span>
+          <div className={`flex whitespace-nowrap ${getAnimationClass()}`}>
+            {repeatedContent}
           </div>
         </div>
         
