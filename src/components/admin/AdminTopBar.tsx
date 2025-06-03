@@ -37,17 +37,17 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
   };
 
   return (
-    <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 transition-colors duration-200">
-      <div className="flex items-center gap-4">
+    <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 transition-colors duration-200">
+      <div className="flex items-center gap-3">
         {/* Home Button */}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate("/")}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
           title="Go to Public Homepage"
         >
-          <Home className="h-5 w-5" />
+          <Home className="h-4 w-4" />
         </Button>
 
         {isMobile && onMenuClick && (
@@ -55,45 +55,45 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
             variant="ghost"
             size="sm"
             onClick={onMenuClick}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
           >
-            <Menu className="h-7 w-7" />
+            <Menu className="h-5 w-5" />
           </Button>
         )}
         
         <div className="flex items-center gap-2">
-          <Search className="h-5 w-5 text-gray-400" />
+          <Search className="h-4 w-4 text-gray-400" />
           <span className="text-sm text-gray-500 dark:text-gray-400">Search...</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
           aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
         >
-          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </Button>
 
         {/* Notifications */}
         <Button
           variant="ghost"
           size="sm"
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative"
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative h-8 w-8 p-0"
         >
-          <Bell className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
+          <Bell className="h-4 w-4" />
+          <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </Button>
 
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
+            <Button variant="ghost" className="relative h-7 w-7 rounded-full p-0">
+              <Avatar className="h-7 w-7">
                 <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
                 <AvatarFallback className="bg-orange-500 text-white text-xs">
                   {getInitials(profile?.first_name, profile?.last_name)}
