@@ -1,3 +1,4 @@
+
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -229,8 +230,8 @@ p {
   
   /* Main content needs padding to account for sticky header + ticker */
   main {
-    margin-top: 96px !important; /* Height of ticker (40px) + header (~56px) */
-    padding-top: 0 !important;
+    padding-top: 116px !important; /* Height of ticker (40px) + header (~56px) + buffer (20px) */
+    margin-top: 0 !important;
   }
   
   /* Hero sections positioned after the sticky elements */
@@ -242,15 +243,14 @@ p {
     margin-left: 0 !important;
     margin-right: 0 !important;
     margin-bottom: 0 !important;
-    padding: 0 !important;
   }
   
   /* Only non-hero pages get additional padding for sticky elements */
   .page-content:not(.hero-page),
   .main-content:not(.hero-content),
   [class*="content"]:not([class*="hero"]) {
-    padding-top: 16px !important; /* Small padding since main already has margin */
-    min-height: calc(100vh - 96px) !important; /* Adjusted for new margin */
+    padding-top: 16px !important; /* Small padding since main already has padding */
+    min-height: calc(100vh - 116px) !important; /* Adjusted for new padding */
   }
 }
 
