@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,27 @@ export function SlideDesignManager() {
   };
 
   const handleCreateNew = () => {
-    setSelectedTemplate(undefined);
+    // Create a blank template for the editor
+    const blankTemplate: SlideTemplate = {
+      id: 'blank',
+      name: 'Blank Slide',
+      description: 'Start with a completely blank canvas',
+      layout_type: 'full',
+      designable_areas: [{
+        id: 'main',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        constraints: {}
+      }],
+      default_styles: {},
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    setSelectedTemplate(blankTemplate);
     setEditingDesign(undefined);
     setMode('edit');
   };

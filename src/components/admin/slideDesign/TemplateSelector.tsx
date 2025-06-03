@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -124,6 +125,30 @@ export function TemplateSelector({
   onSelectTemplate,
   onCreateNew 
 }: TemplateSelectorProps) {
+  const handleCreateBlank = () => {
+    // Create a blank template object for the editor
+    const blankTemplate: SlideTemplate = {
+      id: 'blank',
+      name: 'Blank Slide',
+      description: 'Start with a completely blank canvas',
+      layout_type: 'full',
+      designable_areas: [{
+        id: 'main',
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+        constraints: {}
+      }],
+      default_styles: {},
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    onSelectTemplate(blankTemplate);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
@@ -133,7 +158,7 @@ export function TemplateSelector({
             Select a layout template to start designing your slide. Gray areas are reserved for other content.
           </p>
         </div>
-        <Button onClick={onCreateNew} variant="outline" className="w-full sm:w-auto">
+        <Button onClick={handleCreateBlank} variant="outline" className="w-full sm:w-auto">
           Create Blank Slide
         </Button>
       </div>
