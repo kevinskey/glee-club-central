@@ -13,7 +13,8 @@ import {
   Image,
   ImageIcon,
   Home,
-  Palette
+  Palette,
+  Presentation
 } from 'lucide-react';
 import { ViewSwitcher } from './ViewSwitcher';
 
@@ -23,6 +24,7 @@ const navItems = [
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/admin/members', icon: Users, label: 'Members' },
   { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
+  { to: '/admin/slide-design', icon: Presentation, label: 'Slide Designer' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },

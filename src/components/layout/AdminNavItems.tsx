@@ -7,7 +7,8 @@ import {
   Settings, 
   ShoppingCart, 
   BarChart3,
-  Palette
+  Palette,
+  Presentation
 } from "lucide-react";
 
 export const adminNavItems = [
@@ -30,6 +31,11 @@ export const adminNavItems = [
     title: "Hero Manager",
     url: "/admin/hero-manager",
     icon: Image,
+  },
+  {
+    title: "Slide Designer",
+    url: "/admin/slide-design",
+    icon: Presentation,
   },
   {
     title: "Media Library",

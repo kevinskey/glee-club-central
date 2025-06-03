@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -25,6 +24,7 @@ import FinancialRecords from '@/pages/admin/FinancialRecords';
 import UserSystemResetPage from '@/pages/admin/UserSystemResetPage';
 import TourMerchPage from '@/pages/admin/TourMerchPage';
 import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
+import SlideDesignPage from '@/pages/admin/SlideDesignPage';
 
 // Events
 import EventsListPage from '@/pages/events/EventsListPage';
@@ -36,6 +36,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/slide-design',
+    element: (
+      <AdminRoute>
+        <SlideDesignPage />
       </AdminRoute>
     ),
   },

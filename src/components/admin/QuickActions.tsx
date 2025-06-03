@@ -8,7 +8,8 @@ import {
   FileText, 
   Music, 
   Upload,
-  Users 
+  Users,
+  Presentation
 } from "lucide-react";
 
 export function QuickActions() {
@@ -26,6 +27,12 @@ export function QuickActions() {
       icon: Calendar,
       action: () => navigate("/admin/calendar"),
       color: "bg-green-500"
+    },
+    {
+      title: "Design Slides",
+      icon: Presentation,
+      action: () => navigate("/admin/slide-design"),
+      color: "bg-orange-500"
     },
     {
       title: "Send Announcement",
