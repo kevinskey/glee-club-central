@@ -91,19 +91,6 @@ export const useAINewsGeneration = () => {
 
       console.log('✅ User authenticated:', session.user.id);
 
-      // Check if we can access the profiles table
-      console.log('🔍 Checking user profile...');
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, role, is_super_admin')
-        .eq('id', session.user.id)
-        .maybeSingle();
-
-      console.log('👤 User profile:', profile);
-      if (profileError) {
-        console.error('❌ Profile error:', profileError);
-      }
-
       const newsItem = {
         headline: content.headline,
         content: content.content,
