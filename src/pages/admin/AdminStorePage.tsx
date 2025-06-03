@@ -35,8 +35,7 @@ export default function AdminStorePage() {
       <AdminLayout>
         <div className="space-y-6">
           <PageHeader
-            title="Store Management"
-            description="Access restricted"
+            title="Store"
             icon={<Lock className="h-6 w-6" />}
           />
           
@@ -58,8 +57,7 @@ export default function AdminStorePage() {
     <AdminLayout>
       <div className="space-y-6">
         <PageHeader
-          title="Store Management"
-          description="Manage products, orders, and store settings"
+          title="Store"
           icon={<ShoppingBag className="h-6 w-6" />}
         />
 
