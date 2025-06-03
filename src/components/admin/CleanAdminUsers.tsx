@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,7 +13,6 @@ import {
   AlertCircle,
   UserPlus
 } from "lucide-react";
-import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
 import { UserListCore } from '@/components/members/UserListCore';
 import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
@@ -21,11 +21,39 @@ import { EditUserDialog } from '@/components/members/EditUserDialog';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const CleanAdminUsers: React.FC = () => {
   console.log('🔧 CleanAdminUsers: Component rendering started');
   
-  const { isAdmin } = useAuthMigration();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check admin status
+  React.useEffect(() => {
+    const checkAdminStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          // Check if user is admin
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_super_admin, role')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          const adminStatus = user.email === 'kevinskey@mac.com' || 
+                             profile?.is_super_admin || 
+                             profile?.role === 'admin';
+          setIsAdmin(adminStatus);
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+    
+    checkAdminStatus();
+  }, []);
+
   const {
     filteredUsers,
     isLoading,
@@ -54,8 +82,6 @@ const CleanAdminUsers: React.FC = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const isAdminUser = isAdmin();
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
     if (key === 'search') return value !== '';
@@ -195,7 +221,7 @@ const CleanAdminUsers: React.FC = () => {
             <>
               <UserListCore
                 users={paginatedUsers}
-                isAdmin={isAdminUser}
+                isAdmin={isAdmin}
                 onEditUser={handleEditUser}
                 onDeleteUser={handleDeleteUser}
               />
