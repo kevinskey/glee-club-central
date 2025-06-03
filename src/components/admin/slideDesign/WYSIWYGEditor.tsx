@@ -9,31 +9,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { SlideTemplate, SlideDesign, TextElement, BackgroundElement } from '@/types/slideDesign';
 import { Type, Palette, Image, Link, Save, Eye } from 'lucide-react';
+import { MediaLibrarySelector } from './MediaLibrarySelector';
 import { toast } from 'sonner';
 
 interface WYSIWYGEditorProps {
-  template: SlideTemplate;
+  template?: SlideTemplate;
   design?: SlideDesign;
   onSave: (designData: Partial<SlideDesign>) => void;
   onPreview: () => void;
 }
 
 export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEditorProps) {
-  const [title, setTitle] = useState(design?.title || '');
+  const [title, setTitle] = useState(design?.title || 'New Slide');
   const [description, setDescription] = useState(design?.description || '');
   const [backgroundColor, setBackgroundColor] = useState(design?.background_color || '#4A90E2');
   const [backgroundImage, setBackgroundImage] = useState(design?.background_image_url || '');
+  const [backgroundMediaId, setBackgroundMediaId] = useState(design?.background_media_id || '');
   const [linkUrl, setLinkUrl] = useState(design?.link_url || '');
-  const [animationDuration, setAnimationDuration] = useState(design?.animation_settings.duration || 5000);
+  const [animationDuration, setAnimationDuration] = useState(design?.animation_settings?.duration || 5000);
+  const [layoutType, setLayoutType] = useState<'full' | 'half_horizontal' | 'half_vertical' | 'quarter'>(
+    design?.layout_type || template?.layout_type || 'full'
+  );
+  
   const [textElements, setTextElements] = useState<TextElement[]>(
-    design?.design_data.textElements || 
-    template.template_data.textAreas.map(area => ({
+    design?.design_data?.textElements || 
+    (template?.template_data?.textAreas || []).map(area => ({
       id: area.id,
       type: area.type,
       text: area.defaultText,
       position: area.position,
       style: area.style
-    }))
+    })) || [
+      {
+        id: 'main-title',
+        type: 'heading' as const,
+        text: 'Your Slide Title',
+        position: { x: 50, y: 40 },
+        style: { fontSize: '2rem', color: '#FFFFFF', fontWeight: 'bold', textAlign: 'center' as const }
+      },
+      {
+        id: 'subtitle',
+        type: 'paragraph' as const,
+        text: 'Your slide description here',
+        position: { x: 50, y: 60 },
+        style: { fontSize: '1.2rem', color: '#FFFFFF', textAlign: 'center' as const }
+      }
+    ]
   );
 
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -44,6 +65,12 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     );
   };
 
+  const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
+    setBackgroundImage(mediaUrl);
+    setBackgroundMediaId(mediaId);
+    toast.success('Background image updated');
+  };
+
   const handleSave = () => {
     if (!title.trim()) {
       toast.error('Please enter a title for your slide');
@@ -51,10 +78,10 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     }
 
     const designData: Partial<SlideDesign> = {
-      template_id: template.id,
+      template_id: template?.id,
       title,
       description,
-      layout_type: template.layout_type,
+      layout_type: layoutType,
       design_data: {
         textElements,
         backgroundElements: [{
@@ -66,9 +93,11 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
       },
       background_color: backgroundColor,
       background_image_url: backgroundImage,
+      background_media_id: backgroundMediaId,
       animation_settings: {
         duration: animationDuration,
-        transition: 'fade'
+        transition: 'fade',
+        autoPlay: true
       },
       link_url: linkUrl,
       is_active: true,
@@ -117,7 +146,8 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                     left: `${element.position.x}%`,
                     top: `${element.position.y}%`,
                     transform: 'translate(-50%, -50%)',
-                    ...element.style
+                    ...element.style,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
                   }}
                 >
                   {element.text}
@@ -126,13 +156,13 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               
               {/* Layout grid overlay */}
               <div className="absolute inset-0 pointer-events-none">
-                {template.layout_type === 'half_horizontal' && (
+                {layoutType === 'half_horizontal' && (
                   <div className="w-full h-full border-r border-white/30" style={{ width: '50%' }} />
                 )}
-                {template.layout_type === 'half_vertical' && (
+                {layoutType === 'half_vertical' && (
                   <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
                 )}
-                {template.layout_type === 'quarter' && (
+                {layoutType === 'quarter' && (
                   <>
                     <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
                     <div className="absolute top-0 h-full border-r border-white/30" style={{ width: '50%' }} />
@@ -173,6 +203,21 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                 placeholder="Enter slide description"
                 rows={3}
               />
+            </div>
+
+            <div>
+              <Label htmlFor="layout">Layout Type</Label>
+              <Select value={layoutType} onValueChange={(value) => setLayoutType(value as any)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full">Full Page</SelectItem>
+                  <SelectItem value="half_horizontal">Split Horizontal</SelectItem>
+                  <SelectItem value="half_vertical">Split Vertical</SelectItem>
+                  <SelectItem value="quarter">Quarter Layout</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -228,13 +273,15 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             </div>
 
             <div>
-              <Label htmlFor="backgroundImage">Background Image URL</Label>
-              <Input
-                id="backgroundImage"
-                value={backgroundImage}
-                onChange={(e) => setBackgroundImage(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
+              <Label>Background Image</Label>
+              <div className="space-y-2">
+                <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
+                <Input
+                  value={backgroundImage}
+                  onChange={(e) => setBackgroundImage(e.target.value)}
+                  placeholder="Or enter image URL directly"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

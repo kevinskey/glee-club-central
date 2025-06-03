@@ -49,7 +49,7 @@ export function SlideDesignManager() {
       setSelectedTemplate(undefined);
       setEditingDesign(undefined);
     } catch (error) {
-      // Error handling is done in the hook
+      console.error('Error saving design:', error);
     }
   };
 
@@ -100,7 +100,7 @@ export function SlideDesignManager() {
             <>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Your Slide Designs</h3>
-                <Button onClick={() => setMode('edit')}>
+                <Button onClick={handleCreateNew}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Slide
                 </Button>
@@ -160,7 +160,7 @@ export function SlideDesignManager() {
                     <p className="text-muted-foreground mb-4">
                       Create your first custom slide design to get started
                     </p>
-                    <Button onClick={() => setMode('edit')}>
+                    <Button onClick={handleCreateNew}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Your First Slide
                     </Button>
@@ -170,16 +170,7 @@ export function SlideDesignManager() {
             </>
           )}
 
-          {mode === 'edit' && !selectedTemplate && (
-            <TemplateSelector
-              templates={templates}
-              selectedTemplate={selectedTemplate}
-              onSelectTemplate={handleSelectTemplate}
-              onCreateNew={handleCreateNew}
-            />
-          )}
-
-          {mode === 'edit' && selectedTemplate && (
+          {mode === 'edit' && (
             <WYSIWYGEditor
               template={selectedTemplate}
               design={editingDesign}
@@ -190,32 +181,12 @@ export function SlideDesignManager() {
         </TabsContent>
 
         <TabsContent value="templates" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map((template) => (
-              <Card key={template.id}>
-                <CardHeader>
-                  <CardTitle className="text-base">{template.name}</CardTitle>
-                  <CardDescription>{template.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Badge variant="secondary" className="mb-2">
-                    {template.layout_type.replace('_', ' ')}
-                  </Badge>
-                  <div className="w-full h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded border mb-4 flex items-center justify-center">
-                    <span className="text-xs text-blue-600">Template Preview</span>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleSelectTemplate(template)}
-                    className="w-full"
-                  >
-                    Use Template
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <TemplateSelector
+            templates={templates}
+            selectedTemplate={selectedTemplate}
+            onSelectTemplate={handleSelectTemplate}
+            onCreateNew={handleCreateNew}
+          />
         </TabsContent>
       </Tabs>
     </div>
