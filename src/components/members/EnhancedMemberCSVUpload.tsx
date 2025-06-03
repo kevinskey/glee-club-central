@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -460,14 +461,14 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
                   <ArrowRight className="h-4 w-4 text-gray-400" />
                   <div className="flex-1">
                     <Select
-                      value={columnMapping[column.header] || ''}
-                      onValueChange={(value) => handleMappingChange(column.header, value || null)}
+                      value={columnMapping[column.header] || 'none'}
+                      onValueChange={(value) => handleMappingChange(column.header, value === 'none' ? null : value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select system field..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Don't map</SelectItem>
+                        <SelectItem value="none">Don't map</SelectItem>
                         {SYSTEM_FIELDS.map((field) => (
                           <SelectItem key={field.key} value={field.key}>
                             {field.label} {field.required && '*'}
