@@ -2,18 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -22,17 +14,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Users, 
-  Search, 
-  Filter, 
   UserPlus, 
   MoreVertical, 
   Mail, 
   Phone,
-  Calendar,
   Music,
-  Settings as SettingsIcon,
-  Download,
-  Upload,
   Edit,
   Trash2,
   AlertCircle,
@@ -44,8 +30,7 @@ import { useUserUpdate } from '@/hooks/user/useUserUpdate';
 import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
 import { EditUserDialog } from './EditUserDialog';
-import { MemberCSVUpload } from './MemberCSVUpload';
-import { MemberCSVDownload } from './MemberCSVDownload';
+import { MemberFiltersAdvanced, MemberFilters } from './MemberFiltersAdvanced';
 import { UserFormValues } from './form/userFormSchema';
 import { useUserCreate } from '@/hooks/user/useUserCreate';
 import { toast } from 'sonner';
@@ -56,9 +41,16 @@ export function MembersPageRefactor() {
   const { addUser } = useUserCreate();
   const { updateUser } = useUserUpdate(refetch);
   
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedVoicePart, setSelectedVoicePart] = useState('all');
-  const [selectedRole, setSelectedRole] = useState('all');
+  const [filters, setFilters] = useState<MemberFilters>({
+    search: '',
+    role: 'all',
+    status: 'all',
+    voicePart: 'all',
+    classYear: 'all',
+    duesPaid: 'all',
+    isAdmin: 'all'
+  });
+  
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -80,16 +72,64 @@ export function MembersPageRefactor() {
     });
   }, [isAuthenticated, authLoading, usersLoading, users.length, error, isAdminUser, users]);
 
+  // Apply filters to users
   const filteredMembers = users.filter(user => {
-    const searchTermLower = searchTerm.toLowerCase();
-    const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-    const matchesSearch = fullName.includes(searchTermLower) || (user.email || '').toLowerCase().includes(searchTermLower);
+    // Search filter
+    if (filters.search) {
+      const searchTermLower = filters.search.toLowerCase();
+      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      const notes = (user.notes || '').toLowerCase();
+      
+      const matchesSearch = fullName.includes(searchTermLower) || 
+                           email.includes(searchTermLower) || 
+                           notes.includes(searchTermLower);
+      
+      if (!matchesSearch) return false;
+    }
 
-    const matchesVoicePart = selectedVoicePart === 'all' || user.voice_part === selectedVoicePart;
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
+    // Role filter
+    if (filters.role !== 'all' && user.role !== filters.role) {
+      return false;
+    }
 
-    return matchesSearch && matchesVoicePart && matchesRole;
+    // Status filter
+    if (filters.status !== 'all' && user.status !== filters.status) {
+      return false;
+    }
+
+    // Voice part filter
+    if (filters.voicePart !== 'all' && user.voice_part !== filters.voicePart) {
+      return false;
+    }
+
+    // Class year filter
+    if (filters.classYear !== 'all' && user.class_year !== filters.classYear) {
+      return false;
+    }
+
+    // Dues paid filter
+    if (filters.duesPaid !== 'all') {
+      const isDuesPaid = user.dues_paid === true;
+      const filterValue = filters.duesPaid === 'true';
+      if (isDuesPaid !== filterValue) return false;
+    }
+
+    // Admin status filter
+    if (filters.isAdmin !== 'all') {
+      const isUserAdmin = user.is_super_admin === true || user.role === 'admin';
+      const filterValue = filters.isAdmin === 'true';
+      if (isUserAdmin !== filterValue) return false;
+    }
+
+    return true;
   });
+
+  // Count active filters
+  const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
+    if (key === 'search') return value !== '';
+    return value !== 'all';
+  }).length;
 
   const handleUserCreated = () => {
     refetch();
@@ -191,7 +231,7 @@ export function MembersPageRefactor() {
         <div>
           <h1 className="text-3xl font-bold">Members</h1>
           <p className="text-muted-foreground">
-            Manage choir members and their information
+            Manage choir members and their information ({users.length} total members)
           </p>
         </div>
         <div className="flex gap-2">
@@ -224,6 +264,13 @@ export function MembersPageRefactor() {
         </Alert>
       )}
 
+      {/* Advanced Filters */}
+      <MemberFiltersAdvanced
+        filters={filters}
+        onFiltersChange={setFilters}
+        activeFilterCount={activeFilterCount}
+      />
+
       {/* Loading State */}
       {usersLoading && (
         <Card>
@@ -241,8 +288,9 @@ export function MembersPageRefactor() {
             <CardTitle className="text-sm">Debug Info</CardTitle>
           </CardHeader>
           <CardContent className="text-xs">
-            <p>Users loaded: {users.length}</p>
+            <p>Total users: {users.length}</p>
             <p>Filtered: {filteredMembers.length}</p>
+            <p>Active filters: {activeFilterCount}</p>
             <p>Auth: {isAuthenticated ? 'Yes' : 'No'}</p>
             <p>Admin: {isAdminUser ? 'Yes' : 'No'}</p>
             <p>Loading: {usersLoading ? 'Yes' : 'No'}</p>
@@ -257,57 +305,16 @@ export function MembersPageRefactor() {
       {/* Main Content */}
       {!usersLoading && (
         <>
-          {/* Search and filter controls */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      placeholder="Search members..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Select value={selectedVoicePart} onValueChange={setSelectedVoicePart}>
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="Voice Part" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Voice Parts</SelectItem>
-                      <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                      <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                      <SelectItem value="alto_1">Alto 1</SelectItem>
-                      <SelectItem value="alto_2">Alto 2</SelectItem>
-                      <SelectItem value="tenor">Tenor</SelectItem>
-                      <SelectItem value="bass">Bass</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedRole} onValueChange={setSelectedRole}>
-                    <SelectTrigger className="w-[120px]">
-                      <SelectValue placeholder="Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Roles</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="member">Member</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" size="sm">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filter
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Results Summary */}
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <p>
+              Showing {filteredMembers.length} of {users.length} members
+              {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+            </p>
+          </div>
 
           {/* Member List */}
-          {filteredMembers.length === 0 && !usersLoading ? (
+          {filteredMembers.length === 0 ? (
             <Card>
               <CardContent className="text-center py-8">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -315,7 +322,9 @@ export function MembersPageRefactor() {
                 <p className="text-muted-foreground mb-4">
                   {users.length === 0 
                     ? 'No members have been added yet.' 
-                    : 'No members match your search criteria.'
+                    : activeFilterCount > 0
+                      ? 'No members match your current filters.'
+                      : 'No members found.'
                   }
                 </p>
                 {isAdminUser && users.length === 0 && (
@@ -378,6 +387,16 @@ export function MembersPageRefactor() {
                         <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
                           {member.status || 'active'}
                         </Badge>
+                        {member.dues_paid && (
+                          <Badge variant="default" className="bg-green-600">
+                            Dues Paid
+                          </Badge>
+                        )}
+                        {member.class_year && (
+                          <Badge variant="outline">
+                            Class {member.class_year}
+                          </Badge>
+                        )}
                         {isAdminUser && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

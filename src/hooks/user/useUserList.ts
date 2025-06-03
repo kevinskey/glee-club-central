@@ -93,7 +93,7 @@ export const useUserList = (): UseUserListResponse => {
         return;
       }
 
-      // Check if current user is admin to determine what data to show
+      // Check if current user is admin
       const currentUserProfile = profiles.find(p => p.id === currentUser.id);
       const isAdmin = currentUser.email === 'kevinskey@mac.com' || 
         currentUserProfile?.is_super_admin || 
@@ -115,14 +115,14 @@ export const useUserList = (): UseUserListResponse => {
           const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
           
           if (authError || !authData?.users) {
-            console.warn('Could not fetch auth users, showing profiles with current user email:', authError);
-            // Fallback: show all profiles, but only show email for current user
+            console.warn('Could not fetch auth users, showing all profiles with limited email access:', authError);
+            // Show all profiles with email access limited to current user
             usersWithEmails = profiles.map(profile => ({
               ...profile,
               email: profile.id === currentUser.id ? currentUser.email || '' : 'Email access limited'
             }));
           } else {
-            // Success: map emails from auth data
+            // Success: map emails from auth data to all profiles
             const emailMap = new Map<string, string>();
             authData.users.forEach((user: any) => {
               emailMap.set(user.id, user.email || '');
