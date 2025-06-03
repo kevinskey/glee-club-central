@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,6 +61,8 @@ export function TopSliderManager() {
 
   const fetchItems = async () => {
     try {
+      console.log('🔍 TopSliderManager: Fetching slider items...');
+      
       const { data, error } = await supabase
         .from('top_slider_items')
         .select(`
@@ -74,11 +75,15 @@ export function TopSliderManager() {
         `)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ TopSliderManager: Database error:', error);
+        throw error;
+      }
 
+      console.log('📊 TopSliderManager: Fetched items:', data);
       setItems(data || []);
     } catch (error) {
-      console.error('Error fetching top slider items:', error);
+      console.error('💥 TopSliderManager: Error fetching top slider items:', error);
       toast.error('Failed to load slider items');
     } finally {
       setIsLoading(false);
@@ -86,6 +91,7 @@ export function TopSliderManager() {
   };
 
   useEffect(() => {
+    console.log('🚀 TopSliderManager: Component mounted');
     fetchItems();
   }, []);
 
@@ -143,6 +149,8 @@ export function TopSliderManager() {
     }
 
     try {
+      console.log('💾 TopSliderManager: Saving slider item...', { formData, backgroundType });
+      
       // Prepare data based on background type
       const dataToSave = {
         title: formData.title,
@@ -156,6 +164,8 @@ export function TopSliderManager() {
         media_id: backgroundType === 'media' ? formData.media_id : null
       };
 
+      console.log('📋 TopSliderManager: Data to save:', dataToSave);
+
       if (editingItem) {
         // Update existing item
         const { error } = await supabase
@@ -163,19 +173,31 @@ export function TopSliderManager() {
           .update(dataToSave)
           .eq('id', editingItem.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ TopSliderManager: Update error:', error);
+          throw error;
+        }
+        console.log('✅ TopSliderManager: Item updated successfully');
         toast.success('Slider item updated successfully');
       } else {
         // Create new item
         const maxOrder = Math.max(...items.map(item => item.display_order), -1);
+        const newItemData = {
+          ...dataToSave,
+          display_order: maxOrder + 1
+        };
+        
+        console.log('🆕 TopSliderManager: Creating new item:', newItemData);
+        
         const { error } = await supabase
           .from('top_slider_items')
-          .insert({
-            ...dataToSave,
-            display_order: maxOrder + 1
-          });
+          .insert(newItemData);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ TopSliderManager: Insert error:', error);
+          throw error;
+        }
+        console.log('✅ TopSliderManager: Item created successfully');
         toast.success('Slider item created successfully');
       }
 
@@ -183,12 +205,13 @@ export function TopSliderManager() {
       resetForm();
       fetchItems();
     } catch (error) {
-      console.error('Error saving slider item:', error);
+      console.error('💥 TopSliderManager: Error saving slider item:', error);
       toast.error('Failed to save slider item');
     }
   };
 
   const handleMediaSelect = (mediaFile: any) => {
+    console.log('📁 TopSliderManager: Media selected:', mediaFile);
     setFormData({ ...formData, media_id: mediaFile.id });
     setMediaPickerOpen(false);
   };

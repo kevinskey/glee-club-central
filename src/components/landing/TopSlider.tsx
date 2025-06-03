@@ -54,6 +54,8 @@ export function TopSlider({
 
   const fetchSlides = async () => {
     try {
+      console.log('🔍 TopSlider: Starting to fetch slides...');
+      
       const { data, error } = await supabase
         .from('top_slider_items')
         .select(`
@@ -67,24 +69,39 @@ export function TopSlider({
         .eq('visible', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ TopSlider: Error fetching slides:', error);
+        throw error;
+      }
+
+      console.log('📊 TopSlider: Raw data from database:', data);
 
       // Process slides to include media library images
-      const processedSlides = data?.map(slide => ({
-        ...slide,
-        // Use media library image if available, otherwise use direct image_url
-        computed_image_url: slide.media_library?.file_url || slide.image_url
-      })) || [];
+      const processedSlides = data?.map(slide => {
+        const computed_image_url = slide.media_library?.file_url || slide.image_url;
+        console.log(`🖼️ TopSlider: Processing slide "${slide.title}":`, {
+          media_library: slide.media_library,
+          image_url: slide.image_url,
+          computed_image_url
+        });
+        
+        return {
+          ...slide,
+          computed_image_url
+        };
+      }) || [];
 
+      console.log('✅ TopSlider: Processed slides:', processedSlides);
       setSlides(processedSlides);
     } catch (error) {
-      console.error('Error fetching top slider items:', error);
+      console.error('💥 TopSlider: Error in fetchSlides:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log('🚀 TopSlider: Component mounted, fetching slides...');
     fetchSlides();
   }, []);
 
@@ -110,6 +127,7 @@ export function TopSlider({
   const handleMouseLeave = () => setIsPlaying(autoPlay);
 
   if (isLoading) {
+    console.log('⏳ TopSlider: Still loading...');
     return (
       <div 
         className={cn("w-full bg-gradient-to-r from-blue-500 to-purple-600", className)}
@@ -123,11 +141,21 @@ export function TopSlider({
   }
 
   if (!slides || slides.length === 0) {
+    console.log('📭 TopSlider: No slides to display');
     return null; // Don't render anything if no slides
   }
 
+  console.log(`🎬 TopSlider: Rendering slider with ${slides.length} slides, current: ${currentSlide}`);
+
   const currentSlideData = slides[currentSlide];
   const youtubeVideoId = currentSlideData.youtube_url ? getYouTubeVideoId(currentSlideData.youtube_url) : null;
+
+  console.log('🎯 TopSlider: Current slide data:', {
+    title: currentSlideData.title,
+    youtube_url: currentSlideData.youtube_url,
+    youtubeVideoId,
+    computed_image_url: currentSlideData.computed_image_url
+  });
 
   return (
     <div 
