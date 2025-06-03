@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -37,14 +38,14 @@ const navigationGroups = [
     items: [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
       { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
-      { to: '/admin/media', icon: Image, label: 'Media Library' },
-      { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+      { to: '/admin/media-library', icon: Image, label: 'Media Library' },
+      { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
     ]
   },
   {
     label: 'Management',
     items: [
-      { to: '/admin/members', icon: Users, label: 'Members' },
+      { to: '/admin/users', icon: Users, label: 'Users' },
       { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
       { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
     ]
