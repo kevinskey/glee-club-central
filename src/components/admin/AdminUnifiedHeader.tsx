@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { AdminTopBar } from './AdminTopBar';
-import { AdminTopNavigation } from './AdminTopNavigation';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 export const AdminUnifiedHeader: React.FC = () => {
@@ -10,7 +9,6 @@ export const AdminUnifiedHeader: React.FC = () => {
   return (
     <div className="admin-header">
       <AdminTopBar isMobile={isMobile} />
-      {!isMobile && <AdminTopNavigation />}
     </div>
   );
 };
