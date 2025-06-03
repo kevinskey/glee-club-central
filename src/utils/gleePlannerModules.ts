@@ -1,17 +1,9 @@
 
-export const EVENT_TYPES = [
-  { value: 'concert', label: 'Concert/Performance' },
-  { value: 'rehearsal', label: 'Rehearsal' },
-  { value: 'audition', label: 'Audition' },
-  { value: 'workshop', label: 'Workshop/Masterclass' },
-  { value: 'tour', label: 'Tour Event' },
-  { value: 'fundraiser', label: 'Fundraiser' },
-  { value: 'social', label: 'Social Event' },
-  { value: 'meeting', label: 'Meeting' },
-  { value: 'outreach', label: 'Community Outreach' },
-  { value: 'competition', label: 'Competition' },
-] as const;
+// Import the shared event types
+import { EVENT_TYPES as SHARED_EVENT_TYPES } from './eventTypes';
 
+// Re-export for consistency
+export const EVENT_TYPES = SHARED_EVENT_TYPES;
 export type EventType = typeof EVENT_TYPES[number]['value'];
 
 export interface PlannerModule {
@@ -88,6 +80,29 @@ export const SPECIALIZED_MODULES: Record<EventType, PlannerModule[]> = {
       required: false,
     },
   ],
+  performance: [
+    {
+      id: 'repertoire',
+      title: 'Performance Music',
+      description: 'Song selections, sheet music, and performance order',
+      icon: 'Music',
+      required: true,
+    },
+    {
+      id: 'wardrobe',
+      title: 'Wardrobe & Styling',
+      description: 'Performance attire and appearance guidelines',
+      icon: 'Shirt',
+      required: true,
+    },
+    {
+      id: 'technical',
+      title: 'Technical Requirements',
+      description: 'Sound, lighting, and stage requirements',
+      icon: 'Settings',
+      required: false,
+    },
+  ],
   rehearsal: [
     {
       id: 'repertoire',
@@ -153,6 +168,29 @@ export const SPECIALIZED_MODULES: Record<EventType, PlannerModule[]> = {
       id: 'facilitator',
       title: 'Facilitator Information',
       description: 'Workshop leader details and bio',
+      icon: 'User',
+      required: true,
+    },
+  ],
+  masterclass: [
+    {
+      id: 'curriculum',
+      title: 'Masterclass Curriculum',
+      description: 'Learning objectives and session content',
+      icon: 'BookOpen',
+      required: true,
+    },
+    {
+      id: 'materials',
+      title: 'Materials & Resources',
+      description: 'Handouts, recordings, and required materials',
+      icon: 'Package',
+      required: false,
+    },
+    {
+      id: 'facilitator',
+      title: 'Master Teacher Information',
+      description: 'Master teacher details and bio',
       icon: 'User',
       required: true,
     },
@@ -281,8 +319,36 @@ export const SPECIALIZED_MODULES: Record<EventType, PlannerModule[]> = {
       required: false,
     },
   ],
+  // Additional event types with basic modules
+  event: [
+    {
+      id: 'details',
+      title: 'Event Details',
+      description: 'Additional event information and requirements',
+      icon: 'FileText',
+      required: false,
+    },
+  ],
+  holiday: [
+    {
+      id: 'celebration',
+      title: 'Celebration Activities',
+      description: 'Holiday-specific activities and traditions',
+      icon: 'Gift',
+      required: false,
+    },
+  ],
+  academic: [
+    {
+      id: 'academic-info',
+      title: 'Academic Information',
+      description: 'Academic calendar details and requirements',
+      icon: 'BookOpen',
+      required: false,
+    },
+  ],
 };
 
 export const getModulesForEventType = (eventType: EventType): PlannerModule[] => {
-  return [...CORE_MODULES, ...SPECIALIZED_MODULES[eventType]];
+  return [...CORE_MODULES, ...(SPECIALIZED_MODULES[eventType] || [])];
 };
