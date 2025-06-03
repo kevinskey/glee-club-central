@@ -4,7 +4,6 @@ import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { Header } from "@/components/landing/Header";
-import { HeroSection } from "@/components/landing/HeroSection";
 import { migrateHeroImages } from "@/utils/heroMigration";
 
 const HomePage = () => {
@@ -36,7 +35,6 @@ const HomePage = () => {
   return (
     <div className="min-h-screen overflow-x-hidden m-0 p-0">
       <Header />
-      <HeroSection />
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
