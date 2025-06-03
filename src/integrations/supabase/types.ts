@@ -2147,6 +2147,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      current_user_is_super_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       get_all_users: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2227,10 +2231,6 @@ export type Database = {
         Returns: boolean
       }
       is_admin_by_email_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_admin_email: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
