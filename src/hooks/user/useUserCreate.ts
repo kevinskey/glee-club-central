@@ -41,8 +41,8 @@ export const useUserCreate = (
         console.log('Normalized email:', normalizedEmail);
         
         // Check if user already exists in auth.users by email
-        const { data: existingUser } = await supabase.auth.admin.listUsers();
-        const emailExists = existingUser.users?.some(user => user.email === normalizedEmail);
+        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        const emailExists = existingUsers.users?.some((user: any) => user.email === normalizedEmail);
         
         if (emailExists) {
           console.error('User with this email already exists in auth');
@@ -75,7 +75,7 @@ export const useUserCreate = (
               first_name: userData.first_name,
               last_name: userData.last_name,
               role: isAdmin ? 'admin' : 'member',
-              email: normalizedEmail // Include in metadata too
+              email: normalizedEmail
             }
           }
         });
@@ -150,7 +150,7 @@ export const useUserCreate = (
         if (setUsers) {
           const newUser: User = {
             id: authData.user.id,
-            email: normalizedEmail, // Use normalized email
+            email: normalizedEmail,
             first_name: userData.first_name,
             last_name: userData.last_name,
             phone: userData.phone || null,
