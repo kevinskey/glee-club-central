@@ -10,13 +10,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { EventTypeDropdown } from '@/components/calendar/EventTypeDropdown';
 import { EventAssignmentManager } from './EventAssignmentManager';
 import { EventImageUpload } from './EventImageUpload';
 import { PerformerSelector } from './PerformerSelector';
-import { X, Calendar, Clock, MapPin, Users, Music } from 'lucide-react';
+import { EVENT_TYPES, getEventTypeLabel } from '@/utils/eventTypes';
+import { X, Calendar, Clock, MapPin, Users, Music, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
@@ -131,8 +138,25 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleEventTypesChange = (eventId: string, newTypes: string[]) => {
-    setFormData(prev => ({ ...prev, event_types: newTypes }));
+  const handleEventTypeToggle = (typeValue: string, checked: boolean) => {
+    setFormData(prev => {
+      let newTypes: string[];
+      
+      if (checked) {
+        // Add the type if it's not already present
+        newTypes = [...prev.event_types, typeValue];
+      } else {
+        // Remove the type
+        newTypes = prev.event_types.filter(type => type !== typeValue);
+      }
+      
+      // Ensure at least one type is selected
+      if (newTypes.length === 0) {
+        newTypes = ['event']; // Default to 'event' type
+      }
+      
+      return { ...prev, event_types: newTypes };
+    });
   };
 
   const handleImageChange = (imageUrl: string) => {
@@ -237,33 +261,48 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <div>
                 <Label htmlFor="event_types">Event Types</Label>
                 <div className="mt-2">
-                  <EventTypeDropdown
-                    event={event || { 
-                      id: 'temp',
-                      title: formData.title,
-                      event_types: formData.event_types,
-                      start_time: formData.start_time,
-                      end_time: formData.end_time,
-                      is_private: formData.is_private,
-                      is_public: formData.is_public,
-                      allow_rsvp: formData.allow_rsvp,
-                      allow_reminders: formData.allow_reminders,
-                      allow_ics_download: formData.allow_ics_download,
-                      allow_google_map_link: formData.allow_google_map_link,
-                      created_at: new Date().toISOString()
-                    }}
-                    onEventTypesChange={handleEventTypesChange}
-                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="flex flex-wrap gap-1 cursor-pointer min-h-[40px] border rounded-md p-2 hover:bg-gray-50">
+                        {formData.event_types.length > 0 ? (
+                          formData.event_types.map((type, index) => (
+                            <Badge
+                              key={type}
+                              variant="outline"
+                              className="text-xs flex items-center gap-1"
+                            >
+                              {getEventTypeLabel(type)}
+                              {index === formData.event_types.length - 1 && (
+                                <ChevronDown className="h-3 w-3" />
+                              )}
+                            </Badge>
+                          ))
+                        ) : (
+                          <div className="flex items-center justify-between w-full text-sm text-gray-500">
+                            Select event types...
+                            <ChevronDown className="h-4 w-4" />
+                          </div>
+                        )}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 max-h-96 overflow-y-auto bg-white z-50" align="start">
+                      <div className="p-2 text-sm font-medium text-muted-foreground">
+                        Select Event Types
+                      </div>
+                      <DropdownMenuSeparator />
+                      {EVENT_TYPES.map((eventType) => (
+                        <DropdownMenuCheckboxItem
+                          key={eventType.value}
+                          checked={formData.event_types.includes(eventType.value)}
+                          onCheckedChange={(checked) => handleEventTypeToggle(eventType.value, checked)}
+                          className="text-sm"
+                        >
+                          {eventType.label}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                {formData.event_types.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {formData.event_types.map(type => (
-                      <Badge key={type} variant="secondary" className="text-xs">
-                        {type.replace('_', ' ')}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div>
