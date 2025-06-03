@@ -29,6 +29,7 @@ import {
   Sun,
   Moon,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -98,95 +99,37 @@ export const AdminUnifiedHeader: React.FC = () => {
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
-      {/* Top bar with branding and user actions */}
+      {/* Single unified header bar */}
       <div className="h-16 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/")}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            title="Go to Public Homepage"
-          >
-            <Home className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Admin Panel
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Search */}
-          <div className="hidden md:flex items-center gap-2">
-            <Search className="h-5 w-5 text-gray-400" />
-            <span className="text-sm text-gray-500 dark:text-gray-400">Search...</span>
+        {/* Left side - Logo and Navigation */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Go to Public Homepage"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Admin Panel
+            </h1>
           </div>
 
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-          >
-            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-          </Button>
-
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full text-xs"></span>
-          </Button>
-
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
-                  <AvatarFallback className="bg-orange-500 text-white text-xs">
-                    {getInitials(profile?.first_name, profile?.last_name)}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium leading-none">
-                  {profile?.first_name} {profile?.last_name}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      {/* Navigation bar */}
-      <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-        <div className="flex items-center justify-between">
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Desktop Navigation - moved to left */}
+          <div className="hidden lg:flex items-center space-x-1">
             {navigationGroups.map((group) => (
               <DropdownMenu key={group.label}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
+                    size="sm"
                     className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     {group.label}
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
@@ -211,9 +154,79 @@ export const AdminUnifiedHeader: React.FC = () => {
               </DropdownMenu>
             ))}
           </div>
+        </div>
+
+        {/* Right side - Actions and User Menu */}
+        <div className="flex items-center gap-3">
+          {/* Search - hidden on smaller screens */}
+          <div className="hidden xl:flex items-center gap-2">
+            <Search className="h-4 w-4 text-gray-400" />
+            <span className="text-sm text-gray-500 dark:text-gray-400">Search...</span>
+          </div>
+
+          {/* Notifications */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full text-xs"></span>
+          </Button>
+
+          {/* Theme Toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+          >
+            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </Button>
+
+          {/* Quick Logout Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+            title="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+
+          {/* User Avatar */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
+                  <AvatarFallback className="bg-orange-500 text-white text-xs">
+                    {getInitials(profile?.first_name, profile?.last_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium leading-none">
+                  {profile?.first_name} {profile?.last_name}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
