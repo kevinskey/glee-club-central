@@ -12,7 +12,8 @@ import {
   Music,
   Bell,
   BarChart,
-  LayoutDashboard
+  LayoutDashboard,
+  ImageIcon
 } from "lucide-react";
 
 interface AdminQuickActionsProps {
@@ -28,6 +29,12 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
       icon: <LayoutDashboard className="h-4 w-4" />,
       action: () => navigate("/admin"),
       color: "bg-glee-spelman"
+    },
+    {
+      title: "Edit Hero",
+      icon: <ImageIcon className="h-4 w-4" />,
+      action: () => navigate("/admin/hero-manager"),
+      color: "bg-purple-500"
     },
     {
       title: "Add Member",
