@@ -12,7 +12,9 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AdminLayout>
-      {isMobile ? <MobileAdminDashboard /> : <AdminDashboardContent />}
+      <div className="w-full max-w-full overflow-x-hidden">
+        {isMobile ? <MobileAdminDashboard /> : <AdminDashboardContent />}
+      </div>
     </AdminLayout>
   );
 };

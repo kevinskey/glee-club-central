@@ -59,9 +59,9 @@ export function MobileAdminDashboard() {
     },
     {
       title: 'Music',
-      description: 'Sheet music',
+      description: 'SoundCloud',
       icon: Music,
-      path: '/admin/media-library',
+      path: '/admin/soundcloud',
       color: 'bg-indigo-500'
     },
     {
@@ -111,9 +111,9 @@ export function MobileAdminDashboard() {
   ];
 
   return (
-    <div className="dashboard-mobile-container p-4 space-y-6">
+    <div className="w-full max-w-full p-4 space-y-6 overflow-x-hidden">
       {/* Header */}
-      <div className="dashboard-mobile-section">
+      <div className="w-full">
         <h1 className="text-2xl font-bold text-foreground mb-2">
           Admin Dashboard
         </h1>
@@ -123,28 +123,30 @@ export function MobileAdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="dashboard-mobile-section">
-        <div className="dashboard-mobile-stats grid grid-cols-2 gap-4">
+      <div className="w-full">
+        <div className="grid grid-cols-2 gap-3 w-full">
           {stats.map((stat, index) => (
-            <div key={index} className="dashboard-mobile-stat-card bg-card border rounded-lg p-4 text-center">
-              <stat.icon className="h-6 w-6 mx-auto mb-2 text-primary" />
-              <div className="dashboard-mobile-stat-value text-2xl font-bold text-primary">{stat.value}</div>
-              <div className="dashboard-mobile-stat-label text-xs text-muted-foreground">{stat.label}</div>
-            </div>
+            <Card key={index} className="w-full">
+              <CardContent className="p-4 text-center">
+                <stat.icon className="h-6 w-6 mx-auto mb-2 text-primary" />
+                <div className="text-xl font-bold text-primary">{stat.value}</div>
+                <div className="text-xs text-muted-foreground">{stat.label}</div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="dashboard-mobile-section">
+      <div className="w-full">
         <h2 className="text-lg font-semibold text-foreground mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 w-full">
           {quickActions.map((action, index) => (
             <Card 
               key={index}
-              className="dashboard-mobile-card cursor-pointer hover:shadow-md transition-shadow border"
+              className="w-full cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(action.path)}
             >
               <CardContent className="p-4 text-center">
@@ -164,15 +166,15 @@ export function MobileAdminDashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="dashboard-mobile-section">
-        <Card className="dashboard-mobile-card border">
+      <div className="w-full">
+        <Card className="w-full">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     New member registered
@@ -182,8 +184,8 @@ export function MobileAdminDashboard() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     Media file uploaded
@@ -193,8 +195,8 @@ export function MobileAdminDashboard() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">
                     Event created
