@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -96,32 +97,32 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     };
   }, []);
 
-  // Static fallback news items with space after icons
+  // Static fallback news items without icons
   const getStaticNewsItems = (): NewsItem[] => [
     {
       id: "static-1",
-      headline: "🎵 Spelman College Glee Club announces Spring Concert series",
+      headline: "Spelman College Glee Club announces Spring Concert series",
       active: true,
       content: "The Spelman College Glee Club is proud to announce our Spring Concert series, featuring performances across Atlanta throughout April and May.",
       date: "May 1, 2025"
     },
     {
       id: "static-2", 
-      headline: "🏛️ HBCU Choir Festival featuring top collegiate ensembles",
+      headline: "HBCU Choir Festival featuring top collegiate ensembles",
       active: true,
       content: "Spelman College Glee Club will be participating in the annual HBCU Choir Festival this June, joining forces with top collegiate ensembles from across the country.",
       date: "May 5, 2025"
     },
     {
       id: "static-3",
-      headline: "🎓 New scholarship opportunities available for music students",
+      headline: "New scholarship opportunities available for music students",
       active: true,
       content: "We're pleased to announce several new scholarship opportunities for exceptional music students at Spelman College.",
       date: "May 8, 2025"
     },
     {
       id: "static-4",
-      headline: "📰 Glee Club wins national recognition for excellence in choral music",
+      headline: "Glee Club wins national recognition for excellence in choral music",
       active: true,
       content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition.",
       date: "May 12, 2025"
@@ -157,14 +158,14 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  // Function to add space after icons
-  const formatHeadlineWithSpacedIcons = (headline: string) => {
-    // Add space after emojis/icons (Unicode ranges for various emoji)
-    return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '$1 ');
+  // Function to remove icons/emojis from headlines
+  const removeIconsFromHeadline = (headline: string) => {
+    // Remove emojis/icons (Unicode ranges for various emoji)
+    return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create seamless infinite scroll by repeating content multiple times with 8 blank characters spacing
-  const newsContent = newsItems.map(item => formatHeadlineWithSpacedIcons(item.headline)).join('        '); // 8 spaces
+  // Create seamless infinite scroll by repeating content multiple times with 8 spaces spacing
+  const newsContent = newsItems.map(item => removeIconsFromHeadline(item.headline)).join('        '); // 8 spaces
   // Repeat the content multiple times to ensure seamless infinite scroll
   const repeatedContent = Array(6).fill(newsContent).join('        '); // 8 spaces between repeats
 
@@ -226,3 +227,4 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     </div>
   );
 };
+
