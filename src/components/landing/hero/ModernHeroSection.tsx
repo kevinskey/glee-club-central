@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -243,7 +244,7 @@ export function ModernHeroSection({
         <video
           key={currentMedia.id}
           src={currentMedia.file_url}
-          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
+          className={cn("absolute inset-0 w-full h-full object-contain", getAnimationClass())}
           autoPlay
           muted
           loop
@@ -258,7 +259,7 @@ export function ModernHeroSection({
           key={currentMedia.id}
           src={currentMedia.file_url}
           alt={currentMedia.title}
-          className={cn("absolute inset-0 w-full h-full object-cover", getAnimationClass())}
+          className={cn("absolute inset-0 w-full h-full object-contain", getAnimationClass())}
           onError={(e) => {
             console.error('🎭 Hero: Image load error:', e);
             console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
