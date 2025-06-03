@@ -44,48 +44,54 @@ export function useSimpleHero(sectionId: string = 'homepage-main') {
         return;
       }
 
-      console.log('🎯 SimpleHero: Raw slides data:', slidesData);
+      console.log('🎯 SimpleHero: Found slides:', slidesData);
 
       // Transform slides to SimpleHeroSlide format
-      const transformedSlides: SimpleHeroSlide[] = await Promise.all(
-        slidesData.map(async (slide) => {
-          let imageUrl: string | undefined = undefined;
+      const transformedSlides: SimpleHeroSlide[] = [];
 
-          // If slide has media_id, try to fetch the media file
-          if (slide.media_id) {
-            console.log('🎯 SimpleHero: Fetching media for slide:', slide.title, 'media_id:', slide.media_id);
-            
+      for (const slide of slidesData) {
+        let imageUrl: string | undefined = undefined;
+
+        // If slide has media_id, try to fetch the media file
+        if (slide.media_id) {
+          console.log('🎯 SimpleHero: Checking media for slide:', slide.title, 'media_id:', slide.media_id);
+          
+          try {
             const { data: mediaFile, error: mediaError } = await supabase
               .from('media_library')
               .select('file_url')
               .eq('id', slide.media_id)
               .eq('is_public', true)
-              .single();
+              .maybeSingle();
 
             if (mediaError) {
               console.warn('🎯 SimpleHero: Media fetch error for slide:', slide.title, mediaError);
             } else if (mediaFile?.file_url) {
               imageUrl = mediaFile.file_url;
-              console.log('🎯 SimpleHero: Found media URL:', imageUrl);
+              console.log('🎯 SimpleHero: ✅ Found media URL for slide:', slide.title);
             } else {
-              console.warn('🎯 SimpleHero: No media URL found for slide:', slide.title);
+              console.log('🎯 SimpleHero: ⚠️ No media found for slide:', slide.title, '- will use gradient');
             }
+          } catch (err) {
+            console.warn('🎯 SimpleHero: Exception fetching media for slide:', slide.title, err);
           }
+        } else {
+          console.log('🎯 SimpleHero: No media_id for slide:', slide.title, '- will use gradient');
+        }
 
-          return {
-            id: slide.id,
-            title: slide.title || 'Spelman College Glee Club',
-            description: slide.description || 'A distinguished ensemble with a rich heritage of musical excellence',
-            imageUrl,
-            buttonText: slide.button_text || undefined,
-            buttonLink: slide.button_link || undefined,
-            textPosition: (slide.text_position || 'center') as 'top' | 'center' | 'bottom',
-            textAlignment: (slide.text_alignment || 'center') as 'left' | 'center' | 'right'
-          };
-        })
-      );
+        transformedSlides.push({
+          id: slide.id,
+          title: slide.title || 'Spelman College Glee Club',
+          description: slide.description || 'A distinguished ensemble with a rich heritage of musical excellence',
+          imageUrl,
+          buttonText: slide.button_text || undefined,
+          buttonLink: slide.button_link || undefined,
+          textPosition: (slide.text_position || 'center') as 'top' | 'center' | 'bottom',
+          textAlignment: (slide.text_alignment || 'center') as 'left' | 'center' | 'right'
+        });
+      }
 
-      console.log('🎯 SimpleHero: Transformed slides:', transformedSlides);
+      console.log('🎯 SimpleHero: Final transformed slides:', transformedSlides);
       setSlides(transformedSlides);
 
     } catch (error) {

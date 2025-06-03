@@ -167,7 +167,7 @@ export function SimpleHero({
             alt={slide.title}
             className="w-full h-full object-cover"
             onError={(e) => {
-              console.log('Image failed to load:', slide.imageUrl);
+              console.log('🎯 SimpleHero: Image failed to load:', slide.imageUrl);
               (e.target as HTMLElement).style.display = 'none';
             }}
           />
