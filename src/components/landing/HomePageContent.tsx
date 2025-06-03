@@ -1,8 +1,7 @@
-
 import React from "react";
-import { EventsSection } from "./EventsSection";
-import { StoreSection } from "./StoreSection";
-import { AudioSection } from "./AudioSection";
+import { EventsSection } from "./sections/EventsSection";
+import { StoreSection } from "./sections/StoreSection";
+import { AudioSection } from "./sections/AudioSection";
 
 interface Event {
   id: string;
