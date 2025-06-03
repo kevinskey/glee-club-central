@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MediaType } from "@/utils/mediaUtils";
 import { removeMediaFromHeroSlides } from "@/utils/heroMediaSync";
+import { getMediaType } from "@/utils/mediaUtils";
 
 export function useMediaLibrary() {
   const [loading, setLoading] = useState(true);
@@ -48,8 +49,12 @@ export function useMediaLibrary() {
         setFilteredMediaFiles(data);
         setTotalCount(data.length);
         
-        // Extract and set media types and categories
-        const types = [...new Set(data.map(file => file.file_type.split('/')[0]))];
+        // Extract and set media types and categories with better PDF handling
+        const types = [...new Set(data.map(file => {
+          const mediaType = getMediaType(file.file_type);
+          console.log(`File: ${file.title}, Type: ${file.file_type}, Detected: ${mediaType}`);
+          return mediaType;
+        }))];
         setMediaTypes(types);
         
         const cats = [...new Set(data.filter(file => file.category).map(file => file.category || ""))];
@@ -60,7 +65,7 @@ export function useMediaLibrary() {
           totalFiles: data.length,
           totalSize: data.reduce((sum, file) => sum + (file.size || 0), 0),
           filesByType: data.reduce((acc, file) => {
-            const type = file.file_type.split('/')[0];
+            const type = getMediaType(file.file_type);
             acc[type] = (acc[type] || 0) + 1;
             return acc;
           }, {} as Record<string, number>)
@@ -89,9 +94,14 @@ export function useMediaLibrary() {
       );
     }
     
-    // Filter by media type
+    // Filter by media type - improved PDF filtering
     if (selectedMediaType !== "all") {
-      results = results.filter(file => file.file_type.startsWith(selectedMediaType));
+      console.log(`Filtering by media type: ${selectedMediaType}`);
+      results = results.filter(file => {
+        const detectedType = getMediaType(file.file_type);
+        console.log(`File ${file.title}: detected=${detectedType}, selected=${selectedMediaType}, match=${detectedType === selectedMediaType}`);
+        return detectedType === selectedMediaType;
+      });
     }
     
     // Filter by category
@@ -106,6 +116,7 @@ export function useMediaLibrary() {
       return dateFilter === "newest" ? dateB - dateA : dateA - dateB;
     });
     
+    console.log(`Filtered results: ${results.length} files`);
     setFilteredMediaFiles(results);
   };
 
