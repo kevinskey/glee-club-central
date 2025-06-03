@@ -4,13 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 
 // Type definitions for reusability
-interface HeroImage {
-  id: string;
-  url: string;
-  title?: string;
-  alt?: string;
-}
-
 interface Event {
   id: string;
   title: string;
@@ -40,7 +33,6 @@ interface AudioTrack {
 }
 
 export const useHomePageData = () => {
-  const [heroImages, setHeroImages] = useState<HeroImage[]>([]);
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,53 +51,6 @@ export const useHomePageData = () => {
       imageUrl: event.feature_image_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
       isPublic: event.is_public
     }));
-
-  // Data fetching functions
-  const fetchHeroImages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('media_library')
-        .select('id, title, file_url')
-        .eq('is_hero', true)
-        .eq('hero_tag', 'main-hero')
-        .eq('is_public', true)
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching hero images:', error);
-        throw error;
-      }
-
-      const formattedImages: HeroImage[] = data?.map(item => ({
-        id: item.id,
-        url: item.file_url,
-        title: item.title,
-        alt: item.title
-      })) || [];
-
-      if (formattedImages.length === 0) {
-        // Fallback to placeholder images if none found
-        const fallbackImages: HeroImage[] = [{
-          id: "fallback-1",
-          url: "https://images.unsplash.com/photo-1493836434471-b9d2aa522a8e?w=1200&h=600&fit=crop",
-          title: "Spelman College Glee Club",
-          alt: "Glee Club Performance"
-        }];
-        setHeroImages(fallbackImages);
-      } else {
-        setHeroImages(formattedImages);
-      }
-    } catch (error) {
-      console.error('Error fetching hero images:', error);
-      // Always provide fallback
-      setHeroImages([{
-        id: "fallback-1",
-        url: "https://images.unsplash.com/photo-1493836434471-b9d2aa522a8e?w=1200&h=600&fit=crop",
-        title: "Spelman College Glee Club",
-        alt: "Glee Club Performance"
-      }]);
-    }
-  };
 
   const fetchStoreProducts = async () => {
     try {
@@ -211,7 +156,6 @@ export const useHomePageData = () => {
       setIsLoading(true);
       try {
         await Promise.all([
-          fetchHeroImages(),
           fetchStoreProducts(),
           fetchAudioTracks()
         ]);
@@ -227,7 +171,7 @@ export const useHomePageData = () => {
   }, [hasLoadedOnce]);
 
   return {
-    heroImages,
+    heroImages: [], // No longer used - hero handled by UniversalHero
     upcomingEvents,
     storeProducts,
     audioTracks,

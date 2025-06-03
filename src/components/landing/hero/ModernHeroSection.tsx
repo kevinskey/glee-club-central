@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -129,8 +128,6 @@ export function ModernHeroSection({
 
       console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
       console.log('🎭 Hero: Fetched media files:', fetchedMedia.length);
-      console.log('🎭 Hero: Slides data:', fetchedSlides);
-      console.log('🎭 Hero: Media data:', fetchedMedia);
 
       setMediaFiles(fetchedMedia);
       setSlides(fetchedSlides);
@@ -142,7 +139,6 @@ export function ModernHeroSection({
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load hero data');
-      // Don't set fallback slides here, let the component show the error state
     } finally {
       setIsLoading(false);
     }
@@ -372,7 +368,7 @@ export function ModernHeroSection({
           <div className="text-white text-center max-w-2xl mx-auto px-4">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
             <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
-            <p className="text-sm opacity-75">No hero slides configured for {sectionId}</p>
+            <p className="text-sm opacity-75">Setting up hero slides for {sectionId}...</p>
           </div>
         </div>
       </section>
