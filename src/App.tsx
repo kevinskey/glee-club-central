@@ -1,28 +1,29 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/providers/ThemeProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 
 // Import page components
-import LandingPage from '@/pages/LandingPage';
-import DashboardPage from '@/pages/DashboardPage';
+import LandingPage from '@/pages/HomePage';
+import DashboardPage from '@/pages/dashboard/DashboardHome';
 import SheetMusicPage from '@/pages/SheetMusicPage';
 import CalendarPage from '@/pages/CalendarPage';
 import AttendancePage from '@/pages/AttendancePage';
 import ProfilePage from '@/pages/ProfilePage';
-import PracticePage from '@/pages/PracticePage';
-import AnnouncementsPage from '@/pages/AnnouncementsPage';
+import PracticePage from '@/pages/practice/PracticePage';
+import AnnouncementsPage from '@/pages/announcements/AnnouncementsPage';
 import ContactAdminPage from '@/pages/ContactAdminPage';
 import AdminDashboardPage from '@/pages/admin/AdminDashboard';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
 import MediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
-import EventManagerPage from '@/pages/admin/EventManagerPage';
+import EventManagerPage from '@/pages/events/EventsListPage';
 import SettingsPage from '@/pages/admin/SettingsPage';
 import SimpleLoginPage from '@/pages/auth/SimpleLoginPage';
-import SignUpPage from '@/pages/auth/SignUpPage';
+import SignUpPage from '@/pages/auth/SignupPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -75,8 +76,6 @@ function App() {
                 
                 {/* Add SoundCloud route */}
                 <Route path="/dashboard/soundcloud" element={<SoundCloudPage />} />
-                
-                {/* Add SoundCloud route */}
               </Routes>
             </div>
             <Toaster />
