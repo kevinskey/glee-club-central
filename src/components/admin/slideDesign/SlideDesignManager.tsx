@@ -66,52 +66,52 @@ export function SlideDesignManager() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Loading slide design system...</span>
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2 text-sm">Loading slide design system...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Slide Design Manager</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl font-bold">Slide Design Manager</h1>
+          <p className="text-sm text-muted-foreground">
             Create and manage custom slides for your homepage hero section
           </p>
         </div>
         {mode !== 'select' && (
-          <Button onClick={() => setMode('select')} variant="outline">
+          <Button onClick={() => setMode('select')} variant="outline" size="sm">
             Back to Overview
           </Button>
         )}
       </div>
 
       <Tabs defaultValue="designs" className="w-full">
-        <TabsList>
-          <TabsTrigger value="designs">Active Designs</TabsTrigger>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="designs" className="text-sm">Active Designs</TabsTrigger>
+          <TabsTrigger value="templates" className="text-sm">Templates</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="designs" className="space-y-4">
+        <TabsContent value="designs" className="space-y-3">
           {mode === 'select' && (
             <>
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Your Slide Designs</h3>
-                <Button onClick={handleCreateNew}>
-                  <Plus className="h-4 w-4 mr-2" />
+                <h3 className="text-base font-semibold">Your Slide Designs</h3>
+                <Button onClick={handleCreateNew} size="sm">
+                  <Plus className="h-3 w-3 mr-1" />
                   Create New Slide
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {designs.map((design) => (
-                  <Card key={design.id} className="relative overflow-hidden">
+                  <Card key={design.id} className="relative overflow-hidden h-fit">
                     <div className="relative">
                       {design.background_image_url ? (
-                        <div className="w-full h-48 relative">
+                        <div className="w-full h-32 relative">
                           <img
                             src={design.background_image_url}
                             alt={design.title}
@@ -119,54 +119,54 @@ export function SlideDesignManager() {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                           {/* Text overlay preview */}
-                          <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-4">
-                            {design.design_data?.textElements?.map((element, index) => (
+                          <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-2">
+                            {design.design_data?.textElements?.slice(0, 2).map((element, index) => (
                               <div
                                 key={element.id}
-                                className="mb-2"
+                                className="mb-1"
                                 style={{
-                                  fontSize: index === 0 ? '1rem' : '0.75rem',
+                                  fontSize: index === 0 ? '0.7rem' : '0.6rem',
                                   fontWeight: index === 0 ? 'bold' : 'normal',
                                   opacity: 0.9
                                 }}
                               >
-                                {element.text.length > 30 ? `${element.text.substring(0, 30)}...` : element.text}
+                                {element.text.length > 20 ? `${element.text.substring(0, 20)}...` : element.text}
                               </div>
                             ))}
                           </div>
                         </div>
                       ) : (
                         <div 
-                          className="w-full h-48 flex items-center justify-center"
+                          className="w-full h-32 flex items-center justify-center"
                           style={{ backgroundColor: design.background_color }}
                         >
                           <div className="text-center text-white">
-                            <Image className="h-12 w-12 mx-auto mb-2 opacity-60" />
-                            <p className="text-sm opacity-80">No Background Image</p>
+                            <Image className="h-8 w-8 mx-auto mb-1 opacity-60" />
+                            <p className="text-xs opacity-80">No Background</p>
                           </div>
                         </div>
                       )}
                     </div>
                     
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base truncate">{design.title}</CardTitle>
-                        <Badge variant="outline" className="ml-2 shrink-0">
+                    <CardHeader className="p-3 pb-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-sm truncate leading-tight">{design.title}</CardTitle>
+                        <Badge variant="outline" className="text-xs shrink-0 px-1 py-0">
                           {design.layout_type.replace('_', ' ')}
                         </Badge>
                       </div>
                       {design.description && (
-                        <CardDescription className="text-sm line-clamp-2">{design.description}</CardDescription>
+                        <CardDescription className="text-xs line-clamp-1">{design.description}</CardDescription>
                       )}
                     </CardHeader>
                     
-                    <CardContent className="pt-0">
-                      <div className="flex gap-2">
+                    <CardContent className="p-3 pt-0">
+                      <div className="flex gap-1">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditDesign(design)}
-                          className="flex-1"
+                          className="flex-1 h-7 text-xs"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
@@ -175,7 +175,7 @@ export function SlideDesignManager() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleDeleteDesign(design)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 h-7"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -185,14 +185,14 @@ export function SlideDesignManager() {
                 ))}
 
                 {designs.length === 0 && (
-                  <div className="col-span-full text-center py-12">
-                    <Layout className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No slide designs yet</h3>
-                    <p className="text-muted-foreground mb-4">
+                  <div className="col-span-full text-center py-8">
+                    <Layout className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
+                    <h3 className="text-base font-medium mb-2">No slide designs yet</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
                       Create your first custom slide design to get started
                     </p>
-                    <Button onClick={handleCreateNew}>
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button onClick={handleCreateNew} size="sm">
+                      <Plus className="h-3 w-3 mr-1" />
                       Create Your First Slide
                     </Button>
                   </div>
@@ -211,7 +211,7 @@ export function SlideDesignManager() {
           )}
         </TabsContent>
 
-        <TabsContent value="templates" className="space-y-4">
+        <TabsContent value="templates" className="space-y-3">
           <TemplateSelector
             templates={templates}
             selectedTemplate={selectedTemplate}

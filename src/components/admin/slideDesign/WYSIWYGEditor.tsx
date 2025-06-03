@@ -134,26 +134,26 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const selectedElement = textElements.find(el => el.id === selectedElementId);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
       {/* Canvas Area */}
       <div className="lg:col-span-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="flex items-center justify-between text-base">
               <span>Design Canvas</span>
               <div className="flex gap-2">
-                <Button onClick={onPreview} variant="outline" size="sm">
-                  <Eye className="h-4 w-4 mr-2" />
+                <Button onClick={onPreview} variant="outline" size="sm" className="h-8">
+                  <Eye className="h-3 w-3 mr-1" />
                   Preview
                 </Button>
-                <Button onClick={handleSave} size="sm">
-                  <Save className="h-4 w-4 mr-2" />
+                <Button onClick={handleSave} size="sm" className="h-8">
+                  <Save className="h-3 w-3 mr-1" />
                   Save Design
                 </Button>
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <div
               ref={canvasRef}
               className="relative w-full aspect-video bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair"
@@ -207,7 +207,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               </div>
             </div>
             
-            <div className="mt-4 text-sm text-muted-foreground">
+            <div className="mt-2 text-xs text-muted-foreground">
               <p>💡 Click on text elements to select and edit them</p>
             </div>
           </CardContent>
@@ -215,40 +215,42 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
       </div>
 
       {/* Properties Panel */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Type className="h-4 w-4" />
               Slide Properties
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">Title</Label>
+          <CardContent className="p-4 pt-0 space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="title" className="text-sm">Title</Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Enter slide title"
+                className="h-8"
               />
             </div>
             
-            <div>
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-1">
+              <Label htmlFor="description" className="text-sm">Description</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter slide description"
-                rows={3}
+                rows={2}
+                className="text-sm"
               />
             </div>
 
-            <div>
-              <Label htmlFor="layout">Layout Type</Label>
+            <div className="space-y-1">
+              <Label htmlFor="layout" className="text-sm">Layout Type</Label>
               <Select value={layoutType} onValueChange={(value) => setLayoutType(value as any)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -260,18 +262,19 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="linkUrl">Link URL (optional)</Label>
+            <div className="space-y-1">
+              <Label htmlFor="linkUrl" className="text-sm">Link URL (optional)</Label>
               <Input
                 id="linkUrl"
                 value={linkUrl}
                 onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder="https://example.com"
+                className="h-8"
               />
             </div>
 
-            <div>
-              <Label htmlFor="duration">Display Duration (ms)</Label>
+            <div className="space-y-1">
+              <Label htmlFor="duration" className="text-sm">Display Duration (ms)</Label>
               <Input
                 id="duration"
                 type="number"
@@ -280,46 +283,48 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                 min={1000}
                 max={30000}
                 step={500}
+                className="h-8"
               />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="p-4 pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Palette className="h-4 w-4" />
               Background
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="backgroundColor">Background Color</Label>
+          <CardContent className="p-4 pt-0 space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="backgroundColor" className="text-sm">Background Color</Label>
               <div className="flex gap-2">
                 <Input
                   id="backgroundColor"
                   type="color"
                   value={backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="w-16 h-10 p-1"
+                  className="w-12 h-8 p-1"
                 />
                 <Input
                   value={backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
                   placeholder="#4A90E2"
-                  className="flex-1"
+                  className="flex-1 h-8"
                 />
               </div>
             </div>
 
-            <div>
-              <Label>Background Image</Label>
+            <div className="space-y-2">
+              <Label className="text-sm">Background Image</Label>
               <div className="space-y-2">
                 <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
                 <Input
                   value={backgroundImage}
                   onChange={(e) => setBackgroundImage(e.target.value)}
                   placeholder="Or enter image URL directly"
+                  className="h-8 text-sm"
                 />
               </div>
             </div>
