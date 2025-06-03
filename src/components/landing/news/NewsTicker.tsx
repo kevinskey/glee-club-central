@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -163,9 +164,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   };
 
   // Create seamless infinite scroll by repeating content multiple times with 8 blank characters spacing
-  const newsContent = newsItems.map(item => formatHeadlineWithSpacedIcons(item.headline)).join('        '); // 8 blank characters
+  const newsContent = newsItems.map(item => formatHeadlineWithSpacedIcons(item.headline)).join('        '); // 8 spaces
   // Repeat the content multiple times to ensure seamless infinite scroll
-  const repeatedContent = Array(8).fill(newsContent).join('        '); // 8 blank characters between repeats
+  const repeatedContent = Array(6).fill(newsContent).join('        '); // 8 spaces between repeats
 
   if (isLoading) {
     return (
