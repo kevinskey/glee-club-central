@@ -30,6 +30,7 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
   };
 
   if (!currentSlide) {
+    console.log('🎭 Hero: No current slide, showing fallback background');
     return (
       <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -38,9 +39,12 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
   }
 
   console.log('🎭 Hero: Current slide:', currentSlide);
-  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, url: m.file_url })));
+  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, url: m.file_url, title: m.title })));
+  console.log('🎭 Hero: Looking for media with ID:', currentSlide.media_id);
   
+  // Handle YouTube embeds
   if (currentSlide.media_id && isYouTubeEmbed(currentSlide.media_id)) {
+    console.log('🎭 Hero: Rendering YouTube embed:', currentSlide.media_id);
     return (
       <iframe
         key={currentSlide.id}
@@ -56,15 +60,17 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
     );
   }
 
+  // Find the media file
   const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
   
-  console.log('🎭 Hero: Looking for media with ID:', currentSlide.media_id);
   console.log('🎭 Hero: Found media:', currentMedia);
   
   if (currentMedia && currentMedia.file_url) {
     console.log('🎭 Hero: Rendering media with URL:', currentMedia.file_url);
+    console.log('🎭 Hero: Media type:', currentSlide.media_type);
+    console.log('🎭 Hero: File type:', currentMedia.file_type);
     
-    return currentSlide.media_type === 'video' ? (
+    return currentSlide.media_type === 'video' || currentMedia.file_type?.startsWith('video/') ? (
       <video
         key={currentMedia.id}
         src={currentMedia.file_url}
@@ -76,9 +82,15 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
         muted
         loop
         playsInline
-        style={{ aspectRatio: '16/9' }}
+        onLoadStart={() => {
+          console.log('🎭 Hero: Video started loading:', currentMedia.file_url);
+        }}
+        onCanPlay={() => {
+          console.log('🎭 Hero: Video can play:', currentMedia.file_url);
+        }}
         onError={(e) => {
           console.error('🎭 Hero: Video failed to load:', currentMedia.file_url);
+          console.error('🎭 Hero: Video error details:', e);
         }}
       />
     ) : (
@@ -90,19 +102,21 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
           "absolute inset-0 w-full h-full object-cover",
           getAnimationClass()
         )}
-        style={{ aspectRatio: '16/9' }}
         onLoad={() => {
           console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
         }}
         onError={(e) => {
           console.error('🎭 Hero: Image failed to load:', currentMedia.file_url);
           console.error('🎭 Hero: Error details:', e);
+          console.error('🎭 Hero: Image element:', e.target);
         }}
       />
     );
   }
 
-  console.log('🎭 Hero: No media found, using fallback background');
+  console.log('🎭 Hero: No media found or no file URL, using fallback background');
+  console.log('🎭 Hero: Media ID:', currentSlide.media_id);
+  console.log('🎭 Hero: Media files count:', mediaFiles.length);
 
   // Default placeholder background with fixed SVG
   return (
