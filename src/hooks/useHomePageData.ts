@@ -152,12 +152,43 @@ export const useHomePageData = () => {
         id: track.id,
         title: track.title,
         audioUrl: track.file_url,
-        albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
         artist: "Spelman Glee Club",
         duration: "3:45"
       })) || [];
 
-      setAudioTracks(formattedTracks);
+      // Add fallback tracks if no data from database
+      if (formattedTracks.length === 0) {
+        const fallbackTracks: AudioTrack[] = [
+          {
+            id: "track-1",
+            title: "Ave Maria - Soprano Solo",
+            audioUrl: "/placeholder.mp3",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            artist: "Spelman Glee Club",
+            duration: "4:20"
+          },
+          {
+            id: "track-2",
+            title: "Amazing Grace - Full Choir",
+            audioUrl: "/placeholder.mp3",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            artist: "Spelman Glee Club",
+            duration: "3:15"
+          },
+          {
+            id: "track-3",
+            title: "Lift Every Voice - HBCU Tribute",
+            audioUrl: "/placeholder.mp3",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            artist: "Spelman Glee Club",
+            duration: "5:00"
+          }
+        ];
+        setAudioTracks(fallbackTracks);
+      } else {
+        setAudioTracks(formattedTracks);
+      }
     } catch (error) {
       console.error('Error fetching audio tracks:', error);
       // Fallback to placeholder
@@ -165,7 +196,7 @@ export const useHomePageData = () => {
         id: "track-1",
         title: "Lift Every Voice",
         audioUrl: "/placeholder.mp3",
-        albumArt: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
+        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
         artist: "Spelman Glee Club",
         duration: "3:45"
       }]);
