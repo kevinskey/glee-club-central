@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -191,7 +192,7 @@ export function TopSlider({
             <div 
               className="w-full h-full relative"
               style={{
-                backgroundColor: currentSlideData.background_color || '#4F46E5',
+                backgroundColor: currentSlideData.background_color || '#4A90E2',
                 backgroundImage: currentSlideData.computed_image_url ? `url(${currentSlideData.computed_image_url})` : undefined,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center'
