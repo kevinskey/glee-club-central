@@ -25,7 +25,7 @@ export const PDFThumbnail = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageWidth, setPageWidth] = useState<number>(200);
+  const [pageWidth, setPageWidth] = useState<number>(300);
 
   useEffect(() => {
     console.log('PDFThumbnail: Loading PDF:', { url, title });
@@ -49,10 +49,13 @@ export const PDFThumbnail = ({
 
   const handlePageRenderSuccess = () => {
     console.log('PDFThumbnail: Page rendered successfully for:', title);
+    setLoading(false);
   };
 
   const handlePageRenderError = (err: any) => {
     console.error('PDFThumbnail: Page render error:', { title, error: err });
+    setError('Failed to render PDF page');
+    setLoading(false);
   };
 
   // Show fallback for failed PDFs
@@ -71,7 +74,7 @@ export const PDFThumbnail = ({
   }
 
   return (
-    <div className={`bg-white flex items-center justify-center overflow-hidden relative ${className}`}>
+    <div className={`bg-white flex items-center justify-center overflow-hidden relative border rounded ${className}`}>
       <AspectRatio ratio={aspectRatio} className="w-full">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
@@ -107,14 +110,8 @@ export const PDFThumbnail = ({
               onRenderError={handlePageRenderError}
               className="max-w-full max-h-full"
               width={pageWidth}
-              onLoadSuccess={(page) => {
-                // Calculate optimal width based on container
-                const containerWidth = 300; // Approximate container width
-                const viewport = page.getViewport({ scale: 1 });
-                const scale = containerWidth / viewport.width;
-                setPageWidth(containerWidth);
-                console.log('PDFThumbnail: Page loaded with scale:', scale);
-              }}
+              height={undefined}
+              scale={1}
             />
           )}
         </Document>
