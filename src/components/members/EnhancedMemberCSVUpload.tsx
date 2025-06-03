@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Upload, FileText, AlertCircle, CheckCircle, Download, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUserCreate } from '@/hooks/user/useUserCreate';
+import { UserFormValues } from '@/components/members/form/userFormSchema';
 
 interface CSVColumn {
   index: number;
@@ -267,21 +268,39 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
+      // Validate and transform voice_part to match enum
+      const validVoicePart = userData.voice_part && 
+        ['soprano_1', 'soprano_2', 'alto_1', 'alto_2', 'tenor', 'bass', 'director'].includes(userData.voice_part) 
+        ? userData.voice_part as UserFormValues['voice_part']
+        : null;
+
+      // Validate and transform role to match enum  
+      const validRole = userData.role && 
+        ['admin', 'member', 'section_leader'].includes(userData.role)
+        ? userData.role as UserFormValues['role']
+        : 'member';
+
+      // Validate and transform status to match enum
+      const validStatus = userData.status &&
+        ['active', 'pending', 'inactive', 'alumni'].includes(userData.status)
+        ? userData.status as UserFormValues['status']
+        : 'active';
+
       // Transform the data to match UserFormValues interface
-      const userFormData = {
+      const userFormData: UserFormValues = {
         email: userData.email,
         password: `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`,
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone: userData.phone || '',
-        voice_part: userData.voice_part || '',
-        role: userData.role || 'member',
-        status: userData.status || 'active',
+        voice_part: validVoicePart,
+        role: validRole,
+        status: validStatus,
         class_year: userData.class_year || '',
         notes: userData.notes || '',
         dues_paid: userData.dues_paid?.toLowerCase() === 'true',
         join_date: userData.join_date || new Date().toISOString().split('T')[0],
-        is_admin: userData.role === 'admin'
+        is_admin: validRole === 'admin'
       };
 
       // Create user using the existing hook
