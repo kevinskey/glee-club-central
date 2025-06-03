@@ -19,6 +19,12 @@ import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
 import { toast } from 'sonner';
 
+// Transform User to UserManagementData format
+interface UserManagementData extends User {
+  full_name: string;
+  email: string; // Make email required
+}
+
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -37,10 +43,13 @@ export default function UserManagement() {
   }, [refreshUsers]);
 
   // Transform User[] to UserManagementData[] format
-  const transformedUsers = users.map(user => ({
-    ...user,
-    full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User'
-  }));
+  const transformedUsers: UserManagementData[] = users
+    .filter(user => user.email) // Filter out users without email
+    .map(user => ({
+      ...user,
+      email: user.email!, // Assert non-null since we filtered
+      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User'
+    }));
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     const success = await handleUpdateUser(userId, { role: newRole });
@@ -73,7 +82,7 @@ export default function UserManagement() {
     await refreshUsers();
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = transformedUsers.filter(user => 
     user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -159,11 +168,7 @@ export default function UserManagement() {
                 {/* Mobile Table for medium screens */}
                 <div className="block lg:hidden">
                   <UserManagementTableMobile
-                    users={transformedUsers.filter(user => 
-                      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )}
+                    users={filteredUsers}
                     onRoleUpdate={handleRoleUpdate}
                     onStatusToggle={handleStatusToggle}
                     isLoading={isLoading}
@@ -178,7 +183,7 @@ export default function UserManagement() {
         <AddUserDialog 
           isOpen={showAddDialog} 
           onClose={() => setShowAddDialog(false)}
-          onUserAdded={handleUserAdded}
+          onSuccess={handleUserAdded}
         />
       </div>
     </div>

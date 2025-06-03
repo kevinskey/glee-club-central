@@ -129,6 +129,8 @@ export function ModernHeroSection({
 
       console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
       console.log('🎭 Hero: Fetched media files:', fetchedMedia.length);
+      console.log('🎭 Hero: Slides data:', fetchedSlides);
+      console.log('🎭 Hero: Media data:', fetchedMedia);
 
       setMediaFiles(fetchedMedia);
       setSlides(fetchedSlides);
@@ -217,8 +219,12 @@ export function ModernHeroSection({
   const renderBackgroundMedia = () => {
     const currentSlideData = slides[currentSlide];
     
+    console.log('🎭 Hero: Rendering background for slide:', currentSlideData);
+    console.log('🎭 Hero: Current slide media_id:', currentSlideData?.media_id);
+    
     // Check if media_id is a YouTube embed URL
     if (currentSlideData.media_id && isYouTubeEmbed(currentSlideData.media_id)) {
+      console.log('🎭 Hero: Using YouTube embed URL:', currentSlideData.media_id);
       return (
         <iframe
           key={currentSlideData.id}
@@ -233,6 +239,8 @@ export function ModernHeroSection({
 
     // Handle regular media files
     const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
+    
+    console.log('🎭 Hero: Found media file:', currentMedia);
     
     if (currentMedia && currentMedia.file_url) {
       return currentSlideData.media_type === 'video' ? (
@@ -263,6 +271,7 @@ export function ModernHeroSection({
       );
     }
 
+    console.log('🎭 Hero: No media found, using fallback gradient');
     // Fallback gradient background
     return (
       <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
