@@ -12,7 +12,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminTopBar />
       <AdminTopNavigation />
-      <main className="p-6">
+      <main className="px-4 py-4 max-w-7xl mx-auto">
         {children}
       </main>
     </div>

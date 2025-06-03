@@ -12,7 +12,6 @@ import {
   Music,
   Bell,
   BarChart,
-  FileText,
   LayoutDashboard
 } from "lucide-react";
 
@@ -26,152 +25,83 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
   const quickActions = [
     {
       title: "Dashboard",
-      description: "Admin dashboard home",
-      icon: <LayoutDashboard className="h-5 w-5" />,
+      icon: <LayoutDashboard className="h-4 w-4" />,
       action: () => navigate("/admin"),
-      color: "bg-glee-spelman",
-      category: "Navigation"
+      color: "bg-glee-spelman"
     },
     {
       title: "Add Member",
-      description: "Create new member account",
-      icon: <Plus className="h-5 w-5" />,
-      action: () => navigate("/admin/members"),
-      color: "bg-blue-500",
-      category: "User Management"
+      icon: <Plus className="h-4 w-4" />,
+      action: () => navigate("/admin/users"),
+      color: "bg-blue-500"
     },
     {
-      title: "Manage Users",
-      description: "View and edit accounts",
-      icon: <Users className="h-5 w-5" />,
-      action: () => navigate("/admin/members"),
-      color: "bg-green-500",
-      category: "User Management"
+      title: "Users",
+      icon: <Users className="h-4 w-4" />,
+      action: () => navigate("/admin/users"),
+      color: "bg-green-500"
     },
     {
-      title: "Add Event",
-      description: "Create calendar event",
-      icon: <Calendar className="h-5 w-5" />,
+      title: "Calendar",
+      icon: <Calendar className="h-4 w-4" />,
       action: () => navigate("/admin/calendar"),
-      color: "bg-purple-500",
-      category: "Content Management"
+      color: "bg-purple-500"
     },
     {
-      title: "Upload Media",
-      description: "Add media files",
-      icon: <Upload className="h-5 w-5" />,
-      action: () => navigate("/admin/media"),
-      color: "bg-orange-500",
-      category: "Content Management"
+      title: "Media",
+      icon: <Upload className="h-4 w-4" />,
+      action: () => navigate("/admin/media-library"),
+      color: "bg-orange-500"
     },
     {
-      title: "Sheet Music",
-      description: "Manage music library",
-      icon: <Music className="h-5 w-5" />,
-      action: () => navigate("/admin/media-uploader"),
-      color: "bg-indigo-500",
-      category: "Content Management"
+      title: "Music",
+      icon: <Music className="h-4 w-4" />,
+      action: () => navigate("/admin/media-library"),
+      color: "bg-indigo-500"
     },
     {
-      title: "Announcements",
-      description: "Send notifications",
-      icon: <Bell className="h-5 w-5" />,
-      action: () => navigate("/admin/announcements"),
-      color: "bg-red-500",
-      category: "Communication"
+      title: "News",
+      icon: <Bell className="h-4 w-4" />,
+      action: () => navigate("/admin/news-items"),
+      color: "bg-red-500"
     },
     {
       title: "Analytics",
-      description: "View reports",
-      icon: <BarChart className="h-5 w-5" />,
+      icon: <BarChart className="h-4 w-4" />,
       action: () => navigate("/admin/analytics"),
-      color: "bg-cyan-500",
-      category: "Analytics"
+      color: "bg-cyan-500"
     },
     {
       title: "Settings",
-      description: "System configuration",
-      icon: <Settings className="h-5 w-5" />,
+      icon: <Settings className="h-4 w-4" />,
       action: () => navigate("/admin/settings"),
-      color: "bg-gray-500",
-      category: "System"
+      color: "bg-gray-500"
     }
   ];
 
-  // Group actions by category
-  const groupedActions = quickActions.reduce((acc, action) => {
-    if (!acc[action.category]) {
-      acc[action.category] = [];
-    }
-    acc[action.category].push(action);
-    return acc;
-  }, {} as Record<string, typeof quickActions>);
-
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Quick Actions</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent>
-        {isMobile ? (
-          // Mobile: Single column with categories
-          <div className="space-y-6">
-            {Object.entries(groupedActions).map(([category, actions]) => (
-              <div key={category}>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">
-                  {category}
-                </h3>
-                <div className="grid gap-2">
-                  {actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="justify-start h-auto p-3"
-                      onClick={action.action}
-                    >
-                      <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white mr-3 flex-shrink-0`}>
-                        {action.icon}
-                      </div>
-                      <div className="text-left min-w-0 flex-1">
-                        <div className="font-medium text-sm">{action.title}</div>
-                        <div className="text-xs text-muted-foreground truncate">{action.description}</div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+      <CardContent className="pt-0">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2">
+          {quickActions.map((action, index) => (
+            <Button
+              key={index}
+              variant="outline"
+              className="h-auto p-3 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800"
+              onClick={action.action}
+            >
+              <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white`}>
+                {action.icon}
               </div>
-            ))}
-          </div>
-        ) : (
-          // Desktop: Multi-column layout
-          <div className="grid grid-cols-2 gap-6">
-            {Object.entries(groupedActions).map(([category, actions]) => (
-              <div key={category} className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide border-b pb-2">
-                  {category}
-                </h3>
-                <div className="space-y-2">
-                  {actions.map((action, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      className="justify-start h-auto p-3 w-full"
-                      onClick={action.action}
-                    >
-                      <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white mr-3`}>
-                        {action.icon}
-                      </div>
-                      <div className="text-left">
-                        <div className="font-medium text-sm">{action.title}</div>
-                        <div className="text-xs text-muted-foreground">{action.description}</div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+              <span className="text-xs font-medium text-center leading-tight">
+                {action.title}
+              </span>
+            </Button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

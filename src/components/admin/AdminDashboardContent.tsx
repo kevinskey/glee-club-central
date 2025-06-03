@@ -10,11 +10,10 @@ import { useAuth } from '@/contexts/AuthContext';
 export function AdminDashboardContent() {
   const { user, profile } = useAuth();
   
-  // Check if user is Admin (exact role match)
   const isAdminRole = profile?.role === 'admin' || user?.email === 'kevinskey@mac.com';
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Stats Overview */}
       <AdminStatsCards />
       
@@ -28,7 +27,7 @@ export function AdminDashboardContent() {
       
       {/* Dashboard Modules */}
       <div>
-        <h2 className="text-2xl font-bold mb-6">Dashboard Modules</h2>
+        <h2 className="text-xl font-bold mb-4">Dashboard Modules</h2>
         <DashboardModules />
       </div>
       

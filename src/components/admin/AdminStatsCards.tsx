@@ -56,7 +56,7 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
   ];
 
   return (
-    <div className={`grid gap-4 ${isMobile ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
+    <div className={`grid gap-3 ${isMobile ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2 lg:grid-cols-4'}`}>
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         const TrendIcon = stat.changeType === 'positive' ? TrendingUp : TrendingDown;
@@ -64,20 +64,20 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
         return (
           <Card 
             key={index} 
-            className="border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
           >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${stat.bgColor} transition-colors duration-200`}>
-                  <Icon className={`h-6 w-6 ${stat.color}`} />
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                  <Icon className={`h-4 w-4 ${stat.color}`} />
                 </div>
                 <Badge 
                   variant="secondary" 
-                  className={`${
+                  className={`text-xs ${
                     stat.changeType === 'positive' 
                       ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' 
                       : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
-                  } transition-colors duration-200`}
+                  }`}
                 >
                   <TrendIcon className="h-3 w-3 mr-1" />
                   {stat.change}
@@ -85,10 +85,10 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
               </div>
               
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {stat.value}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   {stat.title}
                 </p>
               </div>
