@@ -1481,10 +1481,12 @@ export type Database = {
           id: string
           image_url: string | null
           link_url: string | null
+          media_id: string | null
           text_color: string | null
           title: string
           updated_at: string
           visible: boolean
+          youtube_url: string | null
         }
         Insert: {
           background_color?: string | null
@@ -1494,10 +1496,12 @@ export type Database = {
           id?: string
           image_url?: string | null
           link_url?: string | null
+          media_id?: string | null
           text_color?: string | null
           title: string
           updated_at?: string
           visible?: boolean
+          youtube_url?: string | null
         }
         Update: {
           background_color?: string | null
@@ -1507,12 +1511,22 @@ export type Database = {
           id?: string
           image_url?: string | null
           link_url?: string | null
+          media_id?: string | null
           text_color?: string | null
           title?: string
           updated_at?: string
           visible?: boolean
+          youtube_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_top_slider_media"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media_library"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tour_assignments: {
         Row: {

@@ -5,6 +5,12 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
+interface MediaLibraryItem {
+  id: string;
+  file_url: string;
+  title: string;
+}
+
 interface TopSliderItem {
   id: string;
   title: string;
@@ -17,6 +23,8 @@ interface TopSliderItem {
   text_color?: string;
   visible: boolean;
   display_order: number;
+  media_library?: MediaLibraryItem;
+  computed_image_url?: string;
 }
 
 interface TopSliderProps {
@@ -53,7 +61,7 @@ export function TopSlider({
           media_library!left(
             id,
             file_url,
-            title as media_title
+            title
           )
         `)
         .eq('visible', true)

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MediaPicker } from '@/components/media/MediaPicker';
 
+interface MediaLibraryItem {
+  id: string;
+  file_url: string;
+  title: string;
+}
+
 interface TopSliderItem {
   id: string;
   title: string;
@@ -27,6 +34,7 @@ interface TopSliderItem {
   visible: boolean;
   display_order: number;
   created_at: string;
+  media_library?: MediaLibraryItem;
 }
 
 export function TopSliderManager() {
@@ -61,7 +69,7 @@ export function TopSliderManager() {
           media_library!left(
             id,
             file_url,
-            title as media_title
+            title
           )
         `)
         .order('display_order', { ascending: true });
@@ -553,7 +561,6 @@ export function TopSliderManager() {
           </DialogHeader>
           <MediaPicker 
             onSelect={handleMediaSelect}
-            filterType="image"
           />
         </DialogContent>
       </Dialog>
