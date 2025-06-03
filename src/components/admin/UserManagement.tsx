@@ -18,12 +18,7 @@ import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
 import { toast } from 'sonner';
-
-// Transform User to UserManagementData format
-interface UserManagementData extends User {
-  full_name: string;
-  email: string; // Make email required
-}
+import { UserManagementData } from '@/services/userManagementService';
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,9 +41,24 @@ export default function UserManagement() {
   const transformedUsers: UserManagementData[] = users
     .filter(user => user.email) // Filter out users without email
     .map(user => ({
-      ...user,
+      id: user.id,
       email: user.email!, // Assert non-null since we filtered
-      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User'
+      first_name: user.first_name,
+      last_name: user.last_name,
+      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User',
+      role: user.role || 'member', // Ensure role is always present
+      status: user.status || 'active',
+      disabled: user.disabled || false,
+      is_super_admin: user.is_super_admin || false,
+      created_at: user.created_at || new Date().toISOString(),
+      last_sign_in_at: user.last_sign_in_at,
+      phone: user.phone,
+      voice_part: user.voice_part,
+      avatar_url: user.avatar_url,
+      join_date: user.join_date,
+      class_year: user.class_year,
+      dues_paid: user.dues_paid,
+      notes: user.notes
     }));
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
@@ -183,7 +193,8 @@ export default function UserManagement() {
         <AddUserDialog 
           isOpen={showAddDialog} 
           onClose={() => setShowAddDialog(false)}
-          onSuccess={handleUserAdded}
+          onCreateUser={handleUserAdded}
+          onImportUsers={handleUserAdded}
         />
       </div>
     </div>
