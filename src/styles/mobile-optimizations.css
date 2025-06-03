@@ -1,4 +1,3 @@
-
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -207,7 +206,7 @@ p {
     background: rgba(0, 0, 0, 0.95) !important;
   }
   
-  /* News Ticker Sticky Positioning - Above Header */
+  /* News Ticker Sticky Positioning - Above Header with no gap */
   .news-ticker,
   .bg-glee-columbia {
     position: fixed !important;
@@ -219,11 +218,18 @@ p {
     overflow-x: hidden;
     box-sizing: border-box;
     z-index: 101 !important;
+    margin-bottom: 0 !important; /* Remove any margin */
   }
   
-  /* Main content needs padding to account for sticky header + matching gap */
+  /* Header positioned directly after ticker with no gap */
+  header.sticky {
+    margin-top: 0 !important;
+    border-top: none !important;
+  }
+  
+  /* Main content needs padding to account for sticky header + ticker */
   main {
-    margin-top: 104px !important; /* Height of ticker (40px) + header (~56px) + gap (8px) */
+    margin-top: 96px !important; /* Height of ticker (40px) + header (~56px) */
     padding-top: 0 !important;
   }
   
@@ -244,7 +250,7 @@ p {
   .main-content:not(.hero-content),
   [class*="content"]:not([class*="hero"]) {
     padding-top: 16px !important; /* Small padding since main already has margin */
-    min-height: calc(100vh - 104px) !important; /* Adjusted for new margin */
+    min-height: calc(100vh - 96px) !important; /* Adjusted for new margin */
   }
 }
 
@@ -264,6 +270,14 @@ p {
     right: 0 !important;
     z-index: 101 !important;
     height: 40px !important;
+    margin: 0 !important;
+    border-bottom: none !important; /* Remove border to eliminate gap */
+  }
+  
+  /* Ensure header connects seamlessly with ticker */
+  header {
+    border-top: none !important;
+    margin-top: 0 !important;
   }
 }
 
