@@ -27,5 +27,3 @@ export interface MediaFile {
   file_type: string;
   title: string;
 }
-
-export type TestMode = 'desktop' | 'tablet' | 'mobile' | null;

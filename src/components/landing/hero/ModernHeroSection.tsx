@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHeroData } from "./hooks/useHeroData";
 import { HeroBackgroundMedia } from "./HeroBackgroundMedia";
-import { HeroTestControls } from "./HeroTestControls";
 import { HeroContent } from "./HeroContent";
 import { HeroNavigation } from "./HeroNavigation";
-import { TestMode } from "./types";
 
 interface ModernHeroSectionProps {
   sectionId?: string;
@@ -26,7 +24,6 @@ export function ModernHeroSection({
   const { slides, settings, mediaFiles, isLoading, error } = useHeroData(sectionId);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(enableAutoplay);
-  const [testMode, setTestMode] = useState<TestMode>(null);
 
   useEffect(() => {
     if (slides.length > 1 && isPlaying && settings?.scroll_interval && enableAutoplay) {
@@ -85,9 +82,7 @@ export function ModernHeroSection({
 
   const getResponsiveClasses = () => {
     if (!isResponsive) return '';
-    
-    const baseClass = testMode ? `test-mode-${testMode}` : '';
-    return `${baseClass} responsive-hero`;
+    return 'responsive-hero';
   };
 
   const getTextSizeClasses = () => {
@@ -173,7 +168,6 @@ export function ModernHeroSection({
             <p className="text-sm opacity-75">Error loading hero content: {error}</p>
           </div>
         </div>
-        <HeroTestControls isResponsive={isResponsive} testMode={testMode} setTestMode={setTestMode} />
       </section>
     );
   }
@@ -193,7 +187,6 @@ export function ModernHeroSection({
             <p className="text-sm opacity-75">Setting up hero slides for {sectionId}...</p>
           </div>
         </div>
-        <HeroTestControls isResponsive={isResponsive} testMode={testMode} setTestMode={setTestMode} />
       </section>
     );
   }
@@ -225,13 +218,6 @@ export function ModernHeroSection({
         textSizes={textSizes}
         positionClasses={getPositionClasses()}
         isMobile={isMobile}
-      />
-
-      {/* Test Mode Controls */}
-      <HeroTestControls 
-        isResponsive={isResponsive} 
-        testMode={testMode} 
-        setTestMode={setTestMode} 
       />
 
       {/* Navigation Controls */}

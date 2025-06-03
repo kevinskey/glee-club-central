@@ -28,33 +28,6 @@
   }
 }
 
-/* Test Mode Styles */
-.test-mode-mobile {
-  width: 375px !important;
-  height: 50vh !important;
-  max-height: 400px !important;
-  margin: 0 auto;
-  border: 2px solid #3b82f6;
-  border-radius: 12px;
-}
-
-.test-mode-tablet {
-  width: 768px !important;
-  height: 450px !important;
-  max-height: 450px !important;
-  margin: 0 auto;
-  border: 2px solid #10b981;
-  border-radius: 12px;
-}
-
-.test-mode-desktop {
-  width: 100% !important;
-  height: 700px !important;
-  max-height: 700px !important;
-  border: 2px solid #f59e0b;
-  border-radius: 12px;
-}
-
 /* Responsive text scaling */
 .responsive-hero h1 {
   font-size: clamp(1.25rem, 4vw, 3rem);
