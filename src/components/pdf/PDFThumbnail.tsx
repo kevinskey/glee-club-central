@@ -88,13 +88,15 @@ export const PDFThumbnail = ({
         >
           {numPages && (
             <Page 
-              pageNumber={1} 
+              pageNumber={1}
               loading=""
               error=""
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              width={200}
               className="max-w-full max-h-full"
+              scale={1}
+              width={undefined}
+              height={undefined}
             />
           )}
         </Document>
