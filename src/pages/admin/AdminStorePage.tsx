@@ -33,13 +33,7 @@ export default function AdminStorePage() {
   if (!canManageShop()) {
     return (
       <AdminLayout>
-        <div className="space-y-3">
-          <PageHeader
-            title="Store"
-            icon={<Lock className="h-6 w-6" />}
-            className="pb-4"
-          />
-          
+        <div className="space-y-1">
           <Card>
             <CardContent className="p-6 text-center">
               <Lock className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
@@ -56,15 +50,9 @@ export default function AdminStorePage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-3">
-        <PageHeader
-          title="Store"
-          icon={<ShoppingBag className="h-6 w-6" />}
-          className="pb-4"
-        />
-
-        <Tabs defaultValue="inventory" className="space-y-3">
-          <TabsList className="grid w-full grid-cols-6 h-8">
+      <div className="space-y-1">
+        <Tabs defaultValue="inventory" className="space-y-1">
+          <TabsList className="grid w-full grid-cols-6 h-7">
             <TabsTrigger value="inventory" className="flex items-center gap-1 text-xs px-2">
               <Package className="h-3 w-3" />
               Inventory
@@ -91,29 +79,29 @@ export default function AdminStorePage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="inventory" className="mt-2">
+          <TabsContent value="inventory" className="mt-1">
             <InventoryManager />
           </TabsContent>
 
-          <TabsContent value="products" className="mt-2">
+          <TabsContent value="products" className="mt-1">
             <ProductManagement />
           </TabsContent>
 
-          <TabsContent value="designer" className="mt-2">
+          <TabsContent value="designer" className="mt-1">
             <div className="bg-white rounded-lg shadow-sm border">
               <DesignStudio />
             </div>
           </TabsContent>
 
-          <TabsContent value="orders" className="mt-2">
+          <TabsContent value="orders" className="mt-1">
             <OrderManagement />
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-2">
+          <TabsContent value="analytics" className="mt-1">
             <StoreAnalytics />
           </TabsContent>
 
-          <TabsContent value="settings" className="mt-2">
+          <TabsContent value="settings" className="mt-1">
             <StoreSettings />
           </TabsContent>
         </Tabs>
