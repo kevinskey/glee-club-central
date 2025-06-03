@@ -157,10 +157,10 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  // Create seamless infinite scroll by repeating content multiple times with better spacing
-  const newsContent = newsItems.map(item => item.headline).join(' • • • ');
+  // Create seamless infinite scroll by repeating content multiple times with increased spacing
+  const newsContent = newsItems.map(item => item.headline).join('           '); // 75% more spaces (from 7 to 11 spaces)
   // Repeat the content multiple times to ensure seamless infinite scroll
-  const repeatedContent = Array(8).fill(newsContent).join(' • • • ');
+  const repeatedContent = Array(8).fill(newsContent).join('           '); // 75% more spaces between repeats
 
   if (isLoading) {
     return (
