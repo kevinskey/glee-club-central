@@ -37,7 +37,8 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
     );
   }
 
-  console.log('🎭 Hero: Rendering background for slide:', currentSlide);
+  console.log('🎭 Hero: Current slide:', currentSlide);
+  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, url: m.file_url })));
   
   if (currentSlide.media_id && isYouTubeEmbed(currentSlide.media_id)) {
     return (
@@ -57,7 +58,12 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
 
   const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
   
+  console.log('🎭 Hero: Looking for media with ID:', currentSlide.media_id);
+  console.log('🎭 Hero: Found media:', currentMedia);
+  
   if (currentMedia && currentMedia.file_url) {
+    console.log('🎭 Hero: Rendering media with URL:', currentMedia.file_url);
+    
     return currentSlide.media_type === 'video' ? (
       <video
         key={currentMedia.id}
@@ -71,20 +77,32 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
         loop
         playsInline
         style={{ aspectRatio: '16/9' }}
+        onError={(e) => {
+          console.error('🎭 Hero: Video failed to load:', currentMedia.file_url);
+        }}
       />
     ) : (
       <img
         key={currentMedia.id}
         src={currentMedia.file_url}
-        alt={currentMedia.title}
+        alt={currentMedia.title || 'Hero image'}
         className={cn(
           "absolute inset-0 w-full h-full object-cover",
           getAnimationClass()
         )}
         style={{ aspectRatio: '16/9' }}
+        onLoad={() => {
+          console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
+        }}
+        onError={(e) => {
+          console.error('🎭 Hero: Image failed to load:', currentMedia.file_url);
+          console.error('🎭 Hero: Error details:', e);
+        }}
       />
     );
   }
+
+  console.log('🎭 Hero: No media found, using fallback background');
 
   // Default placeholder background with fixed SVG
   return (
