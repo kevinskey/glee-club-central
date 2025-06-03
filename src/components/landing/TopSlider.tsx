@@ -10,6 +10,8 @@ interface TopSliderItem {
   title: string;
   description?: string;
   image_url?: string;
+  youtube_url?: string;
+  media_id?: string;
   link_url?: string;
   background_color?: string;
   text_color?: string;
@@ -23,6 +25,13 @@ interface TopSliderProps {
   height?: string;
   className?: string;
 }
+
+// Function to extract YouTube video ID from URL
+const getYouTubeVideoId = (url: string): string | null => {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
 
 export function TopSlider({ 
   autoPlay = true, 
@@ -39,13 +48,27 @@ export function TopSlider({
     try {
       const { data, error } = await supabase
         .from('top_slider_items')
-        .select('*')
+        .select(`
+          *,
+          media_library!left(
+            id,
+            file_url,
+            title as media_title
+          )
+        `)
         .eq('visible', true)
         .order('display_order', { ascending: true });
 
       if (error) throw error;
 
-      setSlides(data || []);
+      // Process slides to include media library images
+      const processedSlides = data?.map(slide => ({
+        ...slide,
+        // Use media library image if available, otherwise use direct image_url
+        computed_image_url: slide.media_library?.file_url || slide.image_url
+      })) || [];
+
+      setSlides(processedSlides);
     } catch (error) {
       console.error('Error fetching top slider items:', error);
     } finally {
@@ -96,6 +119,7 @@ export function TopSlider({
   }
 
   const currentSlideData = slides[currentSlide];
+  const youtubeVideoId = currentSlideData.youtube_url ? getYouTubeVideoId(currentSlideData.youtube_url) : null;
 
   return (
     <div 
@@ -105,17 +129,37 @@ export function TopSlider({
       onMouseLeave={handleMouseLeave}
     >
       {/* Background */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          backgroundColor: currentSlideData.background_color || '#4F46E5',
-          backgroundImage: currentSlideData.image_url ? `url(${currentSlideData.image_url})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {currentSlideData.image_url && (
-          <div className="absolute inset-0 bg-black/20"></div>
+      <div className="absolute inset-0">
+        {youtubeVideoId ? (
+          // YouTube video background
+          <div className="relative w-full h-full">
+            <iframe
+              src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              style={{
+                transform: 'scale(1.2)', // Scale to hide controls
+                transformOrigin: 'center center'
+              }}
+              allow="autoplay; encrypted-media"
+              allowFullScreen={false}
+            />
+            <div className="absolute inset-0 bg-black/20"></div>
+          </div>
+        ) : (
+          // Image or color background
+          <div 
+            className="w-full h-full"
+            style={{
+              backgroundColor: currentSlideData.background_color || '#4F46E5',
+              backgroundImage: currentSlideData.computed_image_url ? `url(${currentSlideData.computed_image_url})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            {currentSlideData.computed_image_url && (
+              <div className="absolute inset-0 bg-black/20"></div>
+            )}
+          </div>
         )}
       </div>
 

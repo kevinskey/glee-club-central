@@ -1472,6 +1472,48 @@ export type Database = {
           },
         ]
       }
+      top_slider_items: {
+        Row: {
+          background_color: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          link_url: string | null
+          text_color: string | null
+          title: string
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          background_color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          text_color?: string | null
+          title: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          background_color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       tour_assignments: {
         Row: {
           created_at: string | null
