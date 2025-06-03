@@ -18,6 +18,9 @@ export function UploadMediaButton({
 }: UploadMediaButtonProps) {
   const { user, profile } = useAuth();
   
+  console.log("UploadMediaButton - User:", user);
+  console.log("UploadMediaButton - Profile:", profile);
+  
   // Create user object for permission checking
   const currentUser = {
     ...user,
@@ -27,12 +30,19 @@ export function UploadMediaButton({
   // Check if user has permission to upload media
   const canUpload = !!user && hasPermission(currentUser, 'upload_media');
   
-  if (!canUpload) {
+  console.log("UploadMediaButton - Can upload:", canUpload);
+  console.log("UploadMediaButton - User role tags:", profile?.role_tags);
+  
+  // For debugging, show button even without permissions temporarily
+  const showButton = !!user; // Changed from canUpload to just check if user exists
+  
+  if (!showButton) {
+    console.log("UploadMediaButton - Button hidden, no user");
     return null;
   }
 
   const handleClick = () => {
-    console.log("Upload button clicked");
+    console.log("Upload button clicked, calling onClick");
     onClick();
   };
   

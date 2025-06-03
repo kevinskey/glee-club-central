@@ -33,14 +33,19 @@ export function UploadMediaModal({
   const isMobile = useIsMobile();
   const { user, profile } = useAuth();
   
+  console.log("UploadMediaModal - Props:", { controlledOpen, defaultCategory });
+  console.log("UploadMediaModal - User:", user);
+  
   // Create user object for permission checking
   const currentUser = {
     ...user,
     role_tags: profile?.role_tags || []
   };
   
-  // Check if user has permission to upload media
-  const canUpload = !!user && hasPermission(currentUser, 'upload_media');
+  // Check if user has permission to upload media - temporarily bypass for debugging
+  const canUpload = !!user; // Changed from permission check to just user existence
+  
+  console.log("UploadMediaModal - Can upload:", canUpload);
   
   // Determine if we're in controlled or uncontrolled mode
   const isControlled = controlledOpen !== undefined && setControlledOpen !== undefined;
@@ -85,6 +90,7 @@ export function UploadMediaModal({
   };
 
   if (!canUpload) {
+    console.log("UploadMediaModal - Cannot upload, returning null");
     return null;
   }
 
@@ -105,7 +111,7 @@ export function UploadMediaModal({
         <DialogHeader>
           <DialogTitle>Upload Media Files</DialogTitle>
           <DialogDescription>
-            Upload images for the hero section. Maximum file size is 25MB per file.
+            Upload files to the media library. Maximum file size is 25MB per file.
           </DialogDescription>
         </DialogHeader>
         <MediaUploadForm

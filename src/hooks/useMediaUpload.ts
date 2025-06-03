@@ -28,6 +28,7 @@ export function useMediaUpload(
   };
 
   const validateUpload = () => {
+    console.log("Validating upload - Files:", files.length, "Title:", title);
     if (files.length === 0 || !title) {
       toast("Missing information", {
         description: "Please fill in the title and select at least one file",
@@ -39,19 +40,28 @@ export function useMediaUpload(
   };
 
   const handleUpload = async () => {
+    console.log("handleUpload called - User:", user);
+    
     if (!user) {
+      console.log("No user found, showing error");
       toast.error("You must be logged in to upload files");
       return;
     }
     
-    if (!validateUpload()) return;
+    if (!validateUpload()) {
+      console.log("Validation failed");
+      return;
+    }
     
+    console.log("Starting upload process");
     setUploading(true);
     setUploadProgress(0);
     
     try {
       const totalFiles = files.length;
       let completedFiles = 0;
+      
+      console.log(`Processing ${totalFiles} files`);
       
       // Process each file
       for (const [index, file] of files.entries()) {
@@ -67,19 +77,31 @@ export function useMediaUpload(
           ? `${title} ${index + 1}` 
           : title;
         
+        console.log(`Uploading to storage: ${filePath}`);
+        
         // Upload file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('media-library')
           .upload(filePath, file);
           
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error("Storage upload error:", uploadError);
+          throw uploadError;
+        }
+        
+        console.log("File uploaded to storage, getting public URL");
         
         // Get public URL
         const { data: publicURLData } = supabase.storage
           .from('media-library')
           .getPublicUrl(filePath);
           
-        if (!publicURLData) throw new Error("Failed to get public URL");
+        if (!publicURLData) {
+          console.error("Failed to get public URL");
+          throw new Error("Failed to get public URL");
+        }
+        
+        console.log("Got public URL, inserting into database");
         
         // Store media metadata in database with file size
         const { error: dbError } = await supabase
@@ -96,7 +118,10 @@ export function useMediaUpload(
             size: file.size // Explicitly store the file size
           });
           
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error("Database insertion error:", dbError);
+          throw dbError;
+        }
         
         // Update progress
         completedFiles++;
@@ -105,11 +130,13 @@ export function useMediaUpload(
         console.log(`Successfully uploaded ${file.name} with size ${file.size} bytes`);
       }
       
+      console.log("All files uploaded successfully");
       toast.success(`Successfully uploaded ${files.length} file(s)`);
       
       // Reset form and call completion handler
       resetForm();
       if (onUploadComplete) {
+        console.log("Calling onUploadComplete");
         onUploadComplete();
       }
       

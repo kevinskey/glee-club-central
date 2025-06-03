@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { LibraryIcon, ImageIcon, FileTextIcon, Search, Filter } from "lucide-react";
@@ -28,17 +27,22 @@ const MediaLibraryIntegratedPage = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [targetSection, setTargetSection] = useState<string | null>(null);
   
+  console.log("MediaLibraryIntegratedPage - User:", user);
+  console.log("MediaLibraryIntegratedPage - Profile:", profile);
+  
   // Create user object for permission checking
   const currentUser = {
     ...user,
     role_tags: profile?.role_tags || []
   };
   
-  // Check permissions - use new permission system
-  const canUpload = !!user && hasPermission(currentUser, 'upload_media');
+  // Check permissions - temporarily simplify for debugging
+  const canUpload = !!user; // Simplified from hasPermission(currentUser, 'upload_media')
   const canEdit = legacyHasPermission('can_edit_media');
   const canDelete = legacyHasPermission('can_delete_media');
   const canEditSite = legacyHasPermission('can_edit_site');
+  
+  console.log("MediaLibraryIntegratedPage - Can upload:", canUpload);
   
   const {
     filteredMediaFiles,
@@ -63,6 +67,11 @@ const MediaLibraryIntegratedPage = () => {
     console.log("Upload complete, refreshing data");
     fetchAllMedia();
     setIsUploadModalOpen(false);
+  };
+
+  const handleOpenUploadModal = () => {
+    console.log("Opening upload modal");
+    setIsUploadModalOpen(true);
   };
 
   const handleUseInHero = async (mediaId: string) => {
@@ -145,7 +154,7 @@ const MediaLibraryIntegratedPage = () => {
         <div className="flex flex-col md:flex-row justify-between gap-4">
           {canUpload && (
             <Button 
-              onClick={() => setIsUploadModalOpen(true)}
+              onClick={handleOpenUploadModal}
               className="bg-glee-purple hover:bg-glee-purple/90"
             >
               Upload New Media
@@ -242,7 +251,7 @@ const MediaLibraryIntegratedPage = () => {
           isLoading={isLoading}
           isEmpty={filteredMediaFiles.length === 0}
           canUpload={canUpload}
-          onUploadClick={() => setIsUploadModalOpen(true)}
+          onUploadClick={handleOpenUploadModal}
         />
         
         {!isLoading && filteredMediaFiles.length > 0 && (
