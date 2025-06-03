@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, HeroSettings, MediaFile } from '../types';
+import { validateHeroSlideMedia } from '@/utils/heroMediaSync';
 
 export function useHeroData(sectionId: string) {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -15,6 +16,9 @@ export function useHeroData(sectionId: string) {
       setIsLoading(true);
       setError(null);
       console.log('🎭 Hero: Fetching data for section:', sectionId);
+      
+      // First, validate and clean up any orphaned hero slides
+      await validateHeroSlideMedia();
       
       // Fetch slides, settings, and media files in parallel
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([

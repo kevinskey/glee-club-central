@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { MediaFile } from "@/types/media";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { MediaType } from "@/utils/mediaUtils";
+import { removeMediaFromHeroSlides } from "@/utils/heroMediaSync";
 
 export function useMediaLibrary() {
   const [loading, setLoading] = useState(true);
@@ -141,6 +141,12 @@ export function useMediaLibrary() {
     if (!mediaToDelete) return;
 
     try {
+      console.log(`🗑️ Deleting media file: ${mediaToDelete.id}`);
+      
+      // First, clean up any hero slides that reference this media
+      await removeMediaFromHeroSlides(mediaToDelete.id);
+
+      // Then delete the media file
       const { data, error } = await supabase
         .from('media_library')
         .delete()
@@ -150,10 +156,11 @@ export function useMediaLibrary() {
 
       setAllMediaFiles(allMediaFiles.filter((media) => media.id !== mediaToDelete.id));
       setFilteredMediaFiles(filteredMediaFiles.filter((media) => media.id !== mediaToDelete.id));
-      toast("Media file deleted successfully!");
+      toast.success("Media file deleted successfully!");
+      
     } catch (error: any) {
       console.error("Error deleting media:", error);
-      toast("Error deleting media: " + (error.message || "An unexpected error occurred"));
+      toast.error("Error deleting media: " + (error.message || "An unexpected error occurred"));
     } finally {
       setIsDeleteConfirmationOpen(false);
       setMediaToDelete(null);
@@ -218,6 +225,11 @@ export function useMediaLibrary() {
   // Added new function for deleting a media item
   const deleteMediaItem = async (mediaId: string) => {
     try {
+      console.log(`🗑️ Deleting media item: ${mediaId}`);
+      
+      // First, clean up any hero slides that reference this media
+      await removeMediaFromHeroSlides(mediaId);
+
       const { error } = await supabase
         .from('media_library')
         .delete()
@@ -227,11 +239,11 @@ export function useMediaLibrary() {
 
       setAllMediaFiles(allMediaFiles.filter((media) => media.id !== mediaId));
       setFilteredMediaFiles(filteredMediaFiles.filter((media) => media.id !== mediaId));
-      toast("Media file deleted successfully!");
+      toast.success("Media file deleted successfully!");
       return true;
     } catch (error: any) {
       console.error("Error deleting media:", error);
-      toast("Error deleting media: " + (error.message || "An unexpected error occurred"));
+      toast.error("Error deleting media: " + (error.message || "An unexpected error occurred"));
       return false;
     }
   };
