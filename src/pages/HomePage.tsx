@@ -34,7 +34,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden m-0 p-0">
+    <div className="min-h-screen overflow-x-hidden m-0 p-0 bg-white dark:bg-gray-900">
       <Header />
       <HeroSection />
       <HomePageContent

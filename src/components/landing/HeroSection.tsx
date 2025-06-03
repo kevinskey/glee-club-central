@@ -6,12 +6,13 @@ export function HeroSection() {
   console.log('🎭 HeroSection: Rendering homepage hero');
   
   return (
-    <section className="relative">
+    <section className="relative w-full">
       <UniversalHero 
         sectionId="homepage-main"
         height="standard"
         showNavigation={true}
         enableAutoplay={true}
+        className="w-full"
       />
     </section>
   );
