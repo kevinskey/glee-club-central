@@ -55,8 +55,27 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
     mediaFilesCount: mediaFiles.length
   });
 
+  // If slide has no media_id, show gradient background immediately
+  if (!currentSlide.media_id) {
+    console.log('🎭 Hero: Slide has no media_id, showing gradient background');
+    return (
+      <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+        <div className="absolute inset-0 bg-black/30"></div>
+        {/* Add subtle pattern for texture */}
+        <div className="absolute inset-0 opacity-10">
+          <div 
+            className="w-full h-full bg-repeat" 
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+            }}
+          ></div>
+        </div>
+      </div>
+    );
+  }
+
   // Handle YouTube embeds
-  if (currentSlide.media_id && isYouTubeEmbed(currentSlide.media_id)) {
+  if (isYouTubeEmbed(currentSlide.media_id)) {
     console.log('🎭 Hero: Rendering YouTube embed:', currentSlide.media_id);
     return (
       <iframe
@@ -74,22 +93,20 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
   }
 
   // Find the media file
-  const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
+  const currentMedia = mediaFiles.find(m => m.id === currentSlide.media_id);
   
   // Debug media lookup
-  if (currentSlide.media_id) {
-    console.log('🎭 Hero: Looking for media_id:', currentSlide.media_id);
-    console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, title: m.title })));
-    
-    if (currentMedia) {
-      console.log('🎭 Hero: ✅ Found media file:', currentMedia);
-    } else {
-      console.log('🎭 Hero: ❌ Media file not found for media_id:', currentSlide.media_id);
-    }
+  console.log('🎭 Hero: Looking for media_id:', currentSlide.media_id);
+  console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, title: m.title })));
+  
+  if (currentMedia) {
+    console.log('🎭 Hero: ✅ Found media file:', currentMedia);
+  } else {
+    console.log('🎭 Hero: ❌ Media file not found for media_id:', currentSlide.media_id);
   }
   
   // If slide has media_id but media not found, show slide with fallback background
-  if (currentSlide.media_id && !currentMedia) {
+  if (!currentMedia) {
     console.log('🎭 Hero: Media file not found, showing slide with fallback background');
     
     return (
