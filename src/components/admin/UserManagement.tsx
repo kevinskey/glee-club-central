@@ -17,12 +17,14 @@ import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
+import { MemberCSVUpload } from '@/components/members/MemberCSVUpload';
 import { toast } from 'sonner';
 import { UserManagementData } from '@/services/userManagementService';
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const { 
     users, 
     isLoading, 
@@ -86,6 +88,15 @@ export default function UserManagement() {
   const handleUserAdded = () => {
     refreshUsers();
     setShowAddDialog(false);
+  };
+
+  const handleImportUsers = () => {
+    setShowImportDialog(true);
+  };
+
+  const handleImportComplete = () => {
+    setShowImportDialog(false);
+    refreshUsers();
   };
 
   const handleRefresh = async () => {
@@ -194,8 +205,23 @@ export default function UserManagement() {
           isOpen={showAddDialog} 
           onClose={() => setShowAddDialog(false)}
           onCreateUser={handleUserAdded}
-          onImportUsers={handleUserAdded}
+          onImportUsers={handleImportUsers}
         />
+
+        {/* Import Users Dialog */}
+        {showImportDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Import Users from CSV</h2>
+                <Button variant="ghost" onClick={() => setShowImportDialog(false)}>
+                  ×
+                </Button>
+              </div>
+              <MemberCSVUpload onComplete={handleImportComplete} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
