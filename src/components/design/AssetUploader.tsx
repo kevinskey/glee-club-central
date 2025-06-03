@@ -92,7 +92,23 @@ export function AssetUploader() {
         }
       }
 
-      // Create database record
+      // Determine if this is a ZIP file
+      const isZipFile = selectedFile.type === 'application/zip' || 
+                       selectedFile.name.toLowerCase().endsWith('.zip') ||
+                       selectedFile.name.toLowerCase().endsWith('.rar') ||
+                       selectedFile.name.toLowerCase().endsWith('.7z');
+
+      // For non-ZIP files, prepare the extracted_files array immediately
+      const extractedFiles = isZipFile ? [] : [
+        {
+          name: selectedFile.name,
+          path: filePath,
+          size: selectedFile.size,
+          type: selectedFile.type
+        }
+      ];
+
+      // Create database record with appropriate status
       const { data: assetData, error: dbError } = await supabase
         .from('design_assets')
         .insert({
@@ -100,7 +116,10 @@ export function AssetUploader() {
           file_path: filePath,
           file_size: selectedFile.size,
           file_type: selectedFile.type,
-          uploaded_by: user.id
+          uploaded_by: user.id,
+          extraction_status: isZipFile ? 'pending' : 'completed',
+          extracted_files: extractedFiles,
+          extracted_at: isZipFile ? null : new Date().toISOString()
         })
         .select()
         .single();
@@ -117,7 +136,7 @@ export function AssetUploader() {
       await loadAssets();
 
       // Auto-extract if it's a ZIP file
-      if (selectedFile.type === 'application/zip' || selectedFile.name.endsWith('.zip')) {
+      if (isZipFile) {
         await extractAsset(assetData.id);
       }
 
@@ -204,6 +223,23 @@ export function AssetUploader() {
     }
   };
 
+  const getStatusText = (status: string, fileName: string) => {
+    const isZipFile = fileName.toLowerCase().match(/\.(zip|rar|7z)$/);
+    
+    switch (status) {
+      case 'completed':
+        return 'Ready';
+      case 'failed':
+        return 'Failed';
+      case 'extracting':
+        return 'Extracting...';
+      case 'pending':
+        return isZipFile ? 'Ready to extract' : 'Processing...';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -279,8 +315,8 @@ export function AssetUploader() {
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusIcon(asset.extraction_status, asset.id)}
-                    <span className="text-sm capitalize">{asset.extraction_status}</span>
-                    {asset.extraction_status === 'pending' && asset.file_name.endsWith('.zip') && (
+                    <span className="text-sm">{getStatusText(asset.extraction_status, asset.file_name)}</span>
+                    {asset.extraction_status === 'pending' && asset.file_name.toLowerCase().match(/\.(zip|rar|7z)$/) && (
                       <Button
                         size="sm"
                         variant="outline"
