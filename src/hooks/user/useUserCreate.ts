@@ -36,11 +36,25 @@ export const useUserCreate = (
           return false;
         }
         
+        // Normalize email
+        const normalizedEmail = userData.email.trim().toLowerCase();
+        console.log('Normalized email:', normalizedEmail);
+        
+        // Check if user already exists in auth.users by email
+        const { data: existingUser } = await supabase.auth.admin.listUsers();
+        const emailExists = existingUser.users?.some(user => user.email === normalizedEmail);
+        
+        if (emailExists) {
+          console.error('User with this email already exists in auth');
+          toast.error('A user with this email already exists');
+          return false;
+        }
+        
         // Check if user already exists in profiles table
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('id')
-          .eq('id', userData.email)
+          .eq('id', normalizedEmail)
           .single();
           
         if (existingProfile) {
@@ -54,14 +68,14 @@ export const useUserCreate = (
         
         // Create the user in auth with metadata - ensure email is included
         const { data: authData, error: authError } = await supabase.auth.signUp({
-          email: userData.email.trim().toLowerCase(), // Normalize email
+          email: normalizedEmail,
           password: userData.password,
           options: {
             data: {
               first_name: userData.first_name,
               last_name: userData.last_name,
               role: isAdmin ? 'admin' : 'member',
-              email: userData.email.trim().toLowerCase() // Include in metadata too
+              email: normalizedEmail // Include in metadata too
             }
           }
         });
@@ -117,6 +131,8 @@ export const useUserCreate = (
           updated_at: new Date().toISOString()
         };
         
+        console.log('Updating profile with data:', updateData);
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .update(updateData)
@@ -134,7 +150,7 @@ export const useUserCreate = (
         if (setUsers) {
           const newUser: User = {
             id: authData.user.id,
-            email: userData.email.trim().toLowerCase(), // Ensure email is saved
+            email: normalizedEmail, // Use normalized email
             first_name: userData.first_name,
             last_name: userData.last_name,
             phone: userData.phone || null,

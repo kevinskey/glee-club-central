@@ -259,7 +259,14 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
           } else if (systemField === 'email') {
             // Ensure email is properly formatted and normalized
             value = value.toLowerCase().trim();
-            console.log('Processing email:', value);
+            console.log('Processing email from CSV:', value);
+            
+            // Additional email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(value)) {
+              console.error('Invalid email format in CSV:', value);
+              return null;
+            }
           }
           
           mapped[systemField] = value;
@@ -267,19 +274,30 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       }
     });
 
-    // Validate required fields
+    // Validate required fields with detailed logging
     if (!mapped.email || !mapped.first_name || !mapped.last_name) {
-      console.error('Missing required fields for row:', mapped);
+      console.error('Missing required fields for row:', {
+        row: index + 2,
+        email: mapped.email,
+        first_name: mapped.first_name,
+        last_name: mapped.last_name,
+        allMapped: mapped
+      });
       return null;
     }
 
-    console.log('Mapped row data:', mapped);
+    console.log('Successfully mapped row data:', {
+      email: mapped.email,
+      first_name: mapped.first_name,
+      last_name: mapped.last_name
+    });
     return mapped as MappedRow;
   };
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
       console.log('Creating user with email:', userData.email);
+      console.log('User data being processed:', userData);
       
       // Validate email format before proceeding
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -322,16 +340,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         is_admin: validRole === 'admin'
       };
 
-      console.log('Submitting user form data:', userFormData);
+      console.log('Submitting user form data with email:', userFormData.email);
 
       // Create user using the existing hook
       const success = await addUser(userFormData);
       
       if (!success) {
-        throw new Error('Failed to create user');
+        throw new Error('Failed to create user - addUser returned false');
       }
+      
+      console.log('User creation successful for email:', userData.email);
     } catch (error: any) {
-      console.error('Error in createUser:', error);
+      console.error('Error in createUser for email:', userData.email, error);
       throw error;
     }
   };
