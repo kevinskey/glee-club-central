@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, HeroSettings, MediaFile } from '../types';
@@ -61,32 +60,39 @@ export function useHeroData(sectionId: string) {
       const fetchedSlides = slidesResult.data || [];
       const fetchedMedia = mediaResult.data || [];
 
-      console.log('🎭 Hero: Visible slides fetched:', fetchedSlides.length);
+      console.log('🎭 Hero: Raw slides fetched:', fetchedSlides.length);
       console.log('🎭 Hero: Media library count:', fetchedMedia.length);
+      console.log('🎭 Hero: Slide details:', fetchedSlides.map(s => ({
+        id: s.id,
+        title: s.title,
+        media_id: s.media_id,
+        section_id: s.section_id,
+        visible: s.visible
+      })));
 
-      // Filter out slides that have invalid media references, but don't auto-clean
-      const validSlides = fetchedSlides.filter(slide => {
+      // Instead of filtering out slides with missing media, keep them and handle gracefully
+      const allSlides = fetchedSlides.map(slide => {
         if (!slide.media_id) {
-          console.log('🎭 Hero: Slide has no media_id, keeping:', slide.id);
-          return true; // Allow slides without media
+          console.log('🎭 Hero: Slide has no media_id:', slide.id);
+          return slide;
         }
         
         if (slide.media_id.includes('youtube.com/embed/')) {
-          console.log('🎭 Hero: YouTube embed slide, keeping:', slide.id);
-          return true; // Allow YouTube embeds
+          console.log('🎭 Hero: YouTube embed slide:', slide.id);
+          return slide;
         }
         
         const mediaExists = fetchedMedia.some(media => media.id === slide.media_id);
         if (!mediaExists) {
-          console.warn(`🎭 Hero: Slide ${slide.id} (${slide.title}) has invalid media reference ${slide.media_id} - hiding from display`);
+          console.warn(`🎭 Hero: Slide ${slide.id} (${slide.title}) has missing media ${slide.media_id} - will show with fallback`);
         }
-        return mediaExists;
+        return slide;
       });
 
-      console.log('🎭 Hero: Valid slides after filtering:', validSlides.length);
+      console.log('🎭 Hero: All slides to display:', allSlides.length);
 
       setMediaFiles(fetchedMedia);
-      setSlides(validSlides);
+      setSlides(allSlides); // Show all slides, even those with missing media
     } catch (error) {
       console.error('🎭 Hero: Error fetching hero data:', error);
       setError(error instanceof Error ? error.message : 'Failed to load hero data');

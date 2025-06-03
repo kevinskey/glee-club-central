@@ -32,6 +32,7 @@ export function ModernHeroSection({
     if (!isLoading && slides.length >= 0) {
       setIsInitialized(true);
       hasValidSlidesRef.current = slides.length > 0;
+      console.log('🎭 Hero: Initialized with slides:', slides.length);
     }
   }, [isLoading, slides.length]);
 
@@ -149,6 +150,7 @@ export function ModernHeroSection({
 
   // Show loading state only initially
   if (isLoading && !isInitialized) {
+    console.log('🎭 Hero: Showing loading state');
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
@@ -166,6 +168,7 @@ export function ModernHeroSection({
 
   // Show error state with fallback content
   if (error && isInitialized) {
+    console.log('🎭 Hero: Showing error state with fallback');
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -183,8 +186,9 @@ export function ModernHeroSection({
     );
   }
 
-  // Show default content when no slides or still loading
+  // Show slides or default content when initialized
   if (!isInitialized || slides.length === 0) {
+    console.log('🎭 Hero: Showing default content - no slides available');
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -204,6 +208,8 @@ export function ModernHeroSection({
 
   const currentSlideData = slides[currentSlide];
   const textSizes = getTextSizeClasses();
+
+  console.log('🎭 Hero: Rendering slide', currentSlide + 1, 'of', slides.length, ':', currentSlideData.title);
 
   return (
     <section 
