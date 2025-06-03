@@ -17,8 +17,8 @@ import TreasurerDashboard from "./pages/dashboard/TreasurerDashboard";
 import LibrarianDashboard from "./pages/dashboard/LibrarianDashboard";
 import HistorianDashboard from "./pages/dashboard/HistorianDashboard";
 import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
-import { adminRoutes } from "./routes/adminRoutes";
-import { dashboardRoutes } from "./routes/dashboardRoutes";
+import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "contact",
         element: <ContactPage />,
+      },
+      {
+        path: "calendar",
+        element: <EnhancedCalendarPage />,
       },
       {
         path: "login",
@@ -85,10 +89,10 @@ const router = createBrowserRouter([
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
       },
-      // Include dashboard routes
-      ...dashboardRoutes,
-      // Include all admin routes (using the new unified dashboard)
-      ...adminRoutes,
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
     ],
   },
 ]);
