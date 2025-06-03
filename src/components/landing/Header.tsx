@@ -17,7 +17,6 @@ export function Header() {
   const isMobile = useIsMobile();
   
   const handleDashboardClick = () => {
-    // Check if user is known admin or has admin role
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
     const hasAdminRole = isAdmin();
     
@@ -43,31 +42,31 @@ export function Header() {
       
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full">
         <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between">
-          {/* Left side: Logo and site name */}
-          <div className="flex items-center gap-4">
-            <HeaderLogo />
-          </div>
+          {/* Logo */}
+          <HeaderLogo />
           
-          {/* Middle: Navigation Links - Desktop only */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              Home
-            </Link>
-            <Link to="/about" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              About
-            </Link>
-            <Link to="/calendar" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              Calendar
-            </Link>
-            <Link to="/store" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              Store
-            </Link>
-            <Link to="/contact" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
-              Contact
-            </Link>
-          </nav>
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <nav className="flex items-center space-x-6">
+              <Link to="/" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                Home
+              </Link>
+              <Link to="/about" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                About
+              </Link>
+              <Link to="/calendar" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                Calendar
+              </Link>
+              <Link to="/store" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                Store
+              </Link>
+              <Link to="/contact" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                Contact
+              </Link>
+            </nav>
+          )}
           
-          {/* Right side: Auth buttons, Actions and Mobile Nav */}
+          {/* Right Side Actions */}
           <div className="flex items-center gap-2">
             {/* Desktop Auth Buttons */}
             {!isMobile && (
@@ -115,10 +114,9 @@ export function Header() {
               </>
             )}
             
-            {/* Mobile Navigation */}
+            {/* Mobile Actions */}
             {isMobile && (
               <div className="flex items-center gap-2">
-                {/* Mobile Auth Button */}
                 {isAuthenticated ? (
                   <Button 
                     variant="default"
