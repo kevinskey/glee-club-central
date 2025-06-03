@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -223,9 +224,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       errors: []
     };
 
-    const batchSize = 3; // Process 3 users at a time
-    const batchDelay = 10000; // 10 second delay between batches
-    const userDelay = 2000; // 2 second delay between individual users
+    const batchSize = 5; // Increased from 3 to 5
+    const batchDelay = 3000; // Reduced from 10s to 3s
+    const userDelay = 500; // Reduced from 2s to 0.5s
 
     console.log(`Starting batch upload of ${csvData.length} users in batches of ${batchSize}`);
 

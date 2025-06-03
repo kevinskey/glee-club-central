@@ -368,9 +368,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     setUploadResult(null);
 
     const result: UploadResult = { success: 0, errors: [] };
-    const batchSize = 3; // Process 3 users at a time
-    const batchDelay = 10000; // 10 second delay between batches
-    const userDelay = 2000; // 2 second delay between individual users
+    const batchSize = 5; // Increased batch size from 3 to 5
+    const batchDelay = 3000; // Reduced delay from 10s to 3s
+    const userDelay = 500; // Reduced delay from 2s to 0.5s
 
     console.log(`Starting batch upload of ${dataRows.length} users in batches of ${batchSize}`);
 

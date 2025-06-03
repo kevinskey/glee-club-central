@@ -87,7 +87,7 @@ export const useUserCreate = (
           if (authError.message.includes('rate limit') || authError.message.includes('429')) {
             attempt++;
             if (attempt < maxRetries) {
-              const delay = Math.pow(2, attempt) * 2000; // Exponential backoff: 4s, 8s, 16s
+              const delay = Math.pow(2, attempt) * 1000; // Reduced delay: 2s, 4s, 8s
               console.log(`Rate limit hit, retrying in ${delay}ms...`);
               await sleep(delay);
               continue;
@@ -113,8 +113,8 @@ export const useUserCreate = (
         
         console.log('Auth user created with ID:', authData.user.id, 'Email:', authData.user.email);
         
-        // Wait a moment to ensure the trigger has fired
-        await sleep(1500);
+        // Reduced wait time for trigger
+        await sleep(500);
         
         // Update the profile with additional data that wasn't in the trigger
         const updateData: any = {
@@ -177,7 +177,7 @@ export const useUserCreate = (
         if (err.message?.includes('rate limit') || err.message?.includes('429')) {
           attempt++;
           if (attempt < maxRetries) {
-            const delay = Math.pow(2, attempt) * 2000;
+            const delay = Math.pow(2, attempt) * 1000; // Reduced delay
             console.log(`Rate limit error, retrying in ${delay}ms...`);
             await sleep(delay);
             continue;
