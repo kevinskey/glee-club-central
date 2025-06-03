@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,11 +81,6 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
   };
 
   const handleSave = async () => {
-    if (!editData.title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
-
     setIsSaving(true);
     try {
       let updateData = { ...editData };
@@ -102,8 +96,8 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
         .update({
           media_id: updateData.media_id || null,
           media_type: updateData.media_type,
-          title: updateData.title.trim(),
-          description: updateData.description.trim(),
+          title: updateData.title.trim() || '',
+          description: updateData.description.trim() || '',
           button_text: updateData.button_text.trim() || null,
           button_link: updateData.button_link.trim() || null,
           text_position: updateData.text_position,
@@ -250,7 +244,9 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">{slide.title}</h3>
+                      <h3 className="text-lg font-semibold">
+                        {slide.title || 'Untitled Slide'}
+                      </h3>
                       <Badge variant={slide.visible ? "default" : "secondary"}>
                         {slide.visible ? 'Visible' : 'Hidden'}
                       </Badge>
@@ -260,14 +256,27 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                           {isYouTubeEmbed(slide.media_id) ? 'YouTube' : slide.media_type}
                         </Badge>
                       )}
+                      {!slide.title && !slide.description && !slide.button_text && slide.button_link && (
+                        <Badge variant="outline">
+                          Clickable Image
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-muted-foreground">{slide.description}</p>
+                    {slide.description && (
+                      <p className="text-muted-foreground">{slide.description}</p>
+                    )}
                     {slide.button_text && (
                       <div className="text-sm">
                         <span className="font-medium">Button:</span> {slide.button_text}
                         {slide.button_link && (
                           <span className="text-muted-foreground ml-2">→ {slide.button_link}</span>
                         )}
+                      </div>
+                    )}
+                    {!slide.button_text && slide.button_link && (
+                      <div className="text-sm">
+                        <span className="font-medium">Clickable Link:</span>
+                        <span className="text-muted-foreground ml-2">→ {slide.button_link}</span>
                       </div>
                     )}
                     <div className="text-sm text-muted-foreground">
@@ -294,12 +303,12 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">Title (Optional)</Label>
                     <Input
                       id="title"
                       value={editData.title}
                       onChange={(e) => setEditData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Slide title"
+                      placeholder="Leave empty for image-only slide"
                     />
                   </div>
                   <div className="space-y-2">
@@ -315,12 +324,12 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description (Optional)</Label>
                   <Textarea
                     id="description"
                     value={editData.description}
                     onChange={(e) => setEditData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Slide description"
+                    placeholder="Leave empty for image-only slide"
                     rows={3}
                   />
                 </div>
@@ -340,16 +349,16 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="button_text">Button Text</Label>
+                    <Label htmlFor="button_text">Button Text (Optional)</Label>
                     <Input
                       id="button_text"
                       value={editData.button_text}
                       onChange={(e) => setEditData(prev => ({ ...prev, button_text: e.target.value }))}
-                      placeholder="Call to action text"
+                      placeholder="Leave empty to make entire slide clickable"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="button_link">Button Link</Label>
+                    <Label htmlFor="button_link">Link URL</Label>
                     <Input
                       id="button_link"
                       value={editData.button_link}
@@ -357,6 +366,13 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                       placeholder="/events or https://example.com"
                     />
                   </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+                  <p className="text-sm text-blue-800">
+                    <strong>Tip:</strong> For image-only slides, leave title and description empty. 
+                    Add a link URL without button text to make the entire slide clickable.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
