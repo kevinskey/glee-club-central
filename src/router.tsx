@@ -11,6 +11,7 @@ import StorePage from "./pages/StorePage";
 import DesignStudioPage from "./pages/DesignStudioPage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
+import { adminRoutes } from "./routes/adminRoutes";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,8 @@ const router = createBrowserRouter([
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
       },
+      // Include all admin routes
+      ...adminRoutes,
     ],
   },
 ]);
