@@ -77,35 +77,41 @@ export function PerformanceSection() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          {upcomingPerformances.map((performance) => (
-            <Card key={performance.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-glee-purple mb-2">
-                      {performance.title}
-                    </h3>
-                    <div className="text-glee-spelman font-medium mb-1">
-                      {new Date(performance.date).toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })}
+        {/* Horizontal Scrolling Performance Cards */}
+        <div className="mb-12">
+          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory touch-pan-x">
+            {upcomingPerformances.map((performance) => (
+              <Card 
+                key={performance.id} 
+                className="flex-shrink-0 w-80 md:w-96 overflow-hidden hover:shadow-lg transition-shadow snap-start"
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-glee-purple mb-2">
+                        {performance.title}
+                      </h3>
+                      <div className="text-glee-spelman font-medium mb-1">
+                        {new Date(performance.date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </div>
+                      <div className="text-gray-600 mb-3">
+                        {performance.venue}
+                      </div>
                     </div>
-                    <div className="text-gray-600 mb-3">
-                      {performance.venue}
-                    </div>
+                    <Music className="h-8 w-8 text-glee-purple/30 flex-shrink-0" />
                   </div>
-                  <Music className="h-8 w-8 text-glee-purple/30 flex-shrink-0" />
-                </div>
-                <p className="text-gray-700 mb-4">
-                  {performance.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+                  <p className="text-gray-700 mb-4">
+                    {performance.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
 
         <div className="text-center">
