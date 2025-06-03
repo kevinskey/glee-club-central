@@ -75,7 +75,17 @@ export const useAINewsGeneration = () => {
     try {
       console.log('💾 Saving generated news to database:', content);
 
-      // Get current user session and user details
+      // First, let's test a simple query to see if we can access the profiles table
+      console.log('🔍 Testing profiles table access...');
+      const { data: testProfile, error: testError } = await supabase
+        .from('profiles')
+        .select('id, role, is_super_admin')
+        .eq('id', (await supabase.auth.getUser()).data.user?.id)
+        .maybeSingle();
+
+      console.log('🧪 Test query result:', { testProfile, testError });
+
+      // Get current user session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -88,30 +98,14 @@ export const useAINewsGeneration = () => {
         throw new Error('User not authenticated');
       }
 
-      console.log('👤 Current user from session:', session.user.id, session.user.email);
+      console.log('👤 Current user from session:', {
+        id: session.user.id,
+        email: session.user.email,
+        role: session.user.role
+      });
 
-      // Check user's profile and permissions
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, role, is_super_admin, first_name, last_name')
-        .eq('id', session.user.id)
-        .single();
-
-      if (profileError) {
-        console.error('❌ Profile fetch error:', profileError);
-        throw new Error('Failed to fetch user profile');
-      }
-
-      console.log('📋 User profile:', profile);
-
-      // Check if user has admin permissions
-      if (!profile.is_super_admin && profile.role !== 'admin') {
-        console.error('❌ User lacks admin permissions:', {
-          is_super_admin: profile.is_super_admin,
-          role: profile.role
-        });
-        throw new Error('Insufficient permissions to create news items');
-      }
+      // Let's try a direct insert without checking permissions first to isolate the issue
+      console.log('🚀 Attempting direct insert to news_items table...');
 
       const newsItem = {
         headline: content.headline,
@@ -125,7 +119,7 @@ export const useAINewsGeneration = () => {
         created_by: session.user.id
       };
 
-      console.log('📝 Inserting news item:', newsItem);
+      console.log('📝 Inserting news item with data:', newsItem);
 
       const { data: insertedNews, error } = await supabase
         .from('news_items')
@@ -134,13 +128,20 @@ export const useAINewsGeneration = () => {
         .single();
 
       if (error) {
-        console.error('❌ Error saving news item:', error);
-        console.error('❌ Error details:', {
+        console.error('❌ Insert error details:', {
           code: error.code,
           message: error.message,
           details: error.details,
-          hint: error.hint
+          hint: error.hint,
+          table: 'news_items',
+          operation: 'INSERT'
         });
+
+        // Let's also check what RLS policies are currently active
+        console.log('🔒 Checking current user auth context...');
+        const { data: authUser } = await supabase.auth.getUser();
+        console.log('👤 Auth user details:', authUser);
+
         throw error;
       }
 
