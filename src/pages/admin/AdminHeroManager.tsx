@@ -19,8 +19,11 @@ export default function AdminHeroManager() {
   const handleUploadComplete = () => {
     console.log("Upload completed in hero manager");
     setUploadModalOpen(false);
-    // Refresh the page or trigger a refresh of the hero manager
-    window.location.reload();
+    // Refresh the hero manager without full page reload
+    window.location.hash = '#refresh';
+    setTimeout(() => {
+      window.location.hash = '';
+    }, 100);
   };
 
   const handleValidateMedia = async () => {
@@ -28,6 +31,16 @@ export default function AdminHeroManager() {
     try {
       const result = await validateHeroSlideMedia();
       console.log('Validation result:', result);
+      
+      // Don't auto-refresh after validation
+      if (result.cleaned > 0) {
+        toast.info('Cleanup completed - you may need to refresh the page to see changes', {
+          action: {
+            label: 'Refresh Page',
+            onClick: () => window.location.reload()
+          }
+        });
+      }
     } catch (error) {
       console.error("Error validating media:", error);
     } finally {
@@ -44,6 +57,16 @@ export default function AdminHeroManager() {
     try {
       const result = await forceCleanupOrphanedSlides();
       console.log('Force cleanup result:', result);
+      
+      // Offer manual refresh instead of automatic
+      if (result.cleaned > 0) {
+        toast.success(`Force cleanup completed: Fixed ${result.cleaned} slides`, {
+          action: {
+            label: 'Refresh Page',
+            onClick: () => window.location.reload()
+          }
+        });
+      }
     } catch (error) {
       console.error("Error in force cleanup:", error);
     } finally {

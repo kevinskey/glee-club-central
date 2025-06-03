@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, HeroSettings, MediaFile } from '../types';
-import { validateHeroSlideMedia } from '@/utils/heroMediaSync';
 
 export function useHeroData(sectionId: string) {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -17,19 +16,7 @@ export function useHeroData(sectionId: string) {
       setError(null);
       console.log('🎭 Hero: Fetching data for section:', sectionId);
       
-      // First, validate and clean up any orphaned hero slides
-      await validateHeroSlideMedia();
-      
-      // Fetch ALL slides first to see what's in the database
-      const allSlidesResult = await supabase
-        .from('hero_slides')
-        .select('*')
-        .eq('section_id', sectionId);
-        
-      console.log('🎭 Hero: ALL slides in database for section:', allSlidesResult.data?.length || 0);
-      console.log('🎭 Hero: ALL slides data:', allSlidesResult.data);
-      
-      // Now fetch only visible slides
+      // Fetch slides without automatic cleanup to prevent loops
       const [slidesResult, settingsResult, mediaResult] = await Promise.all([
         supabase
           .from('hero_slides')
@@ -75,16 +62,9 @@ export function useHeroData(sectionId: string) {
       const fetchedMedia = mediaResult.data || [];
 
       console.log('🎭 Hero: Visible slides fetched:', fetchedSlides.length);
-      console.log('🎭 Hero: Visible slides details:', fetchedSlides.map(s => ({
-        id: s.id,
-        title: s.title,
-        media_id: s.media_id,
-        visible: s.visible
-      })));
       console.log('🎭 Hero: Media library count:', fetchedMedia.length);
-      console.log('🎭 Hero: Available media IDs:', fetchedMedia.map(m => m.id));
 
-      // Filter out slides that still have invalid media references
+      // Filter out slides that have invalid media references, but don't auto-clean
       const validSlides = fetchedSlides.filter(slide => {
         if (!slide.media_id) {
           console.log('🎭 Hero: Slide has no media_id, keeping:', slide.id);
@@ -98,15 +78,12 @@ export function useHeroData(sectionId: string) {
         
         const mediaExists = fetchedMedia.some(media => media.id === slide.media_id);
         if (!mediaExists) {
-          console.warn(`🎭 Hero: FILTERING OUT slide ${slide.id} (${slide.title}) with invalid media reference ${slide.media_id}`);
-        } else {
-          console.log(`🎭 Hero: Slide ${slide.id} has valid media reference ${slide.media_id}`);
+          console.warn(`🎭 Hero: Slide ${slide.id} (${slide.title}) has invalid media reference ${slide.media_id} - hiding from display`);
         }
         return mediaExists;
       });
 
       console.log('🎭 Hero: Valid slides after filtering:', validSlides.length);
-      console.log('🎭 Hero: Valid slides IDs:', validSlides.map(s => s.id));
 
       setMediaFiles(fetchedMedia);
       setSlides(validSlides);

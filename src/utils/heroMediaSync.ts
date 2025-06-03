@@ -132,7 +132,7 @@ export async function removeMediaFromHeroSlides(mediaId: string) {
 }
 
 /**
- * Validates and repairs hero slide media references
+ * Validates and repairs hero slide media references WITHOUT auto-refreshing
  */
 export async function validateHeroSlideMedia() {
   try {
