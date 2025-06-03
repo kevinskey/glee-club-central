@@ -29,7 +29,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   hideAfter = 8000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('fast');
+  const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('slow');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { isAdmin } = useAuth();
@@ -95,7 +95,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     };
   }, []);
 
-  // Static fallback news items
+  // Static fallback news items with space after icons
   const getStaticNewsItems = (): NewsItem[] => [
     {
       id: "static-1",
@@ -152,12 +152,18 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
       case 'slow': return 'animate-marquee-slow';
       case 'normal': return 'animate-marquee-normal'; 
       case 'fast': return 'animate-marquee-fast';
-      default: return 'animate-marquee-fast';
+      default: return 'animate-marquee-slow';
     }
   };
 
+  // Function to add space after icons
+  const formatHeadlineWithSpacedIcons = (headline: string) => {
+    // Add space after emojis/icons (Unicode ranges for various emoji)
+    return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '$1 ');
+  };
+
   // Create seamless infinite scroll by repeating content multiple times with 8 blank characters spacing
-  const newsContent = newsItems.map(item => item.headline).join('        '); // 8 blank characters
+  const newsContent = newsItems.map(item => formatHeadlineWithSpacedIcons(item.headline)).join('        '); // 8 blank characters
   // Repeat the content multiple times to ensure seamless infinite scroll
   const repeatedContent = Array(8).fill(newsContent).join('        '); // 8 blank characters between repeats
 
