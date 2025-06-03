@@ -267,6 +267,214 @@ p {
   }
 }
 
+/* Admin Panel Mobile Optimizations */
+@media (max-width: 768px) {
+  /* Admin Layout Container */
+  .admin-layout,
+  .min-h-screen.bg-gray-50 {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden;
+  }
+  
+  /* Admin Main Content */
+  .admin-content,
+  .px-4.py-4.max-w-7xl {
+    padding: clamp(8px, 2vw, 16px) !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+  
+  /* Admin Cards and Panels */
+  .admin-card,
+  [class*="card"] {
+    margin: clamp(8px, 2vw, 12px) 0 !important;
+    padding: clamp(12px, 3vw, 16px) !important;
+    border-radius: 8px;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  /* Admin Tabs */
+  .admin-tabs,
+  [data-orientation="horizontal"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .admin-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Admin Tab List */
+  .admin-tab-list,
+  [role="tablist"] {
+    display: flex !important;
+    gap: clamp(4px, 1vw, 8px) !important;
+    padding: clamp(4px, 1vw, 8px) !important;
+    min-width: max-content !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Admin Tab Triggers */
+  .admin-tab-trigger,
+  [role="tab"] {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
+    padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px) !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: clamp(4px, 1vw, 6px) !important;
+  }
+  
+  /* Admin Tab Content */
+  .admin-tab-content,
+  [role="tabpanel"] {
+    padding: clamp(8px, 2vw, 16px) 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+  }
+  
+  /* Admin Forms */
+  .admin-form {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .admin-form-group {
+    margin-bottom: clamp(12px, 3vw, 16px) !important;
+    width: 100% !important;
+  }
+  
+  .admin-form-label {
+    font-size: clamp(0.875rem, 2vw, 1rem) !important;
+    margin-bottom: clamp(4px, 1vw, 6px) !important;
+    display: block !important;
+  }
+  
+  .admin-form-input {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: clamp(8px, 2vw, 12px) !important;
+    font-size: clamp(0.875rem, 2vw, 1rem) !important;
+    box-sizing: border-box;
+  }
+  
+  /* Admin Buttons */
+  .admin-button {
+    min-height: 44px !important;
+    padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 20px) !important;
+    font-size: clamp(0.875rem, 2vw, 1rem) !important;
+    width: auto !important;
+    min-width: 44px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Admin Button Groups */
+  .admin-button-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: clamp(8px, 2vw, 12px) !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  
+  /* Admin Tables */
+  .admin-table-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    margin: clamp(8px, 2vw, 16px) 0 !important;
+  }
+  
+  .admin-table {
+    min-width: 600px !important; /* Minimum width for table readability */
+    width: 100% !important;
+  }
+  
+  /* Admin Page Header */
+  .admin-page-header {
+    padding: clamp(12px, 3vw, 20px) clamp(8px, 2vw, 16px) !important;
+    margin-bottom: clamp(8px, 2vw, 16px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+  
+  .admin-page-title {
+    font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+    margin-bottom: clamp(4px, 1vw, 8px) !important;
+    line-height: 1.2 !important;
+  }
+  
+  .admin-page-description {
+    font-size: clamp(0.875rem, 2.5vw, 1rem) !important;
+    line-height: 1.4 !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
+  
+  /* Design Studio Mobile Adjustments */
+  .design-studio-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
+  }
+  
+  .design-studio-header {
+    padding: clamp(12px, 3vw, 16px) !important;
+    font-size: clamp(1.125rem, 3vw, 1.5rem) !important;
+  }
+  
+  .design-studio-layout {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 60vh !important;
+  }
+  
+  .design-studio-sidebar {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 200px !important;
+    order: 2 !important;
+  }
+  
+  .design-studio-preview {
+    width: 100% !important;
+    height: 50vh !important;
+    min-height: 300px !important;
+    order: 1 !important;
+  }
+  
+  .design-studio-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    order: 3 !important;
+    border-left: none !important;
+    border-top: 1px solid hsl(var(--border)) !important;
+  }
+}
+
 /* PDF Viewer Mobile Optimizations */
 .pdf-mobile-container {
   position: fixed;
