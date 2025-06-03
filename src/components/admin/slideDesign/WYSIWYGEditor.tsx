@@ -133,6 +133,65 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
   const selectedElement = textElements.find(el => el.id === selectedElementId);
 
+  // Function to render non-designable areas
+  const renderNonDesignableAreas = () => {
+    const areas = [];
+    
+    if (layoutType === 'half_horizontal') {
+      // Right half is non-designable
+      areas.push(
+        <div
+          key="non-designable-right"
+          className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable Area</div>
+            <div className="text-xs opacity-75">Reserved for other content</div>
+          </div>
+        </div>
+      );
+    } else if (layoutType === 'half_vertical') {
+      // Bottom half is non-designable
+      areas.push(
+        <div
+          key="non-designable-bottom"
+          className="absolute bottom-0 left-0 w-full h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable Area</div>
+            <div className="text-xs opacity-75">Reserved for other content</div>
+          </div>
+        </div>
+      );
+    } else if (layoutType === 'quarter') {
+      // Right half and bottom half of left side are non-designable
+      areas.push(
+        // Right half
+        <div
+          key="non-designable-right-quarter"
+          className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable</div>
+            <div className="text-xs opacity-75">Reserved</div>
+          </div>
+        </div>,
+        // Bottom left quarter
+        <div
+          key="non-designable-bottom-left"
+          className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/30 border-2 border-dashed border-gray-500/50 flex items-center justify-center pointer-events-none"
+        >
+          <div className="text-center text-gray-600 text-sm font-medium">
+            <div className="mb-1">Non-Designable</div>
+            <div className="text-xs opacity-75">Reserved</div>
+          </div>
+        </div>
+      );
+    }
+    
+    return areas;
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
       {/* Canvas Area */}
@@ -164,6 +223,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                 backgroundPosition: 'center'
               }}
             >
+              {/* Text Elements */}
               {textElements.map((element) => (
                 <div
                   key={element.id}
@@ -205,10 +265,16 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                   </>
                 )}
               </div>
+
+              {/* Non-designable areas */}
+              {renderNonDesignableAreas()}
             </div>
             
             <div className="mt-2 text-xs text-muted-foreground">
               <p>💡 Click on text elements to select and edit them</p>
+              {layoutType !== 'full' && (
+                <p>🚫 Grayed areas are reserved for other content and cannot be designed</p>
+              )}
             </div>
           </CardContent>
         </Card>
