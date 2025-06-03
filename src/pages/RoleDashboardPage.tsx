@@ -20,8 +20,8 @@ const RoleDashboardPage = () => {
     timestamp: new Date().toISOString()
   });
 
-  // Wait for initialization - this should complete quickly
-  if (!isInitialized) {
+  // Show loading only briefly during initialization
+  if (!isInitialized && isLoading) {
     console.log('⏳ RoleDashboardPage: Waiting for auth initialization...');
     return (
       <PageLoader 
@@ -31,7 +31,7 @@ const RoleDashboardPage = () => {
     );
   }
 
-  // Check authentication immediately after initialization
+  // Check authentication
   if (!isAuthenticated || !user) {
     console.log('🔒 RoleDashboardPage: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
@@ -54,7 +54,7 @@ const RoleDashboardPage = () => {
     redirectPath = '/dashboard/fan';
     assignmentReason = 'fan role detected';
   } else {
-    // Default to member dashboard - don't wait for profile if we have a user
+    // Default to member dashboard
     assignmentReason = `member role (profile loaded: ${!!profile})`;
   }
   

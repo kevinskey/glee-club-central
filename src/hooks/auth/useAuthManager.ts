@@ -23,6 +23,7 @@ export const useAuthManager = () => {
   
   const mountedRef = useRef(true);
   const initializingRef = useRef(false);
+  const initTimeoutRef = useRef<NodeJS.Timeout>();
 
   const logAuthEvent = useCallback((event: string, data?: any) => {
     console.log(`🔐 AuthManager: ${event}`, data);
@@ -55,6 +56,7 @@ export const useAuthManager = () => {
           ...prev, 
           profile: fallbackProfile, 
           isLoading: false,
+          isInitialized: true,
           error: null
         }));
         logAuthEvent('Using admin fallback profile', { role: fallbackProfile.role });
@@ -64,7 +66,7 @@ export const useAuthManager = () => {
       // Try to get profile with timeout for non-admin users
       const profilePromise = ensureProfileExists(user.id, user.email, user.user_metadata);
       const timeoutPromise = new Promise<Profile>((_, reject) => 
-        setTimeout(() => reject(new Error('Profile loading timeout')), 2000)
+        setTimeout(() => reject(new Error('Profile loading timeout')), 3000)
       );
 
       const profile = await Promise.race([profilePromise, timeoutPromise]);
@@ -76,6 +78,7 @@ export const useAuthManager = () => {
           ...prev, 
           profile, 
           isLoading: false,
+          isInitialized: true,
           error: null
         }));
         logAuthEvent('Profile loaded successfully', { role: profile.role });
@@ -86,6 +89,7 @@ export const useAuthManager = () => {
           ...prev, 
           profile: fallbackProfile, 
           isLoading: false,
+          isInitialized: true,
           error: null
         }));
         logAuthEvent('Using fallback profile', { role: fallbackProfile.role });
@@ -99,22 +103,39 @@ export const useAuthManager = () => {
           ...prev, 
           profile: fallbackProfile, 
           isLoading: false,
+          isInitialized: true,
           error: null
         }));
       }
     }
   }, [createFallbackProfile, logAuthEvent]);
 
+  const forceInitialization = useCallback(() => {
+    if (!mountedRef.current) return;
+    
+    logAuthEvent('Force completing initialization');
+    setState(prev => ({
+      ...prev,
+      isLoading: false,
+      isInitialized: true
+    }));
+  }, [logAuthEvent]);
+
   const handleAuthStateChange = useCallback((event: string, session: any) => {
     if (!mountedRef.current) return;
 
     logAuthEvent('Auth state change', { event, hasSession: !!session, userId: session?.user?.id });
 
+    // Clear any pending timeout
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
+    }
+
     if (session?.user) {
       setState(prev => ({ 
         ...prev, 
         user: session.user, 
-        isInitialized: true,
+        isLoading: true,
         error: null
       }));
       
@@ -150,21 +171,15 @@ export const useAuthManager = () => {
 
     logAuthEvent('Initializing auth manager');
 
-    let timeoutId: NodeJS.Timeout;
-
     const initAuth = async () => {
       try {
-        // Set a maximum timeout for initialization
-        timeoutId = setTimeout(() => {
+        // Set a maximum timeout for initialization - force complete after 8 seconds
+        initTimeoutRef.current = setTimeout(() => {
           if (mountedRef.current && !state.isInitialized) {
             logAuthEvent('Auth initialization timeout, forcing completion');
-            setState(prev => ({
-              ...prev,
-              isLoading: false,
-              isInitialized: true
-            }));
+            forceInitialization();
           }
-        }, 5000);
+        }, 8000);
 
         // Set up auth listener first
         const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
@@ -190,16 +205,17 @@ export const useAuthManager = () => {
           }
         }
 
-        // Clean up timeout if we got here
-        if (timeoutId) clearTimeout(timeoutId);
-
         return () => {
           subscription.unsubscribe();
-          if (timeoutId) clearTimeout(timeoutId);
+          if (initTimeoutRef.current) {
+            clearTimeout(initTimeoutRef.current);
+          }
         };
       } catch (error) {
         logAuthEvent('Auth initialization error', { error: error.message });
-        if (timeoutId) clearTimeout(timeoutId);
+        if (initTimeoutRef.current) {
+          clearTimeout(initTimeoutRef.current);
+        }
         if (mountedRef.current) {
           setState({
             user: null,
@@ -216,14 +232,20 @@ export const useAuthManager = () => {
     
     return () => {
       initializingRef.current = false;
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
       cleanup?.then(fn => fn?.());
     };
-  }, [handleAuthStateChange]);
+  }, [handleAuthStateChange, forceInitialization]);
 
   // Cleanup
   useEffect(() => {
     return () => {
       mountedRef.current = false;
+      if (initTimeoutRef.current) {
+        clearTimeout(initTimeoutRef.current);
+      }
     };
   }, []);
 
