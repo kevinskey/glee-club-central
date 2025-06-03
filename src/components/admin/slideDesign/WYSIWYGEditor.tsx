@@ -10,10 +10,12 @@ import { SlideTemplate, SlideDesign, TextElement } from '@/types/slideDesign';
 import { Type, Palette, Image, Link, Save, Eye, Plus } from 'lucide-react';
 import { MediaLibrarySelector } from './MediaLibrarySelector';
 import { TextToolbar } from './TextToolbar';
-import { AIDesignAssistant } from './AIDesignAssistant';
+import { EnhancedAIAssistant } from './EnhancedAIAssistant';
 import { DraggableElement } from './DraggableElement';
 import { BorderSettings } from './BorderSettings';
-import { ImageDropZone } from './ImageDropZone';
+import { SectionValidator } from './SectionValidator';
+import { TouchGestureHandler } from './TouchGestureHandler';
+import { EnhancedMediaDropZone } from './EnhancedMediaDropZone';
 import { toast } from 'sonner';
 
 interface WYSIWYGEditorProps {
@@ -73,6 +75,17 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     ]
   );
 
+  // Section validation state
+  const [sections] = useState([
+    { id: 'title', name: 'Title & Description', required: true, completed: !!title, description: 'Main slide information' },
+    { id: 'background', name: 'Background', required: true, completed: !!(backgroundColor || backgroundImage), description: 'Color or image background' },
+    { id: 'text', name: 'Text Elements', required: true, completed: textElements.length > 0, description: 'At least one text element' },
+    { id: 'layout', name: 'Layout', required: false, completed: !!layoutType, description: 'Slide layout configuration' },
+    { id: 'animation', name: 'Animation', required: false, completed: animationDuration > 0, description: 'Animation and timing settings' }
+  ]);
+
+  const canSave = sections.filter(s => s.required).every(s => s.completed);
+
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const updateTextElement = (id: string, updates: Partial<TextElement>) => {
@@ -115,10 +128,30 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     setBackgroundMediaId('');
   };
 
+  const handleVideoUpload = (videoUrl: string) => {
+    setBackgroundImage(videoUrl);
+    setBackgroundMediaId('');
+    toast.success('Background video uploaded');
+  };
+
+  const handleAIMediaGenerate = async (type: 'image' | 'video', prompt: string) => {
+    toast.info(`Generating AI ${type}...`);
+    // In real implementation, this would call an AI service
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Mock response
+    const mockUrl = '/lovable-uploads/ef084f8d-fe71-4e34-8587-9ac0ff3ddebf.png';
+    if (type === 'image') {
+      handleImageUpload(mockUrl);
+    } else {
+      handleVideoUpload(mockUrl);
+    }
+  };
+
   const handleRemoveImage = () => {
     setBackgroundImage('');
     setBackgroundMediaId('');
-    toast.success('Background image removed');
+    toast.success('Background media removed');
   };
 
   const handleAISuggestion = (suggestion: any) => {
@@ -144,13 +177,33 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     }
   };
 
+  const handleAIGraphics = (prompt: string) => {
+    toast.info('Generating AI graphics...');
+    // Implementation for AI graphics generation
+  };
+
+  const handleAIVideo = (prompt: string) => {
+    toast.info('Generating AI video...');
+    // Implementation for AI video generation
+  };
+
   const handleCanvasClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setSelectedElementId(null);
     }
   };
 
+  const handleSectionClick = (sectionId: string) => {
+    toast.info(`Focus on ${sectionId} section`);
+    // Could scroll to or highlight the relevant section
+  };
+
   const handleSave = () => {
+    if (!canSave) {
+      toast.error('Please complete all required sections before saving');
+      return;
+    }
+
     if (!title.trim()) {
       toast.error('Please enter a title for your slide');
       return;
@@ -263,7 +316,12 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                   <Eye className="h-3 w-3 mr-1" />
                   <span className="hidden xs:inline">Preview</span>
                 </Button>
-                <Button onClick={handleSave} size="sm" className="h-8 flex-1 sm:flex-none">
+                <Button 
+                  onClick={handleSave} 
+                  size="sm" 
+                  className="h-8 flex-1 sm:flex-none"
+                  disabled={!canSave}
+                >
                   <Save className="h-3 w-3 mr-1" />
                   <span className="hidden xs:inline">Save </span>Design
                 </Button>
@@ -284,18 +342,25 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
               }}
               onClick={handleCanvasClick}
             >
-              {/* Text Elements with Drag & Drop */}
+              {/* Text Elements with Enhanced Touch & Drag */}
               {textElements.map((element) => (
-                <DraggableElement
+                <TouchGestureHandler
                   key={element.id}
                   element={element}
-                  isSelected={selectedElementId === element.id}
-                  onSelect={() => handleElementClick(element.id)}
                   onUpdate={(updates) => updateTextElement(element.id, updates)}
+                  onSelect={() => handleElementClick(element.id)}
                   containerRef={canvasRef}
-                  showBorders={showBorders}
-                  borderStyle={borderStyle}
-                />
+                >
+                  <DraggableElement
+                    element={element}
+                    isSelected={selectedElementId === element.id}
+                    onSelect={() => handleElementClick(element.id)}
+                    onUpdate={(updates) => updateTextElement(element.id, updates)}
+                    containerRef={canvasRef}
+                    showBorders={showBorders}
+                    borderStyle={borderStyle}
+                  />
+                </TouchGestureHandler>
               ))}
               
               {/* Layout grid overlay */}
@@ -329,7 +394,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             </div>
             
             <div className="mt-2 text-xs text-muted-foreground space-y-1">
-              <p>💡 Click elements to select, double-click to edit, drag to move</p>
+              <p>💡 Touch/click elements to select, double-tap to edit, drag to move, pinch to scale</p>
               <p>📄 Canvas represents standard US Letter size (8.5" × 11")</p>
               {layoutType !== 'full' && (
                 <p>🚫 Grayed areas are reserved for other content and cannot be designed</p>
@@ -341,6 +406,12 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
       {/* Properties Panel - spans 3 columns */}
       <div className="lg:col-span-3 order-2 space-y-3">
+        <SectionValidator
+          sections={sections}
+          onSectionClick={handleSectionClick}
+          canSave={canSave}
+        />
+
         <Card>
           <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-3">
             <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
@@ -442,17 +513,20 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">Background Image</Label>
-              <ImageDropZone
+              <Label className="text-sm">Background Media</Label>
+              <EnhancedMediaDropZone
                 onImageUpload={handleImageUpload}
-                currentImage={backgroundImage}
-                onRemoveImage={handleRemoveImage}
+                onVideoUpload={handleVideoUpload}
+                onAIGenerate={handleAIMediaGenerate}
+                currentMedia={backgroundImage}
+                mediaType={backgroundImage?.includes('video') ? 'video' : 'image'}
+                onRemoveMedia={handleRemoveImage}
               />
               <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
               <Input
                 value={backgroundImage}
                 onChange={(e) => setBackgroundImage(e.target.value)}
-                placeholder="Or enter image URL directly"
+                placeholder="Or enter image/video URL directly"
                 className="h-8 text-sm"
               />
             </div>
@@ -467,9 +541,13 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         />
       </div>
 
-      {/* AI Assistant & Text Tools Panel - spans 3 columns */}
+      {/* Enhanced AI Assistant & Text Tools Panel - spans 3 columns */}
       <div className="lg:col-span-3 order-3 space-y-3">
-        <AIDesignAssistant onApplySuggestion={handleAISuggestion} />
+        <EnhancedAIAssistant 
+          onApplySuggestion={handleAISuggestion}
+          onGenerateGraphics={handleAIGraphics}
+          onGenerateVideo={handleAIVideo}
+        />
         
         <TextToolbar
           selectedElement={selectedElement}
