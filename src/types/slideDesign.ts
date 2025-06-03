@@ -5,6 +5,8 @@ export interface SlideTemplate {
   description?: string;
   layout_type: 'full' | 'half_horizontal' | 'half_vertical' | 'quarter';
   template_data: TemplateData;
+  designable_areas: DesignableArea[];
+  default_styles: Record<string, any>;
   thumbnail_url?: string;
   is_active: boolean;
   created_at: string;
@@ -40,6 +42,15 @@ export interface DesignData {
   textElements: TextElement[];
   backgroundElements: BackgroundElement[];
   customElements?: CustomElement[];
+}
+
+export interface DesignableArea {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  constraints: Record<string, any>;
 }
 
 export interface TextArea {

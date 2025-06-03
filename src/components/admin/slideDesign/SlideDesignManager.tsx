@@ -32,6 +32,10 @@ export function SlideDesignManager() {
       name: 'Blank Slide',
       description: 'Start with a completely blank canvas',
       layout_type: 'full',
+      template_data: {
+        textAreas: [],
+        backgroundZones: []
+      },
       designable_areas: [{
         id: 'main',
         x: 0,
