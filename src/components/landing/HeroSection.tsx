@@ -9,7 +9,7 @@ export function HeroSection() {
     <section className="relative w-full">
       <UniversalHero 
         sectionId="homepage-main"
-        height="standard"
+        height="responsive"
         showNavigation={true}
         enableAutoplay={true}
         className="w-full"

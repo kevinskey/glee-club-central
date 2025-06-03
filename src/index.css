@@ -7,6 +7,7 @@
 @import "./styles/pdf-viewer-optimizations.css";
 @import "./styles/pdf-viewer-mobile.css";
 @import "./styles/mobile-optimizations.css";
+@import "./styles/hero-responsive.css";
 
 @tailwind base;
 @tailwind components;

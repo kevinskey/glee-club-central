@@ -4,7 +4,7 @@ import { ModernHeroSection } from '@/components/landing/hero/ModernHeroSection';
 
 interface UniversalHeroProps {
   sectionId?: string;
-  height?: 'compact' | 'banner' | 'standard' | 'fullscreen' | 'auto';
+  height?: 'compact' | 'banner' | 'standard' | 'fullscreen' | 'auto' | 'responsive';
   showNavigation?: boolean;
   enableAutoplay?: boolean;
   className?: string;
@@ -12,7 +12,7 @@ interface UniversalHeroProps {
 
 export function UniversalHero({ 
   sectionId = "homepage-main",
-  height = 'auto',
+  height = 'responsive',
   showNavigation = true,
   enableAutoplay = true,
   className = ""
@@ -27,6 +27,8 @@ export function UniversalHero({
         return '60vh';
       case 'fullscreen':
         return '100vh';
+      case 'responsive':
+        return 'auto';
       case 'auto':
       default:
         return 'auto';
@@ -34,6 +36,12 @@ export function UniversalHero({
   };
 
   const getContainerClasses = () => {
+    if (height === 'responsive') {
+      return `w-full overflow-hidden relative 
+        max-h-[500px] sm:max-h-[500px] md:max-h-[700px] 
+        h-[80vh] sm:h-[500px] md:h-[700px]
+        ${className}`;
+    }
     if (height === 'auto') {
       return `w-full overflow-hidden ${className}`;
     }
@@ -44,13 +52,14 @@ export function UniversalHero({
 
   return (
     <div 
-      style={height !== 'auto' ? { height: getHeightStyle() } : undefined}
+      style={height !== 'auto' && height !== 'responsive' ? { height: getHeightStyle() } : undefined}
       className={getContainerClasses()}
     >
       <ModernHeroSection 
         sectionId={sectionId}
         showNavigation={showNavigation}
         enableAutoplay={enableAutoplay}
+        isResponsive={height === 'responsive'}
       />
     </div>
   );

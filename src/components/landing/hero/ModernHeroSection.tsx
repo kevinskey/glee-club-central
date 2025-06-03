@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, Monitor, Tablet, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -40,12 +39,16 @@ interface ModernHeroSectionProps {
   sectionId?: string;
   showNavigation?: boolean;
   enableAutoplay?: boolean;
+  isResponsive?: boolean;
 }
+
+type TestMode = 'desktop' | 'tablet' | 'mobile' | null;
 
 export function ModernHeroSection({ 
   sectionId = "homepage-main",
   showNavigation = true,
-  enableAutoplay = true
+  enableAutoplay = true,
+  isResponsive = false
 }: ModernHeroSectionProps) {
   const isMobile = useIsMobile();
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -55,6 +58,7 @@ export function ModernHeroSection({
   const [isPlaying, setIsPlaying] = useState(enableAutoplay);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [testMode, setTestMode] = useState<TestMode>(null);
 
   useEffect(() => {
     fetchHeroData();
@@ -213,91 +217,25 @@ export function ModernHeroSection({
     );
   };
 
-  const renderBackgroundMedia = () => {
-    const currentSlideData = slides[currentSlide];
+  const getResponsiveClasses = () => {
+    if (!isResponsive) return '';
     
-    console.log('🎭 Hero: Rendering background for slide:', currentSlideData);
-    console.log('🎭 Hero: Current slide media_id:', currentSlideData?.media_id);
-    console.log('🎭 Hero: Available media files:', mediaFiles);
-    
-    // Check if media_id is a YouTube embed URL
-    if (currentSlideData.media_id && isYouTubeEmbed(currentSlideData.media_id)) {
-      console.log('🎭 Hero: Using YouTube embed URL:', currentSlideData.media_id);
-      return (
-        <iframe
-          key={currentSlideData.id}
-          src={currentSlideData.media_id}
-          className={cn(
-            "absolute inset-0 w-full h-full pointer-events-none", 
-            isMobile ? "object-contain" : "object-cover",
-            getAnimationClass()
-          )}
-          frameBorder="0"
-          allow="autoplay; encrypted-media"
-          allowFullScreen
-        />
-      );
+    const baseClass = testMode ? `test-mode-${testMode}` : '';
+    return `${baseClass} responsive-hero`;
+  };
+
+  const getTextSizeClasses = () => {
+    if (!isResponsive) {
+      return {
+        title: isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl",
+        description: isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
+      };
     }
 
-    // Handle regular media files
-    const currentMedia = currentSlideData.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
-    
-    console.log('🎭 Hero: Found media file:', currentMedia);
-    console.log('🎭 Hero: Media file URL:', currentMedia?.file_url);
-    console.log('🎭 Hero: Slide media type:', currentSlideData.media_type);
-    
-    if (currentMedia && currentMedia.file_url) {
-      return currentSlideData.media_type === 'video' ? (
-        <video
-          key={currentMedia.id}
-          src={currentMedia.file_url}
-          className={cn(
-            "absolute inset-0 w-full h-full", 
-            isMobile ? "object-contain" : "object-cover",
-            getAnimationClass()
-          )}
-          autoPlay
-          muted
-          loop
-          playsInline
-          onError={(e) => {
-            console.error('🎭 Hero: Video load error:', e);
-            console.error('🎭 Hero: Failed video URL:', currentMedia.file_url);
-          }}
-          onLoad={() => {
-            console.log('🎭 Hero: Video loaded successfully:', currentMedia.file_url);
-          }}
-        />
-      ) : (
-        <img
-          key={currentMedia.id}
-          src={currentMedia.file_url}
-          alt={currentMedia.title}
-          className={cn(
-            "absolute inset-0 w-full h-full", 
-            isMobile ? "object-contain" : "object-cover",
-            getAnimationClass()
-          )}
-          onError={(e) => {
-            console.error('🎭 Hero: Image load error:', e);
-            console.error('🎭 Hero: Failed image URL:', currentMedia.file_url);
-          }}
-          onLoad={() => {
-            console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
-          }}
-        />
-      );
-    }
-
-    console.log('🎭 Hero: No media found, using fallback gradient');
-    console.log('🎭 Hero: Slide has media_id but no matching file found');
-    
-    // Fallback gradient background
-    return (
-      <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
-        <div className="absolute inset-0 bg-black/20"></div>
-      </div>
-    );
+    return {
+      title: "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl",
+      description: "text-sm sm:text-base md:text-lg lg:text-xl"
+    };
   };
 
   const getPositionClasses = () => {
@@ -310,10 +248,14 @@ export function ModernHeroSection({
     let positionClass = '';
     switch (position) {
       case 'top':
-        positionClass = 'items-start pt-8 md:pt-12';
+        positionClass = isResponsive 
+          ? 'items-start pt-4 sm:pt-6 md:pt-8 lg:pt-12' 
+          : 'items-start pt-8 md:pt-12';
         break;
       case 'bottom':
-        positionClass = 'items-end pb-8 md:pb-12';
+        positionClass = isResponsive 
+          ? 'items-end pb-4 sm:pb-6 md:pb-8 lg:pb-12' 
+          : 'items-end pb-8 md:pb-12';
         break;
       default:
         positionClass = 'items-center';
@@ -349,9 +291,106 @@ export function ModernHeroSection({
     }
   };
 
+  const renderBackgroundMedia = () => {
+    const currentSlideData = slides[currentSlide];
+    
+    console.log('🎭 Hero: Rendering background for slide:', currentSlideData);
+    
+    if (currentSlideData?.media_id && isYouTubeEmbed(currentSlideData.media_id)) {
+      return (
+        <iframe
+          key={currentSlideData.id}
+          src={currentSlideData.media_id}
+          className={cn(
+            "absolute inset-0 w-full h-full pointer-events-none object-cover",
+            getAnimationClass()
+          )}
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+        />
+      );
+    }
+
+    const currentMedia = currentSlideData?.media_id ? mediaFiles.find(m => m.id === currentSlideData.media_id) : null;
+    
+    if (currentMedia && currentMedia.file_url) {
+      return currentSlideData.media_type === 'video' ? (
+        <video
+          key={currentMedia.id}
+          src={currentMedia.file_url}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            getAnimationClass()
+          )}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ aspectRatio: '16/9' }}
+        />
+      ) : (
+        <img
+          key={currentMedia.id}
+          src={currentMedia.file_url}
+          alt={currentMedia.title}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            getAnimationClass()
+          )}
+          style={{ aspectRatio: '16/9' }}
+        />
+      );
+    }
+
+    // Default placeholder background
+    return (
+      <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+        <div className="absolute inset-0 bg-black/20"></div>
+        {/* Default placeholder pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="w-full h-full bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] bg-repeat"></div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderTestModeControls = () => {
+    if (!isResponsive) return null;
+
+    return (
+      <div className="absolute top-4 right-4 z-30 flex gap-2 bg-black/50 backdrop-blur-sm rounded-lg p-2">
+        <Button
+          variant={testMode === 'desktop' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTestMode(testMode === 'desktop' ? null : 'desktop')}
+          className="text-white hover:text-black"
+        >
+          <Monitor className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={testMode === 'tablet' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTestMode(testMode === 'tablet' ? null : 'tablet')}
+          className="text-white hover:text-black"
+        >
+          <Tablet className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={testMode === 'mobile' ? 'default' : 'ghost'}
+          size="sm"
+          onClick={() => setTestMode(testMode === 'mobile' ? null : 'mobile')}
+          className="text-white hover:text-black"
+        >
+          <Smartphone className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
-      <section className="relative w-full h-full overflow-hidden">
+      <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
@@ -367,43 +406,50 @@ export function ModernHeroSection({
 
   if (error) {
     return (
-      <section className="relative w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
-          <div className="absolute inset-0 bg-black/20"></div>
-        </div>
+      <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
+        {renderBackgroundMedia()}
         <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="text-white text-center max-w-2xl mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
-            <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
+          <div className="text-white text-center max-w-2xl mx-auto px-4 sm:px-6 md:px-8">
+            <h1 className={cn("font-bold mb-4", getTextSizeClasses().title)}>
+              Spelman College Glee Club
+            </h1>
+            <p className={cn("mb-6", getTextSizeClasses().description)}>
+              A distinguished ensemble with a rich heritage of musical excellence
+            </p>
             <p className="text-sm opacity-75">Error loading hero content: {error}</p>
           </div>
         </div>
+        {renderTestModeControls()}
       </section>
     );
   }
 
   if (slides.length === 0) {
     return (
-      <section className="relative w-full h-full overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
-          <div className="absolute inset-0 bg-black/20"></div>
-        </div>
+      <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
+        {renderBackgroundMedia()}
         <div className="relative z-10 h-full flex items-center justify-center">
-          <div className="text-white text-center max-w-2xl mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Spelman College Glee Club</h1>
-            <p className="text-lg md:text-xl mb-6">A distinguished ensemble with a rich heritage of musical excellence</p>
+          <div className="text-white text-center max-w-2xl mx-auto px-4 sm:px-6 md:px-8">
+            <h1 className={cn("font-bold mb-4", getTextSizeClasses().title)}>
+              Spelman College Glee Club
+            </h1>
+            <p className={cn("mb-6", getTextSizeClasses().description)}>
+              A distinguished ensemble with a rich heritage of musical excellence
+            </p>
             <p className="text-sm opacity-75">Setting up hero slides for {sectionId}...</p>
           </div>
         </div>
+        {renderTestModeControls()}
       </section>
     );
   }
 
   const currentSlideData = slides[currentSlide];
+  const textSizes = getTextSizeClasses();
 
   return (
     <section 
-      className="relative w-full h-full overflow-hidden" 
+      className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())} 
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -416,18 +462,21 @@ export function ModernHeroSection({
       </div>
       
       {/* Content overlay */}
-      <div className={cn("relative z-10 h-full flex px-2 md:px-4", getPositionClasses())}>
+      <div className={cn(
+        "relative z-10 h-full flex px-4 sm:px-6 md:px-8 lg:px-12", 
+        getPositionClasses()
+      )}>
         <div className="max-w-4xl mx-auto w-full">
           <h1 className={cn(
             "font-bold text-white mb-2 md:mb-4 leading-tight",
-            isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl"
+            textSizes.title
           )}>
             {currentSlideData.title}
           </h1>
           <p className={cn(
-            "text-white/90 mb-3 md:mb-6 max-w-2xl",
+            "text-white/90 mb-3 md:mb-6 max-w-2xl leading-relaxed",
             currentSlideData.text_alignment === 'center' ? 'mx-auto' : '',
-            isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
+            textSizes.description
           )}>
             {currentSlideData.description}
           </p>
@@ -442,7 +491,10 @@ export function ModernHeroSection({
         </div>
       </div>
 
-      {/* Navigation Controls (only show if multiple slides and navigation enabled) */}
+      {/* Test Mode Controls */}
+      {renderTestModeControls()}
+
+      {/* Navigation Controls */}
       {slides.length > 1 && showNavigation && !isMobile && (
         <>
           <Button
