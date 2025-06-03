@@ -75,15 +75,43 @@ export const useAINewsGeneration = () => {
     try {
       console.log('💾 Saving generated news to database:', content);
 
-      // Get current user to ensure we have proper authentication
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      // Get current user session and user details
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      if (userError || !user) {
-        console.error('❌ Authentication error:', userError);
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        throw new Error('Failed to get user session');
+      }
+
+      if (!session?.user) {
+        console.error('❌ No authenticated user found');
         throw new Error('User not authenticated');
       }
 
-      console.log('👤 Current user:', user.id);
+      console.log('👤 Current user from session:', session.user.id, session.user.email);
+
+      // Check user's profile and permissions
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, role, is_super_admin, first_name, last_name')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('❌ Profile fetch error:', profileError);
+        throw new Error('Failed to fetch user profile');
+      }
+
+      console.log('📋 User profile:', profile);
+
+      // Check if user has admin permissions
+      if (!profile.is_super_admin && profile.role !== 'admin') {
+        console.error('❌ User lacks admin permissions:', {
+          is_super_admin: profile.is_super_admin,
+          role: profile.role
+        });
+        throw new Error('Insufficient permissions to create news items');
+      }
 
       const newsItem = {
         headline: content.headline,
@@ -94,21 +122,29 @@ export const useAINewsGeneration = () => {
         start_date: options.startDate || new Date().toISOString().split('T')[0],
         end_date: options.endDate || null,
         active: options.active !== false,
-        created_by: user.id
+        created_by: session.user.id
       };
 
       console.log('📝 Inserting news item:', newsItem);
 
-      const { error } = await supabase
+      const { data: insertedNews, error } = await supabase
         .from('news_items')
-        .insert(newsItem);
+        .insert(newsItem)
+        .select()
+        .single();
 
       if (error) {
         console.error('❌ Error saving news item:', error);
+        console.error('❌ Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
-      console.log('✅ News item saved successfully');
+      console.log('✅ News item saved successfully:', insertedNews);
       toast.success('News item saved to ticker!');
       return true;
 
