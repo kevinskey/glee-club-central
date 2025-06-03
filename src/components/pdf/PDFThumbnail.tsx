@@ -25,6 +25,7 @@ export const PDFThumbnail = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageWidth, setPageWidth] = useState<number>(200);
 
   useEffect(() => {
     console.log('PDFThumbnail: Loading PDF:', { url, title });
@@ -44,6 +45,14 @@ export const PDFThumbnail = ({
     console.error('PDFThumbnail: Error loading PDF:', { url, title, error: err });
     setError(err?.message || 'Failed to load PDF');
     setLoading(false);
+  };
+
+  const handlePageRenderSuccess = () => {
+    console.log('PDFThumbnail: Page rendered successfully for:', title);
+  };
+
+  const handlePageRenderError = (err: any) => {
+    console.error('PDFThumbnail: Page render error:', { title, error: err });
   };
 
   // Show fallback for failed PDFs
@@ -68,7 +77,7 @@ export const PDFThumbnail = ({
           <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-xs text-muted-foreground">Loading...</span>
+              <span className="text-xs text-muted-foreground">Loading PDF...</span>
             </div>
           </div>
         )}
@@ -84,6 +93,8 @@ export const PDFThumbnail = ({
             cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
             cMapPacked: true,
             standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+            disableWorker: false,
+            verbosity: 0,
           }}
         >
           {numPages && (
@@ -93,10 +104,18 @@ export const PDFThumbnail = ({
               error=""
               renderTextLayer={false}
               renderAnnotationLayer={false}
+              onRenderSuccess={handlePageRenderSuccess}
+              onRenderError={handlePageRenderError}
               className="max-w-full max-h-full"
-              scale={1}
-              width={undefined}
-              height={undefined}
+              width={pageWidth}
+              onLoadSuccess={(page) => {
+                // Calculate optimal width based on container
+                const containerWidth = 300; // Approximate container width
+                const viewport = page.getViewport({ scale: 1 });
+                const scale = containerWidth / viewport.width;
+                setPageWidth(containerWidth);
+                console.log('PDFThumbnail: Page loaded with scale:', scale);
+              }}
             />
           )}
         </Document>
