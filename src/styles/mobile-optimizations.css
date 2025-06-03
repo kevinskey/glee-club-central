@@ -1,4 +1,3 @@
-
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -48,7 +47,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Hero Section Mobile Fixes - Normal flow positioning */
+/* Hero Section Mobile Fixes - Seamless with header */
 .hero-section, [class*="hero"] {
   width: 100% !important;
   max-width: 100vw !important;
@@ -182,7 +181,7 @@ p {
   color: hsl(var(--foreground));
 }
 
-/* Non-Sticky Header Layout - Normal Document Flow */
+/* Seamless Header-Hero Layout - Remove all gaps */
 @media (max-width: 768px) {
   header {
     position: static !important;
@@ -199,6 +198,8 @@ p {
     -webkit-backdrop-filter: none !important;
     margin: 0 !important;
     border-top: none !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
   }
   
   .dark header {
@@ -221,27 +222,23 @@ p {
     border-bottom: none !important;
   }
   
-  /* Main content - No top margin needed for normal flow */
+  /* Main content - Remove all spacing */
   main {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
-  /* Hero sections normal positioning */
+  /* Hero sections - Remove all spacing */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
-  /* Page content normal spacing */
-  .page-content,
-  .main-content,
-  [class*="content"] {
+  /* Page content - Only non-hero pages get padding */
+  .page-content:not(.hero-page),
+  .main-content:not(.hero-content) {
     padding-top: 0 !important;
     min-height: auto !important;
   }
