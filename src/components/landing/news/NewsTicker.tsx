@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -184,7 +185,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return (
       <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
         <div className="w-full px-4 flex items-center justify-center">
-          <div className="animate-pulse text-white drop-shadow-sm font-bold text-sm">
+          <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
             <span className="inline-flex items-center">
               <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
               Loading latest news...
@@ -199,7 +200,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
       <div className="w-full px-4 flex items-center justify-between">
         {/* News Label */}
-        <div className="hidden sm:flex items-center text-red-200 font-bold text-sm mr-4 whitespace-nowrap">
+        <div className="hidden sm:flex items-center text-red-200 font-bold text-xs mr-4 whitespace-nowrap">
           <div className="w-2 h-2 bg-red-300 rounded-full mr-2 animate-pulse"></div>
           {newsSource === 'google' ? 'LIVE NEWS' : newsSource === 'database' ? 'LATEST NEWS' : 'NEWS'}
         </div>
@@ -207,7 +208,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         <div className="flex-1 overflow-hidden flex items-center justify-center">
           <div className={`whitespace-nowrap ${getAnimationClass()}`}>
             <span 
-              className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
+              className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
               title="Click to read more"
               onClick={() => newsItems.length > 0 && handleNewsClick(newsItems[0])}
             >
