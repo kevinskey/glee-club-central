@@ -310,10 +310,10 @@ export function ModernHeroSection({
     let positionClass = '';
     switch (position) {
       case 'top':
-        positionClass = 'items-start pt-16 md:pt-20';
+        positionClass = 'items-start pt-8 md:pt-12';
         break;
       case 'bottom':
-        positionClass = 'items-end pb-16 md:pb-20';
+        positionClass = 'items-end pb-8 md:pb-12';
         break;
       default:
         positionClass = 'items-center';
@@ -416,16 +416,16 @@ export function ModernHeroSection({
       </div>
       
       {/* Content overlay */}
-      <div className={cn("relative z-10 h-full flex px-4", getPositionClasses())}>
+      <div className={cn("relative z-10 h-full flex px-2 md:px-4", getPositionClasses())}>
         <div className="max-w-4xl mx-auto w-full">
           <h1 className={cn(
-            "font-bold text-white mb-4 leading-tight",
+            "font-bold text-white mb-2 md:mb-4 leading-tight",
             isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl"
           )}>
             {currentSlideData.title}
           </h1>
           <p className={cn(
-            "text-white/90 mb-6 max-w-2xl",
+            "text-white/90 mb-3 md:mb-6 max-w-2xl",
             currentSlideData.text_alignment === 'center' ? 'mx-auto' : '',
             isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
           )}>
