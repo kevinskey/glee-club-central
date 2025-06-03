@@ -188,6 +188,14 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
 
   const currentMedia = selectedMedia || filteredMediaFiles.find(m => m.id === slide.media_id);
 
+  // Get display title - use slide title if available, otherwise media title
+  const getDisplayTitle = () => {
+    if (slide.title && slide.title.trim() !== '') {
+      return slide.title;
+    }
+    return currentMedia?.title || 'Untitled Slide';
+  };
+
   const handleAISuggestion = (field: 'title' | 'description' | 'buttonText', value: string) => {
     setEditData(prev => ({ ...prev, [field]: value }));
   };
@@ -245,7 +253,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-semibold">
-                        {slide.title || 'Untitled Slide'}
+                        {getDisplayTitle()}
                       </h3>
                       <Badge variant={slide.visible ? "default" : "secondary"}>
                         {slide.visible ? 'Visible' : 'Hidden'}
@@ -487,7 +495,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
-            <DialogTitle>Preview: {slide.title}</DialogTitle>
+            <DialogTitle>Preview: {getDisplayTitle()}</DialogTitle>
           </DialogHeader>
           <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
             {slide.media_id && isYouTubeEmbed(slide.media_id) ? (
@@ -508,7 +516,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
               ) : (
                 <img
                   src={currentMedia.file_url}
-                  alt={slide.title}
+                  alt={getDisplayTitle()}
                   className="w-full h-full object-cover"
                 />
               )
@@ -516,8 +524,12 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
             <div className="absolute inset-0 bg-black/50"></div>
             <div className={`absolute inset-0 flex items-${slide.text_position === 'top' ? 'start' : slide.text_position === 'bottom' ? 'end' : 'center'} justify-${slide.text_alignment} p-8`}>
               <div className={`text-white max-w-2xl text-${slide.text_alignment}`}>
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{slide.title}</h1>
-                <p className="text-lg md:text-xl mb-6 opacity-90">{slide.description}</p>
+                {(slide.title || currentMedia?.title) && (
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">{getDisplayTitle()}</h1>
+                )}
+                {slide.description && (
+                  <p className="text-lg md:text-xl mb-6 opacity-90">{slide.description}</p>
+                )}
                 {slide.button_text && (
                   <Button size="lg" className="bg-indigo-500 hover:bg-indigo-600">
                     {slide.button_text}
@@ -535,7 +547,7 @@ export function HeroSlideEditor({ slide, onUpdate, onDelete }: HeroSlideEditorPr
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Hero Slide</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{slide.title}"? This action cannot be undone.
+              Are you sure you want to delete "{getDisplayTitle()}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
