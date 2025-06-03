@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, FileText, AlertCircle, CheckCircle, Download, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { useUserCreate } from '@/hooks/user/useUserCreate';
 
 interface CSVColumn {
   index: number;
@@ -77,6 +77,9 @@ export function EnhancedMemberCSVUpload() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [step, setStep] = useState<'upload' | 'map' | 'preview' | 'complete'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Use the hook to get the addUser function
+  const { addUser } = useUserCreate();
 
   const downloadTemplate = () => {
     const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date
@@ -264,9 +267,6 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
-      // Use the useUserCreate hook's addUser function instead of direct admin API
-      const { addUser } = await import('@/hooks/user/useUserCreate');
-      
       // Transform the data to match UserFormValues interface
       const userFormData = {
         email: userData.email,
@@ -285,8 +285,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       };
 
       // Create user using the existing hook
-      const userCreateHook = addUser;
-      const success = await userCreateHook(userFormData);
+      const success = await addUser(userFormData);
       
       if (!success) {
         throw new Error('Failed to create user');
