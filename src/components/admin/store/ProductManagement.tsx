@@ -10,10 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Package, Lock } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Lock, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { hasPermission } from '@/utils/permissionChecker';
+import { MediaPicker } from '@/components/media/MediaPicker';
 
 interface StoreItem {
   id: string;
@@ -32,6 +33,7 @@ export function ProductManagement() {
   const { user, profile } = useAuth();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -203,6 +205,11 @@ export function ProductManagement() {
     }
   };
 
+  const handleImageSelect = (imageUrl: string) => {
+    setFormData(prev => ({ ...prev, image_url: imageUrl }));
+    setShowMediaPicker(false);
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -305,14 +312,35 @@ export function ProductManagement() {
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                  placeholder="https://example.com/image.jpg"
-                />
+              <div className="space-y-2">
+                <Label>Product Image</Label>
+                <div className="flex items-center gap-4">
+                  {formData.image_url && (
+                    <img
+                      src={formData.image_url}
+                      alt="Product preview"
+                      className="w-20 h-20 object-cover rounded border"
+                    />
+                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowMediaPicker(true)}
+                  >
+                    <Image className="h-4 w-4 mr-2" />
+                    {formData.image_url ? 'Change Image' : 'Select Image'}
+                  </Button>
+                  {formData.image_url && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -493,14 +521,35 @@ export function ProductManagement() {
                 />
               </div>
             </div>
-            <div>
-              <Label htmlFor="edit-image_url">Image URL</Label>
-              <Input
-                id="edit-image_url"
-                value={formData.image_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                placeholder="https://example.com/image.jpg"
-              />
+            <div className="space-y-2">
+              <Label>Product Image</Label>
+              <div className="flex items-center gap-4">
+                {formData.image_url && (
+                  <img
+                    src={formData.image_url}
+                    alt="Product preview"
+                    className="w-20 h-20 object-cover rounded border"
+                  />
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowMediaPicker(true)}
+                >
+                  <Image className="h-4 w-4 mr-2" />
+                  {formData.image_url ? 'Change Image' : 'Select Image'}
+                </Button>
+                {formData.image_url && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
@@ -521,6 +570,18 @@ export function ProductManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Media Picker */}
+      {showMediaPicker && (
+        <MediaPicker
+          isOpen={showMediaPicker}
+          onClose={() => setShowMediaPicker(false)}
+          onSelect={handleImageSelect}
+          currentImageUrl={formData.image_url}
+          allowedTypes={['image']}
+          showUpload={true}
+        />
+      )}
     </div>
   );
 }
