@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -192,7 +191,7 @@ export function ModernHeroSection({
   const renderButton = (slide: HeroSlide) => {
     if (!slide.button_text || !slide.button_link) return null;
 
-    const buttonClasses = "bg-glee-spelman hover:bg-glee-spelman/90 text-white w-auto px-6";
+    const buttonClasses = "bg-blue-500 hover:bg-blue-600 text-white w-auto px-6";
 
     if (isExternalLink(slide.button_link)) {
       return (
