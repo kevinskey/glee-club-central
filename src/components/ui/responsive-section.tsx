@@ -11,6 +11,7 @@ interface ResponsiveSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   fullWidth?: boolean;
   maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full" | "none";
   centered?: boolean;
+  sectionSpacing?: "tight" | "normal" | "loose" | "none";
 }
 
 export function ResponsiveSection({ 
@@ -22,6 +23,7 @@ export function ResponsiveSection({
   fullWidth = false,
   maxWidth = "xl",
   centered = false,
+  sectionSpacing = "normal",
   ...props 
 }: ResponsiveSectionProps) {
   // Vertical padding styles
@@ -50,6 +52,14 @@ export function ResponsiveSection({
     "2xl": "max-w-screen-2xl",
     full: "max-w-full",
   };
+
+  // Section spacing styles
+  const sectionSpacingClasses = {
+    none: "",
+    tight: "mb-6 md:mb-8",
+    normal: "mb-8 md:mb-12 lg:mb-16", 
+    loose: "mb-12 md:mb-16 lg:mb-20",
+  };
   
   return (
     <Component
@@ -59,6 +69,7 @@ export function ResponsiveSection({
         fullWidth ? "w-full" : "",
         maxWidth !== "none" && maxWidthClasses[maxWidth],
         centered && "mx-auto",
+        sectionSpacing !== "none" && sectionSpacingClasses[sectionSpacing],
         className
       )}
       {...props}

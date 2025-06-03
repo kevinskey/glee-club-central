@@ -45,10 +45,21 @@ export function HomePageContent({
   audioTracks
 }: HomePageContentProps) {
   return (
-    <main className="w-full">
-      <EnhancedEventsSection events={upcomingEvents} />
-      <StoreSection products={storeProducts} />
-      <AudioSection tracks={audioTracks} />
+    <main className="w-full space-y-12 md:space-y-16 lg:space-y-20">
+      {/* Events Section */}
+      <section className="w-full">
+        <EnhancedEventsSection events={upcomingEvents} />
+      </section>
+      
+      {/* Store Section */}
+      <section className="w-full">
+        <StoreSection products={storeProducts} />
+      </section>
+      
+      {/* Audio Section */}
+      <section className="w-full">
+        <AudioSection tracks={audioTracks} />
+      </section>
     </main>
   );
 }
