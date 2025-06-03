@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { NewsService } from "@/services/newsService";
 import type { NewsItem } from "@/services/newsService";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NewsTickerProps {
   autoHide?: boolean;
@@ -27,6 +28,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [newsSource, setNewsSource] = useState<'database' | 'google' | 'mixed'>('mixed');
   const { isAdmin } = useAuth();
+  const isMobile = useIsMobile();
 
   // Fetch news items from database or Google News
   useEffect(() => {
@@ -120,10 +122,23 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   const handleNewsClick = (item: NewsItem) => {
-    if (item.link) {
-      window.open(item.link, '_blank', 'noopener,noreferrer');
+    const url = item.link || `/news/${item.id}`;
+    
+    if (isMobile) {
+      // On mobile, open in a smaller popup window instead of full screen
+      const width = Math.min(window.screen.width * 0.9, 400);
+      const height = Math.min(window.screen.height * 0.8, 600);
+      const left = (window.screen.width - width) / 2;
+      const top = (window.screen.height - height) / 2;
+      
+      window.open(
+        url, 
+        '_blank', 
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,noopener,noreferrer`
+      );
     } else {
-      window.open(`/news/${item.id}`, '_blank', 'noopener,noreferrer');
+      // On desktop, open in new tab as before
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
