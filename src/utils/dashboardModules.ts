@@ -1,4 +1,3 @@
-
 // Define the dashboard module interface
 export interface DashboardModule {
   id: string;
@@ -83,7 +82,16 @@ export const dashboardModules: DashboardModule[] = [
     adminOnly: false,
     category: "Support"
   },
-  // Admin-only modules
+  {
+    id: "soundcloud_library",
+    title: "SoundCloud Library",
+    description: "Access your SoundCloud playlists and tracks",
+    icon: "Music",
+    color: "bg-orange-500",
+    path: "/dashboard/soundcloud",
+    adminOnly: false,
+    category: "Music"
+  },
   {
     id: "user_management",
     title: "User Management",
