@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,15 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface NewsItem {
-  id: string;
-  headline: string;
-  active: boolean;
-  content: string;
-  date: string;
-  generated_by_ai?: boolean;
-}
+import { NewsService, NewsItem } from "@/services/newsService";
 
 interface NewsTickerProps {
   autoHide?: boolean;
@@ -32,24 +25,28 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('slow');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [newsSource, setNewsSource] = useState<'database' | 'google' | 'mixed'>('mixed');
   const { isAdmin } = useAuth();
 
-  // Fetch news items from database
+  // Fetch news items from database or Google News
   useEffect(() => {
     const fetchNewsItems = async () => {
       try {
-        const { data, error } = await supabase
+        setIsLoading(true);
+        
+        // Try database first
+        const { data: dbNews, error } = await supabase
           .from('news_items')
           .select('id, headline, content, start_date, end_date, active, generated_by_ai')
           .eq('active', true)
           .order('priority', { ascending: false })
-          .limit(10);
+          .limit(5);
 
-        if (error) {
-          console.error('Error fetching news items:', error);
-          setNewsItems(getStaticNewsItems());
-        } else if (data && data.length > 0) {
-          const formattedItems: NewsItem[] = data.map(item => ({
+        let finalNewsItems: NewsItem[] = [];
+
+        if (!error && dbNews && dbNews.length > 0) {
+          // Use database news if available
+          finalNewsItems = dbNews.map(item => ({
             id: item.id,
             headline: item.headline,
             active: item.active,
@@ -57,13 +54,27 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             date: item.start_date,
             generated_by_ai: item.generated_by_ai
           }));
-          setNewsItems(formattedItems);
+          setNewsSource('database');
         } else {
-          setNewsItems(getStaticNewsItems());
+          // Fallback to Google News
+          console.log('No database news found, fetching from Google News...');
+          const googleNews = await NewsService.fetchMixedNews(8);
+          
+          if (googleNews.length > 0) {
+            finalNewsItems = googleNews;
+            setNewsSource('google');
+          } else {
+            // Final fallback to static content
+            finalNewsItems = NewsService.getStaticFallbackNews();
+            setNewsSource('mixed');
+          }
         }
+
+        setNewsItems(finalNewsItems);
       } catch (error) {
         console.error('Error fetching news items:', error);
-        setNewsItems(getStaticNewsItems());
+        setNewsItems(NewsService.getStaticFallbackNews());
+        setNewsSource('mixed');
       } finally {
         setIsLoading(false);
       }
@@ -71,6 +82,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
     fetchNewsItems();
 
+    // Set up real-time updates for database news
     const channel = supabase
       .channel('news-items-changes')
       .on(
@@ -92,37 +104,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     };
   }, []);
 
-  const getStaticNewsItems = (): NewsItem[] => [
-    {
-      id: "static-1",
-      headline: "Spelman College Glee Club announces Spring Concert series",
-      active: true,
-      content: "The Spelman College Glee Club is proud to announce our Spring Concert series, featuring performances across Atlanta throughout April and May.",
-      date: "May 1, 2025"
-    },
-    {
-      id: "static-2", 
-      headline: "HBCU Choir Festival featuring top collegiate ensembles",
-      active: true,
-      content: "Spelman College Glee Club will be participating in the annual HBCU Choir Festival this June, joining forces with top collegiate ensembles from across the country.",
-      date: "May 5, 2025"
-    },
-    {
-      id: "static-3",
-      headline: "New scholarship opportunities available for music students",
-      active: true,
-      content: "We're pleased to announce several new scholarship opportunities for exceptional music students at Spelman College.",
-      date: "May 8, 2025"
-    },
-    {
-      id: "static-4",
-      headline: "Glee Club wins national recognition for excellence in choral music",
-      active: true,
-      content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition.",
-      date: "May 12, 2025"
-    }
-  ];
-
   // Auto-hide functionality
   useEffect(() => {
     if (autoHide && hideAfter) {
@@ -139,7 +120,11 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   const handleNewsClick = (item: NewsItem) => {
-    window.open(`/news/${item.id}`, '_blank', 'noopener,noreferrer');
+    if (item.link) {
+      window.open(item.link, '_blank', 'noopener,noreferrer');
+    } else {
+      window.open(`/news/${item.id}`, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const getAnimationClass = () => {
@@ -165,6 +150,19 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return Array(6).fill(singlePass).join(separator);
   };
 
+  const refreshGoogleNews = async () => {
+    setIsLoading(true);
+    try {
+      const googleNews = await NewsService.fetchMixedNews(8);
+      setNewsItems(googleNews);
+      setNewsSource('google');
+    } catch (error) {
+      console.error('Error refreshing Google News:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const tickerContent = createTickerContent();
 
   if (isLoading) {
@@ -188,7 +186,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         {/* News Label */}
         <div className="hidden sm:flex items-center text-red-200 font-bold text-sm mr-4 whitespace-nowrap">
           <div className="w-2 h-2 bg-red-300 rounded-full mr-2 animate-pulse"></div>
-          LATEST NEWS
+          {newsSource === 'google' ? 'LIVE NEWS' : newsSource === 'database' ? 'LATEST NEWS' : 'NEWS'}
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
@@ -226,6 +224,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
                 <DropdownMenuItem onClick={() => setScrollSpeed('fast')}>
                   Fast Speed
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={refreshGoogleNews}>
+                  Refresh Google News
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -234,3 +235,5 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     </div>
   );
 };
+
+export { NewsItem };
