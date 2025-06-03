@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,7 +48,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
         if (error) {
           console.error('Error fetching news items:', error);
-          // Fallback to static items
           setNewsItems(getStaticNewsItems());
         } else if (data && data.length > 0) {
           const formattedItems: NewsItem[] = data.map(item => ({
@@ -60,7 +60,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
           }));
           setNewsItems(formattedItems);
         } else {
-          // No items in database, use static fallback
           setNewsItems(getStaticNewsItems());
         }
       } catch (error) {
@@ -73,7 +72,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
     fetchNewsItems();
 
-    // Set up real-time subscription for news items
     const channel = supabase
       .channel('news-items-changes')
       .on(
@@ -95,7 +93,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     };
   }, []);
 
-  // Static fallback news items without icons
   const getStaticNewsItems = (): NewsItem[] => [
     {
       id: "static-1",
@@ -143,7 +140,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   const handleNewsClick = (item: NewsItem) => {
-    // Open the news article page
     window.location.href = `/news/${item.id}`;
   };
 
@@ -156,23 +152,42 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  // Function to remove icons/emojis from headlines
   const removeIconsFromHeadline = (headline: string) => {
-    // Remove emojis/icons (Unicode ranges for various emoji)
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create seamless infinite scroll by repeating content multiple times with 20 spaces spacing
-  const newsContent = newsItems.map(item => removeIconsFromHeadline(item.headline)).join('                    '); // 20 spaces
-  // Repeat the content multiple times to ensure seamless infinite scroll
-  const repeatedContent = Array(6).fill(newsContent).join('                    '); // 20 spaces between repeats
+  // Create ticker items with visual separators
+  const tickerItems = newsItems.map((item, index) => (
+    <span key={`${item.id}-${index}`} className="ticker-item flex items-center">
+      <span 
+        className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm font-semibold text-sm tracking-wide"
+        title="Click to read more"
+        onClick={() => handleNewsClick(item)}
+      >
+        {removeIconsFromHeadline(item.headline)}
+      </span>
+      {index < newsItems.length - 1 && (
+        <span className="mx-8 flex items-center">
+          <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+          <div className="w-1 h-1 bg-yellow-200 rounded-full mx-2 opacity-60"></div>
+          <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+        </span>
+      )}
+    </span>
+  ));
+
+  // Repeat the content for seamless scroll
+  const repeatedContent = Array(4).fill(tickerItems).flat();
 
   if (isLoading) {
     return (
-      <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
+      <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
         <div className="w-full px-4 flex items-center justify-center">
-          <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
-            Loading news...
+          <div className="animate-pulse text-white drop-shadow-sm font-bold text-sm">
+            <span className="inline-flex items-center">
+              <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
+              Loading latest news...
+            </span>
           </div>
         </div>
       </div>
@@ -180,17 +195,17 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   return (
-    <div className="bg-glee-columbia text-white py-2 relative w-full overflow-hidden">
+    <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
       <div className="w-full px-4 flex items-center justify-between">
+        {/* News Label */}
+        <div className="hidden sm:flex items-center text-yellow-200 font-bold text-sm mr-4 whitespace-nowrap">
+          <div className="w-2 h-2 bg-yellow-300 rounded-full mr-2 animate-pulse"></div>
+          LATEST NEWS
+        </div>
+        
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className={`whitespace-nowrap ${getAnimationClass()}`}>
-            <span 
-              className="cursor-pointer hover:text-yellow-200 transition-colors text-white drop-shadow-sm font-bold text-xs"
-              title="Click to read more"
-              onClick={() => handleNewsClick(newsItems[0])}
-            >
-              {repeatedContent}
-            </span>
+          <div className={`flex whitespace-nowrap ${getAnimationClass()}`}>
+            {repeatedContent}
           </div>
         </div>
         
