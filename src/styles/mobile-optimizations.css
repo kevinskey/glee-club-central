@@ -228,12 +228,22 @@ p {
     padding: 0 !important;
   }
   
-  /* Hero sections - Remove all spacing */
+  /* Hero sections - Remove container margins but keep internal padding */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
     margin: 0 !important;
-    padding: 0 !important;
+    /* Keep internal padding for content */
+    padding: clamp(2rem, 6vw, 3rem) 0 !important;
+  }
+  
+  /* Hero content containers - Add proper spacing */
+  .hero-section .flex,
+  .hero-section .relative,
+  [class*="hero"] .flex,
+  [class*="hero"] .relative {
+    padding-left: clamp(1rem, 4vw, 2rem) !important;
+    padding-right: clamp(1rem, 4vw, 2rem) !important;
   }
   
   /* Page content - Only non-hero pages get padding */
