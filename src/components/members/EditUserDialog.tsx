@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -64,7 +65,7 @@ export function EditUserDialog({
       notes: user?.notes || '',
       dues_paid: user?.dues_paid || false,
       is_admin: user?.is_super_admin || false,
-      title: (user as any)?.title || '',
+      title: (user as any)?.title || 'none',
       join_date: (user as any)?.join_date || '',
       ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
       account_balance: (user as any)?.account_balance || 0,
@@ -86,7 +87,7 @@ export function EditUserDialog({
         notes: user.notes || '',
         dues_paid: user.dues_paid || false,
         is_admin: user.is_super_admin || false,
-        title: (user as any)?.title || '',
+        title: (user as any)?.title || 'none',
         join_date: (user as any)?.join_date || '',
         ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
         account_balance: (user as any)?.account_balance || 0,
@@ -335,14 +336,14 @@ export function EditUserDialog({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Executive Title</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select executive title" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No Title</SelectItem>
+                          <SelectItem value="none">No Title</SelectItem>
                           <SelectItem value="President">President</SelectItem>
                           <SelectItem value="Vice President">Vice President</SelectItem>
                           <SelectItem value="Secretary">Secretary</SelectItem>
