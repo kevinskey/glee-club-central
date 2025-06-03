@@ -103,7 +103,6 @@ export const PDFThumbnail = ({
               cMapUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
               cMapPacked: true,
               standardFontDataUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-              disableWorker: false,
               verbosity: 0,
             }}
           >
