@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -265,48 +264,32 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
-      const tempPassword = `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`;
+      // Use the useUserCreate hook's addUser function instead of direct admin API
+      const { addUser } = await import('@/hooks/user/useUserCreate');
       
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      // Transform the data to match UserFormValues interface
+      const userFormData = {
         email: userData.email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          first_name: userData.first_name,
-          last_name: userData.last_name
-        }
-      });
-
-      if (authError) throw new Error(`Auth error: ${authError.message}`);
-      if (!authData.user?.id) throw new Error('User creation failed');
-
-      const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
-      const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
-
-      const profileData = {
-        id: authData.user.id,
+        password: `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`,
         first_name: userData.first_name,
         last_name: userData.last_name,
-        phone: userData.phone || null,
-        voice_part: userData.voice_part || null,
-        status: userData.status || 'active',
-        class_year: userData.class_year || null,
-        notes: userData.notes || null,
-        dues_paid: duesPaid,
-        join_date: joinDate,
+        phone: userData.phone || '',
+        voice_part: userData.voice_part || '',
         role: userData.role || 'member',
-        is_super_admin: userData.role === 'admin',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        status: userData.status || 'active',
+        class_year: userData.class_year || '',
+        notes: userData.notes || '',
+        dues_paid: userData.dues_paid?.toLowerCase() === 'true',
+        join_date: userData.join_date || new Date().toISOString().split('T')[0],
+        is_admin: userData.role === 'admin'
       };
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert(profileData, { onConflict: 'id' });
-
-      if (profileError) {
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw new Error(`Profile error: ${profileError.message}`);
+      // Create user using the existing hook
+      const userCreateHook = addUser;
+      const success = await userCreateHook(userFormData);
+      
+      if (!success) {
+        throw new Error('Failed to create user');
       }
     } catch (error: any) {
       throw error;
