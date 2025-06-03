@@ -36,13 +36,13 @@ export function TouchGestureHandler({
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
 
-  const getDistance = (touch1: Touch, touch2: Touch) => {
+  const getDistance = (touch1: React.Touch, touch2: React.Touch) => {
     const dx = touch1.clientX - touch2.clientX;
     const dy = touch1.clientY - touch2.clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  const getAngle = (touch1: Touch, touch2: Touch) => {
+  const getAngle = (touch1: React.Touch, touch2: React.Touch) => {
     const dx = touch1.clientX - touch2.clientX;
     const dy = touch1.clientY - touch2.clientY;
     return Math.atan2(dy, dx) * 180 / Math.PI;
@@ -130,8 +130,7 @@ export function TouchGestureHandler({
       onUpdate({
         style: {
           ...element.style,
-          fontSize: newFontSize,
-          transform: `scale(${newScale}) rotate(${newRotation}deg)`
+          fontSize: newFontSize
         }
       });
     }
