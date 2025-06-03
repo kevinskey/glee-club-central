@@ -2,10 +2,9 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { Eye, Download, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
+import { Eye, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
@@ -48,7 +47,7 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
               target.style.display = 'none';
               const parent = target.parentElement;
               if (parent) {
-                parent.innerHTML = `<div class="w-full h-full flex items-center justify-center">${getMediaIcon(mediaType)}</div>`;
+                parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-muted">${getMediaIcon(mediaType).props.children}</div>`;
               }
             }}
           />
