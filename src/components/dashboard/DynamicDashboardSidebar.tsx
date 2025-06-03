@@ -44,6 +44,12 @@ export function DynamicDashboardSidebar() {
   // Executive Board navigation items (role-based)
   const execNavItems: NavItem[] = [
     { 
+      to: '/dashboard/executive', 
+      icon: Crown, 
+      label: 'Executive Dashboard', 
+      requiredTags: ['President', 'Secretary', 'Treasurer', 'Historian', 'Social Chair', 'Librarian', 'Chaplain'] 
+    },
+    { 
       to: '/exec/president', 
       icon: Crown, 
       label: 'President Tools', 

@@ -11,6 +11,7 @@ import StorePage from "./pages/StorePage";
 import DesignStudioPage from "./pages/DesignStudioPage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
+import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
 import { adminRoutes } from "./routes/adminRoutes";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
 
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <RoleDashboardPage />,
+      },
+      {
+        path: "dashboard/executive",
+        element: <ExecutiveDashboard />,
       },
       {
         path: "attendance",
