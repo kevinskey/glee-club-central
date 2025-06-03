@@ -67,7 +67,10 @@ export function UploadMediaModal({
     uploadProgress,
     handleUpload,
     resetForm
-  } = useMediaUpload(onUploadComplete, defaultCategory);
+  } = useMediaUpload(() => {
+    console.log("Upload completed, calling onUploadComplete");
+    onUploadComplete();
+  }, defaultCategory);
 
   const handleClose = () => {
     console.log("Closing upload modal");
@@ -95,12 +98,14 @@ export function UploadMediaModal({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}
-        data-testid="upload-media-modal">
+      <DialogContent 
+        className={`${isMobile ? 'w-[calc(100%-2rem)]' : 'sm:max-w-[500px]'} overflow-y-auto max-h-[90vh]`}
+        data-testid="upload-media-modal"
+      >
         <DialogHeader>
           <DialogTitle>Upload Media Files</DialogTitle>
           <DialogDescription>
-            Upload multiple files to the media library. Maximum file size is 25MB per file.
+            Upload images for the hero section. Maximum file size is 25MB per file.
           </DialogDescription>
         </DialogHeader>
         <MediaUploadForm

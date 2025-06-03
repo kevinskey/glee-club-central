@@ -8,9 +8,14 @@ import { hasPermission } from "@/utils/permissionChecker";
 interface UploadMediaButtonProps {
   onClick: () => void;
   label?: string;
+  disabled?: boolean;
 }
 
-export function UploadMediaButton({ onClick, label = "Upload Media" }: UploadMediaButtonProps) {
+export function UploadMediaButton({ 
+  onClick, 
+  label = "Upload Media",
+  disabled = false 
+}: UploadMediaButtonProps) {
   const { user, profile } = useAuth();
   
   // Create user object for permission checking
@@ -25,10 +30,16 @@ export function UploadMediaButton({ onClick, label = "Upload Media" }: UploadMed
   if (!canUpload) {
     return null;
   }
+
+  const handleClick = () => {
+    console.log("Upload button clicked");
+    onClick();
+  };
   
   return (
     <Button 
-      onClick={onClick}
+      onClick={handleClick}
+      disabled={disabled}
       className="bg-glee-purple hover:bg-glee-purple/90 text-white"
     >
       <Upload className="mr-2 h-4 w-4" />
