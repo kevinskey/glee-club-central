@@ -199,7 +199,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         <Card>
           <CardHeader className="p-4 pb-3">
             <CardTitle className="flex items-center justify-between text-base">
-              <span>Design Canvas</span>
+              <span>Design Canvas (8.5" × 11")</span>
               <div className="flex gap-2">
                 <Button onClick={onPreview} variant="outline" size="sm" className="h-8">
                   <Eye className="h-3 w-3 mr-1" />
@@ -215,8 +215,9 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
           <CardContent className="p-4 pt-0">
             <div
               ref={canvasRef}
-              className="relative w-full aspect-video bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair"
+              className="relative w-full bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair"
               style={{
+                aspectRatio: '8.5 / 11', // US Letter paper ratio
                 backgroundColor,
                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                 backgroundSize: 'cover',
@@ -272,6 +273,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             
             <div className="mt-2 text-xs text-muted-foreground">
               <p>💡 Click on text elements to select and edit them</p>
+              <p>📄 Canvas represents standard US Letter size (8.5" × 11")</p>
               {layoutType !== 'full' && (
                 <p>🚫 Grayed areas are reserved for other content and cannot be designed</p>
               )}

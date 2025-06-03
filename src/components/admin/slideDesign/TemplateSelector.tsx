@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,11 +43,12 @@ const getLayoutLabel = (layoutType: string) => {
 };
 
 const renderLayoutPreview = (layoutType: string) => {
-  const baseClasses = "w-full h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded border-2 border-dashed border-blue-300 relative overflow-hidden";
+  const baseClasses = "w-full bg-gradient-to-br from-blue-100 to-blue-200 rounded border-2 border-dashed border-blue-300 relative overflow-hidden";
+  const paperStyle = { aspectRatio: '8.5 / 11' }; // US Letter paper ratio
   
   if (layoutType === 'full') {
     return (
-      <div className={baseClasses}>
+      <div className={baseClasses} style={paperStyle}>
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-xs text-blue-600 font-medium">Full Designable Area</span>
         </div>
@@ -58,7 +58,7 @@ const renderLayoutPreview = (layoutType: string) => {
   
   if (layoutType === 'half_horizontal') {
     return (
-      <div className={baseClasses}>
+      <div className={baseClasses} style={paperStyle}>
         {/* Left half - designable */}
         <div className="absolute left-0 top-0 w-1/2 h-full flex items-center justify-center border-r border-blue-300">
           <span className="text-xs text-blue-600 font-medium text-center">Designable</span>
@@ -73,7 +73,7 @@ const renderLayoutPreview = (layoutType: string) => {
   
   if (layoutType === 'half_vertical') {
     return (
-      <div className={baseClasses}>
+      <div className={baseClasses} style={paperStyle}>
         {/* Top half - designable */}
         <div className="absolute top-0 left-0 w-full h-1/2 flex items-center justify-center border-b border-blue-300">
           <span className="text-xs text-blue-600 font-medium">Designable</span>
@@ -88,7 +88,7 @@ const renderLayoutPreview = (layoutType: string) => {
   
   if (layoutType === 'quarter') {
     return (
-      <div className={baseClasses}>
+      <div className={baseClasses} style={paperStyle}>
         {/* Top left quarter - designable */}
         <div className="absolute top-0 left-0 w-1/2 h-1/2 flex items-center justify-center border-r border-b border-blue-300">
           <span className="text-xs text-blue-600 font-medium text-center leading-tight">Design Area</span>
@@ -106,7 +106,7 @@ const renderLayoutPreview = (layoutType: string) => {
   }
   
   return (
-    <div className={baseClasses}>
+    <div className={baseClasses} style={paperStyle}>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-xs text-blue-600 font-medium">Template Preview</span>
       </div>
