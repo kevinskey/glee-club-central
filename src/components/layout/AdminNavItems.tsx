@@ -1,75 +1,89 @@
-
-import { 
-  Calendar, 
-  Users, 
-  FileText, 
-  Image, 
-  Settings, 
-  ShoppingCart, 
+import React from "react";
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Settings,
   BarChart3,
-  Palette,
-  Presentation
+  DollarSign,
+  Music,
+  Image,
+  Newspaper,
+  ShoppingCart,
+  MapPin,
+  FileText,
+  Megaphone,
+  Clock
 } from "lucide-react";
 
-export const adminNavItems = [
+interface NavItem {
+  title: string;
+  href: string;
+  icon: any;
+  description: string;
+}
+
+const adminNavItems: NavItem[] = [
   {
     title: "Dashboard",
-    url: "/admin",
-    icon: BarChart3,
+    href: "/admin",
+    icon: LayoutDashboard,
+    description: "Overview of your store",
   },
   {
-    title: "Calendar",
-    url: "/admin/calendar",
+    title: "Events Calendar",
+    href: "/admin/events",
     icon: Calendar,
+    description: "Manage events and rehearsals",
   },
   {
     title: "Members",
-    url: "/admin/members",
+    href: "/admin/members",
     icon: Users,
+    description: "Manage members and roles",
   },
   {
-    title: "Hero Manager",
-    url: "/admin/hero-manager",
-    icon: Image,
+    title: "Finances",
+    href: "/admin/finances",
+    icon: DollarSign,
+    description: "Track income and expenses",
   },
   {
-    title: "Slide Designer",
-    url: "/admin/slide-design",
-    icon: Presentation,
-  },
-  {
-    title: "Media Library",
-    url: "/admin/media",
-    icon: Image,
+    title: "Merch Store",
+    href: "/admin/store",
+    icon: ShoppingCart,
+    description: "Manage products and sales",
   },
   {
     title: "News Ticker",
-    url: "/admin/news-ticker",
-    icon: FileText,
+    href: "/admin/news",
+    icon: Newspaper,
+    description: "Manage scrolling news items",
   },
   {
-    title: "Orders",
-    url: "/admin/orders",
-    icon: ShoppingCart,
+    title: "Gallery",
+    href: "/admin/gallery",
+    icon: Image,
+    description: "Manage photos and albums",
   },
   {
-    title: "Design Studio",
-    url: "/admin/design-studio",
-    icon: Palette,
+    title: "Sponsors",
+    href: "/admin/sponsors",
+    icon: DollarSign,
+    description: "Manage sponsors and donations",
   },
   {
-    title: "Analytics",
-    url: "/admin/analytics",
-    icon: BarChart3,
+    title: "Glee Planner",
+    href: "/admin/glee-planner",
+    icon: Clock,
+    description: "Plan and organize events with smart modules"
   },
   {
-    title: "Announcements",
-    url: "/admin/announcements",
-    icon: FileText,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
+    title: "Site Settings",
+    href: "/admin/settings",
     icon: Settings,
+    description: "Configure site-wide settings",
   },
 ];
+
+export default adminNavItems;

@@ -25,6 +25,7 @@ import UserSystemResetPage from '@/pages/admin/UserSystemResetPage';
 import TourMerchPage from '@/pages/admin/TourMerchPage';
 import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
 import SlideDesignPage from '@/pages/admin/SlideDesignPage';
+import GleePlannerPage from '@/pages/admin/GleePlannerPage';
 
 // Events
 import EventsListPage from '@/pages/events/EventsListPage';
@@ -231,5 +232,9 @@ export const adminRoutes: RouteObject[] = [
         <UserSystemResetPage />
       </AdminRoute>
     ),
+  },
+  {
+    path: "/admin/glee-planner",
+    element: <GleePlannerPage />,
   },
 ];
