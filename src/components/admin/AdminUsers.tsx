@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PageHeader } from "@/components/ui/page-header";
 import { 
   Card, 
@@ -17,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Users, Search, Plus, MoreHorizontal } from "lucide-react";
+import { Users, Search, Plus, MoreHorizontal, Upload } from "lucide-react";
 
 const AdminUsers: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,10 +51,18 @@ const AdminUsers: React.FC = () => {
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Members Directory</CardTitle>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Member
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link to="/admin/csv-upload">
+                <Upload className="mr-2 h-4 w-4" />
+                Import CSV
+              </Link>
+            </Button>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Member
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex mb-4">
