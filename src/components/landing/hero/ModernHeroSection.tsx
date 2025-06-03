@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHeroData } from "./hooks/useHeroData";
@@ -23,9 +24,19 @@ export function ModernHeroSection({
   const { slides, settings, mediaFiles, isLoading, error } = useHeroData(sectionId);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(enableAutoplay);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const hasValidSlidesRef = useRef(false);
+
+  // Initialize only when we have valid data
+  useEffect(() => {
+    if (!isLoading && slides.length >= 0) {
+      setIsInitialized(true);
+      hasValidSlidesRef.current = slides.length > 0;
+    }
+  }, [isLoading, slides.length]);
 
   useEffect(() => {
-    if (slides.length > 1 && isPlaying && settings?.scroll_interval && enableAutoplay) {
+    if (slides.length > 1 && isPlaying && settings?.scroll_interval && enableAutoplay && isInitialized) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => {
           const nextSlide = prev + 1;
@@ -38,14 +49,14 @@ export function ModernHeroSection({
 
       return () => clearInterval(interval);
     }
-  }, [slides.length, isPlaying, settings?.scroll_interval, settings?.loop, enableAutoplay]);
+  }, [slides.length, isPlaying, settings?.scroll_interval, settings?.loop, enableAutoplay, isInitialized]);
 
   // Reset current slide if we have slides
   useEffect(() => {
-    if (slides.length > 0) {
+    if (slides.length > 0 && isInitialized) {
       setCurrentSlide(0);
     }
-  }, [slides.length]);
+  }, [slides.length, isInitialized]);
 
   const goToPrevSlide = () => {
     setCurrentSlide((prev) => {
@@ -136,7 +147,8 @@ export function ModernHeroSection({
     return `${positionClass} ${alignmentClass}`;
   };
 
-  if (isLoading) {
+  // Show loading state only initially
+  if (isLoading && !isInitialized) {
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
@@ -152,7 +164,8 @@ export function ModernHeroSection({
     );
   }
 
-  if (error) {
+  // Show error state with fallback content
+  if (error && isInitialized) {
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -164,14 +177,14 @@ export function ModernHeroSection({
             <p className={cn("mb-6", getTextSizeClasses().description)}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
-            <p className="text-sm opacity-75">Error loading hero content: {error}</p>
           </div>
         </div>
       </section>
     );
   }
 
-  if (slides.length === 0) {
+  // Show default content when no slides or still loading
+  if (!isInitialized || slides.length === 0) {
     return (
       <section className={cn("relative w-full h-full overflow-hidden", getResponsiveClasses())}>
         <HeroBackgroundMedia currentSlide={null} mediaFiles={mediaFiles} settings={settings} />
@@ -183,7 +196,6 @@ export function ModernHeroSection({
             <p className={cn("mb-6", getTextSizeClasses().description)}>
               A distinguished ensemble with a rich heritage of musical excellence
             </p>
-            <p className="text-sm opacity-75">Setting up hero slides for {sectionId}...</p>
           </div>
         </div>
       </section>

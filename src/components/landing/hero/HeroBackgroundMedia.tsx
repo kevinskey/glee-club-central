@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { HeroSlide, MediaFile, HeroSettings } from './types';
 
@@ -10,6 +10,9 @@ interface HeroBackgroundMediaProps {
 }
 
 export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: HeroBackgroundMediaProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
   const isYouTubeEmbed = (url: string) => {
     return url?.includes('youtube.com/embed/');
   };
@@ -28,6 +31,12 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
         return '';
     }
   };
+
+  // Reset loading states when slide changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [currentSlide?.id]);
 
   if (!currentSlide) {
     console.log('🎭 Hero: No current slide, showing fallback background');
@@ -66,34 +75,18 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
   // Find the media file
   const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
   
-  // Enhanced debugging for missing media
+  // Handle missing media more gracefully
   if (currentSlide.media_id && !currentMedia) {
-    console.error('🎭 Hero: MISSING MEDIA FILE!');
-    console.error('🎭 Hero: Looking for media ID:', currentSlide.media_id);
-    console.error('🎭 Hero: Available media IDs:', mediaFiles.map(m => m.id));
-    console.error('🎭 Hero: This slide references a media file that no longer exists.');
-    console.error('🎭 Hero: Please update the slide to use an existing media file or upload a new one.');
+    console.warn('🎭 Hero: Media file not found, using fallback');
     
-    // Show fallback with error message
     return (
-      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-red-600 to-red-700">
-        <div className="absolute inset-0 bg-black/40"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-white text-center p-8 bg-black/50 rounded-lg">
-            <h3 className="text-xl font-bold mb-2">Media File Missing</h3>
-            <p className="text-sm opacity-90">
-              This slide references a media file that no longer exists.
-            </p>
-            <p className="text-xs opacity-75 mt-2">
-              Media ID: {currentSlide.media_id}
-            </p>
-          </div>
-        </div>
+      <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
     );
   }
   
-  if (currentMedia && currentMedia.file_url) {
+  if (currentMedia && currentMedia.file_url && !imageError) {
     console.log('🎭 Hero: Rendering media:', {
       mediaId: currentMedia.id,
       title: currentMedia.title,
@@ -121,26 +114,36 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
         }}
         onError={(e) => {
           console.error('🎭 Hero: Video failed to load:', currentMedia.file_url);
-          console.error('🎭 Hero: Video error details:', e);
+          setImageError(true);
         }}
       />
     ) : (
-      <img
-        key={currentMedia.id}
-        src={currentMedia.file_url}
-        alt={currentMedia.title || 'Hero image'}
-        className={cn(
-          "absolute inset-0 w-full h-full object-cover",
-          getAnimationClass()
+      <>
+        {/* Show loading state until image loads */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-glee-spelman via-glee-columbia to-glee-purple">
+            <div className="absolute inset-0 bg-black/20"></div>
+          </div>
         )}
-        onLoad={() => {
-          console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
-        }}
-        onError={(e) => {
-          console.error('🎭 Hero: Image failed to load:', currentMedia.file_url);
-          console.error('🎭 Hero: Error details:', e);
-        }}
-      />
+        <img
+          key={currentMedia.id}
+          src={currentMedia.file_url}
+          alt={currentMedia.title || 'Hero image'}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover",
+            getAnimationClass(),
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          )}
+          onLoad={() => {
+            console.log('🎭 Hero: Image loaded successfully:', currentMedia.file_url);
+            setImageLoaded(true);
+          }}
+          onError={(e) => {
+            console.error('🎭 Hero: Image failed to load:', currentMedia.file_url);
+            setImageError(true);
+          }}
+        />
+      </>
     );
   }
 
