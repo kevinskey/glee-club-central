@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -108,20 +109,51 @@ export async function migrateMediaIds(): Promise<MediaMigrationResult> {
 
     console.log(`✅ Migrated ${result.migratedCount} media files`);
 
-    // Step 3: Update hero slides with new media IDs
-    // First, clean up any slides with string "null" values
+    // Step 3: Clean up and update hero slides with new media IDs
     console.log('🔄 Cleaning up slides with invalid media_id values...');
     
-    const { error: cleanupError } = await supabase
-      .from('hero_slides')
-      .update({ media_id: null })
-      .eq('media_id', 'null');
+    // Clean up slides with various invalid UUID formats
+    const invalidFormats = ['null', 'undefined', ''];
+    
+    for (const invalidFormat of invalidFormats) {
+      const { error: cleanupError } = await supabase
+        .from('hero_slides')
+        .update({ media_id: null })
+        .eq('media_id', invalidFormat);
 
-    if (cleanupError) {
-      console.warn(`⚠️ Warning cleaning up null media_id values: ${cleanupError.message}`);
+      if (cleanupError) {
+        console.warn(`⚠️ Warning cleaning up '${invalidFormat}' media_id values: ${cleanupError.message}`);
+      }
     }
 
-    // Now get slides that have valid media_id references
+    // Also clean up slides with media_id that don't match UUID pattern (like "media-xxx-timestamp")
+    const { data: allSlides, error: allSlidesError } = await supabase
+      .from('hero_slides')
+      .select('id, media_id')
+      .not('media_id', 'is', null);
+
+    if (allSlidesError) {
+      console.warn(`⚠️ Warning fetching slides for UUID validation: ${allSlidesError.message}`);
+    } else if (allSlides) {
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      
+      for (const slide of allSlides) {
+        if (slide.media_id && !uuidPattern.test(slide.media_id)) {
+          console.log(`🔄 Cleaning invalid UUID format: ${slide.media_id}`);
+          
+          const { error: cleanInvalidError } = await supabase
+            .from('hero_slides')
+            .update({ media_id: null })
+            .eq('id', slide.id);
+
+          if (cleanInvalidError) {
+            console.warn(`⚠️ Warning cleaning invalid UUID ${slide.media_id}: ${cleanInvalidError.message}`);
+          }
+        }
+      }
+    }
+
+    // Now get slides that have valid media_id references (should be UUIDs only)
     const { data: heroSlides, error: slidesError } = await supabase
       .from('hero_slides')
       .select('*')
