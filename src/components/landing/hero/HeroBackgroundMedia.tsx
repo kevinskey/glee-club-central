@@ -51,7 +51,8 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
     slideId: currentSlide.id,
     mediaId: currentSlide.media_id,
     mediaType: currentSlide.media_type,
-    title: currentSlide.title
+    title: currentSlide.title,
+    mediaFilesCount: mediaFiles.length
   });
 
   // Handle YouTube embeds
@@ -74,6 +75,18 @@ export function HeroBackgroundMedia({ currentSlide, mediaFiles, settings }: Hero
 
   // Find the media file
   const currentMedia = currentSlide.media_id ? mediaFiles.find(m => m.id === currentSlide.media_id) : null;
+  
+  // Debug media lookup
+  if (currentSlide.media_id) {
+    console.log('🎭 Hero: Looking for media_id:', currentSlide.media_id);
+    console.log('🎭 Hero: Available media files:', mediaFiles.map(m => ({ id: m.id, title: m.title })));
+    
+    if (currentMedia) {
+      console.log('🎭 Hero: ✅ Found media file:', currentMedia);
+    } else {
+      console.log('🎭 Hero: ❌ Media file not found for media_id:', currentSlide.media_id);
+    }
+  }
   
   // If slide has media_id but media not found, show slide with fallback background
   if (currentSlide.media_id && !currentMedia) {

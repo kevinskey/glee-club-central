@@ -63,16 +63,27 @@ export function useHeroData(sectionId: string) {
         // Don't throw here, just log and continue with empty media
         setMediaFiles([]);
       } else {
-        setMediaFiles(mediaResult.data || []);
+        const mediaList = mediaResult.data || [];
+        setMediaFiles(mediaList);
+        console.log('🎭 Hero: Media library files:', mediaList.map(m => ({ id: m.id, title: m.title, url: m.file_url })));
       }
 
       const fetchedSlides = slidesResult.data || [];
       console.log('🎭 Hero: Fetched slides:', fetchedSlides.length);
-      console.log('🎭 Hero: Media library count:', mediaResult.data?.length || 0);
       
-      // Log slide details for debugging
+      // Log slide details for debugging and check for media connectivity
       fetchedSlides.forEach(slide => {
         console.log(`🎭 Hero: Slide "${slide.title}" - visible: ${slide.visible}, media_id: ${slide.media_id}, section: ${slide.section_id}`);
+        
+        if (slide.media_id) {
+          const foundMedia = (mediaResult.data || []).find(m => m.id === slide.media_id);
+          if (foundMedia) {
+            console.log(`🎭 Hero: ✅ Media found for slide "${slide.title}":`, foundMedia.title, foundMedia.file_url);
+          } else {
+            console.warn(`🎭 Hero: ❌ Media NOT found for slide "${slide.title}" with media_id: ${slide.media_id}`);
+            console.log('🎭 Hero: Available media IDs:', (mediaResult.data || []).map(m => m.id));
+          }
+        }
       });
 
       setSlides(fetchedSlides);
