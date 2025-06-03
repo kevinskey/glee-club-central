@@ -49,6 +49,10 @@ const router = createBrowserRouter([
         element: <ExecutiveDashboard />,
       },
       {
+        path: "exec/treasurer",
+        element: React.lazy(() => import("./pages/dashboard/TreasurerDashboard")),
+      },
+      {
         path: "attendance",
         element: <AttendancePage />,
       },

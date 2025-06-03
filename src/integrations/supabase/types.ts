@@ -149,6 +149,96 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_entries: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          purpose: string | null
+          receipt_url: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          id?: string
+          purpose?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          purpose?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_entries_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_entries_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_log: {
+        Row: {
+          action: string
+          amount: number
+          id: string
+          logged_by: string | null
+          notes: string | null
+          timestamp: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          id?: string
+          logged_by?: string | null
+          notes?: string | null
+          timestamp?: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          id?: string
+          logged_by?: string | null
+          notes?: string | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_log_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_log_logged_by_fkey"
+            columns: ["logged_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       choral_titles: {
         Row: {
           amount_on_hand: number | null
@@ -234,6 +324,54 @@ export type Database = {
           uploaded_by?: string
         }
         Relationships: []
+      }
+      dues: {
+        Row: {
+          amount_owed: number
+          amount_paid: number
+          created_at: string
+          date_paid: string | null
+          id: string
+          member_id: string | null
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_owed?: number
+          amount_paid?: number
+          created_at?: string
+          date_paid?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_owed?: number
+          amount_paid?: number
+          created_at?: string
+          date_paid?: string | null
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dues_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dues_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_assignments: {
         Row: {
@@ -1799,6 +1937,45 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      treasurer_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "treasurer_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "treasurer_notes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       uniform_assignments: {
         Row: {
