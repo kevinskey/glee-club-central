@@ -196,6 +196,45 @@ export type Database = {
           },
         ]
       }
+      design_assets: {
+        Row: {
+          extracted_at: string | null
+          extracted_files: Json | null
+          extraction_status: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          extracted_at?: string | null
+          extracted_files?: Json | null
+          extraction_status?: string | null
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          extracted_at?: string | null
+          extracted_files?: Json | null
+          extraction_status?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       event_assignments: {
         Row: {
           assigned_by: string | null
