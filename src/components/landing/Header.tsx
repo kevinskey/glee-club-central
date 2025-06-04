@@ -38,9 +38,9 @@ export function Header() {
   
   return (
     <>
-      {/* Sticky Header with News Ticker */}
+      {/* Fixed Header with News Ticker */}
       <header 
-        className="sticky top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 z-50"
+        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 z-50"
       >
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
@@ -161,7 +161,7 @@ export function Header() {
         </div>
       </header>
       
-      {/* Spacer div to push content below the sticky header */}
+      {/* Spacer div to push content below the fixed header */}
       <div className="h-20 md:h-24" style={{ height: showNewsTicker ? '120px' : '80px' }}></div>
     </>
   );
