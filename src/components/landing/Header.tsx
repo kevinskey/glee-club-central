@@ -38,11 +38,11 @@ export function Header() {
   
   return (
     <>
-      {/* Fixed Header - Force fixed positioning on all screen sizes */}
+      {/* Fixed Header */}
       <header 
-        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg"
+        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700"
         style={{ 
-          position: 'fixed !important',
+          position: 'fixed',
           zIndex: 9999,
           top: 0,
           left: 0,
@@ -53,7 +53,7 @@ export function Header() {
         {showNewsTicker && <NewsTicker />}
         
         {/* Main Header */}
-        <div className="border-b bg-white dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-900">
           <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between">
             {/* Logo */}
             <HeaderLogo />
@@ -61,19 +61,19 @@ export function Header() {
             {/* Desktop Navigation */}
             {!isMobile && (
               <nav className="flex items-center space-x-6">
-                <Link to="/" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                <Link to="/" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
                   Home
                 </Link>
-                <Link to="/about" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                <Link to="/about" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
                   About
                 </Link>
-                <Link to="/calendar" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                <Link to="/calendar" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
                   Calendar
                 </Link>
-                <Link to="/store" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                <Link to="/store" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
                   Store
                 </Link>
-                <Link to="/contact" className="font-medium text-foreground hover:text-glee-spelman transition-colors">
+                <Link to="/contact" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
                   Contact
                 </Link>
               </nav>
@@ -89,7 +89,7 @@ export function Header() {
                       <Button 
                         variant="default"
                         onClick={handleDashboardClick}
-                        className="bg-glee-spelman hover:bg-glee-spelman/90"
+                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
                       >
                         <User className="w-4 h-4 mr-2" />
                         {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
@@ -97,7 +97,7 @@ export function Header() {
                       <Button 
                         variant="outline"
                         onClick={handleLogout}
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
@@ -108,7 +108,7 @@ export function Header() {
                       <Button 
                         variant="outline"
                         onClick={() => navigate("/signup")}
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Sign Up
@@ -116,7 +116,7 @@ export function Header() {
                       <Button 
                         variant="default"
                         onClick={() => navigate("/login")}
-                        className="bg-glee-spelman hover:bg-glee-spelman/90"
+                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
                       >
                         <LogIn className="w-4 h-4 mr-2" />
                         Login
@@ -135,7 +135,7 @@ export function Header() {
                       variant="default"
                       onClick={handleDashboardClick}
                       size="sm"
-                      className="bg-glee-spelman hover:bg-glee-spelman/90"
+                      className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
                     >
                       <User className="w-4 h-4" />
                     </Button>
@@ -145,7 +145,7 @@ export function Header() {
                         variant="outline"
                         onClick={() => navigate("/signup")}
                         size="sm"
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
+                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
                       >
                         <UserPlus className="w-4 h-4" />
                       </Button>
@@ -153,7 +153,7 @@ export function Header() {
                         variant="default"
                         onClick={() => navigate("/login")}
                         size="sm"
-                        className="bg-glee-spelman hover:bg-glee-spelman/90"
+                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
                       >
                         <LogIn className="w-4 h-4" />
                       </Button>
