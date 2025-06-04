@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { NewsTicker } from "@/components/landing/news/NewsTicker";
@@ -42,15 +43,15 @@ export function Header() {
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
         
-        {/* Main Header - Apple style navigation */}
+        {/* Main Header - Apple style navigation with generous padding */}
         <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl">
-          <div className="container mx-auto px-6 md:px-8 flex h-12 md:h-14 items-center justify-between">
+          <div className="container mx-auto px-8 md:px-12 lg:px-16 flex h-14 md:h-16 items-center justify-between">
             {/* Logo */}
             <HeaderLogo />
             
-            {/* Desktop Navigation - Apple style */}
+            {/* Desktop Navigation - Apple style with generous spacing */}
             {!isMobile && (
-              <nav className="flex items-center space-x-8">
+              <nav className="flex items-center space-x-10 lg:space-x-12">
                 <Link to="/" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
                   Home
                 </Link>
@@ -69,17 +70,17 @@ export function Header() {
               </nav>
             )}
             
-            {/* Right Side Actions - Apple style */}
-            <div className="flex items-center gap-3">
+            {/* Right Side Actions - Apple style with generous spacing */}
+            <div className="flex items-center gap-4 lg:gap-6">
               {/* Desktop Auth Buttons */}
               {!isMobile && (
                 <>
                   {isAuthenticated ? (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <Button 
                         variant="ghost"
                         onClick={handleDashboardClick}
-                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200 px-4 py-2"
                       >
                         <User className="w-4 h-4 mr-2" />
                         {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'Dashboard'}
@@ -87,18 +88,18 @@ export function Header() {
                       <Button 
                         variant="ghost"
                         onClick={handleLogout}
-                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200 px-4 py-2"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <Button 
                         variant="ghost"
                         onClick={() => navigate("/signup")}
-                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200 px-4 py-2"
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Sign Up
@@ -106,7 +107,7 @@ export function Header() {
                       <Button 
                         variant="default"
                         onClick={() => navigate("/login")}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-normal px-4 py-2 rounded-full transition-all duration-200 hover:scale-105"
+                        className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white text-sm font-normal px-6 py-2 rounded-full transition-all duration-200 hover:scale-105"
                       >
                         <LogIn className="w-4 h-4 mr-2" />
                         Login
@@ -125,7 +126,7 @@ export function Header() {
                       variant="default"
                       onClick={handleDashboardClick}
                       size="sm"
-                      className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                      className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white"
                     >
                       <User className="w-4 h-4" />
                     </Button>
@@ -135,7 +136,7 @@ export function Header() {
                         variant="outline"
                         onClick={() => navigate("/signup")}
                         size="sm"
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
+                        className="border-glee-columbia text-glee-columbia hover:bg-glee-columbia/10 dark:border-glee-columbia dark:text-glee-columbia"
                       >
                         <UserPlus className="w-4 h-4" />
                       </Button>
@@ -143,7 +144,7 @@ export function Header() {
                         variant="default"
                         onClick={() => navigate("/login")}
                         size="sm"
-                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                        className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white"
                       >
                         <LogIn className="w-4 h-4" />
                       </Button>
@@ -158,8 +159,8 @@ export function Header() {
         </div>
       </header>
       
-      {/* Spacer div to push content below the fixed header */}
-      <div className="h-16 md:h-18" style={{ height: showNewsTicker ? '100px' : '60px' }}></div>
+      {/* Spacer div to push content below the fixed header - Apple style generous spacing */}
+      <div className="h-20 md:h-24" style={{ height: showNewsTicker ? '110px' : '70px' }}></div>
     </>
   );
 }
