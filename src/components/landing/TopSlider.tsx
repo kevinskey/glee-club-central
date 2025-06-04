@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,7 @@ const getYouTubeVideoId = (url: string): string | null => {
 export function TopSlider({ 
   autoPlay = true, 
   interval = 5000, 
-  height = "400px", // Apple Music-style height
+  height = "400px",
   className = ""
 }: TopSliderProps) {
   const [slides, setSlides] = useState<TopSliderItem[]>([]);
@@ -53,7 +52,6 @@ export function TopSlider({
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   
-  // Use media query to detect mobile devices
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   const fetchSlides = async () => {
@@ -134,7 +132,7 @@ export function TopSlider({
     console.log('⏳ TopSlider: Still loading...');
     return (
       <div 
-        className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}
+        className={cn("w-full px-4 sm:px-6 lg:px-8", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -146,7 +144,7 @@ export function TopSlider({
 
   if (!slides || slides.length === 0) {
     console.log('📭 TopSlider: No slides to display');
-    return null; // Don't render anything if no slides
+    return null;
   }
 
   console.log(`🎬 TopSlider: Rendering slider with ${slides.length} slides, current: ${currentSlide}`);
@@ -161,18 +159,115 @@ export function TopSlider({
     computed_image_url: currentSlideData.computed_image_url
   });
 
+  // Mobile horizontal scroll view
+  if (isMobile) {
+    return (
+      <div className={cn("w-full px-4", className)}>
+        <div className="overflow-x-auto">
+          <div 
+            className="flex gap-4 pb-4"
+            style={{
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {slides.map((slide, index) => {
+              const slideYoutubeVideoId = slide.youtube_url ? getYouTubeVideoId(slide.youtube_url) : null;
+              return (
+                <div 
+                  key={slide.id}
+                  className="flex-shrink-0 w-80 relative overflow-hidden rounded-2xl shadow-lg"
+                  style={{ 
+                    height: "240px",
+                    scrollSnapAlign: 'start'
+                  }}
+                >
+                  {/* Background */}
+                  <div className="absolute inset-0">
+                    {slideYoutubeVideoId ? (
+                      <div className="relative w-full h-full">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${slideYoutubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${slideYoutubeVideoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+                          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen={false}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
+                      </div>
+                    ) : (
+                      <div 
+                        className="w-full h-full relative"
+                        style={{
+                          backgroundColor: slide.background_color || '#4A90E2',
+                          backgroundImage: slide.computed_image_url ? `url(${slide.computed_image_url})` : undefined,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center'
+                        }}
+                      >
+                        {slide.computed_image_url && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative z-10 h-full flex items-end pb-4 px-4">
+                    <div className="max-w-full">
+                      <h3 
+                        className="text-lg font-bold mb-2 leading-tight"
+                        style={{ 
+                          color: slide.text_color || '#FFFFFF',
+                          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        {slide.link_url ? (
+                          <a 
+                            href={slide.link_url}
+                            className="hover:opacity-80 transition-opacity"
+                            target={slide.link_url.startsWith('http') ? '_blank' : '_self'}
+                            rel={slide.link_url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                          >
+                            {slide.title}
+                          </a>
+                        ) : (
+                          slide.title
+                        )}
+                      </h3>
+                      {slide.description && (
+                        <p 
+                          className="text-sm opacity-90 leading-relaxed"
+                          style={{ 
+                            color: slide.text_color || '#FFFFFF',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                          }}
+                        >
+                          {slide.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view (unchanged)
   return (
     <div className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}>
       <div 
         className="relative w-full overflow-hidden rounded-2xl shadow-2xl"
-        style={{ height: isMobile ? "240px" : height }}
+        style={{ height }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Background */}
         <div className="absolute inset-0">
           {youtubeVideoId ? (
-            // YouTube video background - Apple Music style
             <div className="relative w-full h-full">
               <iframe
                 src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
@@ -188,7 +283,6 @@ export function TopSlider({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
             </div>
           ) : (
-            // Image or color background
             <div 
               className="w-full h-full relative"
               style={{
@@ -205,7 +299,7 @@ export function TopSlider({
           )}
         </div>
 
-        {/* Content - Apple Music style positioning */}
+        {/* Content */}
         <div className="relative z-10 h-full flex items-end pb-4 sm:pb-6 md:pb-8 px-4 sm:px-6 md:px-8 lg:px-12">
           <div className="max-w-3xl">
             <h2 
@@ -242,7 +336,7 @@ export function TopSlider({
           </div>
         </div>
 
-        {/* Navigation - Apple Music style */}
+        {/* Navigation */}
         {slides.length > 1 && (
           <>
             <Button
@@ -263,7 +357,7 @@ export function TopSlider({
               <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </Button>
 
-            {/* Dots indicator - Apple Music style */}
+            {/* Dots indicator */}
             <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-20">
               {slides.map((_, index) => (
                 <button

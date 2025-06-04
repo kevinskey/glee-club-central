@@ -440,6 +440,27 @@ html {
   }
 }
 
+/* Horizontal Scroll Optimizations - Apple Style */
+.overflow-x-auto {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Smooth momentum scrolling on iOS */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Snap scrolling for horizontal sliders */
+.overflow-x-auto [style*="scroll-snap-type"] {
+  scroll-snap-type: x mandatory;
+}
+
 /* TopSlider Mobile Optimizations - Ultra Tight Apple Style */
 @media (max-width: 768px) {
   /* Top slider specific spacing */
@@ -459,5 +480,29 @@ html {
   /* Tight spacing between header and slider */
   header + * {
     margin-top: 0 !important;
+  }
+}
+
+/* Consistent Slider Widths and Heights */
+@media (max-width: 768px) {
+  /* All slider items should have consistent width */
+  .slider-item {
+    width: 320px !important;
+    height: 240px !important;
+    flex-shrink: 0;
+  }
+  
+  /* Custom slide renderer mobile items */
+  .custom-slide-item {
+    width: 320px !important;
+    height: 300px !important;
+    flex-shrink: 0;
+  }
+  
+  /* Event cards in horizontal scroll */
+  .event-card-mobile {
+    width: 320px !important;
+    height: 384px !important; /* h-96 equivalent */
+    flex-shrink: 0;
   }
 }

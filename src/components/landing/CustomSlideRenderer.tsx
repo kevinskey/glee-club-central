@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,7 +78,7 @@ export function CustomSlideRenderer({
   if (isLoading) {
     return (
       <div 
-        className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}
+        className={cn("w-full px-4 sm:px-6 lg:px-8", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -94,10 +93,8 @@ export function CustomSlideRenderer({
     return null;
   }
 
-  const currentSlideData = slides[currentSlide];
-
-  const renderTextElements = () => {
-    return currentSlideData.design_data.textElements.map((element) => (
+  const renderTextElements = (slideData: SlideDesign) => {
+    return slideData.design_data.textElements.map((element) => (
       <div
         key={element.id}
         className="absolute pointer-events-none select-none"
@@ -114,9 +111,7 @@ export function CustomSlideRenderer({
     ));
   };
 
-  const renderLayoutGrid = () => {
-    const { layout_type } = currentSlideData;
-    
+  const renderLayoutGrid = (layout_type: string) => {
     if (layout_type === 'half_horizontal') {
       return <div className="absolute top-0 left-1/2 w-px h-full bg-white/20" />;
     }
@@ -137,11 +132,74 @@ export function CustomSlideRenderer({
     return null;
   };
 
+  // Mobile horizontal scroll view
+  if (isMobile) {
+    return (
+      <div className={cn("w-full px-4", className)}>
+        <div className="overflow-x-auto">
+          <div 
+            className="flex gap-4 pb-4"
+            style={{
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {slides.map((slide) => (
+              <div 
+                key={slide.id}
+                className="flex-shrink-0 w-80 relative overflow-hidden rounded-2xl shadow-lg cursor-pointer"
+                style={{ 
+                  height: "300px",
+                  scrollSnapAlign: 'start'
+                }}
+                onClick={() => {
+                  if (slide.link_url) {
+                    window.open(slide.link_url, '_blank');
+                  }
+                }}
+              >
+                {/* Background */}
+                <div className="absolute inset-0">
+                  <div 
+                    className="w-full h-full relative"
+                    style={{
+                      backgroundColor: slide.background_color,
+                      backgroundImage: slide.background_image_url ? 
+                        `url(${slide.background_image_url})` : undefined,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat'
+                    }}
+                  >
+                    {slide.background_image_url && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Layout Grid */}
+                {renderLayoutGrid(slide.layout_type)}
+
+                {/* Text Elements */}
+                <div className="relative z-10 h-full">
+                  {renderTextElements(slide)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view (unchanged)
+  const currentSlideData = slides[currentSlide];
+
   return (
     <div className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}>
       <div 
         className="relative w-full overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
-        style={{ height: isMobile ? "300px" : height }}
+        style={{ height }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={() => {
@@ -158,7 +216,7 @@ export function CustomSlideRenderer({
               backgroundColor: currentSlideData.background_color,
               backgroundImage: currentSlideData.background_image_url ? 
                 `url(${currentSlideData.background_image_url})` : undefined,
-              backgroundSize: isMobile ? 'cover' : 'contain',
+              backgroundSize: 'contain',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}
@@ -170,11 +228,11 @@ export function CustomSlideRenderer({
         </div>
 
         {/* Layout Grid */}
-        {renderLayoutGrid()}
+        {renderLayoutGrid(currentSlideData.layout_type)}
 
         {/* Text Elements */}
         <div className="relative z-10 h-full">
-          {renderTextElements()}
+          {renderTextElements(currentSlideData)}
         </div>
 
         {/* Navigation */}
