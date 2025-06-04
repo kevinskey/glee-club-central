@@ -1,14 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { Settings } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { NewsService } from "@/services/newsService";
 import type { NewsItem } from "@/services/newsService";
@@ -24,11 +15,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   hideAfter = 8000 
 }) => {
   const [isVisible, setIsVisible] = useState(true);
-  const [scrollSpeed, setScrollSpeed] = useState<'slow' | 'normal' | 'fast'>('slow');
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newsSource, setNewsSource] = useState<'database' | 'google' | 'mixed'>('mixed');
-  const { isAdmin } = useAuth();
   const isMobile = useIsMobile();
 
   // Fetch news items from database or Google News
@@ -143,15 +132,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     }
   };
 
-  const getAnimationClass = () => {
-    switch (scrollSpeed) {
-      case 'slow': return 'animate-marquee-slow';
-      case 'normal': return 'animate-marquee-normal'; 
-      case 'fast': return 'animate-marquee-fast';
-      default: return 'animate-marquee-slow';
-    }
-  };
-
   const removeIconsFromHeadline = (headline: string) => {
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
@@ -164,19 +144,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     
     // Repeat the content multiple times for seamless scrolling
     return Array(6).fill(singlePass).join(separator);
-  };
-
-  const refreshGoogleNews = async () => {
-    setIsLoading(true);
-    try {
-      const googleNews = await NewsService.fetchMixedNews(8);
-      setNewsItems(googleNews);
-      setNewsSource('google');
-    } catch (error) {
-      console.error('Error refreshing Google News:', error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const tickerContent = createTickerContent();
@@ -206,7 +173,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className={`whitespace-nowrap ${getAnimationClass()}`}>
+          <div className="whitespace-nowrap animate-marquee-20s">
             <span 
               className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
               title="Click to read more"
@@ -216,37 +183,6 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
             </span>
           </div>
         </div>
-        
-        {/* Admin Controls */}
-        {isAdmin() && (
-          <div className="ml-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-white hover:bg-white/20 p-1"
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => setScrollSpeed('slow')}>
-                  Slow Speed
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setScrollSpeed('normal')}>
-                  Normal Speed
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setScrollSpeed('fast')}>
-                  Fast Speed
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={refreshGoogleNews}>
-                  Refresh Google News
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        )}
       </div>
     </div>
   );
