@@ -27,8 +27,8 @@ const HomePage = () => {
       {/* Custom Slide Renderer - No top margin */}
       <CustomSlideRenderer />
       
-      {/* Main Content - Proper spacing from slider */}
-      <div className="mt-8 md:mt-12 lg:mt-16">
+      {/* Main Content - Reduced spacing from slider */}
+      <div className="mt-4 md:mt-6 lg:mt-8">
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}
