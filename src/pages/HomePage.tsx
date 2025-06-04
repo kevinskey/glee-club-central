@@ -21,7 +21,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: '#F9F9F9' }}>
+    <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
       {/* Custom Slide Renderer - Replaces TopSlider */}
