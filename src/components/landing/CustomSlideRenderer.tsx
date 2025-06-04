@@ -79,7 +79,7 @@ export function CustomSlideRenderer({
   if (isLoading) {
     return (
       <div 
-        className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4", className)}
+        className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -138,7 +138,7 @@ export function CustomSlideRenderer({
   };
 
   return (
-    <div className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4", className)}>
+    <div className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}>
       <div 
         className="relative w-full overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
         style={{ height: isMobile ? "300px" : height }}

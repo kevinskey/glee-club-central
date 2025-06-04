@@ -24,7 +24,7 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
-      {/* Custom Slide Renderer - Replaces TopSlider */}
+      {/* Custom Slide Renderer - No top margin */}
       <CustomSlideRenderer />
       
       {/* Main Content - Proper spacing from slider */}
