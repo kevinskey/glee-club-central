@@ -38,8 +38,17 @@ export function Header() {
   
   return (
     <>
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 z-[9999] w-full bg-white dark:bg-gray-900 shadow-lg">
+      {/* Fixed Header - Force fixed positioning on all screen sizes */}
+      <header 
+        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg"
+        style={{ 
+          position: 'fixed !important',
+          zIndex: 9999,
+          top: 0,
+          left: 0,
+          right: 0
+        }}
+      >
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
         
@@ -160,7 +169,7 @@ export function Header() {
       </header>
       
       {/* Spacer div to push content below the fixed header */}
-      <div className="h-20 md:h-24"></div>
+      <div className="h-20 md:h-24" style={{ height: showNewsTicker ? '120px' : '80px' }}></div>
     </>
   );
 }
