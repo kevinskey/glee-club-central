@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NewsService } from "@/services/newsService";
@@ -173,7 +172,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className="whitespace-nowrap animate-marquee-20s">
+          <div className="whitespace-nowrap animate-marquee-12s">
             <span 
               className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
               title="Click to read more"

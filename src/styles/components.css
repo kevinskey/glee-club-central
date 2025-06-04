@@ -27,7 +27,7 @@
   }
 }
 
-@keyframes marquee-20s {
+@keyframes marquee-12s {
   0% {
     transform: translate3d(100%, 0, 0);
   }
@@ -48,6 +48,6 @@
   animation: marquee-fast 17s linear infinite; /* Faster: decreased from 20s to 17s (15% faster) */
 }
 
-.animate-marquee-20s {
-  animation: marquee-20s 20s linear infinite;
+.animate-marquee-12s {
+  animation: marquee-12s 12s linear infinite;
 }
