@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { NewsTicker } from "@/components/landing/news/NewsTicker";
@@ -38,70 +37,68 @@ export function Header() {
   
   return (
     <>
-      {/* Fixed Header with News Ticker */}
-      <header 
-        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 z-50"
-      >
+      {/* Fixed Header with News Ticker - Apple style */}
+      <header className="fixed top-0 left-0 right-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50">
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
         
-        {/* Main Header */}
-        <div className="bg-white dark:bg-gray-900">
-          <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between">
+        {/* Main Header - Apple style navigation */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl">
+          <div className="container mx-auto px-6 md:px-8 flex h-12 md:h-14 items-center justify-between">
             {/* Logo */}
             <HeaderLogo />
             
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - Apple style */}
             {!isMobile && (
-              <nav className="flex items-center space-x-6">
-                <Link to="/" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
+              <nav className="flex items-center space-x-8">
+                <Link to="/" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
                   Home
                 </Link>
-                <Link to="/about" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
+                <Link to="/about" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
                   About
                 </Link>
-                <Link to="/calendar" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
-                  Calendar
+                <Link to="/calendar" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
+                  Events
                 </Link>
-                <Link to="/store" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
+                <Link to="/store" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
                   Store
                 </Link>
-                <Link to="/contact" className="font-medium text-gray-900 dark:text-gray-100 hover:text-glee-spelman transition-colors">
+                <Link to="/contact" className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors duration-200">
                   Contact
                 </Link>
               </nav>
             )}
             
-            {/* Right Side Actions */}
-            <div className="flex items-center gap-2">
+            {/* Right Side Actions - Apple style */}
+            <div className="flex items-center gap-3">
               {/* Desktop Auth Buttons */}
               {!isMobile && (
                 <>
                   {isAuthenticated ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button 
-                        variant="default"
+                        variant="ghost"
                         onClick={handleDashboardClick}
-                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
                       >
                         <User className="w-4 h-4 mr-2" />
-                        {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
+                        {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'Dashboard'}
                       </Button>
                       <Button 
-                        variant="outline"
+                        variant="ghost"
                         onClick={handleLogout}
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <Button 
-                        variant="outline"
+                        variant="ghost"
                         onClick={() => navigate("/signup")}
-                        className="border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10 dark:border-glee-spelman dark:text-glee-spelman"
+                        className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200"
                       >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Sign Up
@@ -109,7 +106,7 @@ export function Header() {
                       <Button 
                         variant="default"
                         onClick={() => navigate("/login")}
-                        className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-normal px-4 py-2 rounded-full transition-all duration-200 hover:scale-105"
                       >
                         <LogIn className="w-4 h-4 mr-2" />
                         Login
@@ -162,7 +159,7 @@ export function Header() {
       </header>
       
       {/* Spacer div to push content below the fixed header */}
-      <div className="h-20 md:h-24" style={{ height: showNewsTicker ? '120px' : '80px' }}></div>
+      <div className="h-16 md:h-18" style={{ height: showNewsTicker ? '100px' : '60px' }}></div>
     </>
   );
 }

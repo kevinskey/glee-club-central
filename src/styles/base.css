@@ -3,70 +3,70 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97.6%;  /* #F9F9F9 instead of pure white */
-    --foreground: 240 10% 3.9%;
+    --background: 0 0% 100%;  /* Pure white like Apple */
+    --foreground: 0 0% 8%;   /* Near black for text */
 
-    --card: 0 0% 98%;  /* Slightly lighter than background for cards */
-    --card-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
 
-    --popover: 0 0% 98%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 200 100% 70%;  /* Light blue primary */
-    --primary-foreground: 0 0% 98%;
+    --primary: 220 100% 60%;  /* Apple blue */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 60% 95%;  /* Light blue secondary */
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 0 0% 96%;   /* Light gray */
+    --secondary-foreground: 0 0% 8%;
 
-    --muted: 220 60% 95%;  /* Light blue muted */
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 200 100% 70%;  /* Light blue accent */
-    --accent-foreground: 0 0% 98%;
+    --accent: 220 100% 60%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 220 40% 85%;  /* Light blue border */
-    --input: 220 40% 92%;  /* Light blue input */
-    --ring: 200 100% 70%;  /* Light blue ring */
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
+    --ring: 220 100% 60%;
 
-    --radius: 0.5rem;
+    --radius: 8px;  /* Apple's rounded corners */
     
-    /* Glee Club Brand Colors - Light blue theme */
-    --glee-purple: 200 100% 70%;  /* Light blue */
-    --glee-spelman: 200 100% 70%;  /* Light blue */
-    --glee-columbia: 200 100% 70%;  /* Light blue */
+    /* Glee Club Brand Colors - Apple inspired */
+    --glee-purple: 220 100% 60%;
+    --glee-spelman: 220 100% 60%;
+    --glee-columbia: 220 100% 60%;
   }
 
   .dark {
-    --background: 215 28% 17%;  /* Dark blue-gray background */
-    --foreground: 210 40% 98%;
+    --background: 0 0% 6%;    /* Apple's dark mode background */
+    --foreground: 0 0% 98%;
 
-    --card: 215 28% 17%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 215 28% 17%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 200 100% 75%;  /* Lighter blue for dark mode */
-    --primary-foreground: 220 14% 11%;
+    --primary: 220 100% 70%;  /* Lighter blue for dark mode */
+    --primary-foreground: 0 0% 6%;
 
-    --secondary: 215 28% 22%;  /* Dark blue secondary */
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 12%;   /* Dark gray */
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 215 28% 22%;
-    --muted-foreground: 217 10% 64.9%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 200 100% 75%;  /* Light blue accent for dark mode */
-    --accent-foreground: 220 14% 11%;
+    --accent: 220 100% 70%;
+    --accent-foreground: 0 0% 6%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 215 28% 22%;
-    --input: 215 28% 22%;
-    --ring: 200 100% 75%;  /* Light blue ring */
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 220 100% 70%;
   }
 
   * {
@@ -74,34 +74,67 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
-    overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.003em;
+    line-height: 1.4;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-playfair;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
   
-  /* Mobile-first input optimization */
+  /* Apple-style button and form elements */
   input, select, textarea {
     @apply text-base;
-    font-size: 16px !important; /* Prevents zoom on focus in iOS */
+    font-size: 16px !important;
     -webkit-appearance: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
   
-  /* Enhanced mobile touch targets */
   button, .btn, [role="button"] {
     @apply min-h-9;
-    min-height: 44px; /* Apple recommended touch target size */
-    touch-action: manipulation; /* Prevents double-tap zoom */
+    min-height: 44px;
+    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.003em;
   }
   
-  /* Mobile-specific auth page optimizations */
+  /* Apple-style smooth scrolling */
+  * {
+    scroll-behavior: smooth;
+  }
+  
+  /* Apple-style focus states */
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+  
+  /* Apple-style link hover effects */
+  a {
+    transition: all 0.2s ease;
+  }
+  
+  /* Apple-style backdrop blur support */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  /* Mobile optimizations with Apple design */
   @media (max-width: 768px) {
-    /* Prevent viewport zoom on input focus */
     input[type="email"],
     input[type="password"],
     input[type="text"] {
@@ -110,164 +143,38 @@
       -webkit-text-size-adjust: 100%;
     }
     
-    /* Improve touch targets on auth forms */
     .auth-input {
       min-height: 48px;
       padding: 12px 16px;
+      border-radius: 12px;
     }
     
-    /* Better mobile button sizing */
     .auth-button {
       min-height: 48px;
       font-size: 16px;
       padding: 12px 24px;
-    }
-    
-    /* Mobile calendar optimizations */
-    .fc .fc-toolbar-title {
-      font-size: 1.2rem !important;
-    }
-    
-    .fc .fc-daygrid-day-number,
-    .fc .fc-col-header-cell-cushion {
-      font-size: 0.875rem !important;
-      padding: 4px !important;
-    }
-    
-    .fc .fc-daygrid-day-top {
-      justify-content: center !important;
-    }
-    
-    .fc .fc-event {
-      font-size: 0.75rem !important;
-    }
-    
-    .fc .fc-list-event-title,
-    .fc .fc-list-event-time {
-      font-size: 0.875rem !important;
+      border-radius: 24px;
     }
   }
   
-  /* Specific phone optimizations (smaller than tablets) */
-  @media (max-width: 480px) {
-    /* Larger touch targets for phones */
-    button, .btn, [role="button"] {
-      min-height: 48px;
-      padding: 12px 16px;
-    }
-    
-    /* Better form spacing */
-    form .space-y-4 > * + * {
-      margin-top: 1.5rem;
-    }
-    
-    /* Prevent background-attachment fixed issues */
-    .login-background {
-      background-attachment: scroll !important;
-    }
-  }
-  
-  /* Calendar spacing and padding optimization */
-  .fc {
-    width: 100% !important;
-    height: auto !important;
-  }
-  
-  .fc .fc-daygrid-day {
-    position: relative;
-  }
-  
-  /* Improve tap targets for mobile */
-  @media (max-width: 640px) {
-    .fc .fc-button {
-      padding: 0.3rem 0.6rem !important;
-      font-size: 0.875rem !important;
-    }
-    
-    .fc .fc-day {
-      min-height: 2.5rem !important;
-    }
-    
-    /* Fix mobile scrolling in modals */
-    .dialog-content {
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    
-    /* Improve table display on mobile */
-    table {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-    
-    /* Better spacing for mobile form elements */
-    form .form-group {
-      margin-bottom: 1rem;
-    }
-    
-    /* Prevent text from being too small */
-    .text-xs {
-      font-size: 0.75rem !important; /* Minimum readable text size */
-    }
-  }
-  
-  /* Fix iOS safe area issues */
-  @supports (padding: max(0px)) {
-    .fixed-bottom {
-      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
-    }
-    
-    body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-  }
-  
-  /* Fix for dropdown menu text visibility in all modes */
-  .dark [data-radix-popper-content-wrapper] [role="menu"] {
-    @apply bg-popover border-border text-popover-foreground;
-  }
-  
-  [data-radix-popper-content-wrapper] [role="menu"] {
-    @apply bg-popover text-popover-foreground border-border;
-  }
-  
-  /* Make dropdown items more visible on hover */
-  [data-radix-popper-content-wrapper] [role="menuitem"]:hover, 
-  [data-radix-popper-content-wrapper] [role="menuitem"]:focus {
-    @apply bg-accent/10;
-  }
-  
-  /* Mobile viewport fixes for auth pages */
+  /* Apple-style text rendering */
   @media screen and (max-width: 768px) {
     html {
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
     }
     
-    /* Prevent horizontal scrolling */
     body {
       overflow-x: hidden;
     }
     
-    /* Better mobile touch handling */
     * {
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
     }
     
-    /* Allow text selection for inputs and content */
     input, textarea, [contenteditable] {
       -webkit-user-select: text;
-      -khtml-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
       user-select: text;
     }
   }

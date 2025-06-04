@@ -2,7 +2,7 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* Utility text classes */
+  /* Apple-style text utilities */
   .text-balance {
     text-wrap: balance;
   }
@@ -11,30 +11,146 @@
     text-wrap: pretty;
   }
   
-  /* Add consistent text spacing */
-  p {
-    @apply leading-relaxed;
-    line-height: 1.7;
+  /* Apple typography hierarchy */
+  .text-display {
+    font-size: clamp(2.5rem, 8vw, 6rem);
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
   }
   
-  /* Adjust line heights based on text size */
-  .text-xs, .text-sm {
-    @apply leading-normal;
+  .text-headline {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
   
-  .text-base, .text-lg {
-    @apply leading-relaxed;
+  .text-subhead {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
   
-  .text-xl, .text-2xl, .text-3xl {
-    @apply leading-relaxed;
+  .text-body {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -0.003em;
+    line-height: 1.47;
   }
   
-  .text-4xl, .text-5xl, .text-6xl {
-    @apply leading-tight;
+  .text-caption {
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: -0.003em;
+    line-height: 1.43;
+    color: hsl(var(--muted-foreground));
   }
 
-  /* Line clamp utilities for mobile text truncation */
+  /* Apple-style animations */
+  .animate-apple-fade-in {
+    animation: apple-fade-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .animate-apple-slide-up {
+    animation: apple-slide-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .animate-apple-scale {
+    animation: apple-scale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  @keyframes apple-fade-in {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes apple-slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes apple-scale {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Apple-style hover effects */
+  .apple-hover {
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .apple-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Apple-style glass effects */
+  .apple-glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .apple-glass {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Apple-style container */
+  .apple-container {
+    @apply mx-auto px-6 md:px-8 w-full max-w-7xl;
+  }
+  
+  /* Apple-style section spacing */
+  .apple-section {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  
+  /* Apple-style card */
+  .apple-card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden transition-all duration-300;
+  }
+  
+  .apple-card:hover {
+    @apply shadow-lg border-gray-300/50 dark:border-gray-700/50 transform -translate-y-1;
+  }
+  
+  /* Apple-style button variants */
+  .apple-button-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-normal rounded-full px-6 py-3 transition-all duration-200 hover:scale-105 active:scale-95;
+  }
+  
+  .apple-button-secondary {
+    @apply bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-normal rounded-full px-6 py-3 transition-all duration-200 hover:scale-105 active:scale-95;
+  }
+  
+  /* Apple-style form elements */
+  .apple-input {
+    @apply bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  /* Remove line clamp utilities for simplicity */
   .line-clamp-1 {
     overflow: hidden;
     display: -webkit-box;
@@ -49,276 +165,25 @@
     -webkit-line-clamp: 2;
   }
   
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
-
-  /* Animation utilities */
-  .animate-marquee {
-    animation: marquee 60s linear infinite;
-  }
-
-  @keyframes marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  /* Carolina blue glow animation */
-  @keyframes carolina-glow {
-    0%, 100% {
-      box-shadow: 0 0 20px rgba(79, 158, 232, 0.4), 0 0 40px rgba(79, 158, 232, 0.2);
-    }
-    50% {
-      box-shadow: 0 0 30px rgba(79, 158, 232, 0.6), 0 0 60px rgba(79, 158, 232, 0.3);
-    }
-  }
-  
-  /* Light blue glow animation that responds to dark/light mode */
-  .light-blue-glow {
-    animation: light-blue-glow 4s ease-in-out infinite;
-  }
-  
-  @keyframes light-blue-glow {
-    0%, 100% {
-      box-shadow: 0 0 20px rgba(79, 158, 232, 0.4), 0 0 40px rgba(79, 158, 232, 0.2);
-    }
-    50% {
-      box-shadow: 0 0 30px rgba(79, 158, 232, 0.6), 0 0 60px rgba(79, 158, 232, 0.3);
-    }
-  }
-
-  /* Dark mode version of light blue glow */
-  .dark .light-blue-glow {
-    animation: light-blue-glow-dark 4s ease-in-out infinite;
-  }
-
-  @keyframes light-blue-glow-dark {
-    0%, 100% {
-      box-shadow: 0 0 20px rgba(107, 182, 255, 0.4), 0 0 40px rgba(107, 182, 255, 0.2);
-    }
-    50% {
-      box-shadow: 0 0 30px rgba(107, 182, 255, 0.6), 0 0 60px rgba(107, 182, 255, 0.3);
-    }
+  /* Apple-style text shadows */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   
   .text-shadow {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
-  .text-shadow-lg {
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  /* Apple-style responsive utilities */
+  .apple-responsive-text {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    line-height: 1.5;
   }
   
-  .bg-blur {
-    backdrop-filter: blur(8px);
-  }
-  
-  .glass-card {
-    @apply bg-white/20 dark:bg-black/20 backdrop-blur-lg border border-white/10 dark:border-white/5 rounded-lg;
-  }
-  
-  /* Animated gradient for Glee Club text */
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient 8s ease infinite; /* Changed from 3s to 8s */
-    background-image: linear-gradient(45deg, white, #4F9EE8, white);
-  }
-  
-  @keyframes gradient {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  
-  /* Background slideshow fade transition */
-  .fade-in {
-    animation: fadeIn 1s ease-in-out;
-  }
-  
-  .fade-out {
-    animation: fadeOut 1s ease-in-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes fadeOut {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-  
-  /* Custom transition durations */
-  .duration-1500 {
-    transition-duration: 1500ms;
-  }
-  
-  .duration-3000 {
-    transition-duration: 3000ms;
-  }
-  
-  /* Additional line spacing utilities */
-  .leading-extra-tight {
+  .apple-responsive-heading {
+    font-size: clamp(1.75rem, 5vw, 3rem);
     line-height: 1.1;
-  }
-  
-  .leading-extra-relaxed {
-    line-height: 1.7; /* Updated from 2.2 to 1.7 */
-  }
-  
-  /* Improved paragraph spacing with bottom margin */
-  .prose-spacing p {
-    margin-bottom: 1.5em; /* Reduced from 1.8em */
-    line-height: 1.7; /* Updated from 2.2 to 1.7 */
-  }
-  
-  /* New utility for increased paragraph spacing */
-  .paragraph-spacing {
-    line-height: 1.7; /* Updated from 2.2 to 1.7 */
-  }
-  
-  .paragraph-spacing-loose {
-    line-height: 1.9; /* Reduced from 2.4 to 1.9 */
-  }
-  
-  /* Mobile-first responsive utilities */
-  .mobile-container {
-    @apply px-3 sm:px-4 md:px-6 lg:px-8 w-full max-w-7xl mx-auto;
-  }
-  
-  /* For non-mobile screens only */
-  @media (min-width: 768px) {
-    .mobile-container {
-      @apply px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto;
-    }
-  }
-  
-  .mobile-section-padding {
-    @apply py-6 sm:py-8 md:py-12 lg:py-16;
-  }
-  
-  .mobile-card-padding {
-    @apply p-3 sm:p-4 md:p-6;
-  }
-  
-  /* Stack items on mobile */
-  .mobile-stack {
-    @apply flex flex-col sm:flex-row;
-  }
-  
-  .mobile-full-width {
-    @apply w-full sm:w-auto;
-  }
-  
-  /* Enhance readability on mobile */
-  .mobile-readable {
-    @apply max-w-full sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto;
-  }
-  
-  /* Mobile calendar optimizations */
-  .mobile-calendar-day {
-    @apply min-h-[60px] sm:min-h-[80px] p-1 sm:p-2;
-    touch-action: manipulation; /* Improve touch response */
-  }
-  
-  /* Better touch targets for mobile */
-  .mobile-touch-target {
-    @apply min-h-[44px] min-w-[44px]; /* Apple recommended minimum */
-    touch-action: manipulation;
-  }
-  
-  /* Smooth scrolling for mobile */
-  .mobile-scroll {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-  
-  /* Prevent text selection on calendar interactions */
-  .no-select {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
-  
-  /* Calendar specific mobile improvements */
-  .calendar-grid {
-    @apply grid grid-cols-7 gap-0.5 sm:gap-1;
-    touch-action: manipulation;
-  }
-  
-  .calendar-day-content {
-    @apply space-y-0.5 sm:space-y-1 mt-1;
-    overflow: hidden; /* Prevent content overflow */
-  }
-  
-  /* Event card mobile optimizations */
-  .event-card-mobile {
-    @apply border-l-4 border-l-blue-500;
-    transition: transform 0.1s ease, box-shadow 0.2s ease;
-    touch-action: manipulation;
-  }
-  
-  .event-card-mobile:active {
-    transform: scale(0.98);
-  }
-  
-  /* Dark mode specific mobile improvements */
-  @media (prefers-color-scheme: dark) {
-    .mobile-container {
-      @apply bg-background text-foreground;
-    }
-    
-    .event-card-mobile {
-      @apply border-l-blue-400;
-    }
-  }
-  
-  /* iOS specific improvements */
-  @supports (-webkit-touch-callout: none) {
-    .mobile-calendar-day {
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
-    }
-    
-    .event-card-mobile {
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
-    }
-  }
-  
-  /* Android specific improvements */
-  @media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
-    .mobile-calendar-day,
-    .event-card-mobile {
-      touch-action: manipulation;
-      -webkit-user-select: none;
-    }
-  }
-  
-  /* Responsive font scaling for very small screens */
-  @media (max-width: 360px) {
-    .calendar-day-content {
-      font-size: 0.625rem; /* 10px */
-    }
-    
-    .mobile-card-padding {
-      @apply p-2;
-    }
+    font-weight: 300;
+    letter-spacing: -0.02em;
   }
 }
