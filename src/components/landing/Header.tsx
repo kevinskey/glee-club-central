@@ -37,10 +37,12 @@ export function Header() {
   };
   
   return (
-    <div className="w-full">
+    <header className="sticky top-0 z-50 w-full bg-background shadow-sm">
+      {/* News Ticker */}
       {showNewsTicker && <NewsTicker />}
       
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full shadow-sm">
+      {/* Main Header */}
+      <div className="border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 md:px-6 flex h-16 md:h-20 items-center justify-between">
           {/* Logo */}
           <HeaderLogo />
@@ -152,7 +154,7 @@ export function Header() {
             )}
           </div>
         </div>
-      </header>
-    </div>
+      </div>
+    </header>
   );
 }
