@@ -2,7 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Clock, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, MapPin, Clock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface Event {
@@ -22,7 +22,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   const upcomingEvents = events.slice(0, 3);
 
   return (
-    <section className="relative -mt-20 pt-20 bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background">
+    <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
@@ -31,14 +31,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Section Header with Floating Design */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-blue-200/50 dark:border-blue-800/50 mb-4">
-            <Sparkles className="h-4 w-4 text-blue-500" />
-            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Upcoming Performances</span>
-          </div>
-        </div>
-
         {/* Events Grid with Enhanced Design */}
         {upcomingEvents.length > 0 ? (
           <>
@@ -126,16 +118,12 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
               )}
             </div>
 
-            {/* Desktop: Grid layout */}
+            {/* Desktop: Equal-sized grid layout */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {upcomingEvents.map((event, index) => (
                 <Card 
                   key={event.id} 
-                  className={`group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden ${
-                    index === 0 
-                      ? 'lg:col-span-2 bg-gradient-to-br from-blue-500 to-purple-600 text-white' 
-                      : 'bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card'
-                  }`}
+                  className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card"
                 >
                   <CardContent className="p-0">
                     <div className="aspect-[16/10] relative overflow-hidden">
@@ -146,34 +134,22 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
                       ) : (
-                        <div className={`w-full h-full flex items-center justify-center ${
-                          index === 0 
-                            ? 'bg-gradient-to-br from-blue-600/20 to-purple-600/20' 
-                            : 'bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20'
-                        }`}>
-                          <Calendar className={`h-16 w-16 ${
-                            index === 0 ? 'text-white/80' : 'text-blue-400'
-                          }`} />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+                          <Calendar className="h-16 w-16 text-blue-400" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     
                     <div className="p-6">
-                      <h3 className={`font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 ${
-                        index === 0 ? 'text-xl text-white' : 'text-lg text-gray-900 dark:text-foreground'
-                      }`}>
+                      <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-lg text-gray-900 dark:text-foreground">
                         {event.title}
                       </h3>
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2">
-                          <Calendar className={`h-4 w-4 ${
-                            index === 0 ? 'text-blue-200' : 'text-blue-500'
-                          }`} />
-                          <span className={`text-sm ${
-                            index === 0 ? 'text-blue-100' : 'text-muted-foreground'
-                          }`}>
+                          <Calendar className="h-4 w-4 text-blue-500" />
+                          <span className="text-sm text-muted-foreground">
                             {new Date(event.date).toLocaleDateString('en-US', {
                               weekday: 'long',
                               year: 'numeric',
@@ -185,12 +161,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                         
                         {event.location && (
                           <div className="flex items-center gap-2">
-                            <MapPin className={`h-4 w-4 ${
-                              index === 0 ? 'text-blue-200' : 'text-blue-500'
-                            }`} />
-                            <span className={`text-sm ${
-                              index === 0 ? 'text-blue-100' : 'text-muted-foreground'
-                            }`}>
+                            <MapPin className="h-4 w-4 text-blue-500" />
+                            <span className="text-sm text-muted-foreground">
                               {event.location}
                             </span>
                           </div>
@@ -198,13 +170,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                       </div>
 
                       <Button
-                        variant={index === 0 ? "secondary" : "outline"}
+                        variant="outline"
                         size="sm"
-                        className={`group/btn ${
-                          index === 0 
-                            ? 'bg-white/20 hover:bg-white/30 text-white border-white/30' 
-                            : 'hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20'
-                        }`}
+                        className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
                         asChild
                       >
                         <Link to="/calendar">
