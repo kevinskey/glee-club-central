@@ -22,7 +22,7 @@ export function PageWrapper({
   className,
   headerClassName,
   contentClassName,
-  maxWidth = "6xl",
+  maxWidth = "xl",
   ...props
 }: PageWrapperProps) {
   const maxWidthClasses = {
@@ -36,15 +36,15 @@ export function PageWrapper({
 
   return (
     <div className={cn("min-h-screen bg-background", className)} {...props}>
-      <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
-        <div className={cn("mx-auto space-y-8", maxWidthClasses[maxWidth])}>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 lg:py-12">
+        <div className={cn("mx-auto space-y-4 sm:space-y-6 md:space-y-8", maxWidthClasses[maxWidth])}>
           {/* Page Header */}
           {(title || icon) && (
-            <div className={cn("space-y-6", headerClassName)}>
+            <div className={cn("space-y-3 sm:space-y-4 md:space-y-6", headerClassName)}>
               {(title || icon) && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {icon && (
-                    <div className="h-6 w-6 sm:h-8 sm:w-8 text-primary">
+                    <div className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-primary flex-shrink-0">
                       {icon}
                     </div>
                   )}
@@ -72,7 +72,7 @@ export function PageWrapper({
           )}
 
           {/* Page Content */}
-          <div className={cn("space-y-8", contentClassName)}>
+          <div className={cn("space-y-4 sm:space-y-6 md:space-y-8", contentClassName)}>
             {children}
           </div>
         </div>
