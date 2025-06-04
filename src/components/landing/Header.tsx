@@ -40,14 +40,7 @@ export function Header() {
     <>
       {/* Fixed Header */}
       <header 
-        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700"
-        style={{ 
-          position: 'fixed',
-          zIndex: 9999,
-          top: 0,
-          left: 0,
-          right: 0
-        }}
+        className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 z-50"
       >
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
