@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -154,62 +155,118 @@ export const UpcomingPerformances: React.FC = () => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {performances.slice(0, 3).map(performance => (
-          <div 
-            key={performance.id} 
-            className="p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-sm truncate">
-                  {performance.title}
-                </h4>
-                
-                {performance.short_description && (
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {performance.short_description}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {formatEventDate(performance.start_time)}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatEventTime(performance.start_time)}
-                  </div>
-                  {performance.location_name && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      <span className="truncate">{performance.location_name}</span>
-                    </div>
+      <CardContent>
+        {/* Mobile: Horizontal scroll */}
+        <div className="block md:hidden">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+            {performances.slice(0, 5).map(performance => (
+              <div 
+                key={performance.id} 
+                className="flex-shrink-0 w-72 p-3 rounded-lg border hover:bg-muted/50 transition-colors snap-start"
+              >
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm line-clamp-2">
+                    {performance.title}
+                  </h4>
+                  
+                  {performance.short_description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {performance.short_description}
+                    </p>
                   )}
-                </div>
 
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {performance.event_types.map(type => (
-                    <Badge 
-                      key={type} 
-                      variant="outline" 
-                      className={`text-xs ${getEventTypeColor(performance.event_types)}`}
-                    >
-                      {type.replace('_', ' ')}
-                    </Badge>
-                  ))}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      {formatEventDate(performance.start_time)}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {formatEventTime(performance.start_time)}
+                    </div>
+                    {performance.location_name && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span className="truncate">{performance.location_name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1">
+                    {performance.event_types.map(type => (
+                      <Badge 
+                        key={type} 
+                        variant="outline" 
+                        className={`text-xs ${getEventTypeColor(performance.event_types)}`}
+                      >
+                        {type.replace('_', ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Vertical stack */}
+        <div className="hidden md:block space-y-3">
+          {performances.slice(0, 3).map(performance => (
+            <div 
+              key={performance.id} 
+              className="p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-medium text-sm truncate">
+                    {performance.title}
+                  </h4>
+                  
+                  {performance.short_description && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {performance.short_description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {formatEventDate(performance.start_time)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatEventTime(performance.start_time)}
+                    </div>
+                    {performance.location_name && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        <span className="truncate">{performance.location_name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {performance.event_types.map(type => (
+                      <Badge 
+                        key={type} 
+                        variant="outline" 
+                        className={`text-xs ${getEventTypeColor(performance.event_types)}`}
+                      >
+                        {type.replace('_', ' ')}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {performances.length > 3 && (
           <Button 
             variant="outline" 
             size="sm" 
-            className="w-full"
+            className="w-full mt-4"
             onClick={() => navigate('/calendar')}
           >
             View All Performances ({performances.length})
