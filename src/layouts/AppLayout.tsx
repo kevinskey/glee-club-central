@@ -58,10 +58,10 @@ export default function AppLayout({
       {/* Desktop Header */}
       {showHeader && <div className="hidden md:block"><Header /></div>}
       
-      {/* Mobile Header */}
+      {/* Mobile Header - Fixed positioning */}
       <div className="block md:hidden">
         {sidebarType === 'dashboard' ? (
-          <div className="sticky top-0 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
+          <div className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center justify-between">
               <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Glee Dashboard
@@ -77,7 +77,7 @@ export default function AppLayout({
       <div className="flex-1 flex">
         {renderSidebar()}
         
-        <main className={`flex-1 ${hasSidebar && isDesktop ? 'lg:ml-64' : ''} ${sidebarType === 'dashboard' ? '' : 'pt-14 md:pt-0'}`}>
+        <main className={`flex-1 ${hasSidebar && isDesktop ? 'lg:ml-64' : ''} ${sidebarType === 'dashboard' ? 'pt-20 md:pt-0' : 'pt-28 md:pt-0'}`}>
           {children || <Outlet />}
         </main>
       </div>
