@@ -134,7 +134,7 @@ export function TopSlider({
     console.log('⏳ TopSlider: Still loading...');
     return (
       <div 
-        className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4", className)}
+        className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -162,10 +162,10 @@ export function TopSlider({
   });
 
   return (
-    <div className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4", className)}>
+    <div className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}>
       <div 
         className="relative w-full overflow-hidden rounded-2xl shadow-2xl"
-        style={{ height: isMobile ? "300px" : height }}
+        style={{ height: isMobile ? "240px" : height }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -206,10 +206,10 @@ export function TopSlider({
         </div>
 
         {/* Content - Apple Music style positioning */}
-        <div className="relative z-10 h-full flex items-end pb-8 px-6 sm:px-8 md:px-12">
+        <div className="relative z-10 h-full flex items-end pb-4 sm:pb-6 md:pb-8 px-4 sm:px-6 md:px-8 lg:px-12">
           <div className="max-w-3xl">
             <h2 
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 leading-tight"
+              className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 sm:mb-3 leading-tight"
               style={{ 
                 color: currentSlideData.text_color || '#FFFFFF',
                 textShadow: '0 2px 4px rgba(0,0,0,0.3)'
@@ -230,7 +230,7 @@ export function TopSlider({
             </h2>
             {currentSlideData.description && (
               <p 
-                className="text-lg sm:text-xl md:text-2xl opacity-90 leading-relaxed"
+                className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 leading-relaxed"
                 style={{ 
                   color: currentSlideData.text_color || '#FFFFFF',
                   textShadow: '0 1px 2px rgba(0,0,0,0.3)'
@@ -248,30 +248,30 @@ export function TopSlider({
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
               onClick={goToPrevSlide}
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </Button>
             
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
               onClick={goToNextSlide}
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
             </Button>
 
             {/* Dots indicator - Apple Music style */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+            <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-20">
               {slides.map((_, index) => (
                 <button
                   key={index}
                   className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-300",
+                    "w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all duration-300",
                     index === currentSlide 
-                      ? "bg-white w-8" 
+                      ? "bg-white w-6 sm:w-8" 
                       : "bg-white/50 hover:bg-white/75"
                   )}
                   onClick={() => setCurrentSlide(index)}

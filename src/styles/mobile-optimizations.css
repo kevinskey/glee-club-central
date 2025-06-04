@@ -232,7 +232,7 @@ p {
   /* Apple-Style Section Spacing */
   .home-page-content section,
   .landing-content section {
-    padding: clamp(2rem, 6vw, 3rem) 0 !important;
+    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
     margin-bottom: 0 !important;
   }
   
@@ -240,7 +240,7 @@ p {
   .space-y-16 > * + *,
   .space-y-20 > * + *,
   .space-y-24 > * + * {
-    margin-top: clamp(1.5rem, 4vw, 2.5rem) !important;
+    margin-top: clamp(1rem, 3vw, 1.5rem) !important;
   }
   
   /* Section container spacing */
@@ -255,7 +255,7 @@ p {
   .text-center.mb-12,
   .text-center.mb-16,
   .text-center.mb-20 {
-    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+    margin-bottom: clamp(1rem, 3vw, 1.5rem) !important;
   }
   
   /* Hero sections - Apple style tight spacing */
@@ -263,7 +263,7 @@ p {
   [class*="hero"],
   .enhanced-hero-section {
     margin: 0 !important;
-    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+    padding: clamp(1rem, 3vw, 1.5rem) 0 !important;
   }
   
   /* Hero content containers */
@@ -279,7 +279,7 @@ p {
 /* Store Section Mobile Optimizations - Apple Style */
 @media (max-width: 768px) {
   .store-section {
-    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+    padding: clamp(1rem, 3vw, 1.5rem) 0 !important;
     background: transparent !important;
   }
   
@@ -290,13 +290,13 @@ p {
   
   /* Store section header */
   .store-section .text-center {
-    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+    margin-bottom: clamp(1rem, 3vw, 1.5rem) !important;
   }
   
   /* Store products grid */
   .store-section .grid {
     gap: clamp(1rem, 3vw, 1.5rem) !important;
-    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+    margin-bottom: clamp(1rem, 3vw, 1.5rem) !important;
   }
   
   /* Store product cards */
@@ -310,7 +310,7 @@ p {
 /* Events Section Mobile Optimizations */
 @media (max-width: 768px) {
   .events-section {
-    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+    padding: clamp(1rem, 3vw, 1.5rem) 0 !important;
   }
   
   .events-section .py-8,
@@ -324,7 +324,7 @@ p {
 /* Audio Section Mobile Optimizations */
 @media (max-width: 768px) {
   .audio-section {
-    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+    padding: clamp(1rem, 3vw, 1.5rem) 0 !important;
   }
   
   .audio-section .py-8,
@@ -415,7 +415,7 @@ html {
   .mb-12,
   .mb-16,
   .mb-20 {
-    margin-bottom: clamp(1rem, 3vw, 1.5rem) !important;
+    margin-bottom: clamp(0.75rem, 2vw, 1rem) !important;
   }
   
   .mt-4,
@@ -435,7 +435,29 @@ html {
   .py-8,
   .py-12,
   .py-16 {
-    padding-top: clamp(1rem, 3vw, 1.5rem) !important;
-    padding-bottom: clamp(1rem, 3vw, 1.5rem) !important;
+    padding-top: clamp(0.75rem, 2vw, 1rem) !important;
+    padding-bottom: clamp(0.75rem, 2vw, 1rem) !important;
+  }
+}
+
+/* TopSlider Mobile Optimizations - Ultra Tight Apple Style */
+@media (max-width: 768px) {
+  /* Top slider specific spacing */
+  .top-slider-container {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  /* Reduce slider height on mobile */
+  .top-slider {
+    height: 200px !important;
+    border-radius: 16px !important;
+  }
+  
+  /* Tight spacing between header and slider */
+  header + * {
+    margin-top: 0 !important;
   }
 }
