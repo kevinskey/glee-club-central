@@ -6,6 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { ResponsiveText } from "@/components/ui/responsive-text";
 import { Music, Users, Calendar, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -13,38 +14,55 @@ export default function AboutPage() {
   const navigate = useNavigate();
   
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header />
-      <main className="flex-1 bg-white dark:bg-gray-950">
+      <main className="flex-1">
         {/* Hero Section */}
-        <div className="relative overflow-hidden bg-glee-purple py-16">
+        <div className="relative overflow-hidden bg-primary py-16 lg:py-24">
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl mx-auto text-center">
-              <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+              <ResponsiveText 
+                as="h1" 
+                size="4xl" 
+                className="font-playfair font-bold text-primary-foreground mb-6"
+                balance
+              >
                 About the Spelman College Glee Club
-              </h1>
-              <p className="text-lg md:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto">
+              </ResponsiveText>
+              <ResponsiveText 
+                size="lg" 
+                className="text-primary-foreground/90 leading-relaxed max-w-3xl mx-auto"
+              >
                 Founded in 1925, we represent one of the nation's most distinguished collegiate choral ensembles, 
                 carrying a legacy of musical excellence for nearly a century.
-              </p>
+              </ResponsiveText>
             </div>
           </div>
           <div className="absolute inset-0 opacity-20 bg-pattern"></div>
         </div>
 
         {/* History Section */}
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-16 lg:py-20">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <Music className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Our Rich Heritage</h2>
+            <div className="flex items-center gap-3 mb-8">
+              <Music className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              <ResponsiveText 
+                as="h2" 
+                size="3xl" 
+                className="font-playfair font-bold text-foreground"
+              >
+                Our Rich Heritage
+              </ResponsiveText>
             </div>
             
-            <div className="prose max-w-none dark:prose-invert">
-              <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 leading-relaxed">
+            <div className="space-y-8">
+              <ResponsiveText 
+                size="lg" 
+                className="text-muted-foreground leading-relaxed"
+              >
                 The Spelman College Glee Club stands as one of the nation's most distinguished collegiate choral ensembles. 
                 For nearly a century, our voices have carried the legacy of musical excellence representing women of African descent.
-              </p>
+              </ResponsiveText>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
                 <div className="rounded-xl overflow-hidden shadow-md">
@@ -56,76 +74,114 @@ export default function AboutPage() {
                     />
                   </AspectRatio>
                 </div>
-                <div className="flex flex-col justify-center">
-                  <h3 className="text-2xl font-semibold mb-4 text-glee-purple">Founded in 1925</h3>
-                  <p className="text-gray-700 dark:text-gray-300">
+                <div className="flex flex-col justify-center space-y-4">
+                  <ResponsiveText 
+                    as="h3" 
+                    size="xl" 
+                    className="font-semibold text-primary"
+                  >
+                    Founded in 1925
+                  </ResponsiveText>
+                  <ResponsiveText className="text-muted-foreground">
                     Founded under the direction of professor Willis Laurence James, the Spelman College Glee Club began 
                     as a small ensemble dedicated to preserving Negro spirituals and exploring classical repertoire. 
                     Through decades of artistic growth and evolution, we've maintained an unwavering commitment to excellence.
-                  </p>
+                  </ResponsiveText>
                 </div>
               </div>
             </div>
 
-            <div className="my-12 border-l-4 border-glee-accent pl-6 py-2">
-              <p className="text-xl italic text-gray-700 dark:text-gray-300">
+            <div className="my-12 border-l-4 border-primary pl-6 py-4">
+              <ResponsiveText 
+                size="lg" 
+                className="italic text-muted-foreground mb-2"
+              >
                 "The human voice is the most perfect instrument of all."
-              </p>
-              <p className="text-right text-gray-500 mt-2">— Arvo Pärt</p>
+              </ResponsiveText>
+              <ResponsiveText size="sm" className="text-right text-muted-foreground/70">
+                — Arvo Pärt
+              </ResponsiveText>
             </div>
           </div>
         </div>
 
         {/* Mission and Values */}
-        <div className="bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="bg-muted/50 py-16 lg:py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-3 mb-6">
-                <Users className="h-8 w-8 text-glee-accent" />
-                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Our Mission</h2>
+              <div className="flex items-center gap-3 mb-8">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                <ResponsiveText 
+                  as="h2" 
+                  size="3xl" 
+                  className="font-playfair font-bold text-foreground"
+                >
+                  Our Mission
+                </ResponsiveText>
               </div>
               
-              <p className="text-lg mb-12 text-gray-700 dark:text-gray-300 leading-relaxed">
+              <ResponsiveText 
+                size="lg" 
+                className="mb-12 text-muted-foreground leading-relaxed"
+              >
                 The Spelman College Glee Club is dedicated to preserving and celebrating the musical 
                 heritage of the African diaspora while fostering excellence in choral performance. 
                 We strive to provide educational and performance opportunities that empower young 
                 women to develop their musical talents and leadership skills.
-              </p>
+              </ResponsiveText>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-white dark:bg-gray-800 border-none shadow-lg">
+                <Card className="border-none shadow-lg">
                   <CardContent className="pt-6">
-                    <div className="rounded-full bg-glee-purple/10 w-12 h-12 flex items-center justify-center mb-4">
-                      <Music className="h-6 w-6 text-glee-purple" />
+                    <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
+                      <Music className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Musical Excellence</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <ResponsiveText 
+                      as="h3" 
+                      size="lg" 
+                      className="font-semibold mb-2"
+                    >
+                      Musical Excellence
+                    </ResponsiveText>
+                    <ResponsiveText className="text-muted-foreground">
                       Dedicated to the highest standards of vocal performance and musicianship.
-                    </p>
+                    </ResponsiveText>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-gray-800 border-none shadow-lg">
+                <Card className="border-none shadow-lg">
                   <CardContent className="pt-6">
-                    <div className="rounded-full bg-glee-purple/10 w-12 h-12 flex items-center justify-center mb-4">
-                      <Award className="h-6 w-6 text-glee-purple" />
+                    <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
+                      <Award className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Cultural Heritage</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <ResponsiveText 
+                      as="h3" 
+                      size="lg" 
+                      className="font-semibold mb-2"
+                    >
+                      Cultural Heritage
+                    </ResponsiveText>
+                    <ResponsiveText className="text-muted-foreground">
                       Preserving and celebrating the rich musical traditions of the African diaspora.
-                    </p>
+                    </ResponsiveText>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white dark:bg-gray-800 border-none shadow-lg">
+                <Card className="border-none shadow-lg">
                   <CardContent className="pt-6">
-                    <div className="rounded-full bg-glee-purple/10 w-12 h-12 flex items-center justify-center mb-4">
-                      <Users className="h-6 w-6 text-glee-purple" />
+                    <div className="rounded-full bg-primary/10 w-12 h-12 flex items-center justify-center mb-4">
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">Empowerment</h3>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <ResponsiveText 
+                      as="h3" 
+                      size="lg" 
+                      className="font-semibold mb-2"
+                    >
+                      Empowerment
+                    </ResponsiveText>
+                    <ResponsiveText className="text-muted-foreground">
                       Fostering leadership, confidence, and artistic growth in women of color.
-                    </p>
+                    </ResponsiveText>
                   </CardContent>
                 </Card>
               </div>
@@ -134,25 +190,34 @@ export default function AboutPage() {
         </div>
 
         {/* Repertoire and Performances */}
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-16 lg:py-20">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
-              <Calendar className="h-8 w-8 text-glee-accent" />
-              <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Repertoire & Performances</h2>
+            <div className="flex items-center gap-3 mb-8">
+              <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              <ResponsiveText 
+                as="h2" 
+                size="3xl" 
+                className="font-playfair font-bold text-foreground"
+              >
+                Repertoire & Performances
+              </ResponsiveText>
             </div>
             
-            <p className="text-lg mb-8 text-gray-700 dark:text-gray-300 leading-relaxed">
+            <ResponsiveText 
+              size="lg" 
+              className="mb-8 text-muted-foreground leading-relaxed"
+            >
               Under the direction of Dr. Kevin Phillip Johnson, the Glee Club's repertoire spans 
               classical masterpieces, spirituals, jazz, and contemporary compositions. Our versatile 
               ensemble maintains the highest standards of musical excellence while celebrating the 
               rich cultural heritage of African American music.
-            </p>
+            </ResponsiveText>
 
             <div className="mb-12">
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="notable-performances">
-                  <AccordionTrigger className="text-xl font-semibold">Notable Performances</AccordionTrigger>
-                  <AccordionContent className="text-gray-700 dark:text-gray-300">
+                  <AccordionTrigger className="text-lg font-semibold">Notable Performances</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground space-y-2">
                     <ul className="list-disc pl-5 space-y-2">
                       <li>Carnegie Hall (New York, NY)</li>
                       <li>The Kennedy Center (Washington, DC)</li>
@@ -165,9 +230,9 @@ export default function AboutPage() {
                 </AccordionItem>
 
                 <AccordionItem value="signature-works">
-                  <AccordionTrigger className="text-xl font-semibold">Signature Works</AccordionTrigger>
-                  <AccordionContent className="text-gray-700 dark:text-gray-300">
-                    <p className="mb-4">Our repertoire encompasses a wide range of musical styles, including:</p>
+                  <AccordionTrigger className="text-lg font-semibold">Signature Works</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground space-y-4">
+                    <ResponsiveText>Our repertoire encompasses a wide range of musical styles, including:</ResponsiveText>
                     <ul className="list-disc pl-5 space-y-2">
                       <li>Negro spirituals and traditional African American compositions</li>
                       <li>Classical choral masterworks</li>
@@ -179,9 +244,9 @@ export default function AboutPage() {
                 </AccordionItem>
 
                 <AccordionItem value="collaborations">
-                  <AccordionTrigger className="text-xl font-semibold">Notable Collaborations</AccordionTrigger>
-                  <AccordionContent className="text-gray-700 dark:text-gray-300">
-                    <p className="mb-4">The Spelman College Glee Club has had the honor of collaborating with:</p>
+                  <AccordionTrigger className="text-lg font-semibold">Notable Collaborations</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground space-y-4">
+                    <ResponsiveText>The Spelman College Glee Club has had the honor of collaborating with:</ResponsiveText>
                     <ul className="list-disc pl-5 space-y-2">
                       <li>The Atlanta Symphony Orchestra</li>
                       <li>The Morehouse College Glee Club</li>
@@ -206,33 +271,48 @@ export default function AboutPage() {
         </div>
 
         {/* Director Section */}
-        <div className="bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="bg-muted/50 py-16 lg:py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center gap-3 mb-6">
-                <Users className="h-8 w-8 text-glee-accent" />
-                <h2 className="font-playfair text-3xl font-bold text-gray-800 dark:text-gray-100">Director</h2>
+              <div className="flex items-center gap-3 mb-8">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                <ResponsiveText 
+                  as="h2" 
+                  size="3xl" 
+                  className="font-playfair font-bold text-foreground"
+                >
+                  Director
+                </ResponsiveText>
               </div>
               
-              <Card className="bg-white dark:bg-gray-800 border-none shadow-lg max-w-3xl mx-auto">
+              <Card className="border-none shadow-lg max-w-3xl mx-auto">
                 <CardContent className="py-8 px-6 md:px-10">
-                  <h3 className="text-2xl font-bold mb-2 text-glee-purple">Dr. Kevin Phillip Johnson</h3>
-                  <p className="text-lg font-medium mb-6 text-gray-600 dark:text-gray-400">
+                  <ResponsiveText 
+                    as="h3" 
+                    size="2xl" 
+                    className="font-bold mb-2 text-primary"
+                  >
+                    Dr. Kevin Phillip Johnson
+                  </ResponsiveText>
+                  <ResponsiveText 
+                    size="lg" 
+                    className="font-medium mb-6 text-muted-foreground"
+                  >
                     Director, Spelman College Glee Club
-                  </p>
-                  <div className="space-y-4 text-gray-700 dark:text-gray-300">
-                    <p>
+                  </ResponsiveText>
+                  <div className="space-y-4 text-muted-foreground">
+                    <ResponsiveText>
                       Dr. Kevin Phillip Johnson is an award-winning composer, arranger, and Associate Professor of Music 
                       at Spelman College, where he directs the renowned Spelman College Glee Club. A dynamic educator 
                       and cultural visionary, Dr. Johnson integrates African-American musical traditions with cutting-edge 
                       technology in both performance and pedagogy.
-                    </p>
-                    <p>
+                    </ResponsiveText>
+                    <ResponsiveText>
                       His innovative work includes the Hip-Hop Mass, the Black Music Scholar Academy, and original 
                       compositions published through Carl Fischer and Lion & Lamb Publishing. With a creative portfolio 
                       spanning choral music, screenwriting, and product development, Dr. Johnson continues to shape 
                       the future of music education and Black cultural expression.
-                    </p>
+                    </ResponsiveText>
                   </div>
                 </CardContent>
               </Card>
@@ -241,18 +321,27 @@ export default function AboutPage() {
         </div>
 
         {/* Join Us CTA */}
-        <div className="bg-glee-purple text-white py-16">
+        <div className="bg-primary text-primary-foreground py-16 lg:py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">
-              <h2 className="font-playfair text-3xl font-bold mb-6">Join Our Community</h2>
-              <p className="text-lg mb-8 text-white/90 max-w-2xl mx-auto">
+              <ResponsiveText 
+                as="h2" 
+                size="3xl" 
+                className="font-playfair font-bold mb-6"
+              >
+                Join Our Community
+              </ResponsiveText>
+              <ResponsiveText 
+                size="lg" 
+                className="mb-8 text-primary-foreground/90 max-w-2xl mx-auto"
+              >
                 Whether you're a prospective member, an alumna, or a supporter of choral music, 
                 we welcome you to be part of our continuing legacy of excellence.
-              </p>
+              </ResponsiveText>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button 
                   size="lg"
-                  className="bg-white text-glee-purple hover:bg-gray-100"
+                  variant="secondary"
                   onClick={() => navigate("/contact")}
                 >
                   Contact Us
@@ -260,7 +349,7 @@ export default function AboutPage() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white text-white hover:bg-white/20"
+                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
                   onClick={() => navigate("/")}
                 >
                   View Performances
