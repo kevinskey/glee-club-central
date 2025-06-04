@@ -20,6 +20,19 @@ export class NewsService {
     glee: 'https://news.google.com/rss/search?q="glee%20club"&hl=en-US&gl=US&ceid=US:en'
   };
 
+  // Content filter to exclude inappropriate content
+  private static readonly FORBIDDEN_KEYWORDS = [
+    'sex', 'sexual', 'porn', 'nude', 'naked', 'adult', 'explicit', 
+    'prostitution', 'escort', 'dating', 'hookup', 'affair', 'scandal',
+    'rape', 'assault', 'harassment', 'abuse', 'violence', 'crime',
+    'drugs', 'marijuana', 'cocaine', 'arrest', 'jail', 'prison'
+  ];
+
+  private static isContentAppropriate(text: string): boolean {
+    const lowerText = text.toLowerCase();
+    return !this.FORBIDDEN_KEYWORDS.some(keyword => lowerText.includes(keyword));
+  }
+
   static async fetchGoogleNews(category: keyof typeof this.NEWS_SOURCES = 'hbcu', maxItems: number = 5): Promise<NewsItem[]> {
     try {
       const rssUrl = this.NEWS_SOURCES[category];
@@ -37,7 +50,14 @@ export class NewsService {
         throw new Error('Invalid response format from news API');
       }
       
-      return data.items.slice(0, maxItems).map((item: any, index: number) => ({
+      // Filter out inappropriate content
+      const filteredItems = data.items.filter((item: any) => {
+        const headline = item.title || '';
+        const description = item.description || '';
+        return this.isContentAppropriate(headline) && this.isContentAppropriate(description);
+      });
+      
+      return filteredItems.slice(0, maxItems).map((item: any, index: number) => ({
         id: `google-news-${category}-${index}`,
         headline: this.cleanHeadline(item.title || ''),
         active: true,
@@ -64,8 +84,13 @@ export class NewsService {
       
       const allNews = [...spelmanNews, ...hbcuNews, ...musicNews];
       
+      // Additional filtering after combining sources
+      const appropriateNews = allNews.filter(item => 
+        this.isContentAppropriate(item.headline) && this.isContentAppropriate(item.content)
+      );
+      
       // Shuffle and limit results
-      const shuffled = allNews.sort(() => Math.random() - 0.5);
+      const shuffled = appropriateNews.sort(() => Math.random() - 0.5);
       return shuffled.slice(0, maxItems);
       
     } catch (error) {

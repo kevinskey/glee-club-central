@@ -22,16 +22,18 @@ serve(async (req) => {
 
     // Predefined prompts for different news categories
     const newsPrompts = {
-      hbcu: "Generate a compelling news headline and brief content about recent achievements, events, or positive developments in HBCU (Historically Black Colleges and Universities) community. Focus on academic excellence, cultural impact, and student success stories.",
-      spelman: "Generate a compelling news headline and brief content about Spelman College - focus on academic achievements, notable alumni, campus events, or institutional accomplishments. Keep it professional and inspiring.",
-      music: "Generate a compelling news headline and brief content about choral music, collegiate choir achievements, classical music performances, or music education developments. Focus on excellence and artistic achievement.",
-      scholarship: "Generate a compelling news headline and brief content about new scholarship opportunities, educational funding, or financial aid programs specifically for music students or HBCU students.",
-      general: "Generate a compelling news headline and brief content suitable for a college glee club website. Focus on positive, engaging content about music, education, or community achievements."
+      hbcu: "Generate a compelling news headline and brief content about recent achievements, events, or positive developments in HBCU (Historically Black Colleges and Universities) community. Focus on academic excellence, cultural impact, and student success stories. Keep content family-friendly and professional.",
+      spelman: "Generate a compelling news headline and brief content about Spelman College - focus on academic achievements, notable alumni, campus events, or institutional accomplishments. Keep it professional, inspiring, and family-friendly.",
+      music: "Generate a compelling news headline and brief content about choral music, collegiate choir achievements, classical music performances, or music education developments. Focus on excellence and artistic achievement. Keep content appropriate for all audiences.",
+      scholarship: "Generate a compelling news headline and brief content about new scholarship opportunities, educational funding, or financial aid programs specifically for music students or HBCU students. Keep content professional and family-friendly.",
+      general: "Generate a compelling news headline and brief content suitable for a college glee club website. Focus on positive, engaging content about music, education, or community achievements. Ensure all content is family-friendly and appropriate for all audiences."
     }
 
     const systemPrompt = customPrompt || newsPrompts[newsType as keyof typeof newsPrompts] || newsPrompts.general
 
     const fullPrompt = `${systemPrompt}
+
+IMPORTANT: The content must be completely family-friendly and appropriate for all audiences. Do not include any content related to inappropriate topics, scandals, or controversial subjects.
 
 Please return a JSON response with the following structure:
 {
@@ -52,7 +54,7 @@ Make sure the content is appropriate for a college glee club website, positive i
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that generates news content for a college glee club website. Always respond with valid JSON.'
+            content: 'You are a helpful assistant that generates news content for a college glee club website. Always respond with valid JSON. All content must be family-friendly and appropriate for all audiences.'
           },
           {
             role: 'user',
