@@ -36,6 +36,15 @@
   }
 }
 
+@keyframes marquee-20s {
+  0% {
+    transform: translate3d(100%, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
 .animate-marquee-slow {
   animation: marquee-slow 38s linear infinite; /* Faster: decreased from 45s to 38s (15% faster) */
 }
@@ -50,4 +59,8 @@
 
 .animate-marquee-12s {
   animation: marquee-12s 12s linear infinite;
+}
+
+.animate-marquee-20s {
+  animation: marquee-20s 20s linear infinite;
 }

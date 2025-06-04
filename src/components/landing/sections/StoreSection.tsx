@@ -23,7 +23,7 @@ export function StoreSection({ products }: StoreSectionProps) {
   const featuredProducts = products.slice(0, 4);
 
   return (
-    <section className="py-16 bg-gradient-to-b from-white via-gray-50/50 to-white dark:from-background dark:via-muted/20 dark:to-background relative overflow-hidden">
+    <section className="py-8 bg-gradient-to-b from-white via-gray-50/50 to-white dark:from-background dark:via-muted/20 dark:to-background relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 right-10 w-40 h-40 bg-purple-400/5 rounded-full blur-3xl"></div>
@@ -32,7 +32,7 @@ export function StoreSection({ products }: StoreSectionProps) {
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-purple-200/50 dark:border-purple-800/50 mb-4">
             <ShoppingBag className="h-4 w-4 text-purple-500" />
             <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Official Merchandise</span>

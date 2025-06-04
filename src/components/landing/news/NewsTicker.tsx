@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NewsService } from "@/services/newsService";
@@ -31,7 +32,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
           .select('id, headline, content, start_date, end_date, active, generated_by_ai')
           .eq('active', true)
           .order('priority', { ascending: false })
-          .limit(5);
+          .limit(8); // Increased limit for more items
 
         let finalNewsItems: NewsItem[] = [];
 
@@ -49,7 +50,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         } else {
           // Fallback to Google News
           console.log('No database news found, fetching from Google News...');
-          const googleNews = await NewsService.fetchMixedNews(8);
+          const googleNews = await NewsService.fetchMixedNews(12); // More items for longer scroll
           
           if (googleNews.length > 0) {
             finalNewsItems = googleNews;
@@ -142,7 +143,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     const singlePass = cleanHeadlines.join(separator);
     
     // Repeat the content multiple times for seamless scrolling
-    return Array(6).fill(singlePass).join(separator);
+    return Array(8).fill(singlePass).join(separator); // More repetitions for longer content
   };
 
   const tickerContent = createTickerContent();
@@ -172,7 +173,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
-          <div className="whitespace-nowrap animate-marquee-12s">
+          <div className="whitespace-nowrap animate-marquee-20s">
             <span 
               className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
               title="Click to read more"
