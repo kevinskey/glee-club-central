@@ -25,7 +25,6 @@ export const PDFThumbnail = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageWidth, setPageWidth] = useState<number>(300);
 
   useEffect(() => {
     console.log('PDFThumbnail: Loading PDF:', { url, title });
@@ -36,9 +35,9 @@ export const PDFThumbnail = ({
 
   const handleLoadSuccess = ({ numPages }: { numPages: number }) => {
     console.log('PDFThumbnail: PDF loaded successfully:', { title, numPages });
-    setLoading(false);
     setNumPages(numPages);
     setError(null);
+    // Don't set loading to false here, wait for page render
   };
 
   const handleLoadError = (err: any) => {
@@ -77,7 +76,7 @@ export const PDFThumbnail = ({
     <div className={`bg-white flex items-center justify-center overflow-hidden relative border rounded ${className}`}>
       <AspectRatio ratio={aspectRatio} className="w-full">
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-10">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
               <span className="text-xs text-muted-foreground">Loading PDF...</span>
@@ -109,9 +108,8 @@ export const PDFThumbnail = ({
               onRenderSuccess={handlePageRenderSuccess}
               onRenderError={handlePageRenderError}
               className="max-w-full max-h-full"
-              width={pageWidth}
+              width={200}
               height={undefined}
-              scale={1}
             />
           )}
         </Document>
