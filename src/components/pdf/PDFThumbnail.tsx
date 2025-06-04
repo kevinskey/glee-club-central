@@ -26,38 +26,31 @@ export const PDFThumbnail = ({
   const [error, setError] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
 
-  useEffect(() => {
-    console.log('PDFThumbnail: Loading PDF:', { url, title });
-    setLoading(true);
-    setError(null);
-    setNumPages(null);
-  }, [url]);
+  console.log('PDFThumbnail rendering:', { url, title });
 
   const handleLoadSuccess = ({ numPages }: { numPages: number }) => {
-    console.log('PDFThumbnail: PDF loaded successfully:', { title, numPages });
+    console.log('PDF loaded successfully:', { title, numPages, url });
     setNumPages(numPages);
     setError(null);
-    // Don't set loading to false here, wait for page render
+    setLoading(false);
   };
 
   const handleLoadError = (err: any) => {
-    console.error('PDFThumbnail: Error loading PDF:', { url, title, error: err });
-    setError(err?.message || 'Failed to load PDF');
+    console.error('PDF load error:', { url, title, error: err });
+    setError('Failed to load PDF');
     setLoading(false);
   };
 
   const handlePageRenderSuccess = () => {
-    console.log('PDFThumbnail: Page rendered successfully for:', title);
-    setLoading(false);
+    console.log('PDF page rendered successfully:', title);
   };
 
   const handlePageRenderError = (err: any) => {
-    console.error('PDFThumbnail: Page render error:', { title, error: err });
+    console.error('PDF page render error:', { title, error: err });
     setError('Failed to render PDF page');
-    setLoading(false);
   };
 
-  // Show fallback for failed PDFs
+  // Show error fallback
   if (error) {
     return (
       <div className={`bg-muted flex items-center justify-center overflow-hidden relative ${className}`}>
@@ -96,6 +89,7 @@ export const PDFThumbnail = ({
             cMapPacked: true,
             standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
             verbosity: 0,
+            workerSrc: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
           }}
         >
           {numPages && (
@@ -108,7 +102,7 @@ export const PDFThumbnail = ({
               onRenderSuccess={handlePageRenderSuccess}
               onRenderError={handlePageRenderError}
               className="max-w-full max-h-full"
-              width={200}
+              width={300}
               height={undefined}
             />
           )}
