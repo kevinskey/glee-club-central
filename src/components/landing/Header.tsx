@@ -37,7 +37,7 @@ export function Header() {
   };
   
   return (
-    <>
+    <div className="w-full">
       {showNewsTicker && <NewsTicker />}
       
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 w-full shadow-sm">
@@ -153,6 +153,6 @@ export function Header() {
           </div>
         </div>
       </header>
-    </>
+    </div>
   );
 }
