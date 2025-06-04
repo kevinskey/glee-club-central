@@ -196,29 +196,18 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           </div>
         )}
 
-        {/* Call to Action with Enhanced Design */}
+        {/* Call to Action with Enhanced Design - Centered single button */}
         <div className="text-center">
-          <div className="inline-flex flex-col sm:flex-row gap-4 items-center">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
-              asChild
-            >
-              <Link to="/calendar">
-                View Full Calendar
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Link>
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="lg"
-              className="px-8 py-4 text-lg border-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-              asChild
-            >
-              <Link to="/about">Learn About Us</Link>
-            </Button>
-          </div>
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            asChild
+          >
+            <Link to="/calendar">
+              View Full Calendar
+              <ArrowRight className="h-5 w-5 ml-2" />
+            </Link>
+          </Button>
         </div>
       </div>
 

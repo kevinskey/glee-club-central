@@ -158,8 +158,9 @@ export function CustomSlideRenderer({
               backgroundColor: currentSlideData.background_color,
               backgroundImage: currentSlideData.background_image_url ? 
                 `url(${currentSlideData.background_image_url})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundSize: isMobile ? 'cover' : 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
             }}
           >
             {currentSlideData.background_image_url && (
