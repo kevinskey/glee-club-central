@@ -46,16 +46,16 @@ export function HomePageContent({
 }: HomePageContentProps) {
   return (
     <main className="w-full">
-      {/* Reduced section spacing from Apple-style excessive spacing */}
-      <div className="space-y-16 md:space-y-20 lg:space-y-24">
+      {/* Apple-style tight section spacing */}
+      <div className="space-y-8 md:space-y-12 lg:space-y-16">
         {/* Events Section */}
-        <section className="w-full py-8 md:py-12 lg:py-16">
-          <div className="container mx-auto px-8 md:px-12 lg:px-16">
-            <div className="text-center mb-12 md:mb-16 lg:mb-20">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 dark:text-white mb-6 tracking-tight leading-none">
+        <section className="w-full py-6 md:py-8 lg:py-12">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8">
+            <div className="text-center mb-8 md:mb-12 lg:mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
                 Upcoming Events
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
                 Experience the extraordinary performances of the Spelman College Glee Club
               </p>
             </div>
@@ -64,13 +64,13 @@ export function HomePageContent({
         </section>
         
         {/* Store Section */}
-        <section className="w-full py-8 md:py-12 lg:py-16 bg-gray-50/50 dark:bg-gray-900/20">
-          <div className="container mx-auto px-8 md:px-12 lg:px-16">
-            <div className="text-center mb-12 md:mb-16 lg:mb-20">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 dark:text-white mb-6 tracking-tight leading-none">
+        <section className="w-full py-6 md:py-8 lg:py-12 bg-gray-50/30 dark:bg-gray-900/10">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8">
+            <div className="text-center mb-8 md:mb-12 lg:mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
                 Glee Store
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
                 Show your support with official Spelman Glee Club merchandise
               </p>
             </div>
@@ -79,13 +79,13 @@ export function HomePageContent({
         </section>
         
         {/* Audio Section */}
-        <section className="w-full py-8 md:py-12 lg:py-16">
-          <div className="container mx-auto px-8 md:px-12 lg:px-16">
-            <div className="text-center mb-12 md:mb-16 lg:mb-20">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-light text-gray-900 dark:text-white mb-6 tracking-tight leading-none">
+        <section className="w-full py-6 md:py-8 lg:py-12">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8">
+            <div className="text-center mb-8 md:mb-12 lg:mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
                 Our Music
               </h2>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
                 Listen to our beautiful harmonies and vocal arrangements
               </p>
             </div>

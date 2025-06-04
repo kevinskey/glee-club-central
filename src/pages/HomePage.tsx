@@ -24,11 +24,11 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
-      {/* Custom Slide Renderer - No top margin */}
+      {/* Custom Slide Renderer - No spacing */}
       <CustomSlideRenderer />
       
-      {/* Main Content - Reduced spacing from slider */}
-      <div className="mt-4 md:mt-6 lg:mt-8">
+      {/* Main Content - No top margin for seamless Apple-style layout */}
+      <div>
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}

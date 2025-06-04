@@ -1,3 +1,4 @@
+
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -29,12 +30,12 @@ body {
   max-width: 100vw;
 }
 
-/* Container and Layout Fixes */
+/* Container and Layout Fixes - Apple Style */
 .container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
   width: 100% !important;
   max-width: 100vw !important;
-  padding-left: clamp(12px, 3vw, 24px);
-  padding-right: clamp(12px, 3vw, 24px);
+  padding-left: clamp(16px, 4vw, 20px);
+  padding-right: clamp(16px, 4vw, 20px);
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -47,7 +48,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Hero Section Mobile Fixes - Seamless with header */
+/* Hero Section Mobile Fixes - Apple Style Tight Integration */
 .hero-section, [class*="hero"] {
   width: 100% !important;
   max-width: 100vw !important;
@@ -69,61 +70,78 @@ img, picture, video, canvas, svg {
   overflow-x: hidden;
 }
 
-/* Typography Scaling */
+/* Apple-Style Typography Scaling */
 h1 {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  line-height: 1.2;
-  margin-bottom: clamp(0.5rem, 2vw, 1rem);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  line-height: 1.1;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
   word-wrap: break-word;
   hyphens: auto;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 h2 {
-  font-size: clamp(1.25rem, 3.5vw, 2rem);
-  line-height: 1.3;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  line-height: 1.2;
   margin-bottom: clamp(0.5rem, 1.5vw, 0.75rem);
   word-wrap: break-word;
   hyphens: auto;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 h3 {
-  font-size: clamp(1.125rem, 3vw, 1.5rem);
-  line-height: 1.4;
-  margin-bottom: clamp(0.25rem, 1vw, 0.5rem);
+  font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+  line-height: 1.3;
+  margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
   word-wrap: break-word;
   hyphens: auto;
+  font-weight: 500;
 }
 
 p {
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  line-height: 1.6;
-  margin-bottom: clamp(0.5rem, 1.5vw, 1rem);
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  line-height: 1.5;
+  margin-bottom: clamp(0.75rem, 2vw, 1rem);
   word-wrap: break-word;
   hyphens: auto;
+  color: rgba(0, 0, 0, 0.8);
 }
 
-/* Reduced Padding System */
+.dark p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Apple-Style Reduced Padding System */
 .mobile-padding-sm {
-  padding: clamp(0.5rem, 2vw, 0.75rem);
+  padding: clamp(0.75rem, 2.5vw, 1rem);
 }
 
 .mobile-padding-md {
-  padding: clamp(0.75rem, 3vw, 1.5rem);
+  padding: clamp(1rem, 3vw, 1.5rem);
 }
 
 .mobile-padding-lg {
-  padding: clamp(1rem, 4vw, 2rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
 }
 
-/* Mobile Card System */
+/* Mobile Card System - Apple Style */
 .mobile-card {
-  border-radius: 8px;
-  padding: clamp(0.75rem, 3vw, 1.5rem);
+  border-radius: 12px;
+  padding: clamp(1rem, 3vw, 1.5rem);
   margin-bottom: clamp(0.75rem, 2vw, 1rem);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.dark .mobile-card {
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
 }
 
 /* Mobile Grid System */
@@ -147,41 +165,23 @@ p {
   }
 }
 
-/* Button Optimizations */
+/* Button Optimizations - Apple Style */
 .mobile-button {
   min-height: 44px;
   min-width: 44px;
-  padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 24px);
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  border-radius: 6px;
+  padding: clamp(12px, 3vw, 16px) clamp(20px, 5vw, 28px);
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
+  border-radius: 8px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
-/* Mobile Navigation - No Sticky Positioning */
-.mobile-nav {
-  position: static;
-  width: 100vw;
-  height: 56px;
-  background: white;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(12px, 3vw, 16px);
-  box-sizing: border-box;
-}
-
-.mobile-nav-dark {
-  background: hsl(var(--background));
-  border-bottom: 1px solid hsl(var(--border));
-  color: hsl(var(--foreground));
-}
-
-/* Seamless Header-Hero Layout - Remove all gaps */
+/* Apple-Style Header Layout - Seamless Integration */
 @media (max-width: 768px) {
   header {
     position: static !important;
@@ -193,20 +193,21 @@ p {
     overflow-x: hidden;
     box-sizing: border-box;
     z-index: auto !important;
-    background: white !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
     margin: 0 !important;
     border-top: none !important;
-    border-bottom: none !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
     padding-bottom: 0 !important;
   }
   
   .dark header {
-    background: hsl(var(--background)) !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
   
-  /* News Ticker Normal Positioning */
+  /* News Ticker - Apple Style Integration */
   .news-ticker,
   .bg-glee-columbia {
     position: static !important;
@@ -222,35 +223,115 @@ p {
     border-bottom: none !important;
   }
   
-  /* Main content - Remove all spacing */
+  /* Main content - Apple Style Seamless Layout */
   main {
     margin: 0 !important;
     padding: 0 !important;
   }
   
-  /* Hero sections - Remove container margins but keep internal padding */
+  /* Apple-Style Section Spacing */
+  .home-page-content section,
+  .landing-content section {
+    padding: clamp(2rem, 6vw, 3rem) 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Reduce space between sections */
+  .space-y-16 > * + *,
+  .space-y-20 > * + *,
+  .space-y-24 > * + * {
+    margin-top: clamp(1.5rem, 4vw, 2.5rem) !important;
+  }
+  
+  /* Section container spacing */
+  .events-section .container,
+  .store-section .container,
+  .audio-section .container {
+    padding-left: clamp(16px, 4vw, 20px) !important;
+    padding-right: clamp(16px, 4vw, 20px) !important;
+  }
+  
+  /* Section headers - reduce margins */
+  .text-center.mb-12,
+  .text-center.mb-16,
+  .text-center.mb-20 {
+    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+  }
+  
+  /* Hero sections - Apple style tight spacing */
   .hero-section,
   [class*="hero"],
   .enhanced-hero-section {
     margin: 0 !important;
-    /* Keep internal padding for content */
-    padding: clamp(2rem, 6vw, 3rem) 0 !important;
+    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
   }
   
-  /* Hero content containers - Add proper spacing */
+  /* Hero content containers */
   .hero-section .flex,
   .hero-section .relative,
   [class*="hero"] .flex,
   [class*="hero"] .relative {
-    padding-left: clamp(1rem, 4vw, 2rem) !important;
-    padding-right: clamp(1rem, 4vw, 2rem) !important;
+    padding-left: clamp(16px, 4vw, 20px) !important;
+    padding-right: clamp(16px, 4vw, 20px) !important;
+  }
+}
+
+/* Store Section Mobile Optimizations - Apple Style */
+@media (max-width: 768px) {
+  .store-section {
+    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+    background: transparent !important;
   }
   
-  /* Page content - Only non-hero pages get padding */
-  .page-content:not(.hero-page),
-  .main-content:not(.hero-content) {
+  .store-section .py-8 {
     padding-top: 0 !important;
-    min-height: auto !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Store section header */
+  .store-section .text-center {
+    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+  }
+  
+  /* Store products grid */
+  .store-section .grid {
+    gap: clamp(1rem, 3vw, 1.5rem) !important;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem) !important;
+  }
+  
+  /* Store product cards */
+  .store-section .card {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+/* Events Section Mobile Optimizations */
+@media (max-width: 768px) {
+  .events-section {
+    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+  }
+  
+  .events-section .py-8,
+  .events-section .py-12,
+  .events-section .py-16 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Audio Section Mobile Optimizations */
+@media (max-width: 768px) {
+  .audio-section {
+    padding: clamp(1.5rem, 4vw, 2rem) 0 !important;
+  }
+  
+  .audio-section .py-8,
+  .audio-section .py-12,
+  .audio-section .py-16 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
@@ -275,445 +356,26 @@ p {
   }
 }
 
-/* Admin Panel Mobile Optimizations */
+/* Apple-Style Cards */
 @media (max-width: 768px) {
-  /* Admin Layout Container */
-  .admin-layout,
-  .min-h-screen.bg-gray-50 {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden;
-  }
-  
-  /* Admin Main Content */
-  .admin-content,
-  .px-4.py-4.max-w-7xl {
-    padding: clamp(8px, 2vw, 16px) !important;
-    margin: 0 !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    box-sizing: border-box;
-  }
-  
-  /* Admin Cards and Panels */
-  .admin-card,
+  .card,
   [class*="card"] {
-    margin: clamp(8px, 2vw, 12px) 0 !important;
-    padding: clamp(12px, 3vw, 16px) !important;
-    border-radius: 8px;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
   }
   
-  /* Admin Tabs */
-  .admin-tabs,
-  [data-orientation="horizontal"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .admin-tabs::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Admin Tab List */
-  .admin-tab-list,
-  [role="tablist"] {
-    display: flex !important;
-    gap: clamp(4px, 1vw, 8px) !important;
-    padding: clamp(4px, 1vw, 8px) !important;
-    min-width: max-content !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Admin Tab Triggers */
-  .admin-tab-trigger,
-  [role="tab"] {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
-    padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px) !important;
-    min-height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: clamp(4px, 1vw, 6px) !important;
-  }
-  
-  /* Admin Tab Content */
-  .admin-tab-content,
-  [role="tabpanel"] {
-    padding: clamp(8px, 2vw, 16px) 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden;
-  }
-  
-  /* Admin Forms */
-  .admin-form {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  .admin-form-group {
-    margin-bottom: clamp(12px, 3vw, 16px) !important;
-    width: 100% !important;
-  }
-  
-  .admin-form-label {
-    font-size: clamp(0.875rem, 2vw, 1rem) !important;
-    margin-bottom: clamp(4px, 1vw, 6px) !important;
-    display: block !important;
-  }
-  
-  .admin-form-input {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: clamp(8px, 2vw, 12px) !important;
-    font-size: clamp(0.875rem, 2vw, 1rem) !important;
-    box-sizing: border-box;
-  }
-  
-  /* Admin Buttons */
-  .admin-button {
-    min-height: 44px !important;
-    padding: clamp(8px, 2vw, 12px) clamp(16px, 4vw, 20px) !important;
-    font-size: clamp(0.875rem, 2vw, 1rem) !important;
-    width: auto !important;
-    min-width: 44px !important;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
-  
-  /* Admin Button Groups */
-  .admin-button-group {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: clamp(8px, 2vw, 12px) !important;
-    width: 100% !important;
-    justify-content: flex-start !important;
-  }
-  
-  /* Admin Tables */
-  .admin-table-container {
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch;
-    margin: clamp(8px, 2vw, 16px) 0 !important;
-  }
-  
-  .admin-table {
-    min-width: 600px !important; /* Minimum width for table readability */
-    width: 100% !important;
-  }
-  
-  /* Admin Page Header */
-  .admin-page-header {
-    padding: clamp(12px, 3vw, 20px) clamp(8px, 2vw, 16px) !important;
-    margin-bottom: clamp(8px, 2vw, 16px) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-  
-  .admin-page-title {
-    font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
-    margin-bottom: clamp(4px, 1vw, 8px) !important;
-    line-height: 1.2 !important;
-  }
-  
-  .admin-page-description {
-    font-size: clamp(0.875rem, 2.5vw, 1rem) !important;
-    line-height: 1.4 !important;
-    color: hsl(var(--muted-foreground)) !important;
-  }
-  
-  /* Design Studio Mobile Adjustments - Enhanced */
-  .design-studio-container {
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  .design-studio-header {
-    padding: clamp(12px, 3vw, 16px) !important;
-    font-size: clamp(1.125rem, 3vw, 1.5rem) !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    box-sizing: border-box;
-  }
-  
-  .design-studio-layout {
-    flex-direction: column !important;
-    height: auto !important;
-    min-height: auto !important;
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden;
-  }
-  
-  .design-studio-sidebar {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 250px !important;
-    order: 2 !important;
-    box-sizing: border-box;
-  }
-  
-  .design-studio-preview {
-    width: 100% !important;
-    height: 60vh !important;
-    min-height: 400px !important;
-    max-height: 70vh !important;
-    order: 1 !important;
-    box-sizing: border-box;
-  }
-  
-  .design-studio-panel {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 200px !important;
-    order: 3 !important;
-    border-left: none !important;
-    border-top: 1px solid hsl(var(--border)) !important;
-    box-sizing: border-box;
-  }
-  
-  /* Design Studio Controls Mobile */
-  .design-studio-controls {
-    padding: clamp(8px, 2vw, 16px) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-  
-  /* Design Studio Tabs Mobile */
-  .design-studio-tabs {
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden;
-  }
-  
-  .design-studio-tab-list {
-    width: 100% !important;
-    max-width: 100% !important;
-    display: flex !important;
-    justify-content: stretch !important;
-  }
-  
-  .design-studio-tab-trigger {
-    flex: 1 !important;
-    text-align: center !important;
-    font-size: clamp(0.875rem, 2vw, 1rem) !important;
-    padding: clamp(8px, 2vw, 12px) !important;
-    min-height: 44px !important;
+  .dark .card,
+  .dark [class*="card"] {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05) !important;
   }
 }
 
-/* PDF Viewer Mobile Optimizations */
-.pdf-mobile-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  background: hsl(var(--background));
-  z-index: 40;
-  overflow: hidden;
-}
-
-.pdf-mobile-toolbar {
-  height: 56px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(12px, 3vw, 16px);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.pdf-mobile-content {
-  height: calc(100vh - 56px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  width: 100%;
-}
-
-.pdf-page-tap-zone {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 25%;
-  z-index: 5;
-  background: transparent;
-  cursor: pointer;
-}
-
-.pdf-page-tap-left {
-  left: 0;
-}
-
-.pdf-page-tap-right {
-  right: 0;
-}
-
-/* Calendar Mobile Optimizations */
-.calendar-mobile-container {
-  padding: clamp(0.5rem, 2vw, 1rem);
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.calendar-mobile-event {
-  padding: clamp(8px, 2vw, 12px);
-  margin-bottom: clamp(4px, 1vw, 8px);
-  border-radius: 6px;
-  border-left: 3px solid hsl(var(--primary));
-  background: hsl(var(--muted/20));
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.calendar-mobile-event-time {
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-  font-weight: 600;
-  color: hsl(var(--primary));
-}
-
-.calendar-mobile-event-title {
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  font-weight: 500;
-  margin-top: 2px;
-}
-
-.calendar-mobile-event-location {
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-  color: hsl(var(--muted-foreground));
-  margin-top: 2px;
-}
-
-/* Dashboard Mobile Optimizations */
-.dashboard-mobile-container {
-  padding: clamp(0.75rem, 3vw, 1.5rem);
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
-.dashboard-mobile-section {
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  width: 100%;
-  max-width: 100%;
-}
-
-.dashboard-mobile-card {
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: 8px;
-  padding: clamp(0.75rem, 3vw, 1.5rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.dashboard-mobile-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: clamp(0.5rem, 2vw, 1rem);
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  width: 100%;
-  max-width: 100%;
-}
-
-.dashboard-mobile-stat-card {
-  text-align: center;
-  padding: clamp(0.75rem, 3vw, 1rem);
-  background: hsl(var(--muted/30));
-  border-radius: 6px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.dashboard-mobile-stat-value {
-  font-size: clamp(1.25rem, 4vw, 2rem);
-  font-weight: 700;
-  color: hsl(var(--primary));
-}
-
-.dashboard-mobile-stat-label {
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-  color: hsl(var(--muted-foreground));
-  margin-top: 2px;
-}
-
-/* Specific Mobile Viewport Fixes */
-@media (max-width: 768px) {
-  .container {
-    width: 100% !important;
-    max-width: 100vw !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-  
-  /* Fix any flex containers that might overflow */
-  .flex {
-    flex-wrap: wrap;
-    min-width: 0;
-  }
-  
-  /* Fix grid containers */
-  .grid {
-    width: 100%;
-    max-width: 100%;
-  }
-}
-
-/* Dark Mode Optimizations */
-.dark .pdf-mobile-toolbar {
-  background: rgba(0, 0, 0, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: hsl(var(--foreground));
-}
-
-.dark .calendar-mobile-event {
-  background: hsl(var(--muted/10));
-  border-left-color: hsl(var(--primary));
-}
-
-.dark .mobile-nav {
-  background: hsl(var(--background));
-  border-bottom: 1px solid hsl(var(--border));
-  color: hsl(var(--foreground));
-}
-
-/* Touch Optimizations */
+/* Touch Optimizations - Apple Standards */
 @media (hover: none) and (pointer: coarse) {
   button, .btn, [role="button"] {
     min-height: 44px;
@@ -742,52 +404,38 @@ p {
   }
 }
 
-@media (prefers-contrast: high) {
-  .dashboard-mobile-card,
-  .calendar-mobile-event {
-    border-width: 2px;
-  }
+/* Apple-Style Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Viewport Meta Fixes */
-@media (max-width: 320px) {
-  .container {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-  
-  .dashboard-mobile-stats {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Large touch targets for very small screens */
-@media (max-width: 375px) {
-  .mobile-button {
-    min-height: 48px;
-    padding: 12px 16px;
-  }
-}
-
-/* Home Page Content Mobile Fixes */
+/* Remove excessive margins on mobile */
 @media (max-width: 768px) {
-  .home-page-content,
-  .landing-content {
-    width: 100% !important;
-    max-width: 100vw !important;
-    overflow-x: hidden;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+  .mb-12,
+  .mb-16,
+  .mb-20 {
+    margin-bottom: clamp(1rem, 3vw, 1.5rem) !important;
   }
   
-  /* Section containers */
-  .events-section,
-  .audio-section,
-  .store-section {
-    width: 100% !important;
-    max-width: 100vw !important;
-    padding-left: 16px;
-    padding-right: 16px;
-    box-sizing: border-box;
+  .mt-4,
+  .mt-6,
+  .mt-8 {
+    margin-top: 0 !important;
+  }
+  
+  /* Tighten up padding in main containers */
+  .px-8,
+  .px-12,
+  .px-16 {
+    padding-left: clamp(16px, 4vw, 20px) !important;
+    padding-right: clamp(16px, 4vw, 20px) !important;
+  }
+  
+  .py-8,
+  .py-12,
+  .py-16 {
+    padding-top: clamp(1rem, 3vw, 1.5rem) !important;
+    padding-bottom: clamp(1rem, 3vw, 1.5rem) !important;
   }
 }
