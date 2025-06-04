@@ -27,10 +27,15 @@ export function HeroContent({ slide, textSizes, positionClasses, isMobile, media
 
     const buttonClasses = "bg-blue-500 hover:bg-blue-600 text-white w-auto px-6";
 
-    if (isExternalLink(slide.button_link)) {
+    // Use the specific Syracuse calendar URL for Learn More buttons
+    const buttonLink = slide.button_text.toLowerCase().includes('learn more') 
+      ? 'https://calendar.syracuse.edu/events/2025-jun-29/return-to-community-a-sunday-gospel-jazz-service-with-the-spelman-college-glee-club'
+      : slide.button_link;
+
+    if (isExternalLink(buttonLink)) {
       return (
         <Button size={isMobile ? "default" : "lg"} className={buttonClasses} asChild>
-          <a href={slide.button_link} target="_blank" rel="noopener noreferrer">
+          <a href={buttonLink} target="_blank" rel="noopener noreferrer">
             {slide.button_text} <ChevronRight className="h-4 w-4 ml-1" />
           </a>
         </Button>
@@ -39,7 +44,7 @@ export function HeroContent({ slide, textSizes, positionClasses, isMobile, media
 
     return (
       <Button size={isMobile ? "default" : "lg"} className={buttonClasses} asChild>
-        <Link to={slide.button_link}>
+        <Link to={buttonLink}>
           {slide.button_text} <ChevronRight className="h-4 w-4 ml-1" />
         </Link>
       </Button>
