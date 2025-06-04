@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -101,13 +100,13 @@ export function ModernHeroSection({
   const getTextSizeClasses = () => {
     if (!isResponsive) {
       return {
-        title: isMobile ? "text-2xl sm:text-3xl" : "text-4xl md:text-5xl lg:text-6xl",
-        description: isMobile ? "text-base sm:text-lg" : "text-lg md:text-xl lg:text-2xl"
+        title: isMobile ? "text-xl sm:text-2xl md:text-3xl lg:text-4xl" : "text-2xl md:text-3xl lg:text-4xl xl:text-5xl 2xl:text-6xl",
+        description: isMobile ? "text-sm sm:text-base md:text-lg" : "text-base md:text-lg lg:text-xl xl:text-2xl"
       };
     }
 
     return {
-      title: "text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl",
+      title: "text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl",
       description: "text-sm sm:text-base md:text-lg lg:text-xl"
     };
   };
@@ -123,13 +122,13 @@ export function ModernHeroSection({
     switch (position) {
       case 'top':
         positionClass = isResponsive 
-          ? 'items-start pt-4 sm:pt-6 md:pt-8 lg:pt-12' 
-          : 'items-start pt-8 md:pt-12';
+          ? 'items-start pt-8 sm:pt-12 md:pt-16 lg:pt-20' 
+          : 'items-start pt-16 md:pt-20 lg:pt-24';
         break;
       case 'bottom':
         positionClass = isResponsive 
-          ? 'items-end pb-4 sm:pb-6 md:pb-8 lg:pb-12' 
-          : 'items-end pb-8 md:pb-12';
+          ? 'items-end pb-8 sm:pb-12 md:pb-16 lg:pb-20' 
+          : 'items-end pb-16 md:pb-20 lg:pb-24';
         break;
       default:
         positionClass = 'items-center';
@@ -236,8 +235,8 @@ export function ModernHeroSection({
           settings={settings} 
         />
         
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        {/* Reduced dark overlay for better text visibility while keeping image visible */}
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
       
       {/* Content overlay */}

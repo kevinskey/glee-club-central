@@ -83,41 +83,48 @@ export function HeroContent({ slide, textSizes, positionClasses, isMobile, media
     return linkElement;
   }
 
-  // If we have content to show, render it normally
+  // If we have content to show, render it normally with better spacing and visibility
   if (hasTitle || hasDescription || hasButton) {
     return (
       <div className={cn(
-        "relative z-10 h-full flex px-4 sm:px-6 md:px-8 lg:px-12", 
+        "relative z-10 h-full flex px-6 sm:px-8 md:px-12 lg:px-16", 
         positionClasses
       )}>
-        <div className="max-w-4xl mx-auto w-full">
-          {hasTitle && (
-            <h1 className={cn(
-              "font-bold text-white mb-2 md:mb-4 leading-tight",
-              textSizes.title
-            )}>
-              {displayTitle}
-            </h1>
-          )}
-          {hasDescription && (
-            <p className={cn(
-              "text-white/90 mb-3 md:mb-6 max-w-2xl leading-relaxed",
-              slide.text_alignment === 'center' ? 'mx-auto' : '',
-              textSizes.description
-            )}>
-              {slide.description}
-            </p>
-          )}
-          {hasButton && (
-            <div className={cn(
-              "flex gap-3",
-              slide.text_alignment === 'center' ? 'justify-center' : '',
-              slide.text_alignment === 'right' ? 'justify-end' : '',
-              isMobile ? 'flex-col sm:flex-row items-center' : 'flex-row items-center'
-            )}>
-              {renderButton()}
-            </div>
-          )}
+        <div className="max-w-6xl mx-auto w-full">
+          {/* Add background overlay for better text readability */}
+          <div className="bg-black/20 backdrop-blur-sm rounded-lg p-6 md:p-8 lg:p-10">
+            {hasTitle && (
+              <h1 className={cn(
+                "font-bold text-white mb-4 md:mb-6 leading-tight",
+                textSizes.title,
+                // Ensure text doesn't overflow
+                "break-words hyphens-auto"
+              )}>
+                {displayTitle}
+              </h1>
+            )}
+            {hasDescription && (
+              <p className={cn(
+                "text-white/95 mb-6 md:mb-8 max-w-4xl leading-relaxed",
+                slide.text_alignment === 'center' ? 'mx-auto' : '',
+                textSizes.description,
+                // Ensure text doesn't overflow
+                "break-words hyphens-auto"
+              )}>
+                {slide.description}
+              </p>
+            )}
+            {hasButton && (
+              <div className={cn(
+                "flex gap-3",
+                slide.text_alignment === 'center' ? 'justify-center' : '',
+                slide.text_alignment === 'right' ? 'justify-end' : '',
+                isMobile ? 'flex-col sm:flex-row items-center' : 'flex-row items-center'
+              )}>
+                {renderButton()}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
