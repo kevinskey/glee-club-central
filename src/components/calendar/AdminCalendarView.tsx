@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { Calendar } from '@/components/ui/calendar';
@@ -36,92 +37,92 @@ export function AdminCalendarView({
   console.log('AdminCalendarView: Selected event type:', selectedEventType);
   console.log('AdminCalendarView: Enabled categories:', enabledCategories);
 
-  // Get all holiday data for the current year and next year
-  const currentYear = new Date().getFullYear();
-  const spelmanDates = [
-    ...getSpelmanAcademicDates(currentYear),
-    ...getSpelmanAcademicDates(currentYear + 1)
-  ];
-  const nationalHolidays = [
-    ...getNationalHolidays(currentYear),
-    ...getNationalHolidays(currentYear + 1)
-  ];
-  const religiousHolidays = [
-    ...getReligiousHolidays(currentYear),
-    ...getReligiousHolidays(currentYear + 1)
-  ];
+  // Memoize holiday data to prevent recalculation on every render
+  const { spelmanEvents, nationalHolidayEvents, religiousHolidayEvents } = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const spelmanDates = [
+      ...getSpelmanAcademicDates(currentYear),
+      ...getSpelmanAcademicDates(currentYear + 1)
+    ];
+    const nationalHolidays = [
+      ...getNationalHolidays(currentYear),
+      ...getNationalHolidays(currentYear + 1)
+    ];
+    const religiousHolidays = [
+      ...getReligiousHolidays(currentYear),
+      ...getReligiousHolidays(currentYear + 1)
+    ];
 
-  console.log('AdminCalendarView: National holidays loaded:', nationalHolidays.length);
-  console.log('AdminCalendarView: Religious holidays loaded:', religiousHolidays.length);
-  console.log('AdminCalendarView: Spelman dates loaded:', spelmanDates.length);
+    // Convert Spelman dates to CalendarEvent format
+    const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
+      id: `spelman-${date.id}`,
+      title: date.title,
+      start_time: date.date.toISOString(),
+      end_time: date.date.toISOString(),
+      short_description: date.description,
+      full_description: date.description,
+      event_type: 'academic',
+      event_types: ['academic'],
+      is_private: true,
+      is_public: false,
+      allow_rsvp: false,
+      allow_reminders: true,
+      allow_ics_download: true,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      feature_image_url: date.imageUrl
+    }));
 
-  // Convert Spelman dates to CalendarEvent format
-  const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
-    id: `spelman-${date.id}`,
-    title: date.title,
-    start_time: date.date.toISOString(),
-    end_time: date.date.toISOString(),
-    short_description: date.description,
-    full_description: date.description,
-    event_type: 'academic',
-    event_types: ['academic'],
-    is_private: true,
-    is_public: false,
-    allow_rsvp: false,
-    allow_reminders: true,
-    allow_ics_download: true,
-    allow_google_map_link: false,
-    created_at: new Date().toISOString(),
-    feature_image_url: date.imageUrl
-  }));
+    // Convert national holidays to CalendarEvent format
+    const nationalHolidayEvents: CalendarEvent[] = nationalHolidays.map(holiday => ({
+      id: `national-${holiday.id}`,
+      title: holiday.title,
+      start_time: holiday.date.toISOString(),
+      end_time: holiday.date.toISOString(),
+      short_description: holiday.description,
+      full_description: holiday.description,
+      event_type: 'holiday',
+      event_types: ['holiday'],
+      is_private: true,
+      is_public: false,
+      allow_rsvp: false,
+      allow_reminders: true,
+      allow_ics_download: true,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      feature_image_url: holiday.imageUrl
+    }));
 
-  // Convert national holidays to CalendarEvent format
-  const nationalHolidayEvents: CalendarEvent[] = nationalHolidays.map(holiday => ({
-    id: `national-${holiday.id}`,
-    title: holiday.title,
-    start_time: holiday.date.toISOString(),
-    end_time: holiday.date.toISOString(),
-    short_description: holiday.description,
-    full_description: holiday.description,
-    event_type: 'holiday',
-    event_types: ['holiday'],
-    is_private: true,
-    is_public: false,
-    allow_rsvp: false,
-    allow_reminders: true,
-    allow_ics_download: true,
-    allow_google_map_link: false,
-    created_at: new Date().toISOString(),
-    feature_image_url: holiday.imageUrl
-  }));
+    // Convert religious holidays to CalendarEvent format
+    const religiousHolidayEvents: CalendarEvent[] = religiousHolidays.map(holiday => ({
+      id: `religious-${holiday.id}`,
+      title: holiday.title,
+      start_time: holiday.date.toISOString(),
+      end_time: holiday.date.toISOString(),
+      short_description: holiday.description,
+      full_description: holiday.description,
+      event_type: 'religious',
+      event_types: ['religious'],
+      is_private: true,
+      is_public: false,
+      allow_rsvp: false,
+      allow_reminders: true,
+      allow_ics_download: true,
+      allow_google_map_link: false,
+      created_at: new Date().toISOString(),
+      feature_image_url: holiday.imageUrl
+    }));
 
-  // Convert religious holidays to CalendarEvent format
-  const religiousHolidayEvents: CalendarEvent[] = religiousHolidays.map(holiday => ({
-    id: `religious-${holiday.id}`,
-    title: holiday.title,
-    start_time: holiday.date.toISOString(),
-    end_time: holiday.date.toISOString(),
-    short_description: holiday.description,
-    full_description: holiday.description,
-    event_type: 'religious',
-    event_types: ['religious'],
-    is_private: true,
-    is_public: false,
-    allow_rsvp: false,
-    allow_reminders: true,
-    allow_ics_download: true,
-    allow_google_map_link: false,
-    created_at: new Date().toISOString(),
-    feature_image_url: holiday.imageUrl
-  }));
+    return { spelmanEvents, nationalHolidayEvents, religiousHolidayEvents };
+  }, []); // Empty dependency array since these don't change
 
-  // Combine all events
-  const allEvents = [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
+  // Combine all events - memoized to prevent unnecessary recalculations
+  const allEvents = useMemo(() => {
+    return [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
+  }, [events, spelmanEvents, nationalHolidayEvents, religiousHolidayEvents]);
 
-  console.log('AdminCalendarView: Total combined events:', allEvents.length);
-
-  // Filter events based on search, event types, and enabled categories
-  const filteredEvents = React.useMemo(() => {
+  // Filter events based on search, event types, and enabled categories - properly memoized
+  const filteredEvents = useMemo(() => {
     return allEvents.filter(event => {
       let matchesSearch = true;
       let matchesType = true;
@@ -148,11 +149,11 @@ export function AdminCalendarView({
         matchesCategory = enabledCategories.includes(event.event_type);
       }
       
-      console.log(`Event "${event.title}": search=${matchesSearch}, type=${matchesType}, category=${matchesCategory}, query="${searchQuery}"`);
       return matchesSearch && matchesType && matchesCategory;
     });
   }, [allEvents, searchQuery, selectedEventType, enabledCategories]);
 
+  console.log('AdminCalendarView: Total combined events:', allEvents.length);
   console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
 
   // Handle edit event (only for non-system events)
@@ -223,19 +224,20 @@ export function AdminCalendarView({
     setEditingEvent(null);
   };
 
-  // Get events for selected date
-  const getEventsForDate = (date: Date): CalendarEvent[] => {
-    const dayEvents = filteredEvents.filter(event => 
-      isSameDay(new Date(event.start_time), date)
-    );
-    return dayEvents;
-  };
+  // Get events for selected date - memoized for performance
+  const getEventsForDate = useMemo(() => {
+    return (date: Date): CalendarEvent[] => {
+      const dayEvents = filteredEvents.filter(event => 
+        isSameDay(new Date(event.start_time), date)
+      );
+      return dayEvents;
+    };
+  }, [filteredEvents]);
 
-  // Get dates that have events for the calendar modifiers
-  const getDatesWithEvents = () => {
-    const datesWithEvents = filteredEvents.map(event => new Date(event.start_time));
-    return datesWithEvents;
-  };
+  // Get dates that have events for the calendar modifiers - memoized
+  const getDatesWithEvents = useMemo(() => {
+    return filteredEvents.map(event => new Date(event.start_time));
+  }, [filteredEvents]);
 
   // Get date range based on view
   const getDateRange = () => {
@@ -419,19 +421,6 @@ export function AdminCalendarView({
         </Card>
       )}
 
-      {/* Debug info - only show in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="text-xs text-muted-foreground bg-gray-50 dark:bg-gray-800 p-2 rounded border">
-          <strong>Debug:</strong> Total events: {events?.length || 0} | Spelman events: {spelmanEvents.length} | Filtered: {filteredEvents.length} | 
-          Search: "{searchQuery}" | Type: {selectedEventType} | 
-          Categories: {enabledCategories.join(', ')} |
-          Has Active Search: {hasActiveSearch ? 'Yes' : 'No'} | 
-          Has Active Filter: {hasActiveFilter ? 'Yes' : 'No'} |
-          Editor Open: {isEventEditorOpen ? 'Yes' : 'No'} |
-          Editing Event: {editingEvent?.title || 'None'}
-        </div>
-      )}
-
       {/* Calendar Views */}
       {view === 'month' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -448,7 +437,7 @@ export function AdminCalendarView({
                   onSelect={(date) => date && setSelectedDate(date)}
                   className="rounded-md border"
                   modifiers={{
-                    hasEvents: filteredEvents.map(event => new Date(event.start_time)),
+                    hasEvents: getDatesWithEvents,
                     today: new Date()
                   }}
                   modifiersClassNames={{
