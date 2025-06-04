@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,14 +65,12 @@ export default function AdminCalendarPage() {
     setSelectedEventType('all');
   };
 
-  // Handle create new event
   const handleCreateEvent = () => {
     console.log('Opening event editor for new event');
-    setEditingEvent(null); // Clear any existing event
+    setEditingEvent(null);
     setIsEventEditorOpen(true);
   };
 
-  // Handle save new event
   const handleSaveNewEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
     try {
       console.log('Creating new event:', eventData);
@@ -85,7 +84,6 @@ export default function AdminCalendarPage() {
     }
   };
 
-  // Handle close editor
   const handleCloseEditor = () => {
     console.log('Closing event editor');
     setIsEventEditorOpen(false);
@@ -107,39 +105,60 @@ export default function AdminCalendarPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-glee-spelman/10 rounded-lg">
-              <CalendarDays className="h-6 w-6 text-glee-spelman" />
+      {/* Enhanced Header */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              {/* Title Section */}
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-glee-spelman/10 rounded-xl">
+                  <CalendarDays className="h-8 w-8 text-glee-spelman" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    Event Calendar Management
+                  </h1>
+                  <p className="text-lg text-gray-600 dark:text-gray-400 mb-3">
+                    Manage events, performances, rehearsals, and important dates
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="text-sm">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {selectedView.charAt(0).toUpperCase() + selectedView.slice(1)} View
+                    </Badge>
+                    <Badge variant="outline" className="text-sm">
+                      <Users className="h-3 w-3 mr-1" />
+                      Admin Access
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCategoryFilter(!showCategoryFilter)}
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  Categories
+                  {enabledCategories.length < 8 && (
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {8 - enabledCategories.length} hidden
+                    </Badge>
+                  )}
+                </Button>
+                <Button 
+                  onClick={handleCreateEvent}
+                  className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Event
+                </Button>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Event Calendar
-              </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Manage events, performances, and rehearsals
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowCategoryFilter(!showCategoryFilter)}
-              className="flex items-center gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Categories
-            </Button>
-            <Button 
-              onClick={handleCreateEvent}
-              className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Event
-            </Button>
           </div>
         </div>
       </div>
