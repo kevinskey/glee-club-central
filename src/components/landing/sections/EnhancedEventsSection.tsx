@@ -42,74 +42,88 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Grid with Enhanced Design */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: Horizontal scrolling */}
+            {/* Mobile: Single card with horizontal scrolling */}
             <div className="block md:hidden mb-8">
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                {upcomingEvents.map((event, index) => (
-                  <Card 
-                    key={event.id} 
-                    className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden flex-shrink-0 w-80 bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card"
-                  >
-                    <CardContent className="p-0">
-                      <div className="aspect-[16/10] relative overflow-hidden">
-                        {event.imageUrl ? (
-                          <img
-                            src={event.imageUrl}
-                            alt={event.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
-                            <Calendar className="h-16 w-16 text-blue-400" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                      
-                      <div className="p-6">
-                        <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-lg text-gray-900 dark:text-foreground">
-                          {event.title}
-                        </h3>
-                        
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-blue-500" />
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(event.date).toLocaleDateString('en-US', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </span>
-                          </div>
-                          
-                          {event.location && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-blue-500" />
-                              <span className="text-sm text-muted-foreground">
-                                {event.location}
-                              </span>
+              <div className="overflow-x-auto pb-4 scrollbar-hide">
+                <div className="flex gap-4" style={{ width: `${upcomingEvents.length * 320}px` }}>
+                  {upcomingEvents.map((event, index) => (
+                    <Card 
+                      key={event.id} 
+                      className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden w-80 bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card flex-shrink-0"
+                    >
+                      <CardContent className="p-0">
+                        <div className="aspect-[16/10] relative overflow-hidden">
+                          {event.imageUrl ? (
+                            <img
+                              src={event.imageUrl}
+                              alt={event.title}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+                              <Calendar className="h-16 w-16 text-blue-400" />
                             </div>
                           )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
+                        
+                        <div className="p-6">
+                          <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-lg text-gray-900 dark:text-foreground">
+                            {event.title}
+                          </h3>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm text-muted-foreground">
+                                {new Date(event.date).toLocaleDateString('en-US', {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                            </div>
+                            
+                            {event.location && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-blue-500" />
+                                <span className="text-sm text-muted-foreground">
+                                  {event.location}
+                                </span>
+                              </div>
+                            )}
+                          </div>
 
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
-                          asChild
-                        >
-                          <Link to="/calendar">
-                            Learn More
-                            <ArrowRight className="h-3 w-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
-                          </Link>
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
+                            asChild
+                          >
+                            <Link to="/calendar">
+                              Learn More
+                              <ArrowRight className="h-3 w-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
+              
+              {/* Mobile scroll indicator */}
+              {upcomingEvents.length > 1 && (
+                <div className="flex justify-center gap-2 mt-4">
+                  {upcomingEvents.map((_, index) => (
+                    <div
+                      key={index}
+                      className="w-2 h-2 rounded-full bg-blue-300 dark:bg-blue-700"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Desktop: Grid layout */}
