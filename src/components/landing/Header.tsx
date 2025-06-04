@@ -42,7 +42,7 @@ export function Header() {
       <header 
         className="fixed top-0 left-0 right-0 w-full bg-white dark:bg-gray-900 shadow-lg"
         style={{ 
-          position: 'fixed !important',
+          position: 'fixed',
           zIndex: 9999,
           top: 0,
           left: 0,
