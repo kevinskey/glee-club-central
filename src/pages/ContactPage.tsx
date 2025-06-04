@@ -124,6 +124,7 @@ export default function ContactPage() {
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
+      <Header />
       <main className="flex-1">
         <div className="container max-w-4xl px-4 py-8 md:py-12">
           <h1 className="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-glee-purple mb-6">
@@ -295,6 +296,7 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
