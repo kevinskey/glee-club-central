@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,17 @@ import {
   Smartphone,
   Shield
 } from 'lucide-react';
+import { BulkUploadDialog } from '@/components/members/BulkUploadDialog';
+import { toast } from 'sonner';
 
 export function AdminOverview() {
+  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
+
+  const handleBulkUploadComplete = () => {
+    setShowBulkUploadDialog(false);
+    toast.success('Bulk upload completed successfully');
+  };
+
   const features = [
     {
       title: 'User Management',
@@ -29,7 +38,7 @@ export function AdminOverview() {
       description: 'CSV, Excel, JSON file processing with validation',
       icon: <Upload className="h-5 w-5" />,
       status: 'Interactive ✅',
-      link: '/admin/users'
+      action: () => setShowBulkUploadDialog(true)
     },
     {
       title: 'Calendar Management',
@@ -107,15 +116,28 @@ export function AdminOverview() {
               <p className="text-sm text-muted-foreground mb-4">
                 {feature.description}
               </p>
-              <Button asChild size="sm" className="w-full">
-                <Link to={feature.link}>
-                  Access Module
-                </Link>
-              </Button>
+              {feature.link ? (
+                <Button asChild size="sm" className="w-full">
+                  <Link to={feature.link}>
+                    Access Module
+                  </Link>
+                </Button>
+              ) : (
+                <Button onClick={feature.action} size="sm" className="w-full">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Start Bulk Upload
+                </Button>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <BulkUploadDialog
+        isOpen={showBulkUploadDialog}
+        onOpenChange={setShowBulkUploadDialog}
+        onUploadComplete={handleBulkUploadComplete}
+      />
     </div>
   );
 }
