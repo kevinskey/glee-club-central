@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -79,7 +80,7 @@ export function CustomSlideRenderer({
     return (
       <div 
         className="w-full"
-        style={{ height }}
+        style={{ height, margin: 0, padding: 0 }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
@@ -135,13 +136,14 @@ export function CustomSlideRenderer({
   // Mobile horizontal scroll view
   if (isMobile) {
     return (
-      <div className="w-full">
-        <div className="overflow-x-auto">
+      <div className="w-full" style={{ margin: 0, padding: 0 }}>
+        <div className="overflow-x-auto" style={{ margin: 0, padding: 0 }}>
           <div 
             className="flex gap-4 pb-4 px-4"
             style={{
               scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch'
+              WebkitOverflowScrolling: 'touch',
+              margin: 0
             }}
           >
             {slides.map((slide) => (
@@ -150,7 +152,8 @@ export function CustomSlideRenderer({
                 className="flex-shrink-0 w-80 relative overflow-hidden rounded-2xl shadow-lg cursor-pointer"
                 style={{ 
                   height: "300px",
-                  scrollSnapAlign: 'start'
+                  scrollSnapAlign: 'start',
+                  margin: 0
                 }}
                 onClick={() => {
                   if (slide.link_url) {
@@ -196,10 +199,10 @@ export function CustomSlideRenderer({
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className="w-full">
+    <div className="w-full" style={{ margin: 0, padding: 0 }}>
       <div 
         className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
-        style={{ height }}
+        style={{ height, margin: 0, padding: 0 }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={() => {

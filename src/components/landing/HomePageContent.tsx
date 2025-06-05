@@ -45,11 +45,11 @@ export function HomePageContent({
   audioTracks
 }: HomePageContentProps) {
   return (
-    <main className="w-full">
-      {/* Apple-style tight section spacing */}
-      <div className="space-y-8 md:space-y-12 lg:space-y-16">
+    <main className="w-full" style={{ margin: 0, padding: 0 }}>
+      {/* Apple-style tight section spacing - Remove any inherited spacing */}
+      <div className="space-y-8 md:space-y-12 lg:space-y-16" style={{ margin: 0 }}>
         {/* Events Section */}
-        <section className="w-full py-6 md:py-8 lg:py-12">
+        <section className="w-full py-6 md:py-8 lg:py-12" style={{ margin: 0 }}>
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
             <div className="text-center mb-8 md:mb-12 lg:mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
@@ -64,7 +64,7 @@ export function HomePageContent({
         </section>
         
         {/* Store Section */}
-        <section className="w-full py-6 md:py-8 lg:py-12 bg-gray-50/30 dark:bg-gray-900/10">
+        <section className="w-full py-6 md:py-8 lg:py-12 bg-gray-50/30 dark:bg-gray-900/10" style={{ margin: 0 }}>
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
             <div className="text-center mb-8 md:mb-12 lg:mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
@@ -79,7 +79,7 @@ export function HomePageContent({
         </section>
         
         {/* Audio Section */}
-        <section className="w-full py-6 md:py-8 lg:py-12">
+        <section className="w-full py-6 md:py-8 lg:py-12" style={{ margin: 0 }}>
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
             <div className="text-center mb-8 md:mb-12 lg:mb-16">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 tracking-tight leading-tight">
