@@ -24,22 +24,18 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
-      {/* Custom Slide Renderer - Reset all margins and position directly under header */}
-      <div className="pt-20 md:pt-24">
-        <div className="m-0 p-0">
-          <CustomSlideRenderer />
-        </div>
+      {/* Custom Slide Renderer - Position directly under header with no gaps */}
+      <div className="pt-[88px] md:pt-[96px]">
+        <CustomSlideRenderer />
       </div>
       
-      {/* Main Content - Reset top spacing */}
-      <div className="m-0 p-0">
-        <HomePageContent
-          heroImages={heroImages}
-          upcomingEvents={upcomingEvents}
-          storeProducts={storeProducts}
-          audioTracks={audioTracks}
-        />
-      </div>
+      {/* Main Content */}
+      <HomePageContent
+        heroImages={heroImages}
+        upcomingEvents={upcomingEvents}
+        storeProducts={storeProducts}
+        audioTracks={audioTracks}
+      />
     </div>
   );
 };
