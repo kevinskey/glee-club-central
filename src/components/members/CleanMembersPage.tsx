@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,8 @@ import {
   Users, 
   UserPlus, 
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -17,6 +17,7 @@ import { MembersPagination } from './MembersPagination';
 import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
 import { EditUserDialog } from './EditUserDialog';
+import { BulkUploadDialog } from './BulkUploadDialog';
 import { UserFormValues } from './form/userFormSchema';
 import { toast } from 'sonner';
 
@@ -40,6 +41,7 @@ export function CleanMembersPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,6 +54,12 @@ export function CleanMembersPage() {
 
   const handleUserCreated = () => {
     refetch();
+  };
+
+  const handleBulkUploadComplete = () => {
+    setShowBulkUploadDialog(false);
+    refetch();
+    toast.success('Bulk upload completed');
   };
 
   const handleAddMember = async (data: UserFormValues) => {
@@ -146,6 +154,10 @@ export function CleanMembersPage() {
           </Button>
           {isAdminUser && (
             <>
+              <Button onClick={() => setShowBulkUploadDialog(true)} variant="outline">
+                <Upload className="mr-2 h-4 w-4" />
+                Bulk Upload
+              </Button>
               <Button onClick={() => setShowAddMemberDialog(true)} variant="default">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Member
@@ -198,10 +210,16 @@ export function CleanMembersPage() {
                   {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
                 </p>
                 {isAdminUser && activeFilterCount === 0 && (
-                  <Button onClick={() => setShowAddMemberDialog(true)}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Add Your First Member
-                  </Button>
+                  <div className="flex gap-2 justify-center">
+                    <Button onClick={() => setShowAddMemberDialog(true)}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Add Your First Member
+                    </Button>
+                    <Button onClick={() => setShowBulkUploadDialog(true)} variant="outline">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Bulk Upload
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -246,6 +264,12 @@ export function CleanMembersPage() {
         onSave={handleSaveUser}
         isSubmitting={isSubmitting}
         user={selectedUser}
+      />
+
+      <BulkUploadDialog
+        isOpen={showBulkUploadDialog}
+        onOpenChange={setShowBulkUploadDialog}
+        onUploadComplete={handleBulkUploadComplete}
       />
     </div>
   );
