@@ -1,28 +1,21 @@
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/layouts/AdminLayout';
-import { PageLoader } from '@/components/ui/page-loader';
+import React from 'react';
+import { PageHeader } from '@/components/ui/page-header';
+import { AdminOverview } from '@/components/admin/AdminOverview';
+import { Settings } from 'lucide-react';
 
-const AdminDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Add a small delay to ensure the redirect works properly
-    const timer = setTimeout(() => {
-      navigate('/admin/v2', { replace: true });
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  }, [navigate]);
-
+export default function AdminDashboard() {
   return (
-    <AdminLayout>
-      <div className="min-h-screen flex items-center justify-center">
-        <PageLoader message="Redirecting to admin dashboard..." />
+    <div className="container mx-auto px-4 py-8">
+      <PageHeader
+        title="Admin Dashboard"
+        description="Complete system management with live data integration"
+        icon={<Settings className="h-6 w-6" />}
+      />
+      
+      <div className="mt-8">
+        <AdminOverview />
       </div>
-    </AdminLayout>
+    </div>
   );
-};
-
-export default AdminDashboard;
+}
