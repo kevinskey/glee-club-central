@@ -7,7 +7,14 @@ import { Toaster as SonnerToaster } from 'sonner';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (

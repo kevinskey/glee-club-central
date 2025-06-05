@@ -3,7 +3,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
 import router from "./router";
-import { ThemeProvider } from "./providers/ThemeProvider";
 import "./index.css";
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
@@ -24,11 +23,9 @@ if (!rootElement) {
 // Create a root
 const root = ReactDOM.createRoot(rootElement);
 
-// Initialize app with proper provider nesting order
+// Initialize app with proper React Router setup
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
