@@ -11,6 +11,7 @@ import { Mic, Play, Pause, Square, Music, Upload, Archive, Share, Eye } from 'lu
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRecordingSave } from '@/hooks/useRecordingSave';
 
 interface BackingTrack {
   id: string;
@@ -45,8 +46,20 @@ export default function MusicStudioPage() {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [recordingTitle, setRecordingTitle] = useState('');
-  const [shareLevel, setShareLevel] = useState<'private' | 'section' | 'group' | 'director'>('private');
+  const [audioURL, setAudioURL] = useState<string | null>(null);
+
+  // Use the recording save hook
+  const { recordingName, setRecordingName, recordingCategory, setRecordingCategory, isSaving, saveRecording } = useRecordingSave({
+    onSaveComplete: () => {
+      setSaveDialogOpen(false);
+      setRecordedBlob(null);
+      if (audioURL) {
+        URL.revokeObjectURL(audioURL);
+        setAudioURL(null);
+      }
+      fetchRecordings();
+    }
+  });
 
   useEffect(() => {
     fetchBackingTracks();
@@ -118,13 +131,18 @@ export default function MusicStudioPage() {
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/wav' });
         setRecordedBlob(blob);
+        
+        // Create URL for playback
+        const url = URL.createObjectURL(blob);
+        setAudioURL(url);
+        
         setSaveDialogOpen(true);
         
         // Generate automatic title
         const timestamp = new Date().toLocaleString();
         const trackTitle = selectedTrack ? selectedTrack.title : 'Practice';
         const userName = profile?.first_name || 'User';
-        setRecordingTitle(`${userName} - ${trackTitle} - ${timestamp}`);
+        setRecordingName(`${userName} - ${trackTitle} - ${timestamp}`);
       };
 
       recorder.start();
@@ -147,68 +165,10 @@ export default function MusicStudioPage() {
     }
   };
 
-  const saveRecording = async () => {
-    if (!recordedBlob || !recordingTitle || !user) {
-      toast.error('Please provide a title for your recording and ensure you are logged in');
-      return;
-    }
-
-    try {
-      console.log('Starting recording save process...');
-      
-      // Create a unique filename
-      const fileName = `${user.id}/${Date.now()}-recording.wav`;
-      
-      // Upload file to audio storage bucket
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('audio')
-        .upload(fileName, recordedBlob, {
-          contentType: 'audio/wav'
-        });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
-
-      console.log('File uploaded successfully:', uploadData);
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('audio')
-        .getPublicUrl(fileName);
-
-      console.log('Public URL generated:', publicUrl);
-
-      // Save recording record to audio_files table
-      const { data: dbData, error: recordError } = await supabase
-        .from('audio_files')
-        .insert({
-          uploaded_by: user.id,
-          title: recordingTitle,
-          description: `Recording created on ${new Date().toLocaleDateString()}`,
-          file_url: publicUrl,
-          file_path: fileName,
-          category: 'recordings'
-        })
-        .select()
-        .single();
-
-      if (recordError) {
-        console.error('Database error:', recordError);
-        throw recordError;
-      }
-
-      console.log('Recording saved to database:', dbData);
-
+  const handleSaveRecording = async () => {
+    const result = await saveRecording(audioURL);
+    if (result) {
       toast.success('Recording saved successfully');
-      setSaveDialogOpen(false);
-      setRecordedBlob(null);
-      setRecordingTitle('');
-      fetchRecordings();
-    } catch (error: any) {
-      console.error('Error saving recording:', error);
-      toast.error(`Failed to save recording: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -501,35 +461,34 @@ export default function MusicStudioPage() {
             <div>
               <label className="text-sm font-medium">Recording Title</label>
               <Input
-                value={recordingTitle}
-                onChange={(e) => setRecordingTitle(e.target.value)}
+                value={recordingName}
+                onChange={(e) => setRecordingName(e.target.value)}
                 placeholder="Enter recording title"
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium">Share Level</label>
+              <label className="text-sm font-medium">Category</label>
               <Select 
-                value={shareLevel} 
-                onValueChange={(value) => setShareLevel(value as 'private' | 'section' | 'group' | 'director')}
+                value={recordingCategory} 
+                onValueChange={(value) => setRecordingCategory(value)}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="private">Private (only you)</SelectItem>
-                  <SelectItem value="section">Section (your voice part)</SelectItem>
-                  <SelectItem value="group">Group (all members)</SelectItem>
-                  <SelectItem value="director">Director (directors only)</SelectItem>
+                  <SelectItem value="recordings">Recordings</SelectItem>
+                  <SelectItem value="my_tracks">My Tracks</SelectItem>
+                  <SelectItem value="part_tracks">Part Tracks</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {recordedBlob && (
+            {audioURL && (
               <div>
                 <label className="text-sm font-medium">Preview</label>
                 <audio controls className="w-full mt-2">
-                  <source src={URL.createObjectURL(recordedBlob)} type="audio/wav" />
+                  <source src={audioURL} type="audio/wav" />
                 </audio>
               </div>
             )}
@@ -539,8 +498,8 @@ export default function MusicStudioPage() {
             <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={saveRecording}>
-              Save Recording
+            <Button onClick={handleSaveRecording} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Recording'}
             </Button>
           </div>
         </DialogContent>
