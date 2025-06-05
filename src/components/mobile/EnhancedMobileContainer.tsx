@@ -2,7 +2,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface MobileOptimizedContainerProps {
+interface EnhancedMobileContainerProps {
   children: React.ReactNode;
   className?: string;
   padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg';
@@ -10,19 +10,19 @@ interface MobileOptimizedContainerProps {
   spacing?: 'tight' | 'normal' | 'relaxed';
 }
 
-export function MobileOptimizedContainer({ 
+export function EnhancedMobileContainer({ 
   children, 
   className,
   padding = 'md',
   maxWidth = 'full',
   spacing = 'normal'
-}: MobileOptimizedContainerProps) {
+}: EnhancedMobileContainerProps) {
   const paddingClasses = {
     none: '',
-    xs: 'px-2 py-1 sm:px-3 sm:py-2',
-    sm: 'px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4',
-    md: 'px-3 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8',
-    lg: 'px-4 py-6 sm:px-8 sm:py-8 md:px-12 md:py-12'
+    xs: 'px-2 py-1',
+    sm: 'px-3 py-2 sm:px-4 sm:py-3',
+    md: 'px-3 py-4 sm:px-6 sm:py-6',
+    lg: 'px-4 py-6 sm:px-8 sm:py-8'
   };
 
   const maxWidthClasses = {

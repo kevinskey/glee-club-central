@@ -1,5 +1,5 @@
 
-/* Mobile-First Design System Optimizations */
+/* Mobile-First Design System Optimizations - Enhanced */
 
 /* Global Mobile Fixes */
 * {
@@ -34,8 +34,8 @@ body {
 .container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
   width: 100% !important;
   max-width: 100vw !important;
-  padding-left: clamp(16px, 4vw, 20px);
-  padding-right: clamp(16px, 4vw, 20px);
+  padding-left: clamp(12px, 3vw, 20px);
+  padding-right: clamp(12px, 3vw, 20px);
   margin-left: auto;
   margin-right: auto;
   box-sizing: border-box;
@@ -48,9 +48,9 @@ body {
   overflow-x: hidden;
 }
 
-/* Mobile Header Fixes */
+/* Enhanced Mobile Header Fixes */
 @media (max-width: 768px) {
-  /* Static header - no longer fixed */
+  /* Static header - no longer fixed to prevent layout issues */
   header {
     position: static !important;
     top: auto !important;
@@ -66,11 +66,34 @@ body {
     -webkit-backdrop-filter: blur(20px) !important;
     margin: 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    min-height: 56px !important;
   }
   
   .dark header {
     background: rgba(0, 0, 0, 0.95) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  /* Header content spacing */
+  header .flex {
+    padding: 8px 12px !important;
+    min-height: 56px !important;
+  }
+  
+  /* Logo sizing */
+  header .flex .flex {
+    gap: 8px !important;
+  }
+  
+  header .h-7, header .h-8, header .h-12 {
+    height: 32px !important;
+    width: auto !important;
+  }
+  
+  /* Header text sizing */
+  header .text-xl, header .text-2xl, header .text-4xl {
+    font-size: 1.125rem !important;
+    line-height: 1.3 !important;
   }
   
   /* News Ticker */
@@ -86,14 +109,9 @@ body {
     box-sizing: border-box;
     z-index: 49 !important;
     margin: 0 !important;
-    height: 32px !important;
-    font-size: 13px !important;
-  }
-  
-  /* Main header height */
-  header .h-14,
-  header .h-16 {
-    height: 48px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+    line-height: 28px !important;
   }
   
   /* Main content - remove padding since header is no longer fixed */
@@ -102,7 +120,7 @@ body {
     padding-top: 0 !important;
   }
   
-  /* Home page specific adjustments - remove padding */
+  /* Remove padding from home page */
   .home-page main {
     padding-top: 0 !important;
   }
@@ -120,125 +138,287 @@ body {
   }
 }
 
-/* Reset Typography and Spacing */
-@media (max-width: 768px) {
-  /* Section spacing reset */
-  section {
-    padding: 2rem 0 !important;
-  }
-  
-  section:first-child {
-    padding-top: 1rem !important;
-  }
-  
-  /* Container spacing */
-  .container {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-  }
-  
-  /* Header spacing in sections */
-  .text-center.mb-8,
-  .text-center.mb-12,
-  .text-center.mb-16 {
-    margin-bottom: 1.5rem !important;
-  }
-  
-  /* Remove excessive margins */
-  .space-y-8 > * + *,
-  .space-y-12 > * + *,
-  .space-y-16 > * + * {
-    margin-top: 2rem !important;
-  }
-}
-
-/* Typography Reset - Consistent Sizing */
+/* Enhanced Typography - Smaller Mobile Sizes */
 h1 {
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  line-height: 1.2;
-  margin-bottom: 1rem;
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem) !important;
+  line-height: 1.2 !important;
+  margin-bottom: 0.75rem !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.02em !important;
 }
 
 h2 {
-  font-size: clamp(1.5rem, 3.5vw, 2rem);
-  line-height: 1.3;
-  margin-bottom: 0.75rem;
-  font-weight: 300;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.25rem, 3vw, 2rem) !important;
+  line-height: 1.3 !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.01em !important;
 }
 
 h3 {
-  font-size: clamp(1.25rem, 3vw, 1.5rem);
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
-  font-weight: 400;
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem) !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.5rem !important;
+  font-weight: 400 !important;
+}
+
+h4 {
+  font-size: clamp(1rem, 2.25vw, 1.25rem) !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.375rem !important;
+  font-weight: 500 !important;
 }
 
 p {
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  line-height: 1.6;
-  margin-bottom: 0.75rem;
-  color: rgba(0, 0, 0, 0.8);
+  font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+  line-height: 1.6 !important;
+  margin-bottom: 0.75rem !important;
+  color: rgba(0, 0, 0, 0.8) !important;
 }
 
 .dark p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Mobile Cards */
+/* Small text optimizations */
+.text-xs {
+  font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
+}
+
+.text-sm {
+  font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+}
+
+.text-base {
+  font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+}
+
+.text-lg {
+  font-size: clamp(1rem, 2.5vw, 1.125rem) !important;
+}
+
+.text-xl {
+  font-size: clamp(1.125rem, 2.75vw, 1.25rem) !important;
+}
+
+.text-2xl {
+  font-size: clamp(1.25rem, 3vw, 1.5rem) !important;
+}
+
+/* Enhanced Mobile Cards */
 @media (max-width: 768px) {
   .card,
-  [class*="card"] {
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    margin-bottom: 1rem !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-    border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    background: rgba(255, 255, 255, 0.9) !important;
+  [class*="card"],
+  .border.rounded {
+    border-radius: 8px !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(10px) !important;
   }
   
   .dark .card,
-  .dark [class*="card"] {
-    background: rgba(0, 0, 0, 0.4) !important;
+  .dark [class*="card"],
+  .dark .border.rounded {
+    background: rgba(0, 0, 0, 0.6) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 1px 6px rgba(255, 255, 255, 0.05) !important;
+  }
+  
+  /* Card headers */
+  .card header,
+  [class*="card"] header,
+  .card-header,
+  [class*="CardHeader"] {
+    padding: 12px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  /* Card content */
+  .card-content,
+  [class*="CardContent"] {
+    padding: 12px !important;
+  }
+  
+  /* Card titles */
+  .card-title,
+  [class*="CardTitle"] {
+    font-size: clamp(1rem, 2.5vw, 1.125rem) !important;
+    margin-bottom: 4px !important;
   }
 }
 
-/* Button Optimizations */
-button {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0.75rem 1.5rem;
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  border-radius: 8px;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  font-weight: 500;
+/* Enhanced Button Optimizations - Tap-friendly */
+button, .btn, [role="button"], .button {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 8px 16px !important;
+  font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+  border-radius: 6px !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
 }
 
-/* Grid System */
+/* Small buttons still need to meet minimum touch target */
+.btn-sm, button[class*="sm"], [class*="size-sm"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 8px 12px !important;
+  font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
+}
+
+/* Icon buttons */
+.btn-icon, button[class*="icon"], [class*="size-icon"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 8px !important;
+}
+
+/* Grid System - Mobile-first */
 .grid {
-  display: grid;
-  gap: 1rem;
-  width: 100%;
-  max-width: 100%;
+  display: grid !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
 }
 
 @media (min-width: 640px) {
   .grid {
-    gap: 1.5rem;
+    gap: 16px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .grid {
+    gap: 20px !important;
+  }
+}
+
+/* Mobile Navigation Fixes */
+@media (max-width: 768px) {
+  /* Mobile navigation spacing */
+  nav {
+    padding: 8px !important;
+  }
+  
+  nav a, nav button {
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+    margin: 2px 0 !important;
+  }
+  
+  /* Dropdown menus */
+  .dropdown-menu,
+  [role="menu"],
+  .popover {
+    min-width: 200px !important;
+    max-width: calc(100vw - 24px) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
+  }
+  
+  .dark .dropdown-menu,
+  .dark [role="menu"],
+  .dark .popover {
+    background: rgba(0, 0, 0, 0.9) !important;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .dropdown-menu a,
+  [role="menu"] a,
+  .dropdown-menu button,
+  [role="menu"] button {
+    min-height: 44px !important;
+    width: 100% !important;
+    padding: 12px !important;
+    font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+    text-align: left !important;
+    border-radius: 4px !important;
+  }
+}
+
+/* Form Optimizations */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+    min-height: 44px !important;
+    padding: 12px !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  label {
+    font-size: clamp(0.875rem, 2.25vw, 1rem) !important;
+    margin-bottom: 6px !important;
+    display: block !important;
+  }
+  
+  .form-group,
+  .space-y-2 > *,
+  .space-y-4 > * {
+    margin-bottom: 16px !important;
+  }
+}
+
+/* Section Spacing - Reduced for Mobile */
+@media (max-width: 768px) {
+  section {
+    padding: 16px 0 !important;
+  }
+  
+  section:first-child {
+    padding-top: 8px !important;
+  }
+  
+  /* Container spacing */
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  
+  /* Reduce excessive margins */
+  .space-y-8 > * + *,
+  .space-y-12 > * + *,
+  .space-y-16 > * + * {
+    margin-top: 16px !important;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 12px !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 8px !important;
+  }
+  
+  /* Reduce section header spacing */
+  .text-center.mb-8,
+  .text-center.mb-12,
+  .text-center.mb-16 {
+    margin-bottom: 16px !important;
   }
 }
 
 /* Touch Optimizations */
 @media (hover: none) and (pointer: coarse) {
-  button, .btn, [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
+  button, .btn, [role="button"], a {
+    min-height: 44px !important;
+    min-width: 44px !important;
   }
   
   input, select, textarea {
@@ -248,14 +428,14 @@ button {
 
 /* Scroll Optimizations */
 .overflow-x-auto {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
 }
 
 .overflow-x-auto::-webkit-scrollbar {
-  display: none;
+  display: none !important;
 }
 
 /* Accessibility */
@@ -269,13 +449,79 @@ button {
 
 /* Image and Media Fixes */
 img, picture, video, canvas, svg {
-  max-width: 100%;
-  height: auto;
-  display: block;
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
 }
 
 /* Flex and Grid Container Fixes */
 .flex, [class*="flex"], .grid, [class*="grid"] {
-  max-width: 100%;
-  overflow-x: hidden;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Mobile Table Improvements */
+@media (max-width: 768px) {
+  table {
+    font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
+  }
+  
+  th, td {
+    padding: 8px 4px !important;
+    min-height: 44px !important;
+  }
+  
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* Mobile Modal/Dialog Improvements */
+@media (max-width: 768px) {
+  .modal, .dialog, [role="dialog"] {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 24px) !important;
+    margin: 12px !important;
+    border-radius: 8px !important;
+  }
+  
+  .modal-header, .dialog-header {
+    padding: 16px !important;
+    font-size: clamp(1rem, 2.5vw, 1.125rem) !important;
+  }
+  
+  .modal-content, .dialog-content {
+    padding: 16px !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* Top Slider Mobile Optimizations */
+@media (max-width: 768px) {
+  .top-slider, [class*="slider"] {
+    height: auto !important;
+    min-height: 60px !important;
+    max-height: 120px !important;
+  }
+  
+  .top-slider .flex, 
+  .top-slider .grid {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+  
+  .top-slider h1, 
+  .top-slider h2, 
+  .top-slider h3 {
+    font-size: clamp(0.875rem, 2.5vw, 1.125rem) !important;
+    line-height: 1.3 !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .top-slider p {
+    font-size: clamp(0.75rem, 2vw, 0.875rem) !important;
+    line-height: 1.4 !important;
+  }
 }
