@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AdminV2Layout } from '@/layouts/AdminV2Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Users, Sparkles } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Users, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday } from 'date-fns';
+import { format, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, startOfMonth, endOfMonth, addMonths, subMonths, getDay } from 'date-fns';
 
 interface Event {
   id: string;
@@ -56,7 +57,7 @@ export default function CalendarV2Page() {
   const [events, setEvents] = useState<Event[]>([]);
   const [rsvps, setRSVPs] = useState<RSVP[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [view, setView] = useState<'week' | 'month' | 'list'>('week');
+  const [view, setView] = useState<'week' | 'month' | 'list'>('month');
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -244,6 +245,36 @@ export default function CalendarV2Page() {
     return rsvps.filter(rsvp => rsvp.event_id === eventId);
   };
 
+  // Month view navigation
+  const goToPrevMonth = () => {
+    setSelectedDate(subMonths(selectedDate, 1));
+  };
+
+  const goToNextMonth = () => {
+    setSelectedDate(addMonths(selectedDate, 1));
+  };
+
+  const goToToday = () => {
+    setSelectedDate(new Date());
+  };
+
+  // Generate calendar grid for month view
+  const generateMonthCalendar = () => {
+    const monthStart = startOfMonth(selectedDate);
+    const monthEnd = endOfMonth(selectedDate);
+    const startDate = startOfWeek(monthStart);
+    const endDate = endOfWeek(monthEnd);
+    
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    const weeks = [];
+    
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+    
+    return weeks;
+  };
+
   const weekStart = startOfWeek(selectedDate);
   const weekEnd = endOfWeek(selectedDate);
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -271,8 +302,8 @@ export default function CalendarV2Page() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">Week</SelectItem>
                 <SelectItem value="month">Month</SelectItem>
+                <SelectItem value="week">Week</SelectItem>
                 <SelectItem value="list">List</SelectItem>
               </SelectContent>
             </Select>
@@ -283,7 +314,82 @@ export default function CalendarV2Page() {
           </div>
         </div>
 
-        {/* Calendar View */}
+        {/* Month View */}
+        {view === 'month' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>{format(selectedDate, 'MMMM yyyy')}</span>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={goToPrevMonth}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={goToToday}>
+                    Today
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={goToNextMonth}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-7 gap-px bg-gray-200 rounded-lg overflow-hidden">
+                {/* Header row */}
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                  <div key={day} className="bg-gray-50 p-2 text-center font-medium text-sm text-gray-700">
+                    {day}
+                  </div>
+                ))}
+                
+                {/* Calendar days */}
+                {generateMonthCalendar().map((week, weekIndex) => (
+                  week.map((day, dayIndex) => {
+                    const dayEvents = getEventsForDate(day);
+                    const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
+                    const isDayToday = isToday(day);
+                    
+                    return (
+                      <div 
+                        key={`${weekIndex}-${dayIndex}`} 
+                        className={`min-h-24 p-1 bg-white ${
+                          !isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
+                        } ${isDayToday ? 'bg-blue-50 border-2 border-blue-200' : ''}`}
+                      >
+                        <div className={`text-sm font-medium mb-1 ${
+                          isDayToday ? 'text-blue-600' : isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                        }`}>
+                          {format(day, 'd')}
+                        </div>
+                        
+                        <div className="space-y-1">
+                          {dayEvents.slice(0, 2).map((event) => (
+                            <div
+                              key={event.id}
+                              className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 truncate ${getEventTypeColor(event.event_type)}`}
+                              onClick={() => openEditDialog(event)}
+                              title={`${event.title} - ${format(parseISO(event.start_time), 'h:mm a')}`}
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                          
+                          {dayEvents.length > 2 && (
+                            <div className="text-xs text-gray-500 text-center">
+                              +{dayEvents.length - 2} more
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Week View */}
         {view === 'week' && (
           <Card>
             <CardHeader>
