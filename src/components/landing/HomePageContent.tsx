@@ -49,8 +49,8 @@ export function HomePageContent({
       {/* Events Section - No spacing, directly under header/slider */}
       <section className="w-full">
         <div className="container mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white mb-3 md:mb-4 tracking-tight">
               Upcoming Events
             </h2>
           </div>

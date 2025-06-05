@@ -33,7 +33,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ className }) => {
     return (
       <Card className={cn("w-full overflow-hidden", className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-xl font-bold">Upcoming Events</CardTitle>
+          <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
           <CalendarClock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent className="p-4">
@@ -56,7 +56,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ className }) => {
   return (
     <Card className={cn("w-full overflow-hidden", className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-bold">Upcoming Events</CardTitle>
+        <CardTitle className="text-lg font-bold">Upcoming Events</CardTitle>
         <CalendarClock className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="p-0">
@@ -77,9 +77,9 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ className }) => {
                 />
                 
                 <div className="relative flex items-center p-4 space-x-4 z-10 hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors">
-                  <div className="flex-shrink-0 w-12 h-12 flex flex-col items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800">
+                  <div className="flex-shrink-0 w-10 h-10 flex flex-col items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800">
                     <span className="text-xs font-medium">{format(event.date, "MMM")}</span>
-                    <span className="text-lg font-bold">{format(event.date, "dd")}</span>
+                    <span className="text-sm font-bold">{format(event.date, "dd")}</span>
                   </div>
                   
                   <div className="flex-1 min-w-0">
