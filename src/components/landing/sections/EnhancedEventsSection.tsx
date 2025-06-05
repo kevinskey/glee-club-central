@@ -180,20 +180,20 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Display */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe - full width */}
+            {/* Mobile: One card at a time with swipe - centered in viewport */}
             <div className="block md:hidden mb-8">
-              <div className="relative w-full overflow-hidden">
+              <div className="relative w-full overflow-hidden flex justify-center items-center min-h-[400px]">
                 {/* Navigation arrows */}
                 <button
                   onClick={prevSlide}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
                   disabled={currentSlide === 0}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={nextSlide}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
                   disabled={currentSlide === upcomingEvents.length - 1}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -202,7 +202,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                 <div 
                   className="flex transition-transform duration-300 ease-out"
                   style={{
-                    transform: `translateX(-${currentSlide * 100}%)`,
+                    transform: `translateX(calc(50vw - 50% - ${currentSlide * 100}%))`,
+                    width: `${upcomingEvents.length * 100}%`
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
@@ -211,9 +212,10 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 w-full px-2"
+                      className="flex-shrink-0 flex justify-center px-4"
+                      style={{ width: `${100 / upcomingEvents.length}%` }}
                     >
-                      <div className="h-96 w-full">
+                      <div className="w-80 max-w-[calc(100vw-2rem)]">
                         {renderEventCard(event, index)}
                       </div>
                     </div>
