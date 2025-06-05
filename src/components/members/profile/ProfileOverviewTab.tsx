@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { X, Plus } from "lucide-react";
+import { getAllRoles } from '@/utils/permissionsMap';
 
 interface ProfileOverviewTabProps {
   profile: any;
@@ -23,6 +25,9 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
   const [editedProfile, setEditedProfile] = useState(profile || {});
   const [isLoading, setIsLoading] = useState(false);
   const [newRoleTag, setNewRoleTag] = useState('');
+
+  // Get all available executive roles
+  const availableRoles = getAllRoles();
 
   const handleSave = async () => {
     if (!onSave) return;
@@ -68,6 +73,20 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     }));
   };
 
+  const toggleExecutiveRole = (role: string, checked: boolean) => {
+    if (checked) {
+      setEditedProfile(prev => ({
+        ...prev,
+        role_tags: [...(prev.role_tags || []), role]
+      }));
+    } else {
+      setEditedProfile(prev => ({
+        ...prev,
+        role_tags: (prev.role_tags || []).filter(tag => tag !== role)
+      }));
+    }
+  };
+
   const voicePartOptions = [
     { value: 'soprano_1', label: 'Soprano 1' },
     { value: 'soprano_2', label: 'Soprano 2' },
@@ -75,6 +94,12 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
     { value: 'alto_2', label: 'Alto 2' },
     { value: 'tenor', label: 'Tenor' },
     { value: 'bass', label: 'Bass' }
+  ];
+
+  const roleOptions = [
+    { value: 'member', label: 'Member' },
+    { value: 'section_leader', label: 'Section Leader' },
+    { value: 'admin', label: 'Admin' }
   ];
 
   return (
@@ -161,6 +186,31 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="role">System Role</Label>
+          {isEditable ? (
+            <Select
+              value={editedProfile.role || ''}
+              onValueChange={(value) => handleInputChange('role', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roleOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-sm py-2 px-3 bg-muted rounded">
+              {roleOptions.find(opt => opt.value === profile?.role)?.label || profile?.role || 'Member'}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="class_year">Class Year</Label>
           {isEditable ? (
             <Input
@@ -174,34 +224,52 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label>Additional Roles</Label>
-          <div className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {(editedProfile.role_tags || profile?.role_tags || []).map((tag, index) => (
-                <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                  {tag}
-                  {isEditable && (
+        {/* Executive Board Roles Section */}
+        <div className="space-y-4">
+          <Label>Executive Board Roles</Label>
+          
+          {isEditable ? (
+            <div className="space-y-4">
+              {/* Executive Role Checkboxes */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {availableRoles.map((role) => (
+                  <div key={role} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`role-${role}`}
+                      checked={(editedProfile.role_tags || []).includes(role)}
+                      onCheckedChange={(checked) => toggleExecutiveRole(role, checked as boolean)}
+                    />
+                    <Label 
+                      htmlFor={`role-${role}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {role}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+
+              {/* Current Tags Display */}
+              <div className="flex flex-wrap gap-2">
+                {(editedProfile.role_tags || []).map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {tag}
                     <button
                       onClick={() => removeRoleTag(tag)}
                       className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
                     >
                       <X className="h-3 w-3" />
                     </button>
-                  )}
-                </Badge>
-              ))}
-              {(!editedProfile.role_tags?.length && !profile?.role_tags?.length) && (
-                <p className="text-sm text-muted-foreground">No additional roles assigned</p>
-              )}
-            </div>
-            
-            {isEditable && (
+                  </Badge>
+                ))}
+              </div>
+
+              {/* Add Custom Role */}
               <div className="flex gap-2">
                 <Input
                   value={newRoleTag}
                   onChange={(e) => setNewRoleTag(e.target.value)}
-                  placeholder="Add role (e.g., President, Tour Manager)"
+                  placeholder="Add custom role..."
                   onKeyPress={(e) => e.key === 'Enter' && addRoleTag()}
                 />
                 <Button
@@ -213,8 +281,21 @@ export const ProfileOverviewTab: React.FC<ProfileOverviewTabProps> = ({
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                {(profile?.role_tags || []).map((tag, index) => (
+                  <Badge key={index} variant="secondary">
+                    {tag}
+                  </Badge>
+                ))}
+                {(!profile?.role_tags?.length) && (
+                  <p className="text-sm text-muted-foreground">No executive roles assigned</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">

@@ -22,10 +22,13 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { userFormSchema, UserFormValues } from '@/components/members/form/userFormSchema';
 import { User } from '@/hooks/user/types';
 import { z } from 'zod';
-import { Upload } from 'lucide-react';
+import { Upload, X, Plus } from 'lucide-react';
+import { getAllRoles } from '@/utils/permissionsMap';
 
 interface UserFormProps {
   user?: User;
@@ -37,6 +40,11 @@ interface UserFormProps {
 export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatar_url || '');
+  const [selectedRoleTags, setSelectedRoleTags] = useState<string[]>(user?.role_tags || []);
+  const [newRoleTag, setNewRoleTag] = useState('');
+
+  // Get all available executive roles
+  const availableRoles = getAllRoles();
 
   // Create a schema that makes password and email optional for editing
   const editUserSchema = userFormSchema.extend({
@@ -116,12 +124,37 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   };
 
   const handleFormSubmit = (data: UserFormValues) => {
+    // Include role tags in the submission
+    const dataWithRoleTags = {
+      ...data,
+      role_tags: selectedRoleTags
+    };
+
     // If editing and password is empty, remove it from the data
     if (user && !data.password) {
-      const { password, ...dataWithoutPassword } = data;
+      const { password, ...dataWithoutPassword } = dataWithRoleTags;
       onSubmit(dataWithoutPassword as UserFormValues);
     } else {
-      onSubmit(data);
+      onSubmit(dataWithRoleTags);
+    }
+  };
+
+  const addRoleTag = () => {
+    if (newRoleTag.trim() && !selectedRoleTags.includes(newRoleTag.trim())) {
+      setSelectedRoleTags(prev => [...prev, newRoleTag.trim()]);
+      setNewRoleTag('');
+    }
+  };
+
+  const removeRoleTag = (tagToRemove: string) => {
+    setSelectedRoleTags(prev => prev.filter(tag => tag !== tagToRemove));
+  };
+
+  const toggleExecutiveRole = (role: string, checked: boolean) => {
+    if (checked) {
+      setSelectedRoleTags(prev => [...prev, role]);
+    } else {
+      setSelectedRoleTags(prev => prev.filter(tag => tag !== role));
     }
   };
 
@@ -130,12 +163,12 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
 
   return (
     <Dialog open={true} onOpenChange={onCancel}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           {/* Avatar Section */}
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
@@ -167,6 +200,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             </div>
           </div>
 
+          {/* Basic Information */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name *</Label>
@@ -259,9 +293,10 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             </div>
           </div>
 
+          {/* Role and Status */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">System Role</Label>
               <Select
                 value={watch('role')}
                 onValueChange={(value: 'admin' | 'member' | 'section_leader') => setValue('role', value)}
@@ -271,8 +306,8 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
                   <SelectItem value="section_leader">Section Leader</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -296,6 +331,68 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             </div>
           </div>
 
+          {/* Executive Board Roles */}
+          <div className="space-y-4">
+            <div>
+              <Label className="text-base font-medium">Executive Board Roles</Label>
+              <p className="text-sm text-muted-foreground">Select which executive positions this member holds</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {availableRoles.map((role) => (
+                <div key={role} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`role-${role}`}
+                    checked={selectedRoleTags.includes(role)}
+                    onCheckedChange={(checked) => toggleExecutiveRole(role, checked as boolean)}
+                  />
+                  <Label 
+                    htmlFor={`role-${role}`}
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    {role}
+                  </Label>
+                </div>
+              ))}
+            </div>
+
+            {/* Custom Role Tags */}
+            <div className="space-y-2">
+              <Label>Additional Roles</Label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedRoleTags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeRoleTag(tag)}
+                      className="ml-1 hover:bg-muted-foreground/20 rounded-full p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <Input
+                  value={newRoleTag}
+                  onChange={(e) => setNewRoleTag(e.target.value)}
+                  placeholder="Add custom role..."
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addRoleTag())}
+                />
+                <Button
+                  type="button"
+                  onClick={addRoleTag}
+                  size="sm"
+                  disabled={!newRoleTag.trim()}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="join_date">Join Date</Label>
             <Input
@@ -305,28 +402,31 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={watch('dues_paid')}
-              onCheckedChange={(checked) => setValue('dues_paid', checked)}
-            />
-            <Label>Dues Paid</Label>
-          </div>
+          {/* Checkboxes */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={watch('dues_paid')}
+                onCheckedChange={(checked) => setValue('dues_paid', checked)}
+              />
+              <Label>Dues Paid</Label>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={watch('is_admin')}
-              onCheckedChange={(checked) => setValue('is_admin', checked)}
-            />
-            <Label>Admin Privileges</Label>
-          </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={watch('is_admin')}
+                onCheckedChange={(checked) => setValue('is_admin', checked)}
+              />
+              <Label>Super Admin Privileges</Label>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={watch('ecommerce_enabled')}
-              onCheckedChange={(checked) => setValue('ecommerce_enabled', checked)}
-            />
-            <Label>E-commerce Access</Label>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={watch('ecommerce_enabled')}
+                onCheckedChange={(checked) => setValue('ecommerce_enabled', checked)}
+              />
+              <Label>E-commerce Access</Label>
+            </div>
           </div>
 
           <div className="space-y-2">

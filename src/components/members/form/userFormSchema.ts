@@ -17,7 +17,8 @@ export const userFormSchema = z.object({
   is_admin: z.boolean().default(false),
   join_date: z.string().optional(),
   avatar_url: z.string().optional(),
-  // New e-commerce fields
+  role_tags: z.array(z.string()).optional(),
+  // E-commerce fields
   ecommerce_enabled: z.boolean().default(false),
   account_balance: z.number().min(0).default(0),
   default_shipping_address: z.string().optional(),
