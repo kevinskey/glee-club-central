@@ -2,7 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 

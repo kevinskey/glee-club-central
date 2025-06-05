@@ -1,9 +1,8 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/providers/ThemeProvider";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
