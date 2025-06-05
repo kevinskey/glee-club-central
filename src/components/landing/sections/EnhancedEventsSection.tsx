@@ -22,6 +22,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   const upcomingEvents = events.slice(0, 3);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -34,6 +37,38 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Handle touch events for swiping
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentSlide < upcomingEvents.length - 1) {
+      setCurrentSlide(currentSlide + 1);
+    }
+    if (isRightSwipe && currentSlide > 0) {
+      setCurrentSlide(currentSlide - 1);
+    }
+  };
+
+  // Update slider position
+  useEffect(() => {
+    if (sliderRef.current && isMobile) {
+      const slideWidth = sliderRef.current.offsetWidth;
+      sliderRef.current.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+    }
+  }, [currentSlide, isMobile]);
 
   const renderEventCard = (event: Event, index: number) => (
     <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full relative">
@@ -112,24 +147,40 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Grid with Enhanced Design */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: Horizontal scrolling slider with fixed styling */}
+            {/* Mobile: Full-width swipe slider */}
             <div className="block md:hidden mb-8">
-              <div className="w-full overflow-x-auto">
+              <div className="relative overflow-hidden">
                 <div 
-                  className="flex gap-4 pb-4"
-                  style={{
-                    scrollSnapType: 'x mandatory',
-                    WebkitOverflowScrolling: 'touch'
-                  }}
+                  ref={sliderRef}
+                  className="flex transition-transform duration-300 ease-out"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 >
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 w-72 h-80"
-                      style={{ scrollSnapAlign: 'start' }}
+                      className="w-full flex-shrink-0 px-2"
                     >
-                      {renderEventCard(event, index)}
+                      <div className="h-96">
+                        {renderEventCard(event, index)}
+                      </div>
                     </div>
+                  ))}
+                </div>
+                
+                {/* Slide indicators */}
+                <div className="flex justify-center mt-4 space-x-2">
+                  {upcomingEvents.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                        index === currentSlide 
+                          ? 'bg-blue-500 w-6' 
+                          : 'bg-blue-200 dark:bg-blue-800'
+                      }`}
+                      onClick={() => setCurrentSlide(index)}
+                    />
                   ))}
                 </div>
               </div>
