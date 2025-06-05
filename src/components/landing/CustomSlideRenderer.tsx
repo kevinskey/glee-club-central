@@ -78,10 +78,10 @@ export function CustomSlideRenderer({
   if (isLoading) {
     return (
       <div 
-        className={cn("w-full px-4 sm:px-6 lg:px-8", className)}
+        className={cn("w-full m-0 p-0", className)}
         style={{ height }}
       >
-        <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
+        <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
         </div>
       </div>
@@ -135,8 +135,8 @@ export function CustomSlideRenderer({
   // Mobile horizontal scroll view
   if (isMobile) {
     return (
-      <div className={cn("w-full px-4", className)}>
-        <div className="overflow-x-auto">
+      <div className={cn("w-full m-0 p-0", className)}>
+        <div className="overflow-x-auto m-0 p-4">
           <div 
             className="flex gap-4 pb-4"
             style={{
@@ -196,9 +196,9 @@ export function CustomSlideRenderer({
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className={cn("w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", className)}>
+    <div className={cn("w-full m-0 p-0", className)}>
       <div 
-        className="relative w-full overflow-hidden rounded-2xl shadow-2xl cursor-pointer"
+        className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
         style={{ height }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -216,7 +216,7 @@ export function CustomSlideRenderer({
               backgroundColor: currentSlideData.background_color,
               backgroundImage: currentSlideData.background_image_url ? 
                 `url(${currentSlideData.background_image_url})` : undefined,
-              backgroundSize: 'contain',
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}

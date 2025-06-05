@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { NewsTicker } from "@/components/landing/news/NewsTicker";
@@ -37,8 +38,8 @@ export function Header() {
   
   return (
     <>
-      {/* Fixed Header with News Ticker - Apple style */}
-      <header className="fixed top-0 left-0 right-0 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50">
+      {/* Fixed Header with News Ticker - Ensure proper z-index and positioning */}
+      <header className="fixed top-0 left-0 right-0 w-full max-w-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50 m-0 p-0">
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
         
@@ -157,9 +158,6 @@ export function Header() {
           </div>
         </div>
       </header>
-      
-      {/* Spacer div to push content below the fixed header - Apple style generous spacing */}
-      <div className="h-20 md:h-24" style={{ height: showNewsTicker ? '110px' : '70px' }}></div>
     </>
   );
 }

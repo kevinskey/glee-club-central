@@ -24,11 +24,15 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
-      {/* Custom Slide Renderer - No spacing */}
-      <CustomSlideRenderer />
+      {/* Custom Slide Renderer - Reset all margins and position directly under header */}
+      <div className="pt-20 md:pt-24">
+        <div className="m-0 p-0">
+          <CustomSlideRenderer />
+        </div>
+      </div>
       
-      {/* Main Content - No top margin for seamless Apple-style layout */}
-      <div>
+      {/* Main Content - Reset top spacing */}
+      <div className="m-0 p-0">
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}
