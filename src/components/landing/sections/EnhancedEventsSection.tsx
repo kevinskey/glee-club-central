@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -150,7 +149,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <>
             {/* Mobile: One card at a time with swipe - Full Width */}
             <div className="block md:hidden mb-8">
-              <div className="relative w-full overflow-hidden -mx-4">
+              <div className="relative w-full overflow-hidden">
                 {/* Navigation arrows */}
                 <button
                   onClick={prevSlide}
@@ -172,7 +171,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   className="flex transition-transform duration-300 ease-out"
                   style={{
                     transform: `translateX(-${currentSlide * 100}%)`,
-                    width: `${upcomingEvents.length * 100}%`
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
@@ -181,9 +179,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 w-full"
+                      className="flex-shrink-0 w-full px-4"
                     >
-                      <div className="h-96 mx-4">
+                      <div className="h-96 w-full">
                         {renderEventCard(event, index)}
                       </div>
                     </div>
