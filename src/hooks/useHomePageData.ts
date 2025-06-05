@@ -37,11 +37,19 @@ export const useHomePageData = () => {
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const { events } = useCalendarEvents();
+  const { events, loading: eventsLoading } = useCalendarEvents();
+
+  console.log('🏠 useHomePageData: Raw events from calendar:', events);
+  console.log('🏠 useHomePageData: Events loading state:', eventsLoading);
 
   // Transform calendar events for homepage use
   const upcomingEvents: Event[] = events
-    .filter(event => event.is_public && new Date(event.start_time) > new Date())
+    .filter(event => {
+      const isPublic = event.is_public;
+      const isFuture = new Date(event.start_time) > new Date();
+      console.log(`🔍 Event ${event.title}: isPublic=${isPublic}, isFuture=${isFuture}`);
+      return isPublic && isFuture;
+    })
     .slice(0, 6)
     .map(event => ({
       id: event.id,
@@ -51,6 +59,8 @@ export const useHomePageData = () => {
       imageUrl: event.feature_image_url || "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop",
       isPublic: event.is_public
     }));
+
+  console.log('🎯 useHomePageData: Filtered upcoming events:', upcomingEvents);
 
   const fetchStoreProducts = async () => {
     try {
@@ -170,11 +180,14 @@ export const useHomePageData = () => {
     loadData();
   }, [hasLoadedOnce]);
 
+  // Overall loading state includes events loading
+  const overallLoading = isLoading || eventsLoading;
+
   return {
     heroImages: [], // No longer used - hero handled by UniversalHero
     upcomingEvents,
     storeProducts,
     audioTracks,
-    isLoading
+    isLoading: overallLoading
   };
 };

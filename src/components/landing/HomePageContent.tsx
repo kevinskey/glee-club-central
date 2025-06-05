@@ -44,16 +44,31 @@ export function HomePageContent({
   storeProducts,
   audioTracks
 }: HomePageContentProps) {
+  console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
+  
   return (
     <main className="w-full">
       {/* Events Section - Full width on mobile, no spacing */}
-      <section className="w-full">
-        <div className="w-full px-0 md:container md:mx-auto md:px-6 lg:px-8">
-          <div className="text-center px-4 md:px-0 mb-6">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight italic transform -rotate-[5deg]">
+      <section className="w-full py-8 md:py-12 lg:py-16">
+        <div className="w-full px-4 md:container md:mx-auto md:px-6 lg:px-8">
+          <div className="text-center mb-6 md:mb-8 lg:mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight italic transform -rotate-[2deg] mb-2">
               Upcoming Events
             </h2>
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              Join us for our upcoming performances and events
+            </p>
           </div>
+          
+          {/* Debug info - remove in production */}
+          {upcomingEvents.length === 0 && (
+            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                No upcoming events found. Check back soon for new performances!
+              </p>
+            </div>
+          )}
+          
           <EnhancedEventsSection events={upcomingEvents} />
         </div>
       </section>
