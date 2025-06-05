@@ -8,13 +8,25 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { SlideTemplate, SlideDesign, TextElement } from '@/types/slideDesign';
-import { Type, Palette, Image, Link, Save, Eye, Plus } from 'lucide-react';
+import { 
+  Type, 
+  Palette, 
+  Image, 
+  Save, 
+  Eye, 
+  Plus, 
+  Bold, 
+  Italic, 
+  AlignLeft, 
+  AlignCenter, 
+  AlignRight,
+  Trash2,
+  Upload,
+  Play
+} from 'lucide-react';
 import { MediaLibrarySelector } from './MediaLibrarySelector';
-import { TextToolbar } from './TextToolbar';
 import { EnhancedAIAssistant } from './EnhancedAIAssistant';
 import { DraggableElement } from './DraggableElement';
-import { BorderSettings } from './BorderSettings';
-import { SectionValidator } from './SectionValidator';
 import { TouchGestureHandler } from './TouchGestureHandler';
 import { EnhancedMediaDropZone } from './EnhancedMediaDropZone';
 import { toast } from 'sonner';
@@ -39,17 +51,6 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   );
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   
-  const [showBorders, setShowBorders] = useState(false);
-  const [borderStyle, setBorderStyle] = useState<{
-    width: number;
-    color: string;
-    style: 'solid' | 'dashed' | 'dotted';
-  }>({
-    width: 2,
-    color: '#3b82f6',
-    style: 'solid'
-  });
-  
   const [textElements, setTextElements] = useState<TextElement[]>(
     design?.design_data?.textElements || 
     (template?.template_data?.textAreas || []).map(area => ({
@@ -62,32 +63,22 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
       {
         id: 'main-title',
         type: 'heading' as const,
-        text: 'Your Slide Title',
-        position: { x: 50, y: 40 },
-        style: { fontSize: '2rem', color: '#FFFFFF', fontWeight: 'bold', textAlign: 'center' as const }
+        text: 'Click to edit title',
+        position: { x: 50, y: 30 },
+        style: { fontSize: '2.5rem', color: '#FFFFFF', fontWeight: 'bold', textAlign: 'center' as const }
       },
       {
         id: 'subtitle',
         type: 'paragraph' as const,
-        text: 'Your slide description here',
+        text: 'Click to edit subtitle',
         position: { x: 50, y: 60 },
-        style: { fontSize: '1.2rem', color: '#FFFFFF', textAlign: 'center' as const }
+        style: { fontSize: '1.5rem', color: '#FFFFFF', textAlign: 'center' as const }
       }
     ]
   );
 
-  // Section validation state
-  const [sections] = useState([
-    { id: 'title', name: 'Title & Description', required: true, completed: !!title, description: 'Main slide information' },
-    { id: 'background', name: 'Background', required: true, completed: !!(backgroundColor || backgroundImage), description: 'Color or image background' },
-    { id: 'text', name: 'Text Elements', required: true, completed: textElements.length > 0, description: 'At least one text element' },
-    { id: 'layout', name: 'Layout', required: false, completed: !!layoutType, description: 'Slide layout configuration' },
-    { id: 'animation', name: 'Animation', required: false, completed: animationDuration > 0, description: 'Animation and timing settings' }
-  ]);
-
-  const canSave = sections.filter(s => s.required).every(s => s.completed);
-
   const canvasRef = useRef<HTMLDivElement>(null);
+  const selectedElement = textElements.find(el => el.id === selectedElementId);
 
   const updateTextElement = (id: string, updates: Partial<TextElement>) => {
     setTextElements(prev => 
@@ -101,7 +92,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
       type: 'paragraph',
       text: 'New Text',
       position: { x: 50, y: 50 },
-      style: { fontSize: '1rem', color: '#FFFFFF', textAlign: 'center' as const }
+      style: { fontSize: '1.5rem', color: '#FFFFFF', textAlign: 'center' as const }
     };
     setTextElements(prev => [...prev, newElement]);
     setSelectedElementId(newElement.id);
@@ -121,7 +112,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
     setBackgroundImage(mediaUrl);
     setBackgroundMediaId(mediaId);
-    toast.success('Background image updated');
+    toast.success('Background updated');
   };
 
   const handleImageUpload = (imageUrl: string) => {
@@ -132,15 +123,11 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const handleVideoUpload = (videoUrl: string) => {
     setBackgroundImage(videoUrl);
     setBackgroundMediaId('');
-    toast.success('Background video uploaded');
   };
 
   const handleAIMediaGenerate = async (type: 'image' | 'video', prompt: string) => {
     toast.info(`Generating AI ${type}...`);
-    // In real implementation, this would call an AI service
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Mock response
     const mockUrl = '/lovable-uploads/ef084f8d-fe71-4e34-8587-9ac0ff3ddebf.png';
     if (type === 'image') {
       handleImageUpload(mockUrl);
@@ -152,40 +139,6 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const handleRemoveImage = () => {
     setBackgroundImage('');
     setBackgroundMediaId('');
-    toast.success('Background media removed');
-  };
-
-  const handleAISuggestion = (suggestion: any) => {
-    if (suggestion.type === 'text' && suggestion.data) {
-      if (selectedElementId) {
-        updateTextElement(selectedElementId, {
-          text: suggestion.content,
-          style: { ...textElements.find(el => el.id === selectedElementId)?.style, ...suggestion.data }
-        });
-      } else {
-        const newElement: TextElement = {
-          id: `ai-text-${Date.now()}`,
-          type: 'paragraph',
-          text: suggestion.content,
-          position: { x: 50, y: 30 },
-          style: { fontSize: '1rem', color: '#FFFFFF', textAlign: 'center' as const, ...suggestion.data }
-        };
-        setTextElements(prev => [...prev, newElement]);
-        setSelectedElementId(newElement.id);
-      }
-    } else if (suggestion.type === 'color' && suggestion.data) {
-      setBackgroundColor(suggestion.data.background);
-    }
-  };
-
-  const handleAIGraphics = (prompt: string) => {
-    toast.info('Generating AI graphics...');
-    // Implementation for AI graphics generation
-  };
-
-  const handleAIVideo = (prompt: string) => {
-    toast.info('Generating AI video...');
-    // Implementation for AI video generation
   };
 
   const handleCanvasClick = (e: React.MouseEvent) => {
@@ -194,19 +147,9 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     }
   };
 
-  const handleSectionClick = (sectionId: string) => {
-    toast.info(`Focus on ${sectionId} section`);
-    // Could scroll to or highlight the relevant section
-  };
-
   const handleSave = () => {
-    if (!canSave) {
-      toast.error('Please complete all required sections before saving');
-      return;
-    }
-
     if (!title.trim()) {
-      toast.error('Please enter a title for your slide');
+      toast.error('Please enter a title');
       return;
     }
 
@@ -240,191 +183,254 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     onSave(designData);
   };
 
-  const selectedElement = textElements.find(el => el.id === selectedElementId);
+  const handleStyleUpdate = (property: string, value: any) => {
+    if (!selectedElement) return;
+    
+    updateTextElement(selectedElement.id, {
+      style: {
+        ...selectedElement.style,
+        [property]: value
+      }
+    });
+  };
 
-  const renderNonDesignableAreas = () => {
-    const areas = [];
-    
-    if (layoutType === 'half_horizontal') {
-      areas.push(
-        <div
-          key="non-designable-bottom"
-          className="absolute bottom-0 left-0 w-full h-1/2 bg-gray-400/20 border-2 border-dashed border-gray-500/30 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-xs font-medium">
-            <div className="mb-1">Non-Designable Area</div>
-            <div className="text-xs opacity-75">Reserved for other content</div>
-          </div>
-        </div>
-      );
-    } else if (layoutType === 'half_vertical') {
-      areas.push(
-        <div
-          key="non-designable-right"
-          className="absolute right-0 top-0 w-1/2 h-full bg-gray-400/20 border-2 border-dashed border-gray-500/30 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-xs font-medium">
-            <div className="mb-1">Non-Designable Area</div>
-            <div className="text-xs opacity-75">Reserved for other content</div>
-          </div>
-        </div>
-      );
-    } else if (layoutType === 'quarter') {
-      areas.push(
-        <div
-          key="non-designable-top-right"
-          className="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-400/20 border-2 border-dashed border-gray-500/30 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-xs font-medium">
-            <div className="mb-1">Non-Designable</div>
-            <div className="text-xs opacity-75">Reserved</div>
-          </div>
-        </div>,
-        <div
-          key="non-designable-bottom-left"
-          className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-400/20 border-2 border-dashed border-gray-500/30 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-xs font-medium">
-            <div className="mb-1">Non-Designable</div>
-            <div className="text-xs opacity-75">Reserved</div>
-          </div>
-        </div>,
-        <div
-          key="non-designable-bottom-right"
-          className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-400/20 border-2 border-dashed border-gray-500/30 flex items-center justify-center pointer-events-none"
-        >
-          <div className="text-center text-gray-600 text-xs font-medium">
-            <div className="mb-1">Non-Designable</div>
-            <div className="text-xs opacity-75">Reserved</div>
-          </div>
-        </div>
-      );
-    }
-    
-    return areas;
+  const setAlignment = (alignment: 'left' | 'center' | 'right') => {
+    handleStyleUpdate('textAlign', alignment);
+  };
+
+  const toggleBold = () => {
+    const currentWeight = selectedElement?.style.fontWeight || 'normal';
+    const newWeight = currentWeight === 'bold' ? 'normal' : 'bold';
+    handleStyleUpdate('fontWeight', newWeight);
   };
 
   return (
-    <div className="space-y-4">
-      {/* Main Editor Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-lg border">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Slide Designer</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Create and edit slide designs</p>
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Top Toolbar */}
+      <div className="bg-white border-b px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-semibold">Slide Designer</h1>
+          <div className="flex items-center gap-2">
+            <Button onClick={addTextElement} size="sm" variant="outline">
+              <Plus className="h-4 w-4 mr-1" />
+              Text
+            </Button>
+            <Button size="sm" variant="outline">
+              <Image className="h-4 w-4 mr-1" />
+              Image
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
+        
+        <div className="flex items-center gap-2">
           <Button onClick={onPreview} variant="outline" size="sm">
-            <Eye className="h-4 w-4 mr-2" />
+            <Play className="h-4 w-4 mr-1" />
             Preview
           </Button>
-          <Button onClick={handleSave} disabled={!canSave} size="sm">
-            <Save className="h-4 w-4 mr-2" />
-            Save Design
+          <Button onClick={handleSave} size="sm">
+            <Save className="h-4 w-4 mr-1" />
+            Save
           </Button>
         </div>
       </div>
 
-      {/* Section Validator */}
-      <SectionValidator
-        sections={sections}
-        onSectionClick={handleSectionClick}
-        canSave={canSave}
-      />
+      {/* Formatting Toolbar */}
+      {selectedElement && (
+        <div className="bg-white border-b px-4 py-2 flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <Select 
+              value={selectedElement.style.fontSize} 
+              onValueChange={(value) => handleStyleUpdate('fontSize', value)}
+            >
+              <SelectTrigger className="w-20 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1rem">Small</SelectItem>
+                <SelectItem value="1.5rem">Medium</SelectItem>
+                <SelectItem value="2rem">Large</SelectItem>
+                <SelectItem value="2.5rem">X-Large</SelectItem>
+                <SelectItem value="3rem">XX-Large</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {/* Three Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* Left Panel - Properties */}
-        <div className="lg:col-span-3 space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Type className="h-4 w-4" />
-                Slide Properties
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="title" className="text-sm">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter slide title"
-                  className="mt-1"
-                />
+          <Separator orientation="vertical" className="h-6" />
+
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant={selectedElement.style.fontWeight === 'bold' ? 'default' : 'outline'}
+              onClick={toggleBold}
+              className="h-8 w-8 p-0"
+            >
+              <Bold className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <div className="flex items-center gap-1">
+            <Button
+              size="sm"
+              variant={selectedElement.style.textAlign === 'left' ? 'default' : 'outline'}
+              onClick={() => setAlignment('left')}
+              className="h-8 w-8 p-0"
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant={selectedElement.style.textAlign === 'center' ? 'default' : 'outline'}
+              onClick={() => setAlignment('center')}
+              className="h-8 w-8 p-0"
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              variant={selectedElement.style.textAlign === 'right' ? 'default' : 'outline'}
+              onClick={() => setAlignment('right')}
+              className="h-8 w-8 p-0"
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">Color:</Label>
+            <Input
+              type="color"
+              value={selectedElement.style.color}
+              onChange={(e) => handleStyleUpdate('color', e.target.value)}
+              className="w-12 h-8 p-1"
+            />
+          </div>
+
+          <Button
+            onClick={() => deleteTextElement(selectedElement.id)}
+            size="sm"
+            variant="destructive"
+            className="ml-auto h-8"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Sidebar - Slide Thumbnails */}
+        <div className="w-64 bg-white border-r flex flex-col">
+          <div className="p-3 border-b">
+            <h3 className="font-medium text-sm">Slides</h3>
+          </div>
+          <div className="p-3">
+            <div className="border-2 border-blue-500 rounded-lg p-2 bg-blue-50">
+              <div className="aspect-video bg-gradient-to-br from-blue-400 to-blue-600 rounded text-white text-xs flex items-center justify-center">
+                Slide 1
               </div>
+              <p className="text-xs mt-1 truncate">{title}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Canvas Area */}
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 p-8 flex items-center justify-center">
+            <div
+              ref={canvasRef}
+              className="relative bg-white shadow-2xl rounded-lg overflow-hidden"
+              style={{
+                width: '800px',
+                height: '450px',
+                backgroundColor,
+                backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+              }}
+              onClick={handleCanvasClick}
+            >
+              {/* Text Elements */}
+              {textElements.map((element) => (
+                <TouchGestureHandler
+                  key={element.id}
+                  element={element}
+                  onUpdate={(updates) => updateTextElement(element.id, updates)}
+                  onSelect={() => handleElementClick(element.id)}
+                  containerRef={canvasRef}
+                >
+                  <DraggableElement
+                    element={element}
+                    isSelected={selectedElementId === element.id}
+                    onSelect={() => handleElementClick(element.id)}
+                    onUpdate={(updates) => updateTextElement(element.id, updates)}
+                    containerRef={canvasRef}
+                    showBorders={true}
+                    borderStyle={{
+                      width: 2,
+                      color: selectedElementId === element.id ? '#3b82f6' : 'transparent',
+                      style: 'solid'
+                    }}
+                  />
+                </TouchGestureHandler>
+              ))}
               
-              <div>
-                <Label htmlFor="description" className="text-sm">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter slide description"
-                  rows={2}
-                  className="mt-1 resize-none"
-                />
-              </div>
+              {/* Click hint */}
+              {textElements.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white/80 text-center">
+                    <Plus className="h-12 w-12 mx-auto mb-2" />
+                    <p>Click "Text" to add content</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-              <div>
-                <Label htmlFor="layout" className="text-sm">Layout Type</Label>
-                <Select value={layoutType} onValueChange={(value) => setLayoutType(value as any)}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full">Full Page</SelectItem>
-                    <SelectItem value="half_horizontal">Split Horizontal</SelectItem>
-                    <SelectItem value="half_vertical">Split Vertical</SelectItem>
-                    <SelectItem value="quarter">Quarter Layout</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Right Properties Panel */}
+        <div className="w-80 bg-white border-l flex flex-col overflow-y-auto">
+          <div className="p-4 border-b">
+            <h3 className="font-medium">Properties</h3>
+          </div>
+          
+          <div className="p-4 space-y-4">
+            {/* Slide Properties */}
+            <div>
+              <Label className="text-sm font-medium">Slide Title</Label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter slide title"
+                className="mt-1"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="linkUrl" className="text-sm">Link URL (optional)</Label>
-                <Input
-                  id="linkUrl"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  className="mt-1"
-                />
-              </div>
+            <div>
+              <Label className="text-sm font-medium">Description</Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter description"
+                rows={3}
+                className="mt-1"
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="duration" className="text-sm">Display Duration (ms)</Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  value={animationDuration}
-                  onChange={(e) => setAnimationDuration(Number(e.target.value))}
-                  min={1000}
-                  max={30000}
-                  step={500}
-                  className="mt-1"
-                />
-              </div>
-            </CardContent>
-          </Card>
+            <Separator />
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Palette className="h-4 w-4" />
-                Background
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="backgroundColor" className="text-sm">Background Color</Label>
-                <div className="flex gap-2 mt-1">
+            {/* Background */}
+            <div>
+              <Label className="text-sm font-medium mb-2 block">Background</Label>
+              <div className="space-y-3">
+                <div className="flex gap-2">
                   <Input
-                    id="backgroundColor"
                     type="color"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-12 h-9 p-1"
+                    className="w-16 h-9 p-1"
                   />
                   <Input
                     value={backgroundColor}
@@ -433,131 +439,50 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
                     className="flex-1"
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label className="text-sm">Background Media</Label>
-                <div className="mt-1 space-y-3">
-                  <EnhancedMediaDropZone
-                    onImageUpload={handleImageUpload}
-                    onVideoUpload={handleVideoUpload}
-                    onAIGenerate={handleAIMediaGenerate}
-                    currentMedia={backgroundImage}
-                    mediaType={backgroundImage?.includes('video') ? 'video' : 'image'}
-                    onRemoveMedia={handleRemoveImage}
-                  />
-                  <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
-                  <Input
-                    value={backgroundImage}
-                    onChange={(e) => setBackgroundImage(e.target.value)}
-                    placeholder="Or enter image/video URL directly"
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <BorderSettings
-            showBorders={showBorders}
-            onShowBordersChange={setShowBorders}
-            borderStyle={borderStyle}
-            onBorderStyleChange={setBorderStyle}
-          />
-        </div>
-
-        {/* Center Panel - Canvas */}
-        <div className="lg:col-span-6">
-          <Card className="h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm flex items-center justify-between">
-                <span>Design Canvas</span>
-                <Button onClick={addTextElement} size="sm" variant="outline">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Text
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div
-                ref={canvasRef}
-                className="relative w-full bg-gradient-to-br rounded-lg overflow-hidden shadow-lg border cursor-crosshair mx-auto"
-                style={{
-                  aspectRatio: '16 / 9',
-                  maxHeight: '400px',
-                  backgroundColor,
-                  backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
-                onClick={handleCanvasClick}
-              >
-                {/* Text Elements with Enhanced Touch & Drag */}
-                {textElements.map((element) => (
-                  <TouchGestureHandler
-                    key={element.id}
-                    element={element}
-                    onUpdate={(updates) => updateTextElement(element.id, updates)}
-                    onSelect={() => handleElementClick(element.id)}
-                    containerRef={canvasRef}
-                  >
-                    <DraggableElement
-                      element={element}
-                      isSelected={selectedElementId === element.id}
-                      onSelect={() => handleElementClick(element.id)}
-                      onUpdate={(updates) => updateTextElement(element.id, updates)}
-                      containerRef={canvasRef}
-                      showBorders={showBorders}
-                      borderStyle={borderStyle}
-                    />
-                  </TouchGestureHandler>
-                ))}
                 
-                {/* Layout grid overlay */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {layoutType === 'half_horizontal' && (
-                    <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
-                  )}
-                  {layoutType === 'half_vertical' && (
-                    <div className="h-full border-r border-white/30" style={{ width: '50%' }} />
-                  )}
-                  {layoutType === 'quarter' && (
-                    <>
-                      <div className="w-full border-b border-white/30" style={{ height: '50%' }} />
-                      <div className="absolute top-0 h-full border-r border-white/30" style={{ width: '50%' }} />
-                    </>
-                  )}
-                </div>
-
-                {/* Non-designable areas */}
-                {renderNonDesignableAreas()}
+                <EnhancedMediaDropZone
+                  onImageUpload={handleImageUpload}
+                  onVideoUpload={handleVideoUpload}
+                  onAIGenerate={handleAIMediaGenerate}
+                  currentMedia={backgroundImage}
+                  mediaType={backgroundImage?.includes('video') ? 'video' : 'image'}
+                  onRemoveMedia={handleRemoveImage}
+                />
+                
+                <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
               </div>
-              
-              <div className="mt-3 text-xs text-muted-foreground space-y-1">
-                <p>💡 Click elements to select, drag to move, double-click to edit text</p>
-                <p>📐 Canvas uses 16:9 aspect ratio optimized for displays</p>
-                {layoutType !== 'full' && (
-                  <p>🚫 Grayed areas are reserved for other content</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
 
-        {/* Right Panel - Tools */}
-        <div className="lg:col-span-3 space-y-4">
-          <TextToolbar
-            selectedElement={selectedElement}
-            onUpdateElement={updateTextElement}
-            onAddElement={addTextElement}
-            onDeleteElement={deleteTextElement}
-          />
-          
-          <EnhancedAIAssistant 
-            onApplySuggestion={handleAISuggestion}
-            onGenerateGraphics={handleAIGraphics}
-            onGenerateVideo={handleAIVideo}
-          />
+            <Separator />
+
+            {/* Animation */}
+            <div>
+              <Label className="text-sm font-medium">Display Duration (seconds)</Label>
+              <Input
+                type="number"
+                value={animationDuration / 1000}
+                onChange={(e) => setAnimationDuration(Number(e.target.value) * 1000)}
+                min={1}
+                max={30}
+                className="mt-1"
+              />
+            </div>
+
+            {/* AI Assistant */}
+            <Separator />
+            <EnhancedAIAssistant 
+              onApplySuggestion={(suggestion) => {
+                if (suggestion.type === 'text' && selectedElementId) {
+                  updateTextElement(selectedElementId, {
+                    text: suggestion.content,
+                    style: { ...selectedElement?.style, ...suggestion.data }
+                  });
+                }
+              }}
+              onGenerateGraphics={() => {}}
+              onGenerateVideo={() => {}}
+            />
+          </div>
         </div>
       </div>
     </div>
