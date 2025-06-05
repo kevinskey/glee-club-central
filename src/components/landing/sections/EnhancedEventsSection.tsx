@@ -169,10 +169,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
 
                 <div 
                   ref={sliderRef}
-                  className="flex transition-transform duration-300 ease-out"
+                  className="flex transition-transform duration-300 ease-out w-full"
                   style={{
-                    transform: `translateX(-${currentSlide * 100}%)`,
-                    width: `${upcomingEvents.length * 100}%`
+                    transform: `translateX(-${currentSlide * 100}%)`
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
@@ -181,8 +180,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 px-4"
-                      style={{ width: `${100 / upcomingEvents.length}%` }}
+                      className="w-full flex-shrink-0 px-4"
                     >
                       <div className="h-96">
                         {renderEventCard(event, index)}
