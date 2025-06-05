@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -170,14 +169,13 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
 
   const renderMobileEventCard = (event: Event, index: number) => (
     <div className="w-full h-[50vh] relative overflow-hidden">
-      {/* Image Background - positioned to show upper portion */}
-      <div className="absolute inset-0">
+      {/* Image Background - positioned higher up in the card */}
+      <div className="absolute inset-0 top-[-20%] h-[120%]">
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
             alt={event.title}
-            className="w-full h-full object-cover object-top"
-            style={{ objectPosition: 'center 20%' }}
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
