@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { LibraryIcon, ImageIcon, FileTextIcon, Search, Filter } from "lucide-react";
@@ -18,6 +19,7 @@ import { MediaLoadingState } from "@/components/media/MediaLoadingState";
 import { MediaFilterBar } from "@/components/media/MediaFilterBar";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaType } from "@/utils/mediaUtils";
 
 const MediaLibraryIntegratedPage = () => {
   const navigate = useNavigate();
@@ -134,7 +136,7 @@ const MediaLibraryIntegratedPage = () => {
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <LibraryIcon className="h-12 w-12 text-destructive mb-4" />
           <h2 className="text-xl font-bold mb-2">Unable to load media library</h2>
-          <p className="text-muted-foreground mb-4">{error.message}</p>
+          <p className="text-muted-foreground mb-4">{error}</p>
           <Button onClick={() => fetchAllMedia()}>Retry</Button>
         </div>
       </div>
@@ -183,15 +185,15 @@ const MediaLibraryIntegratedPage = () => {
         <MediaFilterBar 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          selectedMediaType={selectedMediaType}
-          setSelectedMediaType={setSelectedMediaType}
+          selectedMediaType={selectedMediaType as MediaType | "all"}
+          setSelectedMediaType={(type: MediaType | "all") => setSelectedMediaType(type)}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           dateFilter={dateFilter as "newest" | "oldest"}
           setDateFilter={setDateFilter}
           viewMode={viewMode}
           setViewMode={setViewMode}
-          mediaTypes={mediaTypes as any[]}
+          mediaTypes={mediaTypes}
           categories={categories}
         />
 
