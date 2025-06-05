@@ -1,14 +1,33 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { TrendingUp, DollarSign, ShoppingCart, Package } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react';
+
+interface Order {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  items: any[];
+}
+
+interface StoreItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity_in_stock: number;
+  tags: string[];
+}
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 export function StoreAnalytics() {
   const { data: orders } = useQuery({
-    queryKey: ['store-analytics-orders'],
+    queryKey: ['store-orders-analytics'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('orders')
@@ -16,180 +35,224 @@ export function StoreAnalytics() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as Order[];
     },
   });
 
-  const { data: products } = useQuery({
-    queryKey: ['store-analytics-products'],
+  const { data: items } = useQuery({
+    queryKey: ['store-items-analytics'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('products')
+        .from('store_items')
         .select('*');
 
       if (error) throw error;
-      return data;
+      return data as StoreItem[];
     },
   });
 
-  // Calculate monthly revenue
-  const monthlyRevenue = React.useMemo(() => {
-    if (!orders) return [];
-    
-    const revenueByMonth: { [key: string]: number } = {};
-    
-    orders
-      .filter(order => order.status === 'completed')
-      .forEach(order => {
-        const month = new Date(order.created_at).toISOString().slice(0, 7); // YYYY-MM format
-        revenueByMonth[month] = (revenueByMonth[month] || 0) + (order.amount / 100);
-      });
-    
-    return Object.entries(revenueByMonth)
-      .map(([month, revenue]) => ({
-        month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-        revenue
-      }))
-      .slice(-6); // Last 6 months
-  }, [orders]);
-
-  // Calculate product sales
-  const productSales = React.useMemo(() => {
-    if (!orders) return [];
-    
-    const salesByProduct: { [key: string]: number } = {};
-    
-    orders
-      .filter(order => order.status === 'completed')
-      .forEach(order => {
-        order.items.forEach((item: any) => {
-          const productName = item.product_name || item.description || 'Unknown Product';
-          salesByProduct[productName] = (salesByProduct[productName] || 0) + (item.quantity || 1);
-        });
-      });
-    
-    return Object.entries(salesByProduct)
-      .map(([product, sales]) => ({ product, sales }))
-      .sort((a, b) => b.sales - a.sales)
-      .slice(0, 5); // Top 5 products
-  }, [orders]);
-
-  const totalRevenue = orders?.filter(o => o.status === 'completed').reduce((sum, order) => sum + order.amount, 0) / 100 || 0;
+  // Calculate analytics
+  const totalRevenue = orders?.reduce((sum, order) => sum + (order.amount / 100), 0) || 0;
   const totalOrders = orders?.length || 0;
-  const completedOrders = orders?.filter(o => o.status === 'completed').length || 0;
-  const activeProducts = products?.filter(p => p.is_active).length || 0;
+  const pendingOrders = orders?.filter(order => order.status === 'pending').length || 0;
+  const completedOrders = orders?.filter(order => order.status === 'completed').length || 0;
+
+  // Monthly revenue data
+  const monthlyData = React.useMemo(() => {
+    if (!orders) return [];
+
+    const monthlyRevenue: { [key: string]: number } = {};
+    orders.forEach(order => {
+      const month = new Date(order.created_at).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short' 
+      });
+      monthlyRevenue[month] = (monthlyRevenue[month] || 0) + (order.amount / 100);
+    });
+
+    return Object.entries(monthlyRevenue).map(([month, revenue]) => ({
+      month,
+      revenue: Math.round(revenue * 100) / 100
+    }));
+  }, [orders]);
+
+  // Top selling items
+  const topSellingItems = React.useMemo(() => {
+    if (!orders) return [];
+
+    const itemCounts: { [key: string]: { name: string; count: number; revenue: number } } = {};
+    
+    orders.forEach(order => {
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach((item: any) => {
+          const key = item.name || item.id;
+          if (!itemCounts[key]) {
+            itemCounts[key] = { name: item.name || 'Unknown Item', count: 0, revenue: 0 };
+          }
+          itemCounts[key].count += item.quantity || 1;
+          itemCounts[key].revenue += (item.price || 0) * (item.quantity || 1);
+        });
+      }
+    });
+
+    return Object.values(itemCounts)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [orders]);
+
+  // Order status distribution
+  const orderStatusData = React.useMemo(() => {
+    if (!orders) return [];
+
+    const statusCounts: { [key: string]: number } = {};
+    orders.forEach(order => {
+      statusCounts[order.status] = (statusCounts[order.status] || 0) + 1;
+    });
+
+    return Object.entries(statusCounts).map(([status, count]) => ({
+      name: status.charAt(0).toUpperCase() + status.slice(1),
+      value: count
+    }));
+  }, [orders]);
 
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">All time earnings</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalOrders}</div>
-            <p className="text-xs text-muted-foreground">{completedOrders} completed</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{activeProducts}</div>
-            <p className="text-xs text-muted-foreground">Currently available</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalOrders > 0 ? ((completedOrders / totalOrders) * 100).toFixed(1) : 0}%
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
+                <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-500" />
             </div>
-            <p className="text-xs text-muted-foreground">Orders completed</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Orders</p>
+                <p className="text-2xl font-bold">{totalOrders}</p>
+              </div>
+              <ShoppingCart className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Pending Orders</p>
+                <p className="text-2xl font-bold text-yellow-600">{pendingOrders}</p>
+              </div>
+              <Package className="h-8 w-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Order Value</p>
+                <p className="text-2xl font-bold">
+                  ${totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}
+                </p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Monthly Revenue Chart */}
         <Card>
           <CardHeader>
             <CardTitle>Monthly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
-                <Line type="monotone" dataKey="revenue" stroke="#8884d8" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+                  <Bar dataKey="revenue" fill="#0088FE" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
+        {/* Order Status Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
+            <CardTitle>Order Status Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={productSales} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="product" type="category" width={100} />
-                <Tooltip />
-                <Bar dataKey="sales" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={orderStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {orderStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Activity */}
+      {/* Top Selling Items */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle>Top Selling Items</CardTitle>
         </CardHeader>
         <CardContent>
-          {orders && orders.length > 0 ? (
-            <div className="space-y-2">
-              {orders.slice(0, 5).map((order) => (
-                <div key={order.id} className="flex justify-between items-center p-3 bg-muted/50 rounded">
+          <div className="space-y-4">
+            {topSellingItems.map((item, index) => (
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant="outline">#{index + 1}</Badge>
                   <div>
-                    <p className="font-medium">{order.customer_email}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(order.created_at).toLocaleDateString()}
+                    <h4 className="font-medium">{item.name}</h4>
+                    <p className="text-sm text-gray-600">
+                      {item.count} sold • ${item.revenue.toFixed(2)} revenue
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">${(order.amount / 100).toFixed(2)}</p>
-                    <p className="text-sm text-muted-foreground capitalize">{order.status}</p>
-                  </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No orders yet</p>
-          )}
+                <div className="text-right">
+                  <p className="font-bold">{item.count} units</p>
+                  <p className="text-sm text-gray-600">${item.revenue.toFixed(2)}</p>
+                </div>
+              </div>
+            ))}
+            {topSellingItems.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No sales data available yet
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

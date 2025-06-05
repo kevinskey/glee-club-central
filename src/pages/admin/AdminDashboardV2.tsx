@@ -70,7 +70,7 @@ export default function AdminDashboardV2() {
       description: 'Product management and tour inventory',
       icon: <Store className="h-5 w-5" />,
       path: '/admin/store-v2',
-      status: 'beta',
+      status: 'ready',
       category: 'tools'
     },
     {

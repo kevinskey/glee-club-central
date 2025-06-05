@@ -9,6 +9,7 @@ import CalendarV2Page from '@/pages/admin/CalendarV2Page';
 import MembersV2Page from '@/pages/admin/MembersV2Page';
 import SheetMusicV2Page from '@/pages/admin/SheetMusicV2Page';
 import MusicStudioPage from '@/pages/admin/MusicStudioPage';
+import StoreV2Page from '@/pages/admin/StoreV2Page';
 
 export const adminRoutesV2: RouteObject[] = [
   {
@@ -48,6 +49,14 @@ export const adminRoutesV2: RouteObject[] = [
     element: (
       <AdminRoute>
         <MusicStudioPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/store-v2',
+    element: (
+      <AdminRoute>
+        <StoreV2Page />
       </AdminRoute>
     ),
   },
