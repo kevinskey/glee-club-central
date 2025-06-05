@@ -220,21 +220,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                     </div>
                   ))}
                 </div>
-                
-                {/* Slide indicators */}
-                <div className="flex justify-center mt-4 space-x-2">
-                  {upcomingEvents.map((_, index) => (
-                    <button
-                      key={index}
-                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                        index === currentSlide 
-                          ? 'bg-blue-500 w-6' 
-                          : 'bg-blue-200 dark:bg-blue-800'
-                      }`}
-                      onClick={() => setCurrentSlide(index)}
-                    />
-                  ))}
-                </div>
               </div>
             </div>
 
@@ -292,16 +277,16 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           </div>
         )}
 
-        {/* Call to Action with Enhanced Design - Centered single button */}
+        {/* Call to Action with Enhanced Design - Centered single button with smaller size */}
         <div className="text-center pt-2 px-4">
           <Button
-            size="lg"
-            className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            size="default"
+            className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-6 py-2 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             asChild
           >
             <Link to="/calendar">
               View Full Calendar
-              <ArrowRight className="h-5 w-5 ml-2" />
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>
