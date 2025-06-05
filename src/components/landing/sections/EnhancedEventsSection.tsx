@@ -135,7 +135,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   );
 
   return (
-    <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background py-8 md:py-12">
+    <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background py-6 md:py-8">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
@@ -205,8 +205,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
               </div>
             </div>
 
-            {/* Desktop: Equal-sized grid layout */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {/* Desktop: Equal-sized grid layout with reduced top spacing */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
               {upcomingEvents.map((event, index) => (
                 <div key={event.id} className="min-h-[400px]">
                   {renderEventCard(event, index)}
@@ -225,7 +225,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         )}
 
         {/* Call to Action with Enhanced Design - Centered single button */}
-        <div className="text-center pt-4">
+        <div className="text-center pt-2">
           <Button
             size="lg"
             className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
