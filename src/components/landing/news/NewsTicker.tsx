@@ -150,7 +150,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
+      <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 w-full overflow-hidden border-b border-white/10">
         <div className="w-full px-4 flex items-center justify-center">
           <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
             <span className="inline-flex items-center">
@@ -164,7 +164,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   return (
-    <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 relative w-full overflow-hidden border-b border-white/10">
+    <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 w-full overflow-hidden border-b border-white/10">
       <div className="w-full px-4 flex items-center justify-between">
         {/* News Label */}
         <div className="hidden sm:flex items-center text-red-200 font-bold text-xs mr-4 whitespace-nowrap">
