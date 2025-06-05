@@ -71,6 +71,107 @@ export type Database = {
           },
         ]
       }
+      ai_settings: {
+        Row: {
+          enabled: boolean | null
+          feature_name: string
+          id: string
+          settings: Json | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean | null
+          feature_name: string
+          id?: string
+          settings?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean | null
+          feature_name?: string
+          id?: string
+          settings?: Json | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      announcement_recipients: {
+        Row: {
+          announcement_id: string | null
+          delivered_at: string | null
+          delivery_method: string | null
+          id: string
+          read_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          announcement_id?: string | null
+          delivered_at?: string | null
+          delivery_method?: string | null
+          id?: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          announcement_id?: string | null
+          delivered_at?: string | null
+          delivery_method?: string | null
+          id?: string
+          read_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          ai_generated: boolean | null
+          content: string
+          created_at: string | null
+          created_by: string | null
+          delivery_methods: string[] | null
+          id: string
+          scheduled_for: string | null
+          sent_at: string | null
+          target_audience: Json | null
+          title: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          delivery_methods?: string[] | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          target_audience?: Json | null
+          title: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          delivery_methods?: string[] | null
+          id?: string
+          scheduled_for?: string | null
+          sent_at?: string | null
+          target_audience?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           calendar_event_id: string | null
@@ -445,10 +546,13 @@ export type Database = {
       }
       events: {
         Row: {
+          ai_suggested_title: string | null
           allow_google_map_link: boolean | null
           allow_ics_download: boolean | null
           allow_reminders: boolean | null
           allow_rsvp: boolean | null
+          call_time: string | null
+          conflict_detected: boolean | null
           created_at: string | null
           created_by: string | null
           end_time: string
@@ -469,10 +573,13 @@ export type Database = {
           title: string
         }
         Insert: {
+          ai_suggested_title?: string | null
           allow_google_map_link?: boolean | null
           allow_ics_download?: boolean | null
           allow_reminders?: boolean | null
           allow_rsvp?: boolean | null
+          call_time?: string | null
+          conflict_detected?: boolean | null
           created_at?: string | null
           created_by?: string | null
           end_time: string
@@ -493,10 +600,13 @@ export type Database = {
           title: string
         }
         Update: {
+          ai_suggested_title?: string | null
           allow_google_map_link?: boolean | null
           allow_ics_download?: boolean | null
           allow_reminders?: boolean | null
           allow_rsvp?: boolean | null
+          call_time?: string | null
+          conflict_detected?: boolean | null
           created_at?: string | null
           created_by?: string | null
           end_time?: string
@@ -666,6 +776,7 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number | null
+          event_id: string | null
           file_path: string
           file_type: string
           file_url: string
@@ -673,16 +784,19 @@ export type Database = {
           hero_tag: string | null
           id: string
           is_hero: boolean | null
+          is_internal: boolean | null
           is_public: boolean | null
           size: number | null
           tags: string[] | null
           title: string
           uploaded_by: string
+          year_tag: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          event_id?: string | null
           file_path: string
           file_type: string
           file_url: string
@@ -690,16 +804,19 @@ export type Database = {
           hero_tag?: string | null
           id?: string
           is_hero?: boolean | null
+          is_internal?: boolean | null
           is_public?: boolean | null
           size?: number | null
           tags?: string[] | null
           title: string
           uploaded_by: string
+          year_tag?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
           display_order?: number | null
+          event_id?: string | null
           file_path?: string
           file_type?: string
           file_url?: string
@@ -707,13 +824,23 @@ export type Database = {
           hero_tag?: string | null
           id?: string
           is_hero?: boolean | null
+          is_internal?: boolean | null
           is_public?: boolean | null
           size?: number | null
           tags?: string[] | null
           title?: string
           uploaded_by?: string
+          year_tag?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "media_library_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       member_notes: {
         Row: {
@@ -1249,6 +1376,7 @@ export type Database = {
           description: string | null
           id: string
           minutes_practiced: number
+          recording_id: string | null
           updated_at: string
           user_id: string
         }
@@ -1259,6 +1387,7 @@ export type Database = {
           description?: string | null
           id?: string
           minutes_practiced: number
+          recording_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1269,40 +1398,99 @@ export type Database = {
           description?: string | null
           id?: string
           minutes_practiced?: number
+          recording_id?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "practice_logs_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "track_recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          additional_price: number | null
+          color: string | null
+          created_at: string | null
+          id: string
+          inventory_count: number | null
+          product_id: string | null
+          size: string | null
+          sku: string | null
+        }
+        Insert: {
+          additional_price?: number | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          inventory_count?: number | null
+          product_id?: string | null
+          size?: string | null
+          sku?: string | null
+        }
+        Update: {
+          additional_price?: number | null
+          color?: string | null
+          created_at?: string | null
+          id?: string
+          inventory_count?: number | null
+          product_id?: string | null
+          size?: string | null
+          sku?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
+          category: string | null
           created_at: string | null
+          description: string | null
           featured: boolean | null
           id: string
           image_url: string | null
           is_active: boolean | null
           name: string
           price: number
+          tier: string | null
           updated_at: string | null
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
+          description?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name: string
           price: number
+          tier?: string | null
           updated_at?: string | null
         }
         Update: {
+          category?: string | null
           created_at?: string | null
+          description?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
           name?: string
           price?: number
+          tier?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1468,6 +1656,50 @@ export type Database = {
           voicing?: string | null
         }
         Relationships: []
+      }
+      sheet_music_metadata: {
+        Row: {
+          created_at: string | null
+          difficulty_level: string | null
+          genre: string | null
+          id: string
+          language: string | null
+          sheet_music_id: string | null
+          tags: string[] | null
+          updated_at: string | null
+          voice_parts: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          genre?: string | null
+          id?: string
+          language?: string | null
+          sheet_music_id?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          voice_parts?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          difficulty_level?: string | null
+          genre?: string | null
+          id?: string
+          language?: string | null
+          sheet_music_id?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          voice_parts?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sheet_music_metadata_sheet_music_id_fkey"
+            columns: ["sheet_music_id"]
+            isOneToOne: false
+            referencedRelation: "sheet_music"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_images: {
         Row: {
@@ -1937,6 +2169,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      track_recordings: {
+        Row: {
+          backing_track_id: string | null
+          created_at: string | null
+          id: string
+          recording_file_path: string
+          recording_file_url: string
+          share_level: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          backing_track_id?: string | null
+          created_at?: string | null
+          id?: string
+          recording_file_path: string
+          recording_file_url: string
+          share_level?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          backing_track_id?: string | null
+          created_at?: string | null
+          id?: string
+          recording_file_path?: string
+          recording_file_url?: string
+          share_level?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "track_recordings_backing_track_id_fkey"
+            columns: ["backing_track_id"]
+            isOneToOne: false
+            referencedRelation: "audio_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       treasurer_notes: {
         Row: {

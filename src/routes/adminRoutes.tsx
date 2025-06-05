@@ -26,6 +26,10 @@ import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
 import SliderConsolePage from '@/pages/admin/SliderConsolePage';
 import GleePlannerPage from '@/pages/admin/GleePlannerPage';
 
+// New Enhanced Admin Pages
+import EnhancedCalendarPage from '@/pages/admin/EnhancedCalendarPage';
+import MemberDashboardAdmin from '@/pages/admin/MemberDashboardAdmin';
+
 // Events
 import EventsListPage from '@/pages/events/EventsListPage';
 import EventDetailsPage from '@/pages/events/EventDetailsPage';
@@ -36,6 +40,22 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/calendar-enhanced',
+    element: (
+      <AdminRoute>
+        <EnhancedCalendarPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/members-dashboard',
+    element: (
+      <AdminRoute>
+        <MemberDashboardAdmin />
       </AdminRoute>
     ),
   },
