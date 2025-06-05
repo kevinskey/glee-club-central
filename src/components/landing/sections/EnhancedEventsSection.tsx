@@ -255,6 +255,44 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                     </div>
                   ))}
                 </div>
+                
+                {/* Mobile navigation dots */}
+                <div className="flex justify-center space-x-2 mt-4">
+                  {upcomingEvents.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentSlide(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentSlide 
+                          ? 'bg-blue-500' 
+                          : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Mobile navigation arrows */}
+                {upcomingEvents.length > 1 && (
+                  <>
+                    {currentSlide > 0 && (
+                      <button
+                        onClick={prevSlide}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                    )}
+                    
+                    {currentSlide < upcomingEvents.length - 1 && (
+                      <button
+                        onClick={nextSlide}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
