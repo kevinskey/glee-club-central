@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Clock, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { HorizontalSlider } from "@/components/ui/horizontal-slider";
 
 interface Event {
   id: string;
@@ -37,7 +36,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   }, []);
 
   const renderEventCard = (event: Event, index: number) => (
-    <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full">
+    <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full relative">
       <CardContent className="p-0 h-full flex flex-col">
         <div className="aspect-[16/10] relative overflow-hidden flex-shrink-0">
           {event.imageUrl ? (
@@ -54,7 +53,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
         
-        <div className="p-4 md:p-6 flex-1 flex flex-col justify-between min-h-0">
+        <div className="p-4 md:p-6 flex-1 flex flex-col justify-between min-h-0 relative z-10">
           <div className="flex-1">
             <h3 className="font-playfair font-bold mb-3 px-2 py-1 group-hover:scale-105 transition-transform duration-300 text-base md:text-lg text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
               {event.title}
@@ -87,7 +86,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <Button
             variant="outline"
             size="sm"
-            className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 self-start"
+            className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 self-start relative z-10"
             asChild
           >
             <Link to="/calendar">
