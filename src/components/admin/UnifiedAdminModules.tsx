@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/utils/permissionChecker";
 import { 
-  LayoutDashboard, Sliders, ImageIcon, ShoppingBag, Plus, Users, Calendar, Upload,
+  LayoutDashboard, Sliders, ShoppingBag, Plus, Users, Calendar, Upload,
   Music, Bell, BarChart, Settings, Layout, Presentation, FileText
 } from "lucide-react";
 
@@ -60,16 +60,6 @@ export function UnifiedAdminModules() {
       icon: <Sliders className="h-5 w-5" />,
       color: "bg-indigo-500",
       path: "/admin/slider-console",
-      adminOnly: true,
-      category: "Quick Actions"
-    },
-    {
-      id: "hero_manager",
-      title: "Hero Manager",
-      description: "Edit hero images and content",
-      icon: <ImageIcon className="h-5 w-5" />,
-      color: "bg-pink-500",
-      path: "/admin/hero-manager",
       adminOnly: true,
       category: "Quick Actions"
     },

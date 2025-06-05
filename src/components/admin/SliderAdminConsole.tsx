@@ -5,10 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Layout, Image, Settings, Sliders, Eye, TestTube } from 'lucide-react';
+import { Layout, Settings, Sliders, Eye, TestTube } from 'lucide-react';
 import { SlideDesignManager } from './slideDesign/SlideDesignManager';
 import { TopSliderManager } from './TopSliderManager';
-import { HeroImagesManager } from './HeroImagesManager';
 import { SliderTestPreview } from './SliderTestPreview';
 
 export function SliderAdminConsole() {
@@ -26,7 +25,7 @@ export function SliderAdminConsole() {
           </CardTitle>
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Comprehensive slider and hero section management for the entire website
+              Comprehensive slider management for the entire website
             </p>
             <Button
               variant="outline"
@@ -47,7 +46,7 @@ export function SliderAdminConsole() {
         <Card>
           <CardContent className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="designs" className="flex items-center gap-2">
                   <Layout className="h-4 w-4" />
                   Custom Designs
@@ -55,10 +54,6 @@ export function SliderAdminConsole() {
                 <TabsTrigger value="top-slider" className="flex items-center gap-2">
                   <Sliders className="h-4 w-4" />
                   Top Slider
-                </TabsTrigger>
-                <TabsTrigger value="hero-images" className="flex items-center gap-2">
-                  <Image className="h-4 w-4" />
-                  Hero Images
                 </TabsTrigger>
                 <TabsTrigger value="test" className="flex items-center gap-2">
                   <TestTube className="h-4 w-4" />
@@ -89,18 +84,6 @@ export function SliderAdminConsole() {
                     </p>
                   </div>
                   <TopSliderManager />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="hero-images" className="mt-0">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Hero Image Gallery</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Select and organize images from your media library to display in hero sections.
-                    </p>
-                  </div>
-                  <HeroImagesManager />
                 </div>
               </TabsContent>
 
