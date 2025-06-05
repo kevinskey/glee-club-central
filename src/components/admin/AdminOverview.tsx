@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,37 +8,20 @@ import {
   Users, 
   Calendar, 
   Music, 
-  Upload, 
   CheckCircle,
   Database,
   Smartphone,
   Shield
 } from 'lucide-react';
-import { BulkUploadDialog } from '@/components/members/BulkUploadDialog';
-import { toast } from 'sonner';
 
 export function AdminOverview() {
-  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
-
-  const handleBulkUploadComplete = () => {
-    setShowBulkUploadDialog(false);
-    toast.success('Bulk upload completed successfully');
-  };
-
   const features = [
     {
       title: 'User Management',
-      description: 'Complete CRUD operations with live Supabase data',
+      description: 'Complete CRUD operations with live Supabase data including bulk upload',
       icon: <Users className="h-5 w-5" />,
       status: 'Live Data ✅',
       link: '/admin/users'
-    },
-    {
-      title: 'Bulk Upload',
-      description: 'CSV, Excel, JSON file processing with validation',
-      icon: <Upload className="h-5 w-5" />,
-      status: 'Interactive ✅',
-      action: () => setShowBulkUploadDialog(true)
     },
     {
       title: 'Calendar Management',
@@ -100,7 +83,7 @@ export function AdminOverview() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {features.map((feature, index) => (
           <Card key={index}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -116,28 +99,15 @@ export function AdminOverview() {
               <p className="text-sm text-muted-foreground mb-4">
                 {feature.description}
               </p>
-              {feature.link ? (
-                <Button asChild size="sm" className="w-full">
-                  <Link to={feature.link}>
-                    Access Module
-                  </Link>
-                </Button>
-              ) : (
-                <Button onClick={feature.action} size="sm" className="w-full">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Start Bulk Upload
-                </Button>
-              )}
+              <Button asChild size="sm" className="w-full">
+                <Link to={feature.link}>
+                  Access Module
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         ))}
       </div>
-
-      <BulkUploadDialog
-        isOpen={showBulkUploadDialog}
-        onOpenChange={setShowBulkUploadDialog}
-        onUploadComplete={handleBulkUploadComplete}
-      />
     </div>
   );
 }
