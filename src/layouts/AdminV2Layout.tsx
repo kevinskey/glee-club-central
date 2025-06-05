@@ -16,6 +16,24 @@ export const AdminV2Layout: React.FC<AdminV2LayoutProps> = ({ children }) => {
 
   const isMainDashboard = location.pathname === '/admin/v2';
 
+  const handleBackToDashboard = () => {
+    try {
+      navigate('/admin/v2');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      window.location.href = '/admin/v2';
+    }
+  };
+
+  const handleViewSite = () => {
+    try {
+      navigate('/');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      window.location.href = '/';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navigation */}
@@ -27,7 +45,7 @@ export const AdminV2Layout: React.FC<AdminV2LayoutProps> = ({ children }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/admin/v2')}
+                  onClick={handleBackToDashboard}
                   className="flex items-center gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -55,7 +73,7 @@ export const AdminV2Layout: React.FC<AdminV2LayoutProps> = ({ children }) => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate('/')}
+                onClick={handleViewSite}
                 className="flex items-center gap-2"
               >
                 <Home className="h-4 w-4" />

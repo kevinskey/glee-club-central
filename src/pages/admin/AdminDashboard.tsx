@@ -8,13 +8,19 @@ const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Redirect to the new v2 admin dashboard
-    navigate('/admin/v2', { replace: true });
+    // Add a small delay to ensure the redirect works properly
+    const timer = setTimeout(() => {
+      navigate('/admin/v2', { replace: true });
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
     <AdminLayout>
-      <PageLoader message="Loading admin dashboard..." />
+      <div className="min-h-screen flex items-center justify-center">
+        <PageLoader message="Redirecting to admin dashboard..." />
+      </div>
     </AdminLayout>
   );
 };
