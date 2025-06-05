@@ -136,19 +136,27 @@ export function TopSlider() {
   }
 
   const currentSlide = slides[currentIndex];
+  
+  // Determine the background image source - prioritize media_library, then image_url
   const backgroundImage = currentSlide.media_library?.file_url || currentSlide.image_url;
+  
+  console.log('🎨 TopSlider: Current slide background:', {
+    mediaLibraryUrl: currentSlide.media_library?.file_url,
+    imageUrl: currentSlide.image_url,
+    finalBackgroundImage: backgroundImage,
+    backgroundColor: currentSlide.background_color
+  });
 
   return (
     <div className="relative w-full h-16 md:h-20 overflow-hidden shadow-sm">
       <div
-        className="absolute inset-0 transition-all duration-1000"
+        className="absolute inset-0 transition-all duration-1000 bg-cover bg-center"
         style={{
           backgroundColor: currentSlide.background_color || '#4F46E5',
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
         }}
       >
+        {/* Add overlay for better text readability when background image is present */}
         {backgroundImage && (
           <div className="absolute inset-0 bg-black/40" />
         )}
