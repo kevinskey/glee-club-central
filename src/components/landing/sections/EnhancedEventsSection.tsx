@@ -187,8 +187,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         <div className="absolute inset-0 bg-black/30"></div>
       </div>
 
-      {/* Content overlay - moved higher up */}
-      <div className="absolute top-1/2 left-0 right-0 p-6 text-white transform -translate-y-1/2">
+      {/* Content overlay - moved to top third */}
+      <div className="absolute top-1/3 left-0 right-0 p-6 text-white transform -translate-y-1/2">
         <div className="space-y-4 text-center">
           <h3 className="font-playfair font-bold text-3xl leading-tight">
             {event.title}
