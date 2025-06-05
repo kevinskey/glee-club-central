@@ -40,13 +40,13 @@ const HomePage = () => {
         </Button>
       </div>
       
-      {/* Custom Slide Renderer - Remove all spacing on mobile */}
-      <div className="pt-20 md:pt-[96px]">
+      {/* Custom Slide Renderer - No top padding */}
+      <div className="">
         <CustomSlideRenderer />
       </div>
       
-      {/* Main Content - Remove top spacing completely */}
-      <div className="mt-0">
+      {/* Main Content - No top spacing */}
+      <div className="">
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}
