@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -168,6 +169,70 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     </Card>
   );
 
+  const renderMobileEventCard = (event: Event, index: number) => (
+    <div className="w-full h-screen relative overflow-hidden">
+      {/* Fullscreen Image Background */}
+      <div className="absolute inset-0">
+        {event.imageUrl ? (
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+            <Calendar className="h-24 w-24 text-blue-400" />
+          </div>
+        )}
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
+
+      {/* Content overlay */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+        <div className="space-y-4">
+          <h3 className="font-playfair font-bold text-2xl leading-tight">
+            {event.title}
+          </h3>
+          
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-white flex-shrink-0" />
+              <span className="text-white/90">
+                {new Date(event.date).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+            
+            {event.location && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-white flex-shrink-0" />
+                <span className="text-white/90">
+                  {event.location}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <Button
+            variant="outline"
+            className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            asChild
+          >
+            <Link to="/calendar">
+              Swipe for More Dates
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background py-6 md:py-8">
       {/* Decorative Background Elements */}
@@ -181,25 +246,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Display */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe - full viewport width */}
-            <div className="block md:hidden mb-8">
-              <div className="relative w-full overflow-hidden min-h-[400px]">
-                {/* Navigation arrows */}
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
-                  disabled={currentSlide === 0}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
-                  disabled={currentSlide === upcomingEvents.length - 1}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-
+            {/* Mobile: Fullscreen cards with swipe */}
+            <div className="block md:hidden">
+              <div className="relative w-full overflow-hidden">
                 <div 
                   className="flex transition-transform duration-300 ease-out w-full"
                   style={{
@@ -212,11 +261,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 w-full flex justify-center px-4"
+                      className="flex-shrink-0 w-full"
                     >
-                      <div className="w-full max-w-sm">
-                        {renderEventCard(event, index)}
-                      </div>
+                      {renderMobileEventCard(event, index)}
                     </div>
                   ))}
                 </div>
@@ -287,3 +334,4 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     </section>
   );
 }
+
