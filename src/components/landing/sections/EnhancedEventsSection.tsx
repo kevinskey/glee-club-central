@@ -169,8 +169,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   );
 
   const renderMobileEventCard = (event: Event, index: number) => (
-    <div className="w-full h-screen relative overflow-hidden">
-      {/* Fullscreen Image Background */}
+    <div className="w-full h-[70vh] relative overflow-hidden">
+      {/* Image Background */}
       <div className="absolute inset-0">
         {event.imageUrl ? (
           <img
