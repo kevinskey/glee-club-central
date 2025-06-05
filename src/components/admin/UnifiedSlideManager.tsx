@@ -45,6 +45,17 @@ export function UnifiedSlideManager() {
     backgroundImage: '',
     mediaId: ''
   });
+  const [editForm, setEditForm] = useState<NewSlideForm>({
+    title: '',
+    description: '',
+    buttonText: '',
+    buttonLink: '',
+    textPosition: 'center',
+    textAlignment: 'center',
+    backgroundColor: '#4F46E5',
+    backgroundImage: '',
+    mediaId: ''
+  });
 
   useEffect(() => {
     fetchSlides();
@@ -69,18 +80,113 @@ export function UnifiedSlideManager() {
   };
 
   const handleImageUpload = (imageUrl: string) => {
-    setNewSlide(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
+    if (editingSlide) {
+      setEditForm(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
+    } else {
+      setNewSlide(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
+    }
     toast.success('Image uploaded successfully');
   };
 
   const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
-    setNewSlide(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
+    if (editingSlide) {
+      setEditForm(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
+    } else {
+      setNewSlide(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
+    }
     toast.success('Media selected successfully');
   };
 
   const handleRemoveImage = () => {
-    setNewSlide(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
+    if (editingSlide) {
+      setEditForm(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
+    } else {
+      setNewSlide(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
+    }
     toast.success('Image removed');
+  };
+
+  const startEditing = (slide: any) => {
+    setEditingSlide(slide.id);
+    setEditForm({
+      title: slide.title || '',
+      description: slide.description || '',
+      buttonText: slide.design_data?.buttonText || '',
+      buttonLink: slide.link_url || '',
+      textPosition: slide.design_data?.textPosition || 'center',
+      textAlignment: slide.design_data?.textAlignment || 'center',
+      backgroundColor: slide.background_color || '#4F46E5',
+      backgroundImage: slide.background_image_url || '',
+      mediaId: slide.background_media_id || ''
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingSlide(null);
+    setEditForm({
+      title: '',
+      description: '',
+      buttonText: '',
+      buttonLink: '',
+      textPosition: 'center',
+      textAlignment: 'center',
+      backgroundColor: '#4F46E5',
+      backgroundImage: '',
+      mediaId: ''
+    });
+  };
+
+  const updateSlide = async () => {
+    if (!editingSlide || !editForm.title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('slide_designs')
+        .update({
+          title: editForm.title,
+          description: editForm.description,
+          design_data: {
+            textElements: [{
+              id: '1',
+              type: 'heading',
+              text: editForm.title,
+              position: { x: 50, y: 50 },
+              style: { 
+                fontSize: '2rem', 
+                fontWeight: 'bold', 
+                color: 'white',
+                textAlign: editForm.textAlignment
+              }
+            }],
+            backgroundElements: [{
+              id: 'bg1',
+              type: editForm.backgroundImage ? 'image' : 'color',
+              value: editForm.backgroundImage || editForm.backgroundColor,
+              position: { x: 0, y: 0, width: 100, height: 100 }
+            }],
+            buttonText: editForm.buttonText,
+            textPosition: editForm.textPosition,
+            textAlignment: editForm.textAlignment
+          },
+          background_color: editForm.backgroundColor,
+          background_image_url: editForm.backgroundImage || null,
+          background_media_id: editForm.mediaId || null,
+          link_url: editForm.buttonLink || null
+        })
+        .eq('id', editingSlide);
+
+      if (error) throw error;
+
+      toast.success('Slide updated successfully');
+      setEditingSlide(null);
+      fetchSlides();
+    } catch (error) {
+      console.error('Error updating slide:', error);
+      toast.error('Failed to update slide');
+    }
   };
 
   const createSlide = async () => {
@@ -339,57 +445,171 @@ export function UnifiedSlideManager() {
                   ) : (
                     slides.map((slide, index) => (
                       <div key={slide.id} className="border rounded-lg p-4">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {slide.background_image_url && (
-                                <img 
-                                  src={slide.background_image_url} 
-                                  alt="Slide preview"
-                                  className="w-16 h-10 object-cover rounded border"
-                                />
-                              )}
-                              <div>
-                                <h4 className="font-medium">{slide.title}</h4>
-                                <p className="text-sm text-muted-foreground">{slide.description}</p>
+                        {editingSlide === slide.id ? (
+                          /* Edit Form */
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between mb-4">
+                              <h4 className="font-medium">Edit Slide</h4>
+                              <div className="flex gap-2">
+                                <Button size="sm" onClick={updateSlide}>
+                                  <Save className="h-4 w-4 mr-1" />
+                                  Save
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={cancelEditing}>
+                                  <X className="h-4 w-4 mr-1" />
+                                  Cancel
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex gap-2 mt-2">
-                              <Badge variant="outline">Slide {index + 1}</Badge>
-                              {slide.is_active && (
-                                <Badge variant="default">Active</Badge>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <Input
+                                placeholder="Slide title"
+                                value={editForm.title}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                              />
+                              <div className="flex gap-2">
+                                <Select 
+                                  value={editForm.textPosition} 
+                                  onValueChange={(value: 'top' | 'center' | 'bottom') => 
+                                    setEditForm(prev => ({ ...prev, textPosition: value }))
+                                  }
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="top">Top</SelectItem>
+                                    <SelectItem value="center">Center</SelectItem>
+                                    <SelectItem value="bottom">Bottom</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <Select 
+                                  value={editForm.textAlignment} 
+                                  onValueChange={(value: 'left' | 'center' | 'right') => 
+                                    setEditForm(prev => ({ ...prev, textAlignment: value }))
+                                  }
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="left">Left</SelectItem>
+                                    <SelectItem value="center">Center</SelectItem>
+                                    <SelectItem value="right">Right</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+
+                            <Textarea
+                              placeholder="Slide description"
+                              value={editForm.description}
+                              onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                            />
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <Input
+                                placeholder="Button text (optional)"
+                                value={editForm.buttonText}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, buttonText: e.target.value }))}
+                              />
+                              <Input
+                                placeholder="Button link (optional)"
+                                value={editForm.buttonLink}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, buttonLink: e.target.value }))}
+                              />
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="color"
+                                  value={editForm.backgroundColor}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                                  className="w-16 h-10 p-1 border rounded"
+                                />
+                                <span className="text-sm text-muted-foreground">Background</span>
+                              </div>
+                            </div>
+
+                            {/* Edit Image Upload Section */}
+                            <div className="space-y-3">
+                              <h4 className="text-sm font-medium">Background Image</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-xs text-muted-foreground mb-2 block">Upload Image</label>
+                                  <ImageDropZone
+                                    onImageUpload={handleImageUpload}
+                                    currentImage={editForm.backgroundImage}
+                                    onRemoveImage={handleRemoveImage}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-xs text-muted-foreground mb-2 block">Or Select from Library</label>
+                                  <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
+                                </div>
+                              </div>
+                              {editForm.backgroundImage && (
+                                <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                                  <p className="text-sm text-green-800">
+                                    ✓ Background image selected. This will override the background color.
+                                  </p>
+                                </div>
                               )}
-                              {slide.background_image_url && (
-                                <Badge variant="secondary">
-                                  <Image className="h-3 w-3 mr-1" />
-                                  Image
-                                </Badge>
-                              )}
-                              <Badge 
-                                variant="secondary" 
-                                style={{ backgroundColor: slide.background_color + '20', color: slide.background_color }}
-                              >
-                                {slide.background_color}
-                              </Badge>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setEditingSlide(slide.id)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              onClick={() => deleteSlide(slide.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                        ) : (
+                          /* Display Mode */
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                {slide.background_image_url && (
+                                  <img 
+                                    src={slide.background_image_url} 
+                                    alt="Slide preview"
+                                    className="w-16 h-10 object-cover rounded border"
+                                  />
+                                )}
+                                <div>
+                                  <h4 className="font-medium">{slide.title}</h4>
+                                  <p className="text-sm text-muted-foreground">{slide.description}</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 mt-2">
+                                <Badge variant="outline">Slide {index + 1}</Badge>
+                                {slide.is_active && (
+                                  <Badge variant="default">Active</Badge>
+                                )}
+                                {slide.background_image_url && (
+                                  <Badge variant="secondary">
+                                    <Image className="h-3 w-3 mr-1" />
+                                    Image
+                                  </Badge>
+                                )}
+                                <Badge 
+                                  variant="secondary" 
+                                  style={{ backgroundColor: slide.background_color + '20', color: slide.background_color }}
+                                >
+                                  {slide.background_color}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => startEditing(slide)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => deleteSlide(slide.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))
                   )}
