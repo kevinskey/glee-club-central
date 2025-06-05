@@ -25,8 +25,6 @@ export { useMediaLibrary } from './useMediaLibrary';
 export { useMediaUpload } from './useMediaUpload';
 export { useAudioFiles } from './useAudioFiles';
 export { useAudioRecorder } from './useAudioRecorder';
-export { useSiteImages } from './useSiteImages';
-export { useSiteImageManager } from './useSiteImageManager';
 
 // Practice & Performance Hooks
 export { usePracticeLogs } from './usePracticeLogs';

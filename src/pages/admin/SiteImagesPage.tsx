@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,9 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
-import { listSiteImages, uploadSiteImage, deleteSiteImage, SiteImage } from '@/utils/siteImages';
 import { Upload, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+interface SiteImage {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  file_url: string;
+  position?: number;
+  created_at: string;
+}
 
 export default function SiteImagesPage() {
   const { user, isLoading } = useAuth();
@@ -32,8 +43,19 @@ export default function SiteImagesPage() {
   const fetchImages = async () => {
     setLoading(true);
     try {
-      const imagesData = await listSiteImages(selectedCategory === 'all' ? undefined : selectedCategory);
-      setImages(imagesData);
+      let query = supabase
+        .from('site_images')
+        .select('*')
+        .order('position');
+
+      if (selectedCategory !== 'all') {
+        query = query.eq('category', selectedCategory);
+      }
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      setImages(data || []);
     } catch (error) {
       console.error("Error fetching images:", error);
       toast.error("Failed to load images");
@@ -49,21 +71,39 @@ export default function SiteImagesPage() {
     }
 
     try {
-      const result = await uploadSiteImage({
-        file: uploadData.file,
-        name: uploadData.name,
-        description: uploadData.description,
-        category: uploadData.category
-      });
+      // Upload file to storage
+      const fileExt = uploadData.file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `site-images/${fileName}`;
 
-      if (result.success) {
-        toast.success("Image uploaded successfully");
-        setIsUploadDialogOpen(false);
-        setUploadData({ file: null, name: '', description: '', category: 'general' });
-        fetchImages();
-      } else {
-        toast.error(result.error || "Upload failed");
-      }
+      const { error: uploadError } = await supabase.storage
+        .from('site-images')
+        .upload(filePath, uploadData.file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('site-images')
+        .getPublicUrl(filePath);
+
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('site_images')
+        .insert({
+          name: uploadData.name,
+          description: uploadData.description,
+          category: uploadData.category,
+          file_url: publicUrl,
+          position: 0
+        });
+
+      if (dbError) throw dbError;
+
+      toast.success("Image uploaded successfully");
+      setIsUploadDialogOpen(false);
+      setUploadData({ file: null, name: '', description: '', category: 'general' });
+      fetchImages();
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Upload failed");
@@ -76,12 +116,15 @@ export default function SiteImagesPage() {
     }
 
     try {
-      const result = await deleteSiteImage(id);
-      if (result.success) {
-        fetchImages();
-      } else {
-        toast.error(result.error || "Failed to delete image");
-      }
+      const { error } = await supabase
+        .from('site_images')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success("Image deleted successfully");
+      fetchImages();
     } catch (error) {
       console.error("Delete error:", error);
       toast.error("Failed to delete image");
@@ -128,32 +171,36 @@ export default function SiteImagesPage() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredImages.map((image) => (
-          <Card key={image.id}>
-            <CardContent className="p-4">
-              <div className="aspect-video bg-gray-100 rounded mb-4 overflow-hidden">
-                <img
-                  src={image.file_url}
-                  alt={image.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <h3 className="font-semibold">{image.name}</h3>
-              <p className="text-sm text-muted-foreground">{image.description}</p>
-              <p className="text-xs text-muted-foreground">Category: {image.category}</p>
-              <div className="flex gap-2 mt-4">
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="destructive" size="sm" onClick={() => handleDelete(image.id)}>
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center py-8">Loading images...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredImages.map((image) => (
+            <Card key={image.id}>
+              <CardContent className="p-4">
+                <div className="aspect-video bg-gray-100 rounded mb-4 overflow-hidden">
+                  <img
+                    src={image.file_url}
+                    alt={image.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h3 className="font-semibold">{image.name}</h3>
+                <p className="text-sm text-muted-foreground">{image.description}</p>
+                <p className="text-xs text-muted-foreground">Category: {image.category}</p>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => handleDelete(image.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
         <DialogContent>
