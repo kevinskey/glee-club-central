@@ -48,8 +48,8 @@ export function HomePageContent({
     <main className="w-full">
       {/* Tighter section spacing - mobile optimized */}
       <div className="md:space-y-12 lg:space-y-16">
-        {/* Events Section */}
-        <section className="w-full py-4 md:py-8 lg:py-12">
+        {/* Events Section - Remove top padding/margin */}
+        <section className="w-full pt-0 pb-4 md:py-8 lg:py-12">
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
             <div className="text-center mb-6 md:mb-12 lg:mb-16">
               <h2 className="text-2xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-3 md:mb-4 tracking-tight leading-tight">
