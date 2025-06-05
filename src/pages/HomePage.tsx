@@ -40,13 +40,12 @@ const HomePage = () => {
         </Button>
       </div>
       
-      {/* Custom Slide Renderer - No top padding */}
-      <div className="">
+      {/* Content wrapper - account for fixed header */}
+      <div className="pt-[80px]">
+        {/* Custom Slide Renderer - directly under header */}
         <CustomSlideRenderer />
-      </div>
-      
-      {/* Main Content - No top spacing */}
-      <div className="">
+        
+        {/* Main Content - directly under slider */}
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}
