@@ -46,10 +46,10 @@ export function HomePageContent({
 }: HomePageContentProps) {
   return (
     <main className="w-full">
-      {/* Events Section - No spacing, directly under header/slider */}
+      {/* Events Section - Full width on mobile, no spacing */}
       <section className="w-full">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-6 md:mb-8">
+        <div className="w-full px-0 md:container md:mx-auto md:px-6 lg:px-8">
+          <div className="text-center mb-6 md:mb-8 px-4 md:px-0">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-light text-gray-900 dark:text-white mb-3 md:mb-4 tracking-tight">
               Upcoming Events
             </h2>

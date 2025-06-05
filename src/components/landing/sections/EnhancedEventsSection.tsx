@@ -177,11 +177,11 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-blue-300/5 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full relative z-10">
         {/* Events Display */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe */}
+            {/* Mobile: One card at a time with swipe - full width */}
             <div className="block md:hidden mb-8">
               <div className="relative w-full overflow-hidden">
                 {/* Navigation arrows */}
@@ -212,7 +212,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 w-full px-4"
+                      className="flex-shrink-0 w-full px-2"
                     >
                       <div className="h-96 w-full">
                         {renderEventCard(event, index)}
@@ -240,48 +240,50 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
 
             {/* Desktop: Horizontal scrolling row */}
             <div className="hidden md:block mb-6 relative">
-              {/* Scroll navigation arrows */}
-              {canScrollLeft && (
-                <button
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-              )}
-              
-              {canScrollRight && (
-                <button
-                  onClick={scrollRight}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              )}
-
-              <div 
-                ref={sliderRef}
-                className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
-                style={{ 
-                  scrollbarWidth: 'none', 
-                  msOverflowStyle: 'none',
-                  scrollSnapType: 'x mandatory'
-                }}
-              >
-                {upcomingEvents.map((event, index) => (
-                  <div 
-                    key={event.id} 
-                    className="h-[400px]"
-                    style={{ scrollSnapAlign: 'start' }}
+              <div className="container mx-auto px-6 lg:px-8">
+                {/* Scroll navigation arrows */}
+                {canScrollLeft && (
+                  <button
+                    onClick={scrollLeft}
+                    className="absolute left-6 lg:left-8 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
                   >
-                    {renderEventCard(event, index)}
-                  </div>
-                ))}
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                )}
+                
+                {canScrollRight && (
+                  <button
+                    onClick={scrollRight}
+                    className="absolute right-6 lg:right-8 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                )}
+
+                <div 
+                  ref={sliderRef}
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  style={{ 
+                    scrollbarWidth: 'none', 
+                    msOverflowStyle: 'none',
+                    scrollSnapType: 'x mandatory'
+                  }}
+                >
+                  {upcomingEvents.map((event, index) => (
+                    <div 
+                      key={event.id} 
+                      className="h-[400px]"
+                      style={{ scrollSnapAlign: 'start' }}
+                    >
+                      {renderEventCard(event, index)}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </>
         ) : (
-          <div className="text-center py-12">
+          <div className="text-center py-12 px-4">
             <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center">
               <Calendar className="h-10 w-10 text-blue-400" />
             </div>
@@ -291,7 +293,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         )}
 
         {/* Call to Action with Enhanced Design - Centered single button */}
-        <div className="text-center pt-2">
+        <div className="text-center pt-2 px-4">
           <Button
             size="lg"
             className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
