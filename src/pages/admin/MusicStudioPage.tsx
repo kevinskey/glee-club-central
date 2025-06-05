@@ -473,7 +473,10 @@ export default function MusicStudioPage() {
 
             <div>
               <label className="text-sm font-medium">Share Level</label>
-              <Select value={shareLevel} onValueChange={setShareLevel}>
+              <Select 
+                value={shareLevel} 
+                onValueChange={(value) => setShareLevel(value as 'private' | 'section' | 'group' | 'director')}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
