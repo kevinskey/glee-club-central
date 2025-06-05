@@ -50,7 +50,7 @@ export function HomePageContent({
       <section className="w-full">
         <div className="w-full px-0 md:container md:mx-auto md:px-6 lg:px-8">
           <div className="text-center px-4 md:px-0">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight transform -rotate-[25deg]">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight">
               Upcoming Events
             </h2>
           </div>
