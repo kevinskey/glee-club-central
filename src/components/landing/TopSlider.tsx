@@ -17,7 +17,7 @@ interface TopSliderItem {
   display_order: number;
   media_library?: {
     file_url: string;
-  };
+  } | null;
 }
 
 export function TopSlider() {
