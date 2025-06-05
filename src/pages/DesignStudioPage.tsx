@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { DesignStudio } from '@/components/design/DesignStudio';
-import { UniversalHero } from '@/components/hero/UniversalHero';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';

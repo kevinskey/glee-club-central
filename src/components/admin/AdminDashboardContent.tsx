@@ -5,7 +5,6 @@ import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
 import { AdminQuickActions } from '@/components/admin/AdminQuickActions';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
-import { HeroTestButton } from '@/components/admin/HeroTestButton';
 import { TopSliderManager } from '@/components/admin/TopSliderManager';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,9 +23,6 @@ export function AdminDashboardContent() {
 
       {/* Top Slider Manager */}
       <TopSliderManager />
-      
-      {/* Hero System Test */}
-      <HeroTestButton />
       
       {/* Edit Role Tags Panel - Only for Admin users */}
       {isAdminRole && (

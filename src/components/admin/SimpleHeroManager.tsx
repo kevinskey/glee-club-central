@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useSimpleHero } from '@/hooks/useSimpleHero';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
@@ -21,7 +19,8 @@ interface NewSlideForm {
 }
 
 export function SimpleHeroManager() {
-  const { slides, isLoading, refetch } = useSimpleHero('homepage-main');
+  const [slides, setSlides] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [editingSlide, setEditingSlide] = useState<string | null>(null);
   const [newSlide, setNewSlide] = useState<NewSlideForm>({
     title: '',
@@ -40,17 +39,20 @@ export function SimpleHeroManager() {
 
     try {
       const { error } = await supabase
-        .from('hero_slides')
+        .from('slide_designs')
         .insert({
-          section_id: 'homepage-main',
           title: newSlide.title,
           description: newSlide.description,
-          button_text: newSlide.buttonText || null,
-          button_link: newSlide.buttonLink || null,
-          text_position: newSlide.textPosition,
-          text_alignment: newSlide.textAlignment,
-          visible: true,
-          slide_order: slides.length
+          design_data: {
+            textElements: [{
+              id: '1',
+              text: newSlide.title,
+              position: { x: 50, y: 50 },
+              style: { fontSize: '2rem', fontWeight: 'bold', color: 'white' }
+            }]
+          },
+          is_active: true,
+          display_order: slides.length
         });
 
       if (error) throw error;
@@ -64,7 +66,6 @@ export function SimpleHeroManager() {
         textPosition: 'center',
         textAlignment: 'center'
       });
-      refetch();
     } catch (error) {
       console.error('Error creating slide:', error);
       toast.error('Failed to create slide');
@@ -76,14 +77,14 @@ export function SimpleHeroManager() {
 
     try {
       const { error } = await supabase
-        .from('hero_slides')
+        .from('slide_designs')
         .delete()
         .eq('id', slideId);
 
       if (error) throw error;
 
       toast.success('Slide deleted successfully');
-      refetch();
+      setSlides(prev => prev.filter(slide => slide.id !== slideId));
     } catch (error) {
       console.error('Error deleting slide:', error);
       toast.error('Failed to delete slide');
@@ -94,7 +95,7 @@ export function SimpleHeroManager() {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center">Loading hero slides...</div>
+          <div className="text-center">Loading slides...</div>
         </CardContent>
       </Card>
     );
@@ -104,7 +105,7 @@ export function SimpleHeroManager() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Simple Hero Manager</CardTitle>
+          <CardTitle>Slide Manager</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Create New Slide Form */}
@@ -187,13 +188,9 @@ export function SimpleHeroManager() {
                       <h4 className="font-medium">{slide.title}</h4>
                       <p className="text-sm text-muted-foreground">{slide.description}</p>
                       <div className="flex gap-2 mt-2">
-                        <Badge variant="outline">{slide.textPosition}</Badge>
-                        <Badge variant="outline">{slide.textAlignment}</Badge>
-                        {slide.buttonText && (
-                          <Badge variant="secondary">Has Button</Badge>
-                        )}
-                        {slide.imageUrl && (
-                          <Badge variant="default">Has Image</Badge>
+                        <Badge variant="outline">Slide {index + 1}</Badge>
+                        {slide.is_active && (
+                          <Badge variant="default">Active</Badge>
                         )}
                       </div>
                     </div>
@@ -214,15 +211,6 @@ export function SimpleHeroManager() {
                       </Button>
                     </div>
                   </div>
-                  {slide.imageUrl && (
-                    <div className="mt-2">
-                      <img
-                        src={slide.imageUrl}
-                        alt={slide.title}
-                        className="w-32 h-20 object-cover rounded border"
-                      />
-                    </div>
-                  )}
                 </div>
               ))
             )}

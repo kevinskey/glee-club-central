@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -11,10 +12,8 @@ import EventRSVPsPage from '@/pages/admin/EventRSVPsPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import OrdersPage from '@/pages/admin/OrdersPage';
 import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
-import LandingPageSettingsPage from '@/pages/admin/LandingPageSettingsPage';
 import NewsTickerSettingsPage from '@/pages/admin/NewsTickerSettingsPage';
 import NewsItemsPage from '@/pages/admin/NewsItemsPage';
-import AdminHeroManager from '@/pages/admin/AdminHeroManager';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import AnalyticsPage from '@/pages/admin/AnalyticsPage';
@@ -48,7 +47,6 @@ export const adminRoutes: RouteObject[] = [
       </AdminRoute>
     ),
   },
-  // Remove the old /admin/home route that was pointing to AdminDashboardPage
   {
     path: '/admin/users',
     element: (
@@ -138,14 +136,6 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/landing-settings',
-    element: (
-      <AdminRoute>
-        <LandingPageSettingsPage />
-      </AdminRoute>
-    ),
-  },
-  {
     path: '/admin/news-ticker',
     element: (
       <AdminRoute>
@@ -158,14 +148,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <NewsItemsPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/hero-manager',
-    element: (
-      <AdminRoute>
-        <AdminHeroManager />
       </AdminRoute>
     ),
   },
