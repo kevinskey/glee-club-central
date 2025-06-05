@@ -17,8 +17,14 @@ interface MediaFile {
 
 export function useMediaLibrary() {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
+  const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMediaType, setSelectedMediaType] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
 
   const fetchMediaFiles = async () => {
     try {
@@ -34,7 +40,10 @@ export function useMediaLibrary() {
         throw fetchError;
       }
 
-      setMediaFiles(data || []);
+      const files = data || [];
+      setMediaFiles(files);
+      setAllMediaFiles(files);
+      setFilteredMediaFiles(files);
     } catch (err) {
       console.error('Error fetching media files:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch media files');
@@ -43,6 +52,8 @@ export function useMediaLibrary() {
       setIsLoading(false);
     }
   };
+
+  const fetchAllMedia = fetchMediaFiles;
 
   const uploadMediaFile = async (file: File, title?: string, isPublic: boolean = false) => {
     try {
@@ -113,16 +124,60 @@ export function useMediaLibrary() {
     }
   };
 
+  const deleteMediaItem = deleteMediaFile;
+
+  const mediaStats = {
+    total: allMediaFiles.length,
+    images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+    videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+    documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
+  };
+
+  // Filter media files based on search and filters
+  useEffect(() => {
+    let filtered = [...allMediaFiles];
+
+    if (searchQuery) {
+      filtered = filtered.filter(file => 
+        file.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedMediaType !== 'all') {
+      filtered = filtered.filter(file => {
+        if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
+        if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
+        if (selectedMediaType === 'document') return file.file_type.includes('pdf') || file.file_type.includes('document');
+        return true;
+      });
+    }
+
+    setFilteredMediaFiles(filtered);
+  }, [allMediaFiles, searchQuery, selectedMediaType, selectedCategory, dateFilter]);
+
   useEffect(() => {
     fetchMediaFiles();
   }, []);
 
   return {
     mediaFiles,
+    allMediaFiles,
+    filteredMediaFiles,
     isLoading,
     error,
+    searchQuery,
+    setSearchQuery,
+    selectedMediaType,
+    setSelectedMediaType,
+    selectedCategory,
+    setSelectedCategory,
+    dateFilter,
+    setDateFilter,
+    mediaStats,
     fetchMediaFiles,
+    fetchAllMedia,
     uploadMediaFile,
     deleteMediaFile,
+    deleteMediaItem,
   };
 }
