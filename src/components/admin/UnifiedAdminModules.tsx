@@ -48,7 +48,7 @@ export function UnifiedAdminModules() {
       description: "Design slides & manage all sliders",
       icon: <Sliders className="h-5 w-5" />,
       color: "bg-indigo-500",
-      path: "/admin/slider-console",
+      path: "/admin/unified-slide-management",
       adminOnly: true,
       category: "Quick Actions"
     },

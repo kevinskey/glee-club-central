@@ -7,6 +7,7 @@ import AdminRoute from '@/components/auth/AdminRoute';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
+import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -14,6 +15,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/unified-slide-management',
+    element: (
+      <AdminRoute>
+        <UnifiedSlideManagementPage />
       </AdminRoute>
     ),
   },
