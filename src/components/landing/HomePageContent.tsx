@@ -46,10 +46,10 @@ export function HomePageContent({
 }: HomePageContentProps) {
   return (
     <main className="w-full">
-      {/* Events Section - No top spacing, directly under slider */}
+      {/* Events Section - No spacing, directly under header/slider */}
       <section className="w-full">
         <div className="container mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-8 md:mb-12 pt-8 md:pt-12">
+          <div className="text-center mb-8 md:mb-12">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
               Upcoming Events
             </h2>
