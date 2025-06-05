@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -197,16 +196,15 @@ export function TopSlider({
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
                       </div>
                     ) : slide.computed_image_url ? (
-                      <div className="relative w-full h-full">
-                        <img
-                          src={slide.computed_image_url}
-                          alt={slide.title}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          onError={(e) => {
-                            console.error('Image failed to load:', slide.computed_image_url);
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
-                        />
+                      <div 
+                        className="relative w-full h-full"
+                        style={{
+                          backgroundImage: `url(${slide.computed_image_url})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat'
+                        }}
+                      >
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
                       </div>
                     ) : (
@@ -288,16 +286,15 @@ export function TopSlider({
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
             </div>
           ) : currentSlideData.computed_image_url ? (
-            <div className="relative w-full h-full">
-              <img
-                src={currentSlideData.computed_image_url}
-                alt={currentSlideData.title}
-                className="absolute inset-0 w-full h-full object-cover"
-                onError={(e) => {
-                  console.error('Image failed to load:', currentSlideData.computed_image_url);
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
+            <div 
+              className="relative w-full h-full"
+              style={{
+                backgroundImage: `url(${currentSlideData.computed_image_url})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
             </div>
           ) : (
