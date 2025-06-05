@@ -24,18 +24,20 @@ const HomePage = () => {
     <div className="min-h-screen overflow-x-hidden bg-background">
       <Header />
       
-      {/* Custom Slide Renderer - Position directly under fixed header */}
-      <div className="pt-[88px] md:pt-[96px]">
+      {/* Custom Slide Renderer - Seamless positioning under header */}
+      <div className="md:pt-[96px]">
         <CustomSlideRenderer />
       </div>
       
-      {/* Main Content */}
-      <HomePageContent
-        heroImages={heroImages}
-        upcomingEvents={upcomingEvents}
-        storeProducts={storeProducts}
-        audioTracks={audioTracks}
-      />
+      {/* Main Content - Remove any top spacing on mobile */}
+      <div className="md:mt-0">
+        <HomePageContent
+          heroImages={heroImages}
+          upcomingEvents={upcomingEvents}
+          storeProducts={storeProducts}
+          audioTracks={audioTracks}
+        />
+      </div>
     </div>
   );
 };
