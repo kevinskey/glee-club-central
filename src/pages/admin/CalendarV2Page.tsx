@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AdminV2Layout } from '@/layouts/AdminV2Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +7,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Users, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { Calendar, Plus, Edit, Trash2, MapPin, Clock, Users, Sparkles, ChevronLeft, ChevronRight, CalendarIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, parseISO, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, startOfMonth, endOfMonth, addMonths, subMonths, getDay } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Event {
   id: string;
@@ -61,6 +64,14 @@ export default function CalendarV2Page() {
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Date picker states
+  const [startDatePickerOpen, setStartDatePickerOpen] = useState(false);
+  const [endDatePickerOpen, setEndDatePickerOpen] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | undefined>();
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | undefined>();
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
 
   // Event form state
   const [eventForm, setEventForm] = useState({
@@ -117,16 +128,26 @@ export default function CalendarV2Page() {
   };
 
   const handleCreateEvent = async () => {
-    if (!eventForm.title || !eventForm.start_time || !eventForm.end_time) {
+    if (!eventForm.title || !selectedStartDate || !selectedEndDate || !startTime || !endTime) {
       toast.error('Please fill in all required fields');
       return;
     }
 
     try {
+      const startDateTime = new Date(selectedStartDate);
+      const [startHours, startMinutes] = startTime.split(':');
+      startDateTime.setHours(parseInt(startHours), parseInt(startMinutes));
+
+      const endDateTime = new Date(selectedEndDate);
+      const [endHours, endMinutes] = endTime.split(':');
+      endDateTime.setHours(parseInt(endHours), parseInt(endMinutes));
+
       const { data, error } = await supabase
         .from('events')
         .insert([{
           ...eventForm,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString(),
           created_by: user?.id
         }])
         .select()
@@ -145,12 +166,24 @@ export default function CalendarV2Page() {
   };
 
   const handleUpdateEvent = async () => {
-    if (!editingEvent) return;
+    if (!editingEvent || !selectedStartDate || !selectedEndDate || !startTime || !endTime) return;
 
     try {
+      const startDateTime = new Date(selectedStartDate);
+      const [startHours, startMinutes] = startTime.split(':');
+      startDateTime.setHours(parseInt(startHours), parseInt(startMinutes));
+
+      const endDateTime = new Date(selectedEndDate);
+      const [endHours, endMinutes] = endTime.split(':');
+      endDateTime.setHours(parseInt(endHours), parseInt(endMinutes));
+
       const { error } = await supabase
         .from('events')
-        .update(eventForm)
+        .update({
+          ...eventForm,
+          start_time: startDateTime.toISOString(),
+          end_time: endDateTime.toISOString()
+        })
         .eq('id', editingEvent.id);
 
       if (error) throw error;
@@ -197,6 +230,10 @@ export default function CalendarV2Page() {
       allow_rsvp: true,
       is_public: true
     });
+    setSelectedStartDate(undefined);
+    setSelectedEndDate(undefined);
+    setStartTime('');
+    setEndTime('');
   };
 
   const openCreateDialog = () => {
@@ -217,6 +254,16 @@ export default function CalendarV2Page() {
       allow_rsvp: event.allow_rsvp,
       is_public: event.is_public
     });
+    
+    // Parse dates for the picker
+    const startDate = parseISO(event.start_time);
+    const endDate = parseISO(event.end_time);
+    
+    setSelectedStartDate(startDate);
+    setSelectedEndDate(endDate);
+    setStartTime(format(startDate, 'HH:mm'));
+    setEndTime(format(endDate, 'HH:mm'));
+    
     setEditingEvent(event);
     setIsEventDialogOpen(true);
   };
@@ -523,7 +570,7 @@ export default function CalendarV2Page() {
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium">Title *</label>
+                <Label className="text-sm font-medium">Title *</Label>
                 <div className="flex gap-2">
                   <Input
                     value={eventForm.title}
@@ -538,7 +585,7 @@ export default function CalendarV2Page() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium">Event Type *</label>
+                  <Label className="text-sm font-medium">Event Type *</Label>
                   <Select 
                     value={eventForm.event_type} 
                     onValueChange={(value) => setEventForm(prev => ({ ...prev, event_type: value }))}
@@ -557,7 +604,7 @@ export default function CalendarV2Page() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">Location</label>
+                  <Label className="text-sm font-medium">Location</Label>
                   <Input
                     value={eventForm.location_name}
                     onChange={(e) => setEventForm(prev => ({ ...prev, location_name: e.target.value }))}
@@ -566,28 +613,91 @@ export default function CalendarV2Page() {
                 </div>
               </div>
 
+              {/* Date and Time Pickers */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Start Time *</label>
+                <div className="space-y-2">
+                  <Label>Start Date *</Label>
+                  <Popover open={startDatePickerOpen} onOpenChange={setStartDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedStartDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedStartDate ? format(selectedStartDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedStartDate}
+                        onSelect={(date) => {
+                          setSelectedStartDate(date);
+                          setStartDatePickerOpen(false);
+                        }}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>End Date *</Label>
+                  <Popover open={endDatePickerOpen} onOpenChange={setEndDatePickerOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedEndDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedEndDate ? format(selectedEndDate, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={selectedEndDate}
+                        onSelect={(date) => {
+                          setSelectedEndDate(date);
+                          setEndDatePickerOpen(false);
+                        }}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Time *</Label>
                   <Input
-                    type="datetime-local"
-                    value={eventForm.start_time}
-                    onChange={(e) => setEventForm(prev => ({ ...prev, start_time: e.target.value }))}
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
                   />
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">End Time *</label>
+                <div className="space-y-2">
+                  <Label>End Time *</Label>
                   <Input
-                    type="datetime-local"
-                    value={eventForm.end_time}
-                    onChange={(e) => setEventForm(prev => ({ ...prev, end_time: e.target.value }))}
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium">Short Description</label>
+                <Label className="text-sm font-medium">Short Description</Label>
                 <Input
                   value={eventForm.short_description}
                   onChange={(e) => setEventForm(prev => ({ ...prev, short_description: e.target.value }))}
@@ -596,7 +706,7 @@ export default function CalendarV2Page() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Full Description</label>
+                <Label className="text-sm font-medium">Full Description</Label>
                 <div className="flex gap-2">
                   <Textarea
                     value={eventForm.full_description}
