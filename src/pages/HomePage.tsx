@@ -5,6 +5,7 @@ import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { Header } from "@/components/landing/Header";
 import { CustomSlideRenderer } from "@/components/landing/CustomSlideRenderer";
+import { TopSlider } from "@/components/landing/TopSlider";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Sliders } from "lucide-react";
@@ -28,6 +29,9 @@ const HomePage = () => {
     <div className="min-h-screen home-page overflow-x-hidden bg-background">
       <Header />
       
+      {/* Top Slider - New custom slide at the very top */}
+      <TopSlider />
+      
       {/* Temporary Admin Access Button */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
@@ -42,7 +46,7 @@ const HomePage = () => {
       
       {/* Content wrapper - no padding needed since header is no longer fixed */}
       <div>
-        {/* Custom Slide Renderer - directly under header */}
+        {/* Custom Slide Renderer - directly under top slider */}
         <CustomSlideRenderer />
         
         {/* Main Content - directly under slider */}

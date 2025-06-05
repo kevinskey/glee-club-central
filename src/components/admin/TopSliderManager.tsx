@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -93,6 +94,35 @@ export function TopSliderManager() {
   useEffect(() => {
     console.log('🚀 TopSliderManager: Component mounted');
     fetchItems();
+    
+    // Auto-create a sample slide if none exist
+    const createSampleSlide = async () => {
+      const { data: existingItems } = await supabase
+        .from('top_slider_items')
+        .select('id')
+        .limit(1);
+      
+      if (!existingItems || existingItems.length === 0) {
+        const sampleSlide = {
+          title: 'Welcome to Spelman Glee Club',
+          description: 'Experience the power of music and sisterhood',
+          background_color: '#4F46E5',
+          text_color: '#FFFFFF',
+          visible: true,
+          display_order: 0
+        };
+        
+        try {
+          await supabase.from('top_slider_items').insert(sampleSlide);
+          console.log('✅ Sample slide created');
+          fetchItems();
+        } catch (error) {
+          console.error('❌ Error creating sample slide:', error);
+        }
+      }
+    };
+    
+    createSampleSlide();
   }, []);
 
   const resetForm = () => {
