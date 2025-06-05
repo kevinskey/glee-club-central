@@ -26,10 +26,10 @@ const HomePage = () => {
 
   return (
     <PublicPageWrapper showTopSlider={true} className="home-page overflow-x-hidden">
-      {/* Temporary Admin Access Button - positioned for easy access */}
+      {/* Unified Admin Access Button */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
-          onClick={() => navigate('/admin/slider-console')}
+          onClick={() => navigate('/admin/unified-slide-management')}
           className="bg-glee-spelman hover:bg-glee-spelman/90 text-white shadow-lg"
           size="lg"
         >
