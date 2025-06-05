@@ -23,8 +23,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const [touchStart, setTouchStart] = useState(0);
-  const [touchEnd, setTouchEnd] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -40,6 +40,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
 
   // Handle touch events for swiping
   const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
   };
 
@@ -55,20 +56,20 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     const isRightSwipe = distance < -50;
 
     if (isLeftSwipe && currentSlide < upcomingEvents.length - 1) {
-      setCurrentSlide(currentSlide + 1);
+      setCurrentSlide(prev => prev + 1);
     }
     if (isRightSwipe && currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
+      setCurrentSlide(prev => prev - 1);
     }
   };
 
-  // Update slider position
-  useEffect(() => {
-    if (sliderRef.current && isMobile) {
-      const slideWidth = sliderRef.current.offsetWidth;
-      sliderRef.current.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
-    }
-  }, [currentSlide, isMobile]);
+  const nextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % upcomingEvents.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + upcomingEvents.length) % upcomingEvents.length);
+  };
 
   const renderEventCard = (event: Event, index: number) => (
     <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full relative">
@@ -149,10 +150,30 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <>
             {/* Mobile: Full-width swipe slider */}
             <div className="block md:hidden mb-8">
-              <div className="relative overflow-hidden">
+              <div className="relative w-full overflow-hidden">
+                {/* Navigation arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
+                  disabled={currentSlide === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 dark:bg-black/80 p-2 rounded-full shadow-lg"
+                  disabled={currentSlide === upcomingEvents.length - 1}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+
                 <div 
                   ref={sliderRef}
                   className="flex transition-transform duration-300 ease-out"
+                  style={{
+                    transform: `translateX(-${currentSlide * 100}%)`,
+                    width: `${upcomingEvents.length * 100}%`
+                  }}
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
@@ -160,7 +181,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="w-full flex-shrink-0 px-2"
+                      className="w-full flex-shrink-0 px-4"
+                      style={{ width: `${100 / upcomingEvents.length}%` }}
                     >
                       <div className="h-96">
                         {renderEventCard(event, index)}
