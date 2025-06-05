@@ -38,8 +38,8 @@ export function Header() {
   
   return (
     <>
-      {/* Fixed Header with News Ticker - Ensure proper z-index and positioning */}
-      <header className="fixed top-0 left-0 right-0 w-full max-w-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50 m-0 p-0">
+      {/* Header with News Ticker - Changed from fixed to static positioning */}
+      <header className="top-0 left-0 right-0 w-full max-w-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50 m-0 p-0">
         {/* News Ticker */}
         {showNewsTicker && <NewsTicker />}
         

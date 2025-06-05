@@ -40,8 +40,8 @@ const HomePage = () => {
         </Button>
       </div>
       
-      {/* Content wrapper - account for fixed header */}
-      <div className="pt-[80px]">
+      {/* Content wrapper - no padding needed since header is no longer fixed */}
+      <div>
         {/* Custom Slide Renderer - directly under header */}
         <CustomSlideRenderer />
         
