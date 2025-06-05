@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -80,10 +79,19 @@ export function TopSlider() {
       }
 
       console.log('📊 TopSlider: Fetched slides:', data);
-      setSlides(data || []);
+      
+      // Transform the data to handle the media_library join properly
+      const transformedSlides = (data || []).map(slide => ({
+        ...slide,
+        media_library: Array.isArray(slide.media_library) && slide.media_library.length > 0 
+          ? slide.media_library[0] 
+          : slide.media_library
+      }));
+      
+      setSlides(transformedSlides);
       
       // Reset current index if slides changed
-      if (data && data.length > 0 && currentIndex >= data.length) {
+      if (transformedSlides && transformedSlides.length > 0 && currentIndex >= transformedSlides.length) {
         setCurrentIndex(0);
       }
     } catch (error) {
