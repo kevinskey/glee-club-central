@@ -24,11 +24,19 @@ interface MediaFile {
   title: string;
 }
 
+interface ImageDimensions {
+  width: number;
+  height: number;
+  aspectRatio: number;
+}
+
 export function TopSlider() {
   const [slides, setSlides] = useState<TopSliderItem[]>([]);
   const [mediaFiles, setMediaFiles] = useState<{ [key: string]: MediaFile }>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageDimensions, setImageDimensions] = useState<{ [key: string]: ImageDimensions }>({});
+  const [sliderHeight, setSliderHeight] = useState<number>(80); // Default height in pixels
 
   useEffect(() => {
     fetchSlides();
@@ -54,6 +62,20 @@ export function TopSlider() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Load image dimensions when slides change
+  useEffect(() => {
+    if (slides.length > 0) {
+      loadImageDimensions();
+    }
+  }, [slides, mediaFiles]);
+
+  // Update slider height when current slide changes
+  useEffect(() => {
+    if (slides.length > 0) {
+      updateSliderHeight();
+    }
+  }, [currentIndex, slides, imageDimensions]);
 
   const fetchSlides = async () => {
     try {
@@ -123,6 +145,72 @@ export function TopSlider() {
     }
   };
 
+  const loadImageDimensions = async () => {
+    const dimensionsMap: { [key: string]: ImageDimensions } = {};
+    
+    for (const slide of slides) {
+      let imageUrl: string | undefined;
+      
+      if (slide.media_id && mediaFiles[slide.media_id]) {
+        imageUrl = mediaFiles[slide.media_id].file_url;
+      } else if (slide.image_url) {
+        imageUrl = slide.image_url;
+      }
+      
+      if (imageUrl && !imageDimensions[slide.id]) {
+        try {
+          const dimensions = await getImageDimensions(imageUrl);
+          dimensionsMap[slide.id] = dimensions;
+          console.log(`📐 TopSlider: Loaded dimensions for slide ${slide.id}:`, dimensions);
+        } catch (error) {
+          console.error(`❌ TopSlider: Failed to load dimensions for slide ${slide.id}:`, error);
+          // Fallback to default aspect ratio
+          dimensionsMap[slide.id] = { width: 16, height: 9, aspectRatio: 16/9 };
+        }
+      }
+    }
+    
+    if (Object.keys(dimensionsMap).length > 0) {
+      setImageDimensions(prev => ({ ...prev, ...dimensionsMap }));
+    }
+  };
+
+  const getImageDimensions = (imageUrl: string): Promise<ImageDimensions> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          aspectRatio: img.naturalWidth / img.naturalHeight
+        });
+      };
+      img.onerror = reject;
+      img.src = imageUrl;
+    });
+  };
+
+  const updateSliderHeight = () => {
+    if (slides.length === 0) return;
+    
+    const currentSlide = slides[currentIndex];
+    const dimensions = imageDimensions[currentSlide.id];
+    
+    if (dimensions) {
+      // Calculate height based on viewport width and image aspect ratio
+      const viewportWidth = window.innerWidth;
+      const maxHeight = Math.min(viewportWidth * 0.3, 300); // Max 30% of viewport width or 300px
+      const minHeight = 80; // Minimum height
+      
+      const calculatedHeight = Math.min(maxHeight, Math.max(minHeight, viewportWidth / dimensions.aspectRatio));
+      setSliderHeight(calculatedHeight);
+      console.log(`📏 TopSlider: Updated height to ${calculatedHeight}px for slide ${currentSlide.id}`);
+    } else {
+      // Fallback to default height if no dimensions available
+      setSliderHeight(80);
+    }
+  };
+
   useEffect(() => {
     if (slides.length > 1) {
       const timer = setInterval(() => {
@@ -131,6 +219,16 @@ export function TopSlider() {
       return () => clearInterval(timer);
     }
   }, [slides.length]);
+
+  // Handle window resize to recalculate height
+  useEffect(() => {
+    const handleResize = () => {
+      updateSliderHeight();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [currentIndex, slides, imageDimensions]);
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
@@ -143,7 +241,7 @@ export function TopSlider() {
   // Don't render anything if loading or no slides
   if (isLoading) {
     return (
-      <div className="relative w-full h-16 md:h-20 bg-blue-600 flex items-center justify-center">
+      <div className="relative w-full bg-blue-600 flex items-center justify-center transition-all duration-300" style={{ height: `${sliderHeight}px` }}>
         <div className="text-white text-sm">Loading slides...</div>
       </div>
     );
@@ -172,11 +270,15 @@ export function TopSlider() {
     hasMediaFile: currentSlide.media_id ? !!mediaFiles[currentSlide.media_id] : false,
     imageUrl: currentSlide.image_url,
     finalBackgroundImage: backgroundImage,
-    backgroundColor: currentSlide.background_color
+    backgroundColor: currentSlide.background_color,
+    height: sliderHeight
   });
 
   return (
-    <div className="relative w-full h-16 md:h-20 overflow-hidden shadow-sm">
+    <div 
+      className="relative w-full overflow-hidden shadow-sm transition-all duration-500 ease-in-out"
+      style={{ height: `${sliderHeight}px` }}
+    >
       <div
         className="absolute inset-0 transition-all duration-1000"
         style={{
