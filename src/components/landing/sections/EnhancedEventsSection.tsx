@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -180,9 +181,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Display */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe - centered in viewport */}
+            {/* Mobile: One card at a time with swipe - full viewport width */}
             <div className="block md:hidden mb-8">
-              <div className="relative w-full overflow-hidden flex justify-center items-center min-h-[400px]">
+              <div className="relative w-full overflow-hidden min-h-[400px]">
                 {/* Navigation arrows */}
                 <button
                   onClick={prevSlide}
@@ -200,10 +201,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                 </button>
 
                 <div 
-                  className="flex transition-transform duration-300 ease-out"
+                  className="flex transition-transform duration-300 ease-out w-full"
                   style={{
-                    transform: `translateX(calc(50vw - 50% - ${currentSlide * 100}%))`,
-                    width: `${upcomingEvents.length * 100}%`
+                    transform: `translateX(-${currentSlide * 100}%)`
                   }}
                   onTouchStart={handleTouchStart}
                   onTouchMove={handleTouchMove}
@@ -212,10 +212,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0 flex justify-center px-4"
-                      style={{ width: `${100 / upcomingEvents.length}%` }}
+                      className="flex-shrink-0 w-full flex justify-center px-4"
                     >
-                      <div className="w-80 max-w-[calc(100vw-2rem)]">
+                      <div className="w-full max-w-sm">
                         {renderEventCard(event, index)}
                       </div>
                     </div>
