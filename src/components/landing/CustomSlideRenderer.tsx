@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,7 +79,7 @@ export function CustomSlideRenderer({
   if (isLoading) {
     return (
       <div 
-        className={cn("w-full m-0 p-0", className)}
+        className={cn("w-full", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
@@ -135,10 +136,10 @@ export function CustomSlideRenderer({
   // Mobile horizontal scroll view
   if (isMobile) {
     return (
-      <div className={cn("w-full m-0 p-0", className)}>
-        <div className="overflow-x-auto m-0 p-4">
+      <div className={cn("w-full", className)}>
+        <div className="overflow-x-auto">
           <div 
-            className="flex gap-4 pb-4"
+            className="flex gap-4 pb-4 px-4"
             style={{
               scrollSnapType: 'x mandatory',
               WebkitOverflowScrolling: 'touch'
@@ -196,7 +197,7 @@ export function CustomSlideRenderer({
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className={cn("w-full m-0 p-0", className)}>
+    <div className={cn("w-full", className)}>
       <div 
         className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
         style={{ height }}
