@@ -1,290 +1,205 @@
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { SlideDesign } from '@/types/slideDesign';
-import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-
-interface CustomSlideRendererProps {
-  autoPlay?: boolean;
-  interval?: number;
-  height?: string;
-  className?: string;
+interface Slide {
+  id: string;
+  image: string;
+  background_image?: string;
+  background_position?: string;
+  title?: string;
+  subtitle?: string;
+  link: string;
+  is_active: boolean;
 }
 
-export function CustomSlideRenderer({ 
-  autoPlay = true, 
-  interval = 5000, 
-  height = "400px",
-  className = ""
-}: CustomSlideRendererProps) {
-  const [slides, setSlides] = useState<SlideDesign[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
-  
-  const isMobile = useMediaQuery('(max-width: 768px)');
-
-  const fetchSlides = async () => {
-    try {
-      console.log('🎨 CustomSlideRenderer: Fetching slide designs...');
-      
-      const { data, error } = await supabase
-        .from('slide_designs')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
-
-      if (error) {
-        console.error('❌ CustomSlideRenderer: Error fetching slides:', error);
-        throw error;
-      }
-
-      console.log('✅ CustomSlideRenderer: Loaded slides:', data?.length || 0);
-      setSlides(data || []);
-    } catch (error) {
-      console.error('💥 CustomSlideRenderer: Error in fetchSlides:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+export function CustomSlideRenderer() {
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [currentSlides, setCurrentSlides] = useState<Slide[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [height, setHeight] = useState(400);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const fetchSlides = async () => {
+      try {
+        const response = await fetch('/api/slides');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setSlides(data);
+      } catch (error) {
+        console.error("Could not fetch slides:", error);
+        setSlides([]);
+      }
+    };
+
     fetchSlides();
   }, []);
 
-  // Auto-advance slides
   useEffect(() => {
-    if (slides.length > 1 && isPlaying && autoPlay) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-      }, interval);
-      return () => clearInterval(timer);
-    }
-  }, [slides.length, isPlaying, autoPlay, interval]);
+    const activeSlides = slides.filter(slide => slide.is_active);
+    setCurrentSlides(activeSlides);
+  }, [slides]);
 
-  const goToPrevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  useEffect(() => {
+    const calculateHeight = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) {
+        setHeight(400);
+      } else if (width >= 768) {
+        setHeight(300);
+      } else {
+        setHeight(200);
+      }
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + currentSlides.length) % currentSlides.length);
   };
 
-  const goToNextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
   };
 
-  const handleMouseEnter = () => setIsPlaying(false);
-  const handleMouseLeave = () => setIsPlaying(autoPlay);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
+    }, 5000);
 
-  if (isLoading) {
-    return (
-      <div 
-        className="w-full"
-        style={{ height, margin: 0, padding: 0 }}
-      >
-        <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!slides || slides.length === 0) {
-    console.log('📭 CustomSlideRenderer: No slides to display');
-    return null;
-  }
-
-  const renderTextElements = (slideData: SlideDesign) => {
-    return slideData.design_data.textElements.map((element) => (
-      <div
-        key={element.id}
-        className="absolute pointer-events-none select-none"
-        style={{
-          left: `${element.position.x}%`,
-          top: `${element.position.y}%`,
-          transform: 'translate(-50%, -50%)',
-          ...element.style,
-          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
-        }}
-      >
-        {element.text}
-      </div>
-    ));
-  };
-
-  const renderLayoutGrid = (layout_type: string) => {
-    if (layout_type === 'half_horizontal') {
-      return <div className="absolute top-0 left-1/2 w-px h-full bg-white/20" />;
-    }
-    
-    if (layout_type === 'half_vertical') {
-      return <div className="absolute top-1/2 left-0 w-full h-px bg-white/20" />;
-    }
-    
-    if (layout_type === 'quarter') {
-      return (
-        <>
-          <div className="absolute top-1/2 left-0 w-full h-px bg-white/20" />
-          <div className="absolute top-0 left-1/2 w-px h-full bg-white/20" />
-        </>
-      );
-    }
-    
-    return null;
-  };
-
-  // Mobile horizontal scroll view
-  if (isMobile) {
-    return (
-      <div className="w-full" style={{ margin: 0, padding: 0 }}>
-        <div className="overflow-x-auto" style={{ margin: 0, padding: 0 }}>
-          <div 
-            className="flex gap-4 pb-4 px-4"
-            style={{
-              scrollSnapType: 'x mandatory',
-              WebkitOverflowScrolling: 'touch',
-              margin: 0
-            }}
-          >
-            {slides.map((slide) => (
-              <div 
-                key={slide.id}
-                className="flex-shrink-0 w-80 relative overflow-hidden rounded-2xl shadow-lg cursor-pointer"
-                style={{ 
-                  height: "300px",
-                  scrollSnapAlign: 'start',
-                  margin: 0
-                }}
-                onClick={() => {
-                  if (slide.link_url) {
-                    window.open(slide.link_url, '_blank');
-                  }
-                }}
-              >
-                {/* Background */}
-                <div className="absolute inset-0">
-                  <div 
-                    className="w-full h-full relative"
-                    style={{
-                      backgroundColor: slide.background_color,
-                      backgroundImage: slide.background_image_url ? 
-                        `url(${slide.background_image_url})` : undefined,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      backgroundRepeat: 'no-repeat'
-                    }}
-                  >
-                    {slide.background_image_url && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Layout Grid */}
-                {renderLayoutGrid(slide.layout_type)}
-
-                {/* Text Elements */}
-                <div className="relative z-10 h-full">
-                  {renderTextElements(slide)}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop view (unchanged)
-  const currentSlideData = slides[currentSlide];
+    return () => clearTimeout(timer);
+  }, [currentIndex, currentSlides.length]);
 
   return (
-    <div className="w-full" style={{ margin: 0, padding: 0 }}>
-      <div 
-        className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
-        style={{ height, margin: 0, padding: 0 }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={() => {
-          if (currentSlideData.link_url) {
-            window.open(currentSlideData.link_url, '_blank');
-          }
-        }}
-      >
-        {/* Background */}
-        <div className="absolute inset-0">
-          <div 
-            className="w-full h-full relative"
-            style={{
-              backgroundColor: currentSlideData.background_color,
-              backgroundImage: currentSlideData.background_image_url ? 
-                `url(${currentSlideData.background_image_url})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat'
-            }}
-          >
-            {currentSlideData.background_image_url && (
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
-            )}
-          </div>
-        </div>
-
-        {/* Layout Grid */}
-        {renderLayoutGrid(currentSlideData.layout_type)}
-
-        {/* Text Elements */}
-        <div className="relative z-10 h-full">
-          {renderTextElements(currentSlideData)}
-        </div>
-
-        {/* Navigation */}
-        {slides.length > 1 && (
-          <>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToPrevSlide();
+    <div className="relative w-full">
+      {/* Desktop View */}
+      <div className="hidden md:block">
+        <div 
+          className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
+          style={{ height, margin: 0, padding: 0 }}
+          onClick={goToNext}
+        >
+          {currentSlides.map((slide, index) => (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 transition-opacity duration-1000 ${
+                index === currentIndex ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{
+                backgroundImage: `url(${slide.background_image || slide.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: slide.background_position || 'center',
+                backgroundRepeat: 'no-repeat'
               }}
             >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/20 h-12 w-12 z-20 backdrop-blur-sm bg-black/20 rounded-full transition-all duration-200 hover:scale-110"
-              onClick={(e) => {
-                e.stopPropagation();
-                goToNextSlide();
-              }}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                {slide.title && (
+                  <h2 className="text-4xl font-bold text-white drop-shadow-lg">
+                    {slide.title}
+                  </h2>
+                )}
+                {slide.subtitle && (
+                  <p className="text-lg text-white drop-shadow-lg">
+                    {slide.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
 
-            {/* Dots indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-              {slides.map((_, index) => (
+          {/* Navigation Arrows */}
+          {currentSlides.length > 1 && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToPrevious();
+                }}
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goToNext();
+                }}
+              >
+                <ChevronRight className="h-6 w-6" />
+              </Button>
+            </>
+          )}
+
+          {/* Slide Indicators */}
+          {currentSlides.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+              {currentSlides.map((_, index) => (
                 <button
                   key={index}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-all duration-300",
-                    index === currentSlide 
-                      ? "bg-white w-8" 
-                      : "bg-white/50 hover:bg-white/75"
-                  )}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentIndex 
+                      ? 'bg-white scale-125' 
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCurrentSlide(index);
+                    setCurrentIndex(index);
                   }}
                 />
               ))}
             </div>
-          </>
-        )}
+          )}
+        </div>
+      </div>
+
+      {/* Mobile View - Horizontal Scroll */}
+      <div className="block md:hidden">
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-4 pb-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {currentSlides.map((slide) => (
+            <div
+              key={slide.id}
+              className="flex-shrink-0 w-80 h-64 rounded-lg overflow-hidden shadow-lg snap-start relative cursor-pointer"
+              style={{
+                backgroundImage: `url(${slide.background_image || slide.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: slide.background_position || 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+              onClick={() => window.open(slide.link, '_blank')}
+            >
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                {slide.title && (
+                  <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                    {slide.title}
+                  </h2>
+                )}
+                {slide.subtitle && (
+                  <p className="text-sm text-white drop-shadow-lg">
+                    {slide.subtitle}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
