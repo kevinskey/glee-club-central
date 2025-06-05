@@ -55,9 +55,6 @@ export function HomePageContent({
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
                 Upcoming Events
               </h2>
-              <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
-                Experience the extraordinary performances of the Spelman College Glee Club
-              </p>
             </div>
             <EnhancedEventsSection events={upcomingEvents} />
           </div>
