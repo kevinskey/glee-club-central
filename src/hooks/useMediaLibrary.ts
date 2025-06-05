@@ -6,13 +6,19 @@ import { toast } from 'sonner';
 interface MediaFile {
   id: string;
   title: string;
+  description?: string;
   file_url: string;
+  file_path: string;
   file_type: string;
-  file_size: number;
-  is_public: boolean;
+  file_size?: number;
+  size?: number;
   uploaded_by: string;
+  category?: string;
+  folder?: string;
+  tags?: string[];
   created_at: string;
   updated_at: string;
+  is_public: boolean;
 }
 
 export function useMediaLibrary() {
@@ -40,7 +46,17 @@ export function useMediaLibrary() {
         throw fetchError;
       }
 
-      const files = data || [];
+      const files = (data || []).map(file => ({
+        ...file,
+        description: file.description || '',
+        file_path: file.file_path || '',
+        size: file.size || file.file_size || 0,
+        file_size: file.size || file.file_size || 0,
+        category: file.category || file.folder || 'general',
+        folder: file.folder || 'general',
+        tags: file.tags || []
+      }));
+      
       setMediaFiles(files);
       setAllMediaFiles(files);
       setFilteredMediaFiles(files);
@@ -81,8 +97,9 @@ export function useMediaLibrary() {
         .insert({
           title: title || file.name,
           file_url: publicUrl,
+          file_path: filePath,
           file_type: file.type,
-          file_size: file.size,
+          size: file.size,
           is_public: isPublic,
         })
         .select()
@@ -126,12 +143,26 @@ export function useMediaLibrary() {
 
   const deleteMediaItem = deleteMediaFile;
 
+  // Create comprehensive media stats
   const mediaStats = {
     total: allMediaFiles.length,
+    totalFiles: allMediaFiles.length,
+    totalSize: allMediaFiles.reduce((acc, file) => acc + (file.size || 0), 0),
     images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
     videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
     documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
+    filesByType: {
+      image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+      video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+      pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
+      audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
+      application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
+    }
   };
+
+  // Get unique media types and categories
+  const mediaTypes = ['all', 'image', 'video', 'pdf', 'audio', 'application'];
+  const categories = ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))];
 
   // Filter media files based on search and filters
   useEffect(() => {
@@ -147,6 +178,8 @@ export function useMediaLibrary() {
       filtered = filtered.filter(file => {
         if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
         if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
+        if (selectedMediaType === 'pdf') return file.file_type.includes('pdf');
+        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
         if (selectedMediaType === 'document') return file.file_type.includes('pdf') || file.file_type.includes('document');
         return true;
       });
@@ -174,10 +207,13 @@ export function useMediaLibrary() {
     dateFilter,
     setDateFilter,
     mediaStats,
+    mediaTypes,
+    categories,
     fetchMediaFiles,
     fetchAllMedia,
     uploadMediaFile,
     deleteMediaFile,
     deleteMediaItem,
+    useMediaInContext: () => {}, // Placeholder function
   };
 }

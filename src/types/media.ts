@@ -8,10 +8,11 @@ export interface MediaFile {
   file_type: string;
   uploaded_by: string;
   category?: string;
-  folder?: string;  // Added this property
+  folder?: string;
   tags?: string[];
   created_at: string;
   size?: number;
+  file_size?: number;
 }
 
 export interface MediaStats {
