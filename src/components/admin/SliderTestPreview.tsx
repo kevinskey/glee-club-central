@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -258,11 +257,7 @@ export function SliderTestPreview({ onExitPreview }: SliderTestPreviewProps) {
                     Preview Mode: {previewMode} | Live Data
                   </div>
                   <div className={previewMode === 'mobile' ? 'scale-75 origin-top' : ''}>
-                    <CustomSlideRenderer
-                      autoPlay={true}
-                      interval={3000}
-                      height={previewMode === 'mobile' ? '200px' : '400px'}
-                    />
+                    <CustomSlideRenderer />
                   </div>
                 </div>
                 
