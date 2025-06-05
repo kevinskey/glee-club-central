@@ -23,7 +23,7 @@ import FinancialRecords from '@/pages/admin/FinancialRecords';
 import UserSystemResetPage from '@/pages/admin/UserSystemResetPage';
 import TourMerchPage from '@/pages/admin/TourMerchPage';
 import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
-import SlideDesignPage from '@/pages/admin/SlideDesignPage';
+import SliderConsolePage from '@/pages/admin/SliderConsolePage';
 import GleePlannerPage from '@/pages/admin/GleePlannerPage';
 
 // Events
@@ -40,10 +40,10 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
-    path: '/admin/slide-design',
+    path: '/admin/slider-console',
     element: (
       <AdminRoute>
-        <SlideDesignPage />
+        <SliderConsolePage />
       </AdminRoute>
     ),
   },

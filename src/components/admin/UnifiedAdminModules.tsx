@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/utils/permissionChecker";
 import { 
-  LayoutDashboard, Sliders, ShoppingBag, Plus, Users, Calendar, Upload,
-  Music, Bell, BarChart, Settings, Layout, Presentation, FileText
+  LayoutDashboard, ShoppingBag, Plus, Users, Calendar, Upload,
+  Music, Bell, BarChart, Settings, Layout, Presentation, FileText, Sliders
 } from "lucide-react";
 
 interface ModuleItem {
@@ -44,19 +43,9 @@ export function UnifiedAdminModules() {
       category: "Quick Actions"
     },
     {
-      id: "slide_designer",
-      title: "Slide Designer",
-      description: "Create custom slide designs",
-      icon: <Layout className="h-5 w-5" />,
-      color: "bg-purple-500",
-      path: "/admin/slide-design",
-      adminOnly: true,
-      category: "Quick Actions"
-    },
-    {
-      id: "slider_console",
-      title: "Slider Console",
-      description: "Manage all slider functionality",
+      id: "slider_management",
+      title: "Slider Management",
+      description: "Design slides & manage all sliders",
       icon: <Sliders className="h-5 w-5" />,
       color: "bg-indigo-500",
       path: "/admin/slider-console",

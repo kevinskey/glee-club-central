@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Layout, Settings, Sliders, Eye, TestTube, Plus } from 'lucide-react';
+import { Layout, Settings, Sliders, Eye, TestTube, Plus, Sparkles } from 'lucide-react';
 import { SlideDesignManager } from './slideDesign/SlideDesignManager';
 import { TopSliderManager } from './TopSliderManager';
 import { SliderTestPreview } from './SliderTestPreview';
@@ -15,7 +15,7 @@ export function SliderAdminConsole() {
   const [previewMode, setPreviewMode] = useState(false);
 
   const handleCreateSlide = () => {
-    setActiveTab('designs');
+    setActiveTab('slide-design');
   };
 
   const handleManageTopSlider = () => {
@@ -37,7 +37,7 @@ export function SliderAdminConsole() {
           </CardTitle>
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Complete slider management system for all website sections
+              Complete slider management system - design custom slides, manage top slider content, and test functionality
             </p>
             <Button
               variant="outline"
@@ -63,9 +63,9 @@ export function SliderAdminConsole() {
                   <Layout className="h-4 w-4" />
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="designs" className="flex items-center gap-2">
-                  <Layout className="h-4 w-4" />
-                  Custom Designs
+                <TabsTrigger value="slide-design" className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Slide Design
                 </TabsTrigger>
                 <TabsTrigger value="top-slider" className="flex items-center gap-2">
                   <Sliders className="h-4 w-4" />
@@ -84,30 +84,30 @@ export function SliderAdminConsole() {
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Slider Management Overview</h3>
                     <p className="text-sm text-muted-foreground mb-6">
-                      Centralized control for all slider components across your website. Manage custom slide designs, 
-                      top slider content, and test functionality from one unified interface.
+                      Centralized control for all slider components across your website. Design custom slides, 
+                      manage top slider content, and test functionality from one unified interface.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Custom Designs Card */}
+                    {/* Slide Design Card */}
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleCreateSlide}>
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
-                            <Layout className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20">
+                            <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                           </div>
-                          <Badge variant="secondary">Active</Badge>
+                          <Badge variant="secondary">Design Studio</Badge>
                         </div>
-                        <CardTitle className="text-base">Custom Slide Designs</CardTitle>
+                        <CardTitle className="text-base">Custom Slide Design</CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
                         <p className="text-sm text-muted-foreground mb-4">
-                          Create and manage custom slide designs with advanced layout options, text elements, and media backgrounds.
+                          Create stunning custom slide designs with advanced layout options, text elements, and media backgrounds using the WYSIWYG editor.
                         </p>
                         <Button size="sm" className="w-full">
                           <Plus className="h-4 w-4 mr-2" />
-                          Create New Design
+                          Design New Slide
                         </Button>
                       </CardContent>
                     </Card>
@@ -138,8 +138,8 @@ export function SliderAdminConsole() {
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={handleRunTests}>
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20">
-                            <TestTube className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          <div className="p-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                            <TestTube className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                           </div>
                           <Badge variant="outline">Testing</Badge>
                         </div>
@@ -198,10 +198,10 @@ export function SliderAdminConsole() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="designs" className="mt-0">
+              <TabsContent value="slide-design" className="mt-0">
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Custom Slide Designs</h3>
+                    <h3 className="text-lg font-semibold mb-2">Custom Slide Design Studio</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Create and manage custom slide designs with advanced layout options, text elements, and media backgrounds.
                     </p>
