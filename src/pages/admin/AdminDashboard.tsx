@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PageHeader } from '@/components/ui/page-header';
-import { AdminOverview } from '@/components/admin/AdminOverview';
+import { AdminDashboardContent } from '@/components/admin/AdminDashboardContent';
 import { Settings } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -14,7 +14,7 @@ export default function AdminDashboard() {
       />
       
       <div className="mt-8">
-        <AdminOverview />
+        <AdminDashboardContent />
       </div>
     </div>
   );
