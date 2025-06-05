@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -29,6 +28,8 @@ import GleePlannerPage from '@/pages/admin/GleePlannerPage';
 // New Enhanced Admin Pages
 import EnhancedCalendarPage from '@/pages/admin/EnhancedCalendarPage';
 import MemberDashboardAdmin from '@/pages/admin/MemberDashboardAdmin';
+import SheetMusicLibraryPage from '@/pages/admin/SheetMusicLibraryPage';
+import MusicStudioPage from '@/pages/admin/MusicStudioPage';
 
 // Events
 import EventsListPage from '@/pages/events/EventsListPage';
@@ -56,6 +57,22 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <MemberDashboardAdmin />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/sheet-music',
+    element: (
+      <AdminRoute>
+        <SheetMusicLibraryPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/music-studio',
+    element: (
+      <AdminRoute>
+        <MusicStudioPage />
       </AdminRoute>
     ),
   },
