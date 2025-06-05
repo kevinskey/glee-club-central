@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Save, X, Sliders, Layout, TestTube, Eye, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Sliders, Layout, TestTube, Eye, Settings, Upload, Image } from 'lucide-react';
 import { TopSliderManager } from './TopSliderManager';
 import { SliderTestPreview } from './SliderTestPreview';
+import { ImageDropZone } from './slideDesign/ImageDropZone';
+import { MediaLibrarySelector } from './slideDesign/MediaLibrarySelector';
 
 interface NewSlideForm {
   title: string;
@@ -21,6 +24,8 @@ interface NewSlideForm {
   textPosition: 'top' | 'center' | 'bottom';
   textAlignment: 'left' | 'center' | 'right';
   backgroundColor: string;
+  backgroundImage: string;
+  mediaId: string;
 }
 
 export function UnifiedSlideManager() {
@@ -36,7 +41,9 @@ export function UnifiedSlideManager() {
     buttonLink: '',
     textPosition: 'center',
     textAlignment: 'center',
-    backgroundColor: '#4F46E5'
+    backgroundColor: '#4F46E5',
+    backgroundImage: '',
+    mediaId: ''
   });
 
   useEffect(() => {
@@ -59,6 +66,21 @@ export function UnifiedSlideManager() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    setNewSlide(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
+    toast.success('Image uploaded successfully');
+  };
+
+  const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
+    setNewSlide(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
+    toast.success('Media selected successfully');
+  };
+
+  const handleRemoveImage = () => {
+    setNewSlide(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
+    toast.success('Image removed');
   };
 
   const createSlide = async () => {
@@ -89,12 +111,14 @@ export function UnifiedSlideManager() {
             }],
             backgroundElements: [{
               id: 'bg1',
-              type: 'color',
-              value: newSlide.backgroundColor,
+              type: newSlide.backgroundImage ? 'image' : 'color',
+              value: newSlide.backgroundImage || newSlide.backgroundColor,
               position: { x: 0, y: 0, width: 100, height: 100 }
             }]
           },
           background_color: newSlide.backgroundColor,
+          background_image_url: newSlide.backgroundImage || null,
+          background_media_id: newSlide.mediaId || null,
           animation_settings: {
             duration: 1000,
             transition: 'fade',
@@ -115,7 +139,9 @@ export function UnifiedSlideManager() {
         buttonLink: '',
         textPosition: 'center',
         textAlignment: 'center',
-        backgroundColor: '#4F46E5'
+        backgroundColor: '#4F46E5',
+        backgroundImage: '',
+        mediaId: ''
       });
       fetchSlides();
     } catch (error) {
@@ -198,6 +224,7 @@ export function UnifiedSlideManager() {
                 {/* Create New Slide Form */}
                 <div className="border rounded-lg p-4 space-y-4">
                   <h3 className="font-medium">Create New Hero Slide</h3>
+                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       placeholder="Slide title"
@@ -237,11 +264,13 @@ export function UnifiedSlideManager() {
                       </Select>
                     </div>
                   </div>
+
                   <Textarea
                     placeholder="Slide description"
                     value={newSlide.description}
                     onChange={(e) => setNewSlide(prev => ({ ...prev, description: e.target.value }))}
                   />
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       placeholder="Button text (optional)"
@@ -263,6 +292,33 @@ export function UnifiedSlideManager() {
                       <span className="text-sm text-muted-foreground">Background</span>
                     </div>
                   </div>
+
+                  {/* Image Upload Section */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium">Background Image</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-2 block">Upload Image</label>
+                        <ImageDropZone
+                          onImageUpload={handleImageUpload}
+                          currentImage={newSlide.backgroundImage}
+                          onRemoveImage={handleRemoveImage}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-2 block">Or Select from Library</label>
+                        <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
+                      </div>
+                    </div>
+                    {newSlide.backgroundImage && (
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-800">
+                          ✓ Background image selected. This will override the background color.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <Button onClick={createSlide} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Hero Slide
@@ -285,12 +341,29 @@ export function UnifiedSlideManager() {
                       <div key={slide.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
-                            <h4 className="font-medium">{slide.title}</h4>
-                            <p className="text-sm text-muted-foreground">{slide.description}</p>
+                            <div className="flex items-center gap-2 mb-2">
+                              {slide.background_image_url && (
+                                <img 
+                                  src={slide.background_image_url} 
+                                  alt="Slide preview"
+                                  className="w-16 h-10 object-cover rounded border"
+                                />
+                              )}
+                              <div>
+                                <h4 className="font-medium">{slide.title}</h4>
+                                <p className="text-sm text-muted-foreground">{slide.description}</p>
+                              </div>
+                            </div>
                             <div className="flex gap-2 mt-2">
                               <Badge variant="outline">Slide {index + 1}</Badge>
                               {slide.is_active && (
                                 <Badge variant="default">Active</Badge>
+                              )}
+                              {slide.background_image_url && (
+                                <Badge variant="secondary">
+                                  <Image className="h-3 w-3 mr-1" />
+                                  Image
+                                </Badge>
                               )}
                               <Badge 
                                 variant="secondary" 
