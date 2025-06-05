@@ -49,7 +49,7 @@ export function HomePageContent({
       {/* Events Section - Full width on mobile, no spacing */}
       <section className="w-full">
         <div className="w-full px-0 md:container md:mx-auto md:px-6 lg:px-8">
-          <div className="text-center mb-2 md:mb-3 px-4 md:px-0">
+          <div className="text-center px-4 md:px-0">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-900 dark:text-white tracking-tight">
               Upcoming Events
             </h2>
