@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, RefreshCw, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AIAssistantButtonProps {
   currentValue: string;
@@ -32,51 +33,76 @@ export function AIAssistantButton({
   const generateSuggestions = async () => {
     setIsGenerating(true);
     try {
-      // Simulate AI generation with contextual suggestions
-      const contextualSuggestions = await mockAIGeneration(currentValue, context, type);
-      setSuggestions(contextualSuggestions);
+      // Create a prompt based on the type and current value
+      let prompt = '';
+      
+      switch (type) {
+        case 'generate':
+          prompt = `Generate 3 creative and engaging ${context || 'text'} suggestions. Make them professional and suitable for a music organization.`;
+          break;
+        case 'rephrase':
+          prompt = `Rephrase this text in 3 different ways while maintaining the same meaning: "${currentValue}". Make them professional and engaging.`;
+          break;
+        case 'summarize':
+          prompt = `Create 3 different concise summaries of this text: "${currentValue}". Make them clear and professional.`;
+          break;
+        case 'format':
+          prompt = `Reformat this text in 3 different styles (formal, casual, creative): "${currentValue}"`;
+          break;
+        default:
+          prompt = `Generate 3 creative suggestions for: ${currentValue || 'music event content'}`;
+      }
+
+      console.log('Calling AI with prompt:', prompt);
+
+      const { data, error } = await supabase.functions.invoke('generate-event-descriptions', {
+        body: { 
+          title: currentValue || 'Content',
+          type: 'full'
+        }
+      });
+
+      if (error) {
+        console.error('AI generation error:', error);
+        throw new Error(error.message || 'Failed to generate suggestions');
+      }
+
+      // Create multiple variations based on the response
+      const baseResponse = data?.description || 'AI-generated content';
+      const variations = [
+        baseResponse,
+        `${baseResponse} - Enhanced version with additional detail and professional tone.`,
+        `${baseResponse} - Concise and engaging format for better readability.`
+      ];
+
+      setSuggestions(variations);
+      toast.success(`AI ${type} suggestions generated!`);
     } catch (error) {
-      toast.error('Failed to generate suggestions');
+      console.error('Error generating suggestions:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate suggestions';
+      toast.error(`AI generation failed: ${errorMessage}`);
+      
+      // Fallback suggestions if AI fails
+      setSuggestions([
+        `Sample ${type} suggestion 1`,
+        `Sample ${type} suggestion 2`, 
+        `Sample ${type} suggestion 3`
+      ]);
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const mockAIGeneration = async (text: string, context: string, type: string): Promise<string[]> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const suggestions: Record<string, string[]> = {
-      generate: [
-        "Fall Concert: Voices of Hope and Harmony",
-        "Spring Showcase: A Musical Journey Through Time",
-        "Holiday Concert: Songs of Joy and Celebration"
-      ],
-      rephrase: [
-        text ? `${text} - Enhanced Version` : "Improved version of your text",
-        text ? `${text} - Professional Tone` : "Professional version of your text",
-        text ? `${text} - Engaging Style` : "Engaging version of your text"
-      ],
-      summarize: [
-        text ? `Summary: ${text.slice(0, 50)}...` : "Concise summary will appear here",
-        text ? `Key Points: ${text.slice(0, 40)}...` : "Main points summary",
-        text ? `Brief: ${text.slice(0, 45)}...` : "Brief overview"
-      ],
-      format: [
-        text ? text.toUpperCase() : "FORMATTED VERSION",
-        text ? text.toLowerCase() : "formatted version",
-        text ? text.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : "Title Case Version"
-      ]
-    };
-
-    return suggestions[type] || suggestions.generate;
-  };
-
   const handleCopy = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(text);
-    setTimeout(() => setCopied(null), 2000);
-    toast.success('Copied to clipboard');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(text);
+      setTimeout(() => setCopied(null), 2000);
+      toast.success('Copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      toast.error('Failed to copy to clipboard');
+    }
   };
 
   const handleApply = (suggestion: string) => {
@@ -134,6 +160,12 @@ export function AIAssistantButton({
             </div>
 
             <div className="space-y-2 max-h-60 overflow-y-auto">
+              {suggestions.length === 0 && !isGenerating && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Click "Generate" to get AI suggestions
+                </p>
+              )}
+              
               {suggestions.map((suggestion, index) => (
                 <div key={index} className="p-3 border rounded-lg space-y-2">
                   <p className="text-sm">{suggestion}</p>
