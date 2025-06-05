@@ -29,10 +29,10 @@ const HomePage = () => {
     <div className="min-h-screen home-page overflow-x-hidden bg-background">
       <Header />
       
-      {/* Top Slider - New custom slide at the very top */}
+      {/* Top Slider - Admin managed banner at the very top */}
       <TopSlider />
       
-      {/* Temporary Admin Access Button */}
+      {/* Temporary Admin Access Button - positioned for easy access */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
           onClick={() => navigate('/admin/slider-console')}
@@ -40,16 +40,16 @@ const HomePage = () => {
           size="lg"
         >
           <Sliders className="h-4 w-4 mr-2" />
-          Create Slides
+          Manage Slides
         </Button>
       </div>
       
-      {/* Content wrapper - no padding needed since header is no longer fixed */}
+      {/* Content wrapper */}
       <div>
-        {/* Custom Slide Renderer - directly under top slider */}
+        {/* Custom Slide Renderer - for other custom slides */}
         <CustomSlideRenderer />
         
-        {/* Main Content - directly under slider */}
+        {/* Main Content */}
         <HomePageContent
           heroImages={heroImages}
           upcomingEvents={upcomingEvents}

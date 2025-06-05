@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, Image, Video } from 'lucide-react';
+import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, Image, Video, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MediaPicker } from '@/components/media/MediaPicker';
@@ -115,6 +115,7 @@ export function TopSliderManager() {
         try {
           await supabase.from('top_slider_items').insert(sampleSlide);
           console.log('✅ Sample slide created');
+          toast.success('Sample slide created');
           fetchItems();
         } catch (error) {
           console.error('❌ Error creating sample slide:', error);
@@ -369,13 +370,23 @@ export function TopSliderManager() {
           <div>
             <CardTitle>Top Slider Manager</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Manage the slider that appears above the hero section
+              Manage the banner slider that appears at the top of the homepage. Changes are live immediately.
             </p>
           </div>
-          <Button onClick={() => openEditDialog()}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Slide
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => window.open('/', '_blank')}
+              size="sm"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Preview Homepage
+            </Button>
+            <Button onClick={() => openEditDialog()}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Slide
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -389,6 +400,38 @@ export function TopSliderManager() {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Live Preview Section */}
+            {items.filter(item => item.visible).length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-sm font-medium mb-3 text-muted-foreground">LIVE PREVIEW</h4>
+                <div className="border rounded-lg overflow-hidden">
+                  <div 
+                    className="h-16 md:h-20 flex items-center justify-center relative"
+                    style={{
+                      backgroundColor: items.find(item => item.visible)?.background_color || '#4F46E5'
+                    }}
+                  >
+                    <div className="text-center">
+                      <h3 
+                        className="text-sm md:text-lg font-semibold mb-1"
+                        style={{ color: items.find(item => item.visible)?.text_color || '#FFFFFF' }}
+                      >
+                        {items.find(item => item.visible)?.title}
+                      </h3>
+                      {items.find(item => item.visible)?.description && (
+                        <p 
+                          className="text-xs md:text-sm opacity-90"
+                          style={{ color: items.find(item => item.visible)?.text_color || '#FFFFFF' }}
+                        >
+                          {items.find(item => item.visible)?.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {items.map((item, index) => (
               <div key={item.id} className="flex items-center gap-4 p-4 border rounded-lg">
                 {getItemPreview(item)}

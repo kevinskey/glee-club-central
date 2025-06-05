@@ -27,14 +27,46 @@ export function TopSlider() {
 
   useEffect(() => {
     fetchSlides();
+    
+    // Set up real-time subscription for slide updates
+    const channel = supabase
+      .channel('top-slider-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'top_slider_items'
+        },
+        () => {
+          console.log('🔄 TopSlider: Database change detected, refetching slides...');
+          fetchSlides();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchSlides = async () => {
     try {
+      console.log('🔍 TopSlider: Fetching visible slides...');
+      
       const { data, error } = await supabase
         .from('top_slider_items')
         .select(`
-          *,
+          id,
+          title,
+          description,
+          image_url,
+          youtube_url,
+          link_url,
+          background_color,
+          text_color,
+          visible,
+          display_order,
           media_library!left(
             file_url
           )
@@ -42,10 +74,21 @@ export function TopSlider() {
         .eq('visible', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ TopSlider: Database error:', error);
+        throw error;
+      }
+
+      console.log('📊 TopSlider: Fetched slides:', data);
       setSlides(data || []);
+      
+      // Reset current index if slides changed
+      if (data && data.length > 0 && currentIndex >= data.length) {
+        setCurrentIndex(0);
+      }
     } catch (error) {
-      console.error('Error fetching slides:', error);
+      console.error('💥 TopSlider: Error fetching slides:', error);
+      setSlides([]);
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +111,17 @@ export function TopSlider() {
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
-  if (isLoading || slides.length === 0) {
-    return null;
+  // Don't render anything if loading or no slides
+  if (isLoading) {
+    return (
+      <div className="relative w-full h-16 md:h-20 bg-blue-600 flex items-center justify-center">
+        <div className="text-white text-sm">Loading slides...</div>
+      </div>
+    );
+  }
+
+  if (slides.length === 0) {
+    return null; // Don't show the slider if no slides are available
   }
 
   const currentSlide = slides[currentIndex];
