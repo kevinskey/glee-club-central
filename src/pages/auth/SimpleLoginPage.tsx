@@ -10,35 +10,59 @@ import { LogIn, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SimpleLoginPage() {
-  const { login, user } = useAuth();
+  const { login, user, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   useEffect(() => {
-    if (user) {
+    if (user && !isLoading) {
       navigate(from, { replace: true });
     }
-  }, [user, navigate, from]);
+  }, [user, navigate, from, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+    
+    setSubmitting(true);
 
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
+      const { error } = await login(email, password);
+      
+      if (error) {
+        console.error('Login error:', error);
+        toast.error(error.message || 'Login failed');
+      } else {
+        toast.success('Login successful');
+        navigate(from, { replace: true });
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       toast.error(error.message || 'Login failed');
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -56,7 +80,8 @@ export default function SimpleLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={loading}
+                disabled={submitting}
+                placeholder="Enter your email"
               />
             </div>
             <div>
@@ -68,7 +93,8 @@ export default function SimpleLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={loading}
+                  disabled={submitting}
+                  placeholder="Enter your password"
                 />
                 <Button
                   type="button"
@@ -76,13 +102,14 @@ export default function SimpleLoginPage() {
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={submitting}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : (
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? 'Signing in...' : (
                 <>
                   <LogIn className="mr-2 h-4 w-4" />
                   Sign In
