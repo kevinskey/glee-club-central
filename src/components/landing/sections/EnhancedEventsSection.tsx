@@ -1,5 +1,4 @@
 
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -217,17 +216,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
               </div>
             )}
           </div>
-
-          <Button
-            variant="outline"
-            className="bg-white/20 border-white/30 text-white hover:bg-white/30 mt-6"
-            asChild
-          >
-            <Link to="/calendar">
-              Swipe for More Dates
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
         </div>
       </div>
     </div>
@@ -334,4 +322,3 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     </section>
   );
 }
-
