@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -240,8 +241,8 @@ export function TopSlider() {
   // Don't render anything if loading or no slides
   if (isLoading) {
     return (
-      <div className="relative w-full bg-blue-600 flex items-center justify-center transition-all duration-300 h-16 sm:h-20 lg:h-24">
-        <div className="text-white text-xs sm:text-sm">Loading slides...</div>
+      <div className="relative w-full bg-blue-600 flex items-center justify-center transition-all duration-300" style={{ height: `${sliderHeight}px` }}>
+        <div className="text-white text-sm">Loading slides...</div>
       </div>
     );
   }
@@ -275,7 +276,8 @@ export function TopSlider() {
 
   return (
     <div 
-      className="relative w-full overflow-hidden shadow-sm transition-all duration-500 ease-in-out h-16 sm:h-20 lg:h-24 max-h-[25vh]"
+      className="relative w-full overflow-hidden shadow-sm transition-all duration-500 ease-in-out"
+      style={{ height: `${sliderHeight}px` }}
     >
       <div
         className="absolute inset-0 transition-all duration-1000"
@@ -292,17 +294,17 @@ export function TopSlider() {
           <div className="absolute inset-0 bg-black/40" />
         )}
         
-        <div className="relative h-full flex items-center justify-between px-3 sm:px-6 lg:px-8">
-          <div className="flex-1 text-center px-8 sm:px-12">
+        <div className="relative h-full flex items-center justify-between px-4 md:px-8">
+          <div className="flex-1 text-center">
             <h2 
-              className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mb-0.5 sm:mb-1 line-clamp-2"
+              className="text-sm md:text-lg font-semibold mb-1"
               style={{ color: currentSlide.text_color || '#FFFFFF' }}
             >
               {currentSlide.title}
             </h2>
             {currentSlide.description && (
               <p 
-                className="text-xs sm:text-sm opacity-90 line-clamp-1 sm:line-clamp-2"
+                className="text-xs md:text-sm opacity-90"
                 style={{ color: currentSlide.text_color || '#FFFFFF' }}
               >
                 {currentSlide.description}
@@ -314,12 +316,11 @@ export function TopSlider() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hidden sm:flex min-h-[36px] text-xs"
+              className="bg-white/10 border-white/20 text-white hover:bg-white/20 hidden md:flex"
               onClick={() => window.open(currentSlide.link_url, '_blank')}
             >
               <ExternalLink className="h-3 w-3 mr-1" />
-              <span className="hidden md:inline">Learn More</span>
-              <span className="md:hidden">More</span>
+              Learn More
             </Button>
           )}
         </div>
@@ -329,26 +330,26 @@ export function TopSlider() {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-1 sm:left-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 bg-black/20 hover:bg-black/40 text-white min-h-[32px] min-w-[32px] sm:min-h-[40px] sm:min-w-[40px]"
+              className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
               onClick={goToPrevious}
             >
-              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
             
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 h-8 w-8 sm:h-10 sm:w-10 bg-black/20 hover:bg-black/40 text-white min-h-[32px] min-w-[32px] sm:min-h-[40px] sm:min-w-[40px]"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 bg-black/20 hover:bg-black/40 text-white"
               onClick={goToNext}
             >
-              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
 
-            <div className="absolute bottom-1 sm:bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
               {slides.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all min-h-[12px] min-w-[12px] sm:min-h-[16px] sm:min-w-[16px] ${
+                  className={`w-2 h-2 rounded-full transition-all ${
                     index === currentIndex ? 'bg-white' : 'bg-white/50'
                   }`}
                   onClick={() => setCurrentIndex(index)}
