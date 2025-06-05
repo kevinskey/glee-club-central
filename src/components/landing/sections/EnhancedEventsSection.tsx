@@ -54,19 +54,19 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
         
-        <div className="p-6 flex-1 flex flex-col">
-          <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-lg text-gray-900 dark:text-foreground flex-1">
+        <div className="p-4 md:p-6 flex-1 flex flex-col min-h-0">
+          <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-base md:text-lg text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
             {event.title}
           </h3>
           
-          <div className="space-y-2 mb-4">
+          <div className="space-y-2 mb-4 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 text-blue-500 flex-shrink-0" />
+              <span className="text-xs md:text-sm text-muted-foreground truncate">
                 {new Date(event.date).toLocaleDateString('en-US', {
-                  weekday: 'long',
+                  weekday: 'short',
                   year: 'numeric',
-                  month: 'long',
+                  month: 'short',
                   day: 'numeric'
                 })}
               </span>
@@ -74,8 +74,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             
             {event.location && (
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-blue-500" />
-                <span className="text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                <span className="text-xs md:text-sm text-muted-foreground line-clamp-1">
                   {event.location}
                 </span>
               </div>
@@ -85,7 +85,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <Button
             variant="outline"
             size="sm"
-            className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 mt-auto"
+            className="group/btn hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 mt-auto self-start"
             asChild
           >
             <Link to="/calendar">
@@ -99,7 +99,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   );
 
   return (
-    <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background">
+    <section className="relative bg-gradient-to-b from-transparent via-blue-50/30 to-white dark:from-transparent dark:via-blue-900/10 dark:to-background py-8 md:py-12">
       {/* Decorative Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-32 h-32 bg-blue-400/10 rounded-full blur-3xl"></div>
@@ -113,9 +113,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           <>
             {/* Mobile: Horizontal scrolling slider */}
             <div className="block md:hidden mb-8">
-              <HorizontalSlider itemWidth="w-80" className="px-0">
+              <HorizontalSlider itemWidth="w-72" className="px-0">
                 {upcomingEvents.map((event, index) => (
-                  <div key={event.id} className="h-96">
+                  <div key={event.id} className="h-80">
                     {renderEventCard(event, index)}
                   </div>
                 ))}
@@ -125,7 +125,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             {/* Desktop: Equal-sized grid layout */}
             <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {upcomingEvents.map((event, index) => (
-                <div key={event.id}>
+                <div key={event.id} className="min-h-[400px]">
                   {renderEventCard(event, index)}
                 </div>
               ))}
@@ -142,7 +142,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         )}
 
         {/* Call to Action with Enhanced Design - Centered single button */}
-        <div className="text-center">
+        <div className="text-center pt-4">
           <Button
             size="lg"
             className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"

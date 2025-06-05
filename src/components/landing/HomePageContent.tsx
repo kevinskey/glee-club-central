@@ -47,11 +47,11 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Reset section spacing - properly structured */}
-      <div className="space-y-8 md:space-y-12 lg:space-y-16">
+      <div className="space-y-0">
         {/* Events Section */}
-        <section className="w-full py-8 md:py-12 lg:py-16">
+        <section className="w-full">
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
-            <div className="text-center mb-8 md:mb-12 lg:mb-16">
+            <div className="text-center mb-8 md:mb-12 py-8 md:py-12">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
                 Upcoming Events
               </h2>
