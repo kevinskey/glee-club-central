@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LowStockAlertTrigger } from './LowStockAlertTrigger';
 
 export function StoreSettings() {
   return (
@@ -10,9 +10,7 @@ export function StoreSettings() {
         <p className="text-muted-foreground">Configure store operations and automated alerts</p>
       </div>
 
-      <LowStockAlertTrigger />
-
-      {/* Placeholder for other store settings */}
+      {/* General Settings */}
       <Card>
         <CardHeader>
           <CardTitle>General Settings</CardTitle>
