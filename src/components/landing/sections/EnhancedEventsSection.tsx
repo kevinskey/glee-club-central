@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -180,8 +181,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                   {upcomingEvents.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="flex-shrink-0"
-                      style={{ width: `${100 / upcomingEvents.length}%` }}
+                      className="flex-shrink-0 w-full"
                     >
                       <div className="h-96 mx-4">
                         {renderEventCard(event, index)}
