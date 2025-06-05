@@ -36,7 +36,8 @@ export function TopSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [imageDimensions, setImageDimensions] = useState<{ [key: string]: ImageDimensions }>({});
-  const [sliderHeight, setSliderHeight] = useState<number>(80); // Default height in pixels
+  const [sliderHeight, setSliderHeight] = useState<number>(80);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSlides();
@@ -80,6 +81,7 @@ export function TopSlider() {
   const fetchSlides = async () => {
     try {
       console.log('🔍 TopSlider: Fetching visible slides...');
+      setError(null);
       
       // First, fetch slides
       const { data: slidesData, error: slidesError } = await supabase
@@ -139,6 +141,7 @@ export function TopSlider() {
       }
     } catch (error) {
       console.error('💥 TopSlider: Error fetching slides:', error);
+      setError('Failed to load slider content');
       setSlides([]);
     } finally {
       setIsLoading(false);
@@ -237,6 +240,15 @@ export function TopSlider() {
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="relative w-full bg-red-600 flex items-center justify-center transition-all duration-300" style={{ height: `${sliderHeight}px` }}>
+        <div className="text-white text-sm">Error loading slides: {error}</div>
+      </div>
+    );
+  }
 
   // Don't render anything if loading or no slides
   if (isLoading) {
