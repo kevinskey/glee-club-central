@@ -21,22 +21,31 @@ export function AdminDashboardContent() {
       {/* Quick Actions */}
       <AdminQuickActions />
 
-      {/* Top Slider Manager */}
-      <TopSliderManager />
-      
-      {/* Edit Role Tags Panel - Only for Admin users */}
-      {isAdminRole && (
-        <EditRoleTagsPanel />
-      )}
-      
-      {/* Dashboard Modules */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">Dashboard Modules</h2>
-        <DashboardModules />
+      {/* Two Column Layout for Desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-6">
+          {/* Top Slider Manager */}
+          <TopSliderManager />
+          
+          {/* Dashboard Modules */}
+          <div>
+            <h2 className="text-xl font-bold mb-4">Dashboard Modules</h2>
+            <DashboardModules />
+          </div>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Edit Role Tags Panel - Only for Admin users */}
+          {isAdminRole && (
+            <EditRoleTagsPanel />
+          )}
+          
+          {/* Recent Activity */}
+          <AdminRecentActivity />
+        </div>
       </div>
-      
-      {/* Recent Activity */}
-      <AdminRecentActivity />
     </div>
   );
 }
