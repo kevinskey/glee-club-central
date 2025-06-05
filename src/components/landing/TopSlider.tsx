@@ -15,13 +15,18 @@ interface TopSliderItem {
   text_color?: string;
   visible: boolean;
   display_order: number;
-  media_library?: {
-    file_url: string;
-  } | null;
+  media_id?: string;
+}
+
+interface MediaFile {
+  id: string;
+  file_url: string;
+  title: string;
 }
 
 export function TopSlider() {
   const [slides, setSlides] = useState<TopSliderItem[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<{ [key: string]: MediaFile }>({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,47 +59,60 @@ export function TopSlider() {
     try {
       console.log('🔍 TopSlider: Fetching visible slides...');
       
-      const { data, error } = await supabase
+      // First, fetch slides
+      const { data: slidesData, error: slidesError } = await supabase
         .from('top_slider_items')
-        .select(`
-          id,
-          title,
-          description,
-          image_url,
-          youtube_url,
-          link_url,
-          background_color,
-          text_color,
-          visible,
-          display_order,
-          media_library!left(
-            file_url
-          )
-        `)
+        .select('*')
         .eq('visible', true)
         .order('display_order', { ascending: true });
 
-      if (error) {
-        console.error('❌ TopSlider: Database error:', error);
-        throw error;
+      if (slidesError) {
+        console.error('❌ TopSlider: Slides error:', slidesError);
+        throw slidesError;
       }
 
-      console.log('📊 TopSlider: Fetched slides:', data);
+      console.log('📊 TopSlider: Fetched slides:', slidesData);
       
-      // Transform the data to handle the media_library join properly
-      const transformedSlides: TopSliderItem[] = (data || []).map(slide => ({
-        ...slide,
-        media_library: Array.isArray(slide.media_library) && slide.media_library.length > 0 
-          ? slide.media_library[0] 
-          : Array.isArray(slide.media_library) 
-            ? null 
-            : slide.media_library
-      }));
-      
-      setSlides(transformedSlides);
+      if (!slidesData || slidesData.length === 0) {
+        setSlides([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get all unique media IDs from slides
+      const mediaIds = slidesData
+        .map(slide => slide.media_id)
+        .filter(id => id !== null && id !== undefined);
+
+      console.log('🔍 TopSlider: Media IDs to fetch:', mediaIds);
+
+      // Fetch media files if we have media IDs
+      let mediaData: MediaFile[] = [];
+      if (mediaIds.length > 0) {
+        const { data: fetchedMedia, error: mediaError } = await supabase
+          .from('media_library')
+          .select('id, file_url, title')
+          .in('id', mediaIds);
+
+        if (mediaError) {
+          console.error('❌ TopSlider: Media error:', mediaError);
+        } else {
+          mediaData = fetchedMedia || [];
+          console.log('📁 TopSlider: Fetched media files:', mediaData);
+        }
+      }
+
+      // Create media lookup map
+      const mediaMap: { [key: string]: MediaFile } = {};
+      mediaData.forEach(media => {
+        mediaMap[media.id] = media;
+      });
+
+      setSlides(slidesData);
+      setMediaFiles(mediaMap);
       
       // Reset current index if slides changed
-      if (transformedSlides && transformedSlides.length > 0 && currentIndex >= transformedSlides.length) {
+      if (slidesData.length > 0 && currentIndex >= slidesData.length) {
         setCurrentIndex(0);
       }
     } catch (error) {
@@ -137,11 +155,21 @@ export function TopSlider() {
 
   const currentSlide = slides[currentIndex];
   
-  // Determine the background image source - prioritize media_library, then image_url
-  const backgroundImage = currentSlide.media_library?.file_url || currentSlide.image_url;
+  // Determine the background image source with improved logic
+  let backgroundImage: string | undefined;
   
-  console.log('🎨 TopSlider: Current slide background:', {
-    mediaLibraryUrl: currentSlide.media_library?.file_url,
+  if (currentSlide.media_id && mediaFiles[currentSlide.media_id]) {
+    backgroundImage = mediaFiles[currentSlide.media_id].file_url;
+    console.log('🎨 TopSlider: Using media library image:', backgroundImage);
+  } else if (currentSlide.image_url) {
+    backgroundImage = currentSlide.image_url;
+    console.log('🎨 TopSlider: Using direct image URL:', backgroundImage);
+  }
+  
+  console.log('🎨 TopSlider: Final background setup:', {
+    slideId: currentSlide.id,
+    mediaId: currentSlide.media_id,
+    hasMediaFile: currentSlide.media_id ? !!mediaFiles[currentSlide.media_id] : false,
     imageUrl: currentSlide.image_url,
     finalBackgroundImage: backgroundImage,
     backgroundColor: currentSlide.background_color
@@ -150,10 +178,13 @@ export function TopSlider() {
   return (
     <div className="relative w-full h-16 md:h-20 overflow-hidden shadow-sm">
       <div
-        className="absolute inset-0 transition-all duration-1000 bg-cover bg-center"
+        className="absolute inset-0 transition-all duration-1000"
         style={{
           backgroundColor: currentSlide.background_color || '#4F46E5',
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       >
         {/* Add overlay for better text readability when background image is present */}

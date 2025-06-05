@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, Image, Video, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, Image, Video, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MediaPicker } from '@/components/media/MediaPicker';
@@ -34,11 +33,11 @@ interface TopSliderItem {
   visible: boolean;
   display_order: number;
   created_at: string;
-  media_library?: MediaLibraryItem;
 }
 
 export function TopSliderManager() {
   const [items, setItems] = useState<TopSliderItem[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<{ [key: string]: MediaLibraryItem }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<TopSliderItem | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -64,25 +63,53 @@ export function TopSliderManager() {
     try {
       console.log('🔍 TopSliderManager: Fetching slider items...');
       
-      const { data, error } = await supabase
+      // Fetch slides
+      const { data: slidesData, error: slidesError } = await supabase
         .from('top_slider_items')
-        .select(`
-          *,
-          media_library!left(
-            id,
-            file_url,
-            title
-          )
-        `)
+        .select('*')
         .order('display_order', { ascending: true });
 
-      if (error) {
-        console.error('❌ TopSliderManager: Database error:', error);
-        throw error;
+      if (slidesError) {
+        console.error('❌ TopSliderManager: Slides error:', slidesError);
+        throw slidesError;
       }
 
-      console.log('📊 TopSliderManager: Fetched items:', data);
-      setItems(data || []);
+      console.log('📊 TopSliderManager: Fetched items:', slidesData);
+      
+      if (!slidesData) {
+        setItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get all unique media IDs
+      const mediaIds = slidesData
+        .map(slide => slide.media_id)
+        .filter(id => id !== null && id !== undefined);
+
+      // Fetch media files if we have media IDs
+      let mediaData: MediaLibraryItem[] = [];
+      if (mediaIds.length > 0) {
+        const { data: fetchedMedia, error: mediaError } = await supabase
+          .from('media_library')
+          .select('id, file_url, title')
+          .in('id', mediaIds);
+
+        if (mediaError) {
+          console.error('❌ TopSliderManager: Media error:', mediaError);
+        } else {
+          mediaData = fetchedMedia || [];
+        }
+      }
+
+      // Create media lookup map
+      const mediaMap: { [key: string]: MediaLibraryItem } = {};
+      mediaData.forEach(media => {
+        mediaMap[media.id] = media;
+      });
+
+      setItems(slidesData);
+      setMediaFiles(mediaMap);
     } catch (error) {
       console.error('💥 TopSliderManager: Error fetching top slider items:', error);
       toast.error('Failed to load slider items');
@@ -321,20 +348,26 @@ export function TopSliderManager() {
   };
 
   const getItemPreview = (item: TopSliderItem) => {
+    let backgroundImage: string | undefined;
+    
+    if (item.media_id && mediaFiles[item.media_id]) {
+      backgroundImage = mediaFiles[item.media_id].file_url;
+    } else if (item.image_url) {
+      backgroundImage = item.image_url;
+    }
+
     if (item.youtube_url) {
       return (
         <div className="w-16 h-12 rounded flex-shrink-0 bg-red-600 flex items-center justify-center">
           <Video className="h-6 w-6 text-white" />
         </div>
       );
-    } else if (item.media_library?.file_url || item.image_url) {
+    } else if (backgroundImage) {
       return (
         <div 
-          className="w-16 h-12 rounded flex-shrink-0"
+          className="w-16 h-12 rounded flex-shrink-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `url(${item.media_library?.file_url || item.image_url})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundImage: `url(${backgroundImage})`,
           }}
         />
       );
@@ -376,6 +409,14 @@ export function TopSliderManager() {
           <div className="flex gap-2">
             <Button 
               variant="outline" 
+              onClick={fetchItems}
+              size="sm"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button 
+              variant="outline" 
               onClick={() => window.open('/', '_blank')}
               size="sm"
             >
@@ -405,29 +446,47 @@ export function TopSliderManager() {
               <div className="mb-6">
                 <h4 className="text-sm font-medium mb-3 text-muted-foreground">LIVE PREVIEW</h4>
                 <div className="border rounded-lg overflow-hidden">
-                  <div 
-                    className="h-16 md:h-20 flex items-center justify-center relative"
-                    style={{
-                      backgroundColor: items.find(item => item.visible)?.background_color || '#4F46E5'
-                    }}
-                  >
-                    <div className="text-center">
-                      <h3 
-                        className="text-sm md:text-lg font-semibold mb-1"
-                        style={{ color: items.find(item => item.visible)?.text_color || '#FFFFFF' }}
+                  {(() => {
+                    const firstVisibleItem = items.find(item => item.visible);
+                    if (!firstVisibleItem) return null;
+                    
+                    let previewBackgroundImage: string | undefined;
+                    if (firstVisibleItem.media_id && mediaFiles[firstVisibleItem.media_id]) {
+                      previewBackgroundImage = mediaFiles[firstVisibleItem.media_id].file_url;
+                    } else if (firstVisibleItem.image_url) {
+                      previewBackgroundImage = firstVisibleItem.image_url;
+                    }
+
+                    return (
+                      <div 
+                        className="h-16 md:h-20 flex items-center justify-center relative bg-cover bg-center"
+                        style={{
+                          backgroundColor: firstVisibleItem.background_color || '#4F46E5',
+                          backgroundImage: previewBackgroundImage ? `url(${previewBackgroundImage})` : undefined
+                        }}
                       >
-                        {items.find(item => item.visible)?.title}
-                      </h3>
-                      {items.find(item => item.visible)?.description && (
-                        <p 
-                          className="text-xs md:text-sm opacity-90"
-                          style={{ color: items.find(item => item.visible)?.text_color || '#FFFFFF' }}
-                        >
-                          {items.find(item => item.visible)?.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                        {previewBackgroundImage && (
+                          <div className="absolute inset-0 bg-black/40" />
+                        )}
+                        <div className="text-center relative z-10">
+                          <h3 
+                            className="text-sm md:text-lg font-semibold mb-1"
+                            style={{ color: firstVisibleItem.text_color || '#FFFFFF' }}
+                          >
+                            {firstVisibleItem.title}
+                          </h3>
+                          {firstVisibleItem.description && (
+                            <p 
+                              className="text-xs md:text-sm opacity-90"
+                              style={{ color: firstVisibleItem.text_color || '#FFFFFF' }}
+                            >
+                              {firstVisibleItem.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -444,6 +503,7 @@ export function TopSliderManager() {
                     </Badge>
                     {item.youtube_url && <Badge variant="outline">YouTube</Badge>}
                     {item.media_id && <Badge variant="outline">Media Library</Badge>}
+                    {item.image_url && <Badge variant="outline">Direct URL</Badge>}
                   </div>
                   {item.description && (
                     <p className="text-sm text-muted-foreground truncate">{item.description}</p>
