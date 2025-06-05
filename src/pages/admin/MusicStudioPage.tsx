@@ -72,20 +72,33 @@ export default function MusicStudioPage() {
   const fetchRecordings = async () => {
     try {
       const { data, error } = await supabase
-        .from('track_recordings')
+        .from('audio_files')
         .select(`
           *,
-          profiles (
+          profiles:uploaded_by (
             first_name,
             last_name,
             voice_part
           )
         `)
-        .or(`user_id.eq.${user?.id},share_level.eq.group,share_level.eq.director`)
+        .eq('category', 'recordings')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRecordings(data || []);
+      
+      // Transform the data to match the Recording interface
+      const transformedData = data?.map(item => ({
+        id: item.id,
+        title: item.title,
+        backing_track_id: null,
+        recording_file_url: item.file_url,
+        share_level: 'private' as const,
+        created_at: item.created_at,
+        user_id: item.uploaded_by,
+        profiles: item.profiles
+      })) || [];
+      
+      setRecordings(transformedData);
     } catch (error) {
       console.error('Error fetching recordings:', error);
       toast.error('Failed to load recordings');
@@ -135,61 +148,75 @@ export default function MusicStudioPage() {
   };
 
   const saveRecording = async () => {
-    if (!recordedBlob || !recordingTitle) {
-      toast.error('Please provide a title for your recording');
+    if (!recordedBlob || !recordingTitle || !user) {
+      toast.error('Please provide a title for your recording and ensure you are logged in');
       return;
     }
 
     try {
-      // Upload audio file
-      const fileName = `${user?.id}/${Date.now()}-recording.wav`;
+      console.log('Starting recording save process...');
+      
+      // Create a unique filename
+      const fileName = `${user.id}/${Date.now()}-recording.wav`;
+      
+      // Upload file to audio storage bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('recordings')
-        .upload(fileName, recordedBlob);
+        .from('audio')
+        .upload(fileName, recordedBlob, {
+          contentType: 'audio/wav'
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('File uploaded successfully:', uploadData);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('recordings')
+        .from('audio')
         .getPublicUrl(fileName);
 
-      // Save recording record
-      const { error: recordError } = await supabase
-        .from('track_recordings')
-        .insert({
-          user_id: user?.id,
-          title: recordingTitle,
-          backing_track_id: selectedTrack?.id,
-          recording_file_url: publicUrl,
-          recording_file_path: fileName,
-          share_level: shareLevel
-        });
+      console.log('Public URL generated:', publicUrl);
 
-      if (recordError) throw recordError;
+      // Save recording record to audio_files table
+      const { data: dbData, error: recordError } = await supabase
+        .from('audio_files')
+        .insert({
+          uploaded_by: user.id,
+          title: recordingTitle,
+          description: `Recording created on ${new Date().toLocaleDateString()}`,
+          file_url: publicUrl,
+          file_path: fileName,
+          category: 'recordings'
+        })
+        .select()
+        .single();
+
+      if (recordError) {
+        console.error('Database error:', recordError);
+        throw recordError;
+      }
+
+      console.log('Recording saved to database:', dbData);
 
       toast.success('Recording saved successfully');
       setSaveDialogOpen(false);
       setRecordedBlob(null);
       setRecordingTitle('');
       fetchRecordings();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving recording:', error);
-      toast.error('Failed to save recording');
+      toast.error(`Failed to save recording: ${error.message || 'Unknown error'}`);
     }
   };
 
   const updateShareLevel = async (recordingId: string, newShareLevel: string) => {
     try {
-      const { error } = await supabase
-        .from('track_recordings')
-        .update({ share_level: newShareLevel })
-        .eq('id', recordingId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      toast.success('Share level updated');
-      fetchRecordings();
+      // Note: Since we're using audio_files table, we can't update share_level
+      // This would need to be implemented differently or we need a separate table
+      toast.info('Share level feature not yet implemented for audio files');
     } catch (error) {
       console.error('Error updating share level:', error);
       toast.error('Failed to update share level');
@@ -200,13 +227,36 @@ export default function MusicStudioPage() {
     if (!confirm('Are you sure you want to delete this recording?')) return;
 
     try {
-      const { error } = await supabase
-        .from('track_recordings')
+      // Get the file path first
+      const { data: fileData, error: fetchError } = await supabase
+        .from('audio_files')
+        .select('file_path')
+        .eq('id', recordingId)
+        .eq('uploaded_by', user?.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Delete from storage
+      if (fileData?.file_path) {
+        const { error: storageError } = await supabase.storage
+          .from('audio')
+          .remove([fileData.file_path]);
+        
+        if (storageError) {
+          console.warn('Storage deletion error:', storageError);
+        }
+      }
+
+      // Delete from database
+      const { error: dbError } = await supabase
+        .from('audio_files')
         .delete()
         .eq('id', recordingId)
-        .eq('user_id', user?.id);
+        .eq('uploaded_by', user?.id);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
+      
       toast.success('Recording deleted');
       fetchRecordings();
     } catch (error) {
@@ -366,20 +416,6 @@ export default function MusicStudioPage() {
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-medium">{recording.title}</h3>
                         <div className="flex gap-2">
-                          <Select
-                            value={recording.share_level}
-                            onValueChange={(value) => updateShareLevel(recording.id, value)}
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="private">Private</SelectItem>
-                              <SelectItem value="section">Section</SelectItem>
-                              <SelectItem value="group">Group</SelectItem>
-                              <SelectItem value="director">Director</SelectItem>
-                            </SelectContent>
-                          </Select>
                           <Button
                             variant="outline"
                             size="sm"
