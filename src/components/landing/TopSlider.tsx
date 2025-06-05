@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -133,7 +134,7 @@ export function TopSlider({
     console.log('⏳ TopSlider: Still loading...');
     return (
       <div 
-        className={cn("w-full px-4 sm:px-6 lg:px-8", className)}
+        className={cn("w-full", isMobile ? "px-4" : "px-4 sm:px-6 lg:px-8", className)}
         style={{ height }}
       >
         <div className="h-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
@@ -163,7 +164,7 @@ export function TopSlider({
   // Mobile horizontal scroll view
   if (isMobile) {
     return (
-      <div className={cn("w-full px-4", className)}>
+      <div className={cn("w-full px-4 -mt-2 -mb-2", className)}>
         <div className="overflow-x-auto">
           <div 
             className="flex gap-4 pb-4"
@@ -179,7 +180,7 @@ export function TopSlider({
                   key={slide.id}
                   className="flex-shrink-0 w-80 relative overflow-hidden rounded-2xl shadow-lg"
                   style={{ 
-                    height: "240px",
+                    height: "180px",
                     scrollSnapAlign: 'start'
                   }}
                 >
@@ -267,7 +268,7 @@ export function TopSlider({
 
   // Desktop view
   return (
-    <div className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}>
+    <div className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8", className)}>
       <div 
         className="relative w-full overflow-hidden rounded-2xl shadow-2xl"
         style={{ height }}
