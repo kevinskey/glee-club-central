@@ -3,9 +3,8 @@ import React from "react";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
-import { Header } from "@/components/landing/Header";
+import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
 import { CustomSlideRenderer } from "@/components/landing/CustomSlideRenderer";
-import { TopSlider } from "@/components/landing/TopSlider";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Sliders } from "lucide-react";
@@ -26,12 +25,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen home-page overflow-x-hidden bg-background">
-      <Header />
-      
-      {/* Top Slider - Admin managed banner at the very top */}
-      <TopSlider />
-      
+    <PublicPageWrapper showTopSlider={true} className="home-page overflow-x-hidden">
       {/* Temporary Admin Access Button - positioned for easy access */}
       <div className="fixed bottom-4 right-4 z-50">
         <Button
@@ -44,20 +38,17 @@ const HomePage = () => {
         </Button>
       </div>
       
-      {/* Content wrapper */}
-      <div>
-        {/* Custom Slide Renderer - for other custom slides */}
-        <CustomSlideRenderer />
-        
-        {/* Main Content */}
-        <HomePageContent
-          heroImages={heroImages}
-          upcomingEvents={upcomingEvents}
-          storeProducts={storeProducts}
-          audioTracks={audioTracks}
-        />
-      </div>
-    </div>
+      {/* Custom Slide Renderer - for other custom slides */}
+      <CustomSlideRenderer />
+      
+      {/* Main Content */}
+      <HomePageContent
+        heroImages={heroImages}
+        upcomingEvents={upcomingEvents}
+        storeProducts={storeProducts}
+        audioTracks={audioTracks}
+      />
+    </PublicPageWrapper>
   );
 };
 
