@@ -124,14 +124,14 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         
         <div className="p-4 md:p-6 flex-1 flex flex-col justify-between min-h-0 relative z-10">
           <div className="flex-1">
-            <h3 className="font-playfair font-bold mb-3 px-2 py-1 group-hover:scale-105 transition-transform duration-300 text-base md:text-lg text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
+            <h3 className="font-playfair font-bold mb-3 px-2 py-1 group-hover:scale-105 transition-transform duration-300 text-lg md:text-xl text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
               {event.title}
             </h3>
             
             <div className="space-y-2 mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                <span className="text-xs md:text-sm text-muted-foreground truncate">
+                <span className="text-sm md:text-base text-muted-foreground truncate">
                   {new Date(event.date).toLocaleDateString('en-US', {
                     weekday: 'short',
                     year: 'numeric',
@@ -144,7 +144,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
               {event.location && (
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                  <span className="text-xs md:text-sm text-muted-foreground line-clamp-1">
+                  <span className="text-sm md:text-base text-muted-foreground line-clamp-1">
                     {event.location}
                   </span>
                 </div>
@@ -159,7 +159,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             asChild
           >
             <Link to="/calendar">
-              Learn More
+              Swipe for More Dates
               <ArrowRight className="h-3 w-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
             </Link>
           </Button>
