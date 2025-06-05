@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -148,9 +147,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Grid with Enhanced Design */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe */}
+            {/* Mobile: One card at a time with swipe - Full Width */}
             <div className="block md:hidden mb-8">
-              <div className="relative w-full overflow-hidden">
+              <div className="relative w-full overflow-hidden -mx-4">
                 {/* Navigation arrows */}
                 <button
                   onClick={prevSlide}
@@ -184,7 +183,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                       className="flex-shrink-0"
                       style={{ width: `${100 / upcomingEvents.length}%` }}
                     >
-                      <div className="h-96 mx-2">
+                      <div className="h-96 mx-4">
                         {renderEventCard(event, index)}
                       </div>
                     </div>
