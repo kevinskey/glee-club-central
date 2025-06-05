@@ -1,4 +1,3 @@
-
 import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
@@ -49,7 +48,7 @@ export function HomePageContent({
       {/* Reset section spacing - properly structured */}
       <div className="space-y-0">
         {/* Events Section */}
-        <section className="w-full" style={{ paddingTop: '75px' }}>
+        <section className="w-full" style={{ paddingTop: '30px' }}>
           <div className="container mx-auto px-4 md:px-6 lg:px-8">
             <div className="text-center mb-8 md:mb-12 py-8 md:py-12">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
