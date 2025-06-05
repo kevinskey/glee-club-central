@@ -55,7 +55,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         </div>
         
         <div className="p-4 md:p-6 flex-1 flex flex-col min-h-0">
-          <h3 className="font-playfair font-bold mb-3 group-hover:scale-105 transition-transform duration-300 text-base md:text-lg text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
+          <h3 className="font-playfair font-bold mb-3 px-2 py-1 group-hover:scale-105 transition-transform duration-300 text-base md:text-lg text-gray-900 dark:text-foreground line-clamp-2 leading-tight">
             {event.title}
           </h3>
           
