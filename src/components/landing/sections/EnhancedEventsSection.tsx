@@ -19,7 +19,15 @@ interface EnhancedEventsSectionProps {
 }
 
 export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
-  const upcomingEvents = events.slice(0, 6);
+  // Transform events to ensure proper property mapping
+  const transformedEvents = events.map(event => ({
+    ...event,
+    imageUrl: event.imageUrl || (event as any).feature_image_url,
+    location: event.location || (event as any).location_name,
+    date: event.date || (event as any).start_time
+  }));
+
+  const upcomingEvents = transformedEvents.slice(0, 6);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
