@@ -7,9 +7,8 @@ import { ProductManagement } from '@/components/admin/store/ProductManagement';
 import { InventoryManager } from '@/components/admin/store/InventoryManager';
 import { OrderManagement } from '@/components/admin/store/OrderManagement';
 import { StoreAnalytics } from '@/components/admin/store/StoreAnalytics';
-import { TourMerchAssignment } from '@/components/admin/TourMerchAssignment';
 import { Badge } from '@/components/ui/badge';
-import { Store, Package, ShoppingCart, BarChart3, MapPin } from 'lucide-react';
+import { Store, Package, ShoppingCart, BarChart3 } from 'lucide-react';
 
 export default function StoreV2Page() {
   const [activeTab, setActiveTab] = useState('products');
@@ -23,7 +22,7 @@ export default function StoreV2Page() {
             Store & Merch Manager
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Manage products, inventory, orders, and tour merchandise
+            Manage products, inventory, and orders
           </p>
           <div className="flex items-center gap-4 mt-4">
             <Badge variant="outline" className="bg-green-50 border-green-200 text-green-800">
@@ -41,7 +40,7 @@ export default function StoreV2Page() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -57,10 +56,6 @@ export default function StoreV2Page() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
-            </TabsTrigger>
-            <TabsTrigger value="tour-merch" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Tour Merch
             </TabsTrigger>
           </TabsList>
 
@@ -78,10 +73,6 @@ export default function StoreV2Page() {
 
           <TabsContent value="analytics">
             <StoreAnalytics />
-          </TabsContent>
-
-          <TabsContent value="tour-merch">
-            <TourMerchAssignment />
           </TabsContent>
         </Tabs>
       </div>
