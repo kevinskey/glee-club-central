@@ -277,16 +277,16 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           </div>
         )}
 
-        {/* Call to Action with Enhanced Design - Centered single button with smaller size */}
-        <div className="text-center pt-2 px-4">
+        {/* Call to Action with Enhanced Design - Restored View Full Calendar button */}
+        <div className="text-center pt-4 px-4">
           <Button
-            size="default"
-            className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-6 py-2 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+            size="sm"
+            className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia hover:from-glee-columbia/90 hover:via-glee-purple/90 hover:to-glee-columbia/90 text-white px-4 py-2 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             asChild
           >
             <Link to="/calendar">
               View Full Calendar
-              <ArrowRight className="h-4 w-4 ml-2" />
+              <ArrowRight className="h-3 w-3 ml-2" />
             </Link>
           </Button>
         </div>
