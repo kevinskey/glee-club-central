@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,12 +19,14 @@ interface EnhancedEventsSectionProps {
 }
 
 export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
-  const upcomingEvents = events.slice(0, 3);
+  const upcomingEvents = events.slice(0, 6);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const sliderRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   // Check if mobile on mount and resize
   useEffect(() => {
@@ -37,7 +40,25 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle touch events for swiping
+  // Check scroll position for desktop scroller
+  const checkScrollButtons = () => {
+    if (sliderRef.current && !isMobile) {
+      const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollButtons();
+    const slider = sliderRef.current;
+    if (slider) {
+      slider.addEventListener('scroll', checkScrollButtons);
+      return () => slider.removeEventListener('scroll', checkScrollButtons);
+    }
+  }, [isMobile, upcomingEvents]);
+
+  // Handle touch events for mobile swiping
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
@@ -70,8 +91,21 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
     setCurrentSlide(prev => (prev - 1 + upcomingEvents.length) % upcomingEvents.length);
   };
 
+  // Desktop scroll functions
+  const scrollLeft = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (sliderRef.current) {
+      sliderRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+    }
+  };
+
   const renderEventCard = (event: Event, index: number) => (
-    <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full relative">
+    <Card className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg overflow-hidden bg-white/90 dark:bg-card/90 backdrop-blur-sm hover:bg-white dark:hover:bg-card h-full relative flex-shrink-0 w-80">
       <CardContent className="p-0 h-full flex flex-col">
         <div className="aspect-[16/10] relative overflow-hidden flex-shrink-0">
           {event.imageUrl ? (
@@ -144,10 +178,10 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Events Grid with Enhanced Design */}
+        {/* Events Display */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: One card at a time with swipe - Full Width */}
+            {/* Mobile: One card at a time with swipe */}
             <div className="block md:hidden mb-8">
               <div className="relative w-full overflow-hidden">
                 {/* Navigation arrows */}
@@ -167,7 +201,6 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
                 </button>
 
                 <div 
-                  ref={sliderRef}
                   className="flex transition-transform duration-300 ease-out"
                   style={{
                     transform: `translateX(-${currentSlide * 100}%)`,
@@ -205,13 +238,46 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
               </div>
             </div>
 
-            {/* Desktop: Equal-sized grid layout with reduced top spacing */}
-            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {upcomingEvents.map((event, index) => (
-                <div key={event.id} className="min-h-[400px]">
-                  {renderEventCard(event, index)}
-                </div>
-              ))}
+            {/* Desktop: Horizontal scrolling row */}
+            <div className="hidden md:block mb-6 relative">
+              {/* Scroll navigation arrows */}
+              {canScrollLeft && (
+                <button
+                  onClick={scrollLeft}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              )}
+              
+              {canScrollRight && (
+                <button
+                  onClick={scrollRight}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/90 dark:bg-black/90 p-3 rounded-full shadow-lg hover:bg-white dark:hover:bg-black transition-colors"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              )}
+
+              <div 
+                ref={sliderRef}
+                className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                style={{ 
+                  scrollbarWidth: 'none', 
+                  msOverflowStyle: 'none',
+                  scrollSnapType: 'x mandatory'
+                }}
+              >
+                {upcomingEvents.map((event, index) => (
+                  <div 
+                    key={event.id} 
+                    className="h-[400px]"
+                    style={{ scrollSnapAlign: 'start' }}
+                  >
+                    {renderEventCard(event, index)}
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         ) : (
