@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +45,7 @@ export function UnifiedAdminModules() {
     },
     {
       id: "slider_management",
-      title: "Slider Management",
+      title: "Manage Slides",
       description: "Design slides & manage all sliders",
       icon: <Sliders className="h-5 w-5" />,
       color: "bg-indigo-500",
