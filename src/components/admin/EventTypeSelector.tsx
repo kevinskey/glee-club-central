@@ -104,7 +104,7 @@ export const EventTypeSelector: React.FC<EventTypeSelectorProps> = ({
             <ChevronDown className="h-4 w-4 ml-auto" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-80 p-3" align="start">
+        <PopoverContent className="w-80 p-3 bg-white dark:bg-gray-800 border shadow-lg z-50" align="start">
           <div className="space-y-2">
             <h4 className="font-medium text-sm mb-3">Select Event Types</h4>
             <div className="max-h-60 overflow-y-auto space-y-1">
@@ -116,8 +116,8 @@ export const EventTypeSelector: React.FC<EventTypeSelectorProps> = ({
                 >
                   <Checkbox
                     checked={selectedTypes.includes(eventType.value)}
-                    onChange={() => {}} // Handled by onClick above
-                    className="pointer-events-none"
+                    onCheckedChange={() => handleTypeToggle(eventType.value)}
+                    className="pointer-events-auto"
                   />
                   <span className="text-sm flex-1">{eventType.label}</span>
                 </div>
