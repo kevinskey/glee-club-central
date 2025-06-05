@@ -113,15 +113,27 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
         {/* Events Grid with Enhanced Design */}
         {upcomingEvents.length > 0 ? (
           <>
-            {/* Mobile: Horizontal scrolling slider */}
+            {/* Mobile: Horizontal scrolling slider with fixed styling */}
             <div className="block md:hidden mb-8">
-              <HorizontalSlider itemWidth="w-72" className="px-0">
-                {upcomingEvents.map((event, index) => (
-                  <div key={event.id} className="h-80">
-                    {renderEventCard(event, index)}
-                  </div>
-                ))}
-              </HorizontalSlider>
+              <div className="w-full overflow-x-auto">
+                <div 
+                  className="flex gap-4 pb-4"
+                  style={{
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
+                  {upcomingEvents.map((event, index) => (
+                    <div 
+                      key={event.id} 
+                      className="flex-shrink-0 w-72 h-80"
+                      style={{ scrollSnapAlign: 'start' }}
+                    >
+                      {renderEventCard(event, index)}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Desktop: Equal-sized grid layout */}
