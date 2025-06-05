@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { 
@@ -9,21 +10,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Users, Search, Plus, RefreshCw, AlertCircle, Upload } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { UserManagementTable } from './UserManagementTable';
 import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
 import { UserManagementMobile } from './UserManagementMobile';
-import { BulkUploadDialog } from '@/components/members/BulkUploadDialog';
 import { toast } from 'sonner';
 import { UserManagementData } from '@/services/userManagementService';
 
 export default function UserManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const { 
     users, 
     isLoading, 
@@ -90,13 +90,12 @@ export default function UserManagement() {
   };
 
   const handleImportUsers = () => {
-    setShowBulkUploadDialog(true);
+    setShowImportDialog(true);
   };
 
-  const handleBulkUploadComplete = () => {
-    setShowBulkUploadDialog(false);
+  const handleImportComplete = () => {
+    setShowImportDialog(false);
     refreshUsers();
-    toast.success('Bulk upload completed');
   };
 
   const handleRefresh = async () => {
@@ -146,16 +145,10 @@ export default function UserManagement() {
         <Card className="mt-8">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Members Directory ({users.length})</CardTitle>
-            <div className="flex gap-2">
-              <Button onClick={() => setShowBulkUploadDialog(true)} variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
-                Bulk Upload
-              </Button>
-              <Button onClick={handleAddUser}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Member
-              </Button>
-            </div>
+            <Button onClick={handleAddUser}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Member
+            </Button>
           </CardHeader>
           <CardContent>
             {/* Search and Filter */}
@@ -211,15 +204,40 @@ export default function UserManagement() {
           isOpen={showAddDialog} 
           onClose={() => setShowAddDialog(false)}
           onCreateUser={handleUserAdded}
-          onImportUsers={() => setShowBulkUploadDialog(true)}
+          onImportUsers={handleImportUsers}
         />
 
-        {/* Bulk Upload Dialog */}
-        <BulkUploadDialog
-          isOpen={showBulkUploadDialog}
-          onOpenChange={setShowBulkUploadDialog}
-          onUploadComplete={handleBulkUploadComplete}
-        />
+        {/* Import Users Dialog */}
+        {showImportDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full m-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Import Users from CSV</h2>
+                <Button variant="ghost" onClick={() => setShowImportDialog(false)}>
+                  ×
+                </Button>
+              </div>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upload a CSV file with user information to bulk import members.
+                </p>
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Handle CSV file upload
+                      toast.info('CSV import functionality coming soon');
+                      handleImportComplete();
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
