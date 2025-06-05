@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { DashboardModules } from '@/components/dashboard/DashboardModules';
+import { UnifiedAdminModules } from '@/components/admin/UnifiedAdminModules';
 import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
-import { AdminQuickActions } from '@/components/admin/AdminQuickActions';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
 import { TopSliderManager } from '@/components/admin/TopSliderManager';
@@ -18,8 +17,8 @@ export function AdminDashboardContent() {
       {/* Stats Overview */}
       <AdminStatsCards />
       
-      {/* Quick Actions */}
-      <AdminQuickActions />
+      {/* Unified Modules & Quick Actions */}
+      <UnifiedAdminModules />
 
       {/* Two Column Layout for Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -27,12 +26,6 @@ export function AdminDashboardContent() {
         <div className="space-y-6">
           {/* Top Slider Manager */}
           <TopSliderManager />
-          
-          {/* Dashboard Modules */}
-          <div>
-            <h2 className="text-xl font-bold mb-4">Dashboard Modules</h2>
-            <DashboardModules />
-          </div>
         </div>
 
         {/* Right Column */}
