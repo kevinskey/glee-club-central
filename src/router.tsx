@@ -20,6 +20,7 @@ import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
+import { adminRoutesV2 } from "./routes/adminRoutesV2";
 
 const router = createBrowserRouter([
   {
@@ -90,8 +91,10 @@ const router = createBrowserRouter([
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
       },
-      // Add all admin routes
+      // Add all admin routes (original)
       ...adminRoutes,
+      // Add all v2 admin routes
+      ...adminRoutesV2,
       {
         path: "*",
         element: <NotFoundPage />,

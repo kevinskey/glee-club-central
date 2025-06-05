@@ -1,20 +1,20 @@
 
-import React from 'react';
-import { AdminDashboardContent } from "@/components/admin/AdminDashboardContent";
-import { MobileAdminDashboard } from "@/components/admin/MobileAdminDashboard";
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { PageLoader } from '@/components/ui/page-loader';
 
 const AdminDashboard: React.FC = () => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const navigate = useNavigate();
   
-  console.log('🏛️ AdminDashboard: Rendering with mobile check:', { isMobile });
+  useEffect(() => {
+    // Redirect to the new v2 admin dashboard
+    navigate('/admin/v2', { replace: true });
+  }, [navigate]);
 
   return (
     <AdminLayout>
-      <div className="w-full max-w-full overflow-x-hidden">
-        {isMobile ? <MobileAdminDashboard /> : <AdminDashboardContent />}
-      </div>
+      <PageLoader message="Loading admin dashboard..." />
     </AdminLayout>
   );
 };
