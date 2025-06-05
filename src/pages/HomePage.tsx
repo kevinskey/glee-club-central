@@ -21,7 +21,7 @@ const HomePage = () => {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
+    <div className="min-h-screen home-page overflow-x-hidden bg-background">
       <Header />
       
       {/* Custom Slide Renderer - Seamless positioning under header */}

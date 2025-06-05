@@ -102,9 +102,14 @@ body {
     padding-top: 72px !important; /* Reduced from 80px */
   }
   
-  /* Page content containers */
+  /* Page content containers - FIXED: Remove extra padding on home page */
   .min-h-screen {
-    padding-top: 72px !important; /* Reduced from 80px */
+    padding-top: 0 !important; /* Remove conflicting padding */
+  }
+  
+  /* Only add padding for non-home pages */
+  .min-h-screen:not(.home-page) {
+    padding-top: 72px !important;
   }
   
   /* Dashboard and admin pages */
