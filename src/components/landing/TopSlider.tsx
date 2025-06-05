@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -194,19 +195,27 @@ export function TopSlider({
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
                       </div>
+                    ) : slide.computed_image_url ? (
+                      <div className="relative w-full h-full">
+                        <img
+                          src={slide.computed_image_url}
+                          alt={slide.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error('Image failed to load:', slide.computed_image_url);
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
+                      </div>
                     ) : (
                       <div 
                         className="w-full h-full relative"
                         style={{
-                          backgroundColor: slide.background_color || '#4A90E2',
-                          backgroundImage: slide.computed_image_url ? `url(${slide.computed_image_url})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
+                          backgroundColor: slide.background_color || '#4A90E2'
                         }}
                       >
-                        {slide.computed_image_url && (
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
-                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                       </div>
                     )}
                   </div>
@@ -256,7 +265,7 @@ export function TopSlider({
     );
   }
 
-  // Desktop view (unchanged)
+  // Desktop view
   return (
     <div className={cn("w-full mx-auto max-w-7xl px-2 sm:px-4 lg:px-8 mt-2", className)}>
       <div 
@@ -272,13 +281,21 @@ export function TopSlider({
               <iframe
                 src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&loop=1&playlist=${youtubeVideoId}&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
                 allow="autoplay; encrypted-media"
                 allowFullScreen={false}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
+            </div>
+          ) : currentSlideData.computed_image_url ? (
+            <div className="relative w-full h-full">
+              <img
+                src={currentSlideData.computed_image_url}
+                alt={currentSlideData.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Image failed to load:', currentSlideData.computed_image_url);
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
             </div>
@@ -286,15 +303,10 @@ export function TopSlider({
             <div 
               className="w-full h-full relative"
               style={{
-                backgroundColor: currentSlideData.background_color || '#4A90E2',
-                backgroundImage: currentSlideData.computed_image_url ? `url(${currentSlideData.computed_image_url})` : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
+                backgroundColor: currentSlideData.background_color || '#4A90E2'
               }}
             >
-              {currentSlideData.computed_image_url && (
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30"></div>
-              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
             </div>
           )}
         </div>
