@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -254,6 +255,10 @@ export const adminRoutes: RouteObject[] = [
   },
   {
     path: "/admin/glee-planner",
-    element: <GleePlannerPage />,
+    element: (
+      <AdminRoute>
+        <GleePlannerPage />
+      </AdminRoute>
+    ),
   },
 ];
