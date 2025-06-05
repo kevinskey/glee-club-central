@@ -185,20 +185,20 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           </div>
         )}
         {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/30"></div>
       </div>
 
-      {/* Content overlay */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-        <div className="space-y-4">
-          <h3 className="font-playfair font-bold text-2xl leading-tight">
+      {/* Content overlay - moved higher up */}
+      <div className="absolute top-1/2 left-0 right-0 p-6 text-white transform -translate-y-1/2">
+        <div className="space-y-4 text-center">
+          <h3 className="font-playfair font-bold text-3xl leading-tight">
             {event.title}
           </h3>
           
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2">
               <Calendar className="h-5 w-5 text-white flex-shrink-0" />
-              <span className="text-white/90">
+              <span className="text-white/90 text-lg">
                 {new Date(event.date).toLocaleDateString('en-US', {
                   weekday: 'short',
                   year: 'numeric',
@@ -209,9 +209,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             </div>
             
             {event.location && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <MapPin className="h-5 w-5 text-white flex-shrink-0" />
-                <span className="text-white/90">
+                <span className="text-white/90 text-lg">
                   {event.location}
                 </span>
               </div>
@@ -220,7 +220,7 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
 
           <Button
             variant="outline"
-            className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            className="bg-white/20 border-white/30 text-white hover:bg-white/30 mt-6"
             asChild
           >
             <Link to="/calendar">
