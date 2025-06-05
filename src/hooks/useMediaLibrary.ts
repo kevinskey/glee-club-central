@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { MediaType } from '@/utils/mediaUtils';
 
 interface MediaFile {
   id: string;
@@ -160,8 +160,8 @@ export function useMediaLibrary() {
     }
   };
 
-  // Get unique media types and categories
-  const mediaTypes = ['all', 'image', 'video', 'pdf', 'audio', 'application'];
+  // Get unique media types and categories - properly typed
+  const mediaTypes: MediaType[] = ['image', 'video', 'pdf', 'audio', 'document'];
   const categories = ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))];
 
   // Filter media files based on search and filters
