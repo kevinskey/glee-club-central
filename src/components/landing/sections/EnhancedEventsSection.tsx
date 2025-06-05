@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -169,9 +168,9 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   );
 
   const renderMobileEventCard = (event: Event, index: number) => (
-    <div className="w-full h-[50vh] relative overflow-hidden">
-      {/* Image Background - positioned higher up in the card */}
-      <div className="absolute inset-0 top-[-30%] h-[130%]">
+    <div className="w-full h-[35vh] relative overflow-hidden">
+      {/* Image Background - positioned to fill the compact space */}
+      <div className="absolute inset-0">
         {event.imageUrl ? (
           <img
             src={event.imageUrl}
@@ -180,24 +179,24 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
-            <Calendar className="h-24 w-24 text-blue-400" />
+            <Calendar className="h-16 w-16 text-blue-400" />
           </div>
         )}
         {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-black/30"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
-      {/* Content overlay - moved to top third */}
-      <div className="absolute top-1/3 left-0 right-0 p-6 text-white transform -translate-y-1/2">
-        <div className="space-y-4 text-center">
-          <h3 className="font-playfair font-bold text-3xl leading-tight">
+      {/* Content overlay - centered in the compact space */}
+      <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 p-4 text-white">
+        <div className="space-y-3 text-center">
+          <h3 className="font-playfair font-bold text-2xl leading-tight">
             {event.title}
           </h3>
           
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">
-              <Calendar className="h-5 w-5 text-white flex-shrink-0" />
-              <span className="text-white/90 text-lg">
+              <Calendar className="h-4 w-4 text-white flex-shrink-0" />
+              <span className="text-white/90 text-base">
                 {new Date(event.date).toLocaleDateString('en-US', {
                   weekday: 'short',
                   year: 'numeric',
@@ -209,8 +208,8 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
             
             {event.location && (
               <div className="flex items-center justify-center gap-2">
-                <MapPin className="h-5 w-5 text-white flex-shrink-0" />
-                <span className="text-white/90 text-lg">
+                <MapPin className="h-4 w-4 text-white flex-shrink-0" />
+                <span className="text-white/90 text-base">
                   {event.location}
                 </span>
               </div>
