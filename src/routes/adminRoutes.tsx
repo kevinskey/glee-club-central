@@ -45,6 +45,14 @@ export const adminRoutes: RouteObject[] = [
     ),
   },
   {
+    path: '/admin/sheet-music',
+    element: (
+      <AdminRoute>
+        <SheetMusicLibraryPage />
+      </AdminRoute>
+    ),
+  },
+  {
     path: '/admin/calendar-enhanced',
     element: (
       <AdminRoute>
@@ -57,14 +65,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <MemberDashboardAdmin />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/sheet-music',
-    element: (
-      <AdminRoute>
-        <SheetMusicLibraryPage />
       </AdminRoute>
     ),
   },
