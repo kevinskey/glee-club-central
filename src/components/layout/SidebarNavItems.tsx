@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   ListChecks,
@@ -7,6 +8,7 @@ import {
   Settings,
   Package,
   Wand2,
+  Sliders,
 } from "lucide-react"
 
 import { NavItem } from "@/types"
@@ -53,6 +55,12 @@ export const SidebarNavItems: NavItem[] = [
     href: "/auto-generator",
     icon: Wand2,
     roles: ["treasurer", "merchandise_manager", "admin"],
+  },
+  {
+    title: "Slider Console",
+    href: "/admin/slider-console",
+    icon: Sliders,
+    roles: ["admin"],
   },
   {
     title: "Admin",
