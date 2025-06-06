@@ -9,7 +9,7 @@ import { ProfileProvider } from "@/contexts/ProfileContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import AppLayout from "@/layouts/AppLayout";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient({
   defaultOptions: {
