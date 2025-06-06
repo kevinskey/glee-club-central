@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/utils/permissionChecker";
 import { 
-  LayoutDashboard, ShoppingBag, Plus, Upload,
+  ShoppingBag, Plus, Upload,
   Music, BarChart, Settings, Layout, Presentation, FileText,
   Users, Calendar, Sliders, Bell
 } from "lucide-react";
@@ -50,15 +50,6 @@ export function UnifiedAdminModules() {
       icon: <Bell className="h-5 w-5" />,
       color: "bg-red-500",
       path: "/admin/news-items",
-      adminOnly: true
-    },
-    {
-      id: "dashboard",
-      title: "Dashboard",
-      description: "Admin overview",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      color: "bg-glee-spelman",
-      path: "/admin",
       adminOnly: true
     },
     {
