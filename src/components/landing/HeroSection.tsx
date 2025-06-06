@@ -137,9 +137,11 @@ export function HeroSection() {
 
   if (isLoading) {
     return (
-      <div className={`relative ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse pt-20 overflow-hidden`}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-gray-400">Loading hero content...</div>
+      <div className="w-full flex justify-center pt-20">
+        <div className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden`}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-gray-400">Loading hero content...</div>
+          </div>
         </div>
       </div>
     );
@@ -147,18 +149,20 @@ export function HeroSection() {
 
   if (slides.length === 0) {
     return (
-      <div className={`relative ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 pt-20 overflow-hidden`}>
-        <div className="absolute inset-0 bg-black/40" />
-        <div className="relative h-full flex items-center justify-center text-center px-4 sm:px-8 lg:px-20">
-          <div className="max-w-4xl mx-auto text-white">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6">
-              Welcome to Glee World
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 opacity-90">
-              The official hub for Spelman College Glee Club
-            </p>
-            <div className="text-xs sm:text-sm opacity-75">
-              Configure hero slides in the admin dashboard to customize this section
+      <div className="w-full flex justify-center pt-20">
+        <div className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative h-full flex items-center justify-center text-center px-4 sm:px-8 lg:px-20">
+            <div className="max-w-4xl mx-auto text-white">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6">
+                Welcome to Glee World
+              </h1>
+              <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 opacity-90">
+                The official hub for Spelman College Glee Club
+              </p>
+              <div className="text-xs sm:text-sm opacity-75">
+                Configure hero slides in the admin dashboard to customize this section
+              </div>
             </div>
           </div>
         </div>
@@ -194,111 +198,113 @@ export function HeroSection() {
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
 
   return (
-    <div 
-      className={`relative ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer pt-20`}
-      style={getDynamicStyle(slide.design_data?.height)}
-      onClick={() => handleSlideClick(slide)}
-    >
-      {/* Background with admin-configurable display settings */}
-      {slide.background_image_url ? (
-        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
-          <img
-            src={slide.background_image_url}
-            alt={slide.title || 'Hero slide'}
-            className="w-full h-full"
-            style={{ 
-              objectPosition: objectPosition,
-              objectFit: objectFit
-            }}
-          />
-          {/* Overlay with admin-configurable opacity */}
-          {showTextOverlay && (
-            <div 
-              className="absolute inset-0 bg-black" 
-              style={{ opacity: overlayOpacity / 100 }}
+    <div className="w-full flex justify-center pt-20">
+      <div 
+        className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
+        style={getDynamicStyle(slide.design_data?.height)}
+        onClick={() => handleSlideClick(slide)}
+      >
+        {/* Background with admin-configurable display settings */}
+        {slide.background_image_url ? (
+          <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
+            <img
+              src={slide.background_image_url}
+              alt={slide.title || 'Hero slide'}
+              className="w-full h-full"
+              style={{ 
+                objectPosition: objectPosition,
+                objectFit: objectFit
+              }}
             />
-          )}
-        </div>
-      ) : (
-        <div 
-          className="absolute inset-0"
-          style={{ backgroundColor: slide.background_color || '#4F46E5' }}
-        />
-      )}
-
-      {/* Content - Only show if text is enabled */}
-      {showTextOverlay && (
-        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 sm:px-8 lg:px-20`}>
-          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6`}>
-            {slide.title && (
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in leading-tight drop-shadow-lg">
-                {slide.title}
-              </h1>
+            {/* Overlay with admin-configurable opacity */}
+            {showTextOverlay && (
+              <div 
+                className="absolute inset-0 bg-black" 
+                style={{ opacity: overlayOpacity / 100 }}
+              />
             )}
-            
-            {slide.description && (
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-                {slide.description}
-              </p>
-            )}
+          </div>
+        ) : (
+          <div 
+            className="absolute inset-0"
+            style={{ backgroundColor: slide.background_color || '#4F46E5' }}
+          />
+        )}
 
-            {slide.design_data?.buttonText && slide.link_url && (
-              <div className="pt-2 sm:pt-4">
-                <Button 
-                  size="lg" 
-                  className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 shadow-lg"
+        {/* Content - Only show if text is enabled */}
+        {showTextOverlay && (
+          <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 sm:px-8 lg:px-20`}>
+            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6`}>
+              {slide.title && (
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in leading-tight drop-shadow-lg">
+                  {slide.title}
+                </h1>
+              )}
+              
+              {slide.description && (
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                  {slide.description}
+                </p>
+              )}
+
+              {slide.design_data?.buttonText && slide.link_url && (
+                <div className="pt-2 sm:pt-4">
+                  <Button 
+                    size="lg" 
+                    className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 shadow-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(slide.link_url, '_blank');
+                    }}
+                  >
+                    {slide.design_data.buttonText}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Navigation - Only show if multiple slides */}
+        {slides.length > 1 && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                prevSlide();
+              }}
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
+            >
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                nextSlide();
+              }}
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
+            >
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+
+            {/* Dots indicator */}
+            <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(slide.link_url, '_blank');
+                    setCurrentSlide(index);
                   }}
-                >
-                  {slide.design_data.buttonText}
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Navigation - Only show if multiple slides */}
-      {slides.length > 1 && (
-        <>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prevSlide();
-            }}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
-          >
-            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextSlide();
-            }}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
-          >
-            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-
-          {/* Dots indicator */}
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentSlide(index);
-                }}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-                  index === currentSlide ? 'bg-white' : 'bg-white/50'
-                }`}
-              />
-            ))}
-          </div>
-        </>
-      )}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
+                    index === currentSlide ? 'bg-white' : 'bg-white/50'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
