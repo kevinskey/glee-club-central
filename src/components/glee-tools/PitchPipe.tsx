@@ -3,9 +3,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Music } from 'lucide-react';
 
+// Cache-bust timestamp: 2025-06-06T00:00:00Z
 // Placeholder component - audio functionality has been removed
 export const PitchPipe: React.FC = () => {
-  console.log('PitchPipe component loaded - audio functionality removed');
+  console.log('PitchPipe component loaded - audio functionality removed - cache busted');
   
   return (
     <Card>
