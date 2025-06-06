@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { getResponsiveHeightClass, getTextPositionClass, getTextAlignmentClass } from '@/utils/heroUtils';
 
@@ -27,91 +27,89 @@ interface HeroSlideProps {
 }
 
 export function HeroSlide({ slide }: HeroSlideProps) {
-  const handleSlideClick = useCallback(() => {
+  const handleClick = () => {
     if (slide.link_url) {
-      window.open(slide.link_url, '_blank');
+      if (slide.link_url.startsWith('http')) {
+        window.open(slide.link_url, '_blank');
+      } else {
+        window.location.href = slide.link_url;
+      }
     }
-  }, [slide.link_url]);
-
-  const showTextOverlay = slide.design_data?.showText !== false && 
-    (slide.title || slide.description || slide.design_data?.buttonText);
-
-  const objectFit = slide.design_data?.objectFit || 'contain';
-  const objectPosition = slide.design_data?.objectPosition || 'center center';
-  const overlayOpacity = slide.design_data?.overlayOpacity || 20;
+  };
 
   return (
-    <div className="w-full">
-      <div 
-        className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer flex items-center justify-center`}
-        onClick={handleSlideClick}
-      >
-        {/* Background */}
-        {slide.background_image_url ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-            <img
-              src={slide.background_image_url}
-              alt={slide.title || 'Hero slide'}
-              className="w-full h-full object-contain"
-              style={{ 
-                objectPosition: objectPosition,
-                objectFit: objectFit
-              }}
-              loading="eager"
-              decoding="async"
-              onError={(e) => {
-                console.log('🚨 HeroSection: Image failed to load');
-                e.currentTarget.style.display = 'none';
-              }}
+    <div 
+      className="relative w-full min-h-[320px] overflow-hidden cursor-pointer flex items-center justify-center"
+      onClick={handleClick}
+    >
+      {/* Background */}
+      {slide.background_image_url ? (
+        <div className="absolute inset-0">
+          <img
+            src={slide.background_image_url}
+            alt={slide.title}
+            className="w-full h-full object-contain"
+            style={{ 
+              objectPosition: slide.design_data?.objectPosition || 'center center'
+            }}
+            onLoad={(e) => {
+              // Let the container adapt to the image's natural aspect ratio
+              const img = e.currentTarget;
+              const container = img.parentElement?.parentElement;
+              if (container && img.naturalWidth && img.naturalHeight) {
+                const aspectRatio = img.naturalWidth / img.naturalHeight;
+                const containerWidth = container.offsetWidth;
+                const naturalHeight = containerWidth / aspectRatio;
+                // Cap the height at 80% of viewport height for very tall images
+                const maxHeight = window.innerHeight * 0.8;
+                container.style.height = `${Math.min(naturalHeight, maxHeight)}px`;
+              }
+            }}
+          />
+          {slide.design_data?.showText !== false && (
+            <div 
+              className="absolute inset-0 bg-black" 
+              style={{ opacity: (slide.design_data?.overlayOpacity || 20) / 100 }}
             />
-            {showTextOverlay && (
-              <div 
-                className="absolute inset-0 bg-black" 
-                style={{ opacity: overlayOpacity / 100 }}
-              />
+          )}
+        </div>
+      ) : (
+        <div 
+          className="absolute inset-0"
+          style={{ backgroundColor: slide.background_color || '#4F46E5' }}
+        />
+      )}
+
+      {/* Content */}
+      {slide.design_data?.showText !== false && (
+        <div className={`relative z-10 h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center`}>
+          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 md:space-y-4 px-4`}>
+            {slide.title && (
+              <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
+                {slide.title}
+              </h1>
+            )}
+            
+            {slide.description && (
+              <p className="text-sm md:text-base lg:text-lg opacity-90 leading-relaxed drop-shadow-md">
+                {slide.description}
+              </p>
+            )}
+
+            {slide.design_data?.buttonText && slide.link_url && (
+              <div className="pt-2">
+                <Button 
+                  size="sm"
+                  className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {slide.design_data.buttonText}
+                </Button>
+              </div>
             )}
           </div>
-        ) : (
-          <div 
-            className="absolute inset-0"
-            style={{ backgroundColor: slide.background_color || '#4F46E5' }}
-          />
-        )}
-
-        {/* Content */}
-        {showTextOverlay && (
-          <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 z-10`}>
-            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 sm:space-y-3 md:space-y-4`}>
-              {slide.title && (
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
-                  {slide.title}
-                </h1>
-              )}
-              
-              {slide.description && (
-                <p className="text-sm sm:text-base md:text-lg opacity-90 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-                  {slide.description}
-                </p>
-              )}
-
-              {slide.design_data?.buttonText && slide.link_url && (
-                <div className="pt-2 sm:pt-3">
-                  <Button 
-                    size="default"
-                    className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 py-2 sm:py-3 shadow-lg text-sm sm:text-base font-medium"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(slide.link_url, '_blank');
-                    }}
-                  >
-                    {slide.design_data.buttonText}
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

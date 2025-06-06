@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -121,7 +120,7 @@ export function HeroSection() {
     <div className="relative">
       {/* Hero Slide */}
       <div 
-        className="transition-opacity duration-500"
+        className="transition-opacity duration-500 min-h-[320px]"
         style={{ 
           transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
         }}

@@ -1,13 +1,14 @@
 
 export const getResponsiveHeightClass = (height?: string) => {
+  // Remove fixed heights, use minimums only to let images determine actual height
   switch (height) {
-    case 'tiny': return 'aspect-[16/9] h-[200px] sm:h-[250px] md:h-[300px]';
-    case 'small': return 'aspect-[16/9] h-[250px] sm:h-[300px] md:h-[400px]';
-    case 'medium': return 'aspect-[16/9] h-[300px] sm:h-[400px] md:h-[500px]';
-    case 'full': return 'aspect-[16/9] h-[350px] sm:h-[500px] md:h-screen';
+    case 'tiny': return 'min-h-[200px]';
+    case 'small': return 'min-h-[250px]';
+    case 'medium': return 'min-h-[300px]';
+    case 'full': return 'min-h-[400px]';
     case 'large':
     default:
-      return 'aspect-[16/9] h-[280px] sm:h-[400px] md:h-[550px]';
+      return 'min-h-[320px]';
   }
 };
 

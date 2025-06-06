@@ -251,14 +251,15 @@ export function UnifiedSlideManager() {
   };
 
   const getResponsiveHeightClass = (height?: string) => {
+    // Remove fixed height constraints to let image determine height
     switch (height) {
-      case 'tiny': return 'h-[120px] md:h-[180px]';
-      case 'small': return 'h-[160px] md:h-[240px]';
-      case 'medium': return 'h-[200px] md:h-[320px]';
-      case 'full': return 'h-[240px] md:h-screen';
+      case 'tiny': return 'min-h-[200px] max-h-[300px]';
+      case 'small': return 'min-h-[250px] max-h-[400px]';
+      case 'medium': return 'min-h-[300px] max-h-[500px]';
+      case 'full': return 'min-h-[400px] max-h-screen';
       case 'large':
       default:
-        return 'h-[220px] md:h-[400px]';
+        return 'min-h-[320px]'; // Only set minimum, let image determine actual height
     }
   };
 
@@ -571,7 +572,7 @@ export function UnifiedSlideManager() {
             <CardContent>
               {currentSlideData && (
                 <div 
-                  className={`relative w-full ${getResponsiveHeightClass(currentSlideData.design_data?.height)} overflow-hidden rounded-lg transition-opacity duration-500`}
+                  className={`relative w-full ${getResponsiveHeightClass(currentSlideData.design_data?.height)} overflow-hidden rounded-lg transition-opacity duration-500 flex items-center justify-center`}
                   style={{ 
                     transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
                   }}
@@ -582,10 +583,21 @@ export function UnifiedSlideManager() {
                       <img
                         src={currentSlideData.background_image_url}
                         alt={currentSlideData.title}
-                        className="w-full h-full"
+                        className="w-full h-full object-contain"
                         style={{ 
                           objectPosition: currentSlideData.design_data?.objectPosition || 'center center',
-                          objectFit: currentSlideData.design_data?.objectFit || 'cover'
+                          objectFit: 'contain' // Changed to contain to preserve aspect ratio
+                        }}
+                        onLoad={(e) => {
+                          // Let the container adapt to the image's natural aspect ratio
+                          const img = e.currentTarget;
+                          const container = img.parentElement?.parentElement;
+                          if (container && img.naturalWidth && img.naturalHeight) {
+                            const aspectRatio = img.naturalWidth / img.naturalHeight;
+                            const containerWidth = container.offsetWidth;
+                            const naturalHeight = containerWidth / aspectRatio;
+                            container.style.height = `${Math.min(naturalHeight, window.innerHeight * 0.8)}px`;
+                          }
                         }}
                       />
                       {currentSlideData.design_data?.showText !== false && (
@@ -604,8 +616,8 @@ export function UnifiedSlideManager() {
 
                   {/* Content */}
                   {currentSlideData.design_data?.showText !== false && (
-                    <div className={`relative h-full flex ${getTextPositionClass(currentSlideData.design_data?.textPosition)} justify-center`}>
-                      <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(currentSlideData.design_data?.textAlignment)} space-y-2 md:space-y-4 px-4`}>
+                    <div className={`relative h-full flex ${getTextPositionClass(currentSlideData.design_data?.textPosition)} justify-center px-4`}>
+                      <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(currentSlideData.design_data?.textAlignment)} space-y-2 md:space-y-4`}>
                         {currentSlideData.title && (
                           <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
                             {currentSlideData.title}
