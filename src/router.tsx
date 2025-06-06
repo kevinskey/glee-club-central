@@ -24,9 +24,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 
-// Force router cache invalidation
-const ROUTER_VERSION = `${Date.now()}-router-rebuild`;
-console.log('Router module loaded with version:', ROUTER_VERSION);
+// Force router cache invalidation - removed all glee-tools references
+const ROUTER_VERSION = `${Date.now()}-glee-tools-cleanup-complete`;
+console.log('Router rebuilt without glee-tools references:', ROUTER_VERSION);
 
 const router = createBrowserRouter([
   {
@@ -108,7 +108,7 @@ const router = createBrowserRouter([
       },
       // Add all admin routes (original)
       ...adminRoutes,
-      // Add all v2 admin routes
+      // Add all v2 admin routes  
       ...adminRoutesV2,
       {
         path: "*",
