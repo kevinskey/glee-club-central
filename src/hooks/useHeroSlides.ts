@@ -25,7 +25,7 @@ interface SlideData {
 let slidesCache: SlideData[] | null = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-const QUERY_TIMEOUT = 8000; // Increased to 8 seconds
+const QUERY_TIMEOUT = 6000; // 6 seconds for better reliability
 
 export function useHeroSlides() {
   const [slides, setSlides] = useState<SlideData[]>([]);
@@ -75,9 +75,9 @@ export function useHeroSlides() {
       
       setSlides(slideData);
       setHasError(false);
+      setIsLoading(false);
     } catch (error) {
       console.error('🚨 HeroSection: Error fetching slides:', error);
-      setHasError(true);
       
       // Use cached data if available, even if expired
       if (slidesCache && slidesCache.length > 0) {
@@ -86,25 +86,14 @@ export function useHeroSlides() {
         setHasError(false);
       } else {
         setSlides([]);
+        setHasError(true);
       }
-    } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // Set a maximum loading time before showing fallback
-    const maxLoadingTime = setTimeout(() => {
-      if (isLoading) {
-        console.log('🎭 HeroSection: Max loading time reached, showing fallback');
-        setIsLoading(false);
-        setHasError(true);
-      }
-    }, 5000); // Increased to 5 seconds
-
     fetchSlidesWithCache();
-
-    return () => clearTimeout(maxLoadingTime);
   }, [fetchSlidesWithCache]);
 
   return { slides, isLoading, hasError };
