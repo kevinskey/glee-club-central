@@ -37,6 +37,7 @@ export default function PracticePage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    console.log('PracticePage mounted - checking audio utils');
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };

@@ -19,7 +19,9 @@ export function PitchPipe() {
     
     try {
       setIsPlaying(true);
+      console.log('Playing note:', selectedNote, selectedOctave);
       const frequency = getNoteFrequency(selectedNote, selectedOctave);
+      console.log('Calculated frequency:', frequency);
       await playNote(frequency, 2000); // Play for 2 seconds
     } catch (error) {
       console.error('Error playing note:', error);

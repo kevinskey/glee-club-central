@@ -1,3 +1,4 @@
+
 // Audio utility functions for audio tools
 
 // Audio logging utility
@@ -12,6 +13,8 @@ export const audioLogger = {
 
 // Note frequency calculation for pitch pipe
 export function getNoteFrequency(note: string, octave: number = 4): number {
+  console.log('getNoteFrequency called with:', { note, octave });
+  
   const noteMap: { [key: string]: number } = {
     'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
     'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
@@ -28,11 +31,16 @@ export function getNoteFrequency(note: string, octave: number = 4): number {
   const A4_SEMITONE = 9; // A is the 9th semitone in the chromatic scale
   
   const semitonesFromA4 = (octave - A4_OCTAVE) * 12 + (semitone - A4_SEMITONE);
-  return A4 * Math.pow(2, semitonesFromA4 / 12);
+  const frequency = A4 * Math.pow(2, semitonesFromA4 / 12);
+  
+  console.log('Calculated frequency:', frequency);
+  return frequency;
 }
 
 // Play note function for pitch pipe functionality
 export function playNote(frequency: number, duration: number = 1000): Promise<void> {
+  console.log('playNote called with:', { frequency, duration });
+  
   return new Promise((resolve) => {
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator();
@@ -157,3 +165,5 @@ export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach(track => track.stop());
   audioLogger.log('Microphone released');
 }
+
+console.log('audioUtils.ts loaded successfully - all exports available');
