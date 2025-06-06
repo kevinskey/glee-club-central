@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { UnifiedAdminModules } from '@/components/admin/UnifiedAdminModules';
-import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,10 +12,7 @@ export function AdminDashboardContent() {
 
   return (
     <div className="space-y-6">
-      {/* Compact Stats Overview */}
-      <AdminStatsCards isMobile={true} />
-      
-      {/* All Admin Modules - Including the 4 priority ones at smaller size */}
+      {/* All Admin Modules - Alphabetically arranged */}
       <UnifiedAdminModules />
 
       {/* Two Column Layout for Desktop */}
