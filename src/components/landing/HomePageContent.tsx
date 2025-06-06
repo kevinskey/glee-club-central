@@ -51,13 +51,10 @@ export function HomePageContent({
       {/* Events Section - Reduced spacing from top */}
       <section className="w-full py-4 md:py-6 lg:py-8">
         <div className="w-full px-4 md:container md:mx-auto md:px-6 lg:px-8">
-          <div className="text-center mb-6 md:mb-8 lg:mb-12">
+          <div className="text-center mb-6 md:mb-8 lg:mb-12" style={{ marginTop: '10px' }}>
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight italic transform -rotate-[2deg] mb-2">
               Upcoming Events
             </h2>
-            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
-              Join us for our upcoming performances and events
-            </p>
           </div>
           
           {/* Debug info - remove in production */}
