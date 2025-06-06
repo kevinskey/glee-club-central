@@ -16,12 +16,16 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <AppContentWrapper />
+          <div className="min-h-screen bg-background">
+            <main>
+              <Outlet />
+            </main>
+          </div>
           <Toaster />
           <FloatingThemeToggle position="bottom-right" />
         </AuthProvider>
@@ -29,16 +33,3 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-// Separate component to ensure AuthProvider is ready before using useAuth
-function AppContentWrapper() {
-  return (
-    <div className="min-h-screen bg-background">
-      <main>
-        <Outlet />
-      </main>
-    </div>
-  );
-}
-
-export default App;

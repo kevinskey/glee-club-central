@@ -1,15 +1,29 @@
 
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
-import "./index.css";
-import router from "./router";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import App from "./App";
+import "./App.css";
 
-const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Failed to find the root element");
+// Import pages that will be rendered
+import UnifiedSlideManagementPage from "@/pages/admin/UnifiedSlideManagementPage";
 
-createRoot(rootElement).render(
-  <StrictMode>
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "admin/unified-slide-management",
+        element: <UnifiedSlideManagementPage />,
+      },
+      // Add other routes as needed
+    ],
+  },
+]);
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>
+  </React.StrictMode>
 );
