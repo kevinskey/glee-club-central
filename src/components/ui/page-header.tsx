@@ -43,7 +43,7 @@ export function PageHeader({
             "font-bold text-gray-900 dark:text-white",
             compact 
               ? "text-lg sm:text-xl" 
-              : "text-xl sm:text-2xl lg:text-3xl"
+              : "text-2xl md:text-3xl"
           )}>
             {title}
           </h1>

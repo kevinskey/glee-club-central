@@ -29,8 +29,8 @@ export function ResponsiveText({
     base: "text-sm sm:text-base",
     lg: "text-base sm:text-lg",
     xl: "text-lg sm:text-xl",
-    "2xl": "text-xl sm:text-2xl md:text-3xl",
-    "3xl": "text-2xl sm:text-3xl md:text-4xl",
+    "2xl": "text-xl sm:text-2xl",
+    "3xl": "text-2xl md:text-3xl",
     "4xl": "text-3xl sm:text-4xl md:text-5xl",
     "5xl": "text-4xl sm:text-5xl md:text-6xl",
   };
