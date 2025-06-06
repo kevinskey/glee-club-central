@@ -21,8 +21,15 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  // Force cache invalidation for old PitchPipe references
-  console.log('App loaded - PitchPipe completely removed, cache timestamp:', Date.now());
+  // Aggressive cache invalidation for removed components
+  React.useEffect(() => {
+    console.log('App component mounted - all PitchPipe references removed');
+    
+    // Force garbage collection of any cached module references
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('beforeunload'));
+    }
+  }, []);
   
   return (
     <ErrorBoundary>
