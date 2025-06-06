@@ -14,6 +14,7 @@ import { MediaType } from "@/utils/mediaUtils";
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { UploadMediaModal } from "@/components/UploadMediaModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface MediaLibraryPageProps {
   isAdminView?: boolean;
@@ -21,6 +22,7 @@ interface MediaLibraryPageProps {
 
 const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     isLoading,
     error,
@@ -153,16 +155,19 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
     <div className="container mx-auto px-4 py-6">
       <PageHeader
         title="Media Library"
+        description="Access and manage all your media files including sheet music, images, audio recordings, and videos"
         icon={<Library className="h-6 w-6" />}
         actions={
-          isAdminView && (
-            <Button 
-              className="bg-glee-purple hover:bg-glee-purple/90"
-              onClick={() => setIsUploadModalOpen(true)}
-            >
-              <Upload className="mr-2 h-4 w-4" /> Upload Media
-            </Button>
-          )
+          <div className="flex items-center gap-2">
+            {isAdminView && user && (
+              <Button 
+                className="bg-glee-purple hover:bg-glee-purple/90"
+                onClick={() => setIsUploadModalOpen(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" /> Upload Media
+              </Button>
+            )}
+          </div>
         }
       />
       
@@ -249,7 +254,7 @@ const MediaLibraryPage: React.FC<MediaLibraryPageProps> = ({ isAdminView = false
       </Tabs>
 
       {/* Upload Media Modal */}
-      {isAdminView && (
+      {isAdminView && user && (
         <UploadMediaModal
           open={isUploadModalOpen}
           onOpenChange={setIsUploadModalOpen}
