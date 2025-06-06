@@ -7,12 +7,17 @@ import "./App.css";
 
 // Import pages that will be rendered
 import UnifiedSlideManagementPage from "@/pages/admin/UnifiedSlideManagementPage";
+import HomePage from "@/pages/HomePage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
       {
         path: "admin/unified-slide-management",
         element: <UnifiedSlideManagementPage />,
