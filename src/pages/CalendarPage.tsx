@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventsListView } from '@/components/calendar/EventsListView';
-import { EventDialog } from '@/components/calendar/EventDialog';
+import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
@@ -199,20 +199,19 @@ export default function CalendarPage() {
         )}
 
         {/* Event View Dialog */}
-        <EventDialog
+        <EventEditor
           event={selectedEvent}
           isOpen={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
-          canRSVP={isAuthenticated && selectedEvent?.allow_rsvp}
+          onSave={handleSaveEvent}
         />
 
         {/* Event Create Dialog */}
-        <EventDialog
+        <EventEditor
           event={null}
           isOpen={showCreateDialog}
           onClose={() => setShowCreateDialog(false)}
           onSave={handleSaveEvent}
-          canEdit={isAuthenticated}
         />
       </div>
     </div>
