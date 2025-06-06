@@ -153,9 +153,9 @@ h3 {
   font-weight: 600;
 }
 
-/* Body text and descriptions */
+/* Body text and descriptions - REDUCED BY HALF */
 p {
-  font-size: clamp(0.75rem, 2vw, 0.875rem); /* 12px -> 14px */
+  font-size: clamp(0.625rem, 1.5vw, 0.75rem); /* 10px -> 12px (was 12px -> 14px) */
   line-height: 1.5;
   margin-bottom: 0.5rem;
   color: rgba(0, 0, 0, 0.8);
@@ -165,14 +165,14 @@ p {
   color: rgba(255, 255, 255, 0.8);
 }
 
-/* Small text for captions, labels */
+/* Small text for captions, labels - REDUCED BY HALF */
 .text-sm, small {
-  font-size: clamp(0.75rem, 1.8vw, 0.875rem); /* 12px -> 14px */
+  font-size: clamp(0.625rem, 1.3vw, 0.75rem); /* 10px -> 12px (was 12px -> 14px) */
 }
 
-/* Extra small text for fine print */
+/* Extra small text for fine print - REDUCED BY HALF */
 .text-xs {
-  font-size: clamp(0.6875rem, 1.5vw, 0.75rem); /* 11px -> 12px */
+  font-size: clamp(0.5625rem, 1.2vw, 0.625rem); /* 9px -> 10px (was 11px -> 12px) */
 }
 
 /* Large text for emphasis */
