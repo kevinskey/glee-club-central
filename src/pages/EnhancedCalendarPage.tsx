@@ -48,7 +48,7 @@ export default function EnhancedCalendarPage() {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Events & Performances
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xs text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Stay updated with our upcoming performances, rehearsals, and special events
           </p>
         </div>
