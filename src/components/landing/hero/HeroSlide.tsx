@@ -39,7 +39,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
 
   return (
     <div 
-      className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden cursor-pointer flex items-center justify-center"
+      className="relative w-full h-full overflow-hidden cursor-pointer flex items-center justify-center"
       onClick={handleClick}
     >
       {/* Background */}

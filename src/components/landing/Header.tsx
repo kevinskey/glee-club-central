@@ -45,7 +45,7 @@ export function Header() {
         
         {/* Main Header - Apple style navigation with generous padding */}
         <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
-          <div className="container mx-auto px-8 md:px-12 lg:px-16 flex h-14 md:h-16 items-center justify-between">
+          <div className="container mx-auto px-4 flex h-14 md:h-16 items-center justify-between">
             {/* Logo */}
             <HeaderLogo />
             

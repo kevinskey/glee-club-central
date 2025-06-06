@@ -3,8 +3,8 @@ import React from 'react';
 
 export function HeroDefaultState() {
   return (
-    <div className="w-full">
-      <div className="relative w-full aspect-[16/9] h-[280px] sm:h-[400px] md:h-[550px] bg-gradient-to-br from-glee-spelman to-glee-spelman/90 overflow-hidden flex items-center justify-center">
+    <div className="container mx-auto px-4">
+      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-br from-glee-spelman to-glee-spelman/90 overflow-hidden flex items-center justify-center rounded-lg">
         <div className="absolute inset-0 bg-black/30" />
         <div className="relative h-full flex items-center justify-center text-center px-4 z-10">
           <div className="max-w-4xl mx-auto text-white space-y-3 sm:space-y-4 md:space-y-6">
