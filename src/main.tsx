@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -10,6 +9,7 @@ import { publicRoutes } from '@/routes/publicRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
 import { dashboardRoutes } from '@/routes/dashboardRoutes';
 import { roleRoutes } from '@/routes/roleRoutes';
+import { memberRoutes } from '@/routes/memberRoutes';
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
 const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -26,6 +26,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       ...roleRoutes,
+      ...memberRoutes,
       ...publicRoutes,
       ...adminRoutes,
       ...dashboardRoutes,

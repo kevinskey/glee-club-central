@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { PageLoader } from '@/components/ui/page-loader';
-import { MembersPageRefactor } from '@/components/members/MembersPageRefactor';
+import { CleanMembersPage } from '@/components/members/CleanMembersPage';
 
 export default function MembersPage() {
   const { isLoading } = useAuthMigration();
@@ -11,5 +11,11 @@ export default function MembersPage() {
     return <PageLoader message="Loading members..." />;
   }
 
-  return <MembersPageRefactor />;
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <CleanMembersPage />
+      </div>
+    </div>
+  );
 }
