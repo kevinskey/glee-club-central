@@ -137,7 +137,7 @@ export function HeroSection() {
 
   if (isLoading) {
     return (
-      <div className="w-full pt-20">
+      <div className="w-full">
         <div className={`relative w-full ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden`}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-gray-400">Loading hero content...</div>
@@ -149,7 +149,7 @@ export function HeroSection() {
 
   if (slides.length === 0) {
     return (
-      <div className="w-full pt-20">
+      <div className="w-full">
         <div className={`relative w-full ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative h-full flex items-center justify-center text-center">
@@ -160,9 +160,6 @@ export function HeroSection() {
               <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 opacity-90">
                 The official hub for Spelman College Glee Club
               </p>
-              <div className="text-xs sm:text-sm opacity-75">
-                Configure hero slides in the admin dashboard to customize this section
-              </div>
             </div>
           </div>
         </div>
@@ -198,7 +195,7 @@ export function HeroSection() {
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
 
   return (
-    <div className="w-full pt-20">
+    <div className="w-full">
       <div 
         className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
         style={getDynamicStyle(slide.design_data?.height)}
