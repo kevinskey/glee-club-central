@@ -17,7 +17,7 @@ export function BackgroundSlideshow({
     return <div className="absolute inset-0 bg-black/50"></div>;
   }
 
-  // Always show only the first image with optimized display
+  // Always show only the first image with improved display
   const displayImage = images[0];
 
   return (
@@ -25,8 +25,11 @@ export function BackgroundSlideshow({
       <img
         src={displayImage}
         alt="Background slide"
-        className="w-full h-full object-cover object-center"
-        style={{ objectPosition: 'center top' }}
+        className="w-full h-full object-cover"
+        style={{ 
+          objectPosition: 'center center',
+          objectFit: 'cover'
+        }}
       />
       
       {/* Using a consistent black overlay */}
