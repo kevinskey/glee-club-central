@@ -44,10 +44,10 @@ export function MobileAdminDashboard() {
       color: 'bg-emerald-500'
     },
     {
-      title: 'Hero',
-      description: 'Edit homepage',
+      title: 'Slides',
+      description: 'Manage slides',
       icon: ImageIcon,
-      path: '/admin/hero-manager',
+      path: '/admin/unified-slide-management',
       color: 'bg-purple-500'
     },
     {
