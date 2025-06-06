@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -536,16 +535,26 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
             {/* AI Assistant */}
             <Separator />
             <EnhancedAIAssistant 
-              onApplySuggestion={(suggestion) => {
-                if (suggestion.type === 'text' && selectedElementId) {
-                  updateTextElement(selectedElementId, {
-                    text: suggestion.content,
-                    style: { ...selectedElement?.style, ...suggestion.data }
-                  });
+              onSlideGenerated={(slideData) => {
+                // Handle generated slide data
+                if (slideData.textElements) {
+                  setTextElements(slideData.textElements);
                 }
+                if (slideData.backgroundColor) {
+                  setBackgroundColor(slideData.backgroundColor);
+                }
+                if (slideData.backgroundImage) {
+                  setBackgroundImage(slideData.backgroundImage);
+                }
+                toast.success('AI suggestions applied');
               }}
-              onGenerateGraphics={() => {}}
-              onGenerateVideo={() => {}}
+              currentSlideData={{
+                title,
+                description,
+                textElements,
+                backgroundColor,
+                backgroundImage
+              }}
             />
           </div>
         </div>

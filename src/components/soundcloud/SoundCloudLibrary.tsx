@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -216,11 +215,7 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
           </CardHeader>
         </Card>
 
-        <SoundCloudPlayer 
-          tracks={selectedPlaylist.tracks}
-          currentTrackIndex={currentTrackIndex}
-          onTrackChange={setCurrentTrackIndex}
-        />
+        <SoundCloudPlayer />
       </div>
     );
   }
@@ -282,19 +277,11 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
         </TabsContent>
 
         <TabsContent value="tracks" className="space-y-4">
-          <SoundCloudPlayer 
-            tracks={filteredTracks}
-            currentTrackIndex={currentTrackIndex}
-            onTrackChange={setCurrentTrackIndex}
-          />
+          <SoundCloudPlayer />
         </TabsContent>
 
         <TabsContent value="likes" className="space-y-4">
-          <SoundCloudPlayer 
-            tracks={likedTracks}
-            currentTrackIndex={0}
-            onTrackChange={() => {}}
-          />
+          <SoundCloudPlayer />
         </TabsContent>
       </Tabs>
     </div>

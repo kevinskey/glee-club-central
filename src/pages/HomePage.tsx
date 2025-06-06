@@ -26,12 +26,7 @@ const HomePage = () => {
       <HeroSection />
       
       {/* Main Content */}
-      <HomePageContent
-        heroImages={heroImages}
-        upcomingEvents={upcomingEvents}
-        storeProducts={storeProducts}
-        audioTracks={audioTracks}
-      />
+      <HomePageContent />
     </PublicPageWrapper>
   );
 };

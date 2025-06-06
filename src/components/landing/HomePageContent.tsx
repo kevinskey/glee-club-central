@@ -11,11 +11,11 @@ import { CTASection } from "./CTASection";
 export function HomePageContent() {
   return (
     <>
-      <AnnouncementBanner />
+      <AnnouncementBanner message="Welcome to Spelman Glee Club" />
       <HeroSection />
       <FeaturesSection />
-      <EventsSection />
-      <StoreSection />
+      <EventsSection events={[]} />
+      <StoreSection products={[]} />
       <TestimonialSection />
       <CTASection />
     </>
