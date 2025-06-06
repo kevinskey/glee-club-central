@@ -18,6 +18,7 @@ import LibrarianDashboard from "./pages/dashboard/LibrarianDashboard";
 import HistorianDashboard from "./pages/dashboard/HistorianDashboard";
 import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
+import SheetMusicPage from "./pages/SheetMusicPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
@@ -91,6 +92,10 @@ const router = createBrowserRouter([
       {
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
+      },
+      {
+        path: "sheet-music",
+        element: <SheetMusicPage />,
       },
       // Add all admin routes (original)
       ...adminRoutes,
