@@ -5,7 +5,7 @@ import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
-import { Calendar, CalendarDays, CalendarCheck } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarCheck, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -13,10 +13,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 export default function CalendarPage() {
-  const { events, loading, error, fetchEvents } = useCalendarEvents();
+  const { events, loading, error, fetchEvents, createEvent } = useCalendarEvents();
   const { isAuthenticated, user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const filteredEvents = events.filter(event => {
     if (event.is_public) return true;
@@ -25,6 +26,21 @@ export default function CalendarPage() {
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
+  };
+
+  const handleCreateEvent = (date?: Date) => {
+    setSelectedEvent(null);
+    setShowCreateDialog(true);
+  };
+
+  const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
+    try {
+      await createEvent(eventData);
+      setShowCreateDialog(false);
+      await fetchEvents();
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
   };
 
   if (loading) {
@@ -72,12 +88,25 @@ export default function CalendarPage() {
 
   return (
     <div className="mobile-container mobile-section-padding space-y-3 sm:space-y-4 mobile-scroll">
-      <PageHeader
-        title="Calendar"
-        description={`${isAuthenticated ? 'All events and performances' : 'Upcoming public events'}`}
-        icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
-        compact={true}
-      />
+      <div className="flex items-center justify-between">
+        <PageHeader
+          title="Calendar"
+          description={`${isAuthenticated ? 'All events and performances' : 'Upcoming public events'}`}
+          icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
+          compact={true}
+        />
+        
+        {isAuthenticated && (
+          <Button 
+            onClick={() => handleCreateEvent()}
+            size="sm"
+            className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Event
+          </Button>
+        )}
+      </div>
 
       {/* View Toggle */}
       <div className="flex items-center justify-between">
@@ -128,6 +157,17 @@ export default function CalendarPage() {
                   : "There are no upcoming public events. Log in to see member events."
                 }
               </p>
+              {isAuthenticated && (
+                <Button 
+                  onClick={() => handleCreateEvent()}
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Create First Event
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -135,16 +175,27 @@ export default function CalendarPage() {
         <CalendarView
           events={filteredEvents}
           onEventClick={handleEventClick}
+          onCreateEvent={handleCreateEvent}
           showPrivateEvents={isAuthenticated}
           viewMode={viewMode}
         />
       )}
 
+      {/* Event View Dialog */}
       <EventDialog
         event={selectedEvent}
         isOpen={!!selectedEvent}
         onClose={() => setSelectedEvent(null)}
         canRSVP={isAuthenticated && selectedEvent?.allow_rsvp}
+      />
+
+      {/* Event Create Dialog */}
+      <EventDialog
+        event={null}
+        isOpen={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onSave={handleSaveEvent}
+        canEdit={isAuthenticated}
       />
     </div>
   );
