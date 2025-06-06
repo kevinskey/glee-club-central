@@ -12,6 +12,9 @@ import { dashboardRoutes } from '@/routes/dashboardRoutes';
 import { roleRoutes } from '@/routes/roleRoutes';
 import { memberRoutes } from '@/routes/memberRoutes';
 
+// Import the main dashboard page
+import RoleDashboardPage from '@/pages/RoleDashboardPage';
+
 // Check if dark mode is preferred and apply it immediately to prevent flickering
 const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 const savedTheme = localStorage.getItem('theme');
@@ -27,6 +30,11 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       ...publicRoutes,
+      // Add the main dashboard route
+      {
+        path: 'dashboard',
+        element: <RoleDashboardPage />,
+      },
       ...roleRoutes,
       ...memberRoutes,
       ...adminRoutes,
