@@ -6,7 +6,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
-import AppContent from "./AppContent";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,14 +21,23 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <AppContent>
-            <Outlet />
-          </AppContent>
+          <AppContentWrapper />
           <Toaster />
           <FloatingThemeToggle position="bottom-right" />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+// Separate component to ensure AuthProvider is ready before using useAuth
+function AppContentWrapper() {
+  return (
+    <div className="min-h-screen bg-background">
+      <main>
+        <Outlet />
+      </main>
+    </div>
   );
 }
 
