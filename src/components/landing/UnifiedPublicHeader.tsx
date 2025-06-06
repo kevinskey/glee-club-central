@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Header } from "@/components/landing/Header";
-import { TopSlider } from "@/components/landing/TopSlider";
 
 interface UnifiedPublicHeaderProps {
   showTopSlider?: boolean;
@@ -16,9 +15,6 @@ export function UnifiedPublicHeader({
     <>
       {/* Main Navigation Header */}
       <Header />
-      
-      {/* Top Slider - Admin managed banner (appears below header) */}
-      {showTopSlider && <TopSlider />}
     </>
   );
 }
