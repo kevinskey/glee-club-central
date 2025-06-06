@@ -71,80 +71,115 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
       weeks.push(days.slice(i, i + 7));
     }
 
-    return (
-      <Card>
-        <CardContent className="p-3">
-          {/* Month Navigation */}
-          <div className="flex items-center justify-between mb-3">
-            <Button variant="ghost" size="sm" onClick={() => navigateDate('prev')}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <h2 className="text-sm font-semibold">{format(selectedDate, 'MMMM yyyy')}</h2>
-            <Button variant="ghost" size="sm" onClick={() => navigateDate('next')}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+    const selectedDayEvents = getEventsForDate(selectedDate);
 
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-            {/* Day Headers */}
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-800 p-2 text-center">
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{day}</span>
-              </div>
-            ))}
-            
-            {/* Calendar Days */}
-            {weeks.map((week, weekIndex) => 
-              week.map((day, dayIndex) => {
-                const dayEvents = getEventsForDate(day);
-                const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
-                const isDayToday = isToday(day);
-                
-                return (
+    return (
+      <div className="space-y-4">
+        <Card>
+          <CardContent className="p-3">
+            {/* Month Navigation */}
+            <div className="flex items-center justify-between mb-3">
+              <Button variant="ghost" size="sm" onClick={() => navigateDate('prev')}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <h2 className="text-sm font-semibold">{format(selectedDate, 'MMMM yyyy')}</h2>
+              <Button variant="ghost" size="sm" onClick={() => navigateDate('next')}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-px bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+              {/* Day Headers */}
+              {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                <div key={index} className="bg-gray-50 dark:bg-gray-800 p-2 text-center">
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{day}</span>
+                </div>
+              ))}
+              
+              {/* Calendar Days */}
+              {weeks.map((week, weekIndex) => 
+                week.map((day, dayIndex) => {
+                  const dayEvents = getEventsForDate(day);
+                  const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
+                  const isDayToday = isToday(day);
+                  const isSelected = isSameDay(day, selectedDate);
+                  const hasEvents = dayEvents.length > 0;
+                  
+                  return (
+                    <div 
+                      key={`${weekIndex}-${dayIndex}`}
+                      className={cn(
+                        "min-h-16 p-2 bg-white dark:bg-gray-900 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors relative",
+                        !isCurrentMonth && "bg-gray-50 dark:bg-gray-800 text-gray-400",
+                        isDayToday && "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200",
+                        isSelected && "bg-blue-100 dark:bg-blue-900/40 ring-2 ring-blue-500"
+                      )}
+                      onClick={() => setSelectedDate(day)}
+                    >
+                      <div className={cn(
+                        "text-sm font-medium mb-1 flex items-center justify-between",
+                        isDayToday ? "text-blue-600" : isCurrentMonth ? "text-gray-900 dark:text-gray-100" : "text-gray-400"
+                      )}>
+                        <span>{format(day, 'd')}</span>
+                        {hasEvents && (
+                          <div className="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Selected Day Events List */}
+        {selectedDayEvents.length > 0 && (
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="text-lg font-semibold mb-3">
+                Events for {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+              </h3>
+              <div className="space-y-3">
+                {selectedDayEvents.map((event) => (
                   <div 
-                    key={`${weekIndex}-${dayIndex}`}
-                    className={cn(
-                      "min-h-16 p-1 bg-white dark:bg-gray-900",
-                      !isCurrentMonth && "bg-gray-50 dark:bg-gray-800 text-gray-400",
-                      isDayToday && "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200"
-                    )}
+                    key={event.id} 
+                    className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => onEventClick(event)}
                   >
-                    <div className={cn(
-                      "text-xs font-medium mb-1",
-                      isDayToday ? "text-blue-600" : isCurrentMonth ? "text-gray-900 dark:text-gray-100" : "text-gray-400"
-                    )}>
-                      {format(day, 'd')}
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-semibold text-sm">{event.title}</h4>
+                      <Badge 
+                        className={cn("text-xs text-white", getEventTypeColor(event.event_type || 'other'))}
+                      >
+                        {event.event_type}
+                      </Badge>
                     </div>
                     
-                    <div className="space-y-0.5">
-                      {dayEvents.slice(0, 2).map((event) => (
-                        <div
-                          key={event.id}
-                          className={cn(
-                            "text-xs p-0.5 rounded cursor-pointer hover:opacity-80 truncate text-white",
-                            getEventTypeColor(event.event_type || 'other')
-                          )}
-                          onClick={() => onEventClick(event)}
-                          title={event.title}
-                        >
-                          {event.title.length > 12 ? `${event.title.substring(0, 12)}...` : event.title}
-                        </div>
-                      ))}
-                      
-                      {dayEvents.length > 2 && (
-                        <div className="text-xs text-gray-500 text-center">
-                          +{dayEvents.length - 2}
+                    <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3" />
+                        {format(new Date(event.start_time), 'h:mm a')} - {format(new Date(event.end_time), 'h:mm a')}
+                      </div>
+                      {event.location_name && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3" />
+                          {event.location_name}
                         </div>
                       )}
                     </div>
+                    
+                    {event.short_description && (
+                      <p className="text-xs text-gray-700 dark:text-gray-300 mt-2">{event.short_description}</p>
+                    )}
                   </div>
-                );
-              })
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     );
   }
 
