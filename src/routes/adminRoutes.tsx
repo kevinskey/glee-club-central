@@ -8,6 +8,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
+import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -15,6 +16,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/calendar',
+    element: (
+      <AdminRoute>
+        <AdminCalendarPage />
       </AdminRoute>
     ),
   },
