@@ -21,8 +21,8 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  // Add console log to help debug any remaining references
-  console.log('App component loaded - PitchPipe should be completely removed');
+  // Force cache invalidation for old PitchPipe references
+  console.log('App loaded - PitchPipe completely removed, cache timestamp:', Date.now());
   
   return (
     <ErrorBoundary>

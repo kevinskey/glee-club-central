@@ -36,7 +36,7 @@ export default function PracticePage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    console.log('PracticePage mounted - audio functionality removed');
+    console.log('PracticePage mounted - all audio and pitch pipe functionality removed');
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
