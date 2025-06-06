@@ -11,6 +11,27 @@ export const audioLogger = {
   }
 };
 
+// Note frequency calculation for pitch pipe
+export function getNoteFrequency(note: string, octave: number = 4): number {
+  const noteMap: { [key: string]: number } = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+  };
+  
+  const semitone = noteMap[note];
+  if (semitone === undefined) {
+    throw new Error(`Invalid note: ${note}`);
+  }
+  
+  // A4 = 440 Hz
+  const A4 = 440;
+  const A4_OCTAVE = 4;
+  const A4_SEMITONE = 9; // A is the 9th semitone in the chromatic scale
+  
+  const semitonesFromA4 = (octave - A4_OCTAVE) * 12 + (semitone - A4_SEMITONE);
+  return A4 * Math.pow(2, semitonesFromA4 / 12);
+}
+
 // Click sound for metronome - now accepts optional AudioContext
 export function playClick(audioContext?: AudioContext): Promise<void> {
   if (audioContext) {
