@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,26 +41,49 @@ export function UnifiedSlideManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingSlide, setEditingSlide] = useState<SlideData | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSlides();
   }, []);
 
   const fetchSlides = async () => {
+    console.log('🔍 UnifiedSlideManager: Starting to fetch slides...');
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      const { data, error } = await supabase
+      console.log('🔍 UnifiedSlideManager: Executing database query...');
+      const { data, error: dbError } = await supabase
         .from('slide_designs')
         .select('*')
         .eq('is_active', true)
         .order('display_order');
 
-      if (error) throw error;
+      console.log('🔍 UnifiedSlideManager: Database response:', { data, error: dbError });
+
+      if (dbError) {
+        console.error('🚨 UnifiedSlideManager: Database error:', dbError);
+        setError(`Database error: ${dbError.message}`);
+        throw dbError;
+      }
+      
+      console.log('🔍 UnifiedSlideManager: Successfully fetched slides:', data?.length || 0, 'slides');
       setSlides(data || []);
+      
+      if (!data || data.length === 0) {
+        console.log('🔍 UnifiedSlideManager: No slides found in database');
+        setError('No active slides found in the database');
+      }
     } catch (error) {
-      console.error('Error fetching slides:', error);
+      console.error('🚨 UnifiedSlideManager: Error fetching slides:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      setError(`Failed to load slides: ${errorMessage}`);
       toast.error('Failed to load slides');
+      setSlides([]);
     } finally {
       setIsLoading(false);
+      console.log('🔍 UnifiedSlideManager: Fetch slides completed');
     }
   };
 
@@ -152,6 +174,30 @@ export function UnifiedSlideManager() {
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="h-64 bg-gray-200 rounded"></div>
         </div>
+        <p className="text-center mt-4 text-muted-foreground">Loading slides...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full p-6">
+        <Card className="border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-800">Error Loading Slides</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-700 mb-4">{error}</p>
+            <div className="space-y-2">
+              <Button onClick={fetchSlides} variant="outline">
+                Retry Loading Slides
+              </Button>
+              <Button onClick={() => window.location.href = '/admin/hero-manager'}>
+                Create Your First Slide
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -162,16 +208,27 @@ export function UnifiedSlideManager() {
     <div className="w-full p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Hero Slide Manager</h1>
-        <Button onClick={() => window.location.href = '/admin/hero-manager'}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Slide
-        </Button>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">
+            {slides.length} slides loaded
+          </Badge>
+          <Button onClick={fetchSlides} variant="outline" size="sm">
+            Refresh
+          </Button>
+          <Button onClick={() => window.location.href = '/admin/hero-manager'}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Slide
+          </Button>
+        </div>
       </div>
 
       {slides.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <p className="text-muted-foreground mb-4">No slides found</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              There are no active slides in the database. Create your first slide to get started.
+            </p>
             <Button onClick={() => window.location.href = '/admin/hero-manager'}>
               Create Your First Slide
             </Button>
