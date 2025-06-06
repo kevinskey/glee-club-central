@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -94,7 +95,7 @@ export function UnifiedAdminModules() {
       description: "PDF viewer and music management",
       icon: <FileMusic className="h-5 w-5" />,
       color: "bg-violet-500",
-      path: "/dashboard/sheet-music",
+      path: "/sheet-music",
       adminOnly: true
     },
     {
@@ -130,7 +131,6 @@ export function UnifiedAdminModules() {
     return true;
   });
 
-  // Sort modules alphabetically by title
   const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
