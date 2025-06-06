@@ -23,6 +23,7 @@ import { PracticeLogForm } from '@/components/practice/PracticeLogForm';
 import { PracticeLogsList } from '@/components/practice/PracticeLogsList';
 import { PracticeStats } from '@/components/practice/PracticeStats';
 import { SightReadingEmbed } from '@/components/practice/SightReadingEmbed';
+import { PitchPipe } from '@/components/audio/PitchPipe';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { usePracticeLogs } from '@/hooks/usePracticeLogs';
@@ -97,6 +98,10 @@ export default function PracticePage() {
                 <Headphones className="mr-2 h-4 w-4" />
                 Practice Tunes
               </TabsTrigger>
+              <TabsTrigger value="pitch-pipe">
+                <Volume2 className="mr-2 h-4 w-4" />
+                Pitch Pipe
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="practice-log">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -120,11 +125,15 @@ export default function PracticePage() {
             </TabsContent>
             <TabsContent value="sight-reading">
               <h3 className="text-xl font-semibold mb-2">Sight Reading Exercises</h3>
-                <SightReadingEmbed />
+              <SightReadingEmbed />
             </TabsContent>
             <TabsContent value="practice-tunes">
               <h3 className="text-xl font-semibold mb-2">Practice Tunes</h3>
               <div>Coming Soon!</div>
+            </TabsContent>
+            <TabsContent value="pitch-pipe">
+              <h3 className="text-xl font-semibold mb-2">Pitch Pipe Tool</h3>
+              <PitchPipe />
             </TabsContent>
           </Tabs>
         </CardContent>
