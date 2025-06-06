@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
 import { SlideTemplate, SlideDesign, TextElement } from '@/types/slideDesign';
 import { 
   Type, 
@@ -22,7 +23,9 @@ import {
   AlignRight,
   Trash2,
   Upload,
-  Play
+  Play,
+  Clock,
+  Settings
 } from 'lucide-react';
 import { MediaLibrarySelector } from './MediaLibrarySelector';
 import { EnhancedAIAssistant } from './EnhancedAIAssistant';
@@ -45,13 +48,19 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   const [backgroundImage, setBackgroundImage] = useState(design?.background_image_url || '');
   const [backgroundMediaId, setBackgroundMediaId] = useState(design?.background_media_id || '');
   const [linkUrl, setLinkUrl] = useState(design?.link_url || '');
+  
+  // Animation Controls
   const [animationDuration, setAnimationDuration] = useState(design?.animation_settings?.duration || 5000);
+  const [animationTransition, setAnimationTransition] = useState(design?.animation_settings?.transition || 'fade');
+  const [autoPlay, setAutoPlay] = useState(design?.animation_settings?.autoPlay !== false);
+  
   const [layoutType, setLayoutType] = useState<'full' | 'half_horizontal' | 'half_vertical' | 'quarter'>(
     design?.layout_type || template?.layout_type || 'full'
   );
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   
-  const [textElements, setTextElements] = useState<TextElement[]>(
+  // Memoized text elements for performance
+  const [textElements, setTextElements] = useState<TextElement[]>(() => 
     design?.design_data?.textElements || 
     (template?.template_data?.textAreas || []).map(area => ({
       id: area.id,
@@ -78,15 +87,19 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   );
 
   const canvasRef = useRef<HTMLDivElement>(null);
-  const selectedElement = textElements.find(el => el.id === selectedElementId);
+  const selectedElement = useMemo(() => 
+    textElements.find(el => el.id === selectedElementId), 
+    [textElements, selectedElementId]
+  );
 
-  const updateTextElement = (id: string, updates: Partial<TextElement>) => {
+  // Optimized update function
+  const updateTextElement = useCallback((id: string, updates: Partial<TextElement>) => {
     setTextElements(prev => 
       prev.map(el => el.id === id ? { ...el, ...updates } : el)
     );
-  };
+  }, []);
 
-  const addTextElement = () => {
+  const addTextElement = useCallback(() => {
     const newElement: TextElement = {
       id: `text-${Date.now()}`,
       type: 'paragraph',
@@ -96,36 +109,36 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     };
     setTextElements(prev => [...prev, newElement]);
     setSelectedElementId(newElement.id);
-  };
+  }, []);
 
-  const deleteTextElement = (id: string) => {
+  const deleteTextElement = useCallback((id: string) => {
     setTextElements(prev => prev.filter(el => el.id !== id));
     if (selectedElementId === id) {
       setSelectedElementId(null);
     }
-  };
+  }, [selectedElementId]);
 
-  const handleElementClick = (elementId: string) => {
+  const handleElementClick = useCallback((elementId: string) => {
     setSelectedElementId(elementId);
-  };
+  }, []);
 
-  const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
+  const handleMediaSelect = useCallback((mediaUrl: string, mediaId: string) => {
     setBackgroundImage(mediaUrl);
     setBackgroundMediaId(mediaId);
     toast.success('Background updated');
-  };
+  }, []);
 
-  const handleImageUpload = (imageUrl: string) => {
+  const handleImageUpload = useCallback((imageUrl: string) => {
     setBackgroundImage(imageUrl);
     setBackgroundMediaId('');
-  };
+  }, []);
 
-  const handleVideoUpload = (videoUrl: string) => {
+  const handleVideoUpload = useCallback((videoUrl: string) => {
     setBackgroundImage(videoUrl);
     setBackgroundMediaId('');
-  };
+  }, []);
 
-  const handleAIMediaGenerate = async (type: 'image' | 'video', prompt: string) => {
+  const handleAIMediaGenerate = useCallback(async (type: 'image' | 'video', prompt: string) => {
     toast.info(`Generating AI ${type}...`);
     await new Promise(resolve => setTimeout(resolve, 3000));
     const mockUrl = '/lovable-uploads/ef084f8d-fe71-4e34-8587-9ac0ff3ddebf.png';
@@ -134,20 +147,20 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     } else {
       handleVideoUpload(mockUrl);
     }
-  };
+  }, [handleImageUpload, handleVideoUpload]);
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = useCallback(() => {
     setBackgroundImage('');
     setBackgroundMediaId('');
-  };
+  }, []);
 
-  const handleCanvasClick = (e: React.MouseEvent) => {
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setSelectedElementId(null);
     }
-  };
+  }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!title.trim()) {
       toast.error('Please enter a title');
       return;
@@ -172,8 +185,8 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
       background_media_id: backgroundMediaId,
       animation_settings: {
         duration: animationDuration,
-        transition: 'fade',
-        autoPlay: true
+        transition: animationTransition,
+        autoPlay: autoPlay
       },
       link_url: linkUrl,
       is_active: true,
@@ -181,9 +194,9 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     };
 
     onSave(designData);
-  };
+  }, [title, description, layoutType, textElements, backgroundColor, backgroundImage, backgroundMediaId, animationDuration, animationTransition, autoPlay, linkUrl, template, design, onSave]);
 
-  const handleStyleUpdate = (property: string, value: any) => {
+  const handleStyleUpdate = useCallback((property: string, value: any) => {
     if (!selectedElement) return;
     
     updateTextElement(selectedElement.id, {
@@ -192,17 +205,17 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
         [property]: value
       }
     });
-  };
+  }, [selectedElement, updateTextElement]);
 
-  const setAlignment = (alignment: 'left' | 'center' | 'right') => {
+  const setAlignment = useCallback((alignment: 'left' | 'center' | 'right') => {
     handleStyleUpdate('textAlign', alignment);
-  };
+  }, [handleStyleUpdate]);
 
-  const toggleBold = () => {
+  const toggleBold = useCallback(() => {
     const currentWeight = selectedElement?.style.fontWeight || 'normal';
     const newWeight = currentWeight === 'bold' ? 'normal' : 'bold';
     handleStyleUpdate('fontWeight', newWeight);
-  };
+  }, [selectedElement, handleStyleUpdate]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -421,6 +434,54 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
             <Separator />
 
+            {/* Animation Controls */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <Label className="text-sm font-medium">Animation Settings</Label>
+              </div>
+              
+              <div>
+                <Label className="text-sm">Display Duration: {animationDuration / 1000}s</Label>
+                <Slider
+                  value={[animationDuration]}
+                  onValueChange={([value]) => setAnimationDuration(value)}
+                  min={1000}
+                  max={30000}
+                  step={500}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label className="text-sm">Transition Effect</Label>
+                <Select value={animationTransition} onValueChange={setAnimationTransition}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fade">Fade</SelectItem>
+                    <SelectItem value="slide">Slide</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="autoplay"
+                  checked={autoPlay}
+                  onChange={(e) => setAutoPlay(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="autoplay" className="text-sm">Auto-play in slideshow</Label>
+              </div>
+            </div>
+
+            <Separator />
+
             {/* Background */}
             <div>
               <Label className="text-sm font-medium mb-2 block">Background</Label>
@@ -455,15 +516,12 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
             <Separator />
 
-            {/* Animation */}
             <div>
-              <Label className="text-sm font-medium">Display Duration (seconds)</Label>
+              <Label className="text-sm font-medium">Link URL</Label>
               <Input
-                type="number"
-                value={animationDuration / 1000}
-                onChange={(e) => setAnimationDuration(Number(e.target.value) * 1000)}
-                min={1}
-                max={30}
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://example.com"
                 className="mt-1"
               />
             </div>
