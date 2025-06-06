@@ -8,7 +8,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
 import AppLayout from "./layouts/AppLayout";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (
