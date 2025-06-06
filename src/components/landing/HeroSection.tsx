@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -147,23 +146,6 @@ export function HeroSection() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
           </svg>
         </button>
-      )}
-
-      {/* Slide Indicators */}
-      {slides.length > 1 && showContent && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/50 hover:bg-white/75'
-              }`}
-              onClick={() => setCurrentSlide(index)}
-            />
-          ))}
-        </div>
       )}
 
       {/* Slide Controls Panel */}
