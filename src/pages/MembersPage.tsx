@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { PageLoader } from '@/components/ui/page-loader';
+import { AdminLayout } from '@/layouts/AdminLayout';
 import { CleanMembersPage } from '@/components/members/CleanMembersPage';
 
 export default function MembersPage() {
@@ -11,5 +12,9 @@ export default function MembersPage() {
     return <PageLoader message="Loading members..." />;
   }
 
-  return <CleanMembersPage />;
+  return (
+    <AdminLayout>
+      <CleanMembersPage />
+    </AdminLayout>
+  );
 }
