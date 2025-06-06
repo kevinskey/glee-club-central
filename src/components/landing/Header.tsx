@@ -83,7 +83,7 @@ export function Header() {
                         className="text-sm font-normal text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-all duration-200 px-4 py-2"
                       >
                         <User className="w-4 h-4 mr-2" />
-                        {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'Dashboard'}
+                        Dashboard
                       </Button>
                       <Button 
                         variant="ghost"
