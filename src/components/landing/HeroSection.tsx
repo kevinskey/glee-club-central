@@ -25,7 +25,8 @@ interface SlideData {
 // Cache for slides to avoid repeated database calls
 let slidesCache: SlideData[] | null = null;
 let cacheTimestamp: number = 0;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+const QUERY_TIMEOUT = 2000; // Reduced to 2 seconds
 
 export function HeroSection() {
   const [slides, setSlides] = useState<SlideData[]>([]);
@@ -41,25 +42,26 @@ export function HeroSection() {
       console.log('🎭 HeroSection: Using cached slides');
       setSlides(slidesCache);
       setIsLoading(false);
+      setHasError(false);
       return;
     }
 
     try {
-      console.log('🎭 HeroSection: Fetching slides with timeout protection...');
+      console.log('🎭 HeroSection: Fetching slides...');
       
-      // Use a Promise.race to implement our own timeout
-      const fetchPromise = supabase
+      // Create an AbortController for better timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT);
+
+      const { data, error } = await supabase
         .from('slide_designs')
         .select('id, title, description, background_image_url, background_color, link_url, design_data')
         .eq('is_active', true)
         .order('display_order')
-        .limit(5); // Limit to reduce query complexity
+        .limit(3) // Further reduced limit
+        .abortSignal(controller.signal);
 
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Query timeout')), 3000)
-      );
-
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+      clearTimeout(timeoutId);
 
       if (error) {
         console.error('🚨 HeroSection: Database error:', error);
@@ -80,9 +82,10 @@ export function HeroSection() {
       setHasError(true);
       
       // Use cached data if available, even if expired
-      if (slidesCache) {
+      if (slidesCache && slidesCache.length > 0) {
         console.log('🎭 HeroSection: Falling back to expired cache');
         setSlides(slidesCache);
+        setHasError(false);
       } else {
         setSlides([]);
       }
@@ -92,10 +95,21 @@ export function HeroSection() {
   }, []);
 
   useEffect(() => {
+    // Set a maximum loading time before showing fallback
+    const maxLoadingTime = setTimeout(() => {
+      if (isLoading) {
+        console.log('🎭 HeroSection: Max loading time reached, showing fallback');
+        setIsLoading(false);
+        setHasError(true);
+      }
+    }, 3000);
+
     fetchSlidesWithCache();
+
+    return () => clearTimeout(maxLoadingTime);
   }, [fetchSlidesWithCache]);
 
-  // Auto-advance slides with cleanup
+  // Auto-advance slides
   useEffect(() => {
     if (slides.length > 1) {
       const timer = setInterval(() => {
@@ -120,14 +134,14 @@ export function HeroSection() {
       case 'full': return 'h-[350px] sm:h-[500px] md:h-screen';
       case 'large':
       default:
-        return 'h-[320px] sm:h-[450px] md:h-[600px]';
+        return 'h-[280px] sm:h-[400px] md:h-[550px]'; // Slightly smaller default
     }
   }, []);
 
   const getTextPositionClass = useMemo(() => (position?: string) => {
     switch (position) {
-      case 'top': return 'items-start pt-6 sm:pt-12 md:pt-16';
-      case 'bottom': return 'items-end pb-6 sm:pb-12 md:pb-16';
+      case 'top': return 'items-start pt-4 sm:pt-8 md:pt-12';
+      case 'bottom': return 'items-end pb-4 sm:pb-8 md:pb-12';
       default: return 'items-center';
     }
   }, []);
@@ -140,17 +154,17 @@ export function HeroSection() {
     }
   }, []);
 
-  // Fast loading state with skeleton
+  // Fast loading state
   if (isLoading) {
     return (
       <div className="w-full">
-        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden">
+        <div className="relative w-full h-[280px] sm:h-[400px] md:h-[550px] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
           <div className="absolute inset-0 animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-gray-400 dark:text-gray-500 text-sm sm:text-base animate-pulse">
-              Loading...
+            <div className="text-gray-500 dark:text-gray-400 text-sm animate-pulse">
+              Loading hero...
             </div>
           </div>
         </div>
@@ -158,44 +172,22 @@ export function HeroSection() {
     );
   }
 
-  // Error state with retry option
-  if (hasError && slides.length === 0) {
+  // Show default hero when no slides or error
+  if (hasError || slides.length === 0) {
     return (
       <div className="w-full">
-        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center text-center px-4">
-            <div className="max-w-md">
-              <p className="text-red-800 dark:text-red-200 mb-4">
-                Unable to load hero content
-              </p>
-              <Button 
-                onClick={fetchSlidesWithCache}
-                variant="outline"
-                size="sm"
-                className="bg-white/80 hover:bg-white"
-              >
-                Retry
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default hero when no slides
-  if (slides.length === 0) {
-    return (
-      <div className="w-full">
-        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden">
-          <div className="absolute inset-0 bg-black/40" />
+        <div className="relative w-full h-[280px] sm:h-[400px] md:h-[550px] bg-gradient-to-br from-glee-spelman to-glee-spelman/90 overflow-hidden">
+          <div className="absolute inset-0 bg-black/30" />
           <div className="relative h-full flex items-center justify-center text-center px-4">
-            <div className="max-w-4xl mx-auto text-white">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
+            <div className="max-w-4xl mx-auto text-white space-y-3 sm:space-y-4 md:space-y-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 Welcome to Glee World
               </h1>
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 opacity-90 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl opacity-90 leading-relaxed max-w-3xl mx-auto">
                 The official hub for Spelman College Glee Club
+              </p>
+              <p className="text-sm sm:text-base italic opacity-80">
+                "To Amaze and Inspire"
               </p>
             </div>
           </div>
@@ -218,7 +210,7 @@ export function HeroSection() {
         className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
         onClick={() => handleSlideClick(slide)}
       >
-        {/* Optimized background rendering */}
+        {/* Background */}
         {slide.background_image_url ? (
           <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
             <img
@@ -231,6 +223,11 @@ export function HeroSection() {
               }}
               loading="eager"
               decoding="async"
+              onError={(e) => {
+                console.log('🚨 HeroSection: Image failed to load');
+                // Hide image on error
+                e.currentTarget.style.display = 'none';
+              }}
             />
             {showTextOverlay && (
               <div 
@@ -246,27 +243,27 @@ export function HeroSection() {
           />
         )}
 
-        {/* Optimized content rendering */}
+        {/* Content */}
         {showTextOverlay && (
           <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
-            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 sm:space-y-3 md:space-y-6`}>
+            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 sm:space-y-3 md:space-y-4`}>
               {slide.title && (
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold leading-tight drop-shadow-lg">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
                   {slide.title}
                 </h1>
               )}
               
               {slide.description && (
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                <p className="text-sm sm:text-base md:text-lg opacity-90 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
                   {slide.description}
                 </p>
               )}
 
               {slide.design_data?.buttonText && slide.link_url && (
-                <div className="pt-2 sm:pt-3 md:pt-4">
+                <div className="pt-2 sm:pt-3">
                   <Button 
                     size="default"
-                    className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 shadow-lg text-sm sm:text-base font-medium"
+                    className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 py-2 sm:py-3 shadow-lg text-sm sm:text-base font-medium"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(slide.link_url, '_blank');
