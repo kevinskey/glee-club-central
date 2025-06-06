@@ -1,32 +1,30 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getNoteFrequency, playNote } from '@/utils/audioUtils';
-import { Music } from 'lucide-react';
 
-const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const octaves = [2, 3, 4, 5, 6];
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Music } from 'lucide-react';
+import { getNoteFrequency } from '@/utils/audioUtils';
+
+const notes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
 
 export function PitchPipe() {
-  const [selectedNote, setSelectedNote] = useState('C');
-  const [selectedOctave, setSelectedOctave] = useState(4);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [audio] = useState(() => new AudioContext());
 
-  const handlePlayNote = async () => {
-    if (isPlaying) return;
-    
-    try {
-      setIsPlaying(true);
-      console.log('Playing note:', selectedNote, selectedOctave);
-      const frequency = getNoteFrequency(selectedNote, selectedOctave);
-      console.log('Calculated frequency:', frequency);
-      await playNote(frequency, 2000); // Play for 2 seconds
-    } catch (error) {
-      console.error('Error playing note:', error);
-    } finally {
-      setIsPlaying(false);
-    }
+  const playTone = (note: string) => {
+    const freq = getNoteFrequency(note);
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+
+    oscillator.frequency.value = freq;
+    oscillator.type = 'sine';
+    oscillator.connect(gain);
+    gain.connect(audio.destination);
+
+    gain.gain.setValueAtTime(0.3, audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audio.currentTime + 1);
+
+    oscillator.start();
+    setTimeout(() => oscillator.stop(), 1000);
   };
 
   return (
@@ -37,50 +35,18 @@ export function PitchPipe() {
           Pitch Pipe
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Note</label>
-            <Select value={selectedNote} onValueChange={setSelectedNote}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {notes.map((note) => (
-                  <SelectItem key={note} value={note}>
-                    {note}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Octave</label>
-            <Select value={selectedOctave.toString()} onValueChange={(value) => setSelectedOctave(parseInt(value))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {octaves.map((octave) => (
-                  <SelectItem key={octave} value={octave.toString()}>
-                    {octave}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <Button 
-          onClick={handlePlayNote} 
-          disabled={isPlaying}
-          className="w-full"
-        >
-          {isPlaying ? 'Playing...' : `Play ${selectedNote}${selectedOctave}`}
-        </Button>
-        
-        <div className="text-sm text-muted-foreground text-center">
-          Frequency: {getNoteFrequency(selectedNote, selectedOctave).toFixed(2)} Hz
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          {notes.map(note => (
+            <Button
+              key={note}
+              onClick={() => playTone(note)}
+              variant="outline"
+              className="min-w-16"
+            >
+              {note}
+            </Button>
+          ))}
         </div>
       </CardContent>
     </Card>
