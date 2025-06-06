@@ -16,8 +16,8 @@ interface SlideData {
     buttonText?: string;
     textPosition?: 'top' | 'center' | 'bottom';
     textAlignment?: 'left' | 'center' | 'right';
-    showText?: boolean; // New field to control text visibility
-    height?: 'tiny' | 'small' | 'medium' | 'full' | 'large'; // Updated to include tiny
+    showText?: boolean;
+    height?: 'tiny' | 'small' | 'medium' | 'full' | 'large';
   };
 }
 
@@ -71,20 +71,14 @@ export function HeroSection() {
     }
   };
 
-  const getHeightClass = (height?: string) => {
-    switch (height) {
-      case 'tiny': return 'h-[25vh]';
-      case 'small': return 'h-[40vh]';
-      case 'medium': return 'h-[60vh]';
-      case 'full': return 'h-screen';
-      case 'large':
-      default: return 'h-[60vh] md:h-[70vh] lg:h-[80vh]';
-    }
+  // Responsive height classes with max-height constraint
+  const getResponsiveHeightClass = () => {
+    return 'h-[60vh] md:h-[70vh] lg:h-[80vh] max-h-[700px]';
   };
 
   if (isLoading) {
     return (
-      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 dark:bg-gray-800 animate-pulse pt-20">
+      <div className={`relative ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse pt-20 overflow-hidden`}>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-gray-400">Loading hero content...</div>
         </div>
@@ -94,17 +88,17 @@ export function HeroSection() {
 
   if (slides.length === 0) {
     return (
-      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gradient-to-br from-glee-spelman to-glee-spelman/80 pt-20">
+      <div className={`relative ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 pt-20 overflow-hidden`}>
         <div className="absolute inset-0 bg-black/40" />
-        <div className="relative h-full flex items-center justify-center text-center p-20">
+        <div className="relative h-full flex items-center justify-center text-center px-4 sm:px-8 lg:px-20">
           <div className="max-w-4xl mx-auto text-white">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6">
               Welcome to Glee World
             </h1>
-            <p className="text-xl md:text-2xl mb-8 opacity-90">
+            <p className="text-lg sm:text-xl md:text-2xl mb-6 md:mb-8 opacity-90">
               The official hub for Spelman College Glee Club
             </p>
-            <div className="text-sm opacity-75">
+            <div className="text-xs sm:text-sm opacity-75">
               Configure hero slides in the admin dashboard to customize this section
             </div>
           </div>
@@ -114,13 +108,11 @@ export function HeroSection() {
   }
 
   const slide = slides[currentSlide];
-  const backgroundImages = slide.background_image_url ? [slide.background_image_url] : [];
-  const heightClass = getHeightClass(slide.design_data?.height);
   
   const getTextPositionClass = (position?: string) => {
     switch (position) {
-      case 'top': return 'items-start pt-20';
-      case 'bottom': return 'items-end pb-20';
+      case 'top': return 'items-start pt-24 sm:pt-28 lg:pt-32';
+      case 'bottom': return 'items-end pb-12 sm:pb-16 lg:pb-20';
       default: return 'items-center';
     }
   };
@@ -139,15 +131,23 @@ export function HeroSection() {
 
   return (
     <div 
-      className={`relative ${heightClass} overflow-hidden cursor-pointer pt-20`}
+      className={`relative ${getResponsiveHeightClass()} overflow-hidden cursor-pointer pt-20`}
       onClick={() => handleSlideClick(slide)}
     >
-      {/* Background */}
+      {/* Background with optimized image display */}
       {slide.background_image_url ? (
-        <BackgroundSlideshow 
-          images={backgroundImages} 
-          overlayOpacity={showTextOverlay ? 0.4 : 0.1}
-        />
+        <div className="absolute inset-0">
+          <img
+            src={slide.background_image_url}
+            alt={slide.title || 'Hero slide'}
+            className="w-full h-full object-cover object-center"
+            style={{ objectPosition: 'center top' }}
+          />
+          {/* Overlay for better text readability when text is enabled */}
+          {showTextOverlay && (
+            <div className="absolute inset-0 bg-black/40" />
+          )}
+        </div>
       ) : (
         <div 
           className="absolute inset-0"
@@ -157,37 +157,39 @@ export function HeroSection() {
 
       {/* Content - Only show if text is enabled */}
       {showTextOverlay && (
-        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center p-20`}>
-          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)}`}>
+        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 sm:px-8 lg:px-20`}>
+          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6`}>
             {slide.title && (
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold animate-fade-in leading-tight">
                 {slide.title}
               </h1>
             )}
             
             {slide.description && (
-              <p className="text-xl md:text-2xl mb-8 opacity-90 animate-fade-in">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed">
                 {slide.description}
               </p>
             )}
 
             {slide.design_data?.buttonText && slide.link_url && (
-              <Button 
-                size="lg" 
-                className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(slide.link_url, '_blank');
-                }}
-              >
-                {slide.design_data.buttonText}
-              </Button>
+              <div className="pt-2 sm:pt-4">
+                <Button 
+                  size="lg" 
+                  className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(slide.link_url, '_blank');
+                  }}
+                >
+                  {slide.design_data.buttonText}
+                </Button>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Navigation */}
+      {/* Navigation - Only show if multiple slides */}
       {slides.length > 1 && (
         <>
           <button
@@ -195,22 +197,22 @@ export function HeroSection() {
               e.stopPropagation();
               prevSlide();
             }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               nextSlide();
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10"
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
 
           {/* Dots indicator */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {slides.map((_, index) => (
               <button
                 key={index}
@@ -218,7 +220,7 @@ export function HeroSection() {
                   e.stopPropagation();
                   setCurrentSlide(index);
                 }}
-                className={`w-3 h-3 rounded-full transition-colors ${
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
                   index === currentSlide ? 'bg-white' : 'bg-white/50'
                 }`}
               />
