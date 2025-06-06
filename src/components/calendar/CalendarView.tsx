@@ -11,11 +11,12 @@ import { cn } from '@/lib/utils';
 interface CalendarViewProps {
   events: CalendarEvent[];
   onEventClick: (event: CalendarEvent) => void;
+  onCreateEvent?: (date: Date) => void;
   showPrivateEvents: boolean;
   viewMode: 'month' | 'week' | 'day';
 }
 
-export function CalendarView({ events = [], onEventClick, showPrivateEvents, viewMode }: CalendarViewProps) {
+export function CalendarView({ events = [], onEventClick, onCreateEvent, showPrivateEvents, viewMode }: CalendarViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const getEventTypeColor = (type: string) => {
@@ -36,6 +37,16 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
     return events.filter(event => 
       isSameDay(new Date(event.start_time), date)
     );
+  };
+
+  const handleDayClick = (day: Date) => {
+    setSelectedDate(day);
+    const dayEvents = getEventsForDate(day);
+    
+    // If no events and onCreateEvent is provided, open create event window
+    if (dayEvents.length === 0 && onCreateEvent) {
+      onCreateEvent(day);
+    }
   };
 
   const navigateDate = (direction: 'prev' | 'next') => {
@@ -115,7 +126,7 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
                         isDayToday && "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200",
                         isSelected && "bg-blue-100 dark:bg-blue-900/40 ring-2 ring-blue-500"
                       )}
-                      onClick={() => setSelectedDate(day)}
+                      onClick={() => handleDayClick(day)}
                     >
                       <div className={cn(
                         "text-sm font-medium mb-1 flex items-center justify-between",
@@ -123,7 +134,7 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
                       )}>
                         <span>{format(day, 'd')}</span>
                         {hasEvents && (
-                          <div className="w-3 h-3 bg-blue-500 rounded-full flex-shrink-0"></div>
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
                         )}
                       </div>
                     </div>
@@ -212,10 +223,14 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
               const isDayToday = isToday(day);
               
               return (
-                <div key={day.toString()} className={cn(
-                  "min-h-24 border rounded-lg p-2",
-                  isDayToday && "bg-blue-50 dark:bg-blue-900/20 border-blue-200"
-                )}>
+                <div 
+                  key={day.toString()} 
+                  className={cn(
+                    "min-h-24 border rounded-lg p-2 cursor-pointer",
+                    isDayToday && "bg-blue-50 dark:bg-blue-900/20 border-blue-200"
+                  )}
+                  onClick={() => handleDayClick(day)}
+                >
                   <div className={cn(
                     "text-xs font-medium mb-2 text-center",
                     isDayToday ? "text-blue-600" : "text-gray-700 dark:text-gray-300"
@@ -232,7 +247,10 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
                           "text-xs p-1 rounded cursor-pointer hover:opacity-80 text-white",
                           getEventTypeColor(event.event_type || 'other')
                         )}
-                        onClick={() => onEventClick(event)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEventClick(event);
+                        }}
                       >
                         <div className="font-medium truncate">{event.title}</div>
                         <div className="opacity-75">{format(new Date(event.start_time), 'h:mm a')}</div>
@@ -305,9 +323,10 @@ export function CalendarView({ events = [], onEventClick, showPrivateEvents, vie
             ))}
           </div>
         ) : (
-          <div className="text-center py-8">
+          <div className="text-center py-8 cursor-pointer" onClick={() => onCreateEvent && onCreateEvent(selectedDate)}>
             <Calendar className="h-8 w-8 mx-auto mb-3 text-gray-400" />
             <p className="text-xs text-gray-500">No events scheduled for this day</p>
+            {onCreateEvent && <p className="text-xs text-blue-500 mt-1">Click to create an event</p>}
           </div>
         )}
       </CardContent>

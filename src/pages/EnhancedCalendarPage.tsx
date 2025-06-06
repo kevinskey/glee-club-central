@@ -5,6 +5,8 @@ import { EnhancedCalendarView } from '@/components/calendar/EnhancedCalendarView
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 export default function EnhancedCalendarPage() {
   const { events, loading, error } = useCalendarEvents();
@@ -15,6 +17,10 @@ export default function EnhancedCalendarPage() {
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
+  };
+
+  const handleCreateEvent = (date: Date) => {
+    toast.info(`To create events for ${format(date, 'MMMM d, yyyy')}, please contact the Glee Club administration.`);
   };
 
   if (loading) {
@@ -56,6 +62,7 @@ export default function EnhancedCalendarPage() {
         <EnhancedCalendarView
           events={publicEvents}
           onEventClick={handleEventClick}
+          onCreateEvent={handleCreateEvent}
           showPrivateEvents={false}
         />
 

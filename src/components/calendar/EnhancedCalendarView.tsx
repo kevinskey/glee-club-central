@@ -8,10 +8,11 @@ import { CalendarDays, Calendar, CalendarCheck } from 'lucide-react';
 interface EnhancedCalendarViewProps {
   events: CalendarEvent[];
   onEventClick: (event: CalendarEvent) => void;
+  onCreateEvent?: (date: Date) => void;
   showPrivateEvents: boolean;
 }
 
-export function EnhancedCalendarView({ events, onEventClick, showPrivateEvents }: EnhancedCalendarViewProps) {
+export function EnhancedCalendarView({ events, onEventClick, onCreateEvent, showPrivateEvents }: EnhancedCalendarViewProps) {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
 
   return (
@@ -53,6 +54,7 @@ export function EnhancedCalendarView({ events, onEventClick, showPrivateEvents }
       <CalendarView
         events={events}
         onEventClick={onEventClick}
+        onCreateEvent={onCreateEvent}
         showPrivateEvents={showPrivateEvents}
         viewMode={viewMode}
       />
