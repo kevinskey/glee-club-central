@@ -3,8 +3,8 @@ import React from 'react';
 
 export function HeroDefaultState() {
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
+    <section className="py-8 md:py-12">
+      <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-br from-glee-spelman to-glee-spelman/90 overflow-hidden flex items-center justify-center rounded-lg">
           <div className="absolute inset-0 bg-black/30" />
           <div className="relative h-full flex items-center justify-center text-center px-4 z-10">

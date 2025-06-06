@@ -123,8 +123,8 @@ export function HeroSection() {
   const slide = slides[currentSlide];
   
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
+    <section className="py-8 md:py-12">
+      <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative">
           {/* Hero Slide with fade-in animation */}
           <div 

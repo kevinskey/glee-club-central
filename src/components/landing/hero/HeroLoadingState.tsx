@@ -3,8 +3,8 @@ import React from 'react';
 
 export function HeroLoadingState() {
   return (
-    <section className="py-12">
-      <div className="container mx-auto px-4">
+    <section className="py-8 md:py-12">
+      <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/5 dark:to-primary/15 overflow-hidden flex items-center justify-center rounded-lg">
           <div className="absolute inset-0 animate-pulse">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
