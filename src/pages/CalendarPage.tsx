@@ -5,16 +5,18 @@ import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
-import { Calendar } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const { isAuthenticated, user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
 
   const filteredEvents = events.filter(event => {
     if (event.is_public) return true;
@@ -31,12 +33,13 @@ export default function CalendarPage() {
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+          icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
+          compact={true}
         />
-        <div className="flex items-center justify-center h-48 sm:h-64">
+        <div className="flex items-center justify-center h-32 sm:h-48">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto"></div>
-            <p className="mt-4 text-muted-foreground text-sm sm:text-base">Loading calendar...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-glee-spelman mx-auto"></div>
+            <p className="mt-3 text-muted-foreground text-xs sm:text-sm">Loading calendar...</p>
           </div>
         </div>
       </div>
@@ -49,15 +52,16 @@ export default function CalendarPage() {
         <PageHeader
           title="Calendar"
           description="View upcoming events and performances"
-          icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+          icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
+          compact={true}
         />
-        <Card className="mt-6">
-          <CardContent className="flex flex-col items-center justify-center h-48 space-y-4">
+        <Card className="mt-4">
+          <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
             <div className="text-red-600 text-center">
-              <p className="font-semibold text-sm sm:text-base">Error loading calendar</p>
-              <p className="text-xs sm:text-sm mt-1">{error}</p>
+              <p className="font-semibold text-xs sm:text-sm">Error loading calendar</p>
+              <p className="text-xs mt-1">{error}</p>
             </div>
-            <Button onClick={fetchEvents} variant="outline" className="mobile-touch-target">
+            <Button onClick={fetchEvents} variant="outline" size="sm">
               Try Again
             </Button>
           </CardContent>
@@ -67,20 +71,58 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="mobile-container mobile-section-padding space-y-4 sm:space-y-6 mobile-scroll">
+    <div className="mobile-container mobile-section-padding space-y-3 sm:space-y-4 mobile-scroll">
       <PageHeader
         title="Calendar"
-        description={`View ${isAuthenticated ? 'all events and performances' : 'upcoming public events'}`}
-        icon={<Calendar className="h-5 w-5 sm:h-6 sm:w-6" />}
+        description={`${isAuthenticated ? 'All events and performances' : 'Upcoming public events'}`}
+        icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
+        compact={true}
       />
+
+      {/* View Toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-800">
+          <Button
+            variant={viewMode === 'month' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('month')}
+            className="text-xs px-2 py-1 h-7"
+          >
+            <CalendarDays className="h-3 w-3 mr-1" />
+            Month
+          </Button>
+          <Button
+            variant={viewMode === 'week' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('week')}
+            className="text-xs px-2 py-1 h-7"
+          >
+            <Calendar className="h-3 w-3 mr-1" />
+            Week
+          </Button>
+          <Button
+            variant={viewMode === 'day' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setViewMode('day')}
+            className="text-xs px-2 py-1 h-7"
+          >
+            <CalendarCheck className="h-3 w-3 mr-1" />
+            Day
+          </Button>
+        </div>
+        
+        <Badge variant="secondary" className="text-xs">
+          {filteredEvents.length} events
+        </Badge>
+      </div>
 
       {filteredEvents.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center h-48 space-y-4">
-            <Calendar className="h-12 w-12 text-gray-400" />
+          <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
+            <Calendar className="h-8 w-8 text-gray-400" />
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900">No Events Found</h3>
-              <p className="text-gray-500 mt-2">
+              <h3 className="text-sm font-semibold text-gray-900">No Events Found</h3>
+              <p className="text-gray-500 mt-1 text-xs">
                 {isAuthenticated 
                   ? "There are no upcoming events at this time." 
                   : "There are no upcoming public events. Log in to see member events."
@@ -94,6 +136,7 @@ export default function CalendarPage() {
           events={filteredEvents}
           onEventClick={handleEventClick}
           showPrivateEvents={isAuthenticated}
+          viewMode={viewMode}
         />
       )}
 

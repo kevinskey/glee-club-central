@@ -1,42 +1,62 @@
 
-import React from "react";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { cn } from '@/lib/utils';
 
-export interface PageHeaderProps {
+interface PageHeaderProps {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  actions?: React.ReactNode;
-  children?: React.ReactNode;
+  compact?: boolean;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export function PageHeader({ 
   title, 
   description, 
   icon, 
-  actions, 
-  children, 
-  className 
+  compact = false, 
+  className,
+  children 
 }: PageHeaderProps) {
   return (
-    <div className={cn("space-y-4 pb-8", className)}>
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+    <div className={cn(
+      "flex flex-col gap-1",
+      compact ? "mb-3" : "mb-4 sm:mb-6",
+      className
+    )}>
+      <div className="flex items-center gap-2">
+        {icon && (
+          <div className={cn(
+            "flex items-center justify-center rounded-lg",
+            compact 
+              ? "p-1.5 bg-glee-spelman/10" 
+              : "p-2 bg-glee-spelman/10"
+          )}>
             {icon}
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-          </div>
-          {description && (
-            <p className="text-lg text-muted-foreground">{description}</p>
-          )}
-        </div>
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
           </div>
         )}
+        <h1 className={cn(
+          "font-bold text-gray-900 dark:text-white",
+          compact 
+            ? "text-lg sm:text-xl" 
+            : "text-xl sm:text-2xl lg:text-3xl"
+        )}>
+          {title}
+        </h1>
       </div>
+      
+      {description && (
+        <p className={cn(
+          "text-gray-600 dark:text-gray-400",
+          compact 
+            ? "text-xs sm:text-sm" 
+            : "text-sm sm:text-base"
+        )}>
+          {description}
+        </p>
+      )}
+      
       {children}
     </div>
   );
