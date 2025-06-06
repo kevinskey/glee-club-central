@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Edit, Eye, Trash2, Save, X, Settings, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Edit, Eye, Trash2, Save, X, Settings, Plus, ChevronLeft, ChevronRight, Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -43,9 +45,26 @@ export function UnifiedSlideManager() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Hero controls state
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [speed, setSpeed] = useState(5000);
+  const [transition, setTransition] = useState('fade');
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [showAdvancedControls, setShowAdvancedControls] = useState(false);
+
   useEffect(() => {
     fetchSlides();
   }, []);
+
+  // Auto-advance slides with hero controls
+  useEffect(() => {
+    if (slides.length > 1 && isPlaying && autoPlay) {
+      const timer = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, speed);
+      return () => clearInterval(timer);
+    }
+  }, [slides.length, isPlaying, autoPlay, speed]);
 
   const fetchSlides = async () => {
     console.log('🔍 UnifiedSlideManager: Starting to fetch slides...');
@@ -85,6 +104,47 @@ export function UnifiedSlideManager() {
       setIsLoading(false);
       console.log('🔍 UnifiedSlideManager: Fetch slides completed');
     }
+  };
+
+  // Hero control handlers
+  const handlePlay = () => setIsPlaying(true);
+  const handlePause = () => setIsPlaying(false);
+  const handlePlayPause = () => setIsPlaying(!isPlaying);
+  
+  const handleNext = () => {
+    if (slides.length > 1) {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }
+  };
+  
+  const handlePrevious = () => {
+    if (slides.length > 1) {
+      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    }
+  };
+  
+  const handleSlideChange = (index: number) => {
+    setCurrentSlide(index);
+  };
+  
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed);
+  };
+  
+  const handleTransitionChange = (newTransition: string) => {
+    setTransition(newTransition);
+  };
+  
+  const handleAutoPlayToggle = (enabled: boolean) => {
+    setAutoPlay(enabled);
+    if (!enabled) {
+      setIsPlaying(false);
+    }
+  };
+  
+  const handleReset = () => {
+    setCurrentSlide(0);
+    setIsPlaying(true);
   };
 
   const handleEditSlide = (slide: SlideData) => {
@@ -167,6 +227,13 @@ export function UnifiedSlideManager() {
     }
   };
 
+  const transitionOptions = [
+    { value: 'fade', label: 'Fade' },
+    { value: 'slide', label: 'Slide' },
+    { value: 'zoom', label: 'Zoom' },
+    { value: 'none', label: 'None' }
+  ];
+
   if (isLoading) {
     return (
       <div className="w-full p-6">
@@ -236,6 +303,191 @@ export function UnifiedSlideManager() {
         </Card>
       ) : (
         <>
+          {/* Hero Controls Panel */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Slideshow Controls
+                <Badge variant="outline" className="ml-auto">
+                  {currentSlide + 1} of {slides.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Main Controls */}
+              <div className="flex items-center justify-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevious}
+                  disabled={slides.length <= 1}
+                >
+                  <SkipBack className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePlayPause}
+                  disabled={slides.length <= 1}
+                  className="h-12 w-12"
+                >
+                  {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNext}
+                  disabled={slides.length <= 1}
+                >
+                  <SkipForward className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleReset}
+                  title="Reset to first slide"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Slide Progress */}
+              {slides.length > 1 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Slide Position</Label>
+                  <Slider
+                    value={[currentSlide]}
+                    onValueChange={([value]) => handleSlideChange(value)}
+                    max={slides.length - 1}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Slide 1</span>
+                    <span>Slide {slides.length}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* AutoPlay Toggle */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Play className="h-4 w-4" />
+                  <Label htmlFor="autoplay">Auto Play</Label>
+                </div>
+                <Switch
+                  id="autoplay"
+                  checked={autoPlay}
+                  onCheckedChange={handleAutoPlayToggle}
+                />
+              </div>
+
+              {/* Speed Control */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <Label className="text-sm font-medium">
+                    Speed: {speed / 1000}s per slide
+                  </Label>
+                </div>
+                <Slider
+                  value={[speed]}
+                  onValueChange={([value]) => handleSpeedChange(value)}
+                  min={1000}
+                  max={10000}
+                  step={500}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Fast (1s)</span>
+                  <span>Slow (10s)</span>
+                </div>
+              </div>
+
+              {/* Advanced Controls Toggle */}
+              <Button
+                variant="ghost"
+                onClick={() => setShowAdvancedControls(!showAdvancedControls)}
+                className="w-full flex items-center gap-2"
+              >
+                <Zap className="h-4 w-4" />
+                {showAdvancedControls ? 'Hide' : 'Show'} Advanced Controls
+              </Button>
+
+              {/* Advanced Controls */}
+              {showAdvancedControls && (
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Transition Effect</Label>
+                    <Select value={transition} onValueChange={handleTransitionChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {transitionOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Quick Speed Presets */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Quick Speed Presets</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSpeedChange(2000)}
+                        className={speed === 2000 ? 'bg-primary text-primary-foreground' : ''}
+                      >
+                        Fast
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSpeedChange(5000)}
+                        className={speed === 5000 ? 'bg-primary text-primary-foreground' : ''}
+                      >
+                        Normal
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSpeedChange(8000)}
+                        className={speed === 8000 ? 'bg-primary text-primary-foreground' : ''}
+                      >
+                        Slow
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Status Info */}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status:</span>
+                      <Badge variant={isPlaying ? "default" : "secondary"}>
+                        {isPlaying ? "Playing" : "Paused"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Transition:</span>
+                      <span className="capitalize">{transition}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Separator />
+
           {/* Current Slide Preview */}
           <Card>
             <CardHeader>
@@ -268,7 +520,10 @@ export function UnifiedSlideManager() {
             <CardContent>
               {currentSlideData && (
                 <div 
-                  className={`relative w-full ${getResponsiveHeightClass(currentSlideData.design_data?.height)} overflow-hidden rounded-lg`}
+                  className={`relative w-full ${getResponsiveHeightClass(currentSlideData.design_data?.height)} overflow-hidden rounded-lg transition-opacity duration-500`}
+                  style={{ 
+                    transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
+                  }}
                 >
                   {/* Background */}
                   {currentSlideData.background_image_url ? (
@@ -330,13 +585,13 @@ export function UnifiedSlideManager() {
                   {slides.length > 1 && (
                     <>
                       <button
-                        onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                        onClick={handlePrevious}
                         className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+                        onClick={handleNext}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
                       >
                         <ChevronRight className="h-4 w-4" />
