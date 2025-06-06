@@ -1,5 +1,5 @@
-
 // Audio utility functions for the Glee Club application
+console.log('Loading audioUtils.ts - exports should be available');
 
 // Audio logging utility
 export const audioLogger = {
@@ -13,6 +13,7 @@ export const audioLogger = {
 
 // Note frequency calculation for pitch pipe
 export const getNoteFrequency = (note: string): number => {
+  console.log('getNoteFrequency called with note:', note);
   const frequencies: Record<string, number> = {
     'C4': 261.63,
     'D4': 293.66,
@@ -25,6 +26,9 @@ export const getNoteFrequency = (note: string): number => {
   };
   return frequencies[note] || 440;
 };
+
+// Debug: Log that getNoteFrequency is exported
+console.log('getNoteFrequency export:', typeof getNoteFrequency);
 
 // Click sound for UI feedback
 export function playClick(audioContext?: AudioContext): Promise<void> {
