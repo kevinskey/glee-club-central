@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -17,6 +16,7 @@ interface SlideData {
     textPosition?: 'top' | 'center' | 'bottom';
     textAlignment?: 'left' | 'center' | 'right';
     showText?: boolean; // New field to control text visibility
+    height?: 'small' | 'medium' | 'full' | 'large'; // New field to control height
   };
 }
 
@@ -70,6 +70,16 @@ export function HeroSection() {
     }
   };
 
+  const getHeightClass = (height?: string) => {
+    switch (height) {
+      case 'small': return 'h-[40vh]';
+      case 'medium': return 'h-[60vh]';
+      case 'full': return 'h-screen';
+      case 'large':
+      default: return 'h-[60vh] md:h-[70vh] lg:h-[80vh]';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 dark:bg-gray-800 animate-pulse">
@@ -103,6 +113,7 @@ export function HeroSection() {
 
   const slide = slides[currentSlide];
   const backgroundImages = slide.background_image_url ? [slide.background_image_url] : [];
+  const heightClass = getHeightClass(slide.design_data?.height);
   
   const getTextPositionClass = (position?: string) => {
     switch (position) {
@@ -126,7 +137,7 @@ export function HeroSection() {
 
   return (
     <div 
-      className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden cursor-pointer"
+      className={`relative ${heightClass} overflow-hidden cursor-pointer`}
       onClick={() => handleSlideClick(slide)}
     >
       {/* Background */}

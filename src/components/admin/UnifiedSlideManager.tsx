@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ interface NewSlideForm {
   backgroundImage: string;
   mediaId: string;
   showText: boolean;
+  height: 'small' | 'medium' | 'large' | 'full';
 }
 
 export function UnifiedSlideManager() {
@@ -46,7 +48,8 @@ export function UnifiedSlideManager() {
     backgroundColor: '#4F46E5',
     backgroundImage: '',
     mediaId: '',
-    showText: true
+    showText: true,
+    height: 'large'
   });
   const [editForm, setEditForm] = useState<NewSlideForm>({
     title: '',
@@ -58,7 +61,8 @@ export function UnifiedSlideManager() {
     backgroundColor: '#4F46E5',
     backgroundImage: '',
     mediaId: '',
-    showText: true
+    showText: true,
+    height: 'large'
   });
 
   useEffect(() => {
@@ -122,7 +126,8 @@ export function UnifiedSlideManager() {
       backgroundColor: slide.background_color || '#4F46E5',
       backgroundImage: slide.background_image_url || '',
       mediaId: slide.background_media_id || '',
-      showText: slide.design_data?.showText !== false
+      showText: slide.design_data?.showText !== false,
+      height: slide.design_data?.height || 'large'
     });
   };
 
@@ -138,7 +143,8 @@ export function UnifiedSlideManager() {
       backgroundColor: '#4F46E5',
       backgroundImage: '',
       mediaId: '',
-      showText: true
+      showText: true,
+      height: 'large'
     });
   };
 
@@ -176,7 +182,8 @@ export function UnifiedSlideManager() {
             buttonText: editForm.buttonText,
             textPosition: editForm.textPosition,
             textAlignment: editForm.textAlignment,
-            showText: editForm.showText
+            showText: editForm.showText,
+            height: editForm.height
           },
           background_color: editForm.backgroundColor,
           background_image_url: editForm.backgroundImage || null,
@@ -231,7 +238,8 @@ export function UnifiedSlideManager() {
             buttonText: newSlide.buttonText,
             textPosition: newSlide.textPosition,
             textAlignment: newSlide.textAlignment,
-            showText: newSlide.showText
+            showText: newSlide.showText,
+            height: newSlide.height
           },
           background_color: newSlide.backgroundColor,
           background_image_url: newSlide.backgroundImage || null,
@@ -259,7 +267,8 @@ export function UnifiedSlideManager() {
         backgroundColor: '#4F46E5',
         backgroundImage: '',
         mediaId: '',
-        showText: true
+        showText: true,
+        height: 'large'
       });
       fetchSlides();
     } catch (error) {
@@ -343,7 +352,7 @@ export function UnifiedSlideManager() {
                 <div className="border rounded-lg p-4 space-y-4">
                   <h3 className="font-medium">Create New Hero Slide</h3>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Input
                       placeholder="Slide title (optional for image-only slides)"
                       value={newSlide.title}
@@ -356,6 +365,25 @@ export function UnifiedSlideManager() {
                         onCheckedChange={(checked) => setNewSlide(prev => ({ ...prev, showText: checked }))}
                       />
                       <Label htmlFor="showText">Show text overlay</Label>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hero Height</Label>
+                      <Select 
+                        value={newSlide.height} 
+                        onValueChange={(value: 'small' | 'medium' | 'large' | 'full') => 
+                          setNewSlide(prev => ({ ...prev, height: value }))
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">Small (40vh)</SelectItem>
+                          <SelectItem value="medium">Medium (60vh)</SelectItem>
+                          <SelectItem value="large">Large (80vh)</SelectItem>
+                          <SelectItem value="full">Full Screen (100vh)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -498,7 +526,7 @@ export function UnifiedSlideManager() {
                               </div>
                             </div>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <Input
                                 placeholder="Slide title (optional)"
                                 value={editForm.title}
@@ -511,6 +539,25 @@ export function UnifiedSlideManager() {
                                   onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, showText: checked }))}
                                 />
                                 <Label htmlFor="editShowText">Show text overlay</Label>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Hero Height</Label>
+                                <Select 
+                                  value={editForm.height} 
+                                  onValueChange={(value: 'small' | 'medium' | 'large' | 'full') => 
+                                    setEditForm(prev => ({ ...prev, height: value }))
+                                  }
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="small">Small (40vh)</SelectItem>
+                                    <SelectItem value="medium">Medium (60vh)</SelectItem>
+                                    <SelectItem value="large">Large (80vh)</SelectItem>
+                                    <SelectItem value="full">Full Screen (100vh)</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
                             </div>
 
@@ -649,6 +696,9 @@ export function UnifiedSlideManager() {
                                     Image
                                   </Badge>
                                 )}
+                                <Badge variant="secondary">
+                                  Height: {slide.design_data?.height || 'large'}
+                                </Badge>
                                 <Badge 
                                   variant="secondary" 
                                   style={{ backgroundColor: slide.background_color + '20', color: slide.background_color }}
