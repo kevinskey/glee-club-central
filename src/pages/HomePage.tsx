@@ -4,7 +4,6 @@ import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
-import { CustomSlideRenderer } from "@/components/landing/CustomSlideRenderer";
 
 const HomePage = () => {
   const {
@@ -21,11 +20,8 @@ const HomePage = () => {
   }
 
   return (
-    <PublicPageWrapper showTopSlider={true} className="home-page overflow-x-hidden">
-      {/* Custom Slide Renderer - for other custom slides */}
-      <CustomSlideRenderer />
-      
-      {/* Main Content */}
+    <PublicPageWrapper showTopSlider={false} className="home-page overflow-x-hidden">
+      {/* Main Content - Starting directly with events */}
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
