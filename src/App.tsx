@@ -42,13 +42,13 @@ function App() {
                   <AppLayout>
                     <Outlet />
                   </AppLayout>
+                  <Toaster />
                 </CartProvider>
               </ProfileProvider>
             </AuthProvider>
           </TooltipProvider>
         </ThemeProvider>
       </QueryClientProvider>
-      <Toaster />
     </ErrorBoundary>
   );
 }
