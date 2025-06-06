@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +25,7 @@ interface StatsData {
 }
 
 export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
+  const navigate = useNavigate();
   const [statsData, setStatsData] = useState<StatsData>({
     activeMembers: 0,
     eventsThisMonth: 0,
@@ -86,6 +88,25 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
     fetchStats();
   }, []);
 
+  const handleCardClick = (cardType: string) => {
+    switch (cardType) {
+      case 'members':
+        navigate('/members');
+        break;
+      case 'calendar':
+        navigate('/calendar');
+        break;
+      case 'media':
+        navigate('/admin/media-library');
+        break;
+      case 'orders':
+        navigate('/admin/store');
+        break;
+      default:
+        break;
+    }
+  };
+
   const stats = [
     {
       title: "Active Members",
@@ -94,7 +115,8 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
       changeType: "neutral" as const,
       icon: Users,
       color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100 dark:bg-blue-900/20"
+      bgColor: "bg-blue-100 dark:bg-blue-900/20",
+      onClick: () => handleCardClick('members')
     },
     {
       title: "Events This Month",
@@ -103,7 +125,8 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
       changeType: "neutral" as const,
       icon: Calendar,
       color: "text-green-600 dark:text-green-400",
-      bgColor: "bg-green-100 dark:bg-green-900/20"
+      bgColor: "bg-green-100 dark:bg-green-900/20",
+      onClick: () => handleCardClick('calendar')
     },
     {
       title: "Media Files",
@@ -112,7 +135,8 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
       changeType: "neutral" as const,
       icon: FileImage,
       color: "text-purple-600 dark:text-purple-400",
-      bgColor: "bg-purple-100 dark:bg-purple-900/20"
+      bgColor: "bg-purple-100 dark:bg-purple-900/20",
+      onClick: () => handleCardClick('media')
     },
     {
       title: "Pending Orders",
@@ -121,7 +145,8 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
       changeType: "neutral" as const,
       icon: Package,
       color: "text-orange-600 dark:text-orange-400",
-      bgColor: "bg-orange-100 dark:bg-orange-900/20"
+      bgColor: "bg-orange-100 dark:bg-orange-900/20",
+      onClick: () => handleCardClick('orders')
     }
   ];
 
@@ -133,7 +158,8 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
         return (
           <Card 
             key={index} 
-            className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            className="border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer hover:scale-105"
+            onClick={stat.onClick}
           >
             <CardContent className="p-3">
               <div className="flex items-center justify-between mb-2">
