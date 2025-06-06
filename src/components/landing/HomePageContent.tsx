@@ -1,4 +1,3 @@
-
 import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
@@ -48,9 +47,9 @@ export function HomePageContent({
   
   return (
     <main className="w-full">
-      {/* Events Section */}
+      {/* Events Section - Full Width */}
       <section className="w-full py-8 md:py-12 lg:py-16">
-        <div className="w-full max-w-[80vw] mx-auto px-4 sm:px-6 md:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 md:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
             <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
@@ -64,9 +63,9 @@ export function HomePageContent({
         </div>
       </section>
       
-      {/* Store Section */}
+      {/* Store Section - Full Width */}
       <section className="w-full py-8 md:py-12 lg:py-16 bg-gray-50/30 dark:bg-gray-900/10">
-        <div className="w-full max-w-[80vw] mx-auto px-4 sm:px-6 md:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center mb-8 md:mb-12 lg:mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
               Glee Store
@@ -79,9 +78,9 @@ export function HomePageContent({
         </div>
       </section>
       
-      {/* Audio Section */}
+      {/* Audio Section - Full Width */}
       <section className="w-full py-8 md:py-12 lg:py-16">
-        <div className="w-full max-w-[80vw] mx-auto px-4 sm:px-6 md:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center mb-8 md:mb-12 lg:mb-16">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
               Our Music

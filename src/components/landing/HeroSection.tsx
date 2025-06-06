@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -111,7 +109,7 @@ export function HeroSection() {
     }
   };
 
-  // Responsive height classes with mobile image height support
+  // Full width responsive height classes
   const getResponsiveHeightClass = (height?: string) => {
     // On mobile with image height calculated, use that
     if (isMobile && imageHeight) {
@@ -138,8 +136,8 @@ export function HeroSection() {
 
   if (isLoading) {
     return (
-      <div className="w-full flex justify-center pt-20">
-        <div className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden`}>
+      <div className="w-full pt-20">
+        <div className={`relative w-full ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden`}>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-gray-400">Loading hero content...</div>
           </div>
@@ -150,8 +148,8 @@ export function HeroSection() {
 
   if (slides.length === 0) {
     return (
-      <div className="w-full flex justify-center pt-20">
-        <div className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
+      <div className="w-full pt-20">
+        <div className={`relative w-full ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative h-full flex items-center justify-center text-center px-4 sm:px-8 lg:px-20">
             <div className="max-w-4xl mx-auto text-white">
@@ -199,13 +197,13 @@ export function HeroSection() {
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
 
   return (
-    <div className="w-full flex justify-center pt-20">
+    <div className="w-full pt-20">
       <div 
-        className={`relative w-full max-w-[80vw] ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
+        className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
         style={getDynamicStyle(slide.design_data?.height)}
         onClick={() => handleSlideClick(slide)}
       >
-        {/* Background with admin-configurable display settings */}
+        {/* Background with admin-configurable display settings - Full Width */}
         {slide.background_image_url ? (
           <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
             <img
