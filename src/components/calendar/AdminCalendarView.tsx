@@ -10,7 +10,7 @@ import { Clock, MapPin, Users, Edit, Trash2, Search, GraduationCap, Flag, Church
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, isToday } from 'date-fns';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { toast } from 'sonner';
-import { getSpelmanAcademicDates, getSpelmanDateByDate } from '@/utils/spelmanAcademicDates';
+import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 import { getNationalHolidays } from '@/utils/nationalHolidays';
 import { getReligiousHolidays } from '@/utils/religiousHolidays';
 
@@ -32,11 +32,6 @@ export function AdminCalendarView({
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
   const [isEventEditorOpen, setIsEventEditorOpen] = useState(false);
 
-  console.log('AdminCalendarView: Raw events:', events?.length || 0);
-  console.log('AdminCalendarView: Search query:', searchQuery);
-  console.log('AdminCalendarView: Selected event type:', selectedEventType);
-  console.log('AdminCalendarView: Enabled categories:', enabledCategories);
-
   // Memoize holiday data to prevent recalculation on every render
   const { spelmanEvents, nationalHolidayEvents, religiousHolidayEvents } = useMemo(() => {
     const currentYear = new Date().getFullYear();
@@ -53,14 +48,13 @@ export function AdminCalendarView({
       ...getReligiousHolidays(currentYear + 1)
     ];
 
-    // Convert Spelman dates to CalendarEvent format
+    // Convert to CalendarEvent format
     const spelmanEvents: CalendarEvent[] = spelmanDates.map(date => ({
       id: `spelman-${date.id}`,
       title: date.title,
       start_time: date.date.toISOString(),
       end_time: date.date.toISOString(),
       short_description: date.description,
-      full_description: date.description,
       event_type: 'academic',
       event_types: ['academic'],
       is_private: true,
@@ -69,18 +63,15 @@ export function AdminCalendarView({
       allow_reminders: true,
       allow_ics_download: true,
       allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      feature_image_url: date.imageUrl
+      created_at: new Date().toISOString()
     }));
 
-    // Convert national holidays to CalendarEvent format
     const nationalHolidayEvents: CalendarEvent[] = nationalHolidays.map(holiday => ({
       id: `national-${holiday.id}`,
       title: holiday.title,
       start_time: holiday.date.toISOString(),
       end_time: holiday.date.toISOString(),
       short_description: holiday.description,
-      full_description: holiday.description,
       event_type: 'holiday',
       event_types: ['holiday'],
       is_private: true,
@@ -89,18 +80,15 @@ export function AdminCalendarView({
       allow_reminders: true,
       allow_ics_download: true,
       allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      feature_image_url: holiday.imageUrl
+      created_at: new Date().toISOString()
     }));
 
-    // Convert religious holidays to CalendarEvent format
     const religiousHolidayEvents: CalendarEvent[] = religiousHolidays.map(holiday => ({
       id: `religious-${holiday.id}`,
       title: holiday.title,
       start_time: holiday.date.toISOString(),
       end_time: holiday.date.toISOString(),
       short_description: holiday.description,
-      full_description: holiday.description,
       event_type: 'religious',
       event_types: ['religious'],
       is_private: true,
@@ -109,42 +97,36 @@ export function AdminCalendarView({
       allow_reminders: true,
       allow_ics_download: true,
       allow_google_map_link: false,
-      created_at: new Date().toISOString(),
-      feature_image_url: holiday.imageUrl
+      created_at: new Date().toISOString()
     }));
 
     return { spelmanEvents, nationalHolidayEvents, religiousHolidayEvents };
-  }, []); // Empty dependency array since these don't change
+  }, []);
 
-  // Combine all events - memoized to prevent unnecessary recalculations
+  // Combine all events
   const allEvents = useMemo(() => {
     return [...(events || []), ...spelmanEvents, ...nationalHolidayEvents, ...religiousHolidayEvents];
   }, [events, spelmanEvents, nationalHolidayEvents, religiousHolidayEvents]);
 
-  // Filter events based on search, event types, and enabled categories - properly memoized
+  // Filter events
   const filteredEvents = useMemo(() => {
     return allEvents.filter(event => {
       let matchesSearch = true;
       let matchesType = true;
       let matchesCategory = true;
 
-      // Search filter - check if search query exists and is not empty
       if (searchQuery && searchQuery.trim() !== '') {
         const query = searchQuery.toLowerCase().trim();
         matchesSearch = 
           event.title.toLowerCase().includes(query) ||
           (event.short_description && event.short_description.toLowerCase().includes(query)) ||
-          (event.full_description && event.full_description.toLowerCase().includes(query)) ||
-          (event.location_name && event.location_name.toLowerCase().includes(query)) ||
-          (event.event_host_name && event.event_host_name.toLowerCase().includes(query));
+          (event.location_name && event.location_name.toLowerCase().includes(query));
       }
       
-      // Type filter - only apply if not 'all'
       if (selectedEventType && selectedEventType !== 'all') {
         matchesType = event.event_type === selectedEventType;
       }
 
-      // Category filter - check if event's category is enabled
       if (event.event_type) {
         matchesCategory = enabledCategories.includes(event.event_type);
       }
@@ -153,29 +135,20 @@ export function AdminCalendarView({
     });
   }, [allEvents, searchQuery, selectedEventType, enabledCategories]);
 
-  console.log('AdminCalendarView: Total combined events:', allEvents.length);
-  console.log('AdminCalendarView: Filtered events:', filteredEvents.length);
-
-  // Handle edit event (only for non-system events)
   const handleEditEvent = (event: CalendarEvent) => {
     if (event.id.startsWith('spelman-') || event.id.startsWith('national-') || event.id.startsWith('religious-')) {
       toast.info('System dates cannot be edited');
       return;
     }
     
-    console.log('Opening edit dialog for event:', event);
-    
-    // Ensure the event has all required fields
     const eventToEdit: CalendarEvent = {
       ...event,
-      // Ensure boolean fields have default values
       is_private: event.is_private ?? false,
       is_public: event.is_public ?? true,
       allow_rsvp: event.allow_rsvp ?? true,
       allow_reminders: event.allow_reminders ?? true,
       allow_ics_download: event.allow_ics_download ?? true,
       allow_google_map_link: event.allow_google_map_link ?? true,
-      // Ensure array fields exist
       event_types: event.event_types || (event.event_type ? [event.event_type] : [])
     };
     
@@ -183,7 +156,6 @@ export function AdminCalendarView({
     setIsEventEditorOpen(true);
   };
 
-  // Handle delete event (only for non-system events)
   const handleDeleteEvent = async (eventId: string) => {
     if (eventId.startsWith('spelman-') || eventId.startsWith('national-') || eventId.startsWith('religious-')) {
       toast.info('System dates cannot be deleted');
@@ -201,12 +173,10 @@ export function AdminCalendarView({
     }
   };
 
-  // Handle save event
   const handleSaveEvent = async (eventData: Omit<CalendarEvent, 'id' | 'created_at'>) => {
     if (!editingEvent) return;
     
     try {
-      console.log('Saving event data:', eventData);
       await updateEvent(editingEvent.id, eventData);
       toast.success('Event updated successfully');
       setIsEventEditorOpen(false);
@@ -217,49 +187,17 @@ export function AdminCalendarView({
     }
   };
 
-  // Handle close editor
   const handleCloseEditor = () => {
-    console.log('Closing event editor');
     setIsEventEditorOpen(false);
     setEditingEvent(null);
   };
 
-  // Get events for selected date - memoized for performance
-  const getEventsForDate = useMemo(() => {
-    return (date: Date): CalendarEvent[] => {
-      const dayEvents = filteredEvents.filter(event => 
-        isSameDay(new Date(event.start_time), date)
-      );
-      return dayEvents;
-    };
-  }, [filteredEvents]);
-
-  // Get dates that have events for the calendar modifiers - memoized
-  const getDatesWithEvents = useMemo(() => {
-    return filteredEvents.map(event => new Date(event.start_time));
-  }, [filteredEvents]);
-
-  // Get date range based on view
-  const getDateRange = () => {
-    switch (view) {
-      case 'month':
-        return eachDayOfInterval({
-          start: startOfMonth(selectedDate),
-          end: endOfMonth(selectedDate)
-        });
-      case 'week':
-        return eachDayOfInterval({
-          start: startOfWeek(selectedDate),
-          end: endOfWeek(selectedDate)
-        });
-      case 'day':
-        return [selectedDate];
-      default:
-        return [];
-    }
+  const getEventsForDate = (date: Date): CalendarEvent[] => {
+    return filteredEvents.filter(event => 
+      isSameDay(new Date(event.start_time), date)
+    );
   };
 
-  // Render event card
   const renderEventCard = (event: CalendarEvent) => {
     const isSpelmanEvent = event.id.startsWith('spelman-');
     const isNationalHoliday = event.id.startsWith('national-');
@@ -272,15 +210,9 @@ export function AdminCalendarView({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                {isSpelmanEvent && (
-                  <GraduationCap className="h-3 w-3 text-blue-600" />
-                )}
-                {isNationalHoliday && (
-                  <Flag className="h-3 w-3 text-red-600" />
-                )}
-                {isReligiousHoliday && (
-                  <Church className="h-3 w-3 text-purple-600" />
-                )}
+                {isSpelmanEvent && <GraduationCap className="h-3 w-3 text-blue-600" />}
+                {isNationalHoliday && <Flag className="h-3 w-3 text-red-600" />}
+                {isReligiousHoliday && <Church className="h-3 w-3 text-purple-600" />}
                 <h4 className="font-medium text-sm">{event.title}</h4>
               </div>
               <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
@@ -314,11 +246,6 @@ export function AdminCalendarView({
                      event.event_type}
                   </Badge>
                 )}
-                {event.is_private && (
-                  <Badge variant="outline" className="text-xs">
-                    Private
-                  </Badge>
-                )}
               </div>
             </div>
             {!isSystemEvent && (
@@ -327,10 +254,7 @@ export function AdminCalendarView({
                   size="sm" 
                   variant="ghost" 
                   className="h-6 w-6 p-0"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEditEvent(event);
-                  }}
+                  onClick={() => handleEditEvent(event)}
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
@@ -338,10 +262,7 @@ export function AdminCalendarView({
                   size="sm" 
                   variant="ghost" 
                   className="h-6 w-6 p-0 text-destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteEvent(event.id);
-                  }}
+                  onClick={() => handleDeleteEvent(event.id)}
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
@@ -356,122 +277,58 @@ export function AdminCalendarView({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading calendar...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-destructive">Error loading events: {error}</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Check console for more details
-        </p>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading calendar: {error}</p>
+          <Button onClick={() => window.location.reload()}>Refresh</Button>
+        </div>
       </div>
     );
   }
 
-  const hasActiveSearch = searchQuery && searchQuery.trim() !== '';
-  const hasActiveFilter = selectedEventType && selectedEventType !== 'all';
-
   return (
-    <div className="space-y-4">
-      {/* Search/Filter Results Section - Show when there's an active search or filter */}
-      {(hasActiveSearch || hasActiveFilter) && (
-        <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              {hasActiveSearch && hasActiveFilter ? (
-                <>Search & Filter Results</>
-              ) : hasActiveSearch ? (
-                <>Search Results for "{searchQuery}"</>
-              ) : (
-                <>Filter Results: {selectedEventType}</>
-              )}
-              <Badge variant="secondary" className="ml-2">
-                {filteredEvents.length} found
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-64 overflow-y-auto space-y-2">
-              {filteredEvents.length > 0 ? (
-                filteredEvents.slice(0, 8).map(renderEventCard)
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-muted-foreground">
-                    No events match your {hasActiveSearch && hasActiveFilter ? 'search and filter' : hasActiveSearch ? 'search' : 'filter'} criteria
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Try adjusting your search terms or filters
-                  </p>
-                </div>
-              )}
-              {filteredEvents.length > 8 && (
-                <div className="pt-2 border-t text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Showing first 8 results. {filteredEvents.length - 8} more events match your criteria.
-                  </p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Calendar Views */}
+    <div className="space-y-6">
       {view === 'month' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calendar - takes up 2 columns */}
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Calendar</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
-                  className="rounded-md border"
-                  modifiers={{
-                    hasEvents: getDatesWithEvents,
-                    today: new Date()
-                  }}
-                  modifiersClassNames={{
-                    hasEvents: "relative after:absolute after:bottom-1 after:left-1/2 after:transform after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-blue-500 after:rounded-full",
-                    today: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 font-semibold [&:not(.rdp-day_selected)]:bg-blue-100 [&:not(.rdp-day_selected)]:dark:bg-blue-900/30"
-                  }}
-                />
-              </CardContent>
-            </Card>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => date && setSelectedDate(date)}
+              className="rounded-md border w-full"
+              modifiers={{
+                hasEvents: filteredEvents.map(event => new Date(event.start_time))
+              }}
+              modifiersClassNames={{
+                hasEvents: "bg-blue-100 text-blue-900 font-medium"
+              }}
+            />
           </div>
-
-          {/* Events for selected date - takes up 1 column */}
-          <div className="lg:col-span-1">
+          <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  {format(selectedDate, 'MMM d, yyyy')}
-                  {isToday(selectedDate) && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      Today
-                    </Badge>
-                  )}
+                  {format(selectedDate, 'EEEE, MMMM d')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="max-h-96 overflow-y-auto">
-                  {getEventsForDate(selectedDate).length > 0 ? (
-                    getEventsForDate(selectedDate).map(renderEventCard)
-                  ) : (
-                    <p className="text-muted-foreground text-center py-4">
-                      No events scheduled for this date
-                    </p>
-                  )}
-                </div>
+                {getEventsForDate(selectedDate).length === 0 ? (
+                  <p className="text-muted-foreground text-sm">No events on this date</p>
+                ) : (
+                  <div className="space-y-2">
+                    {getEventsForDate(selectedDate).map(renderEventCard)}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -481,84 +338,52 @@ export function AdminCalendarView({
       {view === 'week' && (
         <div className="space-y-4">
           <div className="grid grid-cols-7 gap-2">
-            {getDateRange().map((date, index) => (
-              <Card key={index} className="min-h-32">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm text-center">
-                    {format(date, 'EEE d')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0 px-2">
-                  <div className="space-y-1">
-                    {getEventsForDate(date).slice(0, 3).map(event => (
-                      <div key={event.id} className={`text-xs p-1 rounded ${
-                        event.id.startsWith('spelman-') 
-                          ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
-                          : 'bg-blue-100 dark:bg-blue-900/30'
-                      }`}>
-                        {event.title}
-                      </div>
-                    ))}
-                    {getEventsForDate(date).length > 3 && (
-                      <div className="text-xs text-muted-foreground">
-                        +{getEventsForDate(date).length - 3} more
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+            {eachDayOfInterval({
+              start: startOfWeek(selectedDate),
+              end: endOfWeek(selectedDate)
+            }).map((day) => (
+              <div key={day.toISOString()} className="border rounded-lg p-2 min-h-[200px]">
+                <div className={`text-sm font-medium mb-2 ${isToday(day) ? 'text-blue-600' : ''}`}>
+                  {format(day, 'EEE d')}
+                </div>
+                <div className="space-y-1">
+                  {getEventsForDate(day).map(event => (
+                    <div 
+                      key={event.id} 
+                      className="text-xs p-1 bg-blue-100 rounded cursor-pointer"
+                      onClick={() => handleEditEvent(event)}
+                    >
+                      {event.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
       {view === 'day' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {getEventsForDate(selectedDate).length > 0 ? (
-                getEventsForDate(selectedDate).map(renderEventCard)
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl">
+                {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {getEventsForDate(selectedDate).length === 0 ? (
+                <p className="text-muted-foreground">No events scheduled for this day</p>
               ) : (
-                <p className="text-muted-foreground text-center py-8">
-                  No events scheduled for this day
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* All Events List - Only show when no active search or filter */}
-      {!hasActiveSearch && !hasActiveFilter && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              All Events ({filteredEvents.length})
-              <Badge variant="outline">{view} view</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-64 overflow-y-auto space-y-2">
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map(renderEventCard)
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground">
-                    No events found in database
-                  </p>
+                <div className="space-y-3">
+                  {getEventsForDate(selectedDate).map(renderEventCard)}
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* Event Editor Dialog */}
       <EventEditor
         event={editingEvent}
         isOpen={isEventEditorOpen}
