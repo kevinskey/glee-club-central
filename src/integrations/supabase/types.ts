@@ -1626,31 +1626,43 @@ export type Database = {
       }
       sheet_music: {
         Row: {
+          audio_url: string | null
           composer: string
           created_at: string
+          difficulty: string | null
           file_path: string
           file_url: string
           id: string
+          is_favorite: boolean | null
+          pdf_url: string | null
           title: string
           uploaded_by: string
           voicing: string | null
         }
         Insert: {
+          audio_url?: string | null
           composer: string
           created_at?: string
+          difficulty?: string | null
           file_path: string
           file_url: string
           id?: string
+          is_favorite?: boolean | null
+          pdf_url?: string | null
           title: string
           uploaded_by: string
           voicing?: string | null
         }
         Update: {
+          audio_url?: string | null
           composer?: string
           created_at?: string
+          difficulty?: string | null
           file_path?: string
           file_url?: string
           id?: string
+          is_favorite?: boolean | null
+          pdf_url?: string | null
           title?: string
           uploaded_by?: string
           voicing?: string | null

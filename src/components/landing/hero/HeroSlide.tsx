@@ -36,23 +36,23 @@ export function HeroSlide({ slide }: HeroSlideProps) {
   const showTextOverlay = slide.design_data?.showText !== false && 
     (slide.title || slide.description || slide.design_data?.buttonText);
 
-  const objectFit = slide.design_data?.objectFit || 'cover';
+  const objectFit = slide.design_data?.objectFit || 'contain';
   const objectPosition = slide.design_data?.objectPosition || 'center center';
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
 
   return (
     <div className="w-full">
       <div 
-        className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
+        className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer flex items-center justify-center`}
         onClick={handleSlideClick}
       >
         {/* Background */}
         {slide.background_image_url ? (
-          <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
             <img
               src={slide.background_image_url}
               alt={slide.title || 'Hero slide'}
-              className="w-full h-full"
+              className="w-full h-full object-contain"
               style={{ 
                 objectPosition: objectPosition,
                 objectFit: objectFit
@@ -80,7 +80,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
 
         {/* Content */}
         {showTextOverlay && (
-          <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
+          <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 z-10`}>
             <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 sm:space-y-3 md:space-y-4`}>
               {slide.title && (
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight drop-shadow-lg">

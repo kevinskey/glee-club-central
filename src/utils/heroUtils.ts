@@ -1,13 +1,13 @@
 
 export const getResponsiveHeightClass = (height?: string) => {
   switch (height) {
-    case 'tiny': return 'h-[200px] sm:h-[250px] md:h-[300px]';
-    case 'small': return 'h-[250px] sm:h-[300px] md:h-[400px]';
-    case 'medium': return 'h-[300px] sm:h-[400px] md:h-[500px]';
-    case 'full': return 'h-[350px] sm:h-[500px] md:h-screen';
+    case 'tiny': return 'aspect-[16/9] h-[200px] sm:h-[250px] md:h-[300px]';
+    case 'small': return 'aspect-[16/9] h-[250px] sm:h-[300px] md:h-[400px]';
+    case 'medium': return 'aspect-[16/9] h-[300px] sm:h-[400px] md:h-[500px]';
+    case 'full': return 'aspect-[16/9] h-[350px] sm:h-[500px] md:h-screen';
     case 'large':
     default:
-      return 'h-[280px] sm:h-[400px] md:h-[550px]';
+      return 'aspect-[16/9] h-[280px] sm:h-[400px] md:h-[550px]';
   }
 };
 
