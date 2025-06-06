@@ -51,12 +51,6 @@ export function HomePageContent({
       {/* Events Section - Reduced spacing from top */}
       <section className="w-full py-4 md:py-6 lg:py-8">
         <div className="w-full px-4 md:container md:mx-auto md:px-6 lg:px-8">
-          <div className="text-center mb-6 md:mb-8 lg:mb-12" style={{ marginTop: '10px' }}>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight italic transform -rotate-[2deg] mb-2">
-              Upcoming Events
-            </h2>
-          </div>
-          
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
             <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
