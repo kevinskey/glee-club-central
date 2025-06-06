@@ -1,18 +1,58 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Share } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { AudioFile } from "@/types/audio";
+import { SocialShareButtons } from "./SocialShareButtons";
 
-export function ShareRecordingDialog() {
+interface ShareRecordingDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  recording: AudioFile;
+}
+
+export function ShareRecordingDialog({
+  open,
+  onOpenChange,
+  recording,
+}: ShareRecordingDialogProps) {
+  const { toast } = useToast();
+  const shareLink = recording.file_url;
+  
   return (
-    <Card>
-      <CardContent className="text-center py-8">
-        <Share className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="font-semibold mb-2">Share Recording Removed</h3>
-        <p className="text-muted-foreground">
-          Recording sharing functionality has been removed from the application.
-        </p>
-      </CardContent>
-    </Card>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" /> Share Recording
+          </DialogTitle>
+          <DialogDescription>
+            Share "{recording.title}" with others using a link or on social media
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="pt-4">
+          <SocialShareButtons 
+            url={shareLink} 
+            title={recording.title}
+          />
+        </div>
+        
+        <DialogFooter className="sm:justify-start">
+          <div className="text-xs text-muted-foreground mt-2">
+            Anyone with this link will be able to listen to your recording.
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -1,72 +1,169 @@
 
-// NUCLEAR AUDIO UTILS REBUILD - Complete elimination of audio functionality
-console.log('NUCLEAR REBUILD: Loading audioUtils.ts with complete cache invalidation at:', Date.now());
+// Audio utility functions for audio tools
 
-// Force log to ensure this new version is loaded
-console.warn('🚨 AUDIO FUNCTIONALITY COMPLETELY REMOVED FROM APPLICATION 🚨');
-
-// Stub functions to prevent any import errors
-export const getNoteFrequency = (note?: string): number => {
-  console.warn('🚨 getNoteFrequency called - audio functionality completely removed');
-  return 440; // Default A4 frequency
+// Audio logging utility
+export const audioLogger = {
+  log: (message: string, data?: any) => {
+    console.log(`[Audio] ${message}`, data);
+  },
+  error: (message: string, error?: any) => {
+    console.error(`[Audio Error] ${message}`, error);
+  }
 };
 
-export const playNote = (frequency?: number, duration?: number): void => {
-  console.warn('🚨 playNote called - audio functionality completely removed');
-};
+// Note frequency calculation for pitch pipe
+export function getNoteFrequency(note: string, octave: number = 4): number {
+  console.log('getNoteFrequency called with:', { note, octave });
+  
+  const noteMap: { [key: string]: number } = {
+    'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
+    'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+  };
+  
+  const semitone = noteMap[note];
+  if (semitone === undefined) {
+    throw new Error(`Invalid note: ${note}`);
+  }
+  
+  // A4 = 440 Hz
+  const A4 = 440;
+  const A4_OCTAVE = 4;
+  const A4_SEMITONE = 9; // A is the 9th semitone in the chromatic scale
+  
+  const semitonesFromA4 = (octave - A4_OCTAVE) * 12 + (semitone - A4_SEMITONE);
+  const frequency = A4 * Math.pow(2, semitonesFromA4 / 12);
+  
+  console.log('Calculated frequency:', frequency);
+  return frequency;
+}
 
-export const stopAllAudio = (): void => {
-  console.warn('🚨 stopAllAudio called - audio functionality completely removed');
-};
+// Play note function for pitch pipe functionality
+export function playNote(frequency: number, duration: number = 1000): Promise<void> {
+  console.log('playNote called with:', { frequency, duration });
+  
+  return new Promise((resolve) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration / 1000);
+    
+    setTimeout(() => {
+      resolve();
+    }, duration);
+  });
+}
 
-export const createOscillator = () => {
-  console.warn('🚨 createOscillator called - audio functionality completely removed');
-  return null;
-};
+// Click sound for metronome - now accepts optional AudioContext
+export function playClick(audioContext?: AudioContext): Promise<void> {
+  if (audioContext) {
+    return new Promise((resolve) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+      
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
+  } else {
+    // Fallback using basic Audio API
+    return new Promise((resolve) => {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+      
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
+  }
+}
 
-export const initializeAudioContext = () => {
-  console.warn('🚨 initializeAudioContext called - audio functionality completely removed');
-  return null;
-};
+// Create click buffer for metronome
+export function createClickBuffer(audioContext: AudioContext): AudioBuffer {
+  const sampleRate = audioContext.sampleRate;
+  const duration = 0.1; // 100ms
+  const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.sin(2 * Math.PI * 800 * i / sampleRate) * 0.3;
+  }
+  
+  return buffer;
+}
 
-// Additional exports that might be needed by any cached components
-export const playSound = () => {
-  console.warn('🚨 playSound called - audio functionality completely removed');
-};
+// Create accent click buffer for metronome
+export function createAccentClickBuffer(audioContext: AudioContext): AudioBuffer {
+  const sampleRate = audioContext.sampleRate;
+  const duration = 0.1; // 100ms
+  const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+  const data = buffer.getChannelData(0);
+  
+  for (let i = 0; i < data.length; i++) {
+    data[i] = Math.sin(2 * Math.PI * 1200 * i / sampleRate) * 0.5;
+  }
+  
+  return buffer;
+}
 
-export const stopSound = () => {
-  console.warn('🚨 stopSound called - audio functionality completely removed');
-};
+// Resume audio context
+export async function resumeAudioContext(audioContext: AudioContext): Promise<void> {
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+}
 
-export const createAudioContext = () => {
-  console.warn('🚨 createAudioContext called - audio functionality completely removed');
-  return null;
-};
+// Request microphone access
+export async function requestMicrophoneAccess(): Promise<MediaStream> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioLogger.log('Microphone access granted');
+    return stream;
+  } catch (error) {
+    audioLogger.error('Microphone access denied', error);
+    throw error;
+  }
+}
 
-// Force default export
-export default {
-  getNoteFrequency,
-  playNote,
-  stopAllAudio,
-  createOscillator,
-  initializeAudioContext,
-  playSound,
-  stopSound,
-  createAudioContext
-};
+// Release microphone
+export function releaseMicrophone(stream: MediaStream): void {
+  stream.getTracks().forEach(track => track.stop());
+  audioLogger.log('Microphone released');
+}
 
-// Log all exports with timestamp to verify new version is loaded
-console.log('🚨 NUCLEAR REBUILD audioUtils exports verified at:', Date.now(), {
-  getNoteFrequency: typeof getNoteFrequency,
-  playNote: typeof playNote,
-  stopAllAudio: typeof stopAllAudio,
-  createOscillator: typeof createOscillator,
-  initializeAudioContext: typeof initializeAudioContext,
-  playSound: typeof playSound,
-  stopSound: typeof stopSound,
-  createAudioContext: typeof createAudioContext
-});
-
-// Force module to be recognized as completely new
-(window as any).__AUDIO_UTILS_REBUILD__ = Date.now();
-console.log('🚨 audioUtils.ts NUCLEAR REBUILD COMPLETE');
+console.log('audioUtils.ts loaded successfully - all exports available');

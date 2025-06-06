@@ -20,15 +20,10 @@ import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
+import PracticePage from "./pages/practice/PracticePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
-
-// Emergency router rebuild - complete cache invalidation
-console.log('Router rebuilding with emergency cache clearing at:', Date.now());
-
-// Log to verify no glee-tools references exist
-console.log('Router: All glee-tools components have been removed');
 
 const router = createBrowserRouter([
   {
@@ -89,6 +84,10 @@ const router = createBrowserRouter([
         element: <AttendancePage />,
       },
       {
+        path: "practice",
+        element: <PracticePage />,
+      },
+      {
         path: "store",
         element: <StorePage />,
       },
@@ -110,7 +109,7 @@ const router = createBrowserRouter([
       },
       // Add all admin routes (original)
       ...adminRoutes,
-      // Add all v2 admin routes  
+      // Add all v2 admin routes
       ...adminRoutesV2,
       {
         path: "*",

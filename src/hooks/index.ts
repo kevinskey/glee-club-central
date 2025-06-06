@@ -1,41 +1,56 @@
 
-// Core hooks
-export { useAuth } from './auth/useAuthState';
-export { useProfile } from './useUserProfile';
-export { usePermissions } from './usePermissions';
-export { useMediaQuery } from './useMediaQuery';
+// Main hooks export index
+// This file centralizes all hook exports to prevent import path drift
+// Always import from @/hooks instead of deep paths like @/hooks/user/useUserManagement
 
-// Data hooks
+// User Management Hooks
+export * from './user/useUserManagement';
+export * from './user/useUsers';
+export * from './user/useUserCreate';
+export * from './user/useUserUpdate';
+export * from './user/useUserDelete';
+export { type User } from './user/types';
+
+// Authentication Hooks
+export { useAuthState } from './auth/useAuthState';
+export { usePermissions } from './usePermissions';
+export { useUserRole } from './useUserRole';
+
+// Events & Calendar Hooks
 export { useCalendarEvents } from './useCalendarEvents';
 export { useConcertEvents } from './useConcertEvents';
-export { useEventRSVPs } from './useEventRSVPs';
-export { useFanForm } from './useFanForm';
-export { useFanTags } from './useFanTags';
-export { useHeroSlides } from './useHeroSlides';
-export { useHomePageData } from './useHomePageData';
+
+// Media & Content Hooks
 export { useMediaLibrary } from './useMediaLibrary';
 export { useMediaUpload } from './useMediaUpload';
-export { useMessaging } from './useMessaging';
+export { useAudioFiles } from './useAudioFiles';
+export { useAudioRecorder } from './useAudioRecorder';
+
+// Practice & Performance Hooks
+export { usePracticeLogs } from './usePracticeLogs';
+export { useBackingTracks } from './useBackingTracks';
+export { useMixedRecordings } from './useMixedRecordings';
+export { useRecordingSave } from './useRecordingSave';
+
+// Utility Hooks
 export { useNotifications } from './useNotifications';
-export { usePDFAnnotations } from './usePDFAnnotations';
-export { useSiteSettings } from './useSiteSettings';
-export { useSlideDesigns } from './useSlideDesigns';
-export { useUserOrders } from './useUserOrders';
-export { useUserSettings } from './useUserSettings';
-
-// Utility hooks
-export { useImagePreloader } from './useImagePreloader';
+export { useMessaging } from './useMessaging';
+export { useFanForm } from './useFanForm';
+export { useDashboardData } from './useDashboardData';
 export { useLoadingCoordinator } from './useLoadingCoordinator';
-export { useViewMode } from './useViewMode';
+export { useImagePreloader } from './useImagePreloader';
 
-// AI hooks
+// Site Management Hooks
+export { useSiteSettings } from './useSiteSettings';
 export { useAIDescriptions } from './useAIDescriptions';
-export { useAINewsGeneration } from './useAINewsGeneration';
 
-// User management hooks
-export { useUsers } from './user/useUsers';
-export { useUserManagement } from './user/useUserManagement';
-export { useUnifiedUserManagement } from './user/useUnifiedUserManagement';
+// PDF & Annotations
+export { usePDFAnnotations } from './usePDFAnnotations';
 
-// Design hooks
-export { useDesignAssets } from './useDesignAssets';
+// UI Utility Hooks (re-exported from ui folder)
+export { useToast } from './use-toast';
+export { useMedia, useIsMobile, useIsSmallMobile } from './use-mobile';
+export { useIntersection } from './use-intersection';
+
+// Re-export PageLoader component for convenience
+export { PageLoader } from '../components/ui/page-loader';
