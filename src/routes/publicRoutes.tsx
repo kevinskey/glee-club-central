@@ -1,42 +1,41 @@
 
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import AppLayout from '@/layouts/AppLayout';
-
-// Public Pages
 import HomePage from '@/pages/HomePage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
-import EnhancedCalendarPage from '@/pages/EnhancedCalendarPage';
-import JoinGleeFamPage from '@/pages/JoinGleeFamPage';
-import StorePage from '@/pages/StorePage';
-import CheckoutSuccessPage from '@/pages/CheckoutSuccessPage';
-import CheckoutCancelledPage from '@/pages/CheckoutCancelledPage';
+import LoginPage from '@/pages/auth/LoginPage';
+import SignupPage from '@/pages/auth/SignupPage';
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 
 export const publicRoutes: RouteObject[] = [
   {
-    path: '/',
-    element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: 'about', element: <AboutPage /> },
-      { path: 'contact', element: <ContactPage /> },
-      { path: 'calendar', element: <EnhancedCalendarPage /> },
-      { path: 'join-glee-fam', element: <JoinGleeFamPage /> },
-      { path: 'store', element: <StorePage /> },
-    ],
+    index: true,
+    element: <HomePage />,
   },
-  // Checkout Routes
-  { 
-    path: '/checkout-success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+  {
+    path: 'about',
+    element: <AboutPage />,
   },
-  { 
-    path: '/store/success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+  {
+    path: 'contact',
+    element: <ContactPage />,
   },
-  { 
-    path: '/store/cancelled', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutCancelledPage /></AppLayout>
+  {
+    path: 'login',
+    element: <LoginPage />,
+  },
+  {
+    path: 'signup',
+    element: <SignupPage />,
+  },
+  {
+    path: 'forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: 'reset-password',
+    element: <ResetPasswordPage />,
   },
 ];
