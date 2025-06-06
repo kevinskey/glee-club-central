@@ -91,7 +91,7 @@ const checkForOldCache = () => {
       document.querySelector('[data-component*="glee-tools"]') ||
       document.querySelector('[data-component*="PitchPipe"]')) {
     console.log('Step 6: Detected old cached components, forcing hard reload...');
-    window.location.reload(true);
+    window.location.reload();
     return;
   }
 };
