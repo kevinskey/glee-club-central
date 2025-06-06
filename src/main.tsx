@@ -14,6 +14,7 @@ import { memberRoutes } from '@/routes/memberRoutes';
 
 // Import the main dashboard page
 import RoleDashboardPage from '@/pages/RoleDashboardPage';
+import CalendarPage from '@/pages/CalendarPage';
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
 const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -34,6 +35,11 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <RoleDashboardPage />,
+      },
+      // Add the calendar route
+      {
+        path: 'calendar',
+        element: <CalendarPage />,
       },
       ...roleRoutes,
       ...memberRoutes,
