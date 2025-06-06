@@ -6,7 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
-import AppLayout from "./layouts/AppLayout";
+import AppContent from "./AppContent";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,9 +22,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <AppLayout>
+          <AppContent>
             <Outlet />
-          </AppLayout>
+          </AppContent>
           <Toaster />
           <FloatingThemeToggle position="bottom-right" />
         </AuthProvider>
