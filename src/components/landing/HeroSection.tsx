@@ -18,6 +18,9 @@ interface SlideData {
     textAlignment?: 'left' | 'center' | 'right';
     showText?: boolean;
     height?: 'tiny' | 'small' | 'medium' | 'full' | 'large';
+    objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+    objectPosition?: string;
+    overlayOpacity?: number;
   };
 }
 
@@ -71,9 +74,17 @@ export function HeroSection() {
     }
   };
 
-  // Responsive height classes with no cropping
-  const getResponsiveHeightClass = () => {
-    return 'h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[75vh] xl:h-[80vh] max-h-[600px] min-h-[400px]';
+  // Responsive height classes with support for admin-configured heights
+  const getResponsiveHeightClass = (height?: string) => {
+    switch (height) {
+      case 'tiny': return 'h-[25vh] min-h-[200px]';
+      case 'small': return 'h-[40vh] min-h-[300px]';
+      case 'medium': return 'h-[60vh] min-h-[400px]';
+      case 'full': return 'h-screen';
+      case 'large':
+      default:
+        return 'h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[75vh] xl:h-[80vh] max-h-[600px] min-h-[400px]';
+    }
   };
 
   if (isLoading) {
@@ -129,26 +140,34 @@ export function HeroSection() {
   const showTextOverlay = slide.design_data?.showText !== false && 
     (slide.title || slide.description || slide.design_data?.buttonText);
 
+  // Get image display settings from admin configuration
+  const objectFit = slide.design_data?.objectFit || 'contain';
+  const objectPosition = slide.design_data?.objectPosition || 'center center';
+  const overlayOpacity = slide.design_data?.overlayOpacity || 20;
+
   return (
     <div 
-      className={`relative ${getResponsiveHeightClass()} overflow-hidden cursor-pointer pt-20`}
+      className={`relative ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer pt-20`}
       onClick={() => handleSlideClick(slide)}
     >
-      {/* Background with no cropping - full image display */}
+      {/* Background with admin-configurable display settings */}
       {slide.background_image_url ? (
         <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
           <img
             src={slide.background_image_url}
             alt={slide.title || 'Hero slide'}
-            className="w-full h-full object-contain"
+            className="w-full h-full"
             style={{ 
-              objectPosition: 'center center',
-              objectFit: 'contain'
+              objectPosition: objectPosition,
+              objectFit: objectFit
             }}
           />
-          {/* Overlay for better text readability when text is enabled */}
+          {/* Overlay with admin-configurable opacity */}
           {showTextOverlay && (
-            <div className="absolute inset-0 bg-black/20" />
+            <div 
+              className="absolute inset-0 bg-black" 
+              style={{ opacity: overlayOpacity / 100 }}
+            />
           )}
         </div>
       ) : (

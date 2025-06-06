@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,9 @@ interface NewSlideForm {
   mediaId: string;
   showText: boolean;
   height: 'tiny' | 'small' | 'medium' | 'large' | 'full';
+  objectFit: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+  objectPosition: string;
+  overlayOpacity: number;
 }
 
 export function UnifiedSlideManager() {
@@ -48,7 +52,10 @@ export function UnifiedSlideManager() {
     backgroundImage: '',
     mediaId: '',
     showText: true,
-    height: 'large'
+    height: 'large',
+    objectFit: 'contain',
+    objectPosition: 'center center',
+    overlayOpacity: 20
   });
   const [editForm, setEditForm] = useState<NewSlideForm>({
     title: '',
@@ -61,7 +68,10 @@ export function UnifiedSlideManager() {
     backgroundImage: '',
     mediaId: '',
     showText: true,
-    height: 'large'
+    height: 'large',
+    objectFit: 'contain',
+    objectPosition: 'center center',
+    overlayOpacity: 20
   });
 
   useEffect(() => {
@@ -126,7 +136,10 @@ export function UnifiedSlideManager() {
       backgroundImage: slide.background_image_url || '',
       mediaId: slide.background_media_id || '',
       showText: slide.design_data?.showText !== false,
-      height: slide.design_data?.height || 'large'
+      height: slide.design_data?.height || 'large',
+      objectFit: slide.design_data?.objectFit || 'contain',
+      objectPosition: slide.design_data?.objectPosition || 'center center',
+      overlayOpacity: slide.design_data?.overlayOpacity || 20
     });
   };
 
@@ -143,7 +156,10 @@ export function UnifiedSlideManager() {
       backgroundImage: '',
       mediaId: '',
       showText: true,
-      height: 'large'
+      height: 'large',
+      objectFit: 'contain',
+      objectPosition: 'center center',
+      overlayOpacity: 20
     });
   };
 
@@ -182,7 +198,10 @@ export function UnifiedSlideManager() {
             textPosition: editForm.textPosition,
             textAlignment: editForm.textAlignment,
             showText: editForm.showText,
-            height: editForm.height
+            height: editForm.height,
+            objectFit: editForm.objectFit,
+            objectPosition: editForm.objectPosition,
+            overlayOpacity: editForm.overlayOpacity
           },
           background_color: editForm.backgroundColor,
           background_image_url: editForm.backgroundImage || null,
@@ -238,7 +257,10 @@ export function UnifiedSlideManager() {
             textPosition: newSlide.textPosition,
             textAlignment: newSlide.textAlignment,
             showText: newSlide.showText,
-            height: newSlide.height
+            height: newSlide.height,
+            objectFit: newSlide.objectFit,
+            objectPosition: newSlide.objectPosition,
+            overlayOpacity: newSlide.overlayOpacity
           },
           background_color: newSlide.backgroundColor,
           background_image_url: newSlide.backgroundImage || null,
@@ -267,7 +289,10 @@ export function UnifiedSlideManager() {
         backgroundImage: '',
         mediaId: '',
         showText: true,
-        height: 'large'
+        height: 'large',
+        objectFit: 'contain',
+        objectPosition: 'center center',
+        overlayOpacity: 20
       });
       fetchSlides();
     } catch (error) {
@@ -294,6 +319,79 @@ export function UnifiedSlideManager() {
       toast.error('Failed to delete slide');
     }
   };
+
+  const renderImageDisplayControls = (form: NewSlideForm, setForm: React.Dispatch<React.SetStateAction<NewSlideForm>>) => (
+    <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
+      <h4 className="text-sm font-medium">Image Display Settings</h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label>Object Fit</Label>
+          <Select 
+            value={form.objectFit} 
+            onValueChange={(value: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none') => 
+              setForm(prev => ({ ...prev, objectFit: value }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="contain">Contain (No cropping)</SelectItem>
+              <SelectItem value="cover">Cover (Fill container)</SelectItem>
+              <SelectItem value="fill">Fill (Stretch to fit)</SelectItem>
+              <SelectItem value="scale-down">Scale Down</SelectItem>
+              <SelectItem value="none">None (Original size)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Object Position</Label>
+          <Select 
+            value={form.objectPosition} 
+            onValueChange={(value: string) => 
+              setForm(prev => ({ ...prev, objectPosition: value }))
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="center center">Center</SelectItem>
+              <SelectItem value="top center">Top Center</SelectItem>
+              <SelectItem value="bottom center">Bottom Center</SelectItem>
+              <SelectItem value="center left">Center Left</SelectItem>
+              <SelectItem value="center right">Center Right</SelectItem>
+              <SelectItem value="top left">Top Left</SelectItem>
+              <SelectItem value="top right">Top Right</SelectItem>
+              <SelectItem value="bottom left">Bottom Left</SelectItem>
+              <SelectItem value="bottom right">Bottom Right</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Overlay Opacity ({form.overlayOpacity}%)</Label>
+          <Input
+            type="range"
+            min="0"
+            max="80"
+            step="5"
+            value={form.overlayOpacity}
+            onChange={(e) => setForm(prev => ({ ...prev, overlayOpacity: Number(e.target.value) }))}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      <div className="text-xs text-muted-foreground space-y-1">
+        <p><strong>Contain:</strong> Shows full image without cropping (may have letterboxing)</p>
+        <p><strong>Cover:</strong> Fills container completely (may crop image)</p>
+        <p><strong>Fill:</strong> Stretches image to fit exactly (may distort)</p>
+      </div>
+    </div>
+  );
 
   if (previewMode) {
     return <SliderTestPreview onExitPreview={() => setPreviewMode(false)} />;
@@ -489,6 +587,9 @@ export function UnifiedSlideManager() {
                     )}
                   </div>
 
+                  {/* Image Display Controls */}
+                  {newSlide.backgroundImage && renderImageDisplayControls(newSlide, setNewSlide)}
+
                   <Button onClick={createSlide} className="w-full">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Hero Slide
@@ -663,6 +764,9 @@ export function UnifiedSlideManager() {
                                 </div>
                               )}
                             </div>
+
+                            {/* Edit Image Display Controls */}
+                            {editForm.backgroundImage && renderImageDisplayControls(editForm, setEditForm)}
                           </div>
                         ) : (
                           /* Display Mode */
@@ -683,7 +787,7 @@ export function UnifiedSlideManager() {
                                   )}
                                 </div>
                               </div>
-                              <div className="flex gap-2 mt-2">
+                              <div className="flex gap-2 mt-2 flex-wrap">
                                 <Badge variant="outline">Slide {index + 1}</Badge>
                                 {slide.is_active && (
                                   <Badge variant="default">Active</Badge>
@@ -699,6 +803,12 @@ export function UnifiedSlideManager() {
                                 )}
                                 <Badge variant="secondary">
                                   Height: {slide.design_data?.height || 'large'}
+                                </Badge>
+                                <Badge variant="secondary">
+                                  Fit: {slide.design_data?.objectFit || 'contain'}
+                                </Badge>
+                                <Badge variant="secondary">
+                                  Overlay: {slide.design_data?.overlayOpacity || 20}%
                                 </Badge>
                                 <Badge 
                                   variant="secondary" 
