@@ -1,4 +1,6 @@
+
 import React from "react";
+import { Header } from "@/components/landing/Header";
 
 interface UnifiedPublicHeaderProps {
   showTopSlider?: boolean;
@@ -9,5 +11,10 @@ export function UnifiedPublicHeader({
   showTopSlider = true, 
   className = "" 
 }: UnifiedPublicHeaderProps) {
-  return null;
+  return (
+    <>
+      {/* Main Navigation Header */}
+      <Header />
+    </>
+  );
 }
