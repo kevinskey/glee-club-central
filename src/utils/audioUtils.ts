@@ -2,6 +2,8 @@
 // Placeholder audioUtils to prevent import errors
 // All audio functionality has been removed from the application
 
+console.log('audioUtils.ts loaded - all audio functionality disabled');
+
 export const getNoteFrequency = (note?: string) => {
   console.warn('Audio functionality has been removed from this application');
   return 440; // Default A4 frequency
