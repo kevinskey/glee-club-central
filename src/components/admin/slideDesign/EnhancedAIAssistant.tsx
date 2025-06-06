@@ -1,312 +1,230 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bot, Sparkles, Wand2, Send, Loader2, Mic, MicOff, Image, Video, Palette, Type } from 'lucide-react';
+import { Mic, MicOff, Wand2, Sparkles, MessageSquare, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface EnhancedAIAssistantProps {
-  onApplySuggestion: (suggestion: any) => void;
-  onGenerateGraphics: (prompt: string) => void;
-  onGenerateVideo: (prompt: string) => void;
+  onSlideGenerated: (slideData: any) => void;
+  currentSlideData?: any;
 }
 
-interface AISuggestion {
-  type: 'text' | 'layout' | 'color' | 'image' | 'video' | 'graphics';
-  content: string;
-  data?: any;
-  preview?: string;
+// Simplified speech recognition interface
+interface SpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+        confidence: number;
+      };
+    };
+  };
 }
 
-export function EnhancedAIAssistant({ 
-  onApplySuggestion, 
-  onGenerateGraphics, 
-  onGenerateVideo 
-}: EnhancedAIAssistantProps) {
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  start(): void;
+  stop(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: any) => void;
+  onend: () => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  }
+}
+
+export function EnhancedAIAssistant({ onSlideGenerated, currentSlideData }: EnhancedAIAssistantProps) {
   const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
-  const [aiMode, setAiMode] = useState<'design' | 'graphics' | 'video' | 'speech'>('design');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [suggestions] = useState([
+    'Create a hero slide for upcoming concert',
+    'Design an announcement for new merchandise',
+    'Make a welcome slide for new members',
+    'Create a fundraising campaign slide'
+  ]);
 
-  const aiModes = [
-    { value: 'design', label: 'Design Assistant', icon: Palette },
-    { value: 'graphics', label: 'AI Graphics', icon: Image },
-    { value: 'video', label: 'AI Video', icon: Video },
-    { value: 'speech', label: 'Speech-to-Text', icon: Mic }
-  ];
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
 
-  const quickPrompts = {
-    design: [
-      "Create a professional title and subtitle for a music event",
-      "Suggest color scheme for an elegant design",
-      "Design layout for a concert announcement",
-      "Generate motivational text for a performance poster"
-    ],
-    graphics: [
-      "Generate a background with musical notes",
-      "Create an abstract geometric pattern",
-      "Design a vintage concert poster style",
-      "Generate elegant typography graphics"
-    ],
-    video: [
-      "Create animated text entrance",
-      "Generate sliding background elements",
-      "Design fade-in/out transitions",
-      "Create pulsing rhythm animations"
-    ],
-    speech: [
-      "Click to start voice input",
-      "Speak your design requirements",
-      "Describe what you want to create",
-      "Voice commands for quick edits"
-    ]
-  };
-
-  const startVoiceInput = async () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      toast.error('Speech recognition not supported in this browser');
-      return;
+  useEffect(() => {
+    // Initialize speech recognition if available
+    if (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = false;
+      
+      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = event.results[0][0].transcript;
+        setPrompt(prev => prev + ' ' + transcript);
+      };
+      
+      recognitionInstance.onerror = (event) => {
+        console.error('Speech recognition error:', event);
+        setIsListening(false);
+        toast.error('Speech recognition failed');
+      };
+      
+      recognitionInstance.onend = () => {
+        setIsListening(false);
+      };
+      
+      setRecognition(recognitionInstance);
     }
+  }, []);
 
-    const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-    const recognition = new SpeechRecognition();
-    
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
+  const startListening = () => {
+    if (recognition) {
       setIsListening(true);
-      toast.info('Listening... Speak now');
-    };
-
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setPrompt(transcript);
-      toast.success('Voice input captured');
-    };
-
-    recognition.onerror = (event) => {
-      setIsListening(false);
-      toast.error('Speech recognition error: ' + event.error);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
+      recognition.start();
+    } else {
+      toast.error('Speech recognition not supported in this browser');
+    }
   };
 
-  const generateSuggestions = async () => {
+  const stopListening = () => {
+    if (recognition) {
+      recognition.stop();
+      setIsListening(false);
+    }
+  };
+
+  const handleGenerate = async () => {
     if (!prompt.trim()) {
-      toast.error('Please enter a prompt or use voice input');
+      toast.error('Please enter a prompt');
       return;
     }
 
     setIsGenerating(true);
+    
     try {
-      // Simulate AI response - in real implementation, this would call OpenAI API
+      // Simulate AI generation for demo
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      const mockSuggestions: AISuggestion[] = [];
-      
-      if (aiMode === 'design') {
-        mockSuggestions.push(
+      const mockSlideData = {
+        id: Date.now().toString(),
+        title: 'AI Generated Slide',
+        content: prompt,
+        background: '#1a365d',
+        textColor: '#ffffff',
+        elements: [
           {
             type: 'text',
-            content: 'Spelman College Glee Club presents an evening of musical excellence',
-            data: { fontSize: '2.5rem', color: '#4A90E2', fontWeight: 'bold' }
-          },
-          {
-            type: 'color',
-            content: 'Elegant blue and gold color scheme',
-            data: { background: '#1e3a8a', accent: '#fbbf24', text: '#ffffff' }
+            content: 'Generated from: ' + prompt,
+            style: { fontSize: '24px', textAlign: 'center' }
           }
-        );
-      } else if (aiMode === 'graphics') {
-        mockSuggestions.push(
-          {
-            type: 'graphics',
-            content: 'AI-generated musical background',
-            data: { type: 'background', style: 'musical_notes' },
-            preview: '/lovable-uploads/ef084f8d-fe71-4e34-8587-9ac0ff3ddebf.png'
-          }
-        );
-      } else if (aiMode === 'video') {
-        mockSuggestions.push(
-          {
-            type: 'video',
-            content: 'Animated text entrance effect',
-            data: { animation: 'slideInLeft', duration: '1s', delay: '0.2s' }
-          }
-        );
-      }
-
-      setSuggestions(mockSuggestions);
-      toast.success(`AI ${aiMode} suggestions generated!`);
+        ]
+      };
+      
+      onSlideGenerated(mockSlideData);
+      toast.success('Slide generated successfully!');
+      setPrompt('');
+      
     } catch (error) {
-      toast.error('Failed to generate suggestions');
+      console.error('Generation failed:', error);
+      toast.error('Failed to generate slide');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const applySuggestion = (suggestion: AISuggestion) => {
-    if (suggestion.type === 'graphics') {
-      onGenerateGraphics(suggestion.content);
-    } else if (suggestion.type === 'video') {
-      onGenerateVideo(suggestion.content);
-    } else {
-      onApplySuggestion(suggestion);
-    }
-    toast.success(`Applied ${suggestion.type} suggestion`);
+  const applySuggestion = (suggestion: string) => {
+    setPrompt(suggestion);
   };
 
-  const currentMode = aiModes.find(mode => mode.value === aiMode);
-  const CurrentModeIcon = currentMode?.icon || Bot;
-
   return (
-    <Card className="h-full">
-      <CardHeader className="p-3 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Bot className="h-4 w-4 text-blue-500" />
-          Enhanced AI Assistant
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5" />
+          AI Design Assistant
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3 pt-0 space-y-3">
-        {/* AI Mode Selector */}
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">AI Mode</label>
-          <Select value={aiMode} onValueChange={(value: any) => setAiMode(value)}>
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {aiModes.map((mode) => (
-                <SelectItem key={mode.value} value={mode.value}>
-                  <div className="flex items-center gap-2">
-                    <mode.icon className="h-3 w-3" />
-                    {mode.label}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <CardContent className="space-y-4">
+        {/* Voice Input */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isListening ? "destructive" : "outline"}
+            size="sm"
+            onClick={isListening ? stopListening : startListening}
+            disabled={!recognition}
+          >
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+            {isListening ? 'Stop' : 'Voice Input'}
+          </Button>
+          {isListening && (
+            <Badge variant="destructive" className="animate-pulse">
+              Listening...
+            </Badge>
+          )}
         </div>
 
-        <Separator />
+        {/* Text Input */}
+        <Textarea
+          placeholder="Describe the slide you want to create..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          rows={4}
+        />
 
-        {/* Input Area */}
+        {/* Quick Suggestions */}
         <div className="space-y-2">
-          <div className="flex items-center gap-1">
-            <CurrentModeIcon className="h-3 w-3 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">
-              {currentMode?.label}
-            </span>
-          </div>
-          
-          <Textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={`Describe what you want to ${aiMode === 'design' ? 'design' : aiMode === 'graphics' ? 'generate' : aiMode === 'video' ? 'animate' : 'say'}...`}
-            rows={3}
-            className="text-sm resize-none"
-          />
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={generateSuggestions}
-              disabled={isGenerating}
-              size="sm"
-              className="flex-1 h-8"
-            >
-              {isGenerating ? (
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-              ) : (
-                <Wand2 className="h-3 w-3 mr-1" />
-              )}
-              Generate
-            </Button>
-            
-            {aiMode === 'speech' && (
-              <Button
-                onClick={startVoiceInput}
-                disabled={isListening}
-                size="sm"
-                variant="outline"
-                className="h-8"
-              >
-                {isListening ? (
-                  <MicOff className="h-3 w-3" />
-                ) : (
-                  <Mic className="h-3 w-3" />
-                )}
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Quick Prompts */}
-        <div className="space-y-2">
-          <h4 className="text-xs font-medium text-muted-foreground">Quick Prompts</h4>
-          <div className="flex flex-wrap gap-1">
-            {quickPrompts[aiMode]?.map((quickPrompt, index) => (
+          <h4 className="text-sm font-medium">Quick Suggestions:</h4>
+          <div className="grid grid-cols-1 gap-2">
+            {suggestions.map((suggestion, index) => (
               <Button
                 key={index}
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="h-6 text-xs"
-                onClick={() => setPrompt(quickPrompt)}
+                className="justify-start text-left h-auto p-2"
+                onClick={() => applySuggestion(suggestion)}
               >
-                {quickPrompt.slice(0, 15)}...
+                <MessageSquare className="h-3 w-3 mr-2 flex-shrink-0" />
+                <span className="text-xs">{suggestion}</span>
               </Button>
             ))}
           </div>
         </div>
 
-        {/* AI Suggestions */}
-        {suggestions.length > 0 && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <Sparkles className="h-3 w-3" />
-                AI Suggestions
-              </h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {suggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="p-2 border rounded-md cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => applySuggestion(suggestion)}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {suggestion.type}
-                      </Badge>
-                      <Send className="h-3 w-3 text-muted-foreground" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-1">{suggestion.content}</p>
-                    {suggestion.preview && (
-                      <img 
-                        src={suggestion.preview} 
-                        alt="Preview" 
-                        className="w-full h-16 object-cover rounded"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
+        <Separator />
+
+        {/* Generate Button */}
+        <Button 
+          onClick={handleGenerate} 
+          disabled={isGenerating || !prompt.trim()}
+          className="w-full"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Wand2 className="h-4 w-4 mr-2" />
+              Generate Slide
+            </>
+          )}
+        </Button>
+
+        {/* Current Context */}
+        {currentSlideData && (
+          <div className="mt-4 p-3 bg-muted rounded-lg">
+            <h4 className="text-sm font-medium mb-2">Current Slide Context:</h4>
+            <p className="text-xs text-muted-foreground">
+              {currentSlideData.title || 'Untitled Slide'}
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>
