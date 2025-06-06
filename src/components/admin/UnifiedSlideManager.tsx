@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ import { TopSliderManager } from './TopSliderManager';
 import { SliderTestPreview } from './SliderTestPreview';
 import { ImageDropZone } from './slideDesign/ImageDropZone';
 import { MediaLibrarySelector } from './slideDesign/MediaLibrarySelector';
+import { CacheManager } from './CacheManager';
 
 interface NewSlideForm {
   title: string;
@@ -426,7 +426,7 @@ export function UnifiedSlideManager() {
       <Card>
         <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="hero-slides" className="flex items-center gap-2">
                 <Layout className="h-4 w-4" />
                 Hero Slides
@@ -438,6 +438,10 @@ export function UnifiedSlideManager() {
               <TabsTrigger value="preview" className="flex items-center gap-2">
                 <TestTube className="h-4 w-4" />
                 Preview
+              </TabsTrigger>
+              <TabsTrigger value="cache" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Cache
               </TabsTrigger>
             </TabsList>
 
@@ -864,6 +868,18 @@ export function UnifiedSlideManager() {
                   </p>
                 </div>
                 <SliderTestPreview />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="cache" className="mt-0">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Cache Management</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Clear application caches to force fresh content loading.
+                  </p>
+                </div>
+                <CacheManager />
               </div>
             </TabsContent>
           </Tabs>

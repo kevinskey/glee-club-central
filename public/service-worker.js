@@ -74,3 +74,16 @@ self.addEventListener('activate', (event) => {
     })
   );
 });
+
+// Listen for cache clear messages
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'CACHE_CLEARED') {
+    console.log('Cache cleared message received');
+    // Force service worker to skip waiting and activate
+    self.skipWaiting();
+  }
+  
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
