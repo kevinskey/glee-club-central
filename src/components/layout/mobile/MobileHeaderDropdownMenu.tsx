@@ -44,20 +44,20 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative h-7 w-7 rounded-full">
+          <Avatar className="h-7 w-7">
             <AvatarImage src={profile?.avatar_url} alt={profile?.first_name || 'User'} />
-            <AvatarFallback>{userInitials}</AvatarFallback>
+            <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuContent className="w-48" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             {profile?.first_name && (
-              <p className="font-medium">{profile.first_name} {profile.last_name}</p>
+              <p className="text-xs font-medium">{profile.first_name} {profile.last_name}</p>
             )}
-            <p className="w-[200px] truncate text-sm text-muted-foreground">
+            <p className="w-[150px] truncate text-xs text-muted-foreground">
               {user.email}
             </p>
           </div>
@@ -66,21 +66,21 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         
         <DropdownMenuItem asChild>
           <Link to="/dashboard/member" className="flex items-center">
-            <Home className="mr-2 h-4 w-4" />
+            <Home className="mr-2 h-3 w-3" />
             Dashboard
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
           <Link to="/calendar" className="flex items-center">
-            <Calendar className="mr-2 h-4 w-4" />
+            <Calendar className="mr-2 h-3 w-3" />
             Calendar
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
           <Link to="/profile" className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
+            <User className="mr-2 h-3 w-3" />
             Profile
           </Link>
         </DropdownMenuItem>
@@ -90,7 +90,7 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link to="/admin" className="flex items-center">
-                <Shield className="mr-2 h-4 w-4" />
+                <Shield className="mr-2 h-3 w-3" />
                 Admin Dashboard
               </Link>
             </DropdownMenuItem>
@@ -99,7 +99,7 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-3 w-3" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
