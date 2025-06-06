@@ -25,7 +25,7 @@ const HomePage = () => {
       {/* Hero Section */}
       <HeroSection />
       
-      {/* Main Content - Starting with events */}
+      {/* Main Content */}
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
