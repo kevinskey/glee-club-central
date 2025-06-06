@@ -4,7 +4,6 @@ import { UnifiedAdminModules } from '@/components/admin/UnifiedAdminModules';
 import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
-import { AdminPriorityActions } from '@/components/admin/AdminPriorityActions';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function AdminDashboardContent() {
@@ -17,10 +16,7 @@ export function AdminDashboardContent() {
       {/* Compact Stats Overview */}
       <AdminStatsCards isMobile={true} />
       
-      {/* Priority Actions - Top 4 buttons you use most */}
-      <AdminPriorityActions />
-
-      {/* Secondary Modules - Everything else */}
+      {/* All Admin Modules - Including the 4 priority ones at smaller size */}
       <UnifiedAdminModules />
 
       {/* Two Column Layout for Desktop */}

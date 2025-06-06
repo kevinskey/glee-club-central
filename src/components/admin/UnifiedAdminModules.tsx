@@ -7,7 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/utils/permissionChecker";
 import { 
   LayoutDashboard, ShoppingBag, Plus, Upload,
-  Music, BarChart, Settings, Layout, Presentation, FileText
+  Music, BarChart, Settings, Layout, Presentation, FileText,
+  Users, Calendar, Sliders, Bell
 } from "lucide-react";
 
 interface ModuleItem {
@@ -20,6 +21,7 @@ interface ModuleItem {
   adminOnly: boolean;
   category: string;
   permission?: string;
+  isPriority?: boolean;
 }
 
 export function UnifiedAdminModules() {
@@ -32,7 +34,53 @@ export function UnifiedAdminModules() {
   };
 
   const moduleItems: ModuleItem[] = [
-    // Quick Actions (excluding priority actions now shown at top)
+    // Priority Actions (smaller size)
+    {
+      id: "users",
+      title: "Users/Members",
+      description: "Manage choir members",
+      icon: <Users className="h-4 w-4" />,
+      color: "bg-blue-500",
+      path: "/admin/users",
+      adminOnly: true,
+      category: "Priority Actions",
+      isPriority: true
+    },
+    {
+      id: "calendar",
+      title: "Calendar",
+      description: "Manage events",
+      icon: <Calendar className="h-4 w-4" />,
+      color: "bg-green-500",
+      path: "/admin/calendar",
+      adminOnly: true,
+      category: "Priority Actions",
+      isPriority: true
+    },
+    {
+      id: "slider",
+      title: "Slider Management",
+      description: "Design slides",
+      icon: <Sliders className="h-4 w-4" />,
+      color: "bg-purple-500",
+      path: "/admin/unified-slide-management",
+      adminOnly: true,
+      category: "Priority Actions",
+      isPriority: true
+    },
+    {
+      id: "communications",
+      title: "Communications",
+      description: "Send announcements",
+      icon: <Bell className="h-4 w-4" />,
+      color: "bg-red-500",
+      path: "/admin/news-items",
+      adminOnly: true,
+      category: "Priority Actions",
+      isPriority: true
+    },
+    
+    // Quick Actions
     {
       id: "dashboard",
       title: "Dashboard",
@@ -130,7 +178,7 @@ export function UnifiedAdminModules() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          Additional Admin Modules
+          Admin Modules
           <Badge variant="secondary">{availableModules.length} available</Badge>
         </CardTitle>
       </CardHeader>
@@ -144,20 +192,32 @@ export function UnifiedAdminModules() {
               </Badge>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className={`grid gap-3 ${
+              category === "Priority Actions" 
+                ? "grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4" 
+                : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
+            }`}>
               {modules.map((module) => (
                 <div
                   key={module.id}
-                  className="group cursor-pointer h-auto flex flex-col items-center justify-center py-4 px-3 border rounded-lg transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-105"
+                  className={`group cursor-pointer h-auto flex flex-col items-center justify-center border rounded-lg transition-all duration-200 hover:border-glee-spelman/20 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-105 ${
+                    module.isPriority ? "py-3 px-2" : "py-4 px-3"
+                  }`}
                   onClick={() => navigate(module.path)}
                 >
-                  <div className={`${module.color} text-white p-3 rounded-lg group-hover:scale-110 transition-transform duration-200 mb-3`}>
+                  <div className={`${module.color} text-white rounded-lg group-hover:scale-110 transition-transform duration-200 mb-2 ${
+                    module.isPriority ? "p-2" : "p-3"
+                  }`}>
                     {module.icon}
                   </div>
-                  <span className="text-sm font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-1">
+                  <span className={`font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-1 ${
+                    module.isPriority ? "text-xs" : "text-sm"
+                  }`}>
                     {module.title}
                   </span>
-                  <span className="text-xs text-muted-foreground text-center leading-tight">
+                  <span className={`text-muted-foreground text-center leading-tight ${
+                    module.isPriority ? "text-xs" : "text-xs"
+                  }`}>
                     {module.description}
                   </span>
                 </div>

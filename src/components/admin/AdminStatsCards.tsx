@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Users, 
   Calendar, 
@@ -15,11 +16,80 @@ interface AdminStatsCardsProps {
   isMobile?: boolean;
 }
 
+interface StatsData {
+  activeMembers: number;
+  eventsThisMonth: number;
+  mediaFiles: number;
+  pendingOrders: number;
+}
+
 export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
+  const [statsData, setStatsData] = useState<StatsData>({
+    activeMembers: 0,
+    eventsThisMonth: 0,
+    mediaFiles: 0,
+    pendingOrders: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch active members count
+        const { count: membersCount } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'active');
+
+        // Fetch events this month
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        
+        const endOfMonth = new Date();
+        endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+        endOfMonth.setDate(0);
+        endOfMonth.setHours(23, 59, 59, 999);
+
+        const { count: eventsCount } = await supabase
+          .from('events')
+          .select('*', { count: 'exact', head: true })
+          .gte('start_time', startOfMonth.toISOString())
+          .lte('start_time', endOfMonth.toISOString());
+
+        // Fetch media files count
+        const { count: mediaCount } = await supabase
+          .from('media_library')
+          .select('*', { count: 'exact', head: true });
+
+        // Fetch pending orders count
+        const { count: ordersCount } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending');
+
+        setStatsData({
+          activeMembers: membersCount || 0,
+          eventsThisMonth: eventsCount || 0,
+          mediaFiles: mediaCount || 0,
+          pendingOrders: ordersCount || 0
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const stats = [
     {
       title: "Active Members",
-      value: "-",
+      value: isLoading ? "..." : statsData.activeMembers.toString(),
       change: "",
       changeType: "neutral" as const,
       icon: Users,
@@ -28,7 +98,7 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
     },
     {
       title: "Events This Month",
-      value: "-",
+      value: isLoading ? "..." : statsData.eventsThisMonth.toString(),
       change: "",
       changeType: "neutral" as const,
       icon: Calendar,
@@ -37,7 +107,7 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
     },
     {
       title: "Media Files",
-      value: "-",
+      value: isLoading ? "..." : statsData.mediaFiles.toString(),
       change: "",
       changeType: "neutral" as const,
       icon: FileImage,
@@ -46,7 +116,7 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
     },
     {
       title: "Pending Orders",
-      value: "-",
+      value: isLoading ? "..." : statsData.pendingOrders.toString(),
       change: "",
       changeType: "neutral" as const,
       icon: Package,
