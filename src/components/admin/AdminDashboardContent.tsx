@@ -4,6 +4,7 @@ import { UnifiedAdminModules } from '@/components/admin/UnifiedAdminModules';
 import { AdminStatsCards } from '@/components/admin/AdminStatsCards';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
+import { AdminPriorityActions } from '@/components/admin/AdminPriorityActions';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function AdminDashboardContent() {
@@ -13,10 +14,13 @@ export function AdminDashboardContent() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <AdminStatsCards />
+      {/* Compact Stats Overview */}
+      <AdminStatsCards isMobile={true} />
       
-      {/* Unified Modules & Quick Actions */}
+      {/* Priority Actions - Top 4 buttons you use most */}
+      <AdminPriorityActions />
+
+      {/* Secondary Modules - Everything else */}
       <UnifiedAdminModules />
 
       {/* Two Column Layout for Desktop */}

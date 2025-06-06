@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { hasPermission } from "@/utils/permissionChecker";
 import { 
-  LayoutDashboard, ShoppingBag, Plus, Users, Calendar, Upload,
-  Music, Bell, BarChart, Settings, Layout, Presentation, FileText, Sliders
+  LayoutDashboard, ShoppingBag, Plus, Upload,
+  Music, BarChart, Settings, Layout, Presentation, FileText
 } from "lucide-react";
 
 interface ModuleItem {
@@ -32,7 +32,7 @@ export function UnifiedAdminModules() {
   };
 
   const moduleItems: ModuleItem[] = [
-    // Quick Actions (High Priority)
+    // Quick Actions (excluding priority actions now shown at top)
     {
       id: "dashboard",
       title: "Dashboard",
@@ -43,40 +43,8 @@ export function UnifiedAdminModules() {
       adminOnly: true,
       category: "Quick Actions"
     },
-    {
-      id: "slider_management",
-      title: "Manage Slides",
-      description: "Design slides & manage all sliders",
-      icon: <Sliders className="h-5 w-5" />,
-      color: "bg-indigo-500",
-      path: "/admin/unified-slide-management",
-      adminOnly: true,
-      category: "Quick Actions"
-    },
     
     // Administration
-    {
-      id: "add_member",
-      title: "Add Member",
-      description: "Add new users to the system",
-      icon: <Plus className="h-5 w-5" />,
-      color: "bg-blue-500",
-      path: "/admin/users",
-      adminOnly: true,
-      category: "Administration",
-      permission: "manage_members"
-    },
-    {
-      id: "user_management",
-      title: "User Management",
-      description: "Manage all users in the system",
-      icon: <Users className="h-5 w-5" />,
-      color: "bg-slate-500",
-      path: "/admin/users",
-      adminOnly: true,
-      category: "Administration",
-      permission: "manage_members"
-    },
     {
       id: "settings",
       title: "Settings",
@@ -89,17 +57,6 @@ export function UnifiedAdminModules() {
     },
     
     // Content Management
-    {
-      id: "calendar",
-      title: "Calendar",
-      description: "Manage events and calendar",
-      icon: <Calendar className="h-5 w-5" />,
-      color: "bg-green-500",
-      path: "/admin/calendar",
-      adminOnly: true,
-      category: "Content Management",
-      permission: "edit_events"
-    },
     {
       id: "media",
       title: "Media Library",
@@ -118,16 +75,6 @@ export function UnifiedAdminModules() {
       icon: <Music className="h-5 w-5" />,
       color: "bg-indigo-500",
       path: "/admin/media-library",
-      adminOnly: true,
-      category: "Content Management"
-    },
-    {
-      id: "news",
-      title: "News & Announcements",
-      description: "Create and manage news items",
-      icon: <Bell className="h-5 w-5" />,
-      color: "bg-red-500",
-      path: "/admin/news-items",
       adminOnly: true,
       category: "Content Management"
     },
@@ -183,7 +130,7 @@ export function UnifiedAdminModules() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          Admin Modules & Quick Actions
+          Additional Admin Modules
           <Badge variant="secondary">{availableModules.length} available</Badge>
         </CardTitle>
       </CardHeader>
