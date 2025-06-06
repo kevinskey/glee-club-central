@@ -14,11 +14,11 @@ export function UnifiedPublicHeader({
 }: UnifiedPublicHeaderProps) {
   return (
     <>
-      {/* Top Slider - Admin managed banner */}
-      {showTopSlider && <TopSlider />}
-      
       {/* Main Navigation Header */}
       <Header />
+      
+      {/* Top Slider - Admin managed banner (appears below header) */}
+      {showTopSlider && <TopSlider />}
     </>
   );
 }
