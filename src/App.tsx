@@ -15,7 +15,9 @@ function App() {
       <ThemeProvider>
         <AuthProvider>
           <ProfileProvider>
-            <Outlet />
+            <div className="min-h-screen">
+              <Outlet />
+            </div>
             <Toaster />
           </ProfileProvider>
         </AuthProvider>

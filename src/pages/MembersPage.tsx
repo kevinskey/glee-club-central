@@ -11,11 +11,5 @@ export default function MembersPage() {
     return <PageLoader message="Loading members..." />;
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <CleanMembersPage />
-      </div>
-    </div>
-  );
+  return <CleanMembersPage />;
 }
