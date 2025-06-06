@@ -5,43 +5,49 @@ import { RouterProvider } from "react-router-dom";
 import router from "./router";
 import "./App.css";
 
-// Force complete cache invalidation - timestamp: 2025-06-06T00:00:00Z
-const CACHE_BUST_VERSION = Date.now();
+// EMERGENCY CACHE CLEAR - Force complete rebuild
+const EMERGENCY_VERSION = `${Date.now()}-${Math.random()}`;
 
-// Ultra-aggressive cache refresh - clear all caches and force reload
-if ('caches' in window) {
-  caches.keys().then(names => {
-    names.forEach(name => {
-      console.log('Deleting cache:', name);
-      caches.delete(name);
-    });
-  });
-}
+// Nuclear cache clear option
+const clearAllCaches = async () => {
+  try {
+    // Clear all caches
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      console.log('All caches cleared:', cacheNames);
+    }
+    
+    // Clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+    
+    // Clear any IndexedDB if present
+    if ('indexedDB' in window) {
+      try {
+        indexedDB.deleteDatabase('app-cache');
+      } catch (e) {
+        console.log('IndexedDB clear attempted');
+      }
+    }
+    
+    console.log('EMERGENCY CACHE CLEAR COMPLETE - version:', EMERGENCY_VERSION);
+  } catch (error) {
+    console.error('Cache clear error:', error);
+  }
+};
 
-// Clear any localStorage or sessionStorage that might cache component references
-try {
-  localStorage.clear();
-  sessionStorage.clear();
-  console.log('Storage cleared');
-} catch (e) {
-  console.log('Storage clear attempted');
-}
+// Execute emergency clear
+clearAllCaches();
 
-// Force module cache invalidation by invalidating import maps
-if ('performance' in window && performance.mark) {
-  performance.mark('cache-bust-' + CACHE_BUST_VERSION);
-}
-
-// Force timestamp to break any module caching
-console.log('Application starting - FORCE CACHE CLEAR, version:', CACHE_BUST_VERSION);
-console.log('PitchPipe component cache busted - no audio imports');
-
-// Aggressive reload for module cache issues
-if (window.location.search.indexOf('cache-bust') === -1) {
-  console.log('Adding cache bust parameter and reloading...');
-  window.location.href = window.location.href + (window.location.search ? '&' : '?') + 'cache-bust=' + CACHE_BUST_VERSION;
+// Force module invalidation with query params
+const currentUrl = new URL(window.location.href);
+if (!currentUrl.searchParams.has('emergency-clear')) {
+  currentUrl.searchParams.set('emergency-clear', EMERGENCY_VERSION);
+  console.log('Forcing emergency reload with cache bust...');
+  window.location.href = currentUrl.toString();
 } else {
-  console.log('Cache bust parameter detected, proceeding with normal load');
+  console.log('Emergency cache clear parameter detected, proceeding...');
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
