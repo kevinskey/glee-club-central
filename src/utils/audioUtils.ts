@@ -32,6 +32,31 @@ export function getNoteFrequency(note: string, octave: number = 4): number {
   return A4 * Math.pow(2, semitonesFromA4 / 12);
 }
 
+// Play note function for pitch pipe functionality
+export function playNote(frequency: number, duration: number = 1000): Promise<void> {
+  return new Promise((resolve) => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration / 1000);
+    
+    setTimeout(() => {
+      resolve();
+    }, duration);
+  });
+}
+
 // Click sound for metronome - now accepts optional AudioContext
 export function playClick(audioContext?: AudioContext): Promise<void> {
   if (audioContext) {
