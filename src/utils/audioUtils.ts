@@ -1,4 +1,3 @@
-
 // Types
 export interface NoteEvent {
   note: string;
@@ -157,6 +156,35 @@ export const playTone = (
   }
   
   return oscillator;
+};
+
+// Get frequency for a specific note with octave parameter
+export const getNoteFrequency = (note: string, octave: number = 4): number => {
+  // Base frequencies for notes in octave 4
+  const noteToFrequency: Record<string, number> = {
+    'C': 261.63,
+    'C#': 277.18,
+    'D': 293.66,
+    'D#': 311.13,
+    'E': 329.63,
+    'F': 349.23,
+    'F#': 369.99,
+    'G': 392.00,
+    'G#': 415.30,
+    'A': 440.00,
+    'A#': 466.16,
+    'B': 493.88
+  };
+  
+  // Calculate the frequency with octave adjustment
+  if (octave === 4) {
+    return noteToFrequency[note] || 440; // Default to A440 if note not found
+  }
+  
+  // For other octaves, adjust the frequency
+  const baseFreq = noteToFrequency[note] || 440;
+  const octaveDiff = octave - 4;
+  return baseFreq * Math.pow(2, octaveDiff);
 };
 
 // Utility to create waveform visualization data from audio buffer
