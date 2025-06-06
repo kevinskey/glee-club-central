@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventsListView } from '@/components/calendar/EventsListView';
 import { EventEditor } from '@/components/admin/EventEditor';
@@ -13,6 +13,9 @@ import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { getNationalHolidays } from '@/utils/nationalHolidays';
+import { getReligiousHolidays } from '@/utils/religiousHolidays';
+import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents, createEvent } = useCalendarEvents();
@@ -21,7 +24,71 @@ export default function CalendarPage() {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  const filteredEvents = events.filter(event => {
+  // Combine regular events with holiday and academic dates
+  const allEvents = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    
+    // Get holiday and academic dates
+    const nationalHolidays = getNationalHolidays(currentYear);
+    const religiousHolidays = getReligiousHolidays(currentYear);
+    const spelmanDates = getSpelmanAcademicDates(currentYear);
+    
+    // Convert holidays to calendar event format
+    const holidayEvents: CalendarEvent[] = [
+      ...nationalHolidays.map(holiday => ({
+        id: holiday.id,
+        title: holiday.title,
+        start_time: holiday.date.toISOString(),
+        end_time: new Date(holiday.date.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        short_description: holiday.description,
+        event_type: 'holiday',
+        is_public: true,
+        is_private: false,
+        allow_rsvp: false,
+        allow_reminders: false,
+        allow_ics_download: true,
+        allow_google_map_link: false,
+        created_at: new Date().toISOString(),
+        feature_image_url: holiday.imageUrl
+      })),
+      ...religiousHolidays.map(holiday => ({
+        id: holiday.id,
+        title: holiday.title,
+        start_time: holiday.date.toISOString(),
+        end_time: new Date(holiday.date.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        short_description: holiday.description,
+        event_type: 'religious',
+        is_public: true,
+        is_private: false,
+        allow_rsvp: false,
+        allow_reminders: false,
+        allow_ics_download: true,
+        allow_google_map_link: false,
+        created_at: new Date().toISOString(),
+        feature_image_url: holiday.imageUrl
+      })),
+      ...spelmanDates.map(date => ({
+        id: date.id,
+        title: date.title,
+        start_time: date.date.toISOString(),
+        end_time: new Date(date.date.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+        short_description: date.description,
+        event_type: date.category,
+        is_public: true,
+        is_private: false,
+        allow_rsvp: false,
+        allow_reminders: false,
+        allow_ics_download: true,
+        allow_google_map_link: false,
+        created_at: new Date().toISOString(),
+        feature_image_url: date.imageUrl
+      }))
+    ];
+    
+    return [...events, ...holidayEvents];
+  }, [events]);
+
+  const filteredEvents = allEvents.filter(event => {
     if (event.is_public) return true;
     return isAuthenticated && !event.is_private;
   });

@@ -27,6 +27,15 @@ export function CalendarView({ events = [], onEventClick, onCreateEvent, showPri
       social: 'bg-pink-500',
       workshop: 'bg-yellow-500',
       tour: 'bg-red-500',
+      holiday: 'bg-red-600',
+      religious: 'bg-indigo-600',
+      orientation: 'bg-cyan-500',
+      registration: 'bg-orange-500',
+      classes: 'bg-blue-600',
+      exams: 'bg-red-500',
+      break: 'bg-green-600',
+      deadline: 'bg-yellow-600',
+      special: 'bg-purple-600',
       other: 'bg-gray-500'
     };
     return colors[type as keyof typeof colors] || colors.other;
@@ -134,7 +143,30 @@ export function CalendarView({ events = [], onEventClick, onCreateEvent, showPri
                       )}>
                         <span>{format(day, 'd')}</span>
                         {hasEvents && (
-                          <div className="w-4 h-4 bg-blue-500 rounded-full flex-shrink-0"></div>
+                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                        )}
+                      </div>
+                      <div className="overflow-hidden">
+                        {dayEvents.slice(0, 2).map(event => (
+                          <div 
+                            key={event.id} 
+                            className={cn(
+                              "text-xs p-0.5 mb-0.5 rounded truncate cursor-pointer transition-opacity hover:opacity-80 text-white",
+                              getEventTypeColor(event.event_type || 'other')
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEventClick(event);
+                            }}
+                            title={event.title}
+                          >
+                            {event.title.length > 12 ? `${event.title.substring(0, 12)}...` : event.title}
+                          </div>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <div className="text-xs text-center text-muted-foreground font-medium">
+                            +{dayEvents.length - 2} more
+                          </div>
                         )}
                       </div>
                     </div>

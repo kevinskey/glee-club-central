@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
 import { format, isSameDay, isToday, isTomorrow } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface EventsListViewProps {
   events: CalendarEvent[];
@@ -30,6 +31,50 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
     }
     
     return `${start} - ${format(endTime, 'MMM d, h:mm a')}`;
+  };
+
+  const getEventTypeColor = (type: string) => {
+    const colors = {
+      rehearsal: 'bg-blue-500',
+      performance: 'bg-purple-500',
+      meeting: 'bg-green-500',
+      social: 'bg-pink-500',
+      workshop: 'bg-yellow-500',
+      tour: 'bg-red-500',
+      holiday: 'bg-red-600',
+      religious: 'bg-indigo-600',
+      orientation: 'bg-cyan-500',
+      registration: 'bg-orange-500',
+      classes: 'bg-blue-600',
+      exams: 'bg-red-500',
+      break: 'bg-green-600',
+      deadline: 'bg-yellow-600',
+      special: 'bg-purple-600',
+      other: 'bg-gray-500'
+    };
+    return colors[type as keyof typeof colors] || colors.other;
+  };
+
+  const getEventTypeLabel = (type: string) => {
+    const labels = {
+      rehearsal: 'Rehearsal',
+      performance: 'Performance',
+      meeting: 'Meeting',
+      social: 'Social',
+      workshop: 'Workshop',
+      tour: 'Tour',
+      holiday: 'Holiday',
+      religious: 'Religious',
+      orientation: 'Orientation',
+      registration: 'Registration',
+      classes: 'Classes',
+      exams: 'Exams',
+      break: 'Break',
+      deadline: 'Deadline',
+      special: 'Special',
+      other: 'Event'
+    };
+    return labels[type as keyof typeof labels] || 'Event';
   };
 
   // Sort events by start time
@@ -76,11 +121,18 @@ export const EventsListView: React.FC<EventsListViewProps> = ({
                     )}
                   </div>
                   
-                  {event.is_private && (
-                    <Badge variant="secondary" className="text-xs">
-                      Private Event
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge 
+                      className={cn("text-xs text-white", getEventTypeColor(event.event_type || 'other'))}
+                    >
+                      {getEventTypeLabel(event.event_type || 'other')}
                     </Badge>
-                  )}
+                    {event.is_private && (
+                      <Badge variant="secondary" className="text-xs">
+                        Private Event
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 {/* Event Details */}
