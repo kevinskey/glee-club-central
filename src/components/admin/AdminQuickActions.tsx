@@ -106,7 +106,7 @@ export function AdminQuickActions({ isMobile = false }: AdminQuickActionsProps) 
         <CardTitle className="text-lg">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-9 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
           {quickActions.map((action, index) => (
             <Button
               key={index}
