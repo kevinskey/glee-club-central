@@ -33,7 +33,7 @@ export class NewsService {
     return !this.FORBIDDEN_KEYWORDS.some(keyword => lowerText.includes(keyword));
   }
 
-  static async fetchGoogleNews(category: keyof typeof this.NEWS_SOURCES = 'hbcu', maxItems: number = 8): Promise<NewsItem[]> {
+  static async fetchGoogleNews(category: keyof typeof this.NEWS_SOURCES = 'hbcu', maxItems: number = 3): Promise<NewsItem[]> {
     try {
       const rssUrl = this.NEWS_SOURCES[category];
       const apiUrl = `${this.RSS_TO_JSON_API}?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -58,7 +58,7 @@ export class NewsService {
       });
       
       return filteredItems.slice(0, maxItems).map((item: any, index: number) => ({
-        id: `google-news-${category}-${index}-${Date.now()}`, // Add timestamp for uniqueness
+        id: `google-news-${category}-${index}-${Date.now()}`,
         headline: this.cleanHeadline(item.title || ''),
         active: true,
         content: item.description || item.title || '',
@@ -74,13 +74,13 @@ export class NewsService {
     }
   }
 
-  static async fetchMixedNews(maxItems: number = 15): Promise<NewsItem[]> {
+  static async fetchMixedNews(maxItems: number = 8): Promise<NewsItem[]> {
     try {
       const [hbcuNews, spelmanNews, musicNews, gleeNews] = await Promise.all([
-        this.fetchGoogleNews('hbcu', 4),
-        this.fetchGoogleNews('spelman', 4),
-        this.fetchGoogleNews('music', 4),
-        this.fetchGoogleNews('glee', 3)
+        this.fetchGoogleNews('hbcu', 2), // Reduced from 4 to 2
+        this.fetchGoogleNews('spelman', 2), // Reduced from 4 to 2
+        this.fetchGoogleNews('music', 2), // Reduced from 4 to 2
+        this.fetchGoogleNews('glee', 2) // Reduced from 3 to 2
       ]);
       
       const allNews = [...spelmanNews, ...hbcuNews, ...musicNews, ...gleeNews];
@@ -90,9 +90,9 @@ export class NewsService {
         this.isContentAppropriate(item.headline) && this.isContentAppropriate(item.content)
       );
       
-      // Shuffle and limit results
+      // Shuffle and limit results strictly
       const shuffled = appropriateNews.sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, maxItems);
+      return shuffled.slice(0, Math.min(maxItems, 8)); // Never exceed 8 items
       
     } catch (error) {
       console.error('Error fetching mixed news:', error);
@@ -131,31 +131,10 @@ export class NewsService {
         active: true,
         content: "We're pleased to announce several new scholarship opportunities for exceptional music students at Spelman College.",
         date: "May 8, 2025"
-      },
-      {
-        id: "static-4",
-        headline: "Glee Club wins national recognition for excellence in choral music",
-        active: true,
-        content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition.",
-        date: "May 12, 2025"
-      },
-      {
-        id: "static-5",
-        headline: "Alumni spotlight: Former Glee Club members making their mark in music industry",
-        active: true,
-        content: "Celebrating the achievements of our talented alumni who continue to inspire through their musical careers.",
-        date: "May 15, 2025"
-      },
-      {
-        id: "static-6",
-        headline: "Spelman Glee Club collaborates with Atlanta Symphony Orchestra",
-        active: true,
-        content: "An exciting collaboration bringing together classical and choral traditions in a special performance.",
-        date: "May 18, 2025"
       }
     ];
 
-    // Shuffle the fallback items to add variety
-    return fallbackItems.sort(() => Math.random() - 0.5);
+    // Return only 3 fallback items
+    return fallbackItems;
   }
 }

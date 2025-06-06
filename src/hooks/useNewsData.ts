@@ -26,17 +26,17 @@ export function useNewsData() {
         
         const needsFreshContent = shouldFetchFreshContent();
         
-        // Try database first
+        // Try database first - limit to 5 items max
         const { data: dbNews, error } = await supabase
           .from('news_items')
           .select('id, headline, content, start_date, end_date, active, generated_by_ai')
           .eq('active', true)
           .order('priority', { ascending: false })
-          .limit(15);
+          .limit(5); // Reduced from 15 to 5
 
         let finalNewsItems: NewsItem[] = [];
 
-        if (!error && dbNews && dbNews.length >= 8 && !needsFreshContent) {
+        if (!error && dbNews && dbNews.length >= 3 && !needsFreshContent) {
           finalNewsItems = dbNews.map(item => ({
             id: item.id,
             headline: item.headline,
@@ -48,13 +48,14 @@ export function useNewsData() {
           setNewsSource('database');
         } else {
           console.log('Fetching fresh news from Google News...');
-          const googleNews = await NewsService.fetchMixedNews(20);
+          const googleNews = await NewsService.fetchMixedNews(8); // Reduced from 20 to 8
           
           if (googleNews.length > 0) {
-            finalNewsItems = [...googleNews];
+            // Take only first 5 items from Google News
+            finalNewsItems = googleNews.slice(0, 5);
             
             if (dbNews && dbNews.length > 0) {
-              const dbItems = dbNews.slice(0, 5).map(item => ({
+              const dbItems = dbNews.slice(0, 2).map(item => ({ // Reduced from 5 to 2
                 id: item.id,
                 headline: item.headline,
                 active: item.active,
@@ -62,23 +63,27 @@ export function useNewsData() {
                 date: item.start_date,
                 generated_by_ai: item.generated_by_ai
               }));
-              finalNewsItems = [...googleNews, ...dbItems];
+              // Combine but limit total to 5 items
+              finalNewsItems = [...googleNews.slice(0, 3), ...dbItems];
             }
             
             setNewsSource('google');
             saveFetchDate();
           } else {
-            finalNewsItems = NewsService.getStaticFallbackNews();
+            // Use only first 3 fallback items
+            finalNewsItems = NewsService.getStaticFallbackNews().slice(0, 3);
             setNewsSource('mixed');
           }
         }
 
-        const shuffledItems = finalNewsItems.sort(() => Math.random() - 0.5);
-        setNewsItems(shuffledItems);
+        // Final safety check - never exceed 5 items total
+        const limitedItems = finalNewsItems.slice(0, 5);
+        setNewsItems(limitedItems);
 
       } catch (error) {
         console.error('Error fetching news items:', error);
-        setNewsItems(NewsService.getStaticFallbackNews());
+        // Use only first 3 fallback items on error
+        setNewsItems(NewsService.getStaticFallbackNews().slice(0, 3));
         setNewsSource('mixed');
       } finally {
         setIsLoading(false);

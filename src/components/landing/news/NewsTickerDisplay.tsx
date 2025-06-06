@@ -19,17 +19,16 @@ export function NewsTickerDisplay({ newsItems, newsSource, onNewsClick }: NewsTi
   const createTickerContent = () => {
     if (newsItems.length === 0) return '';
     
-    const cleanHeadlines = newsItems.map(item => removeIconsFromHeadline(item.headline));
+    // Limit to maximum 5 items and clean headlines
+    const limitedItems = newsItems.slice(0, 5);
+    const cleanHeadlines = limitedItems.map(item => removeIconsFromHeadline(item.headline));
     const separator = '   •   ';
-    const randomOffset = Math.floor(Math.random() * cleanHeadlines.length);
     
-    const rotatedHeadlines = [
-      ...cleanHeadlines.slice(randomOffset),
-      ...cleanHeadlines.slice(0, randomOffset)
-    ];
+    // Create a single pass of headlines
+    const singlePass = cleanHeadlines.join(separator);
     
-    const singlePass = rotatedHeadlines.join(separator);
-    return Array(6).fill(singlePass).join(separator);
+    // Repeat only 3 times instead of 6 to reduce content
+    return Array(3).fill(singlePass).join(separator);
   };
 
   const tickerContent = createTickerContent();
