@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
 import { Navigate } from 'react-router-dom';
 
 // Import admin pages
+import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
@@ -12,9 +12,13 @@ import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
-    element: <Navigate to="/dashboard" replace />,
+    element: (
+      <AdminRoute>
+        <AdminDashboard />
+      </AdminRoute>
+    ),
   },
-  // Redirect V2 to main dashboard to avoid confusion
+  // Keep V2 route available for comparison
   {
     path: '/admin/v2',
     element: <Navigate to="/dashboard" replace />,
