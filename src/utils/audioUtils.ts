@@ -72,9 +72,32 @@ export function playNote(note: string, duration: number = 1000): Promise<void> {
   return createTone(frequency, duration);
 }
 
-// Click sound for metronome
-export function playClick(): Promise<void> {
-  return createTone(800, 100);
+// Click sound for metronome - now accepts optional AudioContext
+export function playClick(audioContext?: AudioContext): Promise<void> {
+  if (audioContext) {
+    return new Promise((resolve) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+      
+      setTimeout(() => {
+        resolve();
+      }, 100);
+    });
+  } else {
+    return createTone(800, 100);
+  }
 }
 
 // Create click buffer for metronome
