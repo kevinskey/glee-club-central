@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -94,7 +95,7 @@ export function HeroSection() {
     return (
       <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gradient-to-br from-glee-spelman to-glee-spelman/80">
         <div className="absolute inset-0 bg-black/40" />
-        <div className="relative h-full flex items-center justify-center text-center px-4">
+        <div className="relative h-full flex items-center justify-center text-center p-20">
           <div className="max-w-4xl mx-auto text-white">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
               Welcome to Glee World
@@ -155,7 +156,7 @@ export function HeroSection() {
 
       {/* Content - Only show if text is enabled */}
       {showTextOverlay && (
-        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
+        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center p-20`}>
           <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)}`}>
             {slide.title && (
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
