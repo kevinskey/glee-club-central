@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -14,23 +15,28 @@ export function HeroSection() {
   const [transition, setTransition] = useState('fade');
   const [autoPlay, setAutoPlay] = useState(true);
   const [showControls, setShowControls] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   // Auto-advance slides
   useEffect(() => {
-    if (slides.length > 1 && isReady && isPlaying && autoPlay) {
+    if (slides.length > 1 && isReady && isPlaying && autoPlay && showContent) {
       const timer = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % slides.length);
       }, speed);
       return () => clearInterval(timer);
     }
-  }, [slides.length, isReady, isPlaying, autoPlay, speed]);
+  }, [slides.length, isReady, isPlaying, autoPlay, speed, showContent]);
 
   // Mark as ready when slides are loaded and we have data
   useEffect(() => {
     if (!isLoading && slides.length > 0) {
       const timer = setTimeout(() => {
         setIsReady(true);
-      }, 100);
+        // Add a small delay before showing content for smooth fade transition
+        setTimeout(() => {
+          setShowContent(true);
+        }, 100);
+      }, 1000); // Show loading for at least 1 second for the fade effect
       return () => clearTimeout(timer);
     }
   }, [isLoading, slides.length]);
@@ -104,13 +110,13 @@ export function HeroSection() {
     setIsPlaying(true);
   };
 
-  // Show loading state while fetching
-  if (isLoading) {
+  // Show loading state while fetching or before content is ready
+  if (isLoading || !isReady) {
     return <HeroLoadingState />;
   }
 
   // Show default state if error or no slides
-  if (hasError || slides.length === 0 || !isReady) {
+  if (hasError || slides.length === 0) {
     return <HeroDefaultState />;
   }
 
@@ -118,9 +124,11 @@ export function HeroSection() {
   
   return (
     <div className="relative">
-      {/* Hero Slide */}
+      {/* Hero Slide with fade-in animation */}
       <div 
-        className="transition-opacity duration-500 min-h-[320px]"
+        className={`transition-opacity duration-1000 min-h-[320px] ${
+          showContent ? 'opacity-100' : 'opacity-0'
+        }`}
         style={{ 
           transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
         }}
@@ -129,18 +137,20 @@ export function HeroSection() {
       </div>
 
       {/* Controls Toggle Button */}
-      <button
-        onClick={() => setShowControls(!showControls)}
-        className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
-        title="Toggle slide controls"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-        </svg>
-      </button>
+      {showContent && (
+        <button
+          onClick={() => setShowControls(!showControls)}
+          className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
+          title="Toggle slide controls"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+          </svg>
+        </button>
+      )}
 
       {/* Slide Indicators */}
-      {slides.length > 1 && (
+      {slides.length > 1 && showContent && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
           {slides.map((_, index) => (
             <button
@@ -157,7 +167,7 @@ export function HeroSection() {
       )}
 
       {/* Slide Controls Panel */}
-      {showControls && (
+      {showControls && showContent && (
         <div className="absolute inset-x-0 bottom-0 z-30 bg-black/80 backdrop-blur-sm p-4">
           <SlideControls
             currentSlide={currentSlide}
