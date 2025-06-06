@@ -7,7 +7,8 @@ import {
   Users, 
   UserPlus, 
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -110,7 +111,7 @@ export function CleanMembersPage() {
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading authentication...</p>
+          <p className="text-sm">Loading authentication...</p>
         </div>
       </div>
     );
@@ -131,31 +132,58 @@ export function CleanMembersPage() {
   }
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Members</h1>
-          <p className="text-muted-foreground">
-            Manage choir members and their information ({filteredUsers.length} total members)
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={refetch} variant="outline" disabled={usersLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          {isAdminUser && (
-            <>
-              <Button onClick={() => setShowAddMemberDialog(true)} variant="default">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Member
-              </Button>
-              <Button onClick={() => setShowCreateModal(true)} variant="outline">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Quick Add
-              </Button>
-            </>
-          )}
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header Section - Redesigned */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
+              Members
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Manage choir members ({filteredUsers.length} total)
+            </p>
+          </div>
+          
+          {/* Action Buttons - Redesigned for better mobile */}
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              onClick={refetch} 
+              variant="outline" 
+              disabled={usersLoading}
+              size="sm"
+              className="text-xs sm:text-sm"
+            >
+              <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+              <span className="ml-1 sm:ml-2">Refresh</span>
+            </Button>
+            
+            {isAdminUser && (
+              <>
+                <Button 
+                  onClick={() => setShowAddMemberDialog(true)} 
+                  variant="default"
+                  size="sm"
+                  className="text-xs sm:text-sm bg-glee-spelman hover:bg-glee-spelman/90"
+                >
+                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="ml-1 sm:ml-2 hidden sm:inline">Add Member</span>
+                  <span className="ml-1 sm:hidden">Add</span>
+                </Button>
+                
+                <Button 
+                  onClick={() => setShowCreateModal(true)} 
+                  variant="outline"
+                  size="sm"
+                  className="text-xs sm:text-sm"
+                >
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="ml-1 sm:ml-2 hidden sm:inline">Quick Add</span>
+                  <span className="ml-1 sm:hidden">Quick</span>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -176,15 +204,19 @@ export function CleanMembersPage() {
         <Card>
           <CardContent className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p>Loading members...</p>
+            <p className="text-sm">Loading members...</p>
           </CardContent>
         </Card>
       ) : (
         <>
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
             <p>
               Showing {((currentPage - 1) * 6) + 1}-{Math.min(currentPage * 6, filteredUsers.length)} of {filteredUsers.length} members
-              {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+              {activeFilterCount > 0 && (
+                <span className="hidden sm:inline">
+                  {` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+                </span>
+              )}
             </p>
             <p>Page {currentPage} of {totalPages}</p>
           </div>
@@ -194,11 +226,15 @@ export function CleanMembersPage() {
               <CardContent className="text-center py-8">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="font-semibold mb-2">No Members Found</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
                 </p>
                 {isAdminUser && activeFilterCount === 0 && (
-                  <Button onClick={() => setShowAddMemberDialog(true)}>
+                  <Button 
+                    onClick={() => setShowAddMemberDialog(true)}
+                    size="sm"
+                    className="text-sm"
+                  >
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add Your First Member
                   </Button>
