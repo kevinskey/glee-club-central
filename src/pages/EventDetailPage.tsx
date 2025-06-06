@@ -25,7 +25,6 @@ import { EventRSVPForm } from '@/components/events/EventRSVPForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import AppLayout from '@/layouts/AppLayout';
 
 function EventDetailPageContent() {
   const { id } = useParams<{ id: string }>();
@@ -387,10 +386,8 @@ END:VCALENDAR`;
 
 export default function EventDetailPage() {
   return (
-    <AppLayout sidebarType="none" showHeader={true} showFooter={true}>
-      <ErrorBoundary>
-        <EventDetailPageContent />
-      </ErrorBoundary>
-    </AppLayout>
+    <ErrorBoundary>
+      <EventDetailPageContent />
+    </ErrorBoundary>
   );
 }

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import AppLayout from '@/layouts/AppLayout';
 
 // Public Pages
 import HomePage from '@/pages/HomePage';
@@ -17,7 +16,6 @@ import CheckoutCancelledPage from '@/pages/CheckoutCancelledPage';
 export const enhancedPublicRoutes: RouteObject[] = [
   {
     path: '/',
-    element: <AppLayout sidebarType="none" showHeader={true} showFooter={true} />,
     children: [
       { index: true, element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
@@ -31,14 +29,14 @@ export const enhancedPublicRoutes: RouteObject[] = [
   // Checkout Routes
   { 
     path: '/checkout-success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+    element: <CheckoutSuccessPage />
   },
   { 
     path: '/store/success', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutSuccessPage /></AppLayout>
+    element: <CheckoutSuccessPage />
   },
   { 
     path: '/store/cancelled', 
-    element: <AppLayout sidebarType="none" showHeader={false} showFooter={false}><CheckoutCancelledPage /></AppLayout>
+    element: <CheckoutCancelledPage />
   },
 ];
