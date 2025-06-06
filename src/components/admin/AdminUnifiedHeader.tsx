@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AdminTopBar } from './AdminTopBar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
