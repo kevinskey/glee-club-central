@@ -16,8 +16,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Determine if we're on an admin page
   const isAdminPage = location.pathname.startsWith('/admin');
   
-  // Don't render any header on certain pages that manage their own headers
-  const pagesWithOwnHeaders = ['/login', '/signup'];
+  // Pages that manage their own headers completely (including TopSlider)
+  const pagesWithOwnHeaders = [
+    '/login', 
+    '/signup', 
+    '/' // HomePage manages its own header via PublicPageWrapper
+  ];
+  
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname);
 
   return (

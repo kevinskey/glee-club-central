@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -288,8 +287,11 @@ export function TopSlider() {
 
   return (
     <div 
-      className="relative w-full overflow-hidden shadow-sm transition-all duration-500 ease-in-out"
-      style={{ height: `${sliderHeight}px` }}
+      className="relative w-full overflow-hidden shadow-sm transition-all duration-500 ease-in-out border-b border-gray-200/50 dark:border-gray-700/50"
+      style={{ 
+        height: `${sliderHeight}px`,
+        position: 'static' // Ensure it follows normal document flow
+      }}
     >
       <div
         className="absolute inset-0 transition-all duration-1000"
