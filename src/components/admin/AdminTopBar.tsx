@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
@@ -169,93 +170,6 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
           </DropdownMenu>
         </div>
       </div>
-
-      {/* Navigation Bar - Hidden on mobile, dropdown on tablet, full nav on desktop */}
-      {!isMobile && (
-        <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-          <div className="flex items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Admin Panel
-            </h1>
-
-            {/* Desktop Navigation */}
-            {!isTablet && (
-              <div className="flex items-center space-x-2">
-                {navigationGroups.map((group) => (
-                  <DropdownMenu key={group.label}>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 px-3 text-sm"
-                      >
-                        {group.label}
-                        <ChevronDown className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48">
-                      {group.items.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = isActivePath(item.to, item.end);
-                        return (
-                          <DropdownMenuItem
-                            key={item.to}
-                            onClick={() => handleNavigate(item.to)}
-                            className={cn(
-                              "flex items-center gap-2 cursor-pointer",
-                              isActive && "bg-glee-spelman text-white"
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                            {item.label}
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ))}
-              </div>
-            )}
-
-            {/* Tablet Menu Button */}
-            {isTablet && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
-                  {navigationGroups.map((group, groupIndex) => (
-                    <div key={group.label}>
-                      <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-                        {group.label}
-                      </div>
-                      {group.items.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = isActivePath(item.to, item.end);
-                        return (
-                          <DropdownMenuItem
-                            key={item.to}
-                            onClick={() => handleNavigate(item.to)}
-                            className={cn(
-                              "flex items-center gap-2 cursor-pointer ml-2",
-                              isActive && "bg-glee-spelman text-white"
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                            {item.label}
-                          </DropdownMenuItem>
-                        );
-                      })}
-                      {groupIndex < navigationGroups.length - 1 && <DropdownMenuSeparator />}
-                    </div>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Mobile Navigation - Simple title only */}
       {isMobile && (
