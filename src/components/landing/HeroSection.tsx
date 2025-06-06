@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -83,7 +84,7 @@ export function HeroSection() {
 
   if (isLoading) {
     return (
-      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 dark:bg-gray-800 animate-pulse">
+      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 dark:bg-gray-800 animate-pulse pt-20">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-gray-400">Loading hero content...</div>
         </div>
@@ -93,7 +94,7 @@ export function HeroSection() {
 
   if (slides.length === 0) {
     return (
-      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gradient-to-br from-glee-spelman to-glee-spelman/80">
+      <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gradient-to-br from-glee-spelman to-glee-spelman/80 pt-20">
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative h-full flex items-center justify-center text-center p-20">
           <div className="max-w-4xl mx-auto text-white">
@@ -138,7 +139,7 @@ export function HeroSection() {
 
   return (
     <div 
-      className={`relative ${heightClass} overflow-hidden cursor-pointer`}
+      className={`relative ${heightClass} overflow-hidden cursor-pointer pt-20`}
       onClick={() => handleSlideClick(slide)}
     >
       {/* Background */}
