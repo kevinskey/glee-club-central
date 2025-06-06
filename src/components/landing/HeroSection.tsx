@@ -16,6 +16,7 @@ interface SlideData {
     buttonText?: string;
     textPosition?: 'top' | 'center' | 'bottom';
     textAlignment?: 'left' | 'center' | 'right';
+    showText?: boolean; // New field to control text visibility
   };
 }
 
@@ -61,6 +62,12 @@ export function HeroSection() {
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const handleSlideClick = (slide: SlideData) => {
+    if (slide.link_url) {
+      window.open(slide.link_url, '_blank');
+    }
   };
 
   if (isLoading) {
@@ -113,13 +120,20 @@ export function HeroSection() {
     }
   };
 
+  // Check if we should show text overlay
+  const showTextOverlay = slide.design_data?.showText !== false && 
+    (slide.title || slide.description || slide.design_data?.buttonText);
+
   return (
-    <div className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
+    <div 
+      className="relative h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden cursor-pointer"
+      onClick={() => handleSlideClick(slide)}
+    >
       {/* Background */}
       {slide.background_image_url ? (
         <BackgroundSlideshow 
           images={backgroundImages} 
-          overlayOpacity={0.4}
+          overlayOpacity={showTextOverlay ? 0.4 : 0.1}
         />
       ) : (
         <div 
@@ -128,42 +142,55 @@ export function HeroSection() {
         />
       )}
 
-      {/* Content */}
-      <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
-        <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)}`}>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
-            {slide.title}
-          </h1>
-          
-          {slide.description && (
-            <p className="text-xl md:text-2xl mb-8 opacity-90 animate-fade-in">
-              {slide.description}
-            </p>
-          )}
+      {/* Content - Only show if text is enabled */}
+      {showTextOverlay && (
+        <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
+          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)}`}>
+            {slide.title && (
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-in">
+                {slide.title}
+              </h1>
+            )}
+            
+            {slide.description && (
+              <p className="text-xl md:text-2xl mb-8 opacity-90 animate-fade-in">
+                {slide.description}
+              </p>
+            )}
 
-          {slide.design_data?.buttonText && slide.link_url && (
-            <Button 
-              size="lg" 
-              className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100"
-              onClick={() => window.open(slide.link_url, '_blank')}
-            >
-              {slide.design_data.buttonText}
-            </Button>
-          )}
+            {slide.design_data?.buttonText && slide.link_url && (
+              <Button 
+                size="lg" 
+                className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(slide.link_url, '_blank');
+                }}
+              >
+                {slide.design_data.buttonText}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Navigation */}
       {slides.length > 1 && (
         <>
           <button
-            onClick={prevSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              prevSlide();
+            }}
             className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
           >
             <ChevronLeft className="h-6 w-6" />
           </button>
           <button
-            onClick={nextSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              nextSlide();
+            }}
             className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
           >
             <ChevronRight className="h-6 w-6" />
@@ -174,7 +201,10 @@ export function HeroSection() {
             {slides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentSlide(index);
+                }}
                 className={`w-3 h-3 rounded-full transition-colors ${
                   index === currentSlide ? 'bg-white' : 'bg-white/50'
                 }`}

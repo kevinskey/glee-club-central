@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Save, X, Sliders, Layout, TestTube, Eye, Settings, Upload, Image } from 'lucide-react';
@@ -26,6 +27,7 @@ interface NewSlideForm {
   backgroundColor: string;
   backgroundImage: string;
   mediaId: string;
+  showText: boolean;
 }
 
 export function UnifiedSlideManager() {
@@ -43,7 +45,8 @@ export function UnifiedSlideManager() {
     textAlignment: 'center',
     backgroundColor: '#4F46E5',
     backgroundImage: '',
-    mediaId: ''
+    mediaId: '',
+    showText: true
   });
   const [editForm, setEditForm] = useState<NewSlideForm>({
     title: '',
@@ -54,7 +57,8 @@ export function UnifiedSlideManager() {
     textAlignment: 'center',
     backgroundColor: '#4F46E5',
     backgroundImage: '',
-    mediaId: ''
+    mediaId: '',
+    showText: true
   });
 
   useEffect(() => {
@@ -117,7 +121,8 @@ export function UnifiedSlideManager() {
       textAlignment: slide.design_data?.textAlignment || 'center',
       backgroundColor: slide.background_color || '#4F46E5',
       backgroundImage: slide.background_image_url || '',
-      mediaId: slide.background_media_id || ''
+      mediaId: slide.background_media_id || '',
+      showText: slide.design_data?.showText !== false
     });
   };
 
@@ -132,13 +137,14 @@ export function UnifiedSlideManager() {
       textAlignment: 'center',
       backgroundColor: '#4F46E5',
       backgroundImage: '',
-      mediaId: ''
+      mediaId: '',
+      showText: true
     });
   };
 
   const updateSlide = async () => {
-    if (!editingSlide || !editForm.title.trim()) {
-      toast.error('Title is required');
+    if (!editingSlide) {
+      toast.error('No slide selected for editing');
       return;
     }
 
@@ -169,7 +175,8 @@ export function UnifiedSlideManager() {
             }],
             buttonText: editForm.buttonText,
             textPosition: editForm.textPosition,
-            textAlignment: editForm.textAlignment
+            textAlignment: editForm.textAlignment,
+            showText: editForm.showText
           },
           background_color: editForm.backgroundColor,
           background_image_url: editForm.backgroundImage || null,
@@ -190,8 +197,8 @@ export function UnifiedSlideManager() {
   };
 
   const createSlide = async () => {
-    if (!newSlide.title.trim()) {
-      toast.error('Title is required');
+    if (!newSlide.backgroundImage && !newSlide.backgroundColor) {
+      toast.error('Please select an image or background color');
       return;
     }
 
@@ -199,7 +206,7 @@ export function UnifiedSlideManager() {
       const { error } = await supabase
         .from('slide_designs')
         .insert({
-          title: newSlide.title,
+          title: newSlide.title || 'Image Slide',
           description: newSlide.description,
           layout_type: 'full',
           design_data: {
@@ -220,7 +227,11 @@ export function UnifiedSlideManager() {
               type: newSlide.backgroundImage ? 'image' : 'color',
               value: newSlide.backgroundImage || newSlide.backgroundColor,
               position: { x: 0, y: 0, width: 100, height: 100 }
-            }]
+            }],
+            buttonText: newSlide.buttonText,
+            textPosition: newSlide.textPosition,
+            textAlignment: newSlide.textAlignment,
+            showText: newSlide.showText
           },
           background_color: newSlide.backgroundColor,
           background_image_url: newSlide.backgroundImage || null,
@@ -247,7 +258,8 @@ export function UnifiedSlideManager() {
         textAlignment: 'center',
         backgroundColor: '#4F46E5',
         backgroundImage: '',
-        mediaId: ''
+        mediaId: '',
+        showText: true
       });
       fetchSlides();
     } catch (error) {
@@ -333,70 +345,94 @@ export function UnifiedSlideManager() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
-                      placeholder="Slide title"
+                      placeholder="Slide title (optional for image-only slides)"
                       value={newSlide.title}
                       onChange={(e) => setNewSlide(prev => ({ ...prev, title: e.target.value }))}
                     />
-                    <div className="flex gap-2">
-                      <Select 
-                        value={newSlide.textPosition} 
-                        onValueChange={(value: 'top' | 'center' | 'bottom') => 
-                          setNewSlide(prev => ({ ...prev, textPosition: value }))
-                        }
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="top">Top</SelectItem>
-                          <SelectItem value="center">Center</SelectItem>
-                          <SelectItem value="bottom">Bottom</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select 
-                        value={newSlide.textAlignment} 
-                        onValueChange={(value: 'left' | 'center' | 'right') => 
-                          setNewSlide(prev => ({ ...prev, textAlignment: value }))
-                        }
-                      >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="left">Left</SelectItem>
-                          <SelectItem value="center">Center</SelectItem>
-                          <SelectItem value="right">Right</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="showText"
+                        checked={newSlide.showText}
+                        onCheckedChange={(checked) => setNewSlide(prev => ({ ...prev, showText: checked }))}
+                      />
+                      <Label htmlFor="showText">Show text overlay</Label>
                     </div>
                   </div>
 
-                  <Textarea
-                    placeholder="Slide description"
-                    value={newSlide.description}
-                    onChange={(e) => setNewSlide(prev => ({ ...prev, description: e.target.value }))}
-                  />
+                  {newSlide.showText && (
+                    <>
+                      <Textarea
+                        placeholder="Slide description (optional)"
+                        value={newSlide.description}
+                        onChange={(e) => setNewSlide(prev => ({ ...prev, description: e.target.value }))}
+                      />
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex gap-2">
+                          <Select 
+                            value={newSlide.textPosition} 
+                            onValueChange={(value: 'top' | 'center' | 'bottom') => 
+                              setNewSlide(prev => ({ ...prev, textPosition: value }))
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="top">Top</SelectItem>
+                              <SelectItem value="center">Center</SelectItem>
+                              <SelectItem value="bottom">Bottom</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Select 
+                            value={newSlide.textAlignment} 
+                            onValueChange={(value: 'left' | 'center' | 'right') => 
+                              setNewSlide(prev => ({ ...prev, textAlignment: value }))
+                            }
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="left">Left</SelectItem>
+                              <SelectItem value="center">Center</SelectItem>
+                              <SelectItem value="right">Right</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                          placeholder="Button text (optional)"
+                          value={newSlide.buttonText}
+                          onChange={(e) => setNewSlide(prev => ({ ...prev, buttonText: e.target.value }))}
+                        />
+                        <Input
+                          placeholder="Button/Click link (optional)"
+                          value={newSlide.buttonLink}
+                          onChange={(e) => setNewSlide(prev => ({ ...prev, buttonLink: e.target.value }))}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {!newSlide.showText && (
                     <Input
-                      placeholder="Button text (optional)"
-                      value={newSlide.buttonText}
-                      onChange={(e) => setNewSlide(prev => ({ ...prev, buttonText: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Button link (optional)"
+                      placeholder="Click link for entire image (optional)"
                       value={newSlide.buttonLink}
                       onChange={(e) => setNewSlide(prev => ({ ...prev, buttonLink: e.target.value }))}
                     />
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="color"
-                        value={newSlide.backgroundColor}
-                        onChange={(e) => setNewSlide(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                        className="w-16 h-10 p-1 border rounded"
-                      />
-                      <span className="text-sm text-muted-foreground">Background</span>
-                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="color"
+                      value={newSlide.backgroundColor}
+                      onChange={(e) => setNewSlide(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                      className="w-16 h-10 p-1 border rounded"
+                    />
+                    <span className="text-sm text-muted-foreground">Background color (fallback)</span>
                   </div>
 
                   {/* Image Upload Section */}
@@ -419,7 +455,7 @@ export function UnifiedSlideManager() {
                     {newSlide.backgroundImage && (
                       <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                         <p className="text-sm text-green-800">
-                          ✓ Background image selected. This will override the background color.
+                          ✓ Background image selected. {!newSlide.showText ? 'Image-only slide ready!' : 'This will override the background color.'}
                         </p>
                       </div>
                     )}
@@ -464,70 +500,94 @@ export function UnifiedSlideManager() {
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               <Input
-                                placeholder="Slide title"
+                                placeholder="Slide title (optional)"
                                 value={editForm.title}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
                               />
-                              <div className="flex gap-2">
-                                <Select 
-                                  value={editForm.textPosition} 
-                                  onValueChange={(value: 'top' | 'center' | 'bottom') => 
-                                    setEditForm(prev => ({ ...prev, textPosition: value }))
-                                  }
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="top">Top</SelectItem>
-                                    <SelectItem value="center">Center</SelectItem>
-                                    <SelectItem value="bottom">Bottom</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <Select 
-                                  value={editForm.textAlignment} 
-                                  onValueChange={(value: 'left' | 'center' | 'right') => 
-                                    setEditForm(prev => ({ ...prev, textAlignment: value }))
-                                  }
-                                >
-                                  <SelectTrigger className="w-32">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="left">Left</SelectItem>
-                                    <SelectItem value="center">Center</SelectItem>
-                                    <SelectItem value="right">Right</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                              <div className="flex items-center space-x-2">
+                                <Switch
+                                  id="editShowText"
+                                  checked={editForm.showText}
+                                  onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, showText: checked }))}
+                                />
+                                <Label htmlFor="editShowText">Show text overlay</Label>
                               </div>
                             </div>
 
-                            <Textarea
-                              placeholder="Slide description"
-                              value={editForm.description}
-                              onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                            />
+                            {editForm.showText && (
+                              <>
+                                <Textarea
+                                  placeholder="Slide description (optional)"
+                                  value={editForm.description}
+                                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                                />
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="flex gap-2">
+                                    <Select 
+                                      value={editForm.textPosition} 
+                                      onValueChange={(value: 'top' | 'center' | 'bottom') => 
+                                        setEditForm(prev => ({ ...prev, textPosition: value }))
+                                      }
+                                    >
+                                      <SelectTrigger className="w-32">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="top">Top</SelectItem>
+                                        <SelectItem value="center">Center</SelectItem>
+                                        <SelectItem value="bottom">Bottom</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Select 
+                                      value={editForm.textAlignment} 
+                                      onValueChange={(value: 'left' | 'center' | 'right') => 
+                                        setEditForm(prev => ({ ...prev, textAlignment: value }))
+                                      }
+                                    >
+                                      <SelectTrigger className="w-32">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="left">Left</SelectItem>
+                                        <SelectItem value="center">Center</SelectItem>
+                                        <SelectItem value="right">Right</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <Input
+                                    placeholder="Button text (optional)"
+                                    value={editForm.buttonText}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, buttonText: e.target.value }))}
+                                  />
+                                  <Input
+                                    placeholder="Button/Click link (optional)"
+                                    value={editForm.buttonLink}
+                                    onChange={(e) => setEditForm(prev => ({ ...prev, buttonLink: e.target.value }))}
+                                  />
+                                </div>
+                              </>
+                            )}
+
+                            {!editForm.showText && (
                               <Input
-                                placeholder="Button text (optional)"
-                                value={editForm.buttonText}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, buttonText: e.target.value }))}
-                              />
-                              <Input
-                                placeholder="Button link (optional)"
+                                placeholder="Click link for entire image (optional)"
                                 value={editForm.buttonLink}
                                 onChange={(e) => setEditForm(prev => ({ ...prev, buttonLink: e.target.value }))}
                               />
-                              <div className="flex items-center gap-2">
-                                <Input
-                                  type="color"
-                                  value={editForm.backgroundColor}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                                  className="w-16 h-10 p-1 border rounded"
-                                />
-                                <span className="text-sm text-muted-foreground">Background</span>
-                              </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="color"
+                                value={editForm.backgroundColor}
+                                onChange={(e) => setEditForm(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                                className="w-16 h-10 p-1 border rounded"
+                              />
+                              <span className="text-sm text-muted-foreground">Background color</span>
                             </div>
 
                             {/* Edit Image Upload Section */}
@@ -550,7 +610,7 @@ export function UnifiedSlideManager() {
                               {editForm.backgroundImage && (
                                 <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                                   <p className="text-sm text-green-800">
-                                    ✓ Background image selected. This will override the background color.
+                                    ✓ Background image selected. {!editForm.showText ? 'Image-only slide!' : 'This will override the background color.'}
                                   </p>
                                 </div>
                               )}
@@ -569,14 +629,19 @@ export function UnifiedSlideManager() {
                                   />
                                 )}
                                 <div>
-                                  <h4 className="font-medium">{slide.title}</h4>
-                                  <p className="text-sm text-muted-foreground">{slide.description}</p>
+                                  <h4 className="font-medium">{slide.title || 'Image Slide'}</h4>
+                                  {slide.description && (
+                                    <p className="text-sm text-muted-foreground">{slide.description}</p>
+                                  )}
                                 </div>
                               </div>
                               <div className="flex gap-2 mt-2">
                                 <Badge variant="outline">Slide {index + 1}</Badge>
                                 {slide.is_active && (
                                   <Badge variant="default">Active</Badge>
+                                )}
+                                {slide.design_data?.showText === false && (
+                                  <Badge variant="secondary">Image Only</Badge>
                                 )}
                                 {slide.background_image_url && (
                                   <Badge variant="secondary">
