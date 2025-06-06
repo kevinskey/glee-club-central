@@ -19,7 +19,6 @@ interface ModuleItem {
   color: string;
   path: string;
   adminOnly: boolean;
-  category: string;
   permission?: string;
   isPriority?: boolean;
 }
@@ -34,26 +33,15 @@ export function UnifiedAdminModules() {
   };
 
   const moduleItems: ModuleItem[] = [
-    // Core Management
     {
-      id: "users",
-      title: "Members",
-      description: "Manage choir members and users",
-      icon: <Users className="h-5 w-5" />,
-      color: "bg-blue-500",
-      path: "/admin/users",
+      id: "analytics",
+      title: "Analytics",
+      description: "View insights and reports",
+      icon: <BarChart className="h-5 w-5" />,
+      color: "bg-cyan-500",
+      path: "/admin/analytics",
       adminOnly: true,
-      category: "Core Management"
-    },
-    {
-      id: "calendar",
-      title: "Events & Calendar",
-      description: "Schedule and manage events",
-      icon: <Calendar className="h-5 w-5" />,
-      color: "bg-green-500",
-      path: "/admin/calendar",
-      adminOnly: true,
-      category: "Core Management"
+      permission: "view_budget"
     },
     {
       id: "communications",
@@ -62,30 +50,25 @@ export function UnifiedAdminModules() {
       icon: <Bell className="h-5 w-5" />,
       color: "bg-red-500",
       path: "/admin/news-items",
-      adminOnly: true,
-      category: "Core Management"
+      adminOnly: true
     },
     {
-      id: "settings",
-      title: "Settings",
-      description: "Configure system settings",
-      icon: <Settings className="h-5 w-5" />,
-      color: "bg-gray-500",
-      path: "/admin/settings",
-      adminOnly: true,
-      category: "Core Management"
+      id: "dashboard",
+      title: "Dashboard",
+      description: "Admin overview",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      color: "bg-glee-spelman",
+      path: "/admin",
+      adminOnly: true
     },
-    
-    // Content & Media
     {
-      id: "slider",
-      title: "Slide Designer",
-      description: "Create and manage slides",
-      icon: <Sliders className="h-5 w-5" />,
-      color: "bg-purple-500",
-      path: "/admin/unified-slide-management",
-      adminOnly: true,
-      category: "Content & Media"
+      id: "calendar",
+      title: "Events & Calendar",
+      description: "Schedule and manage events",
+      icon: <Calendar className="h-5 w-5" />,
+      color: "bg-green-500",
+      path: "/admin/calendar",
+      adminOnly: true
     },
     {
       id: "media",
@@ -95,8 +78,16 @@ export function UnifiedAdminModules() {
       color: "bg-orange-500",
       path: "/admin/media-library",
       adminOnly: true,
-      category: "Content & Media",
       permission: "upload_media"
+    },
+    {
+      id: "users",
+      title: "Members",
+      description: "Manage choir members and users",
+      icon: <Users className="h-5 w-5" />,
+      color: "bg-blue-500",
+      path: "/admin/users",
+      adminOnly: true
     },
     {
       id: "music",
@@ -105,11 +96,26 @@ export function UnifiedAdminModules() {
       icon: <Music className="h-5 w-5" />,
       color: "bg-indigo-500",
       path: "/admin/media-library",
-      adminOnly: true,
-      category: "Content & Media"
+      adminOnly: true
     },
-    
-    // Business Operations
+    {
+      id: "settings",
+      title: "Settings",
+      description: "Configure system settings",
+      icon: <Settings className="h-5 w-5" />,
+      color: "bg-gray-500",
+      path: "/admin/settings",
+      adminOnly: true
+    },
+    {
+      id: "slider",
+      title: "Slide Designer",
+      description: "Create and manage slides",
+      icon: <Sliders className="h-5 w-5" />,
+      color: "bg-purple-500",
+      path: "/admin/unified-slide-management",
+      adminOnly: true
+    },
     {
       id: "store",
       title: "Store",
@@ -117,31 +123,7 @@ export function UnifiedAdminModules() {
       icon: <ShoppingBag className="h-5 w-5" />,
       color: "bg-emerald-500",
       path: "/admin/store",
-      adminOnly: true,
-      category: "Business Operations"
-    },
-    {
-      id: "analytics",
-      title: "Analytics",
-      description: "View insights and reports",
-      icon: <BarChart className="h-5 w-5" />,
-      color: "bg-cyan-500",
-      path: "/admin/analytics",
-      adminOnly: true,
-      category: "Business Operations",
-      permission: "view_budget"
-    },
-    
-    // Quick Access
-    {
-      id: "dashboard",
-      title: "Dashboard",
-      description: "Admin overview",
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      color: "bg-glee-spelman",
-      path: "/admin",
-      adminOnly: true,
-      category: "Quick Access"
+      adminOnly: true
     }
   ];
 
@@ -158,65 +140,40 @@ export function UnifiedAdminModules() {
     return true;
   });
 
-  // Group modules by category
-  const groupedModules = availableModules.reduce((acc, module) => {
-    const category = module.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(module);
-    return acc;
-  }, {} as Record<string, ModuleItem[]>);
-
-  // Define category order
-  const categoryOrder = ["Core Management", "Content & Media", "Business Operations", "Quick Access"];
-  const orderedCategories = categoryOrder.filter(category => groupedModules[category]);
+  // Sort modules alphabetically by title
+  const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           Admin Modules
-          <Badge variant="secondary">{availableModules.length} available</Badge>
+          <Badge variant="secondary">{sortedModules.length} available</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {orderedCategories.map((category) => {
-          const modules = groupedModules[category];
-          return (
-            <div key={category} className="space-y-4">
-              <div className="flex items-center gap-3">
-                <h3 className="text-lg font-semibold">{category}</h3>
-                <Badge variant="outline" className="text-xs">
-                  {modules.length} {modules.length === 1 ? 'module' : 'modules'}
-                </Badge>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {sortedModules.map((module) => (
+            <div
+              key={module.id}
+              className="group cursor-pointer flex flex-col items-center justify-center p-6 border rounded-lg transition-all duration-200 hover:border-glee-spelman/30 hover:bg-glee-spelman/5 hover:shadow-lg hover:scale-105"
+              onClick={() => navigate(module.path)}
+            >
+              <div className={`${module.color} text-white rounded-lg p-3 group-hover:scale-110 transition-transform duration-200 mb-3`}>
+                {module.icon}
               </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4">
-                {modules.map((module) => (
-                  <div
-                    key={module.id}
-                    className="group cursor-pointer flex flex-col items-center justify-center p-6 border rounded-lg transition-all duration-200 hover:border-glee-spelman/30 hover:bg-glee-spelman/5 hover:shadow-lg hover:scale-105"
-                    onClick={() => navigate(module.path)}
-                  >
-                    <div className={`${module.color} text-white rounded-lg p-3 group-hover:scale-110 transition-transform duration-200 mb-3`}>
-                      {module.icon}
-                    </div>
-                    <span className="text-sm font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
-                      {module.title}
-                    </span>
-                    <span className="text-xs text-muted-foreground text-center leading-tight">
-                      {module.description}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <span className="text-sm font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
+                {module.title}
+              </span>
+              <span className="text-xs text-muted-foreground text-center leading-tight">
+                {module.description}
+              </span>
             </div>
-          );
-        })}
+          ))}
+        </div>
         
-        {availableModules.length === 0 && (
-          <div className="col-span-full p-8 text-center border rounded-lg">
+        {sortedModules.length === 0 && (
+          <div className="p-8 text-center border rounded-lg">
             <div className="text-muted-foreground mb-2">
               No modules available for your role
             </div>
