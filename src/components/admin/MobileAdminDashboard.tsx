@@ -58,20 +58,6 @@ export function MobileAdminDashboard() {
       color: 'bg-orange-500'
     },
     {
-      title: 'Music',
-      description: 'SoundCloud',
-      icon: Music,
-      path: '/admin/soundcloud',
-      color: 'bg-indigo-500'
-    },
-    {
-      title: 'News',
-      description: 'Send notifications',
-      icon: Bell,
-      path: '/admin/news-items',
-      color: 'bg-red-500'
-    },
-    {
       title: 'Analytics',
       description: 'View reports',
       icon: BarChart3,
@@ -97,24 +83,14 @@ export function MobileAdminDashboard() {
       label: 'Images',
       value: isLoading ? '...' : (mediaStats?.filesByType?.['image'] || 0).toString(),
       icon: FileImage
-    },
-    {
-      label: 'Documents',
-      value: isLoading ? '...' : (mediaStats?.filesByType?.['pdf'] || 0).toString(),
-      icon: FileImage
-    },
-    {
-      label: 'Audio/Video',
-      value: isLoading ? '...' : ((mediaStats?.filesByType?.['audio'] || 0) + (mediaStats?.filesByType?.['video'] || 0)).toString(),
-      icon: Music
     }
   ];
 
   return (
-    <div className="w-full max-w-full p-4 space-y-6 overflow-x-hidden">
+    <div className="w-full max-w-full p-3 space-y-4 overflow-x-hidden">
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
           Admin Dashboard
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -124,12 +100,12 @@ export function MobileAdminDashboard() {
 
       {/* Stats */}
       <div className="w-full">
-        <div className="grid grid-cols-2 gap-3 w-full">
+        <div className="grid grid-cols-2 gap-2 w-full">
           {stats.map((stat, index) => (
             <Card key={index} className="w-full">
-              <CardContent className="p-4 text-center">
-                <stat.icon className="h-6 w-6 mx-auto mb-2 text-primary" />
-                <div className="text-xl font-bold text-primary">{stat.value}</div>
+              <CardContent className="p-3 text-center">
+                <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary" />
+                <div className="text-lg font-bold text-primary">{stat.value}</div>
                 <div className="text-xs text-muted-foreground">{stat.label}</div>
               </CardContent>
             </Card>
@@ -139,19 +115,19 @@ export function MobileAdminDashboard() {
 
       {/* Quick Actions */}
       <div className="w-full">
-        <h2 className="text-lg font-semibold text-foreground mb-4">
+        <h2 className="text-lg font-semibold text-foreground mb-3">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-2 gap-3 w-full">
+        <div className="grid grid-cols-2 gap-2 w-full">
           {quickActions.map((action, index) => (
             <Card 
               key={index}
               className="w-full cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(action.path)}
             >
-              <CardContent className="p-4 text-center">
-                <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-3`}>
-                  <action.icon className="h-6 w-6" />
+              <CardContent className="p-3 text-center">
+                <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-2`}>
+                  <action.icon className="h-5 w-5" />
                 </div>
                 <p className="text-sm font-medium text-foreground mb-1">
                   {action.title}
@@ -163,52 +139,6 @@ export function MobileAdminDashboard() {
             </Card>
           ))}
         </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="w-full">
-        <Card className="w-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    New member registered
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    2 hours ago
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    Media file uploaded
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    4 hours ago
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">
-                    Event created
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    1 day ago
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
