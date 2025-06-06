@@ -1,35 +1,49 @@
 
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
+import { CartProvider } from "@/contexts/CartContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
+import AppLayout from "@/layouts/AppLayout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
     },
   },
 });
 
-export default function App() {
+function App() {
+  // Add console log to help debug any remaining references
+  console.log('App component loaded - PitchPipe should be completely removed');
+  
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <div className="min-h-screen bg-background">
-            <main>
-              <Outlet />
-            </main>
-          </div>
-          <Toaster />
-          <FloatingThemeToggle position="bottom-right" />
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <TooltipProvider>
+            <AuthProvider>
+              <ProfileProvider>
+                <CartProvider>
+                  <AppLayout>
+                    <Outlet />
+                  </AppLayout>
+                </CartProvider>
+              </ProfileProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+      <Toaster />
+    </ErrorBoundary>
   );
 }
+
+export default App;

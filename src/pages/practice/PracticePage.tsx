@@ -94,10 +94,6 @@ export default function PracticePage() {
                 <BookOpen className="mr-2 h-4 w-4" />
                 Sight Reading
               </TabsTrigger>
-              <TabsTrigger value="practice-tunes">
-                <Headphones className="mr-2 h-4 w-4" />
-                Practice Tunes
-              </TabsTrigger>
             </TabsList>
             <TabsContent value="practice-log">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -122,18 +118,6 @@ export default function PracticePage() {
             <TabsContent value="sight-reading">
               <h3 className="text-xl font-semibold mb-2">Sight Reading Exercises</h3>
               <SightReadingEmbed />
-            </TabsContent>
-            <TabsContent value="practice-tunes">
-              <h3 className="text-xl font-semibold mb-2">Practice Tunes</h3>
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Headphones className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-semibold mb-2">Audio Features Removed</h3>
-                  <p className="text-muted-foreground">
-                    Audio functionality has been removed from the application.
-                  </p>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </CardContent>
