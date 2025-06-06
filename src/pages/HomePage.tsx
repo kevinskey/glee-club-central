@@ -4,6 +4,7 @@ import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
+import { HeroSection } from "@/components/landing/HeroSection";
 
 const HomePage = () => {
   const {
@@ -21,7 +22,10 @@ const HomePage = () => {
 
   return (
     <PublicPageWrapper showTopSlider={false} className="home-page overflow-x-hidden">
-      {/* Main Content - Starting directly with events */}
+      {/* Hero Section */}
+      <HeroSection />
+      
+      {/* Main Content - Starting with events */}
       <HomePageContent
         heroImages={heroImages}
         upcomingEvents={upcomingEvents}
