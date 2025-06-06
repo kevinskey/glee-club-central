@@ -13,12 +13,12 @@ export function UnifiedPublicHeader({
   className = "" 
 }: UnifiedPublicHeaderProps) {
   return (
-    <div className={`w-full ${className}`}>
+    <>
       {/* Top Slider - Admin managed banner */}
       {showTopSlider && <TopSlider />}
       
       {/* Main Navigation Header */}
       <Header />
-    </div>
+    </>
   );
 }
