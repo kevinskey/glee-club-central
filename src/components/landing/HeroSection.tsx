@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -152,7 +153,7 @@ export function HeroSection() {
         <div className={`relative w-full ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative h-full flex items-center justify-center text-center">
-            <div className="max-w-4xl mx-auto text-white">
+            <div className="max-w-4xl mx-auto text-white px-2 sm:px-4 lg:px-10">
               <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 md:mb-6">
                 Welcome to Glee World
               </h1>
@@ -233,7 +234,7 @@ export function HeroSection() {
         {/* Content - Only show if text is enabled */}
         {showTextOverlay && (
           <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center`}>
-            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6`}>
+            <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-10`}>
               {slide.title && (
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in leading-tight drop-shadow-lg">
                   {slide.title}
