@@ -2,9 +2,13 @@
 import React from "react";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
-import { HomePageContent } from "@/components/landing/HomePageContent";
 import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
 import { HeroSection } from "@/components/landing/HeroSection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { EventsSection } from "@/components/landing/sections/EventsSection";
+import { StoreSection } from "@/components/landing/sections/StoreSection";
+import { TestimonialSection } from "@/components/landing/TestimonialSection";
+import { CTASection } from "@/components/landing/CTASection";
 
 const HomePage = () => {
   const {
@@ -25,8 +29,14 @@ const HomePage = () => {
       {/* Hero Section - Full Width */}
       <HeroSection />
       
-      {/* Main Content */}
-      <HomePageContent />
+      {/* Main Content Sections */}
+      <div className="space-y-12 md:space-y-16 lg:space-y-20">
+        <FeaturesSection />
+        <EventsSection events={upcomingEvents || []} />
+        <StoreSection products={storeProducts || []} />
+        <TestimonialSection />
+        <CTASection />
+      </div>
     </PublicPageWrapper>
   );
 };
