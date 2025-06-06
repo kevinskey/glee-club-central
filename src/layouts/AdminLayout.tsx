@@ -6,7 +6,11 @@ import { MobileAdminDashboard } from '@/components/admin/MobileAdminDashboard';
 import { AdminUnifiedHeader } from '@/components/admin/AdminUnifiedHeader';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
-export function AdminLayout() {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+export function AdminLayout({ children }: AdminLayoutProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   if (!isDesktop) {
@@ -14,7 +18,7 @@ export function AdminLayout() {
       <div className="min-h-screen bg-background">
         <AdminUnifiedHeader />
         <main className="pt-16">
-          <Outlet />
+          {children || <Outlet />}
         </main>
       </div>
     );
@@ -26,7 +30,7 @@ export function AdminLayout() {
       <main className="flex-1 ml-64">
         <AdminUnifiedHeader />
         <div className="p-6">
-          <Outlet />
+          {children || <Outlet />}
         </div>
       </main>
     </div>
