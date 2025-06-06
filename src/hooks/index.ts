@@ -18,7 +18,6 @@ export { useMediaUpload } from './useMediaUpload';
 export { useMessaging } from './useMessaging';
 export { useNotifications } from './useNotifications';
 export { usePDFAnnotations } from './usePDFAnnotations';
-export { usePracticeLogs } from './usePracticeLogs';
 export { useSiteSettings } from './useSiteSettings';
 export { useSlideDesigns } from './useSlideDesigns';
 export { useUserOrders } from './useUserOrders';
