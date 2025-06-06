@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -192,8 +193,8 @@ export function HeroSection() {
   const showTextOverlay = slide.design_data?.showText !== false && 
     (slide.title || slide.description || slide.design_data?.buttonText);
 
-  // Get image display settings from admin configuration
-  const objectFit = slide.design_data?.objectFit || 'contain';
+  // Get image display settings from admin configuration - default to cover for full width
+  const objectFit = slide.design_data?.objectFit || 'cover';
   const objectPosition = slide.design_data?.objectPosition || 'center center';
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
 
