@@ -1,33 +1,34 @@
 
-// Placeholder audioUtils to prevent import errors
+// Emergency audioUtils replacement - force module reload
+console.log('Loading audioUtils.ts with timestamp:', Date.now());
+
 // All audio functionality has been removed from the application
+console.warn('Audio functionality completely disabled');
 
-console.log('audioUtils.ts loaded - all audio functionality disabled');
-
-export const getNoteFrequency = (note?: string) => {
-  console.warn('Audio functionality has been removed from this application');
+export const getNoteFrequency = (note?: string): number => {
+  console.warn('getNoteFrequency called - audio functionality removed');
   return 440; // Default A4 frequency
 };
 
-export const playNote = (frequency?: number, duration?: number) => {
-  console.warn('Audio functionality has been removed from this application');
+export const playNote = (frequency?: number, duration?: number): void => {
+  console.warn('playNote called - audio functionality removed');
 };
 
-export const stopAllAudio = () => {
-  console.warn('Audio functionality has been removed from this application');
+export const stopAllAudio = (): void => {
+  console.warn('stopAllAudio called - audio functionality removed');
 };
 
 export const createOscillator = () => {
-  console.warn('Audio functionality has been removed from this application');
+  console.warn('createOscillator called - audio functionality removed');
   return null;
 };
 
 export const initializeAudioContext = () => {
-  console.warn('Audio functionality has been removed from this application');
+  console.warn('initializeAudioContext called - audio functionality removed');
   return null;
 };
 
-// Export default function in case it's being imported that way
+// Ensure all exports are available
 export default {
   getNoteFrequency,
   playNote,
@@ -35,3 +36,12 @@ export default {
   createOscillator,
   initializeAudioContext
 };
+
+// Log all exports to verify they exist
+console.log('audioUtils exports:', {
+  getNoteFrequency,
+  playNote,
+  stopAllAudio,
+  createOscillator,
+  initializeAudioContext
+});
