@@ -103,3 +103,18 @@ export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach(track => track.stop());
   audioLogger.log('Microphone released');
 }
+
+// Add namespace export for legacy compatibility
+export * as default from './audioUtils';
+
+// Also export as a namespace for different import patterns
+export const audioUtils = {
+  getNoteFrequency,
+  audioLogger,
+  playClick,
+  createClickBuffer,
+  createAccentClickBuffer,
+  resumeAudioContext,
+  requestMicrophoneAccess,
+  releaseMicrophone
+};
