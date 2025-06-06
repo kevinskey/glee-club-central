@@ -5,7 +5,6 @@ import AdminRoute from '@/components/auth/AdminRoute';
 import { Navigate } from 'react-router-dom';
 
 // Import admin pages
-import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
@@ -13,16 +12,12 @@ import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage
 export const adminRoutes: RouteObject[] = [
   {
     path: '/admin',
-    element: (
-      <AdminRoute>
-        <AdminDashboard />
-      </AdminRoute>
-    ),
+    element: <Navigate to="/dashboard" replace />,
   },
-  // Redirect V2 to main admin dashboard to avoid confusion
+  // Redirect V2 to main dashboard to avoid confusion
   {
     path: '/admin/v2',
-    element: <Navigate to="/admin" replace />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     path: '/admin/unified-slide-management',
