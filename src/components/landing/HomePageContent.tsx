@@ -47,7 +47,7 @@ export function HomePageContent({
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
   return (
-    <main className="w-full">
+    <main className="w-full" style={{ paddingTop: '10px' }}>
       {/* Events Section - Reduced spacing from top */}
       <section className="w-full py-4 md:py-6 lg:py-8">
         <div className="w-full px-4 md:container md:mx-auto md:px-6 lg:px-8">
