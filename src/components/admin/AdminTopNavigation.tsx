@@ -84,12 +84,12 @@ export const AdminTopNavigation: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/')}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-7 w-7 p-0"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
             title="Go to Public Homepage"
           >
-            <Home className="h-3 w-3" />
+            <Home className="h-4 w-4" />
           </Button>
-          <h1 className="text-sm font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-base font-semibold text-gray-900 dark:text-white">
             Admin Panel
           </h1>
         </div>
@@ -101,13 +101,13 @@ export const AdminTopNavigation: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-7 px-2 text-xs"
+                  className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 px-2 text-sm"
                 >
                   {group.label}
-                  <ChevronDown className="h-2 w-2" />
+                  <ChevronDown className="h-3 w-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40">
+              <DropdownMenuContent align="start" className="w-48">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = isActivePath(item.to, item.end);
@@ -120,7 +120,7 @@ export const AdminTopNavigation: React.FC = () => {
                         isActive && "bg-glee-spelman text-white"
                       )}
                     >
-                      <Icon className="h-3 w-3" />
+                      <Icon className="h-4 w-4" />
                       {item.label}
                     </DropdownMenuItem>
                   );
@@ -134,14 +134,14 @@ export const AdminTopNavigation: React.FC = () => {
         <div className="md:hidden">
           <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                <Menu className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Menu className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-64">
               {navigationGroups.map((group, groupIndex) => (
                 <div key={group.label}>
-                  <div className="px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                  <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
                     {group.label}
                   </div>
                   {group.items.map((item) => {
@@ -156,7 +156,7 @@ export const AdminTopNavigation: React.FC = () => {
                           isActive && "bg-glee-spelman text-white"
                         )}
                       >
-                        <Icon className="h-3 w-3" />
+                        <Icon className="h-4 w-4" />
                         {item.label}
                       </DropdownMenuItem>
                     );

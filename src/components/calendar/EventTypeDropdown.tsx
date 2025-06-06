@@ -84,17 +84,17 @@ export const EventTypeDropdown: React.FC<EventTypeDropdownProps> = ({
               {/* Show chevron only on the last badge and when not updating */}
               {index === currentTypes.length - 1 && (
                 isUpdating ? (
-                  <Loader2 className="h-2 w-2 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 ) : (
-                  <ChevronDown className="h-2 w-2" />
+                  <ChevronDown className="h-3 w-3" />
                 )
               )}
             </Badge>
           ))}
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48 max-h-80 overflow-y-auto bg-white z-50" align="end">
-        <div className="p-2 text-xs font-medium text-muted-foreground">
+      <DropdownMenuContent className="w-56 max-h-96 overflow-y-auto bg-white z-50" align="end">
+        <div className="p-2 text-sm font-medium text-muted-foreground">
           Select Event Types
         </div>
         <DropdownMenuSeparator />
@@ -103,10 +103,10 @@ export const EventTypeDropdown: React.FC<EventTypeDropdownProps> = ({
             key={eventType.value}
             checked={currentTypes.includes(eventType.value)}
             onCheckedChange={(checked) => handleTypeToggle(eventType.value, checked)}
-            className="text-xs"
+            className="text-sm"
             disabled={isUpdating}
           >
-            <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+            <span className={`inline-block w-3 h-3 rounded-full mr-2 ${
               getEventTypeColor(eventType.value).includes('purple') ? 'bg-purple-500' :
               getEventTypeColor(eventType.value).includes('blue') ? 'bg-blue-500' :
               getEventTypeColor(eventType.value).includes('green') ? 'bg-green-500' :

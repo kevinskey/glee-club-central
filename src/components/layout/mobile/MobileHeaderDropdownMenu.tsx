@@ -26,11 +26,11 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
 
   if (!user) {
     return (
-      <div className={`flex gap-1 ${className}`}>
-        <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-xs">
+      <div className={`flex gap-2 ${className}`}>
+        <Button variant="ghost" size="sm" asChild>
           <Link to="/login">Login</Link>
         </Button>
-        <Button size="sm" asChild className="h-8 px-2 text-xs">
+        <Button size="sm" asChild>
           <Link to="/signup">Sign Up</Link>
         </Button>
       </div>
@@ -44,20 +44,20 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-6 w-6 rounded-full p-0">
-          <Avatar className="h-6 w-6">
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url} alt={profile?.first_name || 'User'} />
-            <AvatarFallback className="text-xs font-medium">{userInitials}</AvatarFallback>
+            <AvatarFallback>{userInitials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-44 text-xs" align="end" forceMount>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             {profile?.first_name && (
-              <p className="text-xs font-medium">{profile.first_name} {profile.last_name}</p>
+              <p className="font-medium">{profile.first_name} {profile.last_name}</p>
             )}
-            <p className="w-[120px] truncate text-xs text-muted-foreground">
+            <p className="w-[200px] truncate text-sm text-muted-foreground">
               {user.email}
             </p>
           </div>
@@ -65,22 +65,22 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         <DropdownMenuSeparator />
         
         <DropdownMenuItem asChild>
-          <Link to="/dashboard" className="flex items-center text-xs">
-            <Home className="mr-2 h-3 w-3" />
+          <Link to="/dashboard/member" className="flex items-center">
+            <Home className="mr-2 h-4 w-4" />
             Dashboard
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/calendar" className="flex items-center text-xs">
-            <Calendar className="mr-2 h-3 w-3" />
+          <Link to="/calendar" className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4" />
             Calendar
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center text-xs">
-            <User className="mr-2 h-3 w-3" />
+          <Link to="/profile" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
@@ -89,8 +89,8 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/admin" className="flex items-center text-xs">
-                <Shield className="mr-2 h-3 w-3" />
+              <Link to="/admin" className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
                 Admin Dashboard
               </Link>
             </DropdownMenuItem>
@@ -98,8 +98,8 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         )}
         
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-xs">
-          <LogOut className="mr-2 h-3 w-3" />
+        <DropdownMenuItem onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
