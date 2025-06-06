@@ -87,13 +87,13 @@ export function MobileAdminDashboard() {
   ];
 
   return (
-    <div className="w-full max-w-full p-3 space-y-4 overflow-x-hidden">
+    <div className="w-full max-w-full p-3 space-y-3 overflow-x-hidden">
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-xl font-bold text-foreground mb-1">
           Admin Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Manage your Glee Club
         </p>
       </div>
@@ -103,9 +103,9 @@ export function MobileAdminDashboard() {
         <div className="grid grid-cols-2 gap-2 w-full">
           {stats.map((stat, index) => (
             <Card key={index} className="w-full">
-              <CardContent className="p-3 text-center">
-                <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary" />
-                <div className="text-lg font-bold text-primary">{stat.value}</div>
+              <CardContent className="p-2 text-center">
+                <stat.icon className="h-4 w-4 mx-auto mb-1 text-primary" />
+                <div className="text-sm font-bold text-primary">{stat.value}</div>
                 <div className="text-xs text-muted-foreground">{stat.label}</div>
               </CardContent>
             </Card>
@@ -115,7 +115,7 @@ export function MobileAdminDashboard() {
 
       {/* Quick Actions */}
       <div className="w-full">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
+        <h2 className="text-sm font-semibold text-foreground mb-2">
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 gap-2 w-full">
@@ -125,11 +125,11 @@ export function MobileAdminDashboard() {
               className="w-full cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(action.path)}
             >
-              <CardContent className="p-3 text-center">
-                <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-2`}>
-                  <action.icon className="h-5 w-5" />
+              <CardContent className="p-2 text-center">
+                <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-1`}>
+                  <action.icon className="h-4 w-4" />
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">
+                <p className="text-xs font-medium text-foreground mb-1">
                   {action.title}
                 </p>
                 <p className="text-xs text-muted-foreground">

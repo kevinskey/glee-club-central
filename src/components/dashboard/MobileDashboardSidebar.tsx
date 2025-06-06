@@ -40,7 +40,6 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
   const { user, profile } = useAuth();
   const roleTags = profile?.role_tags || [];
   
-  // Same navigation items as desktop version
   const generalNavItems: NavItem[] = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -131,17 +130,17 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-80 p-0">
+      <SheetContent side="left" className="w-72 p-0">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                   Glee Dashboard
                 </h2>
                 {profile && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {profile.first_name} {profile.last_name}
                   </p>
                 )}
@@ -150,18 +149,19 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
                 variant="ghost"
                 size="icon"
                 onClick={() => onOpenChange(false)}
+                className="h-6 w-6"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
           {/* Navigation */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <nav className="space-y-6">
+          <div className="flex-1 overflow-y-auto p-4">
+            <nav className="space-y-4">
               {/* General Navigation */}
               <div>
-                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                   General
                 </h3>
                 <div className="space-y-1">
@@ -174,14 +174,14 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
                         onClick={handleNavClick}
                         className={({ isActive }) =>
                           cn(
-                            'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                            'flex items-center px-2 py-1.5 text-xs font-medium rounded-md transition-colors',
                             isActive
                               ? 'bg-glee-spelman text-white'
                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                           )
                         }
                       >
-                        <Icon className="mr-3 h-5 w-5" />
+                        <Icon className="mr-2 h-4 w-4" />
                         {item.label}
                       </NavLink>
                     );
@@ -192,7 +192,7 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
               {/* Executive Board Navigation */}
               {hasExecRoles && (
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                     Executive Board
                   </h3>
                   <div className="space-y-1">
@@ -205,14 +205,14 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
                           onClick={handleNavClick}
                           className={({ isActive }) =>
                             cn(
-                              'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                              'flex items-center px-2 py-1.5 text-xs font-medium rounded-md transition-colors',
                               isActive
                                 ? 'bg-glee-spelman text-white'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                             )
                           }
                         >
-                          <Icon className="mr-3 h-5 w-5" />
+                          <Icon className="mr-2 h-4 w-4" />
                           {item.label}
                         </NavLink>
                       );
@@ -224,7 +224,7 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
               {/* Admin Navigation */}
               {isAdmin && (
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+                  <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                     Administration
                   </h3>
                   <div className="space-y-1">
@@ -237,14 +237,14 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
                           onClick={handleNavClick}
                           className={({ isActive }) =>
                             cn(
-                              'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                              'flex items-center px-2 py-1.5 text-xs font-medium rounded-md transition-colors',
                               isActive
                                 ? 'bg-glee-spelman text-white'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                             )
                           }
                         >
-                          <Icon className="mr-3 h-5 w-5" />
+                          <Icon className="mr-2 h-4 w-4" />
                           {item.label}
                         </NavLink>
                       );
@@ -256,7 +256,7 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
           </div>
 
           {/* User Info Footer */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
             <div className="text-xs text-gray-500 dark:text-gray-400">
               {roleTags.length > 0 && (
                 <div>
@@ -265,7 +265,7 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
                     {roleTags.map((tag, index) => (
                       <span
                         key={index}
-                        className="inline-block px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs"
+                        className="inline-block px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs"
                       >
                         {tag}
                       </span>
@@ -288,9 +288,9 @@ export function MobileDashboardSidebarTrigger({ onOpen }: { onOpen: () => void }
       variant="ghost"
       size="icon"
       onClick={onOpen}
-      className="md:hidden"
+      className="md:hidden h-6 w-6"
     >
-      <Menu className="h-5 w-5" />
+      <Menu className="h-4 w-4" />
     </Button>
   );
 }

@@ -26,11 +26,11 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
 
   if (!user) {
     return (
-      <div className={`flex gap-2 ${className}`}>
-        <Button variant="ghost" size="sm" asChild>
+      <div className={`flex gap-1 ${className}`}>
+        <Button variant="ghost" size="sm" asChild className="h-8 px-2 text-xs">
           <Link to="/login">Login</Link>
         </Button>
-        <Button size="sm" asChild>
+        <Button size="sm" asChild className="h-8 px-2 text-xs">
           <Link to="/signup">Sign Up</Link>
         </Button>
       </div>
@@ -44,20 +44,20 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-7 w-7 rounded-full">
-          <Avatar className="h-7 w-7">
+        <Button variant="ghost" className="relative h-6 w-6 rounded-full p-0">
+          <Avatar className="h-6 w-6">
             <AvatarImage src={profile?.avatar_url} alt={profile?.first_name || 'User'} />
-            <AvatarFallback className="text-xs">{userInitials}</AvatarFallback>
+            <AvatarFallback className="text-xs font-medium">{userInitials}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-48" align="end" forceMount>
+      <DropdownMenuContent className="w-44 text-xs" align="end" forceMount>
         <div className="flex items-center justify-start gap-2 p-2">
           <div className="flex flex-col space-y-1 leading-none">
             {profile?.first_name && (
               <p className="text-xs font-medium">{profile.first_name} {profile.last_name}</p>
             )}
-            <p className="w-[150px] truncate text-xs text-muted-foreground">
+            <p className="w-[120px] truncate text-xs text-muted-foreground">
               {user.email}
             </p>
           </div>
@@ -65,21 +65,21 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         <DropdownMenuSeparator />
         
         <DropdownMenuItem asChild>
-          <Link to="/dashboard/member" className="flex items-center">
+          <Link to="/dashboard" className="flex items-center text-xs">
             <Home className="mr-2 h-3 w-3" />
             Dashboard
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/calendar" className="flex items-center">
+          <Link to="/calendar" className="flex items-center text-xs">
             <Calendar className="mr-2 h-3 w-3" />
             Calendar
           </Link>
         </DropdownMenuItem>
         
         <DropdownMenuItem asChild>
-          <Link to="/profile" className="flex items-center">
+          <Link to="/profile" className="flex items-center text-xs">
             <User className="mr-2 h-3 w-3" />
             Profile
           </Link>
@@ -89,7 +89,7 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/admin" className="flex items-center">
+              <Link to="/admin" className="flex items-center text-xs">
                 <Shield className="mr-2 h-3 w-3" />
                 Admin Dashboard
               </Link>
@@ -98,7 +98,7 @@ export const MobileHeaderDropdownMenu: React.FC<MobileHeaderDropdownMenuProps> =
         )}
         
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={handleLogout} className="text-xs">
           <LogOut className="mr-2 h-3 w-3" />
           Log out
         </DropdownMenuItem>
