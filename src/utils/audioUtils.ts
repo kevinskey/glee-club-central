@@ -1,5 +1,5 @@
+
 // Audio utility functions for the Glee Club application
-console.log('Loading audioUtils.ts - exports should be available');
 
 // Audio logging utility
 export const audioLogger = {
@@ -12,8 +12,7 @@ export const audioLogger = {
 };
 
 // Note frequency calculation for pitch pipe
-export const getNoteFrequency = (note: string): number => {
-  console.log('getNoteFrequency called with note:', note);
+export function getNoteFrequency(note: string): number {
   const frequencies: Record<string, number> = {
     'C4': 261.63,
     'D4': 293.66,
@@ -25,10 +24,7 @@ export const getNoteFrequency = (note: string): number => {
     'C5': 523.25
   };
   return frequencies[note] || 440;
-};
-
-// Debug: Log that getNoteFrequency is exported
-console.log('getNoteFrequency export:', typeof getNoteFrequency);
+}
 
 // Click sound for UI feedback
 export function playClick(audioContext?: AudioContext): Promise<void> {
@@ -36,19 +32,19 @@ export function playClick(audioContext?: AudioContext): Promise<void> {
     const context = audioContext || new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(context.destination);
-    
+
     oscillator.frequency.setValueAtTime(800, context.currentTime);
     oscillator.type = 'sine';
-    
+
     gainNode.gain.setValueAtTime(0.3, context.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.1);
-    
+
     oscillator.start(context.currentTime);
     oscillator.stop(context.currentTime + 0.1);
-    
+
     setTimeout(() => {
       resolve();
     }, 100);
@@ -61,11 +57,11 @@ export function createClickBuffer(audioContext: AudioContext): AudioBuffer {
   const duration = 0.1; // 100ms
   const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
   const data = buffer.getChannelData(0);
-  
+
   for (let i = 0; i < data.length; i++) {
     data[i] = Math.sin(2 * Math.PI * 800 * i / sampleRate) * 0.3;
   }
-  
+
   return buffer;
 }
 
@@ -75,11 +71,11 @@ export function createAccentClickBuffer(audioContext: AudioContext): AudioBuffer
   const duration = 0.1; // 100ms
   const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
   const data = buffer.getChannelData(0);
-  
+
   for (let i = 0; i < data.length; i++) {
     data[i] = Math.sin(2 * Math.PI * 1200 * i / sampleRate) * 0.5;
   }
-  
+
   return buffer;
 }
 
@@ -107,17 +103,3 @@ export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach(track => track.stop());
   audioLogger.log('Microphone released');
 }
-
-// Add default export to handle any import variations
-const audioUtils = {
-  getNoteFrequency,
-  audioLogger,
-  playClick,
-  createClickBuffer,
-  createAccentClickBuffer,
-  resumeAudioContext,
-  requestMicrophoneAccess,
-  releaseMicrophone
-};
-
-export default audioUtils;
