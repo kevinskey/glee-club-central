@@ -25,7 +25,7 @@ interface SlideData {
 let slidesCache: SlideData[] | null = null;
 let cacheTimestamp: number = 0;
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-const QUERY_TIMEOUT = 2000; // 2 seconds
+const QUERY_TIMEOUT = 8000; // Increased to 8 seconds
 
 export function useHeroSlides() {
   const [slides, setSlides] = useState<SlideData[]>([]);
@@ -47,19 +47,19 @@ export function useHeroSlides() {
     try {
       console.log('🎭 HeroSection: Fetching slides...');
       
-      // Create an AbortController for better timeout handling
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), QUERY_TIMEOUT);
-
-      const { data, error } = await supabase
+      // Create a promise race between the query and timeout
+      const queryPromise = supabase
         .from('slide_designs')
         .select('id, title, description, background_image_url, background_color, link_url, design_data')
         .eq('is_active', true)
         .order('display_order')
-        .limit(3)
-        .abortSignal(controller.signal);
+        .limit(3);
 
-      clearTimeout(timeoutId);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Query timeout')), QUERY_TIMEOUT);
+      });
+
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('🚨 HeroSection: Database error:', error);
@@ -100,7 +100,7 @@ export function useHeroSlides() {
         setIsLoading(false);
         setHasError(true);
       }
-    }, 3000);
+    }, 5000); // Increased to 5 seconds
 
     fetchSlidesWithCache();
 
