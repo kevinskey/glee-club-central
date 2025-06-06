@@ -51,7 +51,9 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
   
   // Animation Controls
   const [animationDuration, setAnimationDuration] = useState(design?.animation_settings?.duration || 5000);
-  const [animationTransition, setAnimationTransition] = useState(design?.animation_settings?.transition || 'fade');
+  const [animationTransition, setAnimationTransition] = useState<'fade' | 'slide' | 'zoom' | 'none'>(
+    design?.animation_settings?.transition || 'fade'
+  );
   const [autoPlay, setAutoPlay] = useState(design?.animation_settings?.autoPlay !== false);
   
   const [layoutType, setLayoutType] = useState<'full' | 'half_horizontal' | 'half_vertical' | 'quarter'>(
@@ -216,6 +218,11 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
     const newWeight = currentWeight === 'bold' ? 'normal' : 'bold';
     handleStyleUpdate('fontWeight', newWeight);
   }, [selectedElement, handleStyleUpdate]);
+
+  // Fixed handler for animation transition
+  const handleAnimationTransitionChange = useCallback((value: string) => {
+    setAnimationTransition(value as 'fade' | 'slide' | 'zoom' | 'none');
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -455,7 +462,7 @@ export function WYSIWYGEditor({ template, design, onSave, onPreview }: WYSIWYGEd
 
               <div>
                 <Label className="text-sm">Transition Effect</Label>
-                <Select value={animationTransition} onValueChange={setAnimationTransition}>
+                <Select value={animationTransition} onValueChange={handleAnimationTransitionChange}>
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
