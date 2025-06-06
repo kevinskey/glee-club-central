@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
+import { EventsListView } from '@/components/calendar/EventsListView';
 import { EventDialog } from '@/components/calendar/EventDialog';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
 import { PageNavigationHeader } from '@/components/ui/page-navigation-header';
-import { Calendar, CalendarDays, CalendarCheck, Plus } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarCheck, List, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
@@ -17,7 +18,7 @@ export default function CalendarPage() {
   const { events, loading, error, fetchEvents, createEvent } = useCalendarEvents();
   const { isAuthenticated, user } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   const filteredEvents = events.filter(event => {
@@ -136,6 +137,15 @@ export default function CalendarPage() {
               <CalendarCheck className="h-3 w-3 mr-1" />
               Day
             </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="text-xs px-2 py-1 h-7"
+            >
+              <List className="h-3 w-3 mr-1" />
+              List
+            </Button>
           </div>
           
           <Badge variant="secondary" className="text-xs">
@@ -170,13 +180,22 @@ export default function CalendarPage() {
             </CardContent>
           </Card>
         ) : (
-          <CalendarView
-            events={filteredEvents}
-            onEventClick={handleEventClick}
-            onCreateEvent={handleCreateEvent}
-            showPrivateEvents={isAuthenticated}
-            viewMode={viewMode}
-          />
+          <>
+            {viewMode === 'list' ? (
+              <EventsListView
+                events={filteredEvents}
+                onEventClick={handleEventClick}
+              />
+            ) : (
+              <CalendarView
+                events={filteredEvents}
+                onEventClick={handleEventClick}
+                onCreateEvent={handleCreateEvent}
+                showPrivateEvents={isAuthenticated}
+                viewMode={viewMode}
+              />
+            )}
+          </>
         )}
 
         {/* Event View Dialog */}
