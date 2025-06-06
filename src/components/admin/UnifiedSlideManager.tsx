@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ interface NewSlideForm {
   backgroundImage: string;
   mediaId: string;
   showText: boolean;
-  height: 'small' | 'medium' | 'large' | 'full';
+  height: 'tiny' | 'small' | 'medium' | 'large' | 'full';
 }
 
 export function UnifiedSlideManager() {
@@ -370,7 +369,7 @@ export function UnifiedSlideManager() {
                       <Label>Hero Height</Label>
                       <Select 
                         value={newSlide.height} 
-                        onValueChange={(value: 'small' | 'medium' | 'large' | 'full') => 
+                        onValueChange={(value: 'tiny' | 'small' | 'medium' | 'large' | 'full') => 
                           setNewSlide(prev => ({ ...prev, height: value }))
                         }
                       >
@@ -378,6 +377,7 @@ export function UnifiedSlideManager() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="tiny">Tiny (25vh)</SelectItem>
                           <SelectItem value="small">Small (40vh)</SelectItem>
                           <SelectItem value="medium">Medium (60vh)</SelectItem>
                           <SelectItem value="large">Large (80vh)</SelectItem>
@@ -544,7 +544,7 @@ export function UnifiedSlideManager() {
                                 <Label>Hero Height</Label>
                                 <Select 
                                   value={editForm.height} 
-                                  onValueChange={(value: 'small' | 'medium' | 'large' | 'full') => 
+                                  onValueChange={(value: 'tiny' | 'small' | 'medium' | 'large' | 'full') => 
                                     setEditForm(prev => ({ ...prev, height: value }))
                                   }
                                 >
@@ -552,6 +552,7 @@ export function UnifiedSlideManager() {
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
+                                    <SelectItem value="tiny">Tiny (25vh)</SelectItem>
                                     <SelectItem value="small">Small (40vh)</SelectItem>
                                     <SelectItem value="medium">Medium (60vh)</SelectItem>
                                     <SelectItem value="large">Large (80vh)</SelectItem>

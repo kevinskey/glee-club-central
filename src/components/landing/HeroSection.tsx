@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -17,7 +16,7 @@ interface SlideData {
     textPosition?: 'top' | 'center' | 'bottom';
     textAlignment?: 'left' | 'center' | 'right';
     showText?: boolean; // New field to control text visibility
-    height?: 'small' | 'medium' | 'full' | 'large'; // New field to control height
+    height?: 'tiny' | 'small' | 'medium' | 'full' | 'large'; // Updated to include tiny
   };
 }
 
@@ -73,6 +72,7 @@ export function HeroSection() {
 
   const getHeightClass = (height?: string) => {
     switch (height) {
+      case 'tiny': return 'h-[25vh]';
       case 'small': return 'h-[40vh]';
       case 'medium': return 'h-[60vh]';
       case 'full': return 'h-screen';
