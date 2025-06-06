@@ -5,16 +5,20 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 
+// Import main pages
+import HomePage from '@/pages/HomePage';
+import AboutPage from '@/pages/AboutPage';
+import ContactPage from '@/pages/ContactPage';
+import LoginPage from '@/pages/auth/LoginPage';
+import RoleDashboardPage from '@/pages/RoleDashboardPage';
+import CalendarPage from '@/pages/CalendarPage';
+import EnhancedCalendarPage from '@/pages/EnhancedCalendarPage';
+
 // Import route configurations
-import { publicRoutes } from '@/routes/publicRoutes';
 import { adminRoutes } from '@/routes/adminRoutes';
 import { dashboardRoutes } from '@/routes/dashboardRoutes';
 import { roleRoutes } from '@/routes/roleRoutes';
 import { memberRoutes } from '@/routes/memberRoutes';
-
-// Import the main dashboard page
-import RoleDashboardPage from '@/pages/RoleDashboardPage';
-import CalendarPage from '@/pages/CalendarPage';
 
 // Check if dark mode is preferred and apply it immediately to prevent flickering
 const prefersDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -30,16 +34,31 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      ...publicRoutes,
-      // Add the main dashboard route
+      // Public routes
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: 'about',
+        element: <AboutPage />,
+      },
+      {
+        path: 'contact',
+        element: <ContactPage />,
+      },
+      {
+        path: 'login',
+        element: <LoginPage />,
+      },
+      {
+        path: 'calendar',
+        element: <EnhancedCalendarPage />,
+      },
+      // Dashboard routes
       {
         path: 'dashboard',
         element: <RoleDashboardPage />,
-      },
-      // Add the calendar route
-      {
-        path: 'calendar',
-        element: <CalendarPage />,
       },
       ...roleRoutes,
       ...memberRoutes,
