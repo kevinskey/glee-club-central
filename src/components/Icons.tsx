@@ -22,7 +22,7 @@ export const Icons = {
       <img 
         src={logoSrc}
         alt="Spelman College Glee Club Logo" 
-        className={cn("h-6 w-auto", props.className)} 
+        className={cn("h-7 w-auto", props.className)} 
         {...props} 
       />
     );

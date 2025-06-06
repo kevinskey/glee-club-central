@@ -31,7 +31,7 @@ export function HeaderNav({
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo Section */}
         <div className="flex items-center gap-2">
-          <Icons.logo className="h-8 w-8" />
+          <Icons.logo className="h-10 w-10" />
           <span className="text-xl font-playfair font-semibold text-glee-spelman">
             {logoText}
           </span>
