@@ -18,7 +18,23 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newsSource, setNewsSource] = useState<'database' | 'google' | 'mixed'>('mixed');
+  const [lastFetchDate, setLastFetchDate] = useState<string>('');
+  const [randomOffset, setRandomOffset] = useState(0);
   const isMobile = useIsMobile();
+
+  // Check if we need to fetch fresh content (once per day)
+  const shouldFetchFreshContent = () => {
+    const today = new Date().toDateString();
+    const lastFetch = localStorage.getItem('news_last_fetch_date');
+    return !lastFetch || lastFetch !== today;
+  };
+
+  // Save fetch date to localStorage
+  const saveFetchDate = () => {
+    const today = new Date().toDateString();
+    localStorage.setItem('news_last_fetch_date', today);
+    setLastFetchDate(today);
+  };
 
   // Fetch news items from database or Google News
   useEffect(() => {
@@ -26,18 +42,21 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
       try {
         setIsLoading(true);
         
+        // Check if we need fresh content
+        const needsFreshContent = shouldFetchFreshContent();
+        
         // Try database first
         const { data: dbNews, error } = await supabase
           .from('news_items')
           .select('id, headline, content, start_date, end_date, active, generated_by_ai')
           .eq('active', true)
           .order('priority', { ascending: false })
-          .limit(8); // Increased limit for more items
+          .limit(15); // Increased limit for more variety
 
         let finalNewsItems: NewsItem[] = [];
 
-        if (!error && dbNews && dbNews.length > 0) {
-          // Use database news if available
+        if (!error && dbNews && dbNews.length >= 8 && !needsFreshContent) {
+          // Use database news if we have enough and don't need fresh content
           finalNewsItems = dbNews.map(item => ({
             id: item.id,
             headline: item.headline,
@@ -48,13 +67,28 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
           }));
           setNewsSource('database');
         } else {
-          // Fallback to Google News
-          console.log('No database news found, fetching from Google News...');
-          const googleNews = await NewsService.fetchMixedNews(12); // More items for longer scroll
+          // Fetch fresh content from Google News or if database has insufficient items
+          console.log('Fetching fresh news from Google News...');
+          const googleNews = await NewsService.fetchMixedNews(20); // More items for variety
           
           if (googleNews.length > 0) {
-            finalNewsItems = googleNews;
+            finalNewsItems = [...googleNews];
+            
+            // If we have some database items, mix them in
+            if (dbNews && dbNews.length > 0) {
+              const dbItems = dbNews.slice(0, 5).map(item => ({
+                id: item.id,
+                headline: item.headline,
+                active: item.active,
+                content: item.content || '',
+                date: item.start_date,
+                generated_by_ai: item.generated_by_ai
+              }));
+              finalNewsItems = [...googleNews, ...dbItems];
+            }
+            
             setNewsSource('google');
+            saveFetchDate(); // Mark that we fetched fresh content today
           } else {
             // Final fallback to static content
             finalNewsItems = NewsService.getStaticFallbackNews();
@@ -62,7 +96,13 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
           }
         }
 
-        setNewsItems(finalNewsItems);
+        // Shuffle the news items to add variety
+        const shuffledItems = finalNewsItems.sort(() => Math.random() - 0.5);
+        setNewsItems(shuffledItems);
+        
+        // Set a random starting offset to avoid always starting with the same item
+        setRandomOffset(Math.floor(Math.random() * shuffledItems.length));
+
       } catch (error) {
         console.error('Error fetching news items:', error);
         setNewsItems(NewsService.getStaticFallbackNews());
@@ -136,14 +176,23 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
     return headline.replace(/([\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '').trim();
   };
 
-  // Create a single continuous ticker with proper spacing
+  // Create a single continuous ticker with proper spacing and random offset
   const createTickerContent = () => {
+    if (newsItems.length === 0) return '';
+    
     const cleanHeadlines = newsItems.map(item => removeIconsFromHeadline(item.headline));
     const separator = '   •   ';
-    const singlePass = cleanHeadlines.join(separator);
+    
+    // Start from a random offset to avoid always showing the same first item
+    const rotatedHeadlines = [
+      ...cleanHeadlines.slice(randomOffset),
+      ...cleanHeadlines.slice(0, randomOffset)
+    ];
+    
+    const singlePass = rotatedHeadlines.join(separator);
     
     // Repeat the content multiple times for seamless scrolling
-    return Array(8).fill(singlePass).join(separator); // More repetitions for longer content
+    return Array(6).fill(singlePass).join(separator);
   };
 
   const tickerContent = createTickerContent();

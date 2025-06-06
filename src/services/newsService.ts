@@ -33,7 +33,7 @@ export class NewsService {
     return !this.FORBIDDEN_KEYWORDS.some(keyword => lowerText.includes(keyword));
   }
 
-  static async fetchGoogleNews(category: keyof typeof this.NEWS_SOURCES = 'hbcu', maxItems: number = 5): Promise<NewsItem[]> {
+  static async fetchGoogleNews(category: keyof typeof this.NEWS_SOURCES = 'hbcu', maxItems: number = 8): Promise<NewsItem[]> {
     try {
       const rssUrl = this.NEWS_SOURCES[category];
       const apiUrl = `${this.RSS_TO_JSON_API}?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -58,7 +58,7 @@ export class NewsService {
       });
       
       return filteredItems.slice(0, maxItems).map((item: any, index: number) => ({
-        id: `google-news-${category}-${index}`,
+        id: `google-news-${category}-${index}-${Date.now()}`, // Add timestamp for uniqueness
         headline: this.cleanHeadline(item.title || ''),
         active: true,
         content: item.description || item.title || '',
@@ -74,15 +74,16 @@ export class NewsService {
     }
   }
 
-  static async fetchMixedNews(maxItems: number = 8): Promise<NewsItem[]> {
+  static async fetchMixedNews(maxItems: number = 15): Promise<NewsItem[]> {
     try {
-      const [hbcuNews, spelmanNews, musicNews] = await Promise.all([
-        this.fetchGoogleNews('hbcu', 3),
-        this.fetchGoogleNews('spelman', 3),
-        this.fetchGoogleNews('music', 2)
+      const [hbcuNews, spelmanNews, musicNews, gleeNews] = await Promise.all([
+        this.fetchGoogleNews('hbcu', 4),
+        this.fetchGoogleNews('spelman', 4),
+        this.fetchGoogleNews('music', 4),
+        this.fetchGoogleNews('glee', 3)
       ]);
       
-      const allNews = [...spelmanNews, ...hbcuNews, ...musicNews];
+      const allNews = [...spelmanNews, ...hbcuNews, ...musicNews, ...gleeNews];
       
       // Additional filtering after combining sources
       const appropriateNews = allNews.filter(item => 
@@ -109,7 +110,7 @@ export class NewsService {
   }
 
   static getStaticFallbackNews(): NewsItem[] {
-    return [
+    const fallbackItems = [
       {
         id: "static-1",
         headline: "Spelman College Glee Club announces Spring Concert series",
@@ -137,7 +138,24 @@ export class NewsService {
         active: true,
         content: "The Spelman College Glee Club has received national recognition for excellence in choral music at the Collegiate Choral Competition.",
         date: "May 12, 2025"
+      },
+      {
+        id: "static-5",
+        headline: "Alumni spotlight: Former Glee Club members making their mark in music industry",
+        active: true,
+        content: "Celebrating the achievements of our talented alumni who continue to inspire through their musical careers.",
+        date: "May 15, 2025"
+      },
+      {
+        id: "static-6",
+        headline: "Spelman Glee Club collaborates with Atlanta Symphony Orchestra",
+        active: true,
+        content: "An exciting collaboration bringing together classical and choral traditions in a special performance.",
+        date: "May 18, 2025"
       }
     ];
+
+    // Shuffle the fallback items to add variety
+    return fallbackItems.sort(() => Math.random() - 0.5);
   }
 }
