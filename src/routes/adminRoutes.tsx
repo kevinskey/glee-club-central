@@ -1,58 +1,21 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import AdminRoute from '@/components/auth/AdminRoute';
-import { Navigate } from 'react-router-dom';
-
-// Import admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
-import SiteImagesPage from '@/pages/admin/SiteImagesPage';
-import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
+import AdminStorePage from '@/pages/admin/AdminStorePage';
+import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
+import SettingsPage from '@/pages/admin/SettingsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
-    path: '/admin',
-    element: (
-      <AdminRoute>
-        <AdminDashboard />
-      </AdminRoute>
-    ),
-  },
-  // Keep V2 route available for comparison
-  {
-    path: '/admin/v2',
-    element: <Navigate to="/dashboard" replace />,
-  },
-  {
-    path: '/admin/unified-slide-management',
-    element: (
-      <AdminRoute>
-        <UnifiedSlideManagementPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/media',
-    element: (
-      <AdminRoute>
-        <AdminMediaLibraryPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/media-library',
-    element: (
-      <AdminRoute>
-        <AdminMediaLibraryPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/site-images',
-    element: (
-      <AdminRoute>
-        <SiteImagesPage />
-      </AdminRoute>
-    ),
+    path: 'admin',
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: 'users', element: <UserManagementPage /> },
+      { path: 'store', element: <AdminStorePage /> },
+      { path: 'calendar', element: <AdminCalendarPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+    ],
   },
 ];
