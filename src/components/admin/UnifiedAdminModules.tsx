@@ -8,7 +8,7 @@ import { hasPermission } from "@/utils/permissionChecker";
 import { 
   ShoppingBag, Plus, Upload,
   Music, BarChart, Settings, Layout, Presentation, FileText,
-  Users, Calendar, Sliders, Bell
+  Users, Calendar, Sliders, Bell, FileMusic
 } from "lucide-react";
 
 interface ModuleItem {
@@ -96,6 +96,15 @@ export function UnifiedAdminModules() {
       icon: <Settings className="h-5 w-5" />,
       color: "bg-gray-500",
       path: "/admin/settings",
+      adminOnly: true
+    },
+    {
+      id: "sheet-music",
+      title: "Sheet Music",
+      description: "PDF viewer and music management",
+      icon: <FileMusic className="h-5 w-5" />,
+      color: "bg-violet-500",
+      path: "/dashboard/sheet-music",
       adminOnly: true
     },
     {
