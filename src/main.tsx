@@ -5,6 +5,13 @@ import { RouterProvider } from "react-router-dom";
 import router from "./router";
 import "./App.css";
 
+// Declare the custom property on window
+declare global {
+  interface Window {
+    __CACHE_BUSTER__?: number;
+  }
+}
+
 // Emergency cache clearing - this should force a complete rebuild
 console.log('Starting application with emergency cache clearing...');
 
