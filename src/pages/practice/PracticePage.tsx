@@ -23,6 +23,7 @@ import { PracticeLogForm } from '@/components/practice/PracticeLogForm';
 import { PracticeLogsList } from '@/components/practice/PracticeLogsList';
 import { PracticeStats } from '@/components/practice/PracticeStats';
 import { SightReadingEmbed } from '@/components/practice/SightReadingEmbed';
+import { PitchReference } from '@/components/glee-tools';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { usePracticeLogs } from '@/hooks/usePracticeLogs';
@@ -94,6 +95,10 @@ export default function PracticePage() {
                 <BookOpen className="mr-2 h-4 w-4" />
                 Sight Reading
               </TabsTrigger>
+              <TabsTrigger value="pitch-reference">
+                <Headphones className="mr-2 h-4 w-4" />
+                Pitch Reference
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="practice-log">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,6 +123,10 @@ export default function PracticePage() {
             <TabsContent value="sight-reading">
               <h3 className="text-xl font-semibold mb-2">Sight Reading Exercises</h3>
               <SightReadingEmbed />
+            </TabsContent>
+            <TabsContent value="pitch-reference">
+              <h3 className="text-xl font-semibold mb-2">Pitch Reference Tool</h3>
+              <PitchReference />
             </TabsContent>
           </Tabs>
         </CardContent>
