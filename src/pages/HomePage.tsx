@@ -21,7 +21,7 @@ const HomePage = () => {
   }
 
   return (
-    <PublicPageWrapper showTopSlider={false} className="home-page">
+    <PublicPageWrapper className="home-page">
       {/* Hero Section - Full Width */}
       <HeroSection />
       

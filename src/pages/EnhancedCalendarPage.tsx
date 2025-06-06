@@ -25,7 +25,7 @@ export default function EnhancedCalendarPage() {
 
   if (loading) {
     return (
-      <PublicPageWrapper showTopSlider={true}>
+      <PublicPageWrapper>
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-48">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -37,7 +37,7 @@ export default function EnhancedCalendarPage() {
 
   if (error) {
     return (
-      <PublicPageWrapper showTopSlider={true}>
+      <PublicPageWrapper>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-red-600">
             <p>Error loading events: {error}</p>
@@ -48,7 +48,7 @@ export default function EnhancedCalendarPage() {
   }
 
   return (
-    <PublicPageWrapper showTopSlider={true}>
+    <PublicPageWrapper>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 text-center">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
