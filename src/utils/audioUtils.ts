@@ -107,3 +107,17 @@ export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach(track => track.stop());
   audioLogger.log('Microphone released');
 }
+
+// Add default export to handle any import variations
+const audioUtils = {
+  getNoteFrequency,
+  audioLogger,
+  playClick,
+  createClickBuffer,
+  createAccentClickBuffer,
+  resumeAudioContext,
+  requestMicrophoneAccess,
+  releaseMicrophone
+};
+
+export default audioUtils;
