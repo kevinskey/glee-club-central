@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
@@ -22,44 +22,80 @@ interface SlideData {
   };
 }
 
+// Cache for slides to avoid repeated database calls
+let slidesCache: SlideData[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export function HeroSection() {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
-  console.log('🎭 HeroSection: Component mounted, isLoading:', isLoading);
-  console.log('🎭 HeroSection: Slides data:', slides);
+  const fetchSlidesWithCache = useCallback(async () => {
+    const now = Date.now();
+    
+    // Check if we have valid cached data
+    if (slidesCache && (now - cacheTimestamp) < CACHE_DURATION) {
+      console.log('🎭 HeroSection: Using cached slides');
+      setSlides(slidesCache);
+      setIsLoading(false);
+      return;
+    }
 
-  useEffect(() => {
-    const fetchSlides = async () => {
-      try {
-        console.log('🎭 HeroSection: Fetching slides from database...');
-        const { data, error } = await supabase
-          .from('slide_designs')
-          .select('*')
-          .eq('is_active', true)
-          .order('display_order');
+    try {
+      console.log('🎭 HeroSection: Fetching slides with timeout protection...');
+      
+      // Use a Promise.race to implement our own timeout
+      const fetchPromise = supabase
+        .from('slide_designs')
+        .select('id, title, description, background_image_url, background_color, link_url, design_data')
+        .eq('is_active', true)
+        .order('display_order')
+        .limit(5); // Limit to reduce query complexity
 
-        if (error) {
-          console.error('🚨 HeroSection: Database error:', error);
-          throw error;
-        }
-        
-        console.log('🎭 HeroSection: Database response:', data);
-        setSlides(data || []);
-      } catch (error) {
-        console.error('Error fetching hero slides:', error);
-        setSlides([]);
-      } finally {
-        setIsLoading(false);
-        console.log('🎭 HeroSection: Loading complete');
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Query timeout')), 3000)
+      );
+
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
+      if (error) {
+        console.error('🚨 HeroSection: Database error:', error);
+        throw error;
       }
-    };
-
-    fetchSlides();
+      
+      console.log('🎭 HeroSection: Successfully fetched', data?.length || 0, 'slides');
+      const slideData = data || [];
+      
+      // Update cache
+      slidesCache = slideData;
+      cacheTimestamp = now;
+      
+      setSlides(slideData);
+      setHasError(false);
+    } catch (error) {
+      console.error('🚨 HeroSection: Error fetching slides:', error);
+      setHasError(true);
+      
+      // Use cached data if available, even if expired
+      if (slidesCache) {
+        console.log('🎭 HeroSection: Falling back to expired cache');
+        setSlides(slidesCache);
+      } else {
+        setSlides([]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // Auto-advance slides
+  useEffect(() => {
+    fetchSlidesWithCache();
+  }, [fetchSlidesWithCache]);
+
+  // Auto-advance slides with cleanup
   useEffect(() => {
     if (slides.length > 1) {
       const timer = setInterval(() => {
@@ -69,14 +105,14 @@ export function HeroSection() {
     }
   }, [slides.length]);
 
-  const handleSlideClick = (slide: SlideData) => {
+  const handleSlideClick = useCallback((slide: SlideData) => {
     if (slide.link_url) {
       window.open(slide.link_url, '_blank');
     }
-  };
+  }, []);
 
-  // Enhanced mobile-first responsive height classes
-  const getResponsiveHeightClass = (height?: string) => {
+  // Memoized style calculations
+  const getResponsiveHeightClass = useMemo(() => (height?: string) => {
     switch (height) {
       case 'tiny': return 'h-[200px] sm:h-[250px] md:h-[300px]';
       case 'small': return 'h-[250px] sm:h-[300px] md:h-[400px]';
@@ -86,41 +122,69 @@ export function HeroSection() {
       default:
         return 'h-[320px] sm:h-[450px] md:h-[600px]';
     }
-  };
+  }, []);
 
-  const getTextPositionClass = (position?: string) => {
+  const getTextPositionClass = useMemo(() => (position?: string) => {
     switch (position) {
       case 'top': return 'items-start pt-6 sm:pt-12 md:pt-16';
       case 'bottom': return 'items-end pb-6 sm:pb-12 md:pb-16';
       default: return 'items-center';
     }
-  };
+  }, []);
 
-  const getTextAlignmentClass = (alignment?: string) => {
+  const getTextAlignmentClass = useMemo(() => (alignment?: string) => {
     switch (alignment) {
       case 'left': return 'text-left';
       case 'right': return 'text-right';
       default: return 'text-center';
     }
-  };
+  }, []);
 
-  console.log('🎭 HeroSection: Rendering with isLoading:', isLoading, 'slides.length:', slides.length);
-
+  // Fast loading state with skeleton
   if (isLoading) {
-    console.log('🎭 HeroSection: Showing loading state');
     return (
       <div className="w-full">
-        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden">
+        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden">
+          <div className="absolute inset-0 animate-pulse">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full animate-shimmer"></div>
+          </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-gray-400 text-sm sm:text-base">Loading hero content...</div>
+            <div className="text-gray-400 dark:text-gray-500 text-sm sm:text-base animate-pulse">
+              Loading...
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // Error state with retry option
+  if (hasError && slides.length === 0) {
+    return (
+      <div className="w-full">
+        <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 overflow-hidden">
+          <div className="absolute inset-0 flex items-center justify-center text-center px-4">
+            <div className="max-w-md">
+              <p className="text-red-800 dark:text-red-200 mb-4">
+                Unable to load hero content
+              </p>
+              <Button 
+                onClick={fetchSlidesWithCache}
+                variant="outline"
+                size="sm"
+                className="bg-white/80 hover:bg-white"
+              >
+                Retry
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default hero when no slides
   if (slides.length === 0) {
-    console.log('🎭 HeroSection: No slides found, showing default content');
     return (
       <div className="w-full">
         <div className="relative w-full h-[320px] sm:h-[450px] md:h-[600px] bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden">
@@ -141,13 +205,9 @@ export function HeroSection() {
   }
 
   const slide = slides[currentSlide];
-  console.log('🎭 HeroSection: Rendering slide:', slide);
-  
-  // Check if we should show text overlay
   const showTextOverlay = slide.design_data?.showText !== false && 
     (slide.title || slide.description || slide.design_data?.buttonText);
 
-  // Get image display settings from admin configuration
   const objectFit = slide.design_data?.objectFit || 'cover';
   const objectPosition = slide.design_data?.objectPosition || 'center center';
   const overlayOpacity = slide.design_data?.overlayOpacity || 20;
@@ -158,7 +218,7 @@ export function HeroSection() {
         className={`relative w-full ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer`}
         onClick={() => handleSlideClick(slide)}
       >
-        {/* Background with responsive handling */}
+        {/* Optimized background rendering */}
         {slide.background_image_url ? (
           <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
             <img
@@ -170,8 +230,8 @@ export function HeroSection() {
                 objectFit: objectFit
               }}
               loading="eager"
+              decoding="async"
             />
-            {/* Overlay with admin-configurable opacity */}
             {showTextOverlay && (
               <div 
                 className="absolute inset-0 bg-black" 
@@ -186,18 +246,18 @@ export function HeroSection() {
           />
         )}
 
-        {/* Content - Mobile optimized text sizing */}
+        {/* Optimized content rendering */}
         {showTextOverlay && (
           <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4`}>
             <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 sm:space-y-3 md:space-y-6`}>
               {slide.title && (
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold animate-fade-in leading-tight drop-shadow-lg">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-5xl font-bold leading-tight drop-shadow-lg">
                   {slide.title}
                 </h1>
               )}
               
               {slide.description && (
-                <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
                   {slide.description}
                 </p>
               )}
@@ -206,7 +266,7 @@ export function HeroSection() {
                 <div className="pt-2 sm:pt-3 md:pt-4">
                   <Button 
                     size="default"
-                    className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 shadow-lg text-sm sm:text-base font-medium"
+                    className="bg-white text-gray-900 hover:bg-gray-100 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 shadow-lg text-sm sm:text-base font-medium"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(slide.link_url, '_blank');
