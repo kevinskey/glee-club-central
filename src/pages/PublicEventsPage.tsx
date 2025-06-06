@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 export default function PublicEventsPage() {
   const { events, loading, error, fetchEvents } = useCalendarEvents();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
 
   // Filter to only show public events
   const publicEvents = events.filter(event => !event.is_private);
@@ -115,6 +116,7 @@ export default function PublicEventsPage() {
           events={publicEvents}
           onEventClick={handleEventClick}
           showPrivateEvents={false}
+          viewMode={viewMode}
         />
 
         {/* Quick Actions for Fans */}

@@ -9,6 +9,7 @@ interface PageHeaderProps {
   compact?: boolean;
   className?: string;
   children?: React.ReactNode;
+  actions?: React.ReactNode;
 }
 
 export function PageHeader({ 
@@ -17,7 +18,8 @@ export function PageHeader({
   icon, 
   compact = false, 
   className,
-  children 
+  children,
+  actions
 }: PageHeaderProps) {
   return (
     <div className={cn(
@@ -25,25 +27,33 @@ export function PageHeader({
       compact ? "mb-3" : "mb-4 sm:mb-6",
       className
     )}>
-      <div className="flex items-center gap-2">
-        {icon && (
-          <div className={cn(
-            "flex items-center justify-center rounded-lg",
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon && (
+            <div className={cn(
+              "flex items-center justify-center rounded-lg",
+              compact 
+                ? "p-1.5 bg-glee-spelman/10" 
+                : "p-2 bg-glee-spelman/10"
+            )}>
+              {icon}
+            </div>
+          )}
+          <h1 className={cn(
+            "font-bold text-gray-900 dark:text-white",
             compact 
-              ? "p-1.5 bg-glee-spelman/10" 
-              : "p-2 bg-glee-spelman/10"
+              ? "text-lg sm:text-xl" 
+              : "text-xl sm:text-2xl lg:text-3xl"
           )}>
-            {icon}
+            {title}
+          </h1>
+        </div>
+        
+        {actions && (
+          <div className="flex items-center gap-2">
+            {actions}
           </div>
         )}
-        <h1 className={cn(
-          "font-bold text-gray-900 dark:text-white",
-          compact 
-            ? "text-lg sm:text-xl" 
-            : "text-xl sm:text-2xl lg:text-3xl"
-        )}>
-          {title}
-        </h1>
       </div>
       
       {description && (

@@ -15,7 +15,7 @@ interface CalendarViewProps {
   viewMode: 'month' | 'week' | 'day';
 }
 
-export function CalendarView({ events, onEventClick, showPrivateEvents, viewMode }: CalendarViewProps) {
+export function CalendarView({ events = [], onEventClick, showPrivateEvents, viewMode }: CalendarViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const getEventTypeColor = (type: string) => {
@@ -32,6 +32,7 @@ export function CalendarView({ events, onEventClick, showPrivateEvents, viewMode
   };
 
   const getEventsForDate = (date: Date) => {
+    if (!events || !Array.isArray(events)) return [];
     return events.filter(event => 
       isSameDay(new Date(event.start_time), date)
     );
@@ -42,6 +43,20 @@ export function CalendarView({ events, onEventClick, showPrivateEvents, viewMode
     const fn = direction === 'prev' ? (viewMode === 'month' ? subMonths : (d: Date) => addDays(d, -amount)) : (viewMode === 'month' ? addMonths : (d: Date) => addDays(d, amount));
     setSelectedDate(fn(selectedDate, viewMode === 'month' ? 1 : undefined));
   };
+
+  // Early return if events is not properly loaded
+  if (!events) {
+    return (
+      <Card>
+        <CardContent className="p-3">
+          <div className="text-center py-8">
+            <Calendar className="h-8 w-8 mx-auto mb-3 text-gray-400" />
+            <p className="text-xs text-gray-500">Loading calendar...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Month View
   if (viewMode === 'month') {
