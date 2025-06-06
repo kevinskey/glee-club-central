@@ -17,18 +17,18 @@ export function BackgroundSlideshow({
     return <div className="absolute inset-0 bg-black/50"></div>;
   }
 
-  // Always show only the first image with improved display
+  // Always show only the first image with no cropping
   const displayImage = images[0];
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden bg-gray-100 dark:bg-gray-800">
       <img
         src={displayImage}
         alt="Background slide"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
         style={{ 
           objectPosition: 'center center',
-          objectFit: 'cover'
+          objectFit: 'contain'
         }}
       />
       

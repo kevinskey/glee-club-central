@@ -71,7 +71,7 @@ export function HeroSection() {
     }
   };
 
-  // Improved responsive height with better aspect ratio handling
+  // Responsive height classes with no cropping
   const getResponsiveHeightClass = () => {
     return 'h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[75vh] xl:h-[80vh] max-h-[600px] min-h-[400px]';
   };
@@ -134,21 +134,21 @@ export function HeroSection() {
       className={`relative ${getResponsiveHeightClass()} overflow-hidden cursor-pointer pt-20`}
       onClick={() => handleSlideClick(slide)}
     >
-      {/* Background with improved image display */}
+      {/* Background with no cropping - full image display */}
       {slide.background_image_url ? (
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
           <img
             src={slide.background_image_url}
             alt={slide.title || 'Hero slide'}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             style={{ 
               objectPosition: 'center center',
-              objectFit: 'cover'
+              objectFit: 'contain'
             }}
           />
           {/* Overlay for better text readability when text is enabled */}
           {showTextOverlay && (
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-black/20" />
           )}
         </div>
       ) : (
@@ -163,13 +163,13 @@ export function HeroSection() {
         <div className={`relative h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center px-4 sm:px-8 lg:px-20`}>
           <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-4 sm:space-y-6`}>
             {slide.title && (
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold animate-fade-in leading-tight drop-shadow-lg">
                 {slide.title}
               </h1>
             )}
             
             {slide.description && (
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 animate-fade-in max-w-3xl mx-auto leading-relaxed drop-shadow-md">
                 {slide.description}
               </p>
             )}
@@ -178,7 +178,7 @@ export function HeroSection() {
               <div className="pt-2 sm:pt-4">
                 <Button 
                   size="lg" 
-                  className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                  className="animate-fade-in bg-white text-gray-900 hover:bg-gray-100 text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 shadow-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     window.open(slide.link_url, '_blank');
