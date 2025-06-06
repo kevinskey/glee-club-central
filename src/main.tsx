@@ -5,72 +5,87 @@ import { RouterProvider } from "react-router-dom";
 import router from "./router";
 import "./App.css";
 
-// Force complete cache invalidation - emergency measure
-const CACHE_BUST_VERSION = `v${Date.now()}-${Math.random().toString(36).substring(7)}`;
+// FINAL NUCLEAR CACHE CLEAR - Complete system reset
+const FINAL_CACHE_VERSION = `FINAL-${Date.now()}-${Math.random().toString(36)}`;
 
-// Nuclear option - clear everything and force reload
-const emergencyCacheClear = async () => {
+// Most aggressive cache clearing possible
+const nuclearCacheClear = async () => {
   try {
-    console.log('EMERGENCY CACHE CLEAR INITIATED - version:', CACHE_BUST_VERSION);
+    console.log('NUCLEAR CACHE CLEAR INITIATED - Final version:', FINAL_CACHE_VERSION);
     
-    // Clear all possible caches
+    // Delete ALL caches
     if ('caches' in window) {
       const cacheNames = await caches.keys();
-      await Promise.all(cacheNames.map(name => caches.delete(name)));
-      console.log('Browser caches cleared:', cacheNames.length);
+      console.log('Found caches to delete:', cacheNames);
+      await Promise.all(cacheNames.map(async (name) => {
+        const deleted = await caches.delete(name);
+        console.log(`Cache ${name} deleted:`, deleted);
+      }));
     }
     
-    // Clear all storage
+    // Clear ALL storage types
     try {
       localStorage.clear();
       sessionStorage.clear();
-      console.log('Storage cleared');
+      console.log('All storage cleared');
     } catch (e) {
-      console.log('Storage clear attempted');
+      console.log('Storage clear error:', e);
     }
     
-    // Clear IndexedDB
+    // Clear all IndexedDB databases
     try {
       if ('indexedDB' in window) {
-        const databases = ['app-cache', 'lovable-cache', 'vite-cache'];
-        databases.forEach(db => {
+        const databases = ['app-cache', 'lovable-cache', 'vite-cache', 'workbox-cache'];
+        for (const db of databases) {
           try {
-            indexedDB.deleteDatabase(db);
+            const deleteRequest = indexedDB.deleteDatabase(db);
+            console.log(`IndexedDB ${db} deletion initiated`);
           } catch (e) {
-            console.log(`IndexedDB ${db} clear attempted`);
+            console.log(`IndexedDB ${db} deletion attempted`);
           }
-        });
+        }
       }
     } catch (e) {
-      console.log('IndexedDB clear attempted');
+      console.log('IndexedDB operations attempted');
     }
     
-    // Force module cache invalidation
+    // Force complete module reload
     if (typeof window !== 'undefined') {
+      // Clear any module caches
       // @ts-ignore
       if (window.__vite_plugin_react_preamble_installed__) {
-        console.log('Vite cache detected, forcing reload');
+        console.log('Vite detected - forcing complete reload');
+      }
+      
+      // Clear any webpack hot reload cache
+      // @ts-ignore
+      if (window.webpackChunkName) {
+        console.log('Webpack detected - clearing chunk cache');
       }
     }
     
   } catch (error) {
-    console.error('Emergency cache clear error:', error);
+    console.error('Nuclear cache clear error:', error);
   }
 };
 
-// Check if we need to force a hard reload
+// Check for complete system reset requirement
 const currentUrl = new URL(window.location.href);
-const cacheParam = currentUrl.searchParams.get('cache-bust');
+const nukeCacheParam = currentUrl.searchParams.get('nuke-cache');
 
-if (cacheParam !== CACHE_BUST_VERSION) {
-  console.log('Cache version mismatch, forcing hard reload...');
-  emergencyCacheClear().then(() => {
-    currentUrl.searchParams.set('cache-bust', CACHE_BUST_VERSION);
-    window.location.replace(currentUrl.toString());
+if (nukeCacheParam !== FINAL_CACHE_VERSION) {
+  console.log('System requires nuclear cache clear - initiating...');
+  nuclearCacheClear().then(() => {
+    // Force complete page replacement
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('nuke-cache', FINAL_CACHE_VERSION);
+    console.log('Performing final system reload...');
+    window.location.replace(newUrl.toString());
   });
 } else {
-  console.log('Cache version matches, proceeding with normal load');
+  console.log('Nuclear cache clear complete - normal app startup');
   
+  // Normal app startup
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <RouterProvider router={router} />

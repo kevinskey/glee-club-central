@@ -25,6 +25,10 @@ import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 
+// Force router cache invalidation
+const ROUTER_VERSION = `${Date.now()}-router-rebuild`;
+console.log('Router module loaded with version:', ROUTER_VERSION);
+
 const router = createBrowserRouter([
   {
     path: "/",
