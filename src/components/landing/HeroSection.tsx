@@ -30,6 +30,9 @@ export function HeroSection() {
   const [imageHeight, setImageHeight] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
+  console.log('🎭 HeroSection: Component mounted, isLoading:', isLoading);
+  console.log('🎭 HeroSection: Slides data:', slides);
+
   // Check if mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -68,18 +71,26 @@ export function HeroSection() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
+        console.log('🎭 HeroSection: Fetching slides from database...');
         const { data, error } = await supabase
           .from('slide_designs')
           .select('*')
           .eq('is_active', true)
           .order('display_order');
 
-        if (error) throw error;
+        if (error) {
+          console.error('🚨 HeroSection: Database error:', error);
+          throw error;
+        }
+        
+        console.log('🎭 HeroSection: Database response:', data);
         setSlides(data || []);
       } catch (error) {
         console.error('Error fetching hero slides:', error);
+        setSlides([]);
       } finally {
         setIsLoading(false);
+        console.log('🎭 HeroSection: Loading complete');
       }
     };
 
@@ -135,7 +146,10 @@ export function HeroSection() {
     return {};
   };
 
+  console.log('🎭 HeroSection: Rendering with isLoading:', isLoading, 'slides.length:', slides.length);
+
   if (isLoading) {
+    console.log('🎭 HeroSection: Showing loading state');
     return (
       <div className="w-full">
         <div className={`relative w-full ${getResponsiveHeightClass()} bg-gray-200 dark:bg-gray-800 animate-pulse overflow-hidden`}>
@@ -148,6 +162,7 @@ export function HeroSection() {
   }
 
   if (slides.length === 0) {
+    console.log('🎭 HeroSection: No slides found, showing default content');
     return (
       <div className="w-full">
         <div className={`relative w-full ${getResponsiveHeightClass()} bg-gradient-to-br from-glee-spelman to-glee-spelman/80 overflow-hidden`}>
@@ -168,6 +183,7 @@ export function HeroSection() {
   }
 
   const slide = slides[currentSlide];
+  console.log('🎭 HeroSection: Rendering slide:', slide);
   
   const getTextPositionClass = (position?: string) => {
     switch (position) {
