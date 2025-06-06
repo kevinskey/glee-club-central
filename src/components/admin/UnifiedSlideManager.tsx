@@ -1,78 +1,47 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Edit, Eye, Trash2, Save, X, Settings, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Save, X, Sliders, Layout, TestTube, Eye, Settings, Upload, Image } from 'lucide-react';
-import { TopSliderManager } from './TopSliderManager';
-import { SliderTestPreview } from './SliderTestPreview';
-import { ImageDropZone } from './slideDesign/ImageDropZone';
-import { MediaLibrarySelector } from './slideDesign/MediaLibrarySelector';
-import { CacheManager } from './CacheManager';
+import { cn } from '@/lib/utils';
 
-interface NewSlideForm {
+interface SlideData {
+  id: string;
   title: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-  textPosition: 'top' | 'center' | 'bottom';
-  textAlignment: 'left' | 'center' | 'right';
-  backgroundColor: string;
-  backgroundImage: string;
-  mediaId: string;
-  showText: boolean;
-  height: 'tiny' | 'small' | 'medium' | 'large' | 'full';
-  objectFit: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
-  objectPosition: string;
-  overlayOpacity: number;
+  description?: string;
+  background_image_url?: string;
+  background_color?: string;
+  link_url?: string;
+  design_data?: {
+    buttonText?: string;
+    textPosition?: 'top' | 'center' | 'bottom';
+    textAlignment?: 'left' | 'center' | 'right';
+    showText?: boolean;
+    height?: 'tiny' | 'small' | 'medium' | 'full' | 'large';
+    objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+    objectPosition?: string;
+    overlayOpacity?: number;
+  };
+  display_order: number;
+  is_active: boolean;
 }
 
 export function UnifiedSlideManager() {
-  const [slides, setSlides] = useState<any[]>([]);
+  const [slides, setSlides] = useState<SlideData[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [editingSlide, setEditingSlide] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('hero-slides');
-  const [previewMode, setPreviewMode] = useState(false);
-  const [newSlide, setNewSlide] = useState<NewSlideForm>({
-    title: '',
-    description: '',
-    buttonText: '',
-    buttonLink: '',
-    textPosition: 'center',
-    textAlignment: 'center',
-    backgroundColor: '#4F46E5',
-    backgroundImage: '',
-    mediaId: '',
-    showText: true,
-    height: 'large',
-    objectFit: 'contain',
-    objectPosition: 'center center',
-    overlayOpacity: 20
-  });
-  const [editForm, setEditForm] = useState<NewSlideForm>({
-    title: '',
-    description: '',
-    buttonText: '',
-    buttonLink: '',
-    textPosition: 'center',
-    textAlignment: 'center',
-    backgroundColor: '#4F46E5',
-    backgroundImage: '',
-    mediaId: '',
-    showText: true,
-    height: 'large',
-    objectFit: 'contain',
-    objectPosition: 'center center',
-    overlayOpacity: 20
-  });
+  const [editingSlide, setEditingSlide] = useState<SlideData | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchSlides();
@@ -96,123 +65,31 @@ export function UnifiedSlideManager() {
     }
   };
 
-  const handleImageUpload = (imageUrl: string) => {
-    if (editingSlide) {
-      setEditForm(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
-    } else {
-      setNewSlide(prev => ({ ...prev, backgroundImage: imageUrl, mediaId: '' }));
-    }
-    toast.success('Image uploaded successfully');
+  const handleEditSlide = (slide: SlideData) => {
+    setEditingSlide({ ...slide });
+    setEditDialogOpen(true);
   };
 
-  const handleMediaSelect = (mediaUrl: string, mediaId: string) => {
-    if (editingSlide) {
-      setEditForm(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
-    } else {
-      setNewSlide(prev => ({ ...prev, backgroundImage: mediaUrl, mediaId }));
-    }
-    toast.success('Media selected successfully');
-  };
-
-  const handleRemoveImage = () => {
-    if (editingSlide) {
-      setEditForm(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
-    } else {
-      setNewSlide(prev => ({ ...prev, backgroundImage: '', mediaId: '' }));
-    }
-    toast.success('Image removed');
-  };
-
-  const startEditing = (slide: any) => {
-    setEditingSlide(slide.id);
-    setEditForm({
-      title: slide.title || '',
-      description: slide.description || '',
-      buttonText: slide.design_data?.buttonText || '',
-      buttonLink: slide.link_url || '',
-      textPosition: slide.design_data?.textPosition || 'center',
-      textAlignment: slide.design_data?.textAlignment || 'center',
-      backgroundColor: slide.background_color || '#4F46E5',
-      backgroundImage: slide.background_image_url || '',
-      mediaId: slide.background_media_id || '',
-      showText: slide.design_data?.showText !== false,
-      height: slide.design_data?.height || 'large',
-      objectFit: slide.design_data?.objectFit || 'contain',
-      objectPosition: slide.design_data?.objectPosition || 'center center',
-      overlayOpacity: slide.design_data?.overlayOpacity || 20
-    });
-  };
-
-  const cancelEditing = () => {
-    setEditingSlide(null);
-    setEditForm({
-      title: '',
-      description: '',
-      buttonText: '',
-      buttonLink: '',
-      textPosition: 'center',
-      textAlignment: 'center',
-      backgroundColor: '#4F46E5',
-      backgroundImage: '',
-      mediaId: '',
-      showText: true,
-      height: 'large',
-      objectFit: 'contain',
-      objectPosition: 'center center',
-      overlayOpacity: 20
-    });
-  };
-
-  const updateSlide = async () => {
-    if (!editingSlide) {
-      toast.error('No slide selected for editing');
-      return;
-    }
+  const handleSaveSlide = async () => {
+    if (!editingSlide) return;
 
     try {
       const { error } = await supabase
         .from('slide_designs')
         .update({
-          title: editForm.title,
-          description: editForm.description,
-          design_data: {
-            textElements: [{
-              id: '1',
-              type: 'heading',
-              text: editForm.title,
-              position: { x: 50, y: 50 },
-              style: { 
-                fontSize: '2rem', 
-                fontWeight: 'bold', 
-                color: 'white',
-                textAlign: editForm.textAlignment
-              }
-            }],
-            backgroundElements: [{
-              id: 'bg1',
-              type: editForm.backgroundImage ? 'image' : 'color',
-              value: editForm.backgroundImage || editForm.backgroundColor,
-              position: { x: 0, y: 0, width: 100, height: 100 }
-            }],
-            buttonText: editForm.buttonText,
-            textPosition: editForm.textPosition,
-            textAlignment: editForm.textAlignment,
-            showText: editForm.showText,
-            height: editForm.height,
-            objectFit: editForm.objectFit,
-            objectPosition: editForm.objectPosition,
-            overlayOpacity: editForm.overlayOpacity
-          },
-          background_color: editForm.backgroundColor,
-          background_image_url: editForm.backgroundImage || null,
-          background_media_id: editForm.mediaId || null,
-          link_url: editForm.buttonLink || null
+          title: editingSlide.title,
+          description: editingSlide.description,
+          background_color: editingSlide.background_color,
+          link_url: editingSlide.link_url,
+          design_data: editingSlide.design_data,
+          updated_at: new Date().toISOString()
         })
-        .eq('id', editingSlide);
+        .eq('id', editingSlide.id);
 
       if (error) throw error;
 
       toast.success('Slide updated successfully');
+      setEditDialogOpen(false);
       setEditingSlide(null);
       fetchSlides();
     } catch (error) {
@@ -221,88 +98,8 @@ export function UnifiedSlideManager() {
     }
   };
 
-  const createSlide = async () => {
-    if (!newSlide.backgroundImage && !newSlide.backgroundColor) {
-      toast.error('Please select an image or background color');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('slide_designs')
-        .insert({
-          title: newSlide.title || 'Image Slide',
-          description: newSlide.description,
-          layout_type: 'full',
-          design_data: {
-            textElements: [{
-              id: '1',
-              type: 'heading',
-              text: newSlide.title,
-              position: { x: 50, y: 50 },
-              style: { 
-                fontSize: '2rem', 
-                fontWeight: 'bold', 
-                color: 'white',
-                textAlign: newSlide.textAlignment
-              }
-            }],
-            backgroundElements: [{
-              id: 'bg1',
-              type: newSlide.backgroundImage ? 'image' : 'color',
-              value: newSlide.backgroundImage || newSlide.backgroundColor,
-              position: { x: 0, y: 0, width: 100, height: 100 }
-            }],
-            buttonText: newSlide.buttonText,
-            textPosition: newSlide.textPosition,
-            textAlignment: newSlide.textAlignment,
-            showText: newSlide.showText,
-            height: newSlide.height,
-            objectFit: newSlide.objectFit,
-            objectPosition: newSlide.objectPosition,
-            overlayOpacity: newSlide.overlayOpacity
-          },
-          background_color: newSlide.backgroundColor,
-          background_image_url: newSlide.backgroundImage || null,
-          background_media_id: newSlide.mediaId || null,
-          animation_settings: {
-            duration: 1000,
-            transition: 'fade',
-            autoPlay: true
-          },
-          link_url: newSlide.buttonLink || null,
-          is_active: true,
-          display_order: slides.length
-        });
-
-      if (error) throw error;
-
-      toast.success('Slide created successfully');
-      setNewSlide({
-        title: '',
-        description: '',
-        buttonText: '',
-        buttonLink: '',
-        textPosition: 'center',
-        textAlignment: 'center',
-        backgroundColor: '#4F46E5',
-        backgroundImage: '',
-        mediaId: '',
-        showText: true,
-        height: 'large',
-        objectFit: 'contain',
-        objectPosition: 'center center',
-        overlayOpacity: 20
-      });
-      fetchSlides();
-    } catch (error) {
-      console.error('Error creating slide:', error);
-      toast.error('Failed to create slide');
-    }
-  };
-
-  const deleteSlide = async (slideId: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return;
+  const handleDeleteSlide = async (slideId: string) => {
+    if (!window.confirm('Are you sure you want to delete this slide?')) return;
 
     try {
       const { error } = await supabase
@@ -313,578 +110,494 @@ export function UnifiedSlideManager() {
       if (error) throw error;
 
       toast.success('Slide deleted successfully');
-      setSlides(prev => prev.filter(slide => slide.id !== slideId));
+      fetchSlides();
     } catch (error) {
       console.error('Error deleting slide:', error);
       toast.error('Failed to delete slide');
     }
   };
 
-  const renderImageDisplayControls = (form: NewSlideForm, setForm: React.Dispatch<React.SetStateAction<NewSlideForm>>) => (
-    <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
-      <h4 className="text-sm font-medium">Image Display Settings</h4>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label>Object Fit</Label>
-          <Select 
-            value={form.objectFit} 
-            onValueChange={(value: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none') => 
-              setForm(prev => ({ ...prev, objectFit: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="contain">Contain (No cropping)</SelectItem>
-              <SelectItem value="cover">Cover (Fill container)</SelectItem>
-              <SelectItem value="fill">Fill (Stretch to fit)</SelectItem>
-              <SelectItem value="scale-down">Scale Down</SelectItem>
-              <SelectItem value="none">None (Original size)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const getResponsiveHeightClass = (height?: string) => {
+    switch (height) {
+      case 'tiny': return 'h-[120px] md:h-[180px]';
+      case 'small': return 'h-[160px] md:h-[240px]';
+      case 'medium': return 'h-[200px] md:h-[320px]';
+      case 'full': return 'h-[240px] md:h-screen';
+      case 'large':
+      default:
+        return 'h-[220px] md:h-[400px]';
+    }
+  };
 
-        <div className="space-y-2">
-          <Label>Object Position</Label>
-          <Select 
-            value={form.objectPosition} 
-            onValueChange={(value: string) => 
-              setForm(prev => ({ ...prev, objectPosition: value }))
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="center center">Center</SelectItem>
-              <SelectItem value="top center">Top Center</SelectItem>
-              <SelectItem value="bottom center">Bottom Center</SelectItem>
-              <SelectItem value="center left">Center Left</SelectItem>
-              <SelectItem value="center right">Center Right</SelectItem>
-              <SelectItem value="top left">Top Left</SelectItem>
-              <SelectItem value="top right">Top Right</SelectItem>
-              <SelectItem value="bottom left">Bottom Left</SelectItem>
-              <SelectItem value="bottom right">Bottom Right</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+  const getTextPositionClass = (position?: string) => {
+    switch (position) {
+      case 'top': return 'items-start pt-4 md:pt-8';
+      case 'bottom': return 'items-end pb-4 md:pb-8';
+      default: return 'items-center';
+    }
+  };
 
-        <div className="space-y-2">
-          <Label>Overlay Opacity ({form.overlayOpacity}%)</Label>
-          <Input
-            type="range"
-            min="0"
-            max="80"
-            step="5"
-            value={form.overlayOpacity}
-            onChange={(e) => setForm(prev => ({ ...prev, overlayOpacity: Number(e.target.value) }))}
-            className="w-full"
-          />
+  const getTextAlignmentClass = (alignment?: string) => {
+    switch (alignment) {
+      case 'left': return 'text-left';
+      case 'right': return 'text-right';
+      default: return 'text-center';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
-
-      <div className="text-xs text-muted-foreground space-y-1">
-        <p><strong>Contain:</strong> Shows full image without cropping (may have letterboxing)</p>
-        <p><strong>Cover:</strong> Fills container completely (may crop image)</p>
-        <p><strong>Fill:</strong> Stretches image to fit exactly (may distort)</p>
-      </div>
-    </div>
-  );
-
-  if (previewMode) {
-    return <SliderTestPreview onExitPreview={() => setPreviewMode(false)} />;
+    );
   }
 
+  const currentSlideData = slides[currentSlide];
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sliders className="h-5 w-5" />
-              Unified Slide Management
-              <Badge variant="secondary" className="ml-2">Admin Only</Badge>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPreviewMode(!previewMode)}
-              className="flex items-center gap-2"
-            >
-              {previewMode ? <Settings /> : <Eye />}
-              {previewMode ? 'Admin Mode' : 'Preview Mode'}
+    <div className="w-full p-4 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Hero Slide Manager</h1>
+        <Button onClick={() => window.location.href = '/admin/hero-manager'}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add New Slide
+        </Button>
+      </div>
+
+      {slides.length === 0 ? (
+        <Card>
+          <CardContent className="text-center py-12">
+            <p className="text-muted-foreground mb-4">No slides found</p>
+            <Button onClick={() => window.location.href = '/admin/hero-manager'}>
+              Create Your First Slide
             </Button>
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Manage all slide content from one unified interface - hero slides and top slider banners
-          </p>
-        </CardHeader>
-      </Card>
-
-      <Card>
-        <CardContent className="p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="hero-slides" className="flex items-center gap-2">
-                <Layout className="h-4 w-4" />
-                Hero Slides
-              </TabsTrigger>
-              <TabsTrigger value="top-slider" className="flex items-center gap-2">
-                <Sliders className="h-4 w-4" />
-                Top Banner
-              </TabsTrigger>
-              <TabsTrigger value="preview" className="flex items-center gap-2">
-                <TestTube className="h-4 w-4" />
-                Preview
-              </TabsTrigger>
-              <TabsTrigger value="cache" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                Cache
-              </TabsTrigger>
-            </TabsList>
-
-            <Separator className="my-6" />
-
-            <TabsContent value="hero-slides" className="mt-0">
-              <div className="space-y-6">
-                {/* Create New Slide Form */}
-                <div className="border rounded-lg p-4 space-y-4">
-                  <h3 className="font-medium">Create New Hero Slide</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Input
-                      placeholder="Slide title (optional for image-only slides)"
-                      value={newSlide.title}
-                      onChange={(e) => setNewSlide(prev => ({ ...prev, title: e.target.value }))}
-                    />
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="showText"
-                        checked={newSlide.showText}
-                        onCheckedChange={(checked) => setNewSlide(prev => ({ ...prev, showText: checked }))}
-                      />
-                      <Label htmlFor="showText">Show text overlay</Label>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Hero Height</Label>
-                      <Select 
-                        value={newSlide.height} 
-                        onValueChange={(value: 'tiny' | 'small' | 'medium' | 'large' | 'full') => 
-                          setNewSlide(prev => ({ ...prev, height: value }))
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tiny">Tiny (25vh)</SelectItem>
-                          <SelectItem value="small">Small (40vh)</SelectItem>
-                          <SelectItem value="medium">Medium (60vh)</SelectItem>
-                          <SelectItem value="large">Large (80vh)</SelectItem>
-                          <SelectItem value="full">Full Screen (100vh)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {newSlide.showText && (
-                    <>
-                      <Textarea
-                        placeholder="Slide description (optional)"
-                        value={newSlide.description}
-                        onChange={(e) => setNewSlide(prev => ({ ...prev, description: e.target.value }))}
-                      />
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex gap-2">
-                          <Select 
-                            value={newSlide.textPosition} 
-                            onValueChange={(value: 'top' | 'center' | 'bottom') => 
-                              setNewSlide(prev => ({ ...prev, textPosition: value }))
-                            }
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="top">Top</SelectItem>
-                              <SelectItem value="center">Center</SelectItem>
-                              <SelectItem value="bottom">Bottom</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Select 
-                            value={newSlide.textAlignment} 
-                            onValueChange={(value: 'left' | 'center' | 'right') => 
-                              setNewSlide(prev => ({ ...prev, textAlignment: value }))
-                            }
-                          >
-                            <SelectTrigger className="w-32">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="left">Left</SelectItem>
-                              <SelectItem value="center">Center</SelectItem>
-                              <SelectItem value="right">Right</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          placeholder="Button text (optional)"
-                          value={newSlide.buttonText}
-                          onChange={(e) => setNewSlide(prev => ({ ...prev, buttonText: e.target.value }))}
-                        />
-                        <Input
-                          placeholder="Button/Click link (optional)"
-                          value={newSlide.buttonLink}
-                          onChange={(e) => setNewSlide(prev => ({ ...prev, buttonLink: e.target.value }))}
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {!newSlide.showText && (
-                    <Input
-                      placeholder="Click link for entire image (optional)"
-                      value={newSlide.buttonLink}
-                      onChange={(e) => setNewSlide(prev => ({ ...prev, buttonLink: e.target.value }))}
-                    />
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="color"
-                      value={newSlide.backgroundColor}
-                      onChange={(e) => setNewSlide(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                      className="w-16 h-10 p-1 border rounded"
-                    />
-                    <span className="text-sm text-muted-foreground">Background color (fallback)</span>
-                  </div>
-
-                  {/* Image Upload Section */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium">Background Image</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-2 block">Upload Image</label>
-                        <ImageDropZone
-                          onImageUpload={handleImageUpload}
-                          currentImage={newSlide.backgroundImage}
-                          onRemoveImage={handleRemoveImage}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground mb-2 block">Or Select from Library</label>
-                        <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
-                      </div>
-                    </div>
-                    {newSlide.backgroundImage && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                        <p className="text-sm text-green-800">
-                          ✓ Background image selected. {!newSlide.showText ? 'Image-only slide ready!' : 'This will override the background color.'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Image Display Controls */}
-                  {newSlide.backgroundImage && renderImageDisplayControls(newSlide, setNewSlide)}
-
-                  <Button onClick={createSlide} className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Hero Slide
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Current Slide Preview */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Slide Preview</CardTitle>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="outline">
+                    {currentSlide + 1} of {slides.length}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={currentSlideData ? () => handleEditSlide(currentSlideData) : undefined}
+                    disabled={!currentSlideData}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={currentSlideData ? () => handleDeleteSlide(currentSlideData.id) : undefined}
+                    disabled={!currentSlideData}
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-
-                {/* Existing Slides */}
-                <div className="space-y-4">
-                  <h3 className="font-medium">Current Hero Slides ({slides.length})</h3>
-                  {isLoading ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      Loading slides...
-                    </div>
-                  ) : slides.length === 0 ? (
-                    <div className="text-center text-muted-foreground py-8">
-                      No hero slides configured. Create your first slide above.
+              </div>
+            </CardHeader>
+            <CardContent>
+              {currentSlideData && (
+                <div 
+                  className={`relative w-full ${getResponsiveHeightClass(currentSlideData.design_data?.height)} overflow-hidden rounded-lg`}
+                >
+                  {/* Background */}
+                  {currentSlideData.background_image_url ? (
+                    <div className="absolute inset-0">
+                      <img
+                        src={currentSlideData.background_image_url}
+                        alt={currentSlideData.title}
+                        className="w-full h-full"
+                        style={{ 
+                          objectPosition: currentSlideData.design_data?.objectPosition || 'center center',
+                          objectFit: currentSlideData.design_data?.objectFit || 'cover'
+                        }}
+                      />
+                      {currentSlideData.design_data?.showText !== false && (
+                        <div 
+                          className="absolute inset-0 bg-black" 
+                          style={{ opacity: (currentSlideData.design_data?.overlayOpacity || 20) / 100 }}
+                        />
+                      )}
                     </div>
                   ) : (
-                    slides.map((slide, index) => (
-                      <div key={slide.id} className="border rounded-lg p-4">
-                        {editingSlide === slide.id ? (
-                          /* Edit Form */
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between mb-4">
-                              <h4 className="font-medium">Edit Slide</h4>
-                              <div className="flex gap-2">
-                                <Button size="sm" onClick={updateSlide}>
-                                  <Save className="h-4 w-4 mr-1" />
-                                  Save
-                                </Button>
-                                <Button size="sm" variant="outline" onClick={cancelEditing}>
-                                  <X className="h-4 w-4 mr-1" />
-                                  Cancel
-                                </Button>
-                              </div>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                              <Input
-                                placeholder="Slide title (optional)"
-                                value={editForm.title}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
-                              />
-                              <div className="flex items-center space-x-2">
-                                <Switch
-                                  id="editShowText"
-                                  checked={editForm.showText}
-                                  onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, showText: checked }))}
-                                />
-                                <Label htmlFor="editShowText">Show text overlay</Label>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Hero Height</Label>
-                                <Select 
-                                  value={editForm.height} 
-                                  onValueChange={(value: 'tiny' | 'small' | 'medium' | 'large' | 'full') => 
-                                    setEditForm(prev => ({ ...prev, height: value }))
-                                  }
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="tiny">Tiny (25vh)</SelectItem>
-                                    <SelectItem value="small">Small (40vh)</SelectItem>
-                                    <SelectItem value="medium">Medium (60vh)</SelectItem>
-                                    <SelectItem value="large">Large (80vh)</SelectItem>
-                                    <SelectItem value="full">Full Screen (100vh)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
+                    <div 
+                      className="absolute inset-0"
+                      style={{ backgroundColor: currentSlideData.background_color || '#4F46E5' }}
+                    />
+                  )}
 
-                            {editForm.showText && (
-                              <>
-                                <Textarea
-                                  placeholder="Slide description (optional)"
-                                  value={editForm.description}
-                                  onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                                />
+                  {/* Content */}
+                  {currentSlideData.design_data?.showText !== false && (
+                    <div className={`relative h-full flex ${getTextPositionClass(currentSlideData.design_data?.textPosition)} justify-center`}>
+                      <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(currentSlideData.design_data?.textAlignment)} space-y-2 md:space-y-4 px-4`}>
+                        {currentSlideData.title && (
+                          <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
+                            {currentSlideData.title}
+                          </h1>
+                        )}
+                        
+                        {currentSlideData.description && (
+                          <p className="text-sm md:text-base lg:text-lg opacity-90 leading-relaxed drop-shadow-md">
+                            {currentSlideData.description}
+                          </p>
+                        )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <div className="flex gap-2">
-                                    <Select 
-                                      value={editForm.textPosition} 
-                                      onValueChange={(value: 'top' | 'center' | 'bottom') => 
-                                        setEditForm(prev => ({ ...prev, textPosition: value }))
-                                      }
-                                    >
-                                      <SelectTrigger className="w-32">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="top">Top</SelectItem>
-                                        <SelectItem value="center">Center</SelectItem>
-                                        <SelectItem value="bottom">Bottom</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                    <Select 
-                                      value={editForm.textAlignment} 
-                                      onValueChange={(value: 'left' | 'center' | 'right') => 
-                                        setEditForm(prev => ({ ...prev, textAlignment: value }))
-                                      }
-                                    >
-                                      <SelectTrigger className="w-32">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="left">Left</SelectItem>
-                                        <SelectItem value="center">Center</SelectItem>
-                                        <SelectItem value="right">Right</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                  <Input
-                                    placeholder="Button text (optional)"
-                                    value={editForm.buttonText}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, buttonText: e.target.value }))}
-                                  />
-                                  <Input
-                                    placeholder="Button/Click link (optional)"
-                                    value={editForm.buttonLink}
-                                    onChange={(e) => setEditForm(prev => ({ ...prev, buttonLink: e.target.value }))}
-                                  />
-                                </div>
-                              </>
-                            )}
-
-                            {!editForm.showText && (
-                              <Input
-                                placeholder="Click link for entire image (optional)"
-                                value={editForm.buttonLink}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, buttonLink: e.target.value }))}
-                              />
-                            )}
-
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="color"
-                                value={editForm.backgroundColor}
-                                onChange={(e) => setEditForm(prev => ({ ...prev, backgroundColor: e.target.value }))}
-                                className="w-16 h-10 p-1 border rounded"
-                              />
-                              <span className="text-sm text-muted-foreground">Background color</span>
-                            </div>
-
-                            {/* Edit Image Upload Section */}
-                            <div className="space-y-3">
-                              <h4 className="text-sm font-medium">Background Image</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-xs text-muted-foreground mb-2 block">Upload Image</label>
-                                  <ImageDropZone
-                                    onImageUpload={handleImageUpload}
-                                    currentImage={editForm.backgroundImage}
-                                    onRemoveImage={handleRemoveImage}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-xs text-muted-foreground mb-2 block">Or Select from Library</label>
-                                  <MediaLibrarySelector onSelectMedia={handleMediaSelect} />
-                                </div>
-                              </div>
-                              {editForm.backgroundImage && (
-                                <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                                  <p className="text-sm text-green-800">
-                                    ✓ Background image selected. {!editForm.showText ? 'Image-only slide!' : 'This will override the background color.'}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Edit Image Display Controls */}
-                            {editForm.backgroundImage && renderImageDisplayControls(editForm, setEditForm)}
-                          </div>
-                        ) : (
-                          /* Display Mode */
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                {slide.background_image_url && (
-                                  <img 
-                                    src={slide.background_image_url} 
-                                    alt="Slide preview"
-                                    className="w-16 h-10 object-cover rounded border"
-                                  />
-                                )}
-                                <div>
-                                  <h4 className="font-medium">{slide.title || 'Image Slide'}</h4>
-                                  {slide.description && (
-                                    <p className="text-sm text-muted-foreground">{slide.description}</p>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex gap-2 mt-2 flex-wrap">
-                                <Badge variant="outline">Slide {index + 1}</Badge>
-                                {slide.is_active && (
-                                  <Badge variant="default">Active</Badge>
-                                )}
-                                {slide.design_data?.showText === false && (
-                                  <Badge variant="secondary">Image Only</Badge>
-                                )}
-                                {slide.background_image_url && (
-                                  <Badge variant="secondary">
-                                    <Image className="h-3 w-3 mr-1" />
-                                    Image
-                                  </Badge>
-                                )}
-                                <Badge variant="secondary">
-                                  Height: {slide.design_data?.height || 'large'}
-                                </Badge>
-                                <Badge variant="secondary">
-                                  Fit: {slide.design_data?.objectFit || 'contain'}
-                                </Badge>
-                                <Badge variant="secondary">
-                                  Overlay: {slide.design_data?.overlayOpacity || 20}%
-                                </Badge>
-                                <Badge 
-                                  variant="secondary" 
-                                  style={{ backgroundColor: slide.background_color + '20', color: slide.background_color }}
-                                >
-                                  {slide.background_color}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => startEditing(slide)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="icon"
-                                onClick={() => deleteSlide(slide.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                        {currentSlideData.design_data?.buttonText && currentSlideData.link_url && (
+                          <div className="pt-2">
+                            <Button 
+                              size="sm"
+                              className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg"
+                            >
+                              {currentSlideData.design_data.buttonText}
+                            </Button>
                           </div>
                         )}
                       </div>
-                    ))
+                    </div>
+                  )}
+
+                  {/* Navigation */}
+                  {slides.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+
+                      {/* Dots indicator */}
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                        {slides.map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentSlide(index)}
+                            className={`w-2 h-2 rounded-full transition-colors ${
+                              index === currentSlide ? 'bg-white' : 'bg-white/50'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
-              </div>
-            </TabsContent>
+              )}
+            </CardContent>
+          </Card>
 
-            <TabsContent value="top-slider" className="mt-0">
+          {/* Slides List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>All Slides</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {slides.map((slide, index) => (
+                  <Card 
+                    key={slide.id} 
+                    className={cn(
+                      "cursor-pointer transition-all hover:shadow-md",
+                      index === currentSlide && "ring-2 ring-primary"
+                    )}
+                    onClick={() => setCurrentSlide(index)}
+                  >
+                    <div className="relative h-32 overflow-hidden rounded-t-lg">
+                      {slide.background_image_url ? (
+                        <img
+                          src={slide.background_image_url}
+                          alt={slide.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div 
+                          className="w-full h-full"
+                          style={{ backgroundColor: slide.background_color || '#4F46E5' }}
+                        />
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditSlide(slide);
+                          }}
+                          className="bg-white/90 text-gray-900 hover:bg-white"
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSlide(slide.id);
+                          }}
+                          className="bg-red-500/90 hover:bg-red-500"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="font-medium truncate">{slide.title}</h3>
+                      {slide.description && (
+                        <p className="text-sm text-muted-foreground truncate">{slide.description}</p>
+                      )}
+                      <div className="flex items-center justify-between mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          Order: {slide.display_order}
+                        </Badge>
+                        <Badge variant={slide.is_active ? "default" : "secondary"} className="text-xs">
+                          {slide.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+
+      {/* Edit Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Slide Attributes</DialogTitle>
+          </DialogHeader>
+          
+          {editingSlide && (
+            <div className="space-y-6">
+              {/* Basic Info */}
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Top Banner Slider</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Manage the banner slides that appear at the top of your pages.
-                  </p>
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={editingSlide.title}
+                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, title: e.target.value } : null)}
+                  />
                 </div>
-                <TopSliderManager />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="preview" className="mt-0">
-              <div className="space-y-4">
+                
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Live Preview</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Preview how your slides appear on the live site.
-                  </p>
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={editingSlide.description || ''}
+                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    rows={3}
+                  />
                 </div>
-                <SliderTestPreview />
-              </div>
-            </TabsContent>
 
-            <TabsContent value="cache" className="mt-0">
-              <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Cache Management</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Clear application caches to force fresh content loading.
-                  </p>
+                  <Label htmlFor="link_url">Link URL</Label>
+                  <Input
+                    id="link_url"
+                    value={editingSlide.link_url || ''}
+                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, link_url: e.target.value } : null)}
+                    placeholder="https://example.com or /internal-page"
+                  />
                 </div>
-                <CacheManager />
+
+                <div>
+                  <Label htmlFor="button_text">Button Text</Label>
+                  <Input
+                    id="button_text"
+                    value={editingSlide.design_data?.buttonText || ''}
+                    onChange={(e) => setEditingSlide(prev => prev ? { 
+                      ...prev, 
+                      design_data: { 
+                        ...prev.design_data, 
+                        buttonText: e.target.value 
+                      } 
+                    } : null)}
+                    placeholder="Learn More"
+                  />
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+
+              {/* Layout Settings */}
+              <div className="space-y-4">
+                <h3 className="font-medium">Layout Settings</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Height</Label>
+                    <Select
+                      value={editingSlide.design_data?.height || 'large'}
+                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          height: value as any 
+                        } 
+                      } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tiny">Tiny</SelectItem>
+                        <SelectItem value="small">Small</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="large">Large</SelectItem>
+                        <SelectItem value="full">Full Screen</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Text Position</Label>
+                    <Select
+                      value={editingSlide.design_data?.textPosition || 'center'}
+                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          textPosition: value as any 
+                        } 
+                      } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="top">Top</SelectItem>
+                        <SelectItem value="center">Center</SelectItem>
+                        <SelectItem value="bottom">Bottom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Text Alignment</Label>
+                    <Select
+                      value={editingSlide.design_data?.textAlignment || 'center'}
+                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          textAlignment: value as any 
+                        } 
+                      } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">Left</SelectItem>
+                        <SelectItem value="center">Center</SelectItem>
+                        <SelectItem value="right">Right</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Image Fit</Label>
+                    <Select
+                      value={editingSlide.design_data?.objectFit || 'cover'}
+                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          objectFit: value as any 
+                        } 
+                      } : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cover">Cover</SelectItem>
+                        <SelectItem value="contain">Contain</SelectItem>
+                        <SelectItem value="fill">Fill</SelectItem>
+                        <SelectItem value="scale-down">Scale Down</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Overlay Opacity: {editingSlide.design_data?.overlayOpacity || 20}%</Label>
+                  <Slider
+                    value={[editingSlide.design_data?.overlayOpacity || 20]}
+                    onValueChange={([value]) => setEditingSlide(prev => prev ? { 
+                      ...prev, 
+                      design_data: { 
+                        ...prev.design_data, 
+                        overlayOpacity: value 
+                      } 
+                    } : null)}
+                    max={100}
+                    step={5}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={editingSlide.design_data?.showText !== false}
+                    onCheckedChange={(checked) => setEditingSlide(prev => prev ? { 
+                      ...prev, 
+                      design_data: { 
+                        ...prev.design_data, 
+                        showText: checked 
+                      } 
+                    } : null)}
+                  />
+                  <Label>Show Text Overlay</Label>
+                </div>
+              </div>
+
+              {/* Background Color */}
+              <div>
+                <Label htmlFor="bg_color">Background Color (for slides without images)</Label>
+                <Input
+                  id="bg_color"
+                  type="color"
+                  value={editingSlide.background_color || '#4F46E5'}
+                  onChange={(e) => setEditingSlide(prev => prev ? { ...prev, background_color: e.target.value } : null)}
+                  className="h-12"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveSlide}>
+                  <Save className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
