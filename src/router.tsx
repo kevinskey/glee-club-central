@@ -1,4 +1,3 @@
-
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
@@ -19,6 +18,7 @@ import HistorianDashboard from "./pages/dashboard/HistorianDashboard";
 import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
+import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
@@ -96,6 +96,10 @@ const router = createBrowserRouter([
       {
         path: "sheet-music",
         element: <SheetMusicPage />,
+      },
+      {
+        path: "sheet-music/view/:id",
+        element: <ViewSheetMusicPage />,
       },
       // Add all admin routes (original)
       ...adminRoutes,
