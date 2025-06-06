@@ -20,6 +20,7 @@ import MemberCSVUploadPage from "./pages/admin/MemberCSVUploadPage";
 import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
+import PracticePage from "./pages/practice/PracticePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
@@ -81,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "attendance",
         element: <AttendancePage />,
+      },
+      {
+        path: "practice",
+        element: <PracticePage />,
       },
       {
         path: "store",
