@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -78,15 +77,6 @@ export function UnifiedAdminModules() {
       icon: <Users className="h-5 w-5" />,
       color: "bg-blue-500",
       path: "/admin/users",
-      adminOnly: true
-    },
-    {
-      id: "music",
-      title: "Music Library",
-      description: "Manage sheet music and audio",
-      icon: <Music className="h-5 w-5" />,
-      color: "bg-indigo-500",
-      path: "/admin/media-library",
       adminOnly: true
     },
     {
