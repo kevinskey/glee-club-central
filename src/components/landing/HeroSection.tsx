@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SlideData {
   id: string;
@@ -69,14 +68,6 @@ export function HeroSection() {
       return () => clearInterval(timer);
     }
   }, [slides.length]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
 
   const handleSlideClick = (slide: SlideData) => {
     if (slide.link_url) {
@@ -227,49 +218,6 @@ export function HeroSection() {
               )}
             </div>
           </div>
-        )}
-
-        {/* Navigation - Mobile optimized */}
-        {slides.length > 1 && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                prevSlide();
-              }}
-              className="absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 md:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10 touch-manipulation"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                nextSlide();
-              }}
-              className="absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 md:p-3 rounded-full bg-black/20 text-white hover:bg-black/40 transition-colors z-10 touch-manipulation"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
-            </button>
-
-            {/* Dots indicator - Mobile optimized */}
-            <div className="absolute bottom-3 sm:bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10">
-              {slides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentSlide(index);
-                  }}
-                  className={`w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full transition-colors touch-manipulation ${
-                    index === currentSlide ? 'bg-white' : 'bg-white/50'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </>
         )}
       </div>
     </div>
