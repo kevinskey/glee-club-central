@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,10 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Edit, Eye, Trash2, Save, X, Settings, Plus, ChevronLeft, ChevronRight, Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, Zap } from 'lucide-react';
+import { Edit, Eye, Trash2, Save, X, Settings, Plus, ChevronLeft, ChevronRight, Play, Pause, SkipBack, SkipForward, RotateCcw, Clock, Zap, Image, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 
 interface SlideData {
   id: string;
@@ -38,6 +38,7 @@ interface SlideData {
 }
 
 export function UnifiedSlideManager() {
+  const { filteredMediaFiles, fetchAllMedia } = useMediaLibrary();
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +55,7 @@ export function UnifiedSlideManager() {
 
   useEffect(() => {
     fetchSlides();
+    fetchAllMedia();
   }, []);
 
   // Auto-advance slides with hero controls
@@ -162,6 +164,7 @@ export function UnifiedSlideManager() {
           title: editingSlide.title,
           description: editingSlide.description,
           background_color: editingSlide.background_color,
+          background_image_url: editingSlide.background_image_url,
           link_url: editingSlide.link_url,
           design_data: editingSlide.design_data,
           updated_at: new Date().toISOString()
@@ -197,6 +200,54 @@ export function UnifiedSlideManager() {
       console.error('Error deleting slide:', error);
       toast.error('Failed to delete slide');
     }
+  };
+
+  const handleImageSelect = (media: any) => {
+    if (!editingSlide) return;
+    setEditingSlide(prev => prev ? {
+      ...prev,
+      background_image_url: media.file_url
+    } : null);
+    toast.success('Background image updated');
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!editingSlide) return;
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `slide-bg-${Date.now()}.${fileExt}`;
+      const filePath = `slides/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('media-library')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('media-library')
+        .getPublicUrl(filePath);
+
+      setEditingSlide(prev => prev ? {
+        ...prev,
+        background_image_url: publicUrl
+      } : null);
+
+      toast.success('Image uploaded and set as background');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (!editingSlide) return;
+    setEditingSlide(prev => prev ? {
+      ...prev,
+      background_image_url: ''
+    } : null);
+    toast.success('Background image removed');
   };
 
   const getResponsiveHeightClass = (height?: string) => {
@@ -694,217 +745,366 @@ export function UnifiedSlideManager() {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Slide Attributes</DialogTitle>
           </DialogHeader>
           
           {editingSlide && (
-            <div className="space-y-6">
-              {/* Basic Info */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Form Fields */}
+              <div className="space-y-6">
+                {/* Basic Info */}
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={editingSlide.title}
+                      onChange={(e) => setEditingSlide(prev => prev ? { ...prev, title: e.target.value } : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={editingSlide.description || ''}
+                      onChange={(e) => setEditingSlide(prev => prev ? { ...prev, description: e.target.value } : null)}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="link_url">Link URL</Label>
+                    <Input
+                      id="link_url"
+                      value={editingSlide.link_url || ''}
+                      onChange={(e) => setEditingSlide(prev => prev ? { ...prev, link_url: e.target.value } : null)}
+                      placeholder="https://example.com or /internal-page"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="button_text">Button Text</Label>
+                    <Input
+                      id="button_text"
+                      value={editingSlide.design_data?.buttonText || ''}
+                      onChange={(e) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          buttonText: e.target.value 
+                        } 
+                      } : null)}
+                      placeholder="Learn More"
+                    />
+                  </div>
+                </div>
+
+                {/* Layout Settings */}
+                <div className="space-y-4">
+                  <h3 className="font-medium">Layout Settings</h3>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Height</Label>
+                      <Select
+                        value={editingSlide.design_data?.height || 'large'}
+                        onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                          ...prev, 
+                          design_data: { 
+                            ...prev.design_data, 
+                            height: value as any 
+                          } 
+                        } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="tiny">Tiny</SelectItem>
+                          <SelectItem value="small">Small</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="large">Large</SelectItem>
+                          <SelectItem value="full">Full Screen</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Text Position</Label>
+                      <Select
+                        value={editingSlide.design_data?.textPosition || 'center'}
+                        onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                          ...prev, 
+                          design_data: { 
+                            ...prev.design_data, 
+                            textPosition: value as any 
+                          } 
+                        } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="top">Top</SelectItem>
+                          <SelectItem value="center">Center</SelectItem>
+                          <SelectItem value="bottom">Bottom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Text Alignment</Label>
+                      <Select
+                        value={editingSlide.design_data?.textAlignment || 'center'}
+                        onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                          ...prev, 
+                          design_data: { 
+                            ...prev.design_data, 
+                            textAlignment: value as any 
+                          } 
+                        } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="left">Left</SelectItem>
+                          <SelectItem value="center">Center</SelectItem>
+                          <SelectItem value="right">Right</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Image Fit</Label>
+                      <Select
+                        value={editingSlide.design_data?.objectFit || 'cover'}
+                        onValueChange={(value) => setEditingSlide(prev => prev ? { 
+                          ...prev, 
+                          design_data: { 
+                            ...prev.design_data, 
+                            objectFit: value as any 
+                          } 
+                        } : null)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cover">Cover</SelectItem>
+                          <SelectItem value="contain">Contain</SelectItem>
+                          <SelectItem value="fill">Fill</SelectItem>
+                          <SelectItem value="scale-down">Scale Down</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Overlay Opacity: {editingSlide.design_data?.overlayOpacity || 20}%</Label>
+                    <Slider
+                      value={[editingSlide.design_data?.overlayOpacity || 20]}
+                      onValueChange={([value]) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          overlayOpacity: value 
+                        } 
+                      } : null)}
+                      max={100}
+                      step={5}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={editingSlide.design_data?.showText !== false}
+                      onCheckedChange={(checked) => setEditingSlide(prev => prev ? { 
+                        ...prev, 
+                        design_data: { 
+                          ...prev.design_data, 
+                          showText: checked 
+                        } 
+                      } : null)}
+                    />
+                    <Label>Show Text Overlay</Label>
+                  </div>
+                </div>
+
+                {/* Background Settings */}
+                <div className="space-y-4">
+                  <h3 className="font-medium">Background Settings</h3>
+                  
+                  <div>
+                    <Label htmlFor="bg_color">Background Color (fallback)</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        type="color"
+                        value={editingSlide.background_color || '#4F46E5'}
+                        onChange={(e) => setEditingSlide(prev => prev ? { ...prev, background_color: e.target.value } : null)}
+                        className="w-16 h-10 p-1"
+                      />
+                      <Input
+                        value={editingSlide.background_color || '#4F46E5'}
+                        onChange={(e) => setEditingSlide(prev => prev ? { ...prev, background_color: e.target.value } : null)}
+                        placeholder="#4F46E5"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Image Upload */}
+                  <div>
+                    <Label>Background Image</Label>
+                    <div className="mt-2 space-y-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file);
+                        }}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById('image-upload')?.click()}
+                          className="flex-1"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload New Image
+                        </Button>
+                        {editingSlide.background_image_url && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={handleRemoveImage}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Media Library Selection */}
+                  <div>
+                    <Label>Or Select from Media Library</Label>
+                    <div className="mt-2 max-h-40 overflow-y-auto border rounded-lg p-2">
+                      <div className="grid grid-cols-3 gap-2">
+                        {filteredMediaFiles
+                          .filter(file => file.file_type.startsWith('image/'))
+                          .slice(0, 12)
+                          .map((media) => (
+                            <div
+                              key={media.id}
+                              className="relative aspect-square cursor-pointer hover:opacity-75 transition-opacity"
+                              onClick={() => handleImageSelect(media)}
+                            >
+                              <img
+                                src={media.file_url}
+                                alt={media.title}
+                                className="w-full h-full object-cover rounded"
+                              />
+                              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded flex items-center justify-center">
+                                <Image className="h-6 w-6 text-white opacity-0 hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                      {filteredMediaFiles.filter(file => file.file_type.startsWith('image/')).length === 0 && (
+                        <p className="text-center text-muted-foreground py-4">No images available in media library</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveSlide}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+
+              {/* Right Column - Preview */}
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={editingSlide.title}
-                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, title: e.target.value } : null)}
-                  />
+                <h3 className="font-medium">Preview</h3>
+                <div 
+                  className="relative w-full aspect-video overflow-hidden rounded-lg border"
+                  style={{ 
+                    backgroundColor: editingSlide.background_color || '#4F46E5',
+                    backgroundImage: editingSlide.background_image_url ? `url(${editingSlide.background_image_url})` : undefined,
+                    backgroundSize: editingSlide.design_data?.objectFit || 'cover',
+                    backgroundPosition: editingSlide.design_data?.objectPosition || 'center center',
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                >
+                  {editingSlide.design_data?.showText !== false && (
+                    <>
+                      {editingSlide.background_image_url && (
+                        <div 
+                          className="absolute inset-0 bg-black" 
+                          style={{ opacity: (editingSlide.design_data?.overlayOpacity || 20) / 100 }}
+                        />
+                      )}
+                      <div className={`relative h-full flex ${getTextPositionClass(editingSlide.design_data?.textPosition)} justify-center px-4`}>
+                        <div className={`max-w-lg text-white ${getTextAlignmentClass(editingSlide.design_data?.textAlignment)} space-y-2`}>
+                          {editingSlide.title && (
+                            <h1 className="text-lg font-bold leading-tight drop-shadow-lg">
+                              {editingSlide.title}
+                            </h1>
+                          )}
+                          
+                          {editingSlide.description && (
+                            <p className="text-sm opacity-90 leading-relaxed drop-shadow-md">
+                              {editingSlide.description}
+                            </p>
+                          )}
+
+                          {editingSlide.design_data?.buttonText && editingSlide.link_url && (
+                            <div className="pt-2">
+                              <Button 
+                                size="sm"
+                                className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg pointer-events-none"
+                              >
+                                {editingSlide.design_data.buttonText}
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  
+                  {!editingSlide.background_image_url && (
+                    <div className="absolute inset-0 flex items-center justify-center text-white/50">
+                      <div className="text-center">
+                        <Image className="h-12 w-12 mx-auto mb-2" />
+                        <p className="text-sm">No background image</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={editingSlide.description || ''}
-                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, description: e.target.value } : null)}
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="link_url">Link URL</Label>
-                  <Input
-                    id="link_url"
-                    value={editingSlide.link_url || ''}
-                    onChange={(e) => setEditingSlide(prev => prev ? { ...prev, link_url: e.target.value } : null)}
-                    placeholder="https://example.com or /internal-page"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="button_text">Button Text</Label>
-                  <Input
-                    id="button_text"
-                    value={editingSlide.design_data?.buttonText || ''}
-                    onChange={(e) => setEditingSlide(prev => prev ? { 
-                      ...prev, 
-                      design_data: { 
-                        ...prev.design_data, 
-                        buttonText: e.target.value 
-                      } 
-                    } : null)}
-                    placeholder="Learn More"
-                  />
-                </div>
-              </div>
-
-              {/* Layout Settings */}
-              <div className="space-y-4">
-                <h3 className="font-medium">Layout Settings</h3>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Height</Label>
-                    <Select
-                      value={editingSlide.design_data?.height || 'large'}
-                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
-                        ...prev, 
-                        design_data: { 
-                          ...prev.design_data, 
-                          height: value as any 
-                        } 
-                      } : null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="tiny">Tiny</SelectItem>
-                        <SelectItem value="small">Small</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="large">Large</SelectItem>
-                        <SelectItem value="full">Full Screen</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {editingSlide.background_image_url && (
+                  <div className="text-xs text-muted-foreground">
+                    <strong>Current image:</strong> {editingSlide.background_image_url.split('/').pop()}
                   </div>
-
-                  <div>
-                    <Label>Text Position</Label>
-                    <Select
-                      value={editingSlide.design_data?.textPosition || 'center'}
-                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
-                        ...prev, 
-                        design_data: { 
-                          ...prev.design_data, 
-                          textPosition: value as any 
-                        } 
-                      } : null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="top">Top</SelectItem>
-                        <SelectItem value="center">Center</SelectItem>
-                        <SelectItem value="bottom">Bottom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Text Alignment</Label>
-                    <Select
-                      value={editingSlide.design_data?.textAlignment || 'center'}
-                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
-                        ...prev, 
-                        design_data: { 
-                          ...prev.design_data, 
-                          textAlignment: value as any 
-                        } 
-                      } : null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="left">Left</SelectItem>
-                        <SelectItem value="center">Center</SelectItem>
-                        <SelectItem value="right">Right</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label>Image Fit</Label>
-                    <Select
-                      value={editingSlide.design_data?.objectFit || 'cover'}
-                      onValueChange={(value) => setEditingSlide(prev => prev ? { 
-                        ...prev, 
-                        design_data: { 
-                          ...prev.design_data, 
-                          objectFit: value as any 
-                        } 
-                      } : null)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cover">Cover</SelectItem>
-                        <SelectItem value="contain">Contain</SelectItem>
-                        <SelectItem value="fill">Fill</SelectItem>
-                        <SelectItem value="scale-down">Scale Down</SelectItem>
-                        <SelectItem value="none">None</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Overlay Opacity: {editingSlide.design_data?.overlayOpacity || 20}%</Label>
-                  <Slider
-                    value={[editingSlide.design_data?.overlayOpacity || 20]}
-                    onValueChange={([value]) => setEditingSlide(prev => prev ? { 
-                      ...prev, 
-                      design_data: { 
-                        ...prev.design_data, 
-                        overlayOpacity: value 
-                      } 
-                    } : null)}
-                    max={100}
-                    step={5}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    checked={editingSlide.design_data?.showText !== false}
-                    onCheckedChange={(checked) => setEditingSlide(prev => prev ? { 
-                      ...prev, 
-                      design_data: { 
-                        ...prev.design_data, 
-                        showText: checked 
-                      } 
-                    } : null)}
-                  />
-                  <Label>Show Text Overlay</Label>
-                </div>
-              </div>
-
-              {/* Background Color */}
-              <div>
-                <Label htmlFor="bg_color">Background Color (for slides without images)</Label>
-                <Input
-                  id="bg_color"
-                  type="color"
-                  value={editingSlide.background_color || '#4F46E5'}
-                  onChange={(e) => setEditingSlide(prev => prev ? { ...prev, background_color: e.target.value } : null)}
-                  className="h-12"
-                />
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                  <X className="h-4 w-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveSlide}>
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </Button>
+                )}
               </div>
             </div>
           )}
