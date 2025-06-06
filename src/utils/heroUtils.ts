@@ -1,15 +1,7 @@
 
 export const getResponsiveHeightClass = (height?: string) => {
-  // Remove fixed heights, use minimums only to let images determine actual height
-  switch (height) {
-    case 'tiny': return 'min-h-[200px]';
-    case 'small': return 'min-h-[250px]';
-    case 'medium': return 'min-h-[300px]';
-    case 'full': return 'min-h-[400px]';
-    case 'large':
-    default:
-      return 'min-h-[320px]';
-  }
+  // Using standard hero height instead of variable heights
+  return 'h-[60vh] min-h-[400px] max-h-[600px]';
 };
 
 export const getTextPositionClass = (position?: string) => {

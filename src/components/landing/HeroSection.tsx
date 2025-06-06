@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -125,7 +126,7 @@ export function HeroSection() {
     <div className="relative">
       {/* Hero Slide with fade-in animation */}
       <div 
-        className={`transition-opacity duration-1000 min-h-[320px] ${
+        className={`transition-opacity duration-1000 h-[60vh] min-h-[400px] max-h-[600px] ${
           showContent ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ 

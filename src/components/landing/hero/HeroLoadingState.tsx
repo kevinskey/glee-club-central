@@ -4,7 +4,7 @@ import React from 'react';
 export function HeroLoadingState() {
   return (
     <div className="w-full">
-      <div className="relative w-full min-h-[320px] bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/5 dark:to-primary/15 overflow-hidden flex items-center justify-center">
+      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/5 dark:to-primary/15 overflow-hidden flex items-center justify-center">
         <div className="absolute inset-0 animate-pulse">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-shimmer"></div>
         </div>

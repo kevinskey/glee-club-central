@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { getResponsiveHeightClass, getTextPositionClass, getTextAlignmentClass } from '@/utils/heroUtils';
+import { getTextPositionClass, getTextAlignmentClass } from '@/utils/heroUtils';
 
 interface SlideData {
   id: string;
@@ -39,7 +39,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
 
   return (
     <div 
-      className="relative w-full min-h-[320px] overflow-hidden cursor-pointer flex items-center justify-center"
+      className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden cursor-pointer flex items-center justify-center"
       onClick={handleClick}
     >
       {/* Background */}
@@ -48,22 +48,9 @@ export function HeroSlide({ slide }: HeroSlideProps) {
           <img
             src={slide.background_image_url}
             alt={slide.title}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
             style={{ 
               objectPosition: slide.design_data?.objectPosition || 'center center'
-            }}
-            onLoad={(e) => {
-              // Let the container adapt to the image's natural aspect ratio
-              const img = e.currentTarget;
-              const container = img.parentElement?.parentElement;
-              if (container && img.naturalWidth && img.naturalHeight) {
-                const aspectRatio = img.naturalWidth / img.naturalHeight;
-                const containerWidth = container.offsetWidth;
-                const naturalHeight = containerWidth / aspectRatio;
-                // Cap the height at 80% of viewport height for very tall images
-                const maxHeight = window.innerHeight * 0.8;
-                container.style.height = `${Math.min(naturalHeight, maxHeight)}px`;
-              }
             }}
           />
           {slide.design_data?.showText !== false && (
