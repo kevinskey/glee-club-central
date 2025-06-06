@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BackgroundSlideshow } from './slideshow/BackgroundSlideshow';
@@ -28,6 +27,43 @@ export function HeroSection() {
   const [slides, setSlides] = useState<SlideData[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [imageHeight, setImageHeight] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Load image dimensions for mobile height calculation
+  useEffect(() => {
+    if (slides.length > 0 && isMobile) {
+      const currentSlideData = slides[currentSlide];
+      if (currentSlideData?.background_image_url) {
+        const img = new Image();
+        img.onload = () => {
+          const aspectRatio = img.naturalWidth / img.naturalHeight;
+          const screenWidth = window.innerWidth;
+          const calculatedHeight = screenWidth / aspectRatio;
+          // Cap at reasonable mobile heights
+          const maxMobileHeight = window.innerHeight * 0.7;
+          const minMobileHeight = 300;
+          setImageHeight(Math.min(maxMobileHeight, Math.max(minMobileHeight, calculatedHeight)));
+        };
+        img.src = currentSlideData.background_image_url;
+      } else {
+        setImageHeight(null);
+      }
+    } else {
+      setImageHeight(null);
+    }
+  }, [slides, currentSlide, isMobile]);
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -74,8 +110,13 @@ export function HeroSection() {
     }
   };
 
-  // Responsive height classes with support for admin-configured heights
+  // Responsive height classes with mobile image height support
   const getResponsiveHeightClass = (height?: string) => {
+    // On mobile with image height calculated, use that
+    if (isMobile && imageHeight) {
+      return '';
+    }
+    
     switch (height) {
       case 'tiny': return 'h-[25vh] min-h-[200px]';
       case 'small': return 'h-[40vh] min-h-[300px]';
@@ -85,6 +126,13 @@ export function HeroSection() {
       default:
         return 'h-[50vh] sm:h-[55vh] md:h-[65vh] lg:h-[75vh] xl:h-[80vh] max-h-[600px] min-h-[400px]';
     }
+  };
+
+  const getDynamicStyle = (height?: string) => {
+    if (isMobile && imageHeight) {
+      return { height: `${imageHeight}px` };
+    }
+    return {};
   };
 
   if (isLoading) {
@@ -148,6 +196,7 @@ export function HeroSection() {
   return (
     <div 
       className={`relative ${getResponsiveHeightClass(slide.design_data?.height)} overflow-hidden cursor-pointer pt-20`}
+      style={getDynamicStyle(slide.design_data?.height)}
       onClick={() => handleSlideClick(slide)}
     >
       {/* Background with admin-configurable display settings */}
