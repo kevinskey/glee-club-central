@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -122,58 +123,54 @@ export function HeroSection() {
   const slide = slides[currentSlide];
   
   return (
-    <section className="w-full">
-      <div className="w-full">
-        <div className="relative">
-          {/* Hero Slide with fade-in animation */}
-          <div 
-            className={`transition-opacity duration-1000 h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden ${
-              showContent ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ 
-              transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
-            }}
-          >
-            <HeroSlide slide={slide} />
-          </div>
-
-          {/* Controls Toggle Button */}
-          {showContent && (
-            <button
-              onClick={() => setShowControls(!showControls)}
-              className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
-              title="Toggle slide controls"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-              </svg>
-            </button>
-          )}
-
-          {/* Slide Controls Panel */}
-          {showControls && showContent && (
-            <div className="absolute inset-x-0 bottom-0 z-30 bg-black/80 backdrop-blur-sm p-4">
-              <SlideControls
-                currentSlide={currentSlide}
-                totalSlides={slides.length}
-                isPlaying={isPlaying}
-                speed={speed}
-                transition={transition}
-                autoPlay={autoPlay}
-                onPlay={handlePlay}
-                onPause={handlePause}
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-                onSlideChange={handleSlideChange}
-                onSpeedChange={handleSpeedChange}
-                onTransitionChange={handleTransitionChange}
-                onAutoPlayToggle={handleAutoPlayToggle}
-                onReset={handleReset}
-              />
-            </div>
-          )}
-        </div>
+    <div className="relative w-full">
+      {/* Hero Slide with fade-in animation */}
+      <div 
+        className={`transition-opacity duration-1000 h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden ${
+          showContent ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={{ 
+          transitionDuration: transition === 'fade' ? '500ms' : '300ms' 
+        }}
+      >
+        <HeroSlide slide={slide} />
       </div>
-    </section>
+
+      {/* Controls Toggle Button */}
+      {showContent && (
+        <button
+          onClick={() => setShowControls(!showControls)}
+          className="absolute top-4 right-4 z-20 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-colors"
+          title="Toggle slide controls"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+          </svg>
+        </button>
+      )}
+
+      {/* Slide Controls Panel */}
+      {showControls && showContent && (
+        <div className="absolute inset-x-0 bottom-0 z-30 bg-black/80 backdrop-blur-sm p-4">
+          <SlideControls
+            currentSlide={currentSlide}
+            totalSlides={slides.length}
+            isPlaying={isPlaying}
+            speed={speed}
+            transition={transition}
+            autoPlay={autoPlay}
+            onPlay={handlePlay}
+            onPause={handlePause}
+            onNext={handleNext}
+            onPrevious={handlePrevious}
+            onSlideChange={handleSlideChange}
+            onSpeedChange={handleSpeedChange}
+            onTransitionChange={handleTransitionChange}
+            onAutoPlayToggle={handleAutoPlayToggle}
+            onReset={handleReset}
+          />
+        </div>
+      )}
+    </div>
   );
 }

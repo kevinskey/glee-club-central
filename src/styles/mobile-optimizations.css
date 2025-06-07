@@ -102,12 +102,18 @@ body {
     padding-top: 0 !important;
   }
   
-  /* Home page specific adjustments - remove padding */
+  /* Home page specific adjustments - remove padding and ensure hero has no spacing */
   .home-page main {
     padding-top: 0 !important;
   }
   
   .min-h-screen.home-page {
+    padding-top: 0 !important;
+  }
+  
+  /* Hero section - ensure no extra spacing */
+  .home-page main > *:first-child {
+    margin-top: 0 !important;
     padding-top: 0 !important;
   }
   
@@ -182,32 +188,32 @@ p {
 
 /* Reset Typography and Spacing */
 @media (max-width: 768px) {
-  /* Section spacing reset */
-  section {
+  /* Section spacing reset - but NOT for hero */
+  section:not(.hero-section) {
     padding: 1.5rem 0 !important;
   }
   
-  section:first-child {
+  section:not(.hero-section):first-child {
     padding-top: 0.75rem !important;
   }
   
-  /* Container spacing */
-  .container {
+  /* Container spacing - but NOT for hero */
+  .container:not(.hero-container) {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
   }
   
-  /* Header spacing in sections */
-  .text-center.mb-8,
-  .text-center.mb-12,
-  .text-center.mb-16 {
+  /* Header spacing in sections - but NOT for hero */
+  .text-center.mb-8:not(.hero-header),
+  .text-center.mb-12:not(.hero-header),
+  .text-center.mb-16:not(.hero-header) {
     margin-bottom: 1rem !important;
   }
   
-  /* Remove excessive margins */
-  .space-y-8 > * + *,
-  .space-y-12 > * + *,
-  .space-y-16 > * + * {
+  /* Remove excessive margins - but NOT for hero */
+  .space-y-8:not(.hero-space) > * + *,
+  .space-y-12:not(.hero-space) > * + *,
+  .space-y-16:not(.hero-space) > * + * {
     margin-top: 1.5rem !important;
   }
   
