@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { HeroLoadingState } from './hero/HeroLoadingState';
@@ -123,12 +122,12 @@ export function HeroSection() {
   const slide = slides[currentSlide];
   
   return (
-    <section className="py-8 md:py-12">
-      <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+    <section className="w-full">
+      <div className="w-full">
         <div className="relative">
           {/* Hero Slide with fade-in animation */}
           <div 
-            className={`transition-opacity duration-1000 h-[60vh] min-h-[400px] max-h-[600px] rounded-lg overflow-hidden ${
+            className={`transition-opacity duration-1000 h-[60vh] min-h-[400px] max-h-[600px] overflow-hidden ${
               showContent ? 'opacity-100' : 'opacity-0'
             }`}
             style={{ 
@@ -153,7 +152,7 @@ export function HeroSection() {
 
           {/* Slide Controls Panel */}
           {showControls && showContent && (
-            <div className="absolute inset-x-0 bottom-0 z-30 bg-black/80 backdrop-blur-sm p-4 rounded-b-lg">
+            <div className="absolute inset-x-0 bottom-0 z-30 bg-black/80 backdrop-blur-sm p-4">
               <SlideControls
                 currentSlide={currentSlide}
                 totalSlides={slides.length}
