@@ -48,7 +48,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
           <img
             src={slide.background_image_url}
             alt={slide.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain md:object-cover"
             style={{ 
               objectPosition: slide.design_data?.objectPosition || 'center center'
             }}
