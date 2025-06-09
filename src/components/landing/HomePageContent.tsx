@@ -2,6 +2,7 @@
 import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
+import { AudioSection } from "./sections/AudioSection";
 
 interface Event {
   id: string;
@@ -63,7 +64,22 @@ export function HomePageContent({
         </div>
       </section>
       
-      {/* Store Section */}
+      {/* Audio Section - Now second */}
+      <section className="w-full py-8 md:py-12">
+        <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
+              Our Music
+            </h2>
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+              Listen to our beautiful harmonies and vocal arrangements
+            </p>
+          </div>
+          <AudioSection tracks={audioTracks} />
+        </div>
+      </section>
+      
+      {/* Store Section - Now third */}
       <section className="w-full py-8 md:py-12 bg-gray-50/30 dark:bg-gray-900/10">
         <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="text-center mb-8 md:mb-12">
