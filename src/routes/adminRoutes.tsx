@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -9,6 +10,7 @@ import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
+import MembersPage from '@/pages/admin/MembersPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -16,6 +18,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminDashboard />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/members',
+    element: (
+      <AdminRoute>
+        <MembersPage />
       </AdminRoute>
     ),
   },
