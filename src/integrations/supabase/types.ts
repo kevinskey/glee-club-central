@@ -250,6 +250,74 @@ export type Database = {
         }
         Relationships: []
       }
+      audio_tracks: {
+        Row: {
+          created_at: string | null
+          id: string
+          label: string | null
+          page_number: number | null
+          score_id: string
+          timecode: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          label?: string | null
+          page_number?: number | null
+          score_id: string
+          timecode: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          label?: string | null
+          page_number?: number | null
+          score_id?: string
+          timecode?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_tracks_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       budget_entries: {
         Row: {
           amount: number
@@ -1017,6 +1085,51 @@ export type Database = {
           },
         ]
       }
+      music_files: {
+        Row: {
+          composer: string | null
+          created_at: string | null
+          file_path: string
+          file_type: string
+          filename: string
+          id: string
+          is_shared: boolean | null
+          org: string
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          composer?: string | null
+          created_at?: string | null
+          file_path: string
+          file_type: string
+          filename: string
+          id?: string
+          is_shared?: boolean | null
+          org: string
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          composer?: string | null
+          created_at?: string | null
+          file_path?: string
+          file_type?: string
+          filename?: string
+          id?: string
+          is_shared?: boolean | null
+          org?: string
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       news_items: {
         Row: {
           active: boolean
@@ -1228,6 +1341,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pdf_files: {
+        Row: {
+          composer: string | null
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_url: string
+          id: string
+          title: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          composer?: string | null
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_url: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          composer?: string | null
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_url?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
       }
       permissions: {
         Row: {
@@ -1512,7 +1664,9 @@ export type Database = {
           is_super_admin: boolean | null
           join_date: string | null
           last_name: string | null
+          music_role: string | null
           notes: string | null
+          org: string | null
           phone: string | null
           role: string | null
           role_tags: string[] | null
@@ -1538,7 +1692,9 @@ export type Database = {
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
+          music_role?: string | null
           notes?: string | null
+          org?: string | null
           phone?: string | null
           role?: string | null
           role_tags?: string[] | null
@@ -1564,7 +1720,9 @@ export type Database = {
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
+          music_role?: string | null
           notes?: string | null
+          org?: string | null
           phone?: string | null
           role?: string | null
           role_tags?: string[] | null
@@ -1594,6 +1752,163 @@ export type Database = {
           id?: string
           permission?: Database["public"]["Enums"]["permission_name"]
           role_id?: string | null
+        }
+        Relationships: []
+      }
+      score_annotations: {
+        Row: {
+          annotation_data: Json
+          annotation_type: string | null
+          created_at: string | null
+          id: string
+          page_number: number
+          score_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          annotation_data?: Json
+          annotation_type?: string | null
+          created_at?: string | null
+          id?: string
+          page_number?: number
+          score_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          annotation_data?: Json
+          annotation_type?: string | null
+          created_at?: string | null
+          id?: string
+          page_number?: number
+          score_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "score_annotations_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_number: number
+          score_id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_number: number
+          score_id: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_number?: number
+          score_id?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "score_bookmarks_score_id_fkey"
+            columns: ["score_id"]
+            isOneToOne: false
+            referencedRelation: "scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores: {
+        Row: {
+          audio_url: string | null
+          composer: string | null
+          created_at: string | null
+          difficulty: string | null
+          file_path: string
+          file_url: string
+          genre: string | null
+          id: string
+          is_favorite: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          uploaded_by: string
+          voice_part: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          composer?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          file_path: string
+          file_url: string
+          genre?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          uploaded_by: string
+          voice_part?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          composer?: string | null
+          created_at?: string | null
+          difficulty?: string | null
+          file_path?: string
+          file_url?: string
+          genre?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          uploaded_by?: string
+          voice_part?: string | null
+        }
+        Relationships: []
+      }
+      set_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          pdf_file_ids: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pdf_file_ids?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          pdf_file_ids?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2496,6 +2811,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_setlists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          pdf_files: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          pdf_files?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          pdf_files?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           created_at: string | null
@@ -2595,6 +2937,10 @@ export type Database = {
       }
       admin_update_user_role: {
         Args: { target_user_id: string; new_role: string }
+        Returns: boolean
+      }
+      assign_admin_role: {
+        Args: { target_user_id: string }
         Returns: boolean
       }
       can_access_profile: {
