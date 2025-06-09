@@ -49,8 +49,8 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section */}
-      <section className="w-full py-12 md:py-16 lg:py-20">
-        <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+      <section className="w-full py-16 md:py-20 lg:py-24">
+        <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
             <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg mb-12">
@@ -65,17 +65,17 @@ export function HomePageContent({
       </section>
       
       {/* Audio Section - Without header text */}
-      <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50/50 dark:bg-gray-900/20">
-        <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+      <section className="w-full py-16 md:py-20 lg:py-24 bg-gray-50/50 dark:bg-gray-900/20">
+        <div className="w-full px-4 md:px-6 lg:px-8">
           <AudioSection tracks={audioTracks} />
         </div>
       </section>
       
       {/* Store Section */}
-      <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50/30 dark:bg-gray-900/10">
-        <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16 lg:mb-20">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-6 md:mb-8 tracking-tight">
+      <section className="w-full py-16 md:py-20 lg:py-24 bg-gray-50/30 dark:bg-gray-900/10">
+        <div className="w-full px-4 md:px-6 lg:px-8">
+          <div className="text-center mb-16 md:mb-20 lg:mb-24">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-8 md:mb-10 tracking-tight">
               Glee Store
             </h2>
             <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
