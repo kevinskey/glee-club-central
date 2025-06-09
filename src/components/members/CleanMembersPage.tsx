@@ -2,12 +2,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Users, 
   UserPlus, 
   RefreshCw,
-  AlertCircle,
   Plus
 } from 'lucide-react';
 import { useAuthMigration } from '@/hooks/useAuthMigration';
@@ -18,10 +16,13 @@ import { MembersPagination } from './MembersPagination';
 import { CreateUserModal } from './CreateUserModal';
 import { AddMemberDialog } from './AddMemberDialog';
 import { EditUserDialog } from './EditUserDialog';
+import { LoadingErrorBoundary } from './LoadingErrorBoundary';
 import { UserFormValues } from './form/userFormSchema';
 import { toast } from 'sonner';
 
 export function CleanMembersPage() {
+  console.log('🔧 CleanMembersPage: Component started rendering');
+  
   const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuthMigration();
   const {
     filteredUsers,
@@ -38,6 +39,15 @@ export function CleanMembersPage() {
     updateUser
   } = useUnifiedUserManagement();
 
+  console.log('🔧 CleanMembersPage: Hook states:', {
+    authLoading,
+    isAuthenticated,
+    usersLoading,
+    error,
+    filteredUsersCount: filteredUsers.length,
+    paginatedUsersCount: paginatedUsers.length
+  });
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -52,6 +62,7 @@ export function CleanMembersPage() {
   }).length;
 
   const handleUserCreated = () => {
+    console.log('🔄 User created, refreshing data');
     refetch();
   };
 
@@ -69,6 +80,7 @@ export function CleanMembersPage() {
   };
 
   const handleEditUser = (user: any) => {
+    console.log('🔧 Editing user:', user.id);
     setSelectedUser(user);
     setShowEditDialog(true);
   };
@@ -106,109 +118,83 @@ export function CleanMembersPage() {
     console.log('Delete user:', userId);
   };
 
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-sm">Loading authentication...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleRetry = () => {
+    console.log('🔄 Retrying data fetch');
+    refetch();
+  };
 
-  if (!isAuthenticated) {
-    return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="font-semibold mb-2">Access Restricted</h3>
-          <p className="text-muted-foreground">
-            You must be logged in to view member information.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-  
   return (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header Section - Redesigned */}
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
-              Members
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Manage choir members ({filteredUsers.length} total)
-            </p>
-          </div>
-          
-          {/* Action Buttons - Redesigned for better mobile */}
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              onClick={refetch} 
-              variant="outline" 
-              disabled={usersLoading}
-              size="sm"
-              className="text-xs sm:text-sm"
-            >
-              <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${usersLoading ? 'animate-spin' : ''}`} />
-              <span className="ml-1 sm:ml-2">Refresh</span>
-            </Button>
+    <LoadingErrorBoundary 
+      isLoading={authLoading} 
+      error={!isAuthenticated ? 'Not authenticated' : null}
+      onRetry={() => window.location.reload()}
+    >
+      <div className="space-y-4 sm:space-y-6">
+        {/* Header Section */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
+                Members
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Manage choir members ({filteredUsers.length} total)
+              </p>
+            </div>
             
-            {isAdminUser && (
-              <>
-                <Button 
-                  onClick={() => setShowAddMemberDialog(true)} 
-                  variant="default"
-                  size="sm"
-                  className="text-xs sm:text-sm bg-glee-spelman hover:bg-glee-spelman/90"
-                >
-                  <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="ml-1 sm:ml-2 hidden sm:inline">Add Member</span>
-                  <span className="ml-1 sm:hidden">Add</span>
-                </Button>
-                
-                <Button 
-                  onClick={() => setShowCreateModal(true)} 
-                  variant="outline"
-                  size="sm"
-                  className="text-xs sm:text-sm"
-                >
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="ml-1 sm:ml-2 hidden sm:inline">Quick Add</span>
-                  <span className="ml-1 sm:hidden">Quick</span>
-                </Button>
-              </>
-            )}
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                onClick={handleRetry} 
+                variant="outline" 
+                disabled={usersLoading}
+                size="sm"
+                className="text-xs sm:text-sm"
+              >
+                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+                <span className="ml-1 sm:ml-2">Refresh</span>
+              </Button>
+              
+              {isAdminUser && (
+                <>
+                  <Button 
+                    onClick={() => setShowAddMemberDialog(true)} 
+                    variant="default"
+                    size="sm"
+                    className="text-xs sm:text-sm bg-glee-spelman hover:bg-glee-spelman/90"
+                  >
+                    <UserPlus className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="ml-1 sm:ml-2 hidden sm:inline">Add Member</span>
+                    <span className="ml-1 sm:hidden">Add</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => setShowCreateModal(true)} 
+                    variant="outline"
+                    size="sm"
+                    className="text-xs sm:text-sm"
+                  >
+                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="ml-1 sm:ml-2 hidden sm:inline">Quick Add</span>
+                    <span className="ml-1 sm:hidden">Quick</span>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Error loading members: {error}</AlertDescription>
-        </Alert>
-      )}
+        <LoadingErrorBoundary 
+          error={error} 
+          isLoading={usersLoading}
+          onRetry={handleRetry}
+        >
+          <StreamlinedFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            activeFilterCount={activeFilterCount}
+          />
 
-      <StreamlinedFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        activeFilterCount={activeFilterCount}
-      />
-
-      {usersLoading ? (
-        <Card>
-          <CardContent className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-sm">Loading members...</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
           <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
             <p>
               Showing {((currentPage - 1) * 6) + 1}-{Math.min(currentPage * 6, filteredUsers.length)} of {filteredUsers.length} members
@@ -257,32 +243,33 @@ export function CleanMembersPage() {
               />
             </>
           )}
-        </>
-      )}
+        </LoadingErrorBoundary>
 
-      <CreateUserModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onUserCreated={handleUserCreated}
-      />
+        {/* Modals */}
+        <CreateUserModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onUserCreated={handleUserCreated}
+        />
 
-      <AddMemberDialog
-        isOpen={showAddMemberDialog}
-        onOpenChange={setShowAddMemberDialog}
-        onMemberAdd={handleAddMember}
-        isSubmitting={isSubmitting}
-      />
+        <AddMemberDialog
+          isOpen={showAddMemberDialog}
+          onOpenChange={setShowAddMemberDialog}
+          onMemberAdd={handleAddMember}
+          isSubmitting={isSubmitting}
+        />
 
-      <EditUserDialog
-        isOpen={showEditDialog}
-        onOpenChange={(open) => {
-          setShowEditDialog(open);
-          if (!open) setSelectedUser(null);
-        }}
-        onSave={handleSaveUser}
-        isSubmitting={isSubmitting}
-        user={selectedUser}
-      />
-    </div>
+        <EditUserDialog
+          isOpen={showEditDialog}
+          onOpenChange={(open) => {
+            setShowEditDialog(open);
+            if (!open) setSelectedUser(null);
+          }}
+          onSave={handleSaveUser}
+          isSubmitting={isSubmitting}
+          user={selectedUser}
+        />
+      </div>
+    </LoadingErrorBoundary>
   );
 }
