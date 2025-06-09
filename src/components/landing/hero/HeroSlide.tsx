@@ -70,7 +70,7 @@ export function HeroSlide({ slide }: HeroSlideProps) {
       {/* Content */}
       {slide.design_data?.showText !== false && (
         <div className={`relative z-10 h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center`}>
-          <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+          <div className="w-full px-4 md:px-6 lg:px-8">
             <div className={`text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 md:space-y-4`}>
               {slide.title && (
                 <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
