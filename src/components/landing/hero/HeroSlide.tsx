@@ -70,30 +70,32 @@ export function HeroSlide({ slide }: HeroSlideProps) {
       {/* Content */}
       {slide.design_data?.showText !== false && (
         <div className={`relative z-10 h-full flex ${getTextPositionClass(slide.design_data?.textPosition)} justify-center`}>
-          <div className={`max-w-4xl mx-auto text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 md:space-y-4 px-4`}>
-            {slide.title && (
-              <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
-                {slide.title}
-              </h1>
-            )}
-            
-            {slide.description && (
-              <p className="text-sm md:text-base lg:text-lg opacity-90 leading-relaxed drop-shadow-md">
-                {slide.description}
-              </p>
-            )}
+          <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+            <div className={`text-white ${getTextAlignmentClass(slide.design_data?.textAlignment)} space-y-2 md:space-y-4`}>
+              {slide.title && (
+                <h1 className="text-lg md:text-2xl lg:text-4xl font-bold leading-tight drop-shadow-lg">
+                  {slide.title}
+                </h1>
+              )}
+              
+              {slide.description && (
+                <p className="text-sm md:text-base lg:text-lg opacity-90 leading-relaxed drop-shadow-md">
+                  {slide.description}
+                </p>
+              )}
 
-            {slide.design_data?.buttonText && slide.link_url && (
-              <div className="pt-2">
-                <Button 
-                  size="sm"
-                  className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {slide.design_data.buttonText}
-                </Button>
-              </div>
-            )}
+              {slide.design_data?.buttonText && slide.link_url && (
+                <div className="pt-2">
+                  <Button 
+                    size="sm"
+                    className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {slide.design_data.buttonText}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
