@@ -49,11 +49,11 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section */}
-      <section className="w-full py-8 md:py-12">
+      <section className="w-full py-12 md:py-16 lg:py-20">
         <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
-            <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg mb-8">
+            <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg mb-12">
               <p className="text-gray-600 dark:text-gray-400 text-sm">
                 No upcoming events found. Check back soon for new performances!
               </p>
@@ -65,17 +65,17 @@ export function HomePageContent({
       </section>
       
       {/* Audio Section - Without header text */}
-      <section className="w-full py-8 md:py-12">
+      <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50/50 dark:bg-gray-900/20">
         <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
           <AudioSection tracks={audioTracks} />
         </div>
       </section>
       
       {/* Store Section */}
-      <section className="w-full py-8 md:py-12 bg-gray-50/30 dark:bg-gray-900/10">
+      <section className="w-full py-12 md:py-16 lg:py-20 bg-gray-50/30 dark:bg-gray-900/10">
         <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-4 md:mb-6 tracking-tight">
+          <div className="text-center mb-12 md:mb-16 lg:mb-20">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-6 md:mb-8 tracking-tight">
               Glee Store
             </h2>
             <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
