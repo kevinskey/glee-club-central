@@ -20,7 +20,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pagesWithOwnHeaders = [
     '/login', 
     '/signup', 
-    '/' // HomePage manages its own header via PublicPageWrapper
+    '/', // HomePage manages its own header via PublicPageWrapper
+    '/contact' // ContactPage manages its own header and footer
   ];
   
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname);
