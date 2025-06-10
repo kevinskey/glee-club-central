@@ -246,7 +246,7 @@ export function MobileOptimizedSlider({
           <iframe
             key={`${slide.id}-${isActive}`}
             src={enhanceYouTubeUrl(slide.src)}
-            className={cn("w-full h-full", objectFitClass)}
+            className="w-full h-full object-cover"
             frameBorder="0"
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
@@ -254,24 +254,22 @@ export function MobileOptimizedSlider({
             style={{ border: 'none' }}
           />
         ) : (
-          /* Regular image content with better positioning */
-          <div className="w-full h-full flex items-center justify-center">
-            <img
-              src={slide.src}
-              srcSet={slide.srcSet}
-              alt={slide.alt}
-              loading={slide.priority ? 'eager' : 'lazy'}
-              className={cn(
-                'w-full h-full transition-opacity duration-300',
-                objectFitClass,
-                !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
-              )}
-              style={{ objectPosition: 'center center' }}
-              onLoad={() => handleImageLoad(index)}
-              onError={() => handleImageError(index)}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-            />
-          </div>
+          /* Regular image content - full width and height with no margins */
+          <img
+            src={slide.src}
+            srcSet={slide.srcSet}
+            alt={slide.alt}
+            loading={slide.priority ? 'eager' : 'lazy'}
+            className={cn(
+              'w-full h-full transition-opacity duration-300',
+              objectFitClass,
+              !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
+            )}
+            style={{ objectPosition: 'center center' }}
+            onLoad={() => handleImageLoad(index)}
+            onError={() => handleImageError(index)}
+            sizes="100vw"
+          />
         )}
 
         {/* Mobile-optimized overlay content with lighter background and better centering */}
@@ -331,7 +329,7 @@ export function MobileOptimizedSlider({
 
   if (slides.length === 0) {
     return (
-      <div className={cn('relative overflow-hidden bg-muted flex items-center justify-center', aspectRatioClass, className)}>
+      <div className={cn('w-full overflow-hidden bg-muted flex items-center justify-center', aspectRatioClass, className)}>
         <div className="text-center text-muted-foreground">
           <span className="text-sm md:text-base">No slides available</span>
         </div>
@@ -341,16 +339,14 @@ export function MobileOptimizedSlider({
 
   return (
     <div 
-      className={cn('relative overflow-hidden group w-full flex justify-center', aspectRatioClass, className)}
+      className={cn('w-full overflow-hidden group', aspectRatioClass, className)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Slides container - centered */}
-      <div className="relative w-full h-full flex justify-center">
-        <div className="relative w-full h-full">
-          {slides.map((slide, index) => renderSlide(slide, index))}
-        </div>
+      {/* Slides container - full width */}
+      <div className="relative w-full h-full">
+        {slides.map((slide, index) => renderSlide(slide, index))}
       </div>
 
       {/* Mobile-optimized navigation controls */}
@@ -382,7 +378,6 @@ export function MobileOptimizedSlider({
             <ChevronRight className={cn(isMobile ? "h-4 w-4" : "h-6 w-6")} />
           </Button>
 
-          {/* Play/Pause button - hidden on mobile */}
           {!isMobile && (
             <Button
               variant="ghost"

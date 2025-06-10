@@ -17,7 +17,7 @@ export function HeroSection() {
   // Show loading state while fetching
   if (isLoading) {
     return (
-      <div className="relative w-full h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] bg-muted animate-pulse flex items-center justify-center">
+      <div className="w-full h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] bg-muted animate-pulse flex items-center justify-center">
         <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -26,7 +26,7 @@ export function HeroSection() {
   // Show default state if error or no slides
   if (hasError || slides.length === 0) {
     return (
-      <div className="relative w-full h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+      <div className="w-full h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
             <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
@@ -71,20 +71,18 @@ export function HeroSection() {
   }));
 
   return (
-    <div className="relative w-full flex justify-center">
-      <div className="w-full max-w-none">
-        <MobileOptimizedSlider
-          slides={optimizedSlides}
-          aspectRatio="auto"
-          autoPlay={true}
-          autoPlayInterval={5000}
-          showControls={true}
-          showIndicators={true}
-          preloadAdjacent={true}
-          defaultObjectFit="contain"
-          className="h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] w-full"
-        />
-      </div>
+    <div className="w-full">
+      <MobileOptimizedSlider
+        slides={optimizedSlides}
+        aspectRatio="auto"
+        autoPlay={true}
+        autoPlayInterval={5000}
+        showControls={true}
+        showIndicators={true}
+        preloadAdjacent={true}
+        defaultObjectFit="contain"
+        className="h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] w-full"
+      />
       
       {/* Admin Edit Button */}
       {isAdmin && (
