@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -256,52 +255,62 @@ export function MobileOptimizedSlider({
           />
         ) : (
           /* Regular image content with better positioning */
-          <img
-            src={slide.src}
-            srcSet={slide.srcSet}
-            alt={slide.alt}
-            loading={slide.priority ? 'eager' : 'lazy'}
-            className={cn(
-              'w-full h-full transition-opacity duration-300',
-              objectFitClass,
-              !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
-            )}
-            style={{ objectPosition: 'center center' }}
-            onLoad={() => handleImageLoad(index)}
-            onError={() => handleImageError(index)}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <img
+              src={slide.src}
+              srcSet={slide.srcSet}
+              alt={slide.alt}
+              loading={slide.priority ? 'eager' : 'lazy'}
+              className={cn(
+                'w-full h-full transition-opacity duration-300',
+                objectFitClass,
+                !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
+              )}
+              style={{ objectPosition: 'center center' }}
+              onLoad={() => handleImageLoad(index)}
+              onError={() => handleImageError(index)}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+            />
+          </div>
         )}
 
-        {/* Mobile-optimized overlay content with lighter background */}
+        {/* Mobile-optimized overlay content with lighter background and better centering */}
         {showTextOverlay && (
-          <div className="absolute inset-0 bg-black/20 md:bg-black/15 flex items-center justify-center p-4">
+          <div className={cn(
+            'absolute inset-0 bg-black/20 md:bg-black/15 flex justify-center',
+            slide.textPosition === 'top' && 'items-start pt-4 sm:pt-8 md:pt-12',
+            slide.textPosition === 'bottom' && 'items-end pb-4 sm:pb-8 md:pb-12',
+            slide.textPosition !== 'top' && slide.textPosition !== 'bottom' && 'items-center'
+          )}>
             <div className={cn(
-              'text-center text-white max-w-xs md:max-w-2xl mx-auto',
-              slide.textPosition === 'top' && 'items-start',
-              slide.textPosition === 'bottom' && 'items-end',
+              'w-full max-w-xs md:max-w-2xl mx-auto px-4',
               slide.textAlignment === 'left' && 'text-left',
-              slide.textAlignment === 'right' && 'text-right'
+              slide.textAlignment === 'right' && 'text-right',
+              slide.textAlignment !== 'left' && slide.textAlignment !== 'right' && 'text-center'
             )}>
-              {slide.title && (
-                <h2 className="text-lg md:text-2xl lg:text-4xl font-bold mb-2 drop-shadow-lg leading-tight">
-                  {slide.title}
-                </h2>
-              )}
-              {slide.subtitle && (
-                <p className="text-xs md:text-sm lg:text-lg opacity-90 drop-shadow-md mb-3 md:mb-4 leading-relaxed">
-                  {slide.subtitle}
-                </p>
-              )}
-              {slide.buttonText && (
-                <Button 
-                  size={isMobile ? "sm" : "lg"}
-                  className="bg-primary hover:bg-primary/90 text-xs md:text-sm px-4 py-2 md:px-6 md:py-3"
-                  onClick={() => slide.link && window.open(slide.link, '_blank')}
-                >
-                  {slide.buttonText}
-                </Button>
-              )}
+              <div className="text-white">
+                {slide.title && (
+                  <h2 className="text-lg md:text-2xl lg:text-4xl font-bold mb-2 drop-shadow-lg leading-tight">
+                    {slide.title}
+                  </h2>
+                )}
+                {slide.subtitle && (
+                  <p className="text-xs md:text-sm lg:text-lg opacity-90 drop-shadow-md mb-3 md:mb-4 leading-relaxed">
+                    {slide.subtitle}
+                  </p>
+                )}
+                {slide.buttonText && (
+                  <div className="flex justify-center">
+                    <Button 
+                      size={isMobile ? "sm" : "lg"}
+                      className="bg-primary hover:bg-primary/90 text-xs md:text-sm px-4 py-2 md:px-6 md:py-3"
+                      onClick={() => slide.link && window.open(slide.link, '_blank')}
+                    >
+                      {slide.buttonText}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -322,8 +331,8 @@ export function MobileOptimizedSlider({
 
   if (slides.length === 0) {
     return (
-      <div className={cn('relative overflow-hidden bg-muted', aspectRatioClass, className)}>
-        <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+      <div className={cn('relative overflow-hidden bg-muted flex items-center justify-center', aspectRatioClass, className)}>
+        <div className="text-center text-muted-foreground">
           <span className="text-sm md:text-base">No slides available</span>
         </div>
       </div>
@@ -332,14 +341,16 @@ export function MobileOptimizedSlider({
 
   return (
     <div 
-      className={cn('relative overflow-hidden group', aspectRatioClass, className)}
+      className={cn('relative overflow-hidden group w-full flex justify-center', aspectRatioClass, className)}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Slides container */}
-      <div className="relative w-full h-full">
-        {slides.map((slide, index) => renderSlide(slide, index))}
+      {/* Slides container - centered */}
+      <div className="relative w-full h-full flex justify-center">
+        <div className="relative w-full h-full">
+          {slides.map((slide, index) => renderSlide(slide, index))}
+        </div>
       </div>
 
       {/* Mobile-optimized navigation controls */}

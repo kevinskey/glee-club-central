@@ -27,13 +27,15 @@ export function HeroSection() {
   if (hasError || slides.length === 0) {
     return (
       <div className="relative w-full h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
-        <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
-          <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
-            Spelman College Glee Club
-          </h1>
-          <p className="text-sm md:text-lg lg:text-xl opacity-90 drop-shadow-md">
-            To Amaze and Inspire
-          </p>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
+            <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
+              Spelman College Glee Club
+            </h1>
+            <p className="text-sm md:text-lg lg:text-xl opacity-90 drop-shadow-md">
+              To Amaze and Inspire
+            </p>
+          </div>
         </div>
         {isAdmin && (
           <Button
@@ -69,18 +71,20 @@ export function HeroSection() {
   }));
 
   return (
-    <div className="relative w-full">
-      <MobileOptimizedSlider
-        slides={optimizedSlides}
-        aspectRatio="auto"
-        autoPlay={true}
-        autoPlayInterval={5000}
-        showControls={true}
-        showIndicators={true}
-        preloadAdjacent={true}
-        defaultObjectFit="contain"
-        className="h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px]"
-      />
+    <div className="relative w-full flex justify-center">
+      <div className="w-full max-w-none">
+        <MobileOptimizedSlider
+          slides={optimizedSlides}
+          aspectRatio="auto"
+          autoPlay={true}
+          autoPlayInterval={5000}
+          showControls={true}
+          showIndicators={true}
+          preloadAdjacent={true}
+          defaultObjectFit="contain"
+          className="h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] w-full"
+        />
+      </div>
       
       {/* Admin Edit Button */}
       {isAdmin && (
