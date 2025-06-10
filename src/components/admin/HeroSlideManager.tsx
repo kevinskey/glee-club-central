@@ -27,6 +27,7 @@ interface HeroSlide {
   visible: boolean;
   slide_order: number;
   media_id?: string;
+  youtube_url?: string;
   media_type: 'image' | 'video';
 }
 
@@ -125,15 +126,16 @@ export function HeroSlideManager() {
       }
 
       let mediaId = null;
+      let youtubeUrl = null;
       let mediaType: 'image' | 'video' = 'image';
 
-      // Handle YouTube URL - store the converted embed URL directly in media_id
+      // Handle YouTube URL - store in youtube_url column
       if (newSlide.youtube_url.trim()) {
-        mediaId = convertYouTubeToEmbed(newSlide.youtube_url.trim());
+        youtubeUrl = convertYouTubeToEmbed(newSlide.youtube_url.trim());
         mediaType = 'video';
-        console.log('📹 Using YouTube video as media_id:', mediaId);
+        console.log('📹 Using YouTube video:', youtubeUrl);
       } else if (newSlide.media_id) {
-        // Handle media library selection - this is a proper UUID
+        // Handle media library selection - store UUID in media_id
         const media = filteredMediaFiles.find(m => m.id === newSlide.media_id);
         if (media) {
           mediaId = media.id; // This is a proper UUID
@@ -158,6 +160,7 @@ export function HeroSlideManager() {
         visible: newSlide.visible,
         slide_order: nextOrder,
         media_id: mediaId,
+        youtube_url: youtubeUrl,
         media_type: mediaType
       };
 
@@ -203,11 +206,12 @@ export function HeroSlideManager() {
   const updateSlide = async (slideId: string) => {
     try {
       let mediaId = null;
+      let youtubeUrl = null;
       let mediaType: 'image' | 'video' = 'image';
 
       // Handle YouTube URL
       if (editData.youtube_url.trim()) {
-        mediaId = convertYouTubeToEmbed(editData.youtube_url.trim());
+        youtubeUrl = convertYouTubeToEmbed(editData.youtube_url.trim());
         mediaType = 'video';
       } else if (editData.media_id) {
         // Handle media library selection
@@ -229,6 +233,7 @@ export function HeroSlideManager() {
           text_alignment: editData.text_alignment,
           visible: editData.visible,
           media_id: mediaId,
+          youtube_url: youtubeUrl,
           media_type: mediaType,
           updated_at: new Date().toISOString()
         })
@@ -311,7 +316,6 @@ export function HeroSlideManager() {
 
   const handleEditSlide = (slide: HeroSlide) => {
     const media = filteredMediaFiles.find(m => m.id === slide.media_id);
-    const isYouTubeEmbed = slide.media_id?.includes('youtube.com/embed/');
     
     setEditData({
       title: slide.title,
@@ -320,8 +324,8 @@ export function HeroSlideManager() {
       button_link: slide.button_link || '',
       text_position: slide.text_position,
       text_alignment: slide.text_alignment,
-      media_id: isYouTubeEmbed ? '' : (slide.media_id || ''),
-      youtube_url: isYouTubeEmbed ? slide.media_id || '' : '',
+      media_id: slide.media_id || '',
+      youtube_url: slide.youtube_url || '',
       visible: slide.visible
     });
     setEditingSlide(slide.id);
@@ -329,14 +333,13 @@ export function HeroSlideManager() {
 
   const renderSlidePreview = (slide: HeroSlide) => {
     const media = filteredMediaFiles.find(m => m.id === slide.media_id);
-    const isYouTubeEmbed = slide.media_id?.includes('youtube.com/embed/');
 
     return (
       <div className="w-48 flex-shrink-0">
         <AspectRatio ratio={16/9}>
-          {isYouTubeEmbed ? (
+          {slide.youtube_url ? (
             <iframe
-              src={slide.media_id}
+              src={slide.youtube_url}
               className="w-full h-full object-cover rounded"
               frameBorder="0"
               allow="autoplay; encrypted-media"
@@ -758,9 +761,9 @@ export function HeroSlideManager() {
               <DialogTitle>Preview: {previewSlide.title}</DialogTitle>
             </DialogHeader>
             <div className="relative aspect-video overflow-hidden rounded-lg bg-black">
-              {previewSlide.media_id?.includes('youtube.com/embed/') ? (
+              {previewSlide.youtube_url ? (
                 <iframe
-                  src={previewSlide.media_id}
+                  src={previewSlide.youtube_url}
                   className="w-full h-full object-cover"
                   frameBorder="0"
                   allow="autoplay; encrypted-media"

@@ -796,6 +796,7 @@ export type Database = {
           title: string
           updated_at: string | null
           visible: boolean | null
+          youtube_url: string | null
         }
         Insert: {
           button_link?: string | null
@@ -812,6 +813,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           visible?: boolean | null
+          youtube_url?: string | null
         }
         Update: {
           button_link?: string | null
@@ -828,6 +830,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           visible?: boolean | null
+          youtube_url?: string | null
         }
         Relationships: [
           {
