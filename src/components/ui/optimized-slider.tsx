@@ -11,7 +11,11 @@ interface SlideImage {
   alt: string;
   title?: string;
   subtitle?: string;
+  buttonText?: string;
   link?: string;
+  textPosition?: 'top' | 'center' | 'bottom';
+  textAlignment?: 'left' | 'center' | 'right';
+  isVideo?: boolean;
   priority?: boolean;
 }
 
@@ -118,11 +122,17 @@ export function OptimizedSlider({
     setImageErrors(prev => new Set([...prev, index]));
   }, []);
 
+  // Check if URL is a YouTube embed URL
+  const isYouTubeEmbed = useCallback((url: string) => {
+    return url?.includes('youtube.com/embed/');
+  }, []);
+
   // Render slides (only visible + adjacent for performance)
   const renderSlide = useCallback((slide: SlideImage, index: number) => {
     const isActive = index === currentIndex;
     const shouldRender = loadedImages.has(index);
     const hasError = imageErrors.has(index);
+    const isVideoSlide = slide.isVideo || isYouTubeEmbed(slide.src);
 
     if (!shouldRender && !isActive) {
       return null;
@@ -137,14 +147,14 @@ export function OptimizedSlider({
         )}
       >
         {/* Loading placeholder */}
-        {!loadedImages.has(index) && !hasError && (
+        {!loadedImages.has(index) && !hasError && !isVideoSlide && (
           <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         {/* Error state */}
-        {hasError && (
+        {hasError && !isVideoSlide && (
           <div className="absolute inset-0 bg-muted flex items-center justify-center">
             <div className="text-center text-muted-foreground">
               <div className="text-2xl mb-2">📷</div>
@@ -153,41 +163,68 @@ export function OptimizedSlider({
           </div>
         )}
 
-        {/* Actual image */}
-        <img
-          src={slide.src}
-          srcSet={slide.srcSet}
-          alt={slide.alt}
-          loading={slide.priority ? 'eager' : 'lazy'}
-          className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
-            !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
-          )}
-          onLoad={() => handleImageLoad(index)}
-          onError={() => handleImageError(index)}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-        />
+        {/* Video content (YouTube or other video) */}
+        {isVideoSlide ? (
+          <iframe
+            src={slide.src}
+            className="w-full h-full object-cover"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            loading={slide.priority ? 'eager' : 'lazy'}
+          />
+        ) : (
+          /* Regular image content */
+          <img
+            src={slide.src}
+            srcSet={slide.srcSet}
+            alt={slide.alt}
+            loading={slide.priority ? 'eager' : 'lazy'}
+            className={cn(
+              'w-full h-full object-cover transition-opacity duration-300',
+              !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
+            )}
+            onLoad={() => handleImageLoad(index)}
+            onError={() => handleImageError(index)}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+          />
+        )}
 
         {/* Overlay content */}
         {(slide.title || slide.subtitle) && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <div className="text-center text-white p-4 max-w-2xl mx-auto">
+            <div className={cn(
+              'text-center text-white p-4 max-w-2xl mx-auto',
+              slide.textPosition === 'top' && 'items-start',
+              slide.textPosition === 'bottom' && 'items-end',
+              slide.textAlignment === 'left' && 'text-left',
+              slide.textAlignment === 'right' && 'text-right'
+            )}>
               {slide.title && (
                 <h2 className="text-2xl md:text-4xl font-bold mb-2 drop-shadow-lg">
                   {slide.title}
                 </h2>
               )}
               {slide.subtitle && (
-                <p className="text-sm md:text-lg opacity-90 drop-shadow-md">
+                <p className="text-sm md:text-lg opacity-90 drop-shadow-md mb-4">
                   {slide.subtitle}
                 </p>
+              )}
+              {slide.buttonText && (
+                <Button 
+                  size="lg" 
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => slide.link && window.open(slide.link, '_blank')}
+                >
+                  {slide.buttonText}
+                </Button>
               )}
             </div>
           </div>
         )}
 
-        {/* Click handler for links */}
-        {slide.link && (
+        {/* Click handler for links without button text */}
+        {slide.link && !slide.buttonText && (
           <div
             className="absolute inset-0 cursor-pointer z-20"
             onClick={() => window.open(slide.link, '_blank')}
@@ -198,7 +235,7 @@ export function OptimizedSlider({
         )}
       </div>
     );
-  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError]);
+  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed]);
 
   if (slides.length === 0) {
     return (
