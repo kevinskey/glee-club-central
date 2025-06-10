@@ -17,6 +17,7 @@ interface HeroSlideData {
   media_type: 'image' | 'video';
   background_image_url?: string;
   link_url?: string;
+  object_fit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
 }
 
 // Cache for slides to avoid repeated database calls
@@ -61,6 +62,7 @@ export function useHeroSlides() {
           media_id, 
           youtube_url, 
           media_type,
+          object_fit,
           media_library!inner(file_url)
         `)
         .eq('visible', true)

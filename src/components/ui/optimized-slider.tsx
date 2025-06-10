@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ interface SlideImage {
   textAlignment?: 'left' | 'center' | 'right';
   isVideo?: boolean;
   priority?: boolean;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
 }
 
 interface OptimizedSliderProps {
@@ -28,6 +30,7 @@ interface OptimizedSliderProps {
   aspectRatio?: 'video' | 'square' | 'wide' | 'auto';
   preloadAdjacent?: boolean;
   onSlideChange?: (index: number) => void;
+  defaultObjectFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
 }
 
 export function OptimizedSlider({
@@ -39,7 +42,8 @@ export function OptimizedSlider({
   className = '',
   aspectRatio = 'video',
   preloadAdjacent = true,
-  onSlideChange
+  onSlideChange,
+  defaultObjectFit = 'cover'
 }: OptimizedSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
@@ -55,6 +59,17 @@ export function OptimizedSlider({
       default: return 'aspect-video';
     }
   }, [aspectRatio]);
+
+  // Get object-fit class
+  const getObjectFitClass = useCallback((objectFit: string) => {
+    switch (objectFit) {
+      case 'contain': return 'object-contain';
+      case 'fill': return 'object-fill';
+      case 'scale-down': return 'object-scale-down';
+      case 'none': return 'object-none';
+      default: return 'object-cover';
+    }
+  }, []);
 
   // Auto-play functionality
   useEffect(() => {
@@ -147,6 +162,7 @@ export function OptimizedSlider({
     const hasError = imageErrors.has(index);
     const isVideoSlide = slide.isVideo || isYouTubeEmbed(slide.src);
     const showTextOverlay = hasTextContent(slide);
+    const objectFitClass = getObjectFitClass(slide.objectFit || defaultObjectFit);
 
     if (!shouldRender && !isActive) {
       return null;
@@ -182,7 +198,7 @@ export function OptimizedSlider({
           <iframe
             key={`${slide.id}-${isActive}`} // Force re-render when slide becomes active
             src={enhanceYouTubeUrl(slide.src)}
-            className="w-full h-full object-cover"
+            className={cn("w-full h-full", objectFitClass)}
             frameBorder="0"
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
@@ -197,7 +213,8 @@ export function OptimizedSlider({
             alt={slide.alt}
             loading={slide.priority ? 'eager' : 'lazy'}
             className={cn(
-              'w-full h-full object-cover transition-opacity duration-300',
+              'w-full h-full transition-opacity duration-300',
+              objectFitClass,
               !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
             )}
             onLoad={() => handleImageLoad(index)}
@@ -251,7 +268,7 @@ export function OptimizedSlider({
         )}
       </div>
     );
-  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed, enhanceYouTubeUrl, hasTextContent]);
+  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed, enhanceYouTubeUrl, hasTextContent, getObjectFitClass, defaultObjectFit]);
 
   if (slides.length === 0) {
     return (

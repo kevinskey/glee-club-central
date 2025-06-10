@@ -46,7 +46,8 @@ export function HeroSection() {
     textPosition: slide.text_position,
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
-    priority: index === 0 // First slide gets priority loading
+    priority: index === 0, // First slide gets priority loading
+    objectFit: slide.object_fit || 'cover' // Add object fit support
   }));
 
   return (
@@ -59,6 +60,7 @@ export function HeroSection() {
         showControls={true}
         showIndicators={true}
         preloadAdjacent={true}
+        defaultObjectFit="cover"
         className="h-[60vh] min-h-[400px] max-h-[600px]"
       />
     </div>
