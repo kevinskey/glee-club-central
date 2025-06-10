@@ -1,8 +1,6 @@
 
 import React from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
-import { HeroLoadingState } from './hero/HeroLoadingState';
-import { HeroDefaultState } from './hero/HeroDefaultState';
 import { OptimizedSlider } from '@/components/ui/optimized-slider';
 
 export function HeroSection() {
@@ -10,12 +8,27 @@ export function HeroSection() {
 
   // Show loading state while fetching
   if (isLoading) {
-    return <HeroLoadingState />;
+    return (
+      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-muted animate-pulse flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   // Show default state if error or no slides
   if (hasError || slides.length === 0) {
-    return <HeroDefaultState />;
+    return (
+      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+        <div className="text-center text-white p-4 max-w-2xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+            Spelman College Glee Club
+          </h1>
+          <p className="text-lg md:text-xl opacity-90 drop-shadow-md">
+            To Amaze and Inspire
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Transform slides data for OptimizedSlider
