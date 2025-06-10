@@ -30,15 +30,66 @@ body {
   max-width: 100vw;
 }
 
-/* Container and Layout Fixes */
-.container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
-  width: 100% !important;
-  max-width: 100vw !important;
-  padding-left: clamp(16px, 4vw, 20px);
-  padding-right: clamp(16px, 4vw, 20px);
-  margin-left: auto;
-  margin-right: auto;
-  box-sizing: border-box;
+/* Unified Container System - All containers use the same padding */
+@media (max-width: 768px) {
+  /* Standard mobile container padding for ALL containers */
+  .container, 
+  .max-w-7xl, 
+  .max-w-6xl, 
+  .max-w-5xl,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl,
+  .max-w-xl,
+  .max-w-lg,
+  .max-w-md,
+  .max-w-sm,
+  [class*="container"],
+  [class*="max-w-"] {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 1rem !important; /* 16px consistent padding */
+    padding-right: 1rem !important; /* 16px consistent padding */
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Override any custom padding classes */
+  .px-3, .px-4, .px-5, .px-6, .px-8, .px-12 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Sections with custom padding classes */
+  .mobile-padding-sm,
+  .mobile-padding-md,
+  .mobile-padding-lg {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Hero section container consistency */
+  .hero-section .container,
+  .hero-section [class*="max-w-"],
+  .hero-container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Card containers */
+  .card-container,
+  [class*="card"] .container {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Section containers */
+  section .container,
+  section [class*="max-w-"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
 }
 
 /* Ensure all main layout containers stay within viewport */
@@ -66,6 +117,8 @@ body {
     -webkit-backdrop-filter: blur(20px) !important;
     margin: 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
   
   .dark header {
@@ -88,6 +141,8 @@ body {
     margin: 0 !important;
     height: 32px !important;
     font-size: 13px !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
   
   /* Main header height */
@@ -100,6 +155,8 @@ body {
   main {
     margin: 0 !important;
     padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
   
   /* Home page specific adjustments - remove padding and ensure hero has no spacing */
@@ -195,12 +252,6 @@ p {
   
   section:not(.hero-section):first-child {
     padding-top: 0.75rem !important;
-  }
-  
-  /* Container spacing - but NOT for hero */
-  .container:not(.hero-container) {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
   }
   
   /* Header spacing in sections - but NOT for hero */
