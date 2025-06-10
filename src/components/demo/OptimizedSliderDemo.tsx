@@ -38,7 +38,31 @@ const demoSlides = [
   }
 ];
 
-export function OptimizedSliderDemo() {
+interface OptimizedSliderDemoProps {
+  settings?: {
+    isPlaying: boolean;
+    currentSlide: number;
+    autoPlayInterval: number;
+    showControls: boolean;
+    showIndicators: boolean;
+    aspectRatio: string;
+    preloadAdjacent: boolean;
+  };
+}
+
+export function OptimizedSliderDemo({ settings }: OptimizedSliderDemoProps) {
+  const defaultSettings = {
+    isPlaying: true,
+    currentSlide: 0,
+    autoPlayInterval: 4000,
+    showControls: true,
+    showIndicators: true,
+    aspectRatio: 'video',
+    preloadAdjacent: true
+  };
+
+  const sliderSettings = settings || defaultSettings;
+
   return (
     <div className="space-y-8 p-6">
       <div className="text-center">
@@ -50,41 +74,18 @@ export function OptimizedSliderDemo() {
         </p>
       </div>
 
-      {/* Video aspect ratio slider */}
+      {/* Controlled Slider */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Video Aspect Ratio (16:9)</h2>
+        <h2 className="text-xl font-semibold">Controlled Slider</h2>
         <OptimizedSlider
           slides={demoSlides}
-          aspectRatio="video"
-          autoPlay={true}
-          autoPlayInterval={4000}
+          aspectRatio={sliderSettings.aspectRatio as any}
+          autoPlay={sliderSettings.isPlaying}
+          autoPlayInterval={sliderSettings.autoPlayInterval}
+          showControls={sliderSettings.showControls}
+          showIndicators={sliderSettings.showIndicators}
+          preloadAdjacent={sliderSettings.preloadAdjacent}
           onSlideChange={(index) => console.log('Current slide:', index)}
-        />
-      </div>
-
-      {/* Square aspect ratio slider */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Square Aspect Ratio</h2>
-        <div className="max-w-md mx-auto">
-          <OptimizedSlider
-            slides={demoSlides}
-            aspectRatio="square"
-            autoPlay={false}
-            showControls={true}
-            showIndicators={true}
-          />
-        </div>
-      </div>
-
-      {/* Wide aspect ratio slider */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Wide Aspect Ratio (21:9)</h2>
-        <OptimizedSlider
-          slides={demoSlides}
-          aspectRatio="wide"
-          autoPlay={true}
-          autoPlayInterval={6000}
-          preloadAdjacent={true}
         />
       </div>
 
@@ -102,6 +103,7 @@ export function OptimizedSliderDemo() {
           <li>✅ Accessibility features with proper ARIA labels</li>
           <li>✅ Memoized components for performance</li>
           <li>✅ Configurable aspect ratios and auto-play</li>
+          <li>✅ External control interface</li>
         </ul>
       </div>
     </div>
