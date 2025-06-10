@@ -57,7 +57,7 @@ export function HeroSection() {
     );
   }
 
-  // Transform hero slides data for MobileOptimizedSlider with explicit objectFit
+  // Transform hero slides data for MobileOptimizedSlider with cover and top positioning
   const optimizedSlides = slides.map((slide, index) => ({
     id: slide.id,
     src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
@@ -73,7 +73,7 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: 'contain' as const // Explicitly set to contain for all slides with proper typing
+    objectFit: 'cover' as const // Use cover to maintain height and crop from bottom
   }));
 
   return (
@@ -88,7 +88,7 @@ export function HeroSection() {
             showControls={false}
             showIndicators={false}
             preloadAdjacent={true}
-            defaultObjectFit="contain"
+            defaultObjectFit="cover"
             className="h-[50vh] md:h-[70vh] min-h-[300px] md:min-h-[450px] max-h-[500px] md:max-h-[700px] w-full"
           />
           

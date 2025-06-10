@@ -42,7 +42,7 @@ export function MobileOptimizedSlider({
   aspectRatio = 'video',
   preloadAdjacent = true,
   onSlideChange,
-  defaultObjectFit = 'contain'
+  defaultObjectFit = 'cover'
 }: MobileOptimizedSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
@@ -80,14 +80,14 @@ export function MobileOptimizedSlider({
     }
   }, [aspectRatio, isMobile]);
 
-  // Get object-fit class with better default
+  // Get object-fit class with top positioning for cover
   const getObjectFitClass = useCallback((objectFit: string) => {
     switch (objectFit) {
-      case 'cover': return 'object-cover';
+      case 'cover': return 'object-cover object-top'; // Added object-top for cropping from bottom
       case 'fill': return 'object-fill';
       case 'scale-down': return 'object-scale-down';
       case 'none': return 'object-none';
-      default: return 'object-contain'; // Better for showing full image
+      default: return 'object-contain';
     }
   }, []);
 
@@ -205,7 +205,7 @@ export function MobileOptimizedSlider({
     return slide.title?.trim() || slide.subtitle?.trim() || slide.buttonText?.trim();
   }, []);
 
-  // Render slides with mobile optimization
+  // Render slides with cover object-fit and top positioning
   const renderSlide = useCallback((slide: SlideImage, index: number) => {
     const isActive = index === currentIndex;
     const shouldRender = loadedImages.has(index);
@@ -254,7 +254,7 @@ export function MobileOptimizedSlider({
             style={{ border: 'none' }}
           />
         ) : (
-          /* Regular image content - full width and height with no margins */
+          /* Image content with top positioning for cropping from bottom */
           <img
             src={slide.src}
             srcSet={slide.srcSet}
@@ -265,14 +265,13 @@ export function MobileOptimizedSlider({
               objectFitClass,
               !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
             )}
-            style={{ objectPosition: 'center center' }}
             onLoad={() => handleImageLoad(index)}
             onError={() => handleImageError(index)}
             sizes="100vw"
           />
         )}
 
-        {/* Mobile-optimized overlay content with lighter background and better centering */}
+        {/* Text overlay content */}
         {showTextOverlay && (
           <div className={cn(
             'absolute inset-0 bg-black/20 md:bg-black/15 flex justify-center',
@@ -344,7 +343,7 @@ export function MobileOptimizedSlider({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
-      {/* Slides container - full width */}
+      {/* Slides container */}
       <div className="relative w-full h-full">
         {slides.map((slide, index) => renderSlide(slide, index))}
       </div>
