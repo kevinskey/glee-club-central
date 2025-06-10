@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Activity,
@@ -11,62 +10,85 @@ import {
   Settings,
   Clock
 } from "lucide-react";
+import { useRecentActivity } from "@/hooks/useRecentActivity";
 
 interface AdminRecentActivityProps {
   isMobile?: boolean;
 }
 
 export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityProps) {
-  const activities = [
-    {
-      id: 1,
-      type: "event",
-      title: "New performance scheduled",
-      description: "Spring Concert 2024 added to calendar",
-      user: "Sarah Johnson",
-      avatar: "",
-      time: "2 hours ago",
-      icon: Calendar,
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100 dark:bg-blue-900/20"
-    },
-    {
-      id: 2,
-      type: "upload",
-      title: "Media files uploaded",
-      description: "15 photos from rehearsal added",
-      user: "Michael Chen",
-      avatar: "",
-      time: "4 hours ago",
-      icon: Upload,
-      color: "text-green-600 dark:text-green-400",
-      bgColor: "bg-green-100 dark:bg-green-900/20"
-    },
-    {
-      id: 3,
-      type: "member",
-      title: "New member joined",
-      description: "Emily Rodriguez accepted invitation",
-      user: "System",
-      avatar: "",
-      time: "1 day ago",
-      icon: UserPlus,
-      color: "text-purple-600 dark:text-purple-400",
-      bgColor: "bg-purple-100 dark:bg-purple-900/20"
-    },
-    {
-      id: 4,
-      type: "settings",
-      title: "Settings updated",
-      description: "Notification preferences changed",
-      user: "David Park",
-      avatar: "",
-      time: "2 days ago",
-      icon: Settings,
-      color: "text-orange-600 dark:text-orange-400",
-      bgColor: "bg-orange-100 dark:bg-orange-900/20"
+  const { data: activities = [], isLoading, error } = useRecentActivity();
+
+  const getIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'Calendar': return Calendar;
+      case 'Upload': return Upload;
+      case 'UserPlus': return UserPlus;
+      case 'Settings': return Settings;
+      default: return Activity;
     }
-  ];
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Activity className="h-5 w-5 text-orange-500" />
+            Recent Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex items-start gap-4 p-4 rounded-lg animate-pulse">
+                <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600">
+                  <div className="h-4 w-4 bg-gray-300 dark:bg-gray-500 rounded"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                  <div className="h-3 w-48 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                  <div className="h-3 w-24 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Activity className="h-5 w-5 text-orange-500" />
+            Recent Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Failed to load recent activity</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (activities.length === 0) {
+    return (
+      <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+            <Activity className="h-5 w-5 text-orange-500" />
+            Recent Activity
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">No recent activity to display</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
@@ -79,7 +101,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
       <CardContent>
         <div className="space-y-4">
           {activities.map((activity) => {
-            const Icon = activity.icon;
+            const Icon = getIcon(activity.icon);
             return (
               <div 
                 key={activity.id} 
