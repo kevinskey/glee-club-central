@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -50,6 +49,7 @@ export function HeroSlideManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
   const [previewSlide, setPreviewSlide] = useState<HeroSlide | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   
   const { filteredMediaFiles, fetchAllMedia } = useMediaLibrary();
   
@@ -84,12 +84,18 @@ export function HeroSlideManager() {
 
   const fetchSlides = async () => {
     try {
+      console.log('🎭 Fetching hero slides...');
       const { data, error } = await supabase
         .from('hero_slides')
         .select('*')
         .order('slide_order');
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching slides:', error);
+        throw error;
+      }
+      
+      console.log('✅ Successfully fetched slides:', data?.length || 0);
       setSlides(data || []);
     } catch (error) {
       console.error('Error fetching hero slides:', error);
@@ -106,12 +112,18 @@ export function HeroSlideManager() {
   };
 
   const createSlide = async () => {
-    if (!newSlide.title.trim()) {
-      toast.error('Title is required');
-      return;
-    }
+    if (isCreating) return;
+    
+    console.log('🎯 Starting slide creation...', newSlide);
+    setIsCreating(true);
 
     try {
+      // Validation
+      if (!newSlide.title.trim() && !newSlide.media_id && !newSlide.youtube_url.trim()) {
+        toast.error('Please provide either a title or select media for the slide');
+        return;
+      }
+
       let mediaId = newSlide.media_id;
       let mediaType: 'image' | 'video' = 'image';
 
@@ -119,30 +131,51 @@ export function HeroSlideManager() {
       if (newSlide.youtube_url.trim()) {
         mediaId = convertYouTubeToEmbed(newSlide.youtube_url.trim());
         mediaType = 'video';
+        console.log('📹 Using YouTube video:', mediaId);
       } else if (newSlide.media_id) {
         const media = filteredMediaFiles.find(m => m.id === newSlide.media_id);
-        mediaType = media?.file_type?.startsWith('video/') ? 'video' : 'image';
+        if (media) {
+          mediaType = media.file_type?.startsWith('video/') ? 'video' : 'image';
+          console.log('🖼️ Using media library file:', media.title, 'Type:', mediaType);
+        } else {
+          console.warn('⚠️ Selected media not found in library');
+        }
       }
 
-      const { error } = await supabase
+      // Calculate next slide order
+      const nextOrder = slides.length;
+      console.log('📊 Next slide order will be:', nextOrder);
+
+      const slideData = {
+        title: newSlide.title.trim() || 'Untitled Slide',
+        description: newSlide.description.trim() || '',
+        button_text: newSlide.button_text.trim() || null,
+        button_link: newSlide.button_link.trim() || null,
+        text_position: newSlide.text_position,
+        text_alignment: newSlide.text_alignment,
+        visible: newSlide.visible,
+        slide_order: nextOrder,
+        media_id: mediaId || null,
+        media_type: mediaType
+      };
+
+      console.log('💾 Inserting slide data:', slideData);
+
+      const { data, error } = await supabase
         .from('hero_slides')
-        .insert({
-          title: newSlide.title.trim(),
-          description: newSlide.description.trim() || '',
-          button_text: newSlide.button_text.trim() || null,
-          button_link: newSlide.button_link.trim() || null,
-          text_position: newSlide.text_position,
-          text_alignment: newSlide.text_alignment,
-          visible: newSlide.visible,
-          slide_order: slides.length,
-          media_id: mediaId || null,
-          media_type: mediaType
-        });
+        .insert(slideData)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error:', error);
+        throw error;
+      }
 
+      console.log('✅ Slide created successfully:', data);
       toast.success('Hero slide created successfully');
-      setShowCreateDialog(false);
+      
+      // Reset form
       setNewSlide({
         title: '',
         description: '',
@@ -154,10 +187,14 @@ export function HeroSlideManager() {
         youtube_url: '',
         visible: true
       });
+      
+      setShowCreateDialog(false);
       fetchSlides();
     } catch (error) {
-      console.error('Error creating hero slide:', error);
-      toast.error('Failed to create hero slide');
+      console.error('💥 Error creating hero slide:', error);
+      toast.error(`Failed to create hero slide: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -574,11 +611,11 @@ export function HeroSlideManager() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Title *</Label>
+                <Label>Title</Label>
                 <Input
                   value={newSlide.title}
                   onChange={(e) => setNewSlide(prev => ({ ...prev, title: e.target.value }))}
-                  placeholder="Slide title"
+                  placeholder="Slide title (optional if using media)"
                 />
               </div>
               <div className="space-y-2">
@@ -598,9 +635,32 @@ export function HeroSlideManager() {
               <Textarea
                 value={newSlide.description}
                 onChange={(e) => setNewSlide(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Slide description"
+                placeholder="Slide description (optional)"
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Media from Library</Label>
+              <Select value={newSlide.media_id} onValueChange={(value) => setNewSlide(prev => ({ ...prev, media_id: value, youtube_url: value ? '' : prev.youtube_url }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an image or video" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mediaLibrary.map((media) => (
+                    <SelectItem key={media.id} value={media.id}>
+                      <div className="flex items-center gap-2">
+                        {media.file_type?.startsWith('video/') ? (
+                          <Video className="h-4 w-4" />
+                        ) : (
+                          <ImageIcon className="h-4 w-4" />
+                        )}
+                        {media.title}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -663,12 +723,19 @@ export function HeroSlideManager() {
               </div>
             </div>
 
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <p className="text-sm text-blue-800">
+                <strong>Note:</strong> You can create a slide with just media (no title/description) or just text. 
+                At least one of title or media is recommended for best results.
+              </p>
+            </div>
+
             <div className="flex gap-2 pt-4">
-              <Button onClick={createSlide} disabled={!newSlide.title.trim()}>
+              <Button onClick={createSlide} disabled={isCreating}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create Slide
+                {isCreating ? 'Creating...' : 'Create Slide'}
               </Button>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isCreating}>
                 Cancel
               </Button>
             </div>
