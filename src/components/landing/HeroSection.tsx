@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { MobileOptimizedSlider } from '@/components/ui/mobile-optimized-slider';
@@ -10,9 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 export function HeroSection() {
   const { slides, isLoading, hasError } = useHeroSlides();
   const navigate = useNavigate();
-  const { user, userRole } = useAuth();
+  const { user, profile } = useAuth();
 
-  const isAdmin = userRole === 'admin' || userRole === 'administrator';
+  const isAdmin = profile?.role === 'admin' || profile?.is_super_admin;
 
   // Show loading state while fetching
   if (isLoading) {

@@ -109,18 +109,115 @@ export function MobileOptimizedEventsSection({
           </div>
         )}
         
-        <div className="grid gap-4 md:gap-6 max-w-4xl mx-auto">
+        {/* Mobile: Horizontal scrolling cards */}
+        <div className="block md:hidden">
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+            {upcomingEvents.map((event) => (
+              <Card key={event.id} className="flex-shrink-0 w-80 snap-start hover:shadow-lg transition-all duration-300">
+                <div className="relative">
+                  {/* Event Image */}
+                  {event.feature_image_url && (
+                    <div className="w-full h-32 overflow-hidden rounded-t-lg">
+                      <img
+                        src={event.feature_image_url}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  
+                  {/* Event Type Badge */}
+                  {event.event_type && (
+                    <div className="absolute top-2 left-2">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-primary/90 text-primary-foreground rounded-full backdrop-blur-sm">
+                        {event.event_type}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    {/* Date Block */}
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex flex-col items-center justify-center text-primary text-xs">
+                        <span className="font-medium">
+                          {format(new Date(event.start_time), 'MMM')}
+                        </span>
+                        <span className="text-sm font-bold">
+                          {format(new Date(event.start_time), 'd')}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Event Details */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm font-semibold mb-2 text-foreground line-clamp-2">
+                        {event.title}
+                      </h3>
+                      
+                      <div className="space-y-1">
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+                          <span>{format(new Date(event.start_time), 'h:mm a')}</span>
+                        </div>
+                        
+                        {event.location_name && (
+                          <div className="flex items-center text-xs text-muted-foreground">
+                            <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                            <span className="truncate">{event.location_name}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {event.short_description && (
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">
+                          {event.short_description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Desktop: Grid layout */}
+        <div className="hidden md:grid md:grid-cols-2 gap-6">
           {upcomingEvents.map((event) => (
-            <Card key={event.id} className="group hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary">
-              <CardContent className="p-4 md:p-6">
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <Card key={event.id} className="hover:shadow-lg transition-shadow">
+              <div className="relative">
+                {/* Event Image */}
+                {event.feature_image_url && (
+                  <div className="w-full h-40 overflow-hidden rounded-t-lg">
+                    <img
+                      src={event.feature_image_url}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Event Type Badge */}
+                {event.event_type && (
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-primary/90 text-primary-foreground rounded-full backdrop-blur-sm">
+                      {event.event_type}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
                   {/* Date Block */}
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-xl flex flex-col items-center justify-center text-primary">
-                      <span className="text-xs md:text-sm font-medium">
+                    <div className="w-16 h-16 bg-primary/10 rounded-xl flex flex-col items-center justify-center text-primary">
+                      <span className="text-sm font-medium">
                         {format(new Date(event.start_time), 'MMM')}
                       </span>
-                      <span className="text-lg md:text-xl font-bold">
+                      <span className="text-xl font-bold">
                         {format(new Date(event.start_time), 'd')}
                       </span>
                     </div>
@@ -128,39 +225,31 @@ export function MobileOptimizedEventsSection({
                   
                   {/* Event Details */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base md:text-lg font-semibold mb-2 text-foreground group-hover:text-primary transition-colors">
+                    <h3 className="text-lg font-semibold mb-2 text-foreground">
                       {event.title}
                     </h3>
                     
                     <div className="space-y-1">
-                      <div className="flex items-center text-xs md:text-sm text-muted-foreground">
-                        <Clock className="w-3 h-3 md:w-4 md:h-4 mr-2 flex-shrink-0" />
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
                         <span>{format(new Date(event.start_time), 'h:mm a')}</span>
                       </div>
                       
                       {event.location_name && (
-                        <div className="flex items-center text-xs md:text-sm text-muted-foreground">
-                          <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{event.location_name}</span>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <span>{event.location_name}</span>
                         </div>
                       )}
                     </div>
                     
                     {event.short_description && (
-                      <p className="text-xs md:text-sm text-muted-foreground mt-2 line-clamp-2">
+                      <p className="text-muted-foreground mt-3 line-clamp-2">
                         {event.short_description}
                       </p>
                     )}
-                  </div>
-                  
-                  {/* Event Type Badge */}
-                  <div className="flex-shrink-0">
-                    <div className="flex flex-col items-end gap-2">
-                      {event.event_type && (
-                        <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                          {event.event_type}
-                        </span>
-                      )}
+                    
+                    <div className="flex justify-end mt-4">
                       <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
