@@ -124,19 +124,21 @@ export function HeroSlideManager() {
         return;
       }
 
-      let mediaId = newSlide.media_id;
+      let mediaId = null;
       let mediaType: 'image' | 'video' = 'image';
 
-      // Handle YouTube URL
+      // Handle YouTube URL - store the converted embed URL directly in media_id
       if (newSlide.youtube_url.trim()) {
         mediaId = convertYouTubeToEmbed(newSlide.youtube_url.trim());
         mediaType = 'video';
-        console.log('📹 Using YouTube video:', mediaId);
+        console.log('📹 Using YouTube video as media_id:', mediaId);
       } else if (newSlide.media_id) {
+        // Handle media library selection - this is a proper UUID
         const media = filteredMediaFiles.find(m => m.id === newSlide.media_id);
         if (media) {
+          mediaId = media.id; // This is a proper UUID
           mediaType = media.file_type?.startsWith('video/') ? 'video' : 'image';
-          console.log('🖼️ Using media library file:', media.title, 'Type:', mediaType);
+          console.log('🖼️ Using media library file:', media.title, 'Type:', mediaType, 'ID:', mediaId);
         } else {
           console.warn('⚠️ Selected media not found in library');
         }
@@ -155,7 +157,7 @@ export function HeroSlideManager() {
         text_alignment: newSlide.text_alignment,
         visible: newSlide.visible,
         slide_order: nextOrder,
-        media_id: mediaId || null,
+        media_id: mediaId,
         media_type: mediaType
       };
 
@@ -200,15 +202,20 @@ export function HeroSlideManager() {
 
   const updateSlide = async (slideId: string) => {
     try {
-      let mediaId = editData.media_id;
+      let mediaId = null;
       let mediaType: 'image' | 'video' = 'image';
 
+      // Handle YouTube URL
       if (editData.youtube_url.trim()) {
         mediaId = convertYouTubeToEmbed(editData.youtube_url.trim());
         mediaType = 'video';
       } else if (editData.media_id) {
+        // Handle media library selection
         const media = filteredMediaFiles.find(m => m.id === editData.media_id);
-        mediaType = media?.file_type?.startsWith('video/') ? 'video' : 'image';
+        if (media) {
+          mediaId = media.id;
+          mediaType = media.file_type?.startsWith('video/') ? 'video' : 'image';
+        }
       }
 
       const { error } = await supabase
@@ -221,7 +228,7 @@ export function HeroSlideManager() {
           text_position: editData.text_position,
           text_alignment: editData.text_alignment,
           visible: editData.visible,
-          media_id: mediaId || null,
+          media_id: mediaId,
           media_type: mediaType,
           updated_at: new Date().toISOString()
         })
