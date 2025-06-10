@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -127,6 +126,15 @@ export function OptimizedSlider({
     return url?.includes('youtube.com/embed/');
   }, []);
 
+  // Enhance YouTube URL with proper parameters for autoplay
+  const enhanceYouTubeUrl = useCallback((url: string) => {
+    if (!isYouTubeEmbed(url)) return url;
+    
+    // Add parameters for better autoplay support
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`;
+  }, [isYouTubeEmbed]);
+
   // Render slides (only visible + adjacent for performance)
   const renderSlide = useCallback((slide: SlideImage, index: number) => {
     const isActive = index === currentIndex;
@@ -166,12 +174,14 @@ export function OptimizedSlider({
         {/* Video content (YouTube or other video) */}
         {isVideoSlide ? (
           <iframe
-            src={slide.src}
+            key={`${slide.id}-${isActive}`} // Force re-render when slide becomes active
+            src={enhanceYouTubeUrl(slide.src)}
             className="w-full h-full object-cover"
             frameBorder="0"
-            allow="autoplay; encrypted-media"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
             loading={slide.priority ? 'eager' : 'lazy'}
+            style={{ border: 'none' }}
           />
         ) : (
           /* Regular image content */
@@ -235,7 +245,7 @@ export function OptimizedSlider({
         )}
       </div>
     );
-  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed]);
+  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed, enhanceYouTubeUrl]);
 
   if (slides.length === 0) {
     return (
