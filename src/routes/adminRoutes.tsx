@@ -11,6 +11,7 @@ import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import MembersPage from '@/pages/admin/MembersPage';
+import SliderDemoPage from '@/pages/admin/SliderDemoPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -47,6 +48,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <UnifiedSlideManagementPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/slider-demo',
+    element: (
+      <AdminRoute>
+        <SliderDemoPage />
       </AdminRoute>
     ),
   },
