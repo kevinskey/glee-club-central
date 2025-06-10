@@ -2,9 +2,17 @@
 import React from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { MobileOptimizedSlider } from '@/components/ui/mobile-optimized-slider';
+import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function HeroSection() {
   const { slides, isLoading, hasError } = useHeroSlides();
+  const navigate = useNavigate();
+  const { user, userRole } = useAuth();
+
+  const isAdmin = userRole === 'admin' || userRole === 'administrator';
 
   // Show loading state while fetching
   if (isLoading) {
@@ -27,6 +35,16 @@ export function HeroSection() {
             To Amaze and Inspire
           </p>
         </div>
+        {isAdmin && (
+          <Button
+            onClick={() => navigate('/admin/hero-slides')}
+            className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white border border-white/30"
+            size="sm"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Slides
+          </Button>
+        )}
       </div>
     );
   }
@@ -63,6 +81,18 @@ export function HeroSection() {
         defaultObjectFit="cover"
         className="h-[50vh] md:h-[60vh] min-h-[300px] md:min-h-[400px] max-h-[600px]"
       />
+      
+      {/* Admin Edit Button */}
+      {isAdmin && (
+        <Button
+          onClick={() => navigate('/admin/hero-slides')}
+          className="absolute top-4 right-4 z-40 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+          size="sm"
+        >
+          <Edit className="h-4 w-4 mr-2" />
+          Edit Slides
+        </Button>
+      )}
     </div>
   );
 }
