@@ -243,38 +243,41 @@ p {
   font-size: clamp(1rem, 2.5vw, 1.125rem); /* 16px -> 18px */
 }
 
-/* Reset Typography and Spacing */
+/* Reset Typography and Spacing - REMOVE ALL SECTION PADDING */
 @media (max-width: 768px) {
-  /* Section spacing reset - but NOT for hero */
-  section:not(.hero-section) {
-    padding: 1.5rem 0 !important;
+  /* Remove ALL section padding */
+  section {
+    padding: 0 !important;
+    margin: 0 !important;
   }
   
-  section:not(.hero-section):first-child {
-    padding-top: 0.75rem !important;
+  /* Remove ALL padding classes */
+  .py-4, .py-6, .py-8, .py-12, .py-16, .py-20, .py-24 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
   
-  /* Header spacing in sections - but NOT for hero */
-  .text-center.mb-8:not(.hero-header),
-  .text-center.mb-12:not(.hero-header),
-  .text-center.mb-16:not(.hero-header) {
-    margin-bottom: 1rem !important;
+  /* Remove header spacing in sections */
+  .text-center.mb-8,
+  .text-center.mb-12,
+  .text-center.mb-16 {
+    margin-bottom: 0 !important;
   }
   
-  /* Remove excessive margins - but NOT for hero */
-  .space-y-8:not(.hero-space) > * + *,
-  .space-y-12:not(.hero-space) > * + *,
-  .space-y-16:not(.hero-space) > * + * {
-    margin-top: 1.5rem !important;
+  /* Remove excessive margins */
+  .space-y-8 > * + *,
+  .space-y-12 > * + *,
+  .space-y-16 > * + * {
+    margin-top: 0 !important;
   }
   
-  /* Compact spacing for dense layouts */
+  /* Remove spacing for dense layouts */
   .space-y-3 > * + * {
-    margin-top: 0.75rem !important;
+    margin-top: 0 !important;
   }
   
   .space-y-4 > * + * {
-    margin-top: 1rem !important;
+    margin-top: 0 !important;
   }
 }
 
