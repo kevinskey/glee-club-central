@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,7 +43,7 @@ export function MobileOptimizedSlider({
   aspectRatio = 'video',
   preloadAdjacent = true,
   onSlideChange,
-  defaultObjectFit = 'cover'
+  defaultObjectFit = 'contain'
 }: MobileOptimizedSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
@@ -61,14 +62,14 @@ export function MobileOptimizedSlider({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Memoize aspect ratio classes with mobile optimization
+  // Memoize aspect ratio classes with better mobile optimization
   const aspectRatioClass = useMemo(() => {
     if (isMobile) {
       switch (aspectRatio) {
         case 'square': return 'aspect-square';
         case 'wide': return 'aspect-[16/9]';
-        case 'auto': return 'h-auto min-h-[50vh]';
-        default: return 'aspect-[4/3]'; // Better for mobile
+        case 'auto': return 'h-auto min-h-[60vh]';
+        default: return 'aspect-[3/2]'; // Less cropping for mobile
       }
     }
     
@@ -76,18 +77,18 @@ export function MobileOptimizedSlider({
       case 'square': return 'aspect-square';
       case 'wide': return 'aspect-[21/9]';
       case 'auto': return 'h-auto';
-      default: return 'aspect-video';
+      default: return 'aspect-[4/3]'; // Less cropping for desktop
     }
   }, [aspectRatio, isMobile]);
 
-  // Get object-fit class
+  // Get object-fit class with better default
   const getObjectFitClass = useCallback((objectFit: string) => {
     switch (objectFit) {
-      case 'contain': return 'object-contain';
+      case 'cover': return 'object-cover';
       case 'fill': return 'object-fill';
       case 'scale-down': return 'object-scale-down';
       case 'none': return 'object-none';
-      default: return 'object-cover';
+      default: return 'object-contain'; // Better for showing full image
     }
   }, []);
 
@@ -254,7 +255,7 @@ export function MobileOptimizedSlider({
             style={{ border: 'none' }}
           />
         ) : (
-          /* Regular image content */
+          /* Regular image content with better positioning */
           <img
             src={slide.src}
             srcSet={slide.srcSet}
@@ -265,15 +266,16 @@ export function MobileOptimizedSlider({
               objectFitClass,
               !loadedImages.has(index) ? 'opacity-0' : 'opacity-100'
             )}
+            style={{ objectPosition: 'center center' }}
             onLoad={() => handleImageLoad(index)}
             onError={() => handleImageError(index)}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
           />
         )}
 
-        {/* Mobile-optimized overlay content */}
+        {/* Mobile-optimized overlay content with lighter background */}
         {showTextOverlay && (
-          <div className="absolute inset-0 bg-black/30 md:bg-black/20 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/20 md:bg-black/15 flex items-center justify-center p-4">
             <div className={cn(
               'text-center text-white max-w-xs md:max-w-2xl mx-auto',
               slide.textPosition === 'top' && 'items-start',
