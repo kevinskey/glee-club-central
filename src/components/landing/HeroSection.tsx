@@ -31,18 +31,22 @@ export function HeroSection() {
     );
   }
 
-  // Transform slides data for OptimizedSlider
-  const optimizedSlides = slides.map(slide => ({
+  // Transform hero slides data for OptimizedSlider
+  const optimizedSlides = slides.map((slide, index) => ({
     id: slide.id,
-    src: slide.background_image_url || '/placeholder-hero.jpg',
-    srcSet: slide.background_image_url ? 
+    src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
+    srcSet: slide.background_image_url && !slide.youtube_url ? 
       `${slide.background_image_url}?w=600&h=338&fit=crop&crop=center 600w, ${slide.background_image_url}?w=1200&h=675&fit=crop&crop=center 1200w` : 
       undefined,
     alt: slide.title,
     title: slide.title,
     subtitle: slide.description,
-    link: slide.link_url,
-    priority: true // First slide gets priority loading
+    buttonText: slide.button_text,
+    link: slide.button_link,
+    textPosition: slide.text_position,
+    textAlignment: slide.text_alignment,
+    isVideo: slide.media_type === 'video' || !!slide.youtube_url,
+    priority: index === 0 // First slide gets priority loading
   }));
 
   return (
