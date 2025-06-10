@@ -21,6 +21,7 @@ import EnhancedCalendarPage from "./pages/EnhancedCalendarPage";
 import SheetMusicPage from "./pages/SheetMusicPage";
 import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
+import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfilePage />,
+      },
+      {
+        path: "members",
+        element: <MembersPage />,
       },
       {
         path: "dashboard",
