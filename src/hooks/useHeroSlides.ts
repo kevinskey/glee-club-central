@@ -62,7 +62,6 @@ export function useHeroSlides() {
           media_id, 
           youtube_url, 
           media_type,
-          object_fit,
           media_library!inner(file_url)
         `)
         .eq('visible', true)
@@ -83,7 +82,8 @@ export function useHeroSlides() {
       const transformedSlides = (data || []).map((slide: any) => ({
         ...slide,
         background_image_url: slide.media_library?.file_url || null,
-        link_url: slide.button_link
+        link_url: slide.button_link,
+        object_fit: 'cover' // Default object fit since column doesn't exist yet
       }));
       
       console.log('🎭 HeroSection: Successfully fetched', transformedSlides.length, 'hero slides');

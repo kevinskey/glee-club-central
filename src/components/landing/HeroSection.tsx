@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
-import { OptimizedSlider } from '@/components/ui/optimized-slider';
+import { MobileOptimizedSlider } from '@/components/ui/mobile-optimized-slider';
 
 export function HeroSection() {
   const { slides, isLoading, hasError } = useHeroSlides();
@@ -9,8 +9,8 @@ export function HeroSection() {
   // Show loading state while fetching
   if (isLoading) {
     return (
-      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-muted animate-pulse flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="relative w-full h-[50vh] md:h-[60vh] min-h-[300px] md:min-h-[400px] max-h-[600px] bg-muted animate-pulse flex items-center justify-center">
+        <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -18,12 +18,12 @@ export function HeroSection() {
   // Show default state if error or no slides
   if (hasError || slides.length === 0) {
     return (
-      <div className="relative w-full h-[60vh] min-h-[400px] max-h-[600px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
-        <div className="text-center text-white p-4 max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
+      <div className="relative w-full h-[50vh] md:h-[60vh] min-h-[300px] md:min-h-[400px] max-h-[600px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center">
+        <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
+          <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
             Spelman College Glee Club
           </h1>
-          <p className="text-lg md:text-xl opacity-90 drop-shadow-md">
+          <p className="text-sm md:text-lg lg:text-xl opacity-90 drop-shadow-md">
             To Amaze and Inspire
           </p>
         </div>
@@ -31,7 +31,7 @@ export function HeroSection() {
     );
   }
 
-  // Transform hero slides data for OptimizedSlider
+  // Transform hero slides data for MobileOptimizedSlider
   const optimizedSlides = slides.map((slide, index) => ({
     id: slide.id,
     src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
@@ -46,13 +46,13 @@ export function HeroSection() {
     textPosition: slide.text_position,
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
-    priority: index === 0, // First slide gets priority loading
-    objectFit: slide.object_fit || 'cover' // Add object fit support
+    priority: index === 0,
+    objectFit: slide.object_fit || 'cover'
   }));
 
   return (
     <div className="relative w-full">
-      <OptimizedSlider
+      <MobileOptimizedSlider
         slides={optimizedSlides}
         aspectRatio="video"
         autoPlay={true}
@@ -61,7 +61,7 @@ export function HeroSection() {
         showIndicators={true}
         preloadAdjacent={true}
         defaultObjectFit="cover"
-        className="h-[60vh] min-h-[400px] max-h-[600px]"
+        className="h-[50vh] md:h-[60vh] min-h-[300px] md:min-h-[400px] max-h-[600px]"
       />
     </div>
   );
