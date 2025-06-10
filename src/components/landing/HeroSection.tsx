@@ -85,8 +85,8 @@ export function HeroSection() {
             aspectRatio="auto"
             autoPlay={true}
             autoPlayInterval={5000}
-            showControls={true}
-            showIndicators={true}
+            showControls={false}
+            showIndicators={false}
             preloadAdjacent={true}
             defaultObjectFit="contain"
             className="h-[60vh] md:h-[70vh] min-h-[350px] md:min-h-[450px] max-h-[700px] w-full"
