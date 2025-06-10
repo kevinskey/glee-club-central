@@ -57,7 +57,7 @@ export function HeroSection() {
     );
   }
 
-  // Transform hero slides data for MobileOptimizedSlider
+  // Transform hero slides data for MobileOptimizedSlider with explicit objectFit
   const optimizedSlides = slides.map((slide, index) => ({
     id: slide.id,
     src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
@@ -73,7 +73,7 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: slide.object_fit || 'contain'
+    objectFit: 'contain' // Explicitly set to contain for all slides
   }));
 
   return (
