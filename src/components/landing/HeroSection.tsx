@@ -18,10 +18,8 @@ export function HeroSection() {
   if (isLoading) {
     return (
       <section className="py-4 md:py-6">
-        <div className="container mx-auto px-4">
-          <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
-            <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
+        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
+          <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       </section>
     );
@@ -31,27 +29,25 @@ export function HeroSection() {
   if (hasError || slides.length === 0) {
     return (
       <section className="py-4 md:py-6">
-        <div className="container mx-auto px-4">
-          <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center relative">
-            <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 drop-shadow-lg">
-                Spelman College Glee Club
-              </h1>
-              <p className="text-sm md:text-lg opacity-90 drop-shadow-md">
-                To Amaze and Inspire
-              </p>
-            </div>
-            {isAdmin && (
-              <Button
-                onClick={() => navigate('/admin/hero-slides')}
-                className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white border border-white/30"
-                size="sm"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Slides
-              </Button>
-            )}
+        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center relative">
+          <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 drop-shadow-lg">
+              Spelman College Glee Club
+            </h1>
+            <p className="text-sm md:text-lg opacity-90 drop-shadow-md">
+              To Amaze and Inspire
+            </p>
           </div>
+          {isAdmin && (
+            <Button
+              onClick={() => navigate('/admin/hero-slides')}
+              className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white border border-white/30"
+              size="sm"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit Slides
+            </Button>
+          )}
         </div>
       </section>
     );
@@ -73,37 +69,35 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: 'cover' as const // Use cover to maintain height and crop from bottom
+    objectFit: 'cover' as const
   }));
 
   return (
-    <section className="py-4 md:py-6">
-      <div className="container mx-auto px-4">
-        <div className="w-full relative">
-          <MobileOptimizedSlider
-            slides={optimizedSlides}
-            aspectRatio="auto"
-            autoPlay={true}
-            autoPlayInterval={5000}
-            showControls={false}
-            showIndicators={false}
-            preloadAdjacent={true}
-            defaultObjectFit="cover"
-            className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
-          />
-          
-          {/* Admin Edit Button */}
-          {isAdmin && (
-            <Button
-              onClick={() => navigate('/admin/hero-slides')}
-              className="absolute top-4 right-4 z-40 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
-              size="sm"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Slides
-            </Button>
-          )}
-        </div>
+    <section className="w-full">
+      <div className="w-full relative">
+        <MobileOptimizedSlider
+          slides={optimizedSlides}
+          aspectRatio="auto"
+          autoPlay={true}
+          autoPlayInterval={5000}
+          showControls={false}
+          showIndicators={false}
+          preloadAdjacent={true}
+          defaultObjectFit="cover"
+          className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
+        />
+        
+        {/* Admin Edit Button */}
+        {isAdmin && (
+          <Button
+            onClick={() => navigate('/admin/hero-slides')}
+            className="absolute top-4 right-4 z-40 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+            size="sm"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Slides
+          </Button>
+        )}
       </div>
     </section>
   );
