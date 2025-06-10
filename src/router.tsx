@@ -25,6 +25,7 @@ import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
+import { dashboardRoutes } from "./routes/dashboardRoutes";
 
 const router = createBrowserRouter([
   {
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
       },
       {
         path: "dashboard",
+        element: <RoleDashboardPage />,
+      },
+      {
+        path: "role-dashboard",
         element: <RoleDashboardPage />,
       },
       {
@@ -112,6 +117,8 @@ const router = createBrowserRouter([
         path: "sheet-music/view/:id",
         element: <ViewSheetMusicPage />,
       },
+      // Add all dashboard routes
+      ...dashboardRoutes,
       // Add all admin routes (original)
       ...adminRoutes,
       // Add all v2 admin routes
