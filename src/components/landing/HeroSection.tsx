@@ -53,7 +53,7 @@ export function HeroSection() {
     );
   }
 
-  // Transform hero slides data for MobileOptimizedSlider with cover and top positioning
+  // Transform hero slides data for MobileOptimizedSlider with contain object-fit
   const optimizedSlides = slides.map((slide, index) => ({
     id: slide.id,
     src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
@@ -69,7 +69,7 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: 'cover' as const
+    objectFit: 'contain' as const
   }));
 
   return (
@@ -83,7 +83,7 @@ export function HeroSection() {
           showControls={false}
           showIndicators={false}
           preloadAdjacent={true}
-          defaultObjectFit="cover"
+          defaultObjectFit="contain"
           className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
         />
         
