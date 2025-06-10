@@ -16,6 +16,10 @@ export default function AppContent({ children }: AppContentProps) {
   // Determine if we're on an admin page
   const isAdminPage = location.pathname.startsWith('/admin');
   
+  // Dashboard pages that should not show the unified header (they manage their own)
+  const isDashboardPage = location.pathname.startsWith('/dashboard') || 
+                          location.pathname.startsWith('/role-dashboard');
+  
   // Pages that manage their own headers completely (including TopSlider)
   const pagesWithOwnHeaders = [
     '/login', 
@@ -24,7 +28,8 @@ export default function AppContent({ children }: AppContentProps) {
     '/contact' // ContactPage manages its own header and footer
   ];
   
-  const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname);
+  const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname) && 
+                          !isDashboardPage;
 
   return (
     <div className="min-h-screen bg-background">
