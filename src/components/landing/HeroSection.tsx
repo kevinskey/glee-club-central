@@ -14,10 +14,12 @@ export function HeroSection() {
 
   const isAdmin = profile?.role === 'admin' || profile?.is_super_admin;
 
+  console.log('🎭 HeroSection: Slides data:', { slides: slides.length, isLoading, hasError });
+
   // Show loading state while fetching
   if (isLoading) {
     return (
-      <section className="py-4 md:py-6">
+      <section className="w-full">
         <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
           <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
@@ -25,38 +27,50 @@ export function HeroSection() {
     );
   }
 
-  // Show default state if error or no slides
-  if (hasError || slides.length === 0) {
-    return (
-      <section className="py-4 md:py-6">
-        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center relative">
-          <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
-            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 drop-shadow-lg">
-              Spelman College Glee Club
-            </h1>
-            <p className="text-sm md:text-lg opacity-90 drop-shadow-md">
-              To Amaze and Inspire
-            </p>
-          </div>
-          {isAdmin && (
-            <Button
-              onClick={() => navigate('/admin/hero-slides')}
-              className="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white border border-white/30"
-              size="sm"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Slides
-            </Button>
-          )}
-        </div>
-      </section>
-    );
-  }
+  // Create test slides if no slides exist
+  const defaultSlides = [
+    {
+      id: 'default-1',
+      src: '/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png',
+      alt: 'Spelman College Glee Club',
+      title: 'Spelman College Glee Club',
+      subtitle: 'To Amaze and Inspire',
+      textPosition: 'center' as const,
+      textAlignment: 'center' as const,
+      isVideo: false,
+      priority: true,
+      objectFit: 'contain' as const
+    },
+    {
+      id: 'default-2', 
+      src: '/lovable-uploads/92a39fc3-43b7-4240-982b-bff85ae2fdca.png',
+      alt: 'Glee Club Performance',
+      title: 'Experience the Music',
+      subtitle: 'Join us for unforgettable performances',
+      textPosition: 'center' as const,
+      textAlignment: 'center' as const,
+      isVideo: false,
+      priority: false,
+      objectFit: 'contain' as const
+    },
+    {
+      id: 'default-3',
+      src: '/lovable-uploads/daf81087-d822-4f6c-9859-43580f9a3971.png', 
+      alt: 'Glee Club Members',
+      title: 'Our Community',
+      subtitle: 'Celebrating excellence in choral music',
+      textPosition: 'center' as const,
+      textAlignment: 'center' as const,
+      isVideo: false,
+      priority: false,
+      objectFit: 'contain' as const
+    }
+  ];
 
-  // Transform hero slides data for MobileOptimizedSlider with contain object-fit
-  const optimizedSlides = slides.map((slide, index) => ({
+  // Use database slides if available, otherwise use defaults
+  const displaySlides = slides.length > 0 ? slides.map((slide, index) => ({
     id: slide.id,
-    src: slide.youtube_url || slide.background_image_url || '/placeholder-hero.jpg',
+    src: slide.youtube_url || slide.background_image_url || '/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png',
     srcSet: slide.background_image_url && !slide.youtube_url ? 
       `${slide.background_image_url}?w=600&h=400&fit=crop&crop=center 600w, ${slide.background_image_url}?w=1200&h=800&fit=crop&crop=center 1200w` : 
       undefined,
@@ -70,18 +84,20 @@ export function HeroSection() {
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
     objectFit: 'contain' as const
-  }));
+  })) : defaultSlides;
+
+  console.log('🎭 HeroSection: Display slides:', displaySlides);
 
   return (
     <section className="w-full">
       <div className="w-full relative">
         <MobileOptimizedSlider
-          slides={optimizedSlides}
+          slides={displaySlides}
           aspectRatio="auto"
           autoPlay={true}
           autoPlayInterval={5000}
-          showControls={false}
-          showIndicators={false}
+          showControls={true}
+          showIndicators={true}
           preloadAdjacent={true}
           defaultObjectFit="contain"
           className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
