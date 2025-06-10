@@ -73,7 +73,7 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: 'contain' // Explicitly set to contain for all slides
+    objectFit: 'contain' as const // Explicitly set to contain for all slides with proper typing
   }));
 
   return (
