@@ -135,12 +135,18 @@ export function OptimizedSlider({
     return `${url}${separator}autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`;
   }, [isYouTubeEmbed]);
 
+  // Check if slide has any text content to display
+  const hasTextContent = useCallback((slide: SlideImage) => {
+    return slide.title?.trim() || slide.subtitle?.trim() || slide.buttonText?.trim();
+  }, []);
+
   // Render slides (only visible + adjacent for performance)
   const renderSlide = useCallback((slide: SlideImage, index: number) => {
     const isActive = index === currentIndex;
     const shouldRender = loadedImages.has(index);
     const hasError = imageErrors.has(index);
     const isVideoSlide = slide.isVideo || isYouTubeEmbed(slide.src);
+    const showTextOverlay = hasTextContent(slide);
 
     if (!shouldRender && !isActive) {
       return null;
@@ -200,8 +206,8 @@ export function OptimizedSlider({
           />
         )}
 
-        {/* Overlay content */}
-        {(slide.title || slide.subtitle) && (
+        {/* Overlay content - only show if there's actual text content */}
+        {showTextOverlay && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
             <div className={cn(
               'text-center text-white p-4 max-w-2xl mx-auto',
@@ -233,8 +239,8 @@ export function OptimizedSlider({
           </div>
         )}
 
-        {/* Click handler for links without button text */}
-        {slide.link && !slide.buttonText && (
+        {/* Click handler for links without button text - only if no text overlay */}
+        {slide.link && !slide.buttonText && !showTextOverlay && (
           <div
             className="absolute inset-0 cursor-pointer z-20"
             onClick={() => window.open(slide.link, '_blank')}
@@ -245,7 +251,7 @@ export function OptimizedSlider({
         )}
       </div>
     );
-  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed, enhanceYouTubeUrl]);
+  }, [currentIndex, loadedImages, imageErrors, handleImageLoad, handleImageError, isYouTubeEmbed, enhanceYouTubeUrl, hasTextContent]);
 
   if (slides.length === 0) {
     return (
