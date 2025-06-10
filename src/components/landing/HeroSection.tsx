@@ -17,9 +17,9 @@ export function HeroSection() {
   // Show loading state while fetching
   if (isLoading) {
     return (
-      <section className="py-8 md:py-12">
+      <section className="py-4 md:py-6">
         <div className="container mx-auto px-4">
-          <div className="w-full h-[50vh] md:h-[70vh] min-h-[300px] md:min-h-[450px] max-h-[500px] md:max-h-[700px] bg-muted animate-pulse flex items-center justify-center">
+          <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
             <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         </div>
@@ -30,14 +30,14 @@ export function HeroSection() {
   // Show default state if error or no slides
   if (hasError || slides.length === 0) {
     return (
-      <section className="py-8 md:py-12">
+      <section className="py-4 md:py-6">
         <div className="container mx-auto px-4">
-          <div className="w-full h-[50vh] md:h-[70vh] min-h-[300px] md:min-h-[450px] max-h-[500px] md:max-h-[700px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center relative">
+          <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-gradient-to-r from-primary/20 to-secondary/20 flex items-center justify-center relative">
             <div className="text-center text-white p-4 max-w-xs md:max-w-2xl mx-auto">
-              <h1 className="text-2xl md:text-4xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 drop-shadow-lg">
                 Spelman College Glee Club
               </h1>
-              <p className="text-sm md:text-lg lg:text-xl opacity-90 drop-shadow-md">
+              <p className="text-sm md:text-lg opacity-90 drop-shadow-md">
                 To Amaze and Inspire
               </p>
             </div>
@@ -77,7 +77,7 @@ export function HeroSection() {
   }));
 
   return (
-    <section className="py-8 md:py-12">
+    <section className="py-4 md:py-6">
       <div className="container mx-auto px-4">
         <div className="w-full relative">
           <MobileOptimizedSlider
@@ -89,7 +89,7 @@ export function HeroSection() {
             showIndicators={false}
             preloadAdjacent={true}
             defaultObjectFit="cover"
-            className="h-[50vh] md:h-[70vh] min-h-[300px] md:min-h-[450px] max-h-[500px] md:max-h-[700px] w-full"
+            className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
           />
           
           {/* Admin Edit Button */}
