@@ -1,28 +1,202 @@
 
 import React from "react";
-import { MobileOptimizedEventsSection } from "./MobileOptimizedEventsSection";
-
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  location?: string;
-  imageUrl?: string;
-  isPublic?: boolean;
-}
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CalendarDays, MapPin, Clock, ArrowRight } from "lucide-react";
+import { format, isAfter } from "date-fns";
+import { cn } from "@/lib/utils";
+import { HorizontalSlider } from "@/components/ui/horizontal-slider";
 
 interface EnhancedEventsSectionProps {
-  events: Event[];
+  events?: any[];
+  maxEvents?: number;
+  showHeader?: boolean;
+  className?: string;
 }
 
-export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
-  console.log('🎭 EnhancedEventsSection: Using MobileOptimizedEventsSection instead');
+export function EnhancedEventsSection({ 
+  events: propEvents,
+  maxEvents = 6, 
+  showHeader = true,
+  className = ""
+}: EnhancedEventsSectionProps) {
+  const { events: fetchedEvents, loading, error } = useCalendarEvents();
   
+  // Use prop events if provided, otherwise use fetched events
+  const events = propEvents || fetchedEvents;
+
+  // Filter and sort upcoming public events
+  const now = new Date();
+  const upcomingEvents = events
+    .filter(event => {
+      const eventDate = new Date(event.start_time);
+      return isAfter(eventDate, now) && event.is_public;
+    })
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    .slice(0, maxEvents);
+
+  if (loading) {
+    return (
+      <section className={cn("py-8 md:py-12", className)}>
+        <div className="container mx-auto px-4">
+          {showHeader && (
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Join us for our upcoming performances
+              </p>
+            </div>
+          )}
+          <HorizontalSlider itemWidth="w-80" gap="gap-4">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="animate-pulse h-64">
+                <CardContent className="p-4">
+                  <div className="w-full h-32 bg-gray-200 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </HorizontalSlider>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className={cn("py-8 md:py-12", className)}>
+        <div className="container mx-auto px-4">
+          <div className="text-center text-red-600 py-8">
+            <p className="text-sm md:text-base">Unable to load events at this time</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (upcomingEvents.length === 0) {
+    return (
+      <section className={cn("py-8 md:py-12", className)}>
+        <div className="container mx-auto px-4">
+          {showHeader && (
+            <div className="text-center mb-6 md:mb-8">
+              <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
+              <p className="text-sm md:text-base text-muted-foreground">
+                Join us for our upcoming performances
+              </p>
+            </div>
+          )}
+          <div className="text-center py-8">
+            <CalendarDays className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-sm md:text-base text-muted-foreground">
+              No upcoming events scheduled at this time
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <MobileOptimizedEventsSection 
-      maxEvents={6}
-      showHeader={true}
-      className="bg-gradient-to-br from-background to-muted/20"
-    />
+    <section className={cn("py-8 md:py-12", className)}>
+      <div className="container mx-auto px-4">
+        {showHeader && (
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
+            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
+              Join us for our upcoming performances and community events
+            </p>
+          </div>
+        )}
+        
+        {/* Horizontal Scrolling Events */}
+        <HorizontalSlider itemWidth="w-80" gap="gap-6">
+          {upcomingEvents.map((event) => (
+            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 h-full">
+              <div className="relative">
+                {/* Event Image */}
+                {event.feature_image_url ? (
+                  <div className="w-full h-40 overflow-hidden rounded-t-lg">
+                    <img
+                      src={event.feature_image_url}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg flex items-center justify-center">
+                    <CalendarDays className="h-12 w-12 text-primary/60" />
+                  </div>
+                )}
+                
+                {/* Event Type Badge */}
+                {event.event_type && (
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-primary/90 text-primary-foreground rounded-full backdrop-blur-sm">
+                      {event.event_type}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  {/* Date Block */}
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 bg-primary/10 rounded-xl flex flex-col items-center justify-center text-primary">
+                      <span className="text-sm font-medium">
+                        {format(new Date(event.start_time), 'MMM')}
+                      </span>
+                      <span className="text-xl font-bold">
+                        {format(new Date(event.start_time), 'd')}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Event Details */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold mb-2 text-foreground line-clamp-2">
+                      {event.title}
+                    </h3>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span>{format(new Date(event.start_time), 'h:mm a')}</span>
+                      </div>
+                      
+                      {event.location_name && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <span className="truncate">{event.location_name}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {event.short_description && (
+                      <p className="text-muted-foreground mt-3 line-clamp-2 text-sm">
+                        {event.short_description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </HorizontalSlider>
+        
+        {upcomingEvents.length >= maxEvents && (
+          <div className="text-center mt-6 md:mt-8">
+            <Button variant="outline" size="sm" className="mobile-button">
+              View All Events
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

@@ -1,12 +1,12 @@
 
 import React, { useMemo, useCallback } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { format, isAfter } from "date-fns";
+import { HorizontalSlider } from "@/components/ui/horizontal-slider";
 
 interface OptimizedPublicEventScrollerProps {
   title?: string;
@@ -126,77 +126,65 @@ export function OptimizedPublicEventScroller({
           )}
         </div>
 
-        <Carousel
-          opts={{
-            align: "start",
-            dragFree: true,
-            loop: false,
-          }}
-          className="w-full"
-        >
-          <CarouselContent className="-ml-2 md:-ml-4">
-            {publicEvents.map((event) => (
-              <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
-                  <CardContent className="p-0">
-                    <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gradient-to-br from-glee-spelman/20 to-glee-purple/20">
-                      {event.feature_image_url ? (
-                        <img
-                          src={event.feature_image_url}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Calendar className="h-12 w-12 text-glee-spelman/60" />
-                        </div>
-                      )}
+        {/* Horizontal Scrolling Events */}
+        <HorizontalSlider itemWidth="w-80" gap="gap-6">
+          {publicEvents.map((event) => (
+            <Card key={event.id} className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
+              <CardContent className="p-0">
+                <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gradient-to-br from-glee-spelman/20 to-glee-purple/20">
+                  {event.feature_image_url ? (
+                    <img
+                      src={event.feature_image_url}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Calendar className="h-12 w-12 text-glee-spelman/60" />
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-playfair font-semibold text-lg mb-2 line-clamp-2 group-hover:text-glee-spelman transition-colors">
-                        {event.title}
-                      </h3>
-                      
-                      {event.event_type && (
-                        <span className="inline-block px-2 py-1 text-xs bg-glee-spelman/10 text-glee-spelman rounded-full mb-2">
-                          {event.event_type}
-                        </span>
-                      )}
-                      
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 flex-shrink-0" />
-                          <span>{formatEventDate(event.start_time)}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 flex-shrink-0" />
-                          <span>{formatEventTime(event.start_time)}</span>
-                        </div>
-                        
-                        {event.location_name && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4 flex-shrink-0" />
-                            <span className="truncate">{event.location_name}</span>
-                          </div>
-                        )}
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-playfair font-semibold text-lg mb-2 line-clamp-2 group-hover:text-glee-spelman transition-colors">
+                    {event.title}
+                  </h3>
+                  
+                  {event.event_type && (
+                    <span className="inline-block px-2 py-1 text-xs bg-glee-spelman/10 text-glee-spelman rounded-full mb-2">
+                      {event.event_type}
+                    </span>
+                  )}
+                  
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 flex-shrink-0" />
+                      <span>{formatEventDate(event.start_time)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 flex-shrink-0" />
+                      <span>{formatEventTime(event.start_time)}</span>
+                    </div>
+                    
+                    {event.location_name && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">{event.location_name}</span>
                       </div>
-                      
-                      {event.short_description && (
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                          {event.short_description}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-        </Carousel>
+                    )}
+                  </div>
+                  
+                  {event.short_description && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {event.short_description}
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </HorizontalSlider>
       </div>
     </section>
   );
