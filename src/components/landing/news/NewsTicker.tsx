@@ -199,8 +199,13 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 w-full overflow-hidden border-b border-white/10">
-        <div className="w-full px-4 flex items-center justify-center">
+      <div className="relative w-full overflow-hidden border-b border-white/10">
+        {/* Navy liquid glass background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 backdrop-blur-md"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-indigo-900/70 to-blue-900/60 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+        
+        <div className="relative py-3 w-full px-4 flex items-center justify-center">
           <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
             <span className="inline-flex items-center">
               <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
@@ -213,18 +218,23 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
   }
 
   return (
-    <div className="bg-gradient-to-r from-glee-columbia via-glee-purple to-glee-columbia text-white py-3 w-full overflow-hidden border-b border-white/10">
-      <div className="w-full px-4 flex items-center justify-between">
+    <div className="relative w-full overflow-hidden border-b border-white/10">
+      {/* Navy liquid glass background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 backdrop-blur-md"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-indigo-900/70 to-blue-900/60 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
+      
+      <div className="relative py-3 w-full px-4 flex items-center justify-between">
         {/* News Label */}
-        <div className="hidden sm:flex items-center text-red-200 font-bold text-xs mr-4 whitespace-nowrap">
-          <div className="w-2 h-2 bg-red-300 rounded-full mr-2 animate-pulse"></div>
+        <div className="hidden sm:flex items-center text-blue-200 font-bold text-xs mr-4 whitespace-nowrap">
+          <div className="w-2 h-2 bg-blue-300 rounded-full mr-2 animate-pulse"></div>
           {newsSource === 'google' ? 'LIVE NEWS' : newsSource === 'database' ? 'LATEST NEWS' : 'NEWS'}
         </div>
         
         <div className="flex-1 overflow-hidden flex items-center justify-center">
           <div className="whitespace-nowrap animate-marquee-20s">
             <span 
-              className="cursor-pointer hover:text-red-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
+              className="cursor-pointer hover:text-blue-200 transition-colors text-white drop-shadow-sm font-semibold text-xs tracking-wide"
               title="Click to read more"
               onClick={() => newsItems.length > 0 && handleNewsClick(newsItems[0])}
             >
