@@ -49,7 +49,7 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section */}
-      <section className="w-full py-16 md:py-20 lg:py-24">
+      <section className="w-full py-16 md:py-20 lg:py-24 pt-20 md:pt-24 lg:pt-28">
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
