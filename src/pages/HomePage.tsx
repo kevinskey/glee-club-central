@@ -1,39 +1,58 @@
 
-import React from "react";
-import { useHomePageData } from "@/hooks/useHomePageData";
-import { HomePageLoader } from "@/components/landing/HomePageLoader";
-import { HomePageContent } from "@/components/landing/HomePageContent";
+import React, { useEffect, useState } from "react";
 import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
-import { HeroSection } from "@/components/landing/HeroSection";
+import { HomePageContent } from "@/components/landing/HomePageContent";
+import { HomePageLoader } from "@/components/landing/HomePageLoader";
+import { useHomePageData } from "@/hooks/useHomePageData";
 
-const HomePage = () => {
-  const {
-    heroImages,
-    upcomingEvents,
-    storeProducts,
-    audioTracks,
-    isLoading
+export default function HomePage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const { 
+    heroImages, 
+    upcomingEvents, 
+    storeProducts, 
+    audioTracks, 
+    loading 
   } = useHomePageData();
 
-  // Show loader while data is being fetched
-  if (isLoading) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading || loading) {
     return <HomePageLoader />;
   }
 
   return (
-    <PublicPageWrapper showTopSlider={false} className="home-page">
-      {/* Hero Section - Now using OptimizedSlider */}
-      <HeroSection />
+    <div className="relative min-h-screen">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png')`
+        }}
+      >
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-black/60"></div>
+      </div>
       
-      {/* Main Content */}
-      <HomePageContent
-        heroImages={heroImages}
-        upcomingEvents={upcomingEvents}
-        storeProducts={storeProducts}
-        audioTracks={audioTracks}
-      />
-    </PublicPageWrapper>
+      {/* Content */}
+      <div className="relative z-10 min-h-screen">
+        <PublicPageWrapper showTopSlider={true}>
+          <div className="bg-white/95 backdrop-blur-sm">
+            <HomePageContent
+              heroImages={heroImages}
+              upcomingEvents={upcomingEvents}
+              storeProducts={storeProducts}
+              audioTracks={audioTracks}
+            />
+          </div>
+        </PublicPageWrapper>
+      </div>
+    </div>
   );
-};
-
-export default HomePage;
+}
