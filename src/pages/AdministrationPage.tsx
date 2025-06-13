@@ -13,7 +13,7 @@ import {
   DollarSign,
   Shield,
   Bell,
-  Layout
+  Presentation
 } from 'lucide-react';
 
 export default function AdministrationPage() {
@@ -39,11 +39,11 @@ export default function AdministrationPage() {
       color: 'bg-blue-500'
     },
     {
-      title: 'Slide Designer',
-      description: 'Create and manage custom slides for the homepage',
-      icon: <Layout className="h-8 w-8" />,
-      href: '/admin/slide-design',
-      color: 'bg-purple-500'
+      title: 'Hero Slides Manager',
+      description: 'Manage homepage hero slides and banners',
+      icon: <Presentation className="h-8 w-8" />,
+      href: '/admin/hero-slides',
+      color: 'bg-blue-500'
     },
     {
       title: 'Analytics Dashboard',

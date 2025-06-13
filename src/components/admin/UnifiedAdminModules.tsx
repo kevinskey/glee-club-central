@@ -62,6 +62,15 @@ export function UnifiedAdminModules() {
       adminOnly: true
     },
     {
+      id: "hero-slides",
+      title: "Hero Slides",
+      description: "Manage homepage hero slides",
+      icon: <Presentation className="h-5 w-5" />,
+      color: "bg-blue-500",
+      path: "/admin/hero-slides",
+      adminOnly: true
+    },
+    {
       id: "media",
       title: "Media Library",
       description: "Upload and organize files",
@@ -99,9 +108,9 @@ export function UnifiedAdminModules() {
       adminOnly: true
     },
     {
-      id: "slider",
-      title: "Slide Designer",
-      description: "Create and manage slides",
+      id: "advanced-design",
+      title: "Advanced Slide Design",
+      description: "Professional slide design studio",
       icon: <Sliders className="h-5 w-5" />,
       color: "bg-purple-500",
       path: "/admin/unified-slide-management",

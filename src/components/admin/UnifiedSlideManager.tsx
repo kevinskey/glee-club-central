@@ -21,11 +21,11 @@ export function UnifiedSlideManager() {
                   <Layout className="h-4 w-4 text-white" />
                 </div>
                 <CardTitle className="text-lg font-bold bg-gradient-to-r from-primary to-orange-500 bg-clip-text text-transparent">
-                  Unified Slide Management
+                  Advanced Slide Design Studio
                 </CardTitle>
               </div>
               <p className="text-sm text-muted-foreground">
-                Manage all your homepage slides and design templates in one place
+                Professional slide design tools with advanced features and templates
               </p>
             </div>
           </div>
@@ -37,7 +37,7 @@ export function UnifiedSlideManager() {
                 <ImageIcon className="h-4 w-4" />
                 Hero Slides
                 <Badge variant="secondary" className="ml-1 text-xs">
-                  Active
+                  Simple
                 </Badge>
               </TabsTrigger>
               <TabsTrigger value="design-studio" className="flex items-center gap-2">

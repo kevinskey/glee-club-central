@@ -44,6 +44,7 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin/v2',
     element: <Navigate to="/dashboard" replace />,
   },
+  // Advanced slide design studio
   {
     path: '/admin/unified-slide-management',
     element: (
@@ -52,6 +53,7 @@ export const adminRoutes: RouteObject[] = [
       </AdminRoute>
     ),
   },
+  // Main hero slides manager (consolidated functionality)
   {
     path: '/admin/hero-slides',
     element: (
