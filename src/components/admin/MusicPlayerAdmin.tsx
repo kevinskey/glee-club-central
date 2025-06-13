@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Music, Settings, BarChart3, Calendar, Plus, Trash2, Edit, Play } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Music, Settings, BarChart3, Calendar, Plus, Trash2, Edit, Play, ListMusic } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +33,15 @@ interface AudioFile {
   category: string;
 }
 
+interface PlaylistTrack {
+  id: string;
+  playlist_id: string;
+  audio_file_id: string;
+  track_order: number;
+  is_featured: boolean;
+  audio_files: AudioFile;
+}
+
 interface PlayerSettings {
   [key: string]: any;
 }
@@ -45,7 +55,10 @@ export function MusicPlayerAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isTracksDialogOpen, setIsTracksDialogOpen] = useState(false);
   const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
+  const [playlistTracks, setPlaylistTracks] = useState<PlaylistTrack[]>([]);
+  const [selectedAudioFiles, setSelectedAudioFiles] = useState<string[]>([]);
   const [newPlaylistData, setNewPlaylistData] = useState({
     name: '',
     description: ''
@@ -240,6 +253,97 @@ export function MusicPlayerAdmin() {
     }
   };
 
+  // Load playlist tracks
+  const loadPlaylistTracks = async (playlistId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('playlist_tracks')
+        .select(`
+          *,
+          audio_files (
+            id,
+            title,
+            description,
+            file_url,
+            category
+          )
+        `)
+        .eq('playlist_id', playlistId)
+        .order('track_order');
+
+      if (error) {
+        console.error('Error loading playlist tracks:', error);
+        toast.error('Failed to load playlist tracks');
+      } else {
+        setPlaylistTracks(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading playlist tracks:', error);
+      toast.error('Failed to load playlist tracks');
+    }
+  };
+
+  // Open tracks management dialog
+  const openTracksDialog = async (playlist: Playlist) => {
+    setEditingPlaylist(playlist);
+    await loadPlaylistTracks(playlist.id);
+    
+    // Get current track audio file IDs
+    const currentTrackIds = playlistTracks.map(track => track.audio_file_id);
+    setSelectedAudioFiles(currentTrackIds);
+    
+    setIsTracksDialogOpen(true);
+  };
+
+  // Add tracks to playlist
+  const addTracksToPlaylist = async () => {
+    if (!editingPlaylist) return;
+
+    try {
+      // Remove existing tracks
+      await supabase
+        .from('playlist_tracks')
+        .delete()
+        .eq('playlist_id', editingPlaylist.id);
+
+      // Add selected tracks
+      const tracksToAdd = selectedAudioFiles.map((audioFileId, index) => ({
+        playlist_id: editingPlaylist.id,
+        audio_file_id: audioFileId,
+        track_order: index,
+        is_featured: false
+      }));
+
+      if (tracksToAdd.length > 0) {
+        const { error } = await supabase
+          .from('playlist_tracks')
+          .insert(tracksToAdd);
+
+        if (error) {
+          console.error('Error adding tracks:', error);
+          toast.error(`Failed to add tracks: ${error.message}`);
+          return;
+        }
+      }
+
+      toast.success('Playlist tracks updated successfully');
+      setIsTracksDialogOpen(false);
+      await loadPlaylistTracks(editingPlaylist.id);
+    } catch (error) {
+      console.error('Error updating playlist tracks:', error);
+      toast.error('Failed to update playlist tracks');
+    }
+  };
+
+  // Handle audio file selection
+  const handleAudioFileToggle = (audioFileId: string) => {
+    setSelectedAudioFiles(prev => 
+      prev.includes(audioFileId)
+        ? prev.filter(id => id !== audioFileId)
+        : [...prev, audioFileId]
+    );
+  };
+
   useEffect(() => {
     loadData();
   }, []);
@@ -369,6 +473,13 @@ export function MusicPlayerAdmin() {
                           }
                         >
                           {playlist.is_homepage_default ? 'Remove Default' : 'Set Default'}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openTracksDialog(playlist)}
+                        >
+                          <ListMusic className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
@@ -526,6 +637,51 @@ export function MusicPlayerAdmin() {
               <Button onClick={updatePlaylist}>
                 Update Playlist
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Tracks Dialog */}
+      <Dialog open={isTracksDialogOpen} onOpenChange={setIsTracksDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Manage Playlist Tracks - {editingPlaylist?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select audio files to add to this playlist:
+            </p>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {audioFiles.map((audioFile) => (
+                <div key={audioFile.id} className="flex items-center space-x-2 p-2 border rounded">
+                  <Checkbox
+                    id={`audio-${audioFile.id}`}
+                    checked={selectedAudioFiles.includes(audioFile.id)}
+                    onCheckedChange={() => handleAudioFileToggle(audioFile.id)}
+                  />
+                  <label htmlFor={`audio-${audioFile.id}`} className="flex-1 cursor-pointer">
+                    <div className="font-medium">{audioFile.title}</div>
+                    {audioFile.description && (
+                      <div className="text-sm text-muted-foreground">{audioFile.description}</div>
+                    )}
+                    <div className="text-xs text-muted-foreground capitalize">{audioFile.category}</div>
+                  </label>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                {selectedAudioFiles.length} tracks selected
+              </p>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={() => setIsTracksDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={addTracksToPlaylist}>
+                  Update Playlist
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
