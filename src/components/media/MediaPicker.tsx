@@ -138,6 +138,23 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     setSelectedMediaItem(item);
   };
 
+  const handleDoubleClickImage = (item: MediaItem) => {
+    console.log('MediaPicker: Double-clicked item:', item);
+    
+    if (returnMediaObject) {
+      onSelect({
+        id: item.id,
+        file_type: item.file_type,
+        file_url: item.file_url
+      });
+    } else {
+      onSelect(item.file_url);
+    }
+    
+    toast.success('Image selected!');
+    onClose();
+  };
+
   const handleConfirmSelection = () => {
     if (returnMediaObject && selectedMediaItem) {
       onSelect({
@@ -162,7 +179,7 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Select Media</DialogTitle>
+          <DialogTitle>Select Media (Double-click to select)</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="library" className="w-full">
@@ -181,12 +198,14 @@ export const MediaPicker: React.FC<MediaPickerProps> = ({
                   {mediaItems.map((item) => (
                     <div
                       key={item.id}
-                      className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all ${
+                      className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:border-primary/50 ${
                         selectedImageUrl === item.file_url
                           ? 'border-primary ring-2 ring-primary/20'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => handleSelectImage(item)}
+                      onDoubleClick={() => handleDoubleClickImage(item)}
+                      title="Double-click to select"
                     >
                       {item.file_type.startsWith('video/') ? (
                         <video
