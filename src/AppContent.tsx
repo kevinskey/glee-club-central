@@ -28,19 +28,15 @@ export default function AppContent({ children }: AppContentProps) {
     '/contact' // ContactPage manages its own header and footer
   ];
   
+  // Admin pages should NOT show any unified header as they use AdminLayout
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname) && 
-                          !isDashboardPage;
+                          !isDashboardPage &&
+                          !isAdminPage; // This is the key fix
 
   return (
     <div className="min-h-screen bg-background">
       {shouldShowHeader && (
-        <>
-          {isAdminPage ? (
-            <AdminUnifiedHeader />
-          ) : (
-            <UnifiedPublicHeader />
-          )}
-        </>
+        <UnifiedPublicHeader />
       )}
       <main className={shouldShowHeader ? "" : "pt-0"}>
         {children}
