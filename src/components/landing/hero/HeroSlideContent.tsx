@@ -20,7 +20,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
         <img
           src={backgroundImage}
           alt={slide.title}
-          className="w-full h-full object-cover transition-all duration-1000"
+          className="w-full h-full object-contain transition-all duration-1000"
           style={{
             objectPosition: 'center center'
           }}
