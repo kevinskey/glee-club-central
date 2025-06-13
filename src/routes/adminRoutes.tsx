@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -9,7 +8,6 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
-import HeroSlideManagerPage from '@/pages/admin/HeroSlideManagerPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import MembersPage from '@/pages/admin/MembersPage';
 import SliderDemoPage from '@/pages/admin/SliderDemoPage';
@@ -50,15 +48,6 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <UnifiedSlideManagementPage />
-      </AdminRoute>
-    ),
-  },
-  // Main hero slides manager (consolidated functionality)
-  {
-    path: '/admin/hero-slides',
-    element: (
-      <AdminRoute>
-        <HeroSlideManagerPage />
       </AdminRoute>
     ),
   },

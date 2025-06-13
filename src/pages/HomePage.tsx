@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
+import { Hero } from "@/components/landing/Hero";
 import { useHomePageData } from "@/hooks/useHomePageData";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const { 
-    heroImages, 
     upcomingEvents, 
     storeProducts, 
     audioTracks, 
@@ -43,9 +43,13 @@ export default function HomePage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen">
         <PublicPageWrapper showTopSlider={true}>
+          {/* New Hero Section */}
+          <Hero />
+          
+          {/* Rest of homepage content */}
           <div className="bg-white/95 backdrop-blur-sm">
             <HomePageContent
-              heroImages={heroImages}
+              heroImages={[]} // No hero images needed anymore
               upcomingEvents={upcomingEvents}
               storeProducts={storeProducts}
               audioTracks={audioTracks}
