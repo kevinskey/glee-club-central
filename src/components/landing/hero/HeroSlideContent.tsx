@@ -14,13 +14,13 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     : '/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png';
 
   return (
-    <section className="relative h-[60vh] sm:h-[70vh] min-h-[400px] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
-      {/* Background Image - Mobile Optimized */}
-      <div className="absolute inset-0">
+    <section className="relative sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+      {/* Background Image - Mobile crops to image size, Desktop maintains aspect */}
+      <div className="absolute inset-0 sm:relative">
         <img
           src={backgroundImage}
           alt={slide.title}
-          className="w-full h-full object-contain transition-all duration-1000"
+          className="w-full h-auto sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
           style={{
             objectPosition: 'center center'
           }}
@@ -43,7 +43,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       )}
       
       {/* Content - Mobile Optimized */}
-      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-2 sm:px-4">
+      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-2 sm:px-4 sm:absolute">
         {(slide.show_title !== false) && (
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight">
             {slide.title}
