@@ -41,6 +41,7 @@ export default function HeroSlidesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [selectedMediaUrl, setSelectedMediaUrl] = useState<string>('');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -92,42 +93,34 @@ export default function HeroSlidesPage() {
     }
   };
 
-  const handleMediaSelect = (mediaData: { id: string; file_type: string; file_url: string }) => {
+  const handleMediaSelect = async (mediaData: { id: string; file_type: string; file_url: string }) => {
     console.log('Media selected:', mediaData);
+    
     setFormData(prev => ({
       ...prev,
       media_id: mediaData.id,
       media_type: mediaData.file_type.startsWith('video/') ? 'video' : 'image'
     }));
+    
+    setSelectedMediaUrl(mediaData.file_url);
     toast.success('Image selected successfully');
+    
+    // Refresh media files to ensure we have the latest data
+    await fetchMediaFiles();
   };
 
   const getCurrentImageUrl = () => {
     if (formData.media_id) {
-      // Try to find in existing mediaFiles first
+      // First check if we have it in selectedMediaUrl
+      if (selectedMediaUrl) {
+        return selectedMediaUrl;
+      }
+      
+      // Then check in mediaFiles
       const existingFile = mediaFiles.find(f => f.id === formData.media_id);
       if (existingFile) {
         return existingFile.file_url;
       }
-      
-      // If not found, try to fetch from media_library directly
-      const fetchMediaUrl = async () => {
-        try {
-          const { data, error } = await supabase
-            .from('media_library')
-            .select('file_url')
-            .eq('id', formData.media_id)
-            .single();
-          
-          if (error) throw error;
-          return data?.file_url;
-        } catch (error) {
-          console.error('Error fetching media URL:', error);
-          return undefined;
-        }
-      };
-      
-      fetchMediaUrl();
     }
     return undefined;
   };
@@ -191,6 +184,15 @@ export default function HeroSlidesPage() {
       slide_order: slide.slide_order,
       section_id: slide.section_id
     });
+    
+    // Set the selected media URL if editing
+    if (slide.media_id) {
+      const mediaFile = mediaFiles.find(f => f.id === slide.media_id);
+      if (mediaFile) {
+        setSelectedMediaUrl(mediaFile.file_url);
+      }
+    }
+    
     setIsCreating(true);
   };
 
@@ -223,6 +225,7 @@ export default function HeroSlidesPage() {
       slide_order: slides.length,
       section_id: 'homepage-main'
     });
+    setSelectedMediaUrl('');
     setEditingSlide(null);
     setIsCreating(false);
   };
@@ -392,6 +395,13 @@ export default function HeroSlidesPage() {
                       <p className="text-sm text-green-800">
                         ✓ Image selected (ID: {formData.media_id})
                       </p>
+                      {getCurrentImageUrl() && (
+                        <img
+                          src={getCurrentImageUrl()}
+                          alt="Selected"
+                          className="w-full max-w-xs h-20 object-cover rounded border mt-2"
+                        />
+                      )}
                     </div>
                   )}
                 </div>
