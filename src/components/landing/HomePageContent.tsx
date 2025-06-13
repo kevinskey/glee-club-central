@@ -2,8 +2,7 @@
 import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
-import { AudioSection } from "./sections/AudioSection";
-import { CustomAudioPlayer } from "@/components/audio/CustomAudioPlayer";
+import { EnhancedCustomAudioPlayer } from "@/components/audio/EnhancedCustomAudioPlayer";
 
 interface Event {
   id: string;
@@ -47,16 +46,6 @@ export function HomePageContent({
 }: HomePageContentProps) {
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
-  // Transform tracks to match CustomAudioPlayer format
-  const customTracks = audioTracks.map(track => ({
-    id: track.id,
-    title: track.title,
-    artist: track.artist,
-    audioUrl: track.audioUrl,
-    coverArt: track.albumArt,
-    duration: parseInt(track.duration.split(':')[0]) * 60 + parseInt(track.duration.split(':')[1]) || 180
-  }));
-  
   return (
     <main className="w-full">
       {/* Events Section with Integrated Music Player */}
@@ -73,24 +62,18 @@ export function HomePageContent({
           
           <EnhancedEventsSection events={upcomingEvents} />
           
-          {/* Compact Music Player - Integrated below events */}
-          {audioTracks.length > 0 && (
-            <div className="mt-12 max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
-                  Listen to Our Music
-                </h3>
-                <p className="text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto font-light">
-                  Experience our latest recordings and performances
-                </p>
-              </div>
-              <CustomAudioPlayer 
-                tracks={customTracks}
-                currentTrackIndex={0}
-                className="shadow-lg"
-              />
+          {/* Enhanced Music Player - Backend Controlled */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
+                Listen to Our Music
+              </h3>
+              <p className="text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto font-light">
+                Experience our curated playlist, managed in real-time
+              </p>
             </div>
-          )}
+            <EnhancedCustomAudioPlayer className="shadow-lg" />
+          </div>
         </div>
       </section>
       

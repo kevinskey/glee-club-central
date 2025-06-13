@@ -1091,6 +1091,50 @@ export type Database = {
           },
         ]
       }
+      music_analytics: {
+        Row: {
+          audio_file_id: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          ip_address: unknown | null
+          listen_duration: number | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          audio_file_id?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: unknown | null
+          listen_duration?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          audio_file_id?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: unknown | null
+          listen_duration?: number | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "music_analytics_audio_file_id_fkey"
+            columns: ["audio_file_id"]
+            isOneToOne: false
+            referencedRelation: "audio_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       music_files: {
         Row: {
           composer: string | null
@@ -1133,6 +1177,33 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      music_player_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -1429,6 +1500,84 @@ export type Database = {
           id?: string
           name?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      playlist_tracks: {
+        Row: {
+          audio_file_id: string | null
+          created_at: string | null
+          id: string
+          is_featured: boolean | null
+          playlist_id: string | null
+          track_order: number | null
+        }
+        Insert: {
+          audio_file_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          playlist_id?: string | null
+          track_order?: number | null
+        }
+        Update: {
+          audio_file_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_featured?: boolean | null
+          playlist_id?: string | null
+          track_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_tracks_audio_file_id_fkey"
+            columns: ["audio_file_id"]
+            isOneToOne: false
+            referencedRelation: "audio_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_tracks_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_homepage_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_homepage_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_homepage_default?: boolean | null
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1760,6 +1909,47 @@ export type Database = {
           role_id?: string | null
         }
         Relationships: []
+      }
+      scheduled_playlists: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          end_time: string | null
+          id: string
+          is_active: boolean | null
+          playlist_id: string | null
+          repeat_schedule: Json | null
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          playlist_id?: string | null
+          repeat_schedule?: Json | null
+          start_time: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          is_active?: boolean | null
+          playlist_id?: string | null
+          repeat_schedule?: Json | null
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_playlists_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       score_annotations: {
         Row: {
@@ -2982,6 +3172,14 @@ export type Database = {
           last_sign_in_at: string
           role_display_name: string
           voice_part_display: string
+        }[]
+      }
+      get_current_active_playlist: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          playlist_id: string
+          playlist_name: string
+          tracks: Json
         }[]
       }
       get_current_user_role: {

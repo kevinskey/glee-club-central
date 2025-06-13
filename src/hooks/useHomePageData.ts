@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useMusicPlayer } from "@/hooks/useMusicPlayer";
 
 // Type definitions for reusability
 interface Event {
@@ -34,10 +34,10 @@ interface AudioTrack {
 
 export const useHomePageData = () => {
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
-  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const { events, loading: eventsLoading } = useCalendarEvents();
+  const { activePlaylist, isLoading: musicLoading } = useMusicPlayer();
 
   console.log('🏠 useHomePageData: Raw events from calendar:', events);
   console.log('🏠 useHomePageData: Events loading state:', eventsLoading);
@@ -61,6 +61,16 @@ export const useHomePageData = () => {
     }));
 
   console.log('🎯 useHomePageData: Filtered upcoming events:', upcomingEvents);
+
+  // Use playlist tracks from the music player hook
+  const audioTracks: AudioTrack[] = activePlaylist?.tracks?.map(track => ({
+    id: track.id,
+    title: track.title,
+    audioUrl: track.audioUrl,
+    albumArt: track.albumArt,
+    artist: track.artist,
+    duration: track.duration
+  })) || [];
 
   const fetchStoreProducts = async () => {
     try {
@@ -93,82 +103,14 @@ export const useHomePageData = () => {
     }
   };
 
-  const fetchAudioTracks = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('audio_files')
-        .select('id, title, file_url, description')
-        .eq('category', 'recordings')
-        .limit(5);
-
-      if (error) throw error;
-
-      const formattedTracks: AudioTrack[] = data?.map(track => ({
-        id: track.id,
-        title: track.title,
-        audioUrl: track.file_url,
-        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-        artist: "Spelman Glee Club",
-        duration: "3:45"
-      })) || [];
-
-      // Add fallback tracks if no data from database
-      if (formattedTracks.length === 0) {
-        const fallbackTracks: AudioTrack[] = [
-          {
-            id: "track-1",
-            title: "Ave Maria - Soprano Solo",
-            audioUrl: "/placeholder.mp3",
-            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-            artist: "Spelman Glee Club",
-            duration: "4:20"
-          },
-          {
-            id: "track-2",
-            title: "Amazing Grace - Full Choir",
-            audioUrl: "/placeholder.mp3",
-            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-            artist: "Spelman Glee Club",
-            duration: "3:15"
-          },
-          {
-            id: "track-3",
-            title: "Lift Every Voice - HBCU Tribute",
-            audioUrl: "/placeholder.mp3",
-            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-            artist: "Spelman Glee Club",
-            duration: "5:00"
-          }
-        ];
-        setAudioTracks(fallbackTracks);
-      } else {
-        setAudioTracks(formattedTracks);
-      }
-    } catch (error) {
-      console.error('Error fetching audio tracks:', error);
-      // Fallback to placeholder
-      setAudioTracks([{
-        id: "track-1",
-        title: "Lift Every Voice",
-        audioUrl: "/placeholder.mp3",
-        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-        artist: "Spelman Glee Club",
-        duration: "3:45"
-      }]);
-    }
-  };
-
-  // Load all data on component mount - only once
+  // Load data on component mount
   useEffect(() => {
     if (hasLoadedOnce) return;
     
     const loadData = async () => {
       setIsLoading(true);
       try {
-        await Promise.all([
-          fetchStoreProducts(),
-          fetchAudioTracks()
-        ]);
+        await fetchStoreProducts();
       } catch (error) {
         console.error('Error loading homepage data:', error);
       } finally {
@@ -180,8 +122,8 @@ export const useHomePageData = () => {
     loadData();
   }, [hasLoadedOnce]);
 
-  // Overall loading state includes events loading
-  const overallLoading = isLoading || eventsLoading;
+  // Overall loading state includes events and music loading
+  const overallLoading = isLoading || eventsLoading || musicLoading;
 
   return {
     heroImages: [], // No longer used - hero handled by UniversalHero
