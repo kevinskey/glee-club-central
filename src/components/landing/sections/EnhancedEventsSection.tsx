@@ -35,7 +35,7 @@ export function EnhancedEventsSection({
         
         <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 mb-8">
           {displayEvents.map((event) => (
-            <Card key={event.id} className="flex-shrink-0 w-80 overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={event.id} className="flex-shrink-0 w-96 overflow-hidden hover:shadow-lg transition-shadow">
               {event.imageUrl && (
                 <div className="aspect-video bg-cover bg-center" 
                      style={{ backgroundImage: `url(${event.imageUrl})` }} />
