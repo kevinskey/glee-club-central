@@ -24,9 +24,9 @@ export function OptimizedPublicEventScroller({
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
         {events.map((event) => (
-          <Card key={event.id} className="overflow-hidden">
+          <Card key={event.id} className="flex-shrink-0 w-80 overflow-hidden">
             {event.imageUrl && (
               <div className="aspect-video bg-cover bg-center" 
                    style={{ backgroundImage: `url(${event.imageUrl})` }} />
