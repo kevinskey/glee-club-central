@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -108,15 +107,6 @@ export function UnifiedAdminModules() {
       adminOnly: true
     },
     {
-      id: "advanced-design",
-      title: "Advanced Slide Design",
-      description: "Professional slide design studio",
-      icon: <Sliders className="h-5 w-5" />,
-      color: "bg-purple-500",
-      path: "/admin/unified-slide-management",
-      adminOnly: true
-    },
-    {
       id: "store",
       title: "Store",
       description: "Manage products and orders",
@@ -139,7 +129,6 @@ export function UnifiedAdminModules() {
     
     return true;
   });
-
   const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
