@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Trash2, Plus, Edit, Eye, EyeOff } from 'lucide-react';
@@ -39,6 +40,7 @@ export default function HeroSlidesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [deleteSlideId, setDeleteSlideId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -118,8 +120,6 @@ export default function HeroSlidesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this slide?')) return;
-
     try {
       const { error } = await supabase
         .from('hero_slides')
@@ -129,6 +129,7 @@ export default function HeroSlidesPage() {
       if (error) throw error;
       toast.success('Slide deleted successfully');
       fetchSlides();
+      setDeleteSlideId(null);
     } catch (error) {
       console.error('Error deleting slide:', error);
       toast.error('Failed to delete slide');
@@ -227,13 +228,33 @@ export default function HeroSlidesPage() {
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDelete(slide.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Slide</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{slide.title}"? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(slide.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardHeader>
             <CardContent>
