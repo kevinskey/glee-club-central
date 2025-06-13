@@ -14,6 +14,7 @@ interface HeroSlide {
   youtube_url?: string;
   media_type?: string;
   visible: boolean;
+  show_title?: boolean; // Add new field
   slide_order: number;
 }
 
@@ -162,9 +163,11 @@ export function DynamicHero() {
       
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 transition-all duration-500">
-          {currentSlide.title}
-        </h1>
+        {(currentSlide.show_title !== false) && (
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 transition-all duration-500">
+            {currentSlide.title}
+          </h1>
+        )}
         {currentSlide.description && (
           <p className="text-xl md:text-2xl mb-8 opacity-90 transition-all duration-500">
             {currentSlide.description}

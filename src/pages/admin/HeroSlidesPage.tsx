@@ -24,6 +24,7 @@ interface HeroSlide {
   youtube_url?: string;
   media_type?: string;
   visible: boolean;
+  show_title?: boolean; // Add new field
   slide_order: number;
   section_id: string;
 }
