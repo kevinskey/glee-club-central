@@ -44,7 +44,7 @@ export const HeroSlideMediaPicker: React.FC<HeroSlideMediaPickerProps> = ({
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[80vh]">
         <DialogHeader>
-          <DialogTitle>Select Hero Slide Image</DialogTitle>
+          <DialogTitle>Select Hero Slide Image (Double-click to select)</DialogTitle>
         </DialogHeader>
         <div className="p-4">
           <MediaPicker
