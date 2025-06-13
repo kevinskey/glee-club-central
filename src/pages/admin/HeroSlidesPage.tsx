@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Trash2, Plus, Edit, Eye, EyeOff } from 'lucide-react';
+import { Trash2, Plus, Edit, Eye, EyeOff, Image } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { HeroSlideMediaPicker } from '@/components/admin/HeroSlideMediaPicker';
 
 interface HeroSlide {
   id: string;
@@ -90,6 +90,22 @@ export default function HeroSlidesPage() {
     } catch (error) {
       console.error('Error fetching media files:', error);
     }
+  };
+
+  const handleMediaSelect = (mediaData: { id: string; file_type: string; file_url: string }) => {
+    setFormData({
+      ...formData,
+      media_id: mediaData.id,
+      media_type: mediaData.file_type.startsWith('video/') ? 'video' : 'image'
+    });
+  };
+
+  const getCurrentImageUrl = () => {
+    if (formData.media_id && mediaFiles.length > 0) {
+      const mediaFile = mediaFiles.find(f => f.id === formData.media_id);
+      return mediaFile?.file_url;
+    }
+    return undefined;
   };
 
   const handleSave = async () => {
@@ -211,7 +227,7 @@ export default function HeroSlidesPage() {
                 ) : (
                   <EyeOff className="h-4 w-4 text-gray-400" />
                 )}
-                {slide.title}
+                {slide.title || 'Untitled Slide'}
               </CardTitle>
               <div className="flex gap-2">
                 <Button
@@ -241,7 +257,7 @@ export default function HeroSlidesPage() {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Slide</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{slide.title}"? This action cannot be undone.
+                        Are you sure you want to delete "{slide.title || 'this slide'}"? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -340,22 +356,22 @@ export default function HeroSlidesPage() {
 
             {formData.media_type === 'image' && (
               <div>
-                <Label htmlFor="media_id">Background Image</Label>
-                <Select
-                  value={formData.media_id}
-                  onValueChange={(value) => setFormData({ ...formData, media_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an image" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mediaFiles.map((file) => (
-                      <SelectItem key={file.id} value={file.id}>
-                        {file.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Background Image</Label>
+                <div className="mt-2">
+                  <HeroSlideMediaPicker
+                    currentImageUrl={getCurrentImageUrl()}
+                    onImageSelect={handleMediaSelect}
+                  />
+                  {getCurrentImageUrl() && (
+                    <div className="mt-3">
+                      <img
+                        src={getCurrentImageUrl()}
+                        alt="Selected"
+                        className="w-full max-w-md h-32 object-cover rounded border"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
