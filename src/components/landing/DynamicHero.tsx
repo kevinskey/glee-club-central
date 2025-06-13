@@ -14,7 +14,7 @@ interface HeroSlide {
   youtube_url?: string;
   media_type?: string;
   visible: boolean;
-  show_title?: boolean; // Add new field
+  show_title?: boolean;
   slide_order: number;
 }
 
@@ -205,21 +205,6 @@ export function DynamicHero() {
           >
             <ChevronRight className="h-6 w-6" />
           </Button>
-
-          {/* Slide indicators */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex 
-                    ? 'bg-white scale-125' 
-                    : 'bg-white/50 hover:bg-white/75'
-                }`}
-                onClick={() => setCurrentIndex(index)}
-              />
-            ))}
-          </div>
         </>
       )}
     </section>
