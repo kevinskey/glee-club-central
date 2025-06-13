@@ -19,10 +19,15 @@ export const HeroSlideMediaPicker: React.FC<HeroSlideMediaPickerProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const handleMediaSelect = (data: string | { id: string; file_type: string; file_url: string }) => {
-    if (typeof data === 'object') {
+    console.log('HeroSlideMediaPicker: Media selected:', data);
+    
+    if (typeof data === 'object' && data.id && data.file_url) {
+      console.log('HeroSlideMediaPicker: Calling onImageSelect with:', data);
       onImageSelect(data);
+      setIsOpen(false);
+    } else {
+      console.error('HeroSlideMediaPicker: Invalid data format received:', data);
     }
-    setIsOpen(false);
   };
 
   const defaultTrigger = (
@@ -41,14 +46,16 @@ export const HeroSlideMediaPicker: React.FC<HeroSlideMediaPickerProps> = ({
         <DialogHeader>
           <DialogTitle>Select Hero Slide Image</DialogTitle>
         </DialogHeader>
-        <MediaPicker
-          isOpen={true}
-          onClose={() => setIsOpen(false)}
-          onSelect={handleMediaSelect}
-          allowedTypes={['image']}
-          showUpload={true}
-          returnMediaObject={true}
-        />
+        <div className="p-4">
+          <MediaPicker
+            isOpen={true}
+            onClose={() => setIsOpen(false)}
+            onSelect={handleMediaSelect}
+            allowedTypes={['image']}
+            showUpload={true}
+            returnMediaObject={true}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

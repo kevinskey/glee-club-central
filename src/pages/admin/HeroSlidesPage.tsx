@@ -94,16 +94,28 @@ export default function HeroSlidesPage() {
   };
 
   const handleMediaSelect = async (mediaData: { id: string; file_type: string; file_url: string }) => {
-    console.log('Media selected:', mediaData);
+    console.log('HeroSlidesPage: Media selected:', mediaData);
     
+    if (!mediaData.id || !mediaData.file_url) {
+      console.error('HeroSlidesPage: Invalid media data received:', mediaData);
+      toast.error('Invalid media selection');
+      return;
+    }
+    
+    // Update form data
     setFormData(prev => ({
       ...prev,
       media_id: mediaData.id,
       media_type: mediaData.file_type.startsWith('video/') ? 'video' : 'image'
     }));
     
+    // Set the selected media URL for immediate display
     setSelectedMediaUrl(mediaData.file_url);
-    toast.success('Image selected successfully');
+    
+    console.log('HeroSlidesPage: Form updated with media_id:', mediaData.id);
+    console.log('HeroSlidesPage: Selected media URL set to:', mediaData.file_url);
+    
+    toast.success('Image selected successfully!');
     
     // Refresh media files to ensure we have the latest data
     await fetchMediaFiles();
@@ -171,6 +183,7 @@ export default function HeroSlidesPage() {
   };
 
   const handleEdit = (slide: HeroSlide) => {
+    console.log('HeroSlidesPage: Editing slide:', slide);
     setEditingSlide(slide);
     setFormData({
       title: slide.title,
@@ -190,7 +203,10 @@ export default function HeroSlidesPage() {
       const mediaFile = mediaFiles.find(f => f.id === slide.media_id);
       if (mediaFile) {
         setSelectedMediaUrl(mediaFile.file_url);
+        console.log('HeroSlidesPage: Set selected media URL for editing:', mediaFile.file_url);
       }
+    } else {
+      setSelectedMediaUrl('');
     }
     
     setIsCreating(true);
@@ -392,16 +408,28 @@ export default function HeroSlidesPage() {
                   />
                   {formData.media_id && (
                     <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800">
+                      <p className="text-sm text-green-800 font-medium">
                         ✓ Image selected (ID: {formData.media_id})
                       </p>
                       {getCurrentImageUrl() && (
-                        <img
-                          src={getCurrentImageUrl()}
-                          alt="Selected"
-                          className="w-full max-w-xs h-20 object-cover rounded border mt-2"
-                        />
+                        <div className="mt-2">
+                          <img
+                            src={getCurrentImageUrl()}
+                            alt="Selected slide image"
+                            className="w-full max-w-xs h-32 object-cover rounded border"
+                            onLoad={() => console.log('Image loaded successfully')}
+                            onError={(e) => console.error('Image failed to load:', e)}
+                          />
+                          <p className="text-xs text-green-600 mt-1">Preview of selected image</p>
+                        </div>
                       )}
+                    </div>
+                  )}
+                  {!formData.media_id && (
+                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        ⚠️ No image selected. Click "Select Image" to choose a background image.
+                      </p>
                     </div>
                   )}
                 </div>
