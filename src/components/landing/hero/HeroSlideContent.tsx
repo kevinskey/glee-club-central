@@ -14,7 +14,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     : '/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png';
 
   return (
-    <section className="relative min-h-[300px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[300px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden pb-8 sm:pb-12">
       {/* Background Image - Mobile crops to image size, Desktop maintains aspect */}
       <div className="absolute inset-0 sm:relative">
         <img
