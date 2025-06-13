@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +41,6 @@ export default function HeroSlidesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [deleteSlideId, setDeleteSlideId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -93,23 +93,49 @@ export default function HeroSlidesPage() {
   };
 
   const handleMediaSelect = (mediaData: { id: string; file_type: string; file_url: string }) => {
-    setFormData({
-      ...formData,
+    console.log('Media selected:', mediaData);
+    setFormData(prev => ({
+      ...prev,
       media_id: mediaData.id,
       media_type: mediaData.file_type.startsWith('video/') ? 'video' : 'image'
-    });
+    }));
+    toast.success('Image selected successfully');
   };
 
   const getCurrentImageUrl = () => {
-    if (formData.media_id && mediaFiles.length > 0) {
-      const mediaFile = mediaFiles.find(f => f.id === formData.media_id);
-      return mediaFile?.file_url;
+    if (formData.media_id) {
+      // Try to find in existing mediaFiles first
+      const existingFile = mediaFiles.find(f => f.id === formData.media_id);
+      if (existingFile) {
+        return existingFile.file_url;
+      }
+      
+      // If not found, try to fetch from media_library directly
+      const fetchMediaUrl = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('media_library')
+            .select('file_url')
+            .eq('id', formData.media_id)
+            .single();
+          
+          if (error) throw error;
+          return data?.file_url;
+        } catch (error) {
+          console.error('Error fetching media URL:', error);
+          return undefined;
+        }
+      };
+      
+      fetchMediaUrl();
     }
     return undefined;
   };
 
   const handleSave = async () => {
     try {
+      console.log('Saving slide with data:', formData);
+      
       if (editingSlide) {
         const { error } = await supabase
           .from('hero_slides')
@@ -145,7 +171,6 @@ export default function HeroSlidesPage() {
       if (error) throw error;
       toast.success('Slide deleted successfully');
       fetchSlides();
-      setDeleteSlideId(null);
     } catch (error) {
       console.error('Error deleting slide:', error);
       toast.error('Failed to delete slide');
@@ -357,18 +382,16 @@ export default function HeroSlidesPage() {
             {formData.media_type === 'image' && (
               <div>
                 <Label>Background Image</Label>
-                <div className="mt-2">
+                <div className="mt-2 space-y-3">
                   <HeroSlideMediaPicker
                     currentImageUrl={getCurrentImageUrl()}
                     onImageSelect={handleMediaSelect}
                   />
-                  {getCurrentImageUrl() && (
-                    <div className="mt-3">
-                      <img
-                        src={getCurrentImageUrl()}
-                        alt="Selected"
-                        className="w-full max-w-md h-32 object-cover rounded border"
-                      />
+                  {formData.media_id && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        ✓ Image selected (ID: {formData.media_id})
+                      </p>
                     </div>
                   )}
                 </div>
@@ -394,7 +417,7 @@ export default function HeroSlidesPage() {
                   id="slide_order"
                   type="number"
                   value={formData.slide_order}
-                  onChange={(e) => setFormData({ ...formData, slide_order: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, slide_order: parseInt(e.target.value) || 0 })}
                 />
               </div>
               <div className="flex items-center space-x-2">
