@@ -14,13 +14,13 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     : '/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png';
 
   return (
-    <section className="relative sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[300px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
       {/* Background Image - Mobile crops to image size, Desktop maintains aspect */}
       <div className="absolute inset-0 sm:relative">
         <img
           src={backgroundImage}
           alt={slide.title}
-          className="w-full h-auto sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
+          className="w-full h-auto min-h-[300px] object-cover sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
           style={{
             objectPosition: 'center center'
           }}
