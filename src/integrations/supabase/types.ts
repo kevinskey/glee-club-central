@@ -790,6 +790,7 @@ export type Database = {
           media_id: string | null
           media_type: string | null
           section_id: string | null
+          show_title: boolean | null
           slide_order: number | null
           text_alignment: string | null
           text_position: string | null
@@ -807,6 +808,7 @@ export type Database = {
           media_id?: string | null
           media_type?: string | null
           section_id?: string | null
+          show_title?: boolean | null
           slide_order?: number | null
           text_alignment?: string | null
           text_position?: string | null
@@ -824,6 +826,7 @@ export type Database = {
           media_id?: string | null
           media_type?: string | null
           section_id?: string | null
+          show_title?: boolean | null
           slide_order?: number | null
           text_alignment?: string | null
           text_position?: string | null
