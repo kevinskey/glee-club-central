@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
@@ -22,7 +21,6 @@ import {
   ShoppingCart,
   Megaphone,
   Image,
-  ImageIcon,
   Package,
   Palette,
 } from 'lucide-react';
@@ -46,7 +44,6 @@ const navigationGroups = [
     label: 'Content',
     items: [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-      { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
       { to: '/admin/media-library', icon: Image, label: 'Media Library' },
       { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
     ]

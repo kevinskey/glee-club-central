@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -12,8 +11,7 @@ import {
   Megaphone,
   Image,
   Home,
-  Palette,
-  Presentation
+  Palette
 } from 'lucide-react';
 import { ViewSwitcher } from './ViewSwitcher';
 
@@ -22,7 +20,6 @@ const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/admin/members', icon: Users, label: 'Members' },
-  { to: '/admin/unified-slide-management', icon: Presentation, label: 'Slides' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
