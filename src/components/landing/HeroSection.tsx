@@ -16,18 +16,7 @@ export function HeroSection() {
 
   console.log('🎭 HeroSection: Slides data:', { slides: slides.length, isLoading, hasError });
 
-  // Show loading state while fetching
-  if (isLoading) {
-    return (
-      <section className="w-full">
-        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
-          <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      </section>
-    );
-  }
-
-  // Create test slides if no slides exist
+  // Create default slides that will always be shown
   const defaultSlides = [
     {
       id: 'default-1',
@@ -67,10 +56,21 @@ export function HeroSection() {
     }
   ];
 
-  // Use database slides if available, otherwise use defaults
+  // Show loading state only briefly while fetching
+  if (isLoading) {
+    return (
+      <section className="w-full">
+        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
+          <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </section>
+    );
+  }
+
+  // Always use database slides if available, otherwise use defaults
   const displaySlides = slides.length > 0 ? slides.map((slide, index) => ({
     id: slide.id,
-    src: slide.youtube_url || slide.background_image_url || '/lovable-uploads/5d6ba7fa-4ea7-42ac-872e-940fb620a273.png',
+    src: slide.youtube_url || slide.background_image_url || defaultSlides[0].src,
     srcSet: slide.background_image_url && !slide.youtube_url ? 
       `${slide.background_image_url}?w=600&h=400&fit=crop&crop=center 600w, ${slide.background_image_url}?w=1200&h=800&fit=crop&crop=center 1200w` : 
       undefined,
