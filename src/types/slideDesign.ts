@@ -106,6 +106,7 @@ export interface TextStyle {
   fontSize: string;
   color: string;
   fontWeight?: string;
+  fontStyle?: string; // Added this property
   textAlign?: 'left' | 'center' | 'right';
   fontFamily?: string;
   textShadow?: string;
