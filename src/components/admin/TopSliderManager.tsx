@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,25 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, Image, Video, ExternalLink, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, MoveUp, MoveDown, Eye, EyeOff, ExternalLink, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { MediaPicker } from '@/components/media/MediaPicker';
-
-interface MediaLibraryItem {
-  id: string;
-  file_url: string;
-  title: string;
-}
 
 interface TopSliderItem {
   id: string;
   title: string;
   description?: string;
   image_url?: string;
-  youtube_url?: string;
-  media_id?: string;
   link_url?: string;
   background_color?: string;
   text_color?: string;
@@ -37,22 +28,17 @@ interface TopSliderItem {
 
 export function TopSliderManager() {
   const [items, setItems] = useState<TopSliderItem[]>([]);
-  const [mediaFiles, setMediaFiles] = useState<{ [key: string]: MediaLibraryItem }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [editingItem, setEditingItem] = useState<TopSliderItem | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [backgroundType, setBackgroundType] = useState<'color' | 'image' | 'media' | 'youtube'>('color');
-  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     image_url: '',
-    youtube_url: '',
-    media_id: '',
     link_url: '',
     background_color: '#4F46E5',
     text_color: '#FFFFFF',
@@ -63,7 +49,6 @@ export function TopSliderManager() {
     try {
       console.log('🔍 TopSliderManager: Fetching slider items...');
       
-      // Fetch slides
       const { data: slidesData, error: slidesError } = await supabase
         .from('top_slider_items')
         .select('*')
@@ -82,34 +67,7 @@ export function TopSliderManager() {
         return;
       }
 
-      // Get all unique media IDs
-      const mediaIds = slidesData
-        .map(slide => slide.media_id)
-        .filter(id => id !== null && id !== undefined);
-
-      // Fetch media files if we have media IDs
-      let mediaData: MediaLibraryItem[] = [];
-      if (mediaIds.length > 0) {
-        const { data: fetchedMedia, error: mediaError } = await supabase
-          .from('media_library')
-          .select('id, file_url, title')
-          .in('id', mediaIds);
-
-        if (mediaError) {
-          console.error('❌ TopSliderManager: Media error:', mediaError);
-        } else {
-          mediaData = fetchedMedia || [];
-        }
-      }
-
-      // Create media lookup map
-      const mediaMap: { [key: string]: MediaLibraryItem } = {};
-      mediaData.forEach(media => {
-        mediaMap[media.id] = media;
-      });
-
       setItems(slidesData);
-      setMediaFiles(mediaMap);
     } catch (error) {
       console.error('💥 TopSliderManager: Error fetching top slider items:', error);
       toast.error('Failed to load slider items');
@@ -158,15 +116,12 @@ export function TopSliderManager() {
       title: '',
       description: '',
       image_url: '',
-      youtube_url: '',
-      media_id: '',
       link_url: '',
       background_color: '#4F46E5',
       text_color: '#FFFFFF',
       visible: true
     });
     setEditingItem(null);
-    setBackgroundType('color');
   };
 
   const openEditDialog = (item?: TopSliderItem) => {
@@ -176,24 +131,11 @@ export function TopSliderManager() {
         title: item.title,
         description: item.description || '',
         image_url: item.image_url || '',
-        youtube_url: item.youtube_url || '',
-        media_id: item.media_id || '',
         link_url: item.link_url || '',
         background_color: item.background_color || '#4F46E5',
         text_color: item.text_color || '#FFFFFF',
         visible: item.visible
       });
-      
-      // Determine background type
-      if (item.youtube_url) {
-        setBackgroundType('youtube');
-      } else if (item.media_id) {
-        setBackgroundType('media');
-      } else if (item.image_url) {
-        setBackgroundType('image');
-      } else {
-        setBackgroundType('color');
-      }
     } else {
       resetForm();
     }
@@ -207,19 +149,16 @@ export function TopSliderManager() {
     }
 
     try {
-      console.log('💾 TopSliderManager: Saving slider item...', { formData, backgroundType });
+      console.log('💾 TopSliderManager: Saving slider item...', { formData });
       
-      // Prepare data based on background type
       const dataToSave = {
         title: formData.title,
         description: formData.description,
+        image_url: formData.image_url || null,
         link_url: formData.link_url,
         background_color: formData.background_color,
         text_color: formData.text_color,
-        visible: formData.visible,
-        image_url: backgroundType === 'image' ? formData.image_url : null,
-        youtube_url: backgroundType === 'youtube' ? formData.youtube_url : null,
-        media_id: backgroundType === 'media' ? formData.media_id : null
+        visible: formData.visible
       };
 
       console.log('📋 TopSliderManager: Data to save:', dataToSave);
@@ -266,12 +205,6 @@ export function TopSliderManager() {
       console.error('💥 TopSliderManager: Error saving slider item:', error);
       toast.error('Failed to save slider item');
     }
-  };
-
-  const handleMediaSelect = (mediaFile: any) => {
-    console.log('📁 TopSliderManager: Media selected:', mediaFile);
-    setFormData({ ...formData, media_id: mediaFile.id });
-    setMediaPickerOpen(false);
   };
 
   const handleDelete = async () => {
@@ -348,26 +281,12 @@ export function TopSliderManager() {
   };
 
   const getItemPreview = (item: TopSliderItem) => {
-    let backgroundImage: string | undefined;
-    
-    if (item.media_id && mediaFiles[item.media_id]) {
-      backgroundImage = mediaFiles[item.media_id].file_url;
-    } else if (item.image_url) {
-      backgroundImage = item.image_url;
-    }
-
-    if (item.youtube_url) {
-      return (
-        <div className="w-16 h-12 rounded flex-shrink-0 bg-red-600 flex items-center justify-center">
-          <Video className="h-6 w-6 text-white" />
-        </div>
-      );
-    } else if (backgroundImage) {
+    if (item.image_url) {
       return (
         <div 
           className="w-16 h-12 rounded flex-shrink-0 bg-cover bg-center"
           style={{ 
-            backgroundImage: `url(${backgroundImage})`,
+            backgroundImage: `url(${item.image_url})`,
           }}
         />
       );
@@ -449,23 +368,16 @@ export function TopSliderManager() {
                   {(() => {
                     const firstVisibleItem = items.find(item => item.visible);
                     if (!firstVisibleItem) return null;
-                    
-                    let previewBackgroundImage: string | undefined;
-                    if (firstVisibleItem.media_id && mediaFiles[firstVisibleItem.media_id]) {
-                      previewBackgroundImage = mediaFiles[firstVisibleItem.media_id].file_url;
-                    } else if (firstVisibleItem.image_url) {
-                      previewBackgroundImage = firstVisibleItem.image_url;
-                    }
 
                     return (
                       <div 
                         className="h-16 md:h-20 flex items-center justify-center relative bg-cover bg-center"
                         style={{
                           backgroundColor: firstVisibleItem.background_color || '#4F46E5',
-                          backgroundImage: previewBackgroundImage ? `url(${previewBackgroundImage})` : undefined
+                          backgroundImage: firstVisibleItem.image_url ? `url(${firstVisibleItem.image_url})` : undefined
                         }}
                       >
-                        {previewBackgroundImage && (
+                        {firstVisibleItem.image_url && (
                           <div className="absolute inset-0 bg-black/40" />
                         )}
                         <div className="text-center relative z-10">
@@ -501,9 +413,6 @@ export function TopSliderManager() {
                     <Badge variant={item.visible ? "default" : "secondary"}>
                       {item.visible ? "Visible" : "Hidden"}
                     </Badge>
-                    {item.youtube_url && <Badge variant="outline">YouTube</Badge>}
-                    {item.media_id && <Badge variant="outline">Media Library</Badge>}
-                    {item.image_url && <Badge variant="outline">Direct URL</Badge>}
                   </div>
                   {item.description && (
                     <p className="text-sm text-muted-foreground truncate">{item.description}</p>
@@ -597,6 +506,16 @@ export function TopSliderManager() {
             </div>
 
             <div>
+              <Label htmlFor="image_url">Background Image URL</Label>
+              <Input
+                id="image_url"
+                value={formData.image_url}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                placeholder="https://example.com/image.jpg"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="link_url">Link URL</Label>
               <Input
                 id="link_url"
@@ -606,86 +525,26 @@ export function TopSliderManager() {
               />
             </div>
 
-            {/* Background Type Selection */}
-            <div>
-              <Label>Background Type</Label>
-              <Tabs value={backgroundType} onValueChange={(value) => setBackgroundType(value as any)}>
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="color">Color</TabsTrigger>
-                  <TabsTrigger value="image">Image URL</TabsTrigger>
-                  <TabsTrigger value="media">Media Library</TabsTrigger>
-                  <TabsTrigger value="youtube">YouTube</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="color" className="mt-4">
-                  <div>
-                    <Label htmlFor="background_color">Background Color</Label>
-                    <Input
-                      id="background_color"
-                      type="color"
-                      value={formData.background_color}
-                      onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
-                    />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="image" className="mt-4">
-                  <div>
-                    <Label htmlFor="image_url">Image URL</Label>
-                    <Input
-                      id="image_url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="media" className="mt-4">
-                  <div>
-                    <Label>Select from Media Library</Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setMediaPickerOpen(true)}
-                      className="w-full mt-2"
-                    >
-                      <Image className="h-4 w-4 mr-2" />
-                      {formData.media_id ? 'Change Media' : 'Select Media'}
-                    </Button>
-                    {formData.media_id && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Media selected: {formData.media_id}
-                      </p>
-                    )}
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="youtube" className="mt-4">
-                  <div>
-                    <Label htmlFor="youtube_url">YouTube URL</Label>
-                    <Input
-                      id="youtube_url"
-                      value={formData.youtube_url}
-                      onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      The video will auto-play muted as background
-                    </p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            <div>
-              <Label htmlFor="text_color">Text Color</Label>
-              <Input
-                id="text_color"
-                type="color"
-                value={formData.text_color}
-                onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="background_color">Background Color</Label>
+                <Input
+                  id="background_color"
+                  type="color"
+                  value={formData.background_color}
+                  onChange={(e) => setFormData({ ...formData, background_color: e.target.value })}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="text_color">Text Color</Label>
+                <Input
+                  id="text_color"
+                  type="color"
+                  value={formData.text_color}
+                  onChange={(e) => setFormData({ ...formData, text_color: e.target.value })}
+                />
+              </div>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -694,34 +553,22 @@ export function TopSliderManager() {
                 checked={formData.visible}
                 onCheckedChange={(checked) => setFormData({ ...formData, visible: checked })}
               />
-              <Label htmlFor="visible">Visible</Label>
+              <Label htmlFor="visible">Visible on homepage</Label>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                {editingItem ? 'Update' : 'Create'} Slide
+              </Button>
             </div>
           </div>
-
-          <div className="flex justify-end gap-2 mt-6">
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              {editingItem ? 'Update' : 'Create'}
-            </Button>
-          </div>
         </DialogContent>
       </Dialog>
 
-      {/* Media Picker Dialog */}
-      <Dialog open={mediaPickerOpen} onOpenChange={setMediaPickerOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Select Media from Library</DialogTitle>
-          </DialogHeader>
-          <MediaPicker 
-            onSelect={handleMediaSelect}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Dialog */}
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -732,9 +579,7 @@ export function TopSliderManager() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
