@@ -28,7 +28,7 @@ export function HeroSection() {
       textAlignment: 'center' as const,
       isVideo: false,
       priority: true,
-      objectFit: 'contain' as const
+      objectFit: 'cover' as const
     },
     {
       id: 'default-2', 
@@ -40,7 +40,7 @@ export function HeroSection() {
       textAlignment: 'center' as const,
       isVideo: false,
       priority: false,
-      objectFit: 'contain' as const
+      objectFit: 'cover' as const
     },
     {
       id: 'default-3',
@@ -52,20 +52,9 @@ export function HeroSection() {
       textAlignment: 'center' as const,
       isVideo: false,
       priority: false,
-      objectFit: 'contain' as const
+      objectFit: 'cover' as const
     }
   ];
-
-  // Show loading state only briefly while fetching
-  if (isLoading) {
-    return (
-      <section className="w-full">
-        <div className="w-full h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] bg-muted animate-pulse flex items-center justify-center">
-          <div className="w-6 h-6 md:w-8 md:h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      </section>
-    );
-  }
 
   // Always use database slides if available, otherwise use defaults
   const displaySlides = slides.length > 0 ? slides.map((slide, index) => ({
@@ -83,31 +72,38 @@ export function HeroSection() {
     textAlignment: slide.text_alignment,
     isVideo: slide.media_type === 'video' || !!slide.youtube_url,
     priority: index === 0,
-    objectFit: 'contain' as const
+    objectFit: 'cover' as const
   })) : defaultSlides;
 
   console.log('🎭 HeroSection: Display slides:', displaySlides);
 
   return (
-    <section className="w-full">
-      <div className="w-full relative">
-        <MobileOptimizedSlider
-          slides={displaySlides}
-          aspectRatio="auto"
-          autoPlay={true}
-          autoPlayInterval={5000}
-          showControls={true}
-          showIndicators={true}
-          preloadAdjacent={true}
-          defaultObjectFit="contain"
-          className="h-[40vh] md:h-[50vh] min-h-[250px] md:min-h-[350px] max-h-[400px] md:max-h-[500px] w-full"
-        />
+    <section className="w-full bg-gray-900">
+      {/* Hero Slides Container with explicit sizing */}
+      <div className="w-full h-[60vh] md:h-[70vh] min-h-[400px] max-h-[600px] relative overflow-hidden">
+        {isLoading ? (
+          <div className="w-full h-full bg-muted animate-pulse flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <MobileOptimizedSlider
+            slides={displaySlides}
+            aspectRatio="auto"
+            autoPlay={true}
+            autoPlayInterval={5000}
+            showControls={true}
+            showIndicators={true}
+            preloadAdjacent={true}
+            defaultObjectFit="cover"
+            className="w-full h-full"
+          />
+        )}
         
         {/* Admin Edit Button */}
         {isAdmin && (
           <Button
             onClick={() => navigate('/admin/hero-slides')}
-            className="absolute top-4 right-4 z-40 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+            className="absolute top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
             size="sm"
           >
             <Edit className="h-4 w-4 mr-2" />
