@@ -1,7 +1,6 @@
 
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { NewsTicker } from "@/components/landing/news/NewsTicker";
 import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
@@ -12,7 +11,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Header() {
   const navigate = useNavigate();
-  const [showNewsTicker, setShowNewsTicker] = React.useState(true);
   const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
   const isMobile = useIsMobile();
   
@@ -38,11 +36,8 @@ export function Header() {
   
   return (
     <>
-      {/* Header with News Ticker - Changed to contained layout */}
+      {/* Header - Contained layout to match other sections */}
       <header className="top-0 left-0 right-0 w-full max-w-none bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 z-50 m-0 p-0">
-        {/* News Ticker - Full width */}
-        {showNewsTicker && <NewsTicker />}
-        
         {/* Main Header - Contained layout to match other sections */}
         <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
           <div className="container mx-auto px-4">
