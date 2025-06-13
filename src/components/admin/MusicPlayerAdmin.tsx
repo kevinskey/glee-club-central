@@ -8,9 +8,12 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import { Music, Settings, BarChart3, Calendar, Plus, Trash2, Edit, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Playlist {
   id: string;
@@ -41,36 +44,56 @@ export function MusicPlayerAdmin() {
   const [activeTab, setActiveTab] = useState('playlists');
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newPlaylistData, setNewPlaylistData] = useState({
+    name: '',
+    description: ''
+  });
+  const { user } = useAuth();
 
   // Load data
   const loadData = async () => {
     setIsLoading(true);
     try {
       // Load playlists
-      const { data: playlistData } = await supabase
+      const { data: playlistData, error: playlistError } = await supabase
         .from('playlists')
         .select('*')
         .order('display_order', { ascending: true });
 
+      if (playlistError) {
+        console.error('Error loading playlists:', playlistError);
+        toast.error('Failed to load playlists');
+      } else {
+        setPlaylists(playlistData || []);
+      }
+
       // Load audio files
-      const { data: audioData } = await supabase
+      const { data: audioData, error: audioError } = await supabase
         .from('audio_files')
         .select('*')
         .order('title');
 
+      if (audioError) {
+        console.error('Error loading audio files:', audioError);
+      } else {
+        setAudioFiles(audioData || []);
+      }
+
       // Load player settings
-      const { data: settingsData } = await supabase
+      const { data: settingsData, error: settingsError } = await supabase
         .from('music_player_settings')
         .select('*');
 
-      setPlaylists(playlistData || []);
-      setAudioFiles(audioData || []);
-      
-      const settings = settingsData?.reduce((acc, setting) => {
-        acc[setting.setting_key] = setting.setting_value;
-        return acc;
-      }, {} as PlayerSettings);
-      setPlayerSettings(settings || {});
+      if (settingsError) {
+        console.error('Error loading settings:', settingsError);
+      } else {
+        const settings = settingsData?.reduce((acc, setting) => {
+          acc[setting.setting_key] = setting.setting_value;
+          return acc;
+        }, {} as PlayerSettings);
+        setPlayerSettings(settings || {});
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       toast.error('Failed to load music data');
@@ -80,18 +103,38 @@ export function MusicPlayerAdmin() {
   };
 
   // Create playlist
-  const createPlaylist = async (name: string, description: string) => {
+  const createPlaylist = async () => {
+    if (!user) {
+      toast.error('You must be logged in to create playlists');
+      return;
+    }
+
+    if (!newPlaylistData.name.trim()) {
+      toast.error('Please enter a playlist name');
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('playlists')
         .insert({
-          name,
-          description,
-          display_order: playlists.length
-        });
+          name: newPlaylistData.name.trim(),
+          description: newPlaylistData.description.trim(),
+          display_order: playlists.length,
+          created_by: user.id
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating playlist:', error);
+        toast.error(`Failed to create playlist: ${error.message}`);
+        return;
+      }
+
       toast.success('Playlist created successfully');
+      setNewPlaylistData({ name: '', description: '' });
+      setIsCreateDialogOpen(false);
       loadData();
     } catch (error) {
       console.error('Error creating playlist:', error);
@@ -107,7 +150,12 @@ export function MusicPlayerAdmin() {
         .update(updates)
         .eq('id', playlistId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating playlist:', error);
+        toast.error(`Failed to update playlist: ${error.message}`);
+        return;
+      }
+
       toast.success('Playlist updated successfully');
       loadData();
     } catch (error) {
@@ -126,7 +174,12 @@ export function MusicPlayerAdmin() {
           setting_value: value
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating setting:', error);
+        toast.error(`Failed to update setting: ${error.message}`);
+        return;
+      }
+
       toast.success('Setting updated successfully');
       loadData();
     } catch (error) {
@@ -140,7 +193,16 @@ export function MusicPlayerAdmin() {
   }, []);
 
   if (isLoading) {
-    return <div className="flex items-center justify-center p-8">Loading...</div>;
+    return (
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p>Loading music player settings...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -177,52 +239,92 @@ export function MusicPlayerAdmin() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Playlist Management
-                <Button onClick={() => {
-                  const name = prompt('Playlist name:');
-                  const description = prompt('Description (optional):');
-                  if (name) createPlaylist(name, description || '');
-                }}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Playlist
-                </Button>
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Playlist
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Playlist</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="playlist-name">Playlist Name</Label>
+                        <Input
+                          id="playlist-name"
+                          value={newPlaylistData.name}
+                          onChange={(e) => setNewPlaylistData(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter playlist name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="playlist-description">Description (Optional)</Label>
+                        <Textarea
+                          id="playlist-description"
+                          value={newPlaylistData.description}
+                          onChange={(e) => setNewPlaylistData(prev => ({ ...prev, description: e.target.value }))}
+                          placeholder="Enter playlist description"
+                        />
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={createPlaylist}>
+                          Create Playlist
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {playlists.map((playlist) => (
-                  <div key={playlist.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold">{playlist.name}</h3>
-                        {playlist.is_active && <Badge variant="default">Active</Badge>}
-                        {playlist.is_homepage_default && <Badge variant="secondary">Homepage Default</Badge>}
-                      </div>
-                      {playlist.description && (
-                        <p className="text-sm text-muted-foreground">{playlist.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={playlist.is_active}
-                        onCheckedChange={(checked) => 
-                          updatePlaylistStatus(playlist.id, { is_active: checked })
-                        }
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => 
-                          updatePlaylistStatus(playlist.id, { is_homepage_default: !playlist.is_homepage_default })
-                        }
-                      >
-                        {playlist.is_homepage_default ? 'Remove Default' : 'Set Default'}
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
+                {playlists.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Music className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No playlists found. Create your first playlist to get started.</p>
                   </div>
-                ))}
+                ) : (
+                  playlists.map((playlist) => (
+                    <div key={playlist.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold">{playlist.name}</h3>
+                          {playlist.is_active && <Badge variant="default">Active</Badge>}
+                          {playlist.is_homepage_default && <Badge variant="secondary">Homepage Default</Badge>}
+                        </div>
+                        {playlist.description && (
+                          <p className="text-sm text-muted-foreground">{playlist.description}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={playlist.is_active}
+                          onCheckedChange={(checked) => 
+                            updatePlaylistStatus(playlist.id, { is_active: checked })
+                          }
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => 
+                            updatePlaylistStatus(playlist.id, { is_homepage_default: !playlist.is_homepage_default })
+                          }
+                        >
+                          {playlist.is_homepage_default ? 'Remove Default' : 'Set Default'}
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
