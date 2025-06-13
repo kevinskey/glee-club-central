@@ -3,12 +3,11 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { HeroSlideManager } from './HeroSlideManager';
 import { SlideDesignManager } from './slideDesign/SlideDesignManager';
-import { Layout, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Layout, Sparkles } from 'lucide-react';
 
 export function UnifiedSlideManager() {
-  const [activeTab, setActiveTab] = useState('hero-slides');
+  const [activeTab, setActiveTab] = useState('design-studio');
 
   return (
     <div className="space-y-6">
@@ -32,14 +31,7 @@ export function UnifiedSlideManager() {
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-100 dark:bg-slate-700">
-              <TabsTrigger value="hero-slides" className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Hero Slides
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  Simple
-                </Badge>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1 bg-slate-100 dark:bg-slate-700">
               <TabsTrigger value="design-studio" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 Design Studio
@@ -48,10 +40,6 @@ export function UnifiedSlideManager() {
                 </Badge>
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="hero-slides" className="mt-6">
-              <HeroSlideManager />
-            </TabsContent>
 
             <TabsContent value="design-studio" className="mt-6">
               <SlideDesignManager />
