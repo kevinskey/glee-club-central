@@ -1,201 +1,74 @@
 
-import React from "react";
-import { useCalendarEvents } from "@/hooks/useCalendarEvents";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CalendarDays, MapPin, Clock, ArrowRight } from "lucide-react";
-import { format, isAfter } from "date-fns";
-import { cn } from "@/lib/utils";
-import { HorizontalSlider } from "@/components/ui/horizontal-slider";
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Event } from '@/types/common';
+import { format } from 'date-fns';
 
 interface EnhancedEventsSectionProps {
-  events?: any[];
-  maxEvents?: number;
-  showHeader?: boolean;
+  events: Event[];
+  title?: string;
   className?: string;
 }
 
 export function EnhancedEventsSection({ 
-  events: propEvents,
-  maxEvents = 6, 
-  showHeader = true,
-  className = ""
+  events, 
+  title = "Upcoming Events",
+  className = "" 
 }: EnhancedEventsSectionProps) {
-  const { events: fetchedEvents, loading, error } = useCalendarEvents();
-  
-  // Use prop events if provided, otherwise use fetched events
-  const events = propEvents || fetchedEvents;
-
-  // Filter and sort upcoming public events
-  const now = new Date();
-  const upcomingEvents = events
-    .filter(event => {
-      const eventDate = new Date(event.start_time);
-      return isAfter(eventDate, now) && event.is_public;
-    })
-    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-    .slice(0, maxEvents);
-
-  if (loading) {
-    return (
-      <section className={cn("py-8 md:py-12", className)}>
-        <div className="container mx-auto px-4">
-          {showHeader && (
-            <div className="text-center mb-6 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Join us for our upcoming performances
-              </p>
-            </div>
-          )}
-          <HorizontalSlider itemWidth="w-80" gap="gap-4">
-            {[...Array(3)].map((_, i) => (
-              <Card key={i} className="animate-pulse h-64">
-                <CardContent className="p-4">
-                  <div className="w-full h-32 bg-gray-200 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </HorizontalSlider>
-        </div>
-      </section>
-    );
+  if (!events || events.length === 0) {
+    return null;
   }
 
-  if (error) {
-    return (
-      <section className={cn("py-8 md:py-12", className)}>
-        <div className="container mx-auto px-4">
-          <div className="text-center text-red-600 py-8">
-            <p className="text-sm md:text-base">Unable to load events at this time</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (upcomingEvents.length === 0) {
-    return (
-      <section className={cn("py-8 md:py-12", className)}>
-        <div className="container mx-auto px-4">
-          {showHeader && (
-            <div className="text-center mb-6 md:mb-8">
-              <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Join us for our upcoming performances
-              </p>
-            </div>
-          )}
-          <div className="text-center py-8">
-            <CalendarDays className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-sm md:text-base text-muted-foreground">
-              No upcoming events scheduled at this time
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  const displayEvents = events.slice(0, 6);
 
   return (
-    <section className={cn("py-8 md:py-12", className)}>
+    <section className={`py-16 bg-background ${className}`}>
       <div className="container mx-auto px-4">
-        {showHeader && (
-          <div className="text-center mb-6 md:mb-8">
-            <h2 className="text-xl md:text-3xl font-bold mb-2 md:mb-4">Upcoming Events</h2>
-            <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto">
-              Join us for our upcoming performances and community events
-            </p>
-          </div>
-        )}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">{title}</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Join us for our upcoming performances and events
+          </p>
+        </div>
         
-        {/* Horizontal Scrolling Events */}
-        <HorizontalSlider itemWidth="w-80" gap="gap-6">
-          {upcomingEvents.map((event) => (
-            <Card key={event.id} className="hover:shadow-lg transition-all duration-300 h-full">
-              <div className="relative">
-                {/* Event Image */}
-                {event.feature_image_url ? (
-                  <div className="w-full h-40 overflow-hidden rounded-t-lg">
-                    <img
-                      src={event.feature_image_url}
-                      alt={event.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-t-lg flex items-center justify-center">
-                    <CalendarDays className="h-12 w-12 text-primary/60" />
-                  </div>
-                )}
-                
-                {/* Event Type Badge */}
-                {event.event_type && (
-                  <div className="absolute top-3 left-3">
-                    <span className="inline-flex items-center px-3 py-1 text-sm font-medium bg-primary/90 text-primary-foreground rounded-full backdrop-blur-sm">
-                      {event.event_type}
-                    </span>
-                  </div>
-                )}
-              </div>
-              
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {displayEvents.map((event) => (
+            <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              {event.imageUrl && (
+                <div className="aspect-video bg-cover bg-center" 
+                     style={{ backgroundImage: `url(${event.imageUrl})` }} />
+              )}
               <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  {/* Date Block */}
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-primary/10 rounded-xl flex flex-col items-center justify-center text-primary">
-                      <span className="text-sm font-medium">
-                        {format(new Date(event.start_time), 'MMM')}
-                      </span>
-                      <span className="text-xl font-bold">
-                        {format(new Date(event.start_time), 'd')}
-                      </span>
-                    </div>
+                <h3 className="font-semibold text-lg mb-3">{event.title}</h3>
+                <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{format(new Date(event.date), 'MMM dd, yyyy')}</span>
                   </div>
-                  
-                  {/* Event Details */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold mb-2 text-foreground line-clamp-2">
-                      {event.title}
-                    </h3>
-                    
-                    <div className="space-y-1">
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
-                        <span>{format(new Date(event.start_time), 'h:mm a')}</span>
-                      </div>
-                      
-                      {event.location_name && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{event.location_name}</span>
-                        </div>
-                      )}
+                  {event.location && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>{event.location}</span>
                     </div>
-                    
-                    {event.short_description && (
-                      <p className="text-muted-foreground mt-3 line-clamp-2 text-sm">
-                        {event.short_description}
-                      </p>
-                    )}
-                  </div>
+                  )}
                 </div>
+                <Button variant="outline" size="sm" className="w-full">
+                  Learn More
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                </Button>
               </CardContent>
             </Card>
           ))}
-        </HorizontalSlider>
-        
-        {upcomingEvents.length >= maxEvents && (
-          <div className="text-center mt-6 md:mt-8">
-            <Button variant="outline" size="sm" className="mobile-button">
-              View All Events
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        )}
+        </div>
+
+        <div className="text-center">
+          <Button variant="outline">
+            View All Events
+            <ExternalLink className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
       </div>
     </section>
   );
