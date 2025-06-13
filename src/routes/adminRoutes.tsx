@@ -9,6 +9,7 @@ import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import MembersPage from '@/pages/admin/MembersPage';
+import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -32,6 +33,14 @@ export const adminRoutes: RouteObject[] = [
     element: (
       <AdminRoute>
         <AdminCalendarPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/hero-slides',
+    element: (
+      <AdminRoute>
+        <HeroSlidesPage />
       </AdminRoute>
     ),
   },
