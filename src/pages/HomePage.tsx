@@ -12,7 +12,7 @@ export default function HomePage() {
     upcomingEvents, 
     storeProducts, 
     audioTracks, 
-    loading 
+    isLoading: dataLoading 
   } = useHomePageData();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading || loading) {
+  if (isLoading || dataLoading) {
     return <HomePageLoader />;
   }
 
