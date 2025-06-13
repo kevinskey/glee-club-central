@@ -14,13 +14,18 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     : '/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png';
 
   return (
-    <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      >
-        <div className="absolute inset-0 bg-black/40"></div>
+    <section className="relative h-[60vh] sm:h-[70vh] min-h-[400px] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+      {/* Background Image - Mobile Optimized */}
+      <div className="absolute inset-0">
+        <img
+          src={backgroundImage}
+          alt={slide.title}
+          className="w-full h-full object-cover transition-all duration-1000"
+          style={{
+            objectPosition: 'center center'
+          }}
+        />
+        <div className="absolute inset-0 bg-black/50 sm:bg-black/40"></div>
       </div>
       
       {/* YouTube Video Background (if applicable) */}
@@ -33,27 +38,27 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/50 sm:bg-black/40"></div>
         </div>
       )}
       
-      {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+      {/* Content - Mobile Optimized */}
+      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-2 sm:px-4">
         {(slide.show_title !== false) && (
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 transition-all duration-500">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight">
             {slide.title}
           </h1>
         )}
         {slide.description && (
-          <p className="text-xl md:text-2xl mb-8 opacity-90 transition-all duration-500">
+          <p className="text-sm sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed">
             {slide.description}
           </p>
         )}
         {slide.button_text && (
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button 
-              size="lg" 
-              className="bg-white text-primary hover:bg-white/90"
+              size="default"
+              className="bg-white text-primary hover:bg-white/90 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
               onClick={() => slide.button_link && window.open(slide.button_link, '_blank')}
             >
               {slide.button_text}
