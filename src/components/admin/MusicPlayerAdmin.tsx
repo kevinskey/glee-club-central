@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,13 @@ export function MusicPlayerAdmin() {
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
   const [newPlaylistData, setNewPlaylistData] = useState({
+    name: '',
+    description: ''
+  });
+  const [editPlaylistData, setEditPlaylistData] = useState({
     name: '',
     description: ''
   });
@@ -139,6 +144,53 @@ export function MusicPlayerAdmin() {
     } catch (error) {
       console.error('Error creating playlist:', error);
       toast.error('Failed to create playlist');
+    }
+  };
+
+  // Edit playlist
+  const openEditDialog = (playlist: Playlist) => {
+    setEditingPlaylist(playlist);
+    setEditPlaylistData({
+      name: playlist.name,
+      description: playlist.description || ''
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const updatePlaylist = async () => {
+    if (!editingPlaylist || !user) {
+      toast.error('Unable to update playlist');
+      return;
+    }
+
+    if (!editPlaylistData.name.trim()) {
+      toast.error('Please enter a playlist name');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('playlists')
+        .update({
+          name: editPlaylistData.name.trim(),
+          description: editPlaylistData.description.trim()
+        })
+        .eq('id', editingPlaylist.id);
+
+      if (error) {
+        console.error('Error updating playlist:', error);
+        toast.error(`Failed to update playlist: ${error.message}`);
+        return;
+      }
+
+      toast.success('Playlist updated successfully');
+      setIsEditDialogOpen(false);
+      setEditingPlaylist(null);
+      setEditPlaylistData({ name: '', description: '' });
+      loadData();
+    } catch (error) {
+      console.error('Error updating playlist:', error);
+      toast.error('Failed to update playlist');
     }
   };
 
@@ -318,7 +370,11 @@ export function MusicPlayerAdmin() {
                         >
                           {playlist.is_homepage_default ? 'Remove Default' : 'Set Default'}
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => openEditDialog(playlist)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                       </div>
@@ -437,6 +493,43 @@ export function MusicPlayerAdmin() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit Playlist Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Playlist</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-playlist-name">Playlist Name</Label>
+              <Input
+                id="edit-playlist-name"
+                value={editPlaylistData.name}
+                onChange={(e) => setEditPlaylistData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter playlist name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-playlist-description">Description (Optional)</Label>
+              <Textarea
+                id="edit-playlist-description"
+                value={editPlaylistData.description}
+                onChange={(e) => setEditPlaylistData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter playlist description"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={updatePlaylist}>
+                Update Playlist
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
