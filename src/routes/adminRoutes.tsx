@@ -7,10 +7,8 @@ import { Navigate } from 'react-router-dom';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
 import SiteImagesPage from '@/pages/admin/SiteImagesPage';
-import UnifiedSlideManagementPage from '@/pages/admin/UnifiedSlideManagementPage';
 import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import MembersPage from '@/pages/admin/MembersPage';
-import SliderDemoPage from '@/pages/admin/SliderDemoPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -41,23 +39,6 @@ export const adminRoutes: RouteObject[] = [
   {
     path: '/admin/v2',
     element: <Navigate to="/dashboard" replace />,
-  },
-  // Advanced slide design studio
-  {
-    path: '/admin/unified-slide-management',
-    element: (
-      <AdminRoute>
-        <UnifiedSlideManagementPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/slider-demo',
-    element: (
-      <AdminRoute>
-        <SliderDemoPage />
-      </AdminRoute>
-    ),
   },
   {
     path: '/admin/media',
