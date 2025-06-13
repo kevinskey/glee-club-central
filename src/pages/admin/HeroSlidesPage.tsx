@@ -24,7 +24,7 @@ interface HeroSlide {
   youtube_url?: string;
   media_type?: string;
   visible: boolean;
-  show_title?: boolean; // Add new field
+  show_title?: boolean;
   slide_order: number;
   section_id: string;
 }
@@ -53,6 +53,7 @@ export default function HeroSlidesPage() {
     youtube_url: '',
     media_type: 'image',
     visible: true,
+    show_title: true,
     slide_order: 0,
     section_id: 'homepage-main'
   });
@@ -195,6 +196,7 @@ export default function HeroSlidesPage() {
       youtube_url: slide.youtube_url || '',
       media_type: slide.media_type || 'image',
       visible: slide.visible,
+      show_title: slide.show_title !== false, // Default to true if undefined
       slide_order: slide.slide_order,
       section_id: slide.section_id
     });
@@ -239,6 +241,7 @@ export default function HeroSlidesPage() {
       youtube_url: '',
       media_type: 'image',
       visible: true,
+      show_title: true,
       slide_order: slides.length,
       section_id: 'homepage-main'
     });
@@ -459,13 +462,23 @@ export default function HeroSlidesPage() {
                   onChange={(e) => setFormData({ ...formData, slide_order: parseInt(e.target.value) || 0 })}
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="visible"
-                  checked={formData.visible}
-                  onCheckedChange={(checked) => setFormData({ ...formData, visible: checked })}
-                />
-                <Label htmlFor="visible">Visible</Label>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="visible"
+                    checked={formData.visible}
+                    onCheckedChange={(checked) => setFormData({ ...formData, visible: checked })}
+                  />
+                  <Label htmlFor="visible">Visible</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="show_title"
+                    checked={formData.show_title}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_title: checked })}
+                  />
+                  <Label htmlFor="show_title">Show title on slide</Label>
+                </div>
               </div>
             </div>
 
