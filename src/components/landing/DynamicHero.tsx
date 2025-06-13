@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface HeroSlide {
   id: string;
@@ -86,14 +85,6 @@ export function DynamicHero() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + slides.length) % slides.length);
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
   };
 
   if (isLoading) {
@@ -185,28 +176,6 @@ export function DynamicHero() {
           </div>
         )}
       </div>
-
-      {/* Navigation arrows (only show if multiple slides) */}
-      {slides.length > 1 && (
-        <>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
-            onClick={goToPrevious}
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
-            onClick={goToNext}
-          >
-            <ChevronRight className="h-6 w-6" />
-          </Button>
-        </>
-      )}
     </section>
   );
 }
