@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, BarChart3, Settings } from 'lucide-react';
+import { ShoppingBag, Package, BarChart3, Settings } from 'lucide-react';
 import { ProductManagement } from '@/components/admin/store/ProductManagement';
 import { InventoryManager } from '@/components/admin/store/InventoryManager';
+import { OrderManagement } from '@/components/admin/store/OrderManagement';
 import { StoreAnalytics } from '@/components/admin/store/StoreAnalytics';
 import { StoreSettings } from '@/components/admin/store/StoreSettings';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,13 +55,13 @@ export default function AdminStorePage() {
             Store Management
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Manage products, inventory, and store settings
+            Manage products, inventory, orders, and store settings
           </p>
         </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -68,6 +69,10 @@ export default function AdminStorePage() {
             <TabsTrigger value="inventory" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Inventory
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4" />
+              Orders
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -85,6 +90,10 @@ export default function AdminStorePage() {
 
           <TabsContent value="inventory">
             <InventoryManager />
+          </TabsContent>
+
+          <TabsContent value="orders">
+            <OrderManagement />
           </TabsContent>
 
           <TabsContent value="analytics">
