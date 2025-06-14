@@ -5,15 +5,36 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { PageHeader } from "@/components/ui/page-header";
 import { FileImage, Upload, RefreshCw, Grid, List, Image, FileText, Music, Video } from 'lucide-react';
-import { EnhancedMediaLibrary } from '@/components/media/EnhancedMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
+import { MediaGridView } from '@/components/media/MediaGridView';
+import { MediaListView } from '@/components/media/MediaListView';
+import { MediaFilterBar } from '@/components/media/MediaFilterBar';
+import { MediaLoadingState } from '@/components/media/MediaLoadingState';
 import { toast } from 'sonner';
+import { MediaType } from '@/utils/mediaUtils';
 
 const AdminMediaLibraryPage = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { fetchAllMedia, isLoading, mediaStats } = useMediaLibrary();
+  
+  const { 
+    filteredMediaFiles,
+    searchQuery,
+    setSearchQuery,
+    selectedMediaType,
+    setSelectedMediaType,
+    selectedCategory,
+    setSelectedCategory,
+    dateFilter,
+    setDateFilter,
+    isLoading,
+    mediaStats,
+    mediaTypes,
+    categories,
+    fetchAllMedia,
+    deleteMediaItem
+  } = useMediaLibrary();
   
   const handleUploadComplete = () => {
     console.log("Admin: Upload complete");
@@ -25,6 +46,15 @@ const AdminMediaLibraryPage = () => {
   const handleRefresh = () => {
     fetchAllMedia();
     toast.success("Media library refreshed");
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteMediaItem(id);
+      toast.success("Media file deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete media file");
+    }
   };
 
   const getFileCount = (type: string): number => {
@@ -145,7 +175,23 @@ const AdminMediaLibraryPage = () => {
         </Card>
       </div>
 
-      {/* Media Library */}
+      {/* Filter Bar */}
+      <MediaFilterBar 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedMediaType={selectedMediaType as MediaType | "all"}
+        setSelectedMediaType={(type: MediaType | "all") => setSelectedMediaType(type)}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        dateFilter={dateFilter as "newest" | "oldest"}
+        setDateFilter={setDateFilter}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        mediaTypes={mediaTypes}
+        categories={categories}
+      />
+
+      {/* Media Library Content */}
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -154,7 +200,32 @@ const AdminMediaLibraryPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <EnhancedMediaLibrary isAdminView={true} />
+          <MediaLoadingState 
+            isLoading={isLoading}
+            isEmpty={filteredMediaFiles.length === 0}
+            canUpload={true}
+            onUploadClick={() => setIsUploadModalOpen(true)}
+          />
+          
+          {!isLoading && filteredMediaFiles.length > 0 && (
+            <div>
+              {viewMode === "grid" ? (
+                <MediaGridView 
+                  mediaFiles={filteredMediaFiles}
+                  canEdit={true}
+                  canDelete={true}
+                  onDelete={handleDelete}
+                />
+              ) : (
+                <MediaListView 
+                  mediaFiles={filteredMediaFiles}
+                  canEdit={true}
+                  canDelete={true}
+                  onDelete={handleDelete}
+                />
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
         
