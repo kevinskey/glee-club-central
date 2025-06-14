@@ -3,23 +3,25 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Music, Play, BarChart3, Eye } from 'lucide-react';
 
-interface Track {
+interface SoundCloudTrack {
   id: string;
   title: string;
   artist: string;
-  duration: number;
   audioUrl: string;
-  coverArt?: string;
+  albumArt: string;
+  duration: number;
+  waveformData: number[];
   likes: number;
   plays: number;
-  genre?: string;
+  isLiked: boolean;
+  genre: string;
   uploadDate: string;
-  description?: string;
-  isPublic: boolean;
+  description: string;
+  permalink_url: string;
 }
 
 interface SoundCloudStatsProps {
-  tracks: Track[];
+  tracks: SoundCloudTrack[];
 }
 
 export function SoundCloudStats({ tracks }: SoundCloudStatsProps) {
@@ -27,7 +29,8 @@ export function SoundCloudStats({ tracks }: SoundCloudStatsProps) {
     const totalTracks = tracks.length;
     const totalPlays = tracks.reduce((sum, track) => sum + track.plays, 0);
     const totalLikes = tracks.reduce((sum, track) => sum + track.likes, 0);
-    const publicTracks = tracks.filter(track => track.isPublic).length;
+    // Since SoundCloud tracks don't have isPublic, we'll assume all are public for now
+    const publicTracks = tracks.length;
     
     return { totalTracks, totalPlays, totalLikes, publicTracks };
   };
