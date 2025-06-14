@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { MediaType } from '@/utils/mediaUtils';
@@ -22,9 +23,7 @@ interface MediaFile {
 }
 
 export function useMediaLibrary() {
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [allMediaFiles, setAllMediaFiles] = useState<MediaFile[]>([]);
-  const [filteredMediaFiles, setFilteredMediaFiles] = useState<MediaFile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -32,7 +31,7 @@ export function useMediaLibrary() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
 
-  const fetchMediaFiles = async () => {
+  const fetchMediaFiles = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -57,9 +56,7 @@ export function useMediaLibrary() {
         tags: file.tags || []
       }));
       
-      setMediaFiles(files);
       setAllMediaFiles(files);
-      setFilteredMediaFiles(files);
     } catch (err) {
       console.error('Error fetching media files:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch media files');
@@ -67,61 +64,13 @@ export function useMediaLibrary() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAllMedia = fetchMediaFiles;
+  const fetchAllMedia = useCallback(() => {
+    fetchMediaFiles();
+  }, [fetchMediaFiles]);
 
-  const uploadMediaFile = async (file: File, title?: string, isPublic: boolean = false) => {
-    try {
-      // Upload file to Supabase storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `media/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('media')
-        .getPublicUrl(filePath);
-
-      // Insert media record
-      const { data: mediaRecord, error: insertError } = await supabase
-        .from('media_library')
-        .insert({
-          title: title || file.name,
-          file_url: publicUrl,
-          file_path: filePath,
-          file_type: file.type,
-          size: file.size,
-          is_public: isPublic,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        throw insertError;
-      }
-
-      // Refresh media files list
-      await fetchMediaFiles();
-
-      toast.success('Media file uploaded successfully');
-      return mediaRecord;
-    } catch (err) {
-      console.error('Error uploading media file:', err);
-      toast.error('Failed to upload media file');
-      throw err;
-    }
-  };
-
-  const deleteMediaFile = async (id: string) => {
+  const deleteMediaItem = useCallback(async (id: string) => {
     try {
       const { error } = await supabase
         .from('media_library')
@@ -132,45 +81,25 @@ export function useMediaLibrary() {
         throw error;
       }
 
-      await fetchMediaFiles();
+      // Update local state instead of refetching
+      setAllMediaFiles(prev => prev.filter(file => file.id !== id));
       toast.success('Media file deleted successfully');
     } catch (err) {
       console.error('Error deleting media file:', err);
       toast.error('Failed to delete media file');
       throw err;
     }
-  };
+  }, []);
 
-  const deleteMediaItem = deleteMediaFile;
-
-  // Create comprehensive media stats
-  const mediaStats = {
-    total: allMediaFiles.length,
-    totalFiles: allMediaFiles.length,
-    totalSize: allMediaFiles.reduce((acc, file) => acc + (file.size || 0), 0),
-    images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
-    videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
-    documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
-    filesByType: {
-      image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
-      video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
-      pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
-      audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
-      application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
-    }
-  };
-
-  // Get unique media types and categories - properly typed
-  const mediaTypes: MediaType[] = ['image', 'video', 'pdf', 'audio', 'document'];
-  const categories = ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))];
-
-  // Filter media files based on search and filters
-  useEffect(() => {
+  // Memoized filtered results to prevent unnecessary recalculations
+  const filteredMediaFiles = useMemo(() => {
     let filtered = [...allMediaFiles];
 
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(file => 
-        file.title.toLowerCase().includes(searchQuery.toLowerCase())
+        file.title.toLowerCase().includes(query) ||
+        (file.description && file.description.toLowerCase().includes(query))
       );
     }
 
@@ -185,15 +114,45 @@ export function useMediaLibrary() {
       });
     }
 
-    setFilteredMediaFiles(filtered);
-  }, [allMediaFiles, searchQuery, selectedMediaType, selectedCategory, dateFilter]);
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(file => file.category === selectedCategory);
+    }
 
+    return filtered;
+  }, [allMediaFiles, searchQuery, selectedMediaType, selectedCategory]);
+
+  // Memoized stats to prevent recalculation
+  const mediaStats = useMemo(() => ({
+    total: allMediaFiles.length,
+    totalFiles: allMediaFiles.length,
+    totalSize: allMediaFiles.reduce((acc, file) => acc + (file.size || 0), 0),
+    images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+    videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+    documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
+    filesByType: {
+      image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+      video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+      pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
+      audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
+      application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
+    }
+  }), [allMediaFiles]);
+
+  // Memoized categories and types
+  const categories = useMemo(() => 
+    ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))],
+    [allMediaFiles]
+  );
+
+  const mediaTypes: MediaType[] = ['image', 'video', 'pdf', 'audio', 'document'];
+
+  // Only fetch on mount
   useEffect(() => {
     fetchMediaFiles();
-  }, []);
+  }, [fetchMediaFiles]);
 
   return {
-    mediaFiles,
+    mediaFiles: filteredMediaFiles,
     allMediaFiles,
     filteredMediaFiles,
     isLoading,
@@ -211,8 +170,6 @@ export function useMediaLibrary() {
     categories,
     fetchMediaFiles,
     fetchAllMedia,
-    uploadMediaFile,
-    deleteMediaFile,
     deleteMediaItem,
     useMediaInContext: () => {}, // Placeholder function
   };

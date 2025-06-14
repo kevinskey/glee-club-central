@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +12,9 @@ import { MediaFilterBar } from '@/components/media/MediaFilterBar';
 import { MediaLoadingState } from '@/components/media/MediaLoadingState';
 import { toast } from 'sonner';
 import { MediaType } from '@/utils/mediaUtils';
+import { MediaLoadingBoundary } from '@/components/media/MediaLoadingBoundary';
 
-const AdminMediaLibraryPage = () => {
+const AdminMediaLibraryPageContent = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
@@ -35,30 +36,30 @@ const AdminMediaLibraryPage = () => {
     deleteMediaItem
   } = useMediaLibrary();
   
-  const handleUploadComplete = () => {
+  const handleUploadComplete = useCallback(() => {
     console.log("Admin: Upload complete");
     setIsUploadModalOpen(false);
     fetchAllMedia();
     toast.success("Media uploaded successfully!");
-  };
+  }, [fetchAllMedia]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     fetchAllMedia();
     toast.success("Media library refreshed");
-  };
+  }, [fetchAllMedia]);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       await deleteMediaItem(id);
       toast.success("Media file deleted successfully");
     } catch (error) {
       toast.error("Failed to delete media file");
     }
-  };
+  }, [deleteMediaItem]);
 
-  const getFileCount = (type: string): number => {
+  const getFileCount = useCallback((type: string): number => {
     return (mediaStats.filesByType as Record<string, number>)?.[type] || 0;
-  };
+  }, [mediaStats.filesByType]);
   
   return (
     <div className="space-y-6">
@@ -187,7 +188,7 @@ const AdminMediaLibraryPage = () => {
         viewMode={viewMode}
         setViewMode={setViewMode}
         mediaTypes={mediaTypes}
-        categories={categories}
+     s={categories}
       />
 
       {/* Media Library Content */}
@@ -236,6 +237,14 @@ const AdminMediaLibraryPage = () => {
         onUploadComplete={handleUploadComplete}
       />
     </div>
+  );
+};
+
+const AdminMediaLibraryPage = () => {
+  return (
+    <MediaLoadingBoundary>
+      <AdminMediaLibraryPageContent />
+    </MediaLoadingBoundary>
   );
 };
 
