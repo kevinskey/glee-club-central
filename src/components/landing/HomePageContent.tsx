@@ -1,3 +1,4 @@
+
 import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
@@ -62,7 +63,7 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section */}
-      <section className="w-full py-4 md:py-6 lg:py-8">
+      <section className="w-full py-4 md:py-6 lg:py-8 pt-12 md:pt-16 lg:pt-20">
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
