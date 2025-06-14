@@ -3,9 +3,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Settings, BarChart3, RefreshCw } from 'lucide-react';
+import { Music, Settings, BarChart3 } from 'lucide-react';
 import { SoundCloudPlaylistManager } from './SoundCloudPlaylistManager';
 import { SoundCloudPlayerSettings } from './soundcloud/SoundCloudPlayerSettings';
+import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
 
 export function MusicPlayerAdmin() {
   return (
@@ -39,21 +40,7 @@ export function MusicPlayerAdmin() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                SoundCloud Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <h3 className="text-lg font-semibold mb-2">Analytics Coming Soon</h3>
-                <p className="mb-4">View detailed analytics for SoundCloud plays, user engagement, and listening patterns</p>
-              </div>
-            </CardContent>
-          </Card>
+          <SoundCloudAnalytics />
         </TabsContent>
       </Tabs>
     </div>
