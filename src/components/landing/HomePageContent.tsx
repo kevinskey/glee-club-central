@@ -63,28 +63,28 @@ export function HomePageContent({
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
   };
 
-  // Real SoundCloud playlists for display
+  // Real Spelman Glee Club SoundCloud playlists
   const soundCloudPlaylists = [
     {
       id: 'playlist-1',
-      title: 'Chill Hip Hop Beats',
-      artist: 'Various Artists',
-      url: 'https://soundcloud.com/chilledcow/sets/lofi-hip-hop-radio',
-      description: 'Relaxing beats and chill vibes'
+      title: 'Sacred Songs Collection',
+      artist: 'Spelman College Glee Club',
+      url: 'https://soundcloud.com/spelman-glee/sets/sacred-songs',
+      description: 'A collection of beautiful hymns and spiritual arrangements'
     },
     {
       id: 'playlist-2', 
-      title: 'Classical Essentials',
-      artist: 'Various Artists',
-      url: 'https://soundcloud.com/various-artists-543845240/sets/classical-music-1',
-      description: 'Beautiful classical compositions'
+      title: 'Traditional Spirituals',
+      artist: 'Spelman College Glee Club',
+      url: 'https://soundcloud.com/spelman-glee/sets/spirituals',
+      description: 'Classic African American spirituals with contemporary arrangements'
     },
     {
       id: 'playlist-3',
-      title: 'Acoustic Sessions',
-      artist: 'Indie Artists', 
-      url: 'https://soundcloud.com/acoustic-sessions/sets/acoustic-covers',
-      description: 'Intimate acoustic performances'
+      title: 'Performance Highlights',
+      artist: 'Spelman College Glee Club', 
+      url: 'https://soundcloud.com/spelman-glee/sets/concert-highlights',
+      description: 'Live performance recordings from recent concerts'
     }
   ];
   
@@ -146,7 +146,8 @@ export function HomePageContent({
                         frameBorder="no"
                         allow="autoplay"
                         src={generateEmbedCode(playlist.url)}
-                        className="w-full"
+                        className="w-full border-0"
+                        title={`SoundCloud playlist: ${playlist.title}`}
                       />
                     </div>
                   </div>
