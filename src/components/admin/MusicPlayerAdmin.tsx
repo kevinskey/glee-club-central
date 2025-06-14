@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface AudioFile {
   description: string;
   file_url: string;
   category: string;
+  source?: 'audio_files' | 'media_library';
 }
 
 interface PlaylistTrack {
@@ -86,17 +88,47 @@ export function MusicPlayerAdmin() {
         setPlaylists(playlistData || []);
       }
 
-      // Load audio files
-      const { data: audioData, error: audioError } = await supabase
-        .from('audio_files')
-        .select('*')
-        .order('title');
+      // Load audio files from both tables
+      const [audioFilesResult, mediaLibraryResult] = await Promise.all([
+        supabase
+          .from('audio_files')
+          .select('*')
+          .order('title'),
+        supabase
+          .from('media_library')
+          .select('*')
+          .or('file_type.like.audio/*,file_type.eq.audio/mpeg,file_type.eq.audio/mp3')
+          .order('title')
+      ]);
 
-      if (audioError) {
-        console.error('Error loading audio files:', audioError);
-      } else {
-        setAudioFiles(audioData || []);
+      const combinedAudioFiles: AudioFile[] = [];
+
+      // Add audio_files entries
+      if (audioFilesResult.data) {
+        combinedAudioFiles.push(...audioFilesResult.data.map(file => ({
+          id: file.id,
+          title: file.title,
+          description: file.description || '',
+          file_url: file.file_url,
+          category: file.category,
+          source: 'audio_files' as const
+        })));
       }
+
+      // Add media_library audio entries
+      if (mediaLibraryResult.data) {
+        combinedAudioFiles.push(...mediaLibraryResult.data.map(file => ({
+          id: file.id,
+          title: file.title,
+          description: file.description || '',
+          file_url: file.file_url,
+          category: file.folder || 'general',
+          source: 'media_library' as const
+        })));
+      }
+
+      console.log('Combined audio files:', combinedAudioFiles);
+      setAudioFiles(combinedAudioFiles);
 
       // Load player settings
       const { data: settingsData, error: settingsError } = await supabase
@@ -295,7 +327,7 @@ export function MusicPlayerAdmin() {
     setIsTracksDialogOpen(true);
   };
 
-  // Add tracks to playlist
+  // Add tracks to playlist - Updated to handle both audio_files and media_library
   const addTracksToPlaylist = async () => {
     if (!editingPlaylist) return;
 
@@ -306,13 +338,57 @@ export function MusicPlayerAdmin() {
         .delete()
         .eq('playlist_id', editingPlaylist.id);
 
-      // Add selected tracks
-      const tracksToAdd = selectedAudioFiles.map((audioFileId, index) => ({
-        playlist_id: editingPlaylist.id,
-        audio_file_id: audioFileId,
-        track_order: index,
-        is_featured: false
-      }));
+      // For tracks from media_library, we need to create corresponding audio_files entries first
+      const tracksToAdd = [];
+      
+      for (let index = 0; index < selectedAudioFiles.length; index++) {
+        const audioFileId = selectedAudioFiles[index];
+        const audioFile = audioFiles.find(f => f.id === audioFileId);
+        
+        if (!audioFile) continue;
+
+        let finalAudioFileId = audioFileId;
+
+        // If this is from media_library, create an audio_files entry
+        if (audioFile.source === 'media_library') {
+          const { data: existingAudioFile } = await supabase
+            .from('audio_files')
+            .select('id')
+            .eq('file_url', audioFile.file_url)
+            .single();
+
+          if (!existingAudioFile) {
+            const { data: newAudioFile, error: audioFileError } = await supabase
+              .from('audio_files')
+              .insert({
+                title: audioFile.title,
+                description: audioFile.description,
+                file_url: audioFile.file_url,
+                file_path: audioFile.file_url.split('/').pop() || 'unknown',
+                category: audioFile.category,
+                uploaded_by: user?.id || '00000000-0000-0000-0000-000000000000'
+              })
+              .select('id')
+              .single();
+
+            if (audioFileError) {
+              console.error('Error creating audio file entry:', audioFileError);
+              continue;
+            }
+
+            finalAudioFileId = newAudioFile.id;
+          } else {
+            finalAudioFileId = existingAudioFile.id;
+          }
+        }
+
+        tracksToAdd.push({
+          playlist_id: editingPlaylist.id,
+          audio_file_id: finalAudioFileId,
+          track_order: index,
+          is_featured: false
+        });
+      }
 
       if (tracksToAdd.length > 0) {
         const { error } = await supabase
@@ -650,7 +726,7 @@ export function MusicPlayerAdmin() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Select audio files to add to this playlist:
+              Select audio files to add to this playlist (includes files from both Audio Files and Media Library):
             </p>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {audioFiles.map((audioFile) => (
@@ -665,14 +741,19 @@ export function MusicPlayerAdmin() {
                     {audioFile.description && (
                       <div className="text-sm text-muted-foreground">{audioFile.description}</div>
                     )}
-                    <div className="text-xs text-muted-foreground capitalize">{audioFile.category}</div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="capitalize">{audioFile.category}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {audioFile.source === 'media_library' ? 'Media Library' : 'Audio Files'}
+                      </Badge>
+                    </div>
                   </label>
                 </div>
               ))}
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm text-muted-foreground">
-                {selectedAudioFiles.length} tracks selected
+                {selectedAudioFiles.length} tracks selected ({audioFiles.length} total available)
               </p>
               <div className="flex space-x-2">
                 <Button variant="outline" onClick={() => setIsTracksDialogOpen(false)}>
