@@ -45,7 +45,6 @@ export const useSoundCloudPlayer = () => {
       
       console.log('Fetching SoundCloud data...');
       
-      // Call the edge function without any body since it doesn't expect parameters
       const response = await fetch('/functions/v1/soundcloud-api', {
         method: 'GET',
         headers: {
@@ -60,11 +59,17 @@ export const useSoundCloudPlayer = () => {
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         console.error('Response is not JSON:', contentType);
+        const textResponse = await response.text();
+        console.error('Response body:', textResponse);
         throw new Error('Server returned non-JSON response');
       }
       
       const data = await response.json();
       console.log('SoundCloud data received:', data);
+      
+      if (data.error) {
+        throw new Error(data.message || 'Failed to load SoundCloud content');
+      }
       
       if (data.playlists && Array.isArray(data.playlists)) {
         console.log('SoundCloud playlists loaded:', data.playlists.length);
@@ -95,14 +100,17 @@ export const useSoundCloudPlayer = () => {
   };
 
   const handlePlaylistSelect = (playlist: SoundCloudPlaylist) => {
+    console.log('Selecting playlist:', playlist.name);
     setActivePlaylist(playlist);
   };
 
   const refetchPlaylists = async () => {
+    console.log('Refetching SoundCloud playlists...');
     await fetchSoundCloudData();
   };
 
   const refetchTracks = async () => {
+    console.log('Refetching SoundCloud tracks...');
     await fetchSoundCloudData();
   };
 
