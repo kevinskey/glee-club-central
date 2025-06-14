@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Settings, BarChart3 } from 'lucide-react';
-import { SoundCloudPlaylistManager } from './SoundCloudPlaylistManager';
+import { SoundCloudOAuth } from './soundcloud/SoundCloudOAuth';
 import { SoundCloudPlayerSettings } from './soundcloud/SoundCloudPlayerSettings';
 import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
 
@@ -14,7 +14,7 @@ export function MusicPlayerAdmin() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">SoundCloud Music Administration</h1>
-          <p className="text-muted-foreground">Manage SoundCloud playlists and streaming content</p>
+          <p className="text-muted-foreground">Connect and manage your SoundCloud content with OAuth authentication</p>
         </div>
         <Button className="gap-2" asChild>
           <a href="https://soundcloud.com/doctorkj" target="_blank" rel="noopener noreferrer">
@@ -24,15 +24,15 @@ export function MusicPlayerAdmin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="soundcloud" className="space-y-6">
+      <Tabs defaultValue="oauth" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="soundcloud">SoundCloud Management</TabsTrigger>
+          <TabsTrigger value="oauth">Connect SoundCloud</TabsTrigger>
           <TabsTrigger value="settings">Player Settings</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="soundcloud" className="space-y-4">
-          <SoundCloudPlaylistManager />
+        <TabsContent value="oauth" className="space-y-4">
+          <SoundCloudOAuth />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
