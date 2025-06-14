@@ -63,28 +63,28 @@ export function HomePageContent({
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
   };
 
-  // Hardcoded SoundCloud tracks for display
-  const soundCloudTracks = [
+  // Hardcoded SoundCloud playlists for display
+  const soundCloudPlaylists = [
     {
-      id: 'track-1',
-      title: 'Amazing Grace',
+      id: 'playlist-1',
+      title: 'Sacred Songs Collection',
       artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/doctorkj/amazing-grace-spelman',
-      description: 'A beautiful rendition of this classic hymn'
+      url: 'https://soundcloud.com/doctorkj/sets/sacred-songs',
+      description: 'A collection of beautiful hymns and spiritual arrangements'
     },
     {
-      id: 'track-2', 
-      title: 'Lift Every Voice and Sing',
+      id: 'playlist-2', 
+      title: 'Traditional Spirituals',
       artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/doctorkj/lift-every-voice',
-      description: 'The Negro National Anthem performed with passion'
+      url: 'https://soundcloud.com/doctorkj/sets/spirituals',
+      description: 'Classic African American spirituals with contemporary arrangements'
     },
     {
-      id: 'track-3',
-      title: 'Wade in the Water',
+      id: 'playlist-3',
+      title: 'Performance Highlights',
       artist: 'Spelman College Glee Club', 
-      url: 'https://soundcloud.com/doctorkj/wade-in-the-water',
-      description: 'Traditional spiritual arrangement'
+      url: 'https://soundcloud.com/doctorkj/sets/highlights',
+      description: 'Live performance recordings from recent concerts'
     }
   ];
   
@@ -115,25 +115,25 @@ export function HomePageContent({
               </p>
             </div>
             
-            {/* Show SoundCloud embeds */}
+            {/* Show SoundCloud playlist embeds */}
             <div className="space-y-8">
-              {soundCloudTracks.map((track) => (
-                <Card key={track.id} className="overflow-hidden">
+              {soundCloudPlaylists.map((playlist) => (
+                <Card key={playlist.id} className="overflow-hidden">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {track.title}
+                          {playlist.title}
                         </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          by {track.artist}
+                          by {playlist.artist}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          {track.description}
+                          {playlist.description}
                         </p>
                       </div>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={track.url} target="_blank" rel="noopener noreferrer">
+                        <a href={playlist.url} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
@@ -141,11 +141,11 @@ export function HomePageContent({
                     <div className="rounded-lg overflow-hidden">
                       <iframe
                         width="100%"
-                        height="166"
+                        height="300"
                         scrolling="no"
                         frameBorder="no"
                         allow="autoplay"
-                        src={generateEmbedCode(track.url)}
+                        src={generateEmbedCode(playlist.url)}
                         className="w-full"
                       />
                     </div>
@@ -155,7 +155,7 @@ export function HomePageContent({
             </div>
 
             {/* Fallback message if no embeds */}
-            {soundCloudTracks.length === 0 && (
+            {soundCloudPlaylists.length === 0 && (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <Music className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
