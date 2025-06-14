@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
-import { CustomAudioPlayer } from "@/components/audio/CustomAudioPlayer";
+import React, { useState, useEffect } from "react";
+import { WaveSurferPlayer } from "@/components/audio/WaveSurferPlayer";
+import { useAudioFiles } from "@/hooks/useAudioFiles";
 
 interface AudioTrack {
   id: string;
@@ -12,26 +13,41 @@ interface AudioTrack {
 }
 
 interface CustomAudioSectionProps {
-  tracks: AudioTrack[];
+  tracks?: AudioTrack[];
 }
 
-export function CustomAudioSection({ tracks }: CustomAudioSectionProps) {
+export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
+  const { audioFiles } = useAudioFiles();
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  
+  // Use either provided tracks or fetch from Supabase
+  const displayTracks = tracks.length > 0 ? tracks : audioFiles.slice(0, 5);
+  const currentTrack = displayTracks[currentTrackIndex];
 
-  // Transform tracks to match CustomAudioPlayer format
-  const customTracks = tracks.map(track => ({
-    id: track.id,
-    title: track.title,
-    artist: track.artist,
-    audioUrl: track.audioUrl,
-    coverArt: track.albumArt,
-    duration: parseInt(track.duration.split(':')[0]) * 60 + parseInt(track.duration.split(':')[1]) || 180
-  }));
+  if (!currentTrack) {
+    return (
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Listen to the Sound of GleeWorld
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Experience our latest recordings and performances
+            </p>
+            <p className="text-gray-600 dark:text-gray-400">
+              No audio tracks available at the moment.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section>
+    <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="text-center">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Listen to the Sound of GleeWorld
           </h2>
@@ -40,12 +56,47 @@ export function CustomAudioSection({ tracks }: CustomAudioSectionProps) {
           </p>
         </div>
         
-        <div className="max-w-2xl mx-auto">
-          <CustomAudioPlayer 
-            tracks={customTracks}
-            currentTrackIndex={currentTrackIndex}
-            onTrackChange={setCurrentTrackIndex}
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Main Player */}
+          <WaveSurferPlayer
+            audioUrl={tracks.length > 0 ? currentTrack.audioUrl : currentTrack.file_url}
+            title={currentTrack.title}
+            artist={tracks.length > 0 ? currentTrack.artist : currentTrack.description}
+            autoLoad={false}
+            className="mb-6"
           />
+
+          {/* Track List */}
+          {displayTracks.length > 1 && (
+            <div className="grid gap-3">
+              <h3 className="text-lg font-semibold text-center mb-4">
+                More Tracks ({displayTracks.length})
+              </h3>
+              {displayTracks.map((track, index) => (
+                <div
+                  key={tracks.length > 0 ? track.id : track.id}
+                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                    index === currentTrackIndex
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                  onClick={() => setCurrentTrackIndex(index)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium">{track.title}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {tracks.length > 0 ? track.artist : track.description}
+                      </p>
+                    </div>
+                    {index === currentTrackIndex && (
+                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </section>
