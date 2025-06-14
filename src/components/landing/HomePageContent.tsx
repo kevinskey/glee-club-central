@@ -3,6 +3,7 @@ import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { SoundCloudPlayer } from "@/components/audio/SoundCloudPlayer";
+import { SoundCloudPlaylistGrid } from "@/components/audio/SoundCloudPlaylistGrid";
 import { useSoundCloudPlayer } from "@/hooks/useSoundCloudPlayer";
 
 interface Event {
@@ -47,7 +48,7 @@ export function HomePageContent({
 }: HomePageContentProps) {
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
-  const { activePlaylist, isLoading, error } = useSoundCloudPlayer();
+  const { playlists, activePlaylist, isLoading, error, setActivePlaylist } = useSoundCloudPlayer();
   
   return (
     <main className="w-full">
@@ -65,14 +66,14 @@ export function HomePageContent({
           
           <EnhancedEventsSection events={upcomingEvents} />
           
-          {/* SoundCloud Music Player */}
-          <div className="mt-12 max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl md:text-3xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
+          {/* SoundCloud Music Section */}
+          <div className="mt-16 max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
                 Listen to the Glee
               </h3>
-              <p className="text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto font-light">
-                Experience our music directly from SoundCloud
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
+                Experience our music collection from SoundCloud
               </p>
             </div>
             
@@ -86,19 +87,44 @@ export function HomePageContent({
             
             {isLoading && (
               <div className="text-center py-12">
-                <p className="text-gray-600 dark:text-gray-400">Loading SoundCloud playlists...</p>
+                <div className="inline-flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading playlists...</p>
+                </div>
               </div>
             )}
             
-            {!isLoading && !error && activePlaylist && (
-              <SoundCloudPlayer 
-                tracks={activePlaylist.tracks}
-                currentTrackIndex={0}
-                onTrackChange={() => {}}
-              />
+            {!isLoading && !error && playlists.length > 0 && (
+              <div className="space-y-12">
+                {/* Playlist Grid */}
+                <div>
+                  <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
+                    Our Playlists
+                  </h4>
+                  <SoundCloudPlaylistGrid 
+                    playlists={playlists}
+                    activePlaylistId={activePlaylist?.id}
+                    onPlaylistSelect={setActivePlaylist}
+                  />
+                </div>
+
+                {/* Active Player */}
+                {activePlaylist && (
+                  <div>
+                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
+                      Now Playing: {activePlaylist.name}
+                    </h4>
+                    <SoundCloudPlayer 
+                      tracks={activePlaylist.tracks}
+                      currentTrackIndex={0}
+                      onTrackChange={() => {}}
+                    />
+                  </div>
+                )}
+              </div>
             )}
             
-            {!isLoading && !error && !activePlaylist && (
+            {!isLoading && !error && playlists.length === 0 && (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
                   No SoundCloud playlists available at the moment.
