@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileImage, Upload, RefreshCw } from 'lucide-react';
+import { FileImage, Upload, RefreshCw, Grid, List } from 'lucide-react';
 import { OptimizedMediaLibrary } from '@/components/media/OptimizedMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 import { usePaginatedMediaLibrary } from '@/hooks/usePaginatedMediaLibrary';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 const AdminMediaLibraryPage = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { refetch } = usePaginatedMediaLibrary();
   
   const handleUploadComplete = () => {
@@ -53,6 +54,26 @@ const AdminMediaLibraryPage = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex rounded-lg border">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+              className="rounded-r-none"
+            >
+              <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="rounded-l-none"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          
           <Button
             variant="outline"
             onClick={handleRefresh}
@@ -80,7 +101,7 @@ const AdminMediaLibraryPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <OptimizedMediaLibrary isAdminView={true} />
+          <OptimizedMediaLibrary isAdminView={true} viewMode={viewMode} />
         </CardContent>
       </Card>
         

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { Search, Grid, List, Loader2 } from 'lucide-react';
 import { usePaginatedMediaLibrary, MediaFileDetailed } from '@/hooks/usePaginatedMediaLibrary';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { LightweightMediaCard } from '@/components/media/LightweightMediaCard';
+import { MediaListView } from '@/components/media/MediaListView';
 import { FilePreviewModal } from '@/components/media/FilePreviewModal';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +18,7 @@ interface OptimizedMediaLibraryProps {
   viewMode?: 'grid' | 'list';
 }
 
-export function OptimizedMediaLibrary({ isAdminView = false }: OptimizedMediaLibraryProps) {
+export function OptimizedMediaLibrary({ isAdminView = false, viewMode = 'grid' }: OptimizedMediaLibraryProps) {
   const {
     mediaFiles,
     isLoading,
@@ -135,13 +137,28 @@ export function OptimizedMediaLibrary({ isAdminView = false }: OptimizedMediaLib
         </p>
       </div>
 
-      {/* Media Grid */}
+      {/* Media Content */}
       {mediaFiles.length === 0 ? (
         <div className="text-center py-12">
           <Grid className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No media files found</h3>
           <p className="text-muted-foreground">Try adjusting your search or filter settings</p>
         </div>
+      ) : viewMode === 'list' ? (
+        <MediaListView
+          mediaFiles={mediaFiles.map(file => ({
+            ...file,
+            file_url: file.file_url || '',
+            file_path: file.file_path || '',
+            uploaded_by: file.uploaded_by || '',
+            is_public: file.is_public || false,
+            updated_at: file.updated_at || file.created_at
+          }))}
+          canEdit={isAdminView}
+          canDelete={isAdminView}
+          onDelete={handleDelete}
+          onUpdateTitle={isAdminView ? updateMediaTitle : undefined}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {mediaFiles.map((file) => (
