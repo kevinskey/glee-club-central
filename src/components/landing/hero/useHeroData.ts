@@ -45,8 +45,6 @@ export function useHeroData() {
       console.log('useHeroData: Fetched slides:', slidesData?.length || 0);
 
       if (slidesData && slidesData.length > 0) {
-        setSlides(slidesData);
-
         // Get unique media IDs from slides that have them
         const mediaIds = [...new Set(
           slidesData
@@ -111,43 +109,30 @@ export function useHeroData() {
             }
           }
 
-          // Final check - if we still don't have media files, let's see what's available
-          if (Object.keys(mediaMap).length === 0) {
-            console.warn('useHeroData: No media files found for any IDs. Let me check what media exists...');
-            
-            // Debug: Check what's actually in the media_library table
-            const { data: allMedia, error: allMediaError } = await supabase
-              .from('media_library')
-              .select('id, title, file_url')
-              .limit(10);
-              
-            if (allMediaError) {
-              console.error('useHeroData: Error checking available media:', allMediaError);
-            } else {
-              console.log('useHeroData: Sample media files available:', allMedia?.map(m => ({ id: m.id, title: m.title })));
-            }
-
-            // Also check site_images
-            const { data: allSiteImages, error: allSiteError } = await supabase
-              .from('site_images')
-              .select('id, name, file_url')
-              .limit(10);
-              
-            if (allSiteError) {
-              console.error('useHeroData: Error checking available site images:', allSiteError);
-            } else {
-              console.log('useHeroData: Sample site images available:', allSiteImages?.map(i => ({ id: i.id, name: i.name })));
-            }
-          }
-
           console.log('useHeroData: Final media map with', Object.keys(mediaMap).length, 'files');
           setMediaFiles(mediaMap);
+
+          // Filter out slides that don't have valid media files
+          const validSlides = slidesData.filter(slide => {
+            if (!slide.media_id) return false; // Slide needs a media_id
+            return mediaMap[slide.media_id]; // Media file must exist
+          });
+
+          console.log('useHeroData: Valid slides with media:', validSlides.length);
+
+          if (validSlides.length > 0) {
+            setSlides(validSlides);
+          } else {
+            console.log('useHeroData: No valid slides with media found, showing empty');
+            setSlides([]);
+          }
         } else {
-          console.log('useHeroData: No media IDs found in slides');
+          console.log('useHeroData: No media IDs found in slides, showing empty');
+          setSlides([]);
           setMediaFiles({});
         }
       } else {
-        console.log('useHeroData: No visible hero slides found, will show default');
+        console.log('useHeroData: No visible hero slides found');
         setSlides([]);
         setMediaFiles({});
       }
