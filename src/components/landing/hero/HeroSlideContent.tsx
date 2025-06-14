@@ -111,24 +111,6 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             </Button>
           </div>
         )}
-        
-        {/* Enhanced debug info in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mt-6 p-4 glass-card border border-yellow-500/50 rounded-2xl text-yellow-100 text-sm max-w-md mx-auto">
-            <p><strong>Debug Info:</strong></p>
-            <p>Slide ID: {slide.id}</p>
-            <p>Media ID: {slide.media_id || 'None'}</p>
-            <p>Available media: {Object.keys(mediaFiles).length}</p>
-            <p>Has valid image: {hasValidImage ? 'Yes' : 'No'}</p>
-            {slide.media_id && !hasValidImage && (
-              <p className="text-red-300 mt-2">⚠️ Media ID exists but image not found</p>
-            )}
-            {slide.media_id && mediaFiles[slide.media_id] && !mediaFiles[slide.media_id].file_url && (
-              <p className="text-red-300 mt-2">⚠️ Media found but no file URL</p>
-            )}
-            <p className="mt-2 text-xs">Check console for detailed logs or go to Admin → Hero Slides to fix this</p>
-          </div>
-        )}
       </div>
     </section>
   );
