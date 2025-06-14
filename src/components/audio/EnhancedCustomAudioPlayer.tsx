@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Play, Pause, Volume2, VolumeX, SkipBack, SkipForward, Shuffle, Repeat, BarChart3 } from 'lucide-react';
 import { useMusicPlayer } from '@/hooks/useMusicPlayer';
+import { WaveformVisualizer } from './WaveformVisualizer';
 
 interface EnhancedCustomAudioPlayerProps {
   className?: string;
@@ -201,7 +202,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
             {playerSettings.show_visualizer && (
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-glee-purple" />
-                <span className="text-xs text-gray-600 dark:text-gray-400">Visualizer</span>
+                <span className="text-xs text-gray-600 dark:text-gray-400">Visualizer Active</span>
               </div>
             )}
           </div>
@@ -238,20 +239,39 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-2">
-            <Slider
-              value={[currentTime]}
-              max={duration || 100}
-              step={1}
-              onValueChange={handleProgressChange}
-              className="w-full [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
-            />
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
+          {/* Waveform Visualizer - Show when enabled */}
+          {playerSettings.show_visualizer && (
+            <div className="space-y-2">
+              <WaveformVisualizer
+                waveformData={[]} // Will use mock data
+                currentTime={currentTime}
+                duration={duration}
+                onSeek={handleProgressChange}
+                className="mb-2"
+              />
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Progress Bar - Show when visualizer is disabled */}
+          {!playerSettings.show_visualizer && (
+            <div className="space-y-2">
+              <Slider
+                value={[currentTime]}
+                max={duration || 100}
+                step={1}
+                onValueChange={handleProgressChange}
+                className="w-full [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
+              />
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+          )}
 
           {/* Controls */}
           <div className="flex items-center justify-center space-x-4">
