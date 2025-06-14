@@ -196,12 +196,12 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
         <div className="flex flex-col space-y-6">
           {/* Current Playlist Info */}
           <div className="flex items-center justify-between">
-            <Badge variant="default" className="bg-glee-purple text-white font-medium">
+            <Badge variant="default" className="bg-blue-600 text-white font-medium">
               {activePlaylist.playlist_name}
             </Badge>
             {playerSettings.show_visualizer && (
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-glee-purple" />
+                <BarChart3 className="h-4 w-4 text-blue-600" />
                 <span className="text-xs text-gray-600 dark:text-gray-400">Visualizer Active</span>
               </div>
             )}
@@ -232,7 +232,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
                 {currentTrack.artist}
               </p>
               {currentTrack.featured && (
-                <Badge variant="outline" className="mt-1 text-xs border-glee-purple text-glee-purple">
+                <Badge variant="outline" className="mt-1 text-xs border-blue-600 text-blue-600">
                   Featured
                 </Badge>
               )}
@@ -264,7 +264,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
                 max={duration || 100}
                 step={1}
                 onValueChange={handleProgressChange}
-                className="w-full [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
+                className="w-full [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-600"
               />
               <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span>{formatTime(currentTime)}</span>
@@ -279,7 +279,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={toggleShuffle}
-              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${isShuffled ? 'bg-gray-100 dark:bg-gray-800 text-glee-purple' : ''}`}
+              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${isShuffled ? 'bg-gray-100 dark:bg-gray-800 text-blue-600' : ''}`}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -297,7 +297,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="default"
               size="lg"
               onClick={togglePlayPause}
-              className="bg-glee-purple hover:bg-glee-purple/90 text-white h-12 w-12 rounded-full"
+              className="bg-blue-600 hover:bg-blue-700 text-white h-12 w-12 rounded-full"
             >
               {isPlaying ? (
                 <Pause className="h-6 w-6" />
@@ -319,7 +319,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={toggleRepeat}
-              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${repeatMode !== 'none' ? 'bg-gray-100 dark:bg-gray-800 text-glee-purple' : ''}`}
+              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${repeatMode !== 'none' ? 'bg-gray-100 dark:bg-gray-800 text-blue-600' : ''}`}
             >
               <Repeat className="h-4 w-4" />
               {repeatMode === 'track' && <span className="text-xs ml-1">1</span>}
@@ -345,7 +345,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               max={1}
               step={0.01}
               onValueChange={handleVolumeChange}
-              className="flex-1 [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
+              className="flex-1 [&_[role=slider]]:bg-blue-600 [&_[role=slider]]:border-blue-600"
             />
           </div>
 
@@ -361,7 +361,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
                   onClick={() => setCurrentTrackIndex(activePlaylist.tracks.findIndex(t => t.id === track.id))}
                   className={`w-full text-left p-3 rounded-lg text-sm transition-colors ${
                     index === currentTrackIndex
-                      ? 'bg-glee-purple/10 text-glee-purple border border-glee-purple/20'
+                      ? 'bg-blue-600/10 text-blue-600 border border-blue-600/20'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >

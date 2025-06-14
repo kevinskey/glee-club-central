@@ -153,7 +153,7 @@ export function SoundCloudPlayer({
           <CardHeader className="pb-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gradient-to-br from-blue-400 to-blue-600">
                   <img 
                     src={currentTrack.coverArt || "/placeholder.svg"} 
                     alt={currentTrack.title}
@@ -213,7 +213,7 @@ export function SoundCloudPlayer({
                 variant="ghost" 
                 size="sm"
                 onClick={() => setIsShuffled(!isShuffled)}
-                className={isShuffled ? "text-orange-500" : ""}
+                className={isShuffled ? "text-blue-500" : ""}
               >
                 <Shuffle className="w-4 h-4" />
               </Button>
@@ -223,7 +223,7 @@ export function SoundCloudPlayer({
               <Button 
                 onClick={handlePlayPause} 
                 size="lg" 
-                className="w-12 h-12 rounded-full"
+                className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700"
               >
                 {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
               </Button>
@@ -237,7 +237,7 @@ export function SoundCloudPlayer({
                   repeatMode === 'none' ? 'track' : 
                   repeatMode === 'track' ? 'playlist' : 'none'
                 )}
-                className={repeatMode !== 'none' ? "text-orange-500" : ""}
+                className={repeatMode !== 'none' ? "text-blue-500" : ""}
               >
                 <Repeat className="w-4 h-4" />
                 {repeatMode === 'track' && <span className="text-xs ml-1">1</span>}

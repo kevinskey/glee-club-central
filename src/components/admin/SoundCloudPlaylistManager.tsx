@@ -86,7 +86,7 @@ export function SoundCloudPlaylistManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Music className="w-4 h-4 text-orange-500" />
+              <Music className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Playlists</span>
             </div>
             <p className="text-2xl font-bold">{playlists.length}</p>
@@ -95,7 +95,7 @@ export function SoundCloudPlaylistManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Play className="w-4 h-4 text-orange-500" />
+              <Play className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Tracks</span>
             </div>
             <p className="text-2xl font-bold">{tracks.length}</p>
@@ -104,7 +104,7 @@ export function SoundCloudPlaylistManager() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-orange-500" />
+              <Users className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Total Plays</span>
             </div>
             <p className="text-2xl font-bold">
