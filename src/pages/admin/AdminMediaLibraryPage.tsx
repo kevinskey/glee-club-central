@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -188,7 +189,7 @@ const AdminMediaLibraryPageContent = () => {
         viewMode={viewMode}
         setViewMode={setViewMode}
         mediaTypes={mediaTypes}
-     s={categories}
+        categories={categories}
       />
 
       {/* Media Library Content */}
