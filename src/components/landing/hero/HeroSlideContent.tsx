@@ -37,11 +37,23 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
               src={backgroundImage}
               alt={slide.title}
               className="w-full h-full object-cover transition-all duration-1000"
+              onLoad={() => {
+                console.log('HeroSlideContent: Image loaded successfully:', backgroundImage);
+              }}
               onError={(e) => {
                 console.error('HeroSlideContent: Failed to load image:', backgroundImage);
-                // Hide the broken image
+                // Hide the broken image and show fallback
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
+                // Show gradient background instead
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+                      <div class="absolute inset-0 bg-black/30"></div>
+                    </div>
+                  `;
+                }
               }}
             />
             <div className="absolute inset-0 bg-black/40"></div>
@@ -92,13 +104,17 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
           </div>
         )}
         
-        {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && !hasValidImage && (
+        {/* Enhanced debug info in development */}
+        {process.env.NODE_ENV === 'development' && (
           <div className="mt-6 p-4 glass-card border border-yellow-500/50 rounded-2xl text-yellow-100 text-sm max-w-md mx-auto">
-            <p><strong>Debug:</strong> No background image loaded</p>
+            <p><strong>Debug Info:</strong></p>
             <p>Slide ID: {slide.id}</p>
             <p>Media ID: {slide.media_id || 'None'}</p>
             <p>Available media: {Object.keys(mediaFiles).length}</p>
+            <p>Has valid image: {hasValidImage ? 'Yes' : 'No'}</p>
+            {slide.media_id && !hasValidImage && (
+              <p className="text-red-300 mt-2">⚠️ Media ID exists but image not found</p>
+            )}
             <p className="mt-2 text-xs">Go to Admin → Hero Slides to fix this</p>
           </div>
         )}

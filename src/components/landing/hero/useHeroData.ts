@@ -53,28 +53,71 @@ export function useHeroData() {
         console.log('useHeroData: Media IDs to fetch:', mediaIds);
 
         if (mediaIds.length > 0) {
-          const { data: mediaData, error: mediaError } = await supabase
+          // First try media_library table
+          let { data: mediaData, error: mediaError } = await supabase
             .from('media_library')
             .select('id, file_url, title')
             .in('id', mediaIds);
 
           if (mediaError) {
-            console.error('useHeroData: Error fetching media:', mediaError);
-            // Don't throw here, just log the error and continue
-            console.warn('useHeroData: Continuing without media files due to error');
-          } else {
-            console.log('useHeroData: Fetched media data:', mediaData);
+            console.error('useHeroData: Error fetching from media_library:', mediaError);
+          }
 
-            if (mediaData && mediaData.length > 0) {
-              const mediaMap = mediaData.reduce((acc, media) => {
-                acc[media.id] = media;
-                return acc;
-              }, {} as Record<string, MediaFile>);
-              
-              console.log('useHeroData: Media map created:', mediaMap);
-              setMediaFiles(mediaMap);
+          // If no results from media_library, try site_images table
+          if (!mediaData || mediaData.length === 0) {
+            console.log('useHeroData: No media found in media_library, trying site_images...');
+            const { data: siteImagesData, error: siteImagesError } = await supabase
+              .from('site_images')
+              .select('id, file_url, name as title')
+              .in('id', mediaIds);
+
+            if (siteImagesError) {
+              console.error('useHeroData: Error fetching from site_images:', siteImagesError);
             } else {
-              console.warn('useHeroData: Media query returned no results');
+              mediaData = siteImagesData;
+              console.log('useHeroData: Found media in site_images:', mediaData);
+            }
+          }
+
+          // If still no results, try products table (for product images)
+          if (!mediaData || mediaData.length === 0) {
+            console.log('useHeroData: No media found in site_images, trying products...');
+            const { data: productData, error: productError } = await supabase
+              .from('products')
+              .select('id, image_url as file_url, name as title')
+              .in('id', mediaIds)
+              .not('image_url', 'is', null);
+
+            if (productError) {
+              console.error('useHeroData: Error fetching from products:', productError);
+            } else {
+              mediaData = productData;
+              console.log('useHeroData: Found media in products:', mediaData);
+            }
+          }
+
+          if (mediaData && mediaData.length > 0) {
+            const mediaMap = mediaData.reduce((acc, media) => {
+              if (media.file_url) {
+                acc[media.id] = media;
+              }
+              return acc;
+            }, {} as Record<string, MediaFile>);
+            
+            console.log('useHeroData: Media map created:', mediaMap);
+            setMediaFiles(mediaMap);
+          } else {
+            console.warn('useHeroData: No media files found in any table');
+            
+            // Debug: Let's check what's actually in the media_library table
+            const { data: allMedia, error: allMediaError } = await supabase
+              .from('media_library')
+              .select('id, title, file_url')
+              .limit(10);
+            
+            console.log('useHeroData: Debug - Sample media_library entries:', allMedia);
+            if (allMediaError) {
+              console.error('useHeroData: Debug - Error fetching sample media:', allMediaError);
             }
           }
         } else {
