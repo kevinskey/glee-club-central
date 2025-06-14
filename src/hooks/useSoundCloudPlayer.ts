@@ -43,17 +43,31 @@ export const useSoundCloudPlayer = () => {
       setIsLoading(true);
       setError(null);
       
-      // Try to fetch from Supabase edge function
-      const response = await fetch('/functions/v1/soundcloud-api');
+      console.log('Fetching SoundCloud data...');
+      
+      // Call the edge function without any body since it doesn't expect parameters
+      const response = await fetch('/functions/v1/soundcloud-api', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch SoundCloud data');
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Response is not JSON:', contentType);
+        throw new Error('Server returned non-JSON response');
       }
       
       const data = await response.json();
+      console.log('SoundCloud data received:', data);
       
       if (data.playlists && Array.isArray(data.playlists)) {
-        console.log('SoundCloud playlists fetched:', data.playlists);
+        console.log('SoundCloud playlists loaded:', data.playlists.length);
         setPlaylists(data.playlists);
         
         // Set first playlist as active if available
@@ -63,7 +77,7 @@ export const useSoundCloudPlayer = () => {
       }
       
       if (data.tracks && Array.isArray(data.tracks)) {
-        console.log('SoundCloud tracks fetched:', data.tracks);
+        console.log('SoundCloud tracks loaded:', data.tracks.length);
         setTracks(data.tracks);
       }
       
