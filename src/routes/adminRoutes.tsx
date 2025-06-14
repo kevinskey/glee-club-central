@@ -3,6 +3,7 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { Navigate } from 'react-router-dom';
 
 // Import admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -30,6 +31,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'members',
         element: <MembersPage />,
+      },
+      {
+        path: 'users',
+        element: <Navigate to="/admin/members" replace />,
       },
       {
         path: 'calendar',
