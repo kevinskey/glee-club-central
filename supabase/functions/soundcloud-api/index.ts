@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  console.log('SoundCloud API function invoked', req.method, req.url)
+  console.log('SoundCloud API function invoked - returning empty data', req.method, req.url)
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -16,17 +16,17 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Processing SoundCloud API request')
+    console.log('Returning empty SoundCloud data (reset)')
     
-    // Return empty data - no content available
+    // Return completely empty data structure
     const emptyData = {
       playlists: [],
       tracks: [],
       status: 'success',
-      message: 'No SoundCloud content configured'
+      message: 'SoundCloud data has been reset - no content available'
     }
 
-    console.log('Returning empty SoundCloud data')
+    console.log('SoundCloud data reset successfully')
     
     return new Response(
       JSON.stringify(emptyData),
@@ -40,13 +40,13 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('SoundCloud API Error:', error)
+    console.error('SoundCloud API Reset Error:', error)
     
     const errorResponse = {
       playlists: [],
       tracks: [],
       status: 'error',
-      message: error?.message || 'Failed to load SoundCloud content',
+      message: 'Failed to reset SoundCloud data',
       error: true
     }
     
