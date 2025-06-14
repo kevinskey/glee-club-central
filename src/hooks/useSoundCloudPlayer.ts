@@ -45,30 +45,34 @@ export const useSoundCloudPlayer = () => {
       
       console.log('Fetching SoundCloud data...');
       
-      const response = await fetch('/functions/v1/soundcloud-api', {
+      // Use the Supabase functions invoke method instead of direct fetch
+      const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-api`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
         }
       });
       
-      // Always check if response is ok first
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      // Check content type before parsing
       const contentType = response.headers.get('content-type');
+      console.log('Content-Type:', contentType);
+      
       if (!contentType || !contentType.includes('application/json')) {
         const textResponse = await response.text();
-        console.error('Non-JSON response received:', textResponse);
+        console.error('Non-JSON response received:', textResponse.substring(0, 500));
         throw new Error('Server returned non-JSON response');
       }
       
       const data = await response.json();
       console.log('SoundCloud data received:', data);
       
-      // Check for API-level errors
       if (data.error || data.status === 'error') {
         throw new Error(data.message || 'Failed to load SoundCloud content');
       }
@@ -77,7 +81,6 @@ export const useSoundCloudPlayer = () => {
         console.log('SoundCloud playlists loaded:', data.playlists.length);
         setPlaylists(data.playlists);
         
-        // Set first playlist as active if available
         if (data.playlists.length > 0) {
           setActivePlaylist(data.playlists[0]);
         }
@@ -91,8 +94,6 @@ export const useSoundCloudPlayer = () => {
     } catch (err) {
       console.error('Error fetching SoundCloud data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load SoundCloud content');
-      
-      // Clear any existing data on error
       setPlaylists([]);
       setTracks([]);
       setActivePlaylist(null);

@@ -7,15 +7,18 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('SoundCloud API function invoked', req.method, req.url)
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight')
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    console.log('SoundCloud API endpoint called')
+    console.log('Processing SoundCloud API request')
     
-    // Return enhanced mock data that matches the expected structure
+    // Return mock SoundCloud data
     const mockData = {
       playlists: [
         {
@@ -23,7 +26,7 @@ serve(async (req) => {
           name: 'Spelman Glee Club - Featured Performances',
           description: 'Our most celebrated vocal performances and arrangements',
           track_count: 5,
-          duration: 900000, // 15 minutes in milliseconds
+          duration: 900000,
           artwork_url: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
           permalink_url: 'https://soundcloud.com/doctorkj/sets/featured-performances',
           is_public: true,
@@ -33,7 +36,7 @@ serve(async (req) => {
               id: 'track-1',
               title: 'Amazing Grace',
               artist: 'Spelman College Glee Club',
-              audioUrl: '#', // Placeholder - would be actual SoundCloud stream URL
+              audioUrl: '#',
               albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
               duration: 240,
               waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
@@ -60,54 +63,6 @@ serve(async (req) => {
               uploadDate: new Date().toISOString(),
               description: 'The Black National Anthem performed with passion',
               permalink_url: 'https://soundcloud.com/doctorkj/lift-every-voice'
-            },
-            {
-              id: 'track-3',
-              title: 'Wade in the Water',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 195,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 389,
-              plays: 2760,
-              isLiked: false,
-              genre: 'Spiritual',
-              uploadDate: new Date().toISOString(),
-              description: 'Traditional spiritual with contemporary arrangement',
-              permalink_url: 'https://soundcloud.com/doctorkj/wade-in-the-water'
-            },
-            {
-              id: 'track-4',
-              title: 'Go Tell It on the Mountain',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 210,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 234,
-              plays: 1890,
-              isLiked: false,
-              genre: 'Christmas',
-              uploadDate: new Date().toISOString(),
-              description: 'Classic Christmas spiritual with jazz influences',
-              permalink_url: 'https://soundcloud.com/doctorkj/go-tell-it'
-            },
-            {
-              id: 'track-5',
-              title: 'Sometimes I Feel Like a Motherless Child',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 270,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 445,
-              plays: 3100,
-              isLiked: false,
-              genre: 'Spiritual',
-              uploadDate: new Date().toISOString(),
-              description: 'Soulful rendition of the classic spiritual',
-              permalink_url: 'https://soundcloud.com/doctorkj/motherless-child'
             }
           ]
         },
@@ -116,7 +71,7 @@ serve(async (req) => {
           name: 'Classical Masterworks',
           description: 'Classical choral pieces from our concert repertoire',
           track_count: 3,
-          duration: 600000, // 10 minutes
+          duration: 600000,
           artwork_url: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
           permalink_url: 'https://soundcloud.com/doctorkj/sets/classical-masterworks',
           is_public: true,
@@ -137,38 +92,6 @@ serve(async (req) => {
               uploadDate: new Date().toISOString(),
               description: 'Schubert\'s beloved Ave Maria performed by our soprano section',
               permalink_url: 'https://soundcloud.com/doctorkj/ave-maria-schubert'
-            },
-            {
-              id: 'track-7',
-              title: 'Hallelujah Chorus',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 180,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 892,
-              plays: 6750,
-              isLiked: false,
-              genre: 'Baroque',
-              uploadDate: new Date().toISOString(),
-              description: 'Handel\'s triumphant Hallelujah Chorus from Messiah',
-              permalink_url: 'https://soundcloud.com/doctorkj/hallelujah-chorus'
-            },
-            {
-              id: 'track-8',
-              title: 'Requiem (Mozart) - Lacrimosa',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 180,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 334,
-              plays: 2100,
-              isLiked: false,
-              genre: 'Classical',
-              uploadDate: new Date().toISOString(),
-              description: 'Mozart\'s hauntingly beautiful Lacrimosa movement',
-              permalink_url: 'https://soundcloud.com/doctorkj/lacrimosa-mozart'
             }
           ]
         }
@@ -178,9 +101,9 @@ serve(async (req) => {
       message: 'SoundCloud playlists loaded successfully'
     }
 
-    console.log('Returning SoundCloud data with', mockData.playlists.length, 'playlists')
+    console.log('Returning mock data with', mockData.playlists.length, 'playlists')
     
-    return new Response(
+    const response = new Response(
       JSON.stringify(mockData),
       { 
         headers: { 
@@ -190,16 +113,18 @@ serve(async (req) => {
         status: 200 
       }
     )
+    
+    console.log('Response created successfully')
+    return response
 
   } catch (error) {
     console.error('SoundCloud API Error:', error)
     
-    // Always return valid JSON, even for errors
     const errorResponse = {
       playlists: [],
       tracks: [],
       status: 'error',
-      message: error.message || 'Failed to load SoundCloud content',
+      message: error?.message || 'Failed to load SoundCloud content',
       error: true
     }
     
@@ -210,7 +135,7 @@ serve(async (req) => {
           ...corsHeaders, 
           'Content-Type': 'application/json' 
         },
-        status: 200 // Return 200 with error data to avoid fetch failures
+        status: 200
       }
     )
   }

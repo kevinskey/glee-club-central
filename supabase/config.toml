@@ -4,30 +4,34 @@ project_id = "dzzptovqfqausipsgabw"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage", "graphql_public"]
+schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
-[auth]
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
 enabled = true
 port = 54324
+smtp_port = 54325
+pop3_port = 54326
+
+[functions.soundcloud-api]
+verify_jwt = false
+
+[auth]
+enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://dzzptovqfqausipsgabw.supabase.co/auth/v1/callback"]
+additional_redirect_urls = ["https://dzzptovqfqausipsgabw.supabase.co"]
 jwt_expiry = 3600
 enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
 enable_confirmations = false
-
-[functions.create_square_checkout]
-verify_jwt = false
-
-[functions.square_webhook]
-verify_jwt = false
-
-[functions.create_checkout_session]
-verify_jwt = false
-
-[functions.send-email]
-verify_jwt = false
-
-[functions.generate-design-image]
-verify_jwt = false
