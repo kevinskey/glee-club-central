@@ -72,14 +72,20 @@ export function OptimizedMediaLibrary({ isAdminView = false, viewMode = 'grid' }
   };
 
   const updateMediaTitle = async (id: string, newTitle: string) => {
+    console.log('OptimizedMediaLibrary: Updating media title', { id, newTitle });
     try {
       const { error } = await supabase
         .from('media_library')
         .update({ title: newTitle })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating media title:', error);
+        throw error;
+      }
 
+      console.log('OptimizedMediaLibrary: Title update successful');
+      
       // Refresh the media files
       refetch();
       toast.success('Title updated successfully');
