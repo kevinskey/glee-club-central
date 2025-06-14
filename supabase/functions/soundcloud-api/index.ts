@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -18,77 +19,18 @@ serve(async (req) => {
   try {
     console.log('Processing SoundCloud API request')
     
-    // Return mock SoundCloud data
-    const mockData = {
-      playlists: [
-        {
-          id: 'playlist-1',
-          name: 'Spelman Glee Club - Featured Performances',
-          description: 'Our most celebrated vocal performances and arrangements',
-          track_count: 1,
-          duration: 300000,
-          artwork_url: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-          permalink_url: 'https://soundcloud.com/doctorkj/sets/featured-performances',
-          is_public: true,
-          created_at: new Date().toISOString(),
-          tracks: [
-            {
-              id: 'track-2',
-              title: 'Lift Every Voice and Sing',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 300,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 623,
-              plays: 4850,
-              isLiked: false,
-              genre: 'Anthem',
-              uploadDate: new Date().toISOString(),
-              description: 'The Black National Anthem performed with passion',
-              permalink_url: 'https://soundcloud.com/doctorkj/lift-every-voice'
-            }
-          ]
-        },
-        {
-          id: 'playlist-2',
-          name: 'Classical Masterworks',
-          description: 'Classical choral pieces from our concert repertoire',
-          track_count: 3,
-          duration: 600000,
-          artwork_url: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-          permalink_url: 'https://soundcloud.com/doctorkj/sets/classical-masterworks',
-          is_public: true,
-          created_at: new Date().toISOString(),
-          tracks: [
-            {
-              id: 'track-6',
-              title: 'Ave Maria (Schubert)',
-              artist: 'Spelman College Glee Club',
-              audioUrl: '#',
-              albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-              duration: 240,
-              waveformData: Array.from({ length: 100 }, () => Math.random() * 0.8 + 0.1),
-              likes: 567,
-              plays: 4200,
-              isLiked: false,
-              genre: 'Classical',
-              uploadDate: new Date().toISOString(),
-              description: 'Schubert\'s beloved Ave Maria performed by our soprano section',
-              permalink_url: 'https://soundcloud.com/doctorkj/ave-maria-schubert'
-            }
-          ]
-        }
-      ],
+    // Return empty data instead of mock data
+    const emptyData = {
+      playlists: [],
       tracks: [],
       status: 'success',
-      message: 'SoundCloud playlists loaded successfully'
+      message: 'No SoundCloud content available at the moment'
     }
 
-    console.log('Returning mock data with', mockData.playlists.length, 'playlists')
+    console.log('Returning empty data')
     
     const response = new Response(
-      JSON.stringify(mockData),
+      JSON.stringify(emptyData),
       { 
         headers: { 
           ...corsHeaders, 
@@ -124,3 +66,4 @@ serve(async (req) => {
     )
   }
 })
+
