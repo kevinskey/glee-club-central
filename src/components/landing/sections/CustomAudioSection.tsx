@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { WaveSurferPlayer } from "@/components/audio/WaveSurferPlayer";
 import { useAudioFiles } from "@/hooks/useAudioFiles";
+import { AudioFile } from "@/types/audio";
 
 interface AudioTrack {
   id: string;
@@ -53,6 +54,19 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
     return 'artist' in track ? track.artist : track.description || 'Unknown Artist';
   };
 
+  // Convert current track to AudioFile format for WaveSurferPlayer
+  const currentAudioFile: AudioFile = {
+    id: currentTrack.id,
+    title: currentTrack.title,
+    description: getTrackArtist(currentTrack),
+    file_url: getTrackUrl(currentTrack),
+    file_path: getTrackUrl(currentTrack),
+    category: 'recordings',
+    is_backing_track: false,
+    uploaded_by: '',
+    created_at: new Date().toISOString(),
+  };
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -68,10 +82,7 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Main Player */}
           <WaveSurferPlayer
-            audioUrl={getTrackUrl(currentTrack)}
-            title={currentTrack.title}
-            artist={getTrackArtist(currentTrack)}
-            autoLoad={false}
+            audio={currentAudioFile}
             className="mb-6"
           />
 

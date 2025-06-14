@@ -7,14 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WaveSurferPlayer } from '@/components/audio/WaveSurferPlayer';
 import { useAudioFiles } from '@/hooks/useAudioFiles';
-import { AudioFileData } from '@/types/audio';
+import { AudioFile } from '@/types/audio';
 import { Search, Filter, Music } from 'lucide-react';
 
 export const RecordingArchive: React.FC = () => {
   const { audioFiles, loading, error, refetch } = useAudioFiles();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [filteredFiles, setFilteredFiles] = useState<AudioFileData[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<typeof audioFiles>([]);
 
   useEffect(() => {
     let filtered = audioFiles;
@@ -103,11 +103,16 @@ export const RecordingArchive: React.FC = () => {
         <div className="space-y-4">
           {filteredFiles.map((file) => {
             // Convert AudioFileData to AudioFile for WaveSurferPlayer
-            const audioFile = {
-              ...file,
+            const audioFile: AudioFile = {
+              id: file.id,
+              title: file.title,
               description: file.description || '',
+              file_url: file.file_url,
               file_path: file.file_path || '',
+              category: file.category,
               is_backing_track: file.is_backing_track || false,
+              uploaded_by: file.uploaded_by || '',
+              created_at: file.created_at,
             };
 
             return (

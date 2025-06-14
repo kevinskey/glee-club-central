@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WaveSurferPlayer } from '@/components/audio/WaveSurferPlayer';
 import { useAudioFiles } from '@/hooks/useAudioFiles';
-import { AudioFile, AudioFileData } from '@/types/audio';
+import { AudioFile } from '@/types/audio';
 import { Search, Music, Mic } from 'lucide-react';
 
 export const RecordingLibrary: React.FC = () => {
@@ -20,10 +20,15 @@ export const RecordingLibrary: React.FC = () => {
     if (audioFiles.length > 0) {
       // Convert AudioFileData to AudioFile format
       const convertedFiles: AudioFile[] = audioFiles.map(file => ({
-        ...file,
+        id: file.id,
+        title: file.title,
         description: file.description || '',
+        file_url: file.file_url,
         file_path: file.file_path || '',
+        category: file.category,
         is_backing_track: file.is_backing_track || false,
+        uploaded_by: file.uploaded_by || '',
+        created_at: file.created_at,
       }));
 
       const recordingFiles = convertedFiles.filter(file => !file.is_backing_track);

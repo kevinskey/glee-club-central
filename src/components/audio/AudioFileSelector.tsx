@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Music, Search, Loader2 } from 'lucide-react';
 import { useAudioFiles, AudioFileData } from '@/hooks/useAudioFiles';
 import { WaveSurferPlayer } from './WaveSurferPlayer';
+import { AudioFile } from '@/types/audio';
 
 interface AudioFileSelectorProps {
   onSelectFile?: (file: AudioFileData) => void;
@@ -132,9 +133,17 @@ export function AudioFileSelector({
       {showPlayer && currentFile && (
         <WaveSurferPlayer
           key={currentFile.id}
-          audioUrl={currentFile.file_url}
-          title={currentFile.title}
-          artist={currentFile.description}
+          audio={{
+            id: currentFile.id,
+            title: currentFile.title,
+            description: currentFile.description || '',
+            file_url: currentFile.file_url,
+            file_path: currentFile.file_path || '',
+            category: currentFile.category,
+            is_backing_track: currentFile.is_backing_track || false,
+            uploaded_by: currentFile.uploaded_by || '',
+            created_at: currentFile.created_at,
+          } as AudioFile}
           className="sticky bottom-4"
         />
       )}

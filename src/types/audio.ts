@@ -14,13 +14,13 @@ export interface AudioFile {
 export interface AudioFileData {
   id: string;
   title: string;
-  description?: string;
+  description?: string | null;
   file_url: string;
-  file_path: string;
+  file_path?: string;
   category: string;
-  is_backing_track?: boolean;
-  uploaded_by: string;
   created_at: string;
+  uploaded_by?: string;
+  is_backing_track?: boolean;
 }
 
 export interface PlaylistTrack {
@@ -40,10 +40,12 @@ export interface Playlist {
   tracks: PlaylistTrack[];
 }
 
-// Add the missing AudioPageCategory type
+// Updated AudioPageCategory type to include all needed categories
 export type AudioPageCategory = 
   | 'recordings' 
   | 'backing_tracks' 
   | 'practice' 
-  | 'performance' 
+  | 'performance'
+  | 'part_tracks'
+  | 'my_tracks'
   | 'all';
