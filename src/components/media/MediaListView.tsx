@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface MediaListViewProps {
   mediaFiles: MediaFile[];
@@ -40,27 +48,37 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
     }
   };
 
+  if (mediaFiles.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <File className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-medium mb-2">No media files found</h3>
+        <p className="text-muted-foreground">Try adjusting your search or filter settings</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-hidden border rounded-md">
-      <table className="w-full">
-        <thead>
-          <tr className="bg-muted/50">
-            <th className="py-2 px-4 text-left font-medium text-sm">File</th>
-            <th className="py-2 px-4 text-left font-medium text-sm hidden md:table-cell">Type</th>
-            <th className="py-2 px-4 text-left font-medium text-sm hidden md:table-cell">Size</th>
-            <th className="py-2 px-4 text-left font-medium text-sm hidden lg:table-cell">Date</th>
-            <th className="py-2 px-4 text-right font-medium text-sm">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y">
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[300px]">File</TableHead>
+            <TableHead className="hidden md:table-cell">Type</TableHead>
+            <TableHead className="hidden md:table-cell">Size</TableHead>
+            <TableHead className="hidden lg:table-cell">Date</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {mediaFiles.map((file) => {
             const mediaType = getMediaType(file.file_type);
             const isImage = mediaType === "image";
             const isPdf = mediaType === "pdf";
             
             return (
-              <tr key={file.id} className="hover:bg-muted/30">
-                <td className="py-3 px-4">
+              <TableRow key={file.id}>
+                <TableCell>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded bg-muted/40 overflow-hidden flex items-center justify-center flex-shrink-0">
                       {isImage ? (
@@ -69,7 +87,18 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                           alt={file.title}
                           className="object-cover w-full h-full"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = "/placeholder-image.svg";
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = `
+                                <div class="w-full h-full flex items-center justify-center">
+                                  <svg class="h-6 w-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                  </svg>
+                                </div>
+                              `;
+                            }
                           }}
                         />
                       ) : isPdf ? (
@@ -85,41 +114,44 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                         getMediaIcon(mediaType)
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{file.title}</p>
-                      <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm truncate">{file.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {file.description || file.file_path.split('/').pop()}
                       </p>
                     </div>
                   </div>
-                </td>
-                <td className="py-3 px-4 hidden md:table-cell">
+                </TableCell>
+                
+                <TableCell className="hidden md:table-cell">
                   <span className="inline-flex items-center gap-1 text-xs">
                     {getMediaIcon(mediaType, "h-3 w-3")}
                     <span className="capitalize">{mediaType}</span>
                   </span>
-                </td>
-                <td className="py-3 px-4 text-sm hidden md:table-cell">
+                </TableCell>
+                
+                <TableCell className="hidden md:table-cell text-sm">
                   {formatFileSize(file.size || 0)}
-                </td>
-                <td className="py-3 px-4 text-sm text-muted-foreground hidden lg:table-cell">
+                </TableCell>
+                
+                <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                   {format(new Date(file.created_at), 'MMM d, yyyy')}
-                </td>
-                <td className="py-3 px-4">
+                </TableCell>
+                
+                <TableCell>
                   <div className="flex items-center justify-end gap-1">
                     <Button 
-                      size="icon" 
+                      size="sm" 
                       variant="ghost" 
-                      className="h-8 w-8"
                       onClick={() => window.open(file.file_url, '_blank')}
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
                     </Button>
                     
                     <Button 
-                      size="icon" 
-                      variant="ghost" 
-                      className="h-8 w-8"
+                      size="sm" 
+                      variant="ghost"
                       onClick={() => {
                         const a = document.createElement('a');
                         a.href = file.file_url;
@@ -134,21 +166,21 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                     
                     {canDelete && (
                       <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        size="sm" 
+                        variant="ghost"
                         onClick={(e) => handleDelete(file.id, e)}
+                        className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }
