@@ -4,23 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Music, Upload, Eye, Edit, Trash2 } from 'lucide-react';
-
-interface SoundCloudTrack {
-  id: string;
-  title: string;
-  artist: string;
-  audioUrl: string;
-  albumArt: string;
-  duration: number;
-  waveformData: number[];
-  likes: number;
-  plays: number;
-  isLiked: boolean;
-  genre: string;
-  uploadDate: string;
-  description: string;
-  permalink_url: string;
-}
+import { SoundCloudTrack } from './types';
 
 interface TrackListProps {
   tracks: SoundCloudTrack[];
@@ -61,7 +45,7 @@ export function TrackList({ tracks, onDeleteTrack, onToggleVisibility, onEditTra
               >
                 <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
                   <img 
-                    src={track.albumArt} 
+                    src={track.artwork_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png'} 
                     alt={track.title}
                     className="w-full h-full object-cover"
                   />
