@@ -181,21 +181,27 @@ const MediaLibraryIntegratedPage = () => {
           </div>
         </div>
         
-        {/* Filter bar */}
-        <MediaFilterBar 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedMediaType={selectedMediaType as MediaType | "all"}
-          setSelectedMediaType={(type: MediaType | "all") => setSelectedMediaType(type)}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          dateFilter={dateFilter as "newest" | "oldest"}
-          setDateFilter={setDateFilter}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          mediaTypes={mediaTypes}
-          categories={categories}
-        />
+        {/* Filter bar - simplified to match refactored MediaFilterBar */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search files..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Media Type Filter */}
+          <MediaFilterBar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedMediaType={selectedMediaType as MediaType | "all"}
+            setSelectedMediaType={(type: MediaType | "all") => setSelectedMediaType(type)}
+          />
+        </div>
 
         {/* Site Integration Section */}
         {canUpload && canEditSite && (

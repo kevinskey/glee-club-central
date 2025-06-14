@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
-import { getMediaType } from '@/utils/mediaUtils';
+import { getMediaType, MediaType } from '@/utils/mediaUtils';
 import { MediaGridView } from '@/components/media/MediaGridView';
 import { MediaListView } from '@/components/media/MediaListView';
 import { MediaFilterBar } from '@/components/media/MediaFilterBar';
@@ -129,8 +129,8 @@ export function EnhancedMediaLibrary({ isAdminView = false, viewMode = 'grid' }:
       <MediaFilterBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedMediaType={selectedMediaType}
-        setSelectedMediaType={setSelectedMediaType}
+        selectedMediaType={selectedMediaType as MediaType | "all"}
+        setSelectedMediaType={(type: MediaType | "all") => setSelectedMediaType(type)}
         showAdvancedFilters={showAdvancedFilters}
         setShowAdvancedFilters={setShowAdvancedFilters}
       />
