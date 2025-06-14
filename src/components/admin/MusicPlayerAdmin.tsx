@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Music, Settings, BarChart3, RefreshCw } from 'lucide-react';
 import { SoundCloudPlaylistManager } from './SoundCloudPlaylistManager';
+import { SoundCloudPlayerSettings } from './soundcloud/SoundCloudPlayerSettings';
 
 export function MusicPlayerAdmin() {
   return (
@@ -34,24 +35,7 @@ export function MusicPlayerAdmin() {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="w-5 h-5" />
-                SoundCloud Player Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                <Settings className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <h3 className="text-lg font-semibold mb-2">Player Configuration</h3>
-                <p className="mb-4">Configure SoundCloud player settings and preferences</p>
-                <Button variant="outline">
-                  Configure Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <SoundCloudPlayerSettings />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
