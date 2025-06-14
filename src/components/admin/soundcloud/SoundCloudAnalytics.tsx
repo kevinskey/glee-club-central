@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Play, Heart, Eye, TrendingUp, Users, Calendar, Music, Share2 } from 'lucide-react';
 import { useSoundCloudPlayer } from '@/hooks/useSoundCloudPlayer';
 import { SoundCloudStats } from './SoundCloudStats';
+import { SoundCloudTrack } from './types';
 
 export function SoundCloudAnalytics() {
   const { tracks, playlists, isLoading } = useSoundCloudPlayer();
@@ -56,6 +57,23 @@ export function SoundCloudAnalytics() {
       </div>
     );
   }
+
+  // Convert tracks to the expected format for SoundCloudStats
+  const soundCloudTracks: SoundCloudTrack[] = tracks.map(track => ({
+    id: track.id,
+    title: track.title,
+    artist: track.artist,
+    permalink_url: track.permalink_url || '',
+    artwork_url: track.albumArt || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
+    duration: track.duration,
+    likes: track.likes,
+    plays: track.plays,
+    genre: track.genre,
+    uploadDate: track.uploadDate,
+    description: track.description,
+    embeddable_by: 'all',
+    stream_url: track.audioUrl || ''
+  }));
 
   return (
     <div className="space-y-6">
@@ -111,7 +129,7 @@ export function SoundCloudAnalytics() {
       </div>
 
       {/* Track Stats */}
-      {tracks.length > 0 && <SoundCloudStats tracks={tracks} />}
+      {soundCloudTracks.length > 0 && <SoundCloudStats tracks={soundCloudTracks} playlists={playlists} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Activity */}

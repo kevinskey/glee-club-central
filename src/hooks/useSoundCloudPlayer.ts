@@ -1,7 +1,8 @@
 
 import { useState, useEffect, useRef } from 'react';
+import { SoundCloudTrack, SoundCloudPlaylist } from '@/components/admin/soundcloud/types';
 
-interface SoundCloudTrack {
+interface LegacySoundCloudTrack {
   id: string;
   title: string;
   artist: string;
@@ -18,7 +19,7 @@ interface SoundCloudTrack {
   permalink_url: string;
 }
 
-interface SoundCloudPlaylist {
+interface LegacySoundCloudPlaylist {
   id: string;
   name: string;
   description: string;
@@ -28,12 +29,12 @@ interface SoundCloudPlaylist {
   permalink_url: string;
   is_public: boolean;
   created_at: string;
-  tracks: SoundCloudTrack[];
+  tracks: LegacySoundCloudTrack[];
 }
 
 export const useSoundCloudPlayer = () => {
   const [playlists, setPlaylists] = useState<SoundCloudPlaylist[]>([]);
-  const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
+  const [tracks, setTracks] = useState<LegacySoundCloudTrack[]>([]);
   const [activePlaylist, setActivePlaylist] = useState<SoundCloudPlaylist | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -91,7 +92,24 @@ export const useSoundCloudPlayer = () => {
       
       if (data.tracks && Array.isArray(data.tracks)) {
         console.log('SoundCloud tracks loaded:', data.tracks.length);
-        setTracks(data.tracks);
+        // Convert API tracks to legacy format for compatibility
+        const legacyTracks: LegacySoundCloudTrack[] = data.tracks.map((track: SoundCloudTrack) => ({
+          id: track.id,
+          title: track.title,
+          artist: track.artist,
+          audioUrl: track.stream_url || '',
+          albumArt: track.artwork_url,
+          duration: track.duration,
+          waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+          likes: track.likes,
+          plays: track.plays,
+          isLiked: false,
+          genre: track.genre,
+          uploadDate: track.uploadDate,
+          description: track.description,
+          permalink_url: track.permalink_url
+        }));
+        setTracks(legacyTracks);
       }
       
     } catch (err) {

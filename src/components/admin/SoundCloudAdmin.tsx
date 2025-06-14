@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,23 +8,7 @@ import { SoundCloudStats } from './soundcloud/SoundCloudStats';
 import { TrackList } from './soundcloud/TrackList';
 import { UploadTrackForm } from './soundcloud/UploadTrackForm';
 import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
-
-interface SoundCloudTrack {
-  id: string;
-  title: string;
-  artist: string;
-  audioUrl: string;
-  albumArt: string;
-  duration: number;
-  waveformData: number[];
-  likes: number;
-  plays: number;
-  isLiked: boolean;
-  genre: string;
-  uploadDate: string;
-  description: string;
-  permalink_url: string;
-}
+import { SoundCloudTrack } from './soundcloud/types';
 
 export function SoundCloudAdmin() {
   const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
@@ -56,7 +41,7 @@ export function SoundCloudAdmin() {
         </Button>
       </div>
 
-      <SoundCloudStats tracks={tracks} />
+      <SoundCloudStats tracks={tracks} playlists={[]} />
 
       <Tabs defaultValue="tracks" className="space-y-6">
         <TabsList>
