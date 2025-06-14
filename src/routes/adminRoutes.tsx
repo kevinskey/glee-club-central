@@ -1,6 +1,7 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Navigate } from 'react-router-dom';
 
 // Import admin pages
@@ -17,69 +18,47 @@ export const adminRoutes: RouteObject[] = [
     path: '/admin',
     element: (
       <AdminRoute>
-        <AdminDashboard />
+        <AdminLayout />
       </AdminRoute>
     ),
-  },
-  {
-    path: '/admin/members',
-    element: (
-      <AdminRoute>
-        <MembersPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/calendar',
-    element: (
-      <AdminRoute>
-        <AdminCalendarPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/hero-slides',
-    element: (
-      <AdminRoute>
-        <HeroSlidesPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/music',
-    element: (
-      <AdminRoute>
-        <MusicAdminPage />
-      </AdminRoute>
-    ),
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: 'members',
+        element: <MembersPage />,
+      },
+      {
+        path: 'calendar',
+        element: <AdminCalendarPage />,
+      },
+      {
+        path: 'hero-slides',
+        element: <HeroSlidesPage />,
+      },
+      {
+        path: 'music',
+        element: <MusicAdminPage />,
+      },
+      {
+        path: 'media',
+        element: <AdminMediaLibraryPage />,
+      },
+      {
+        path: 'media-library',
+        element: <AdminMediaLibraryPage />,
+      },
+      {
+        path: 'site-images',
+        element: <SiteImagesPage />,
+      },
+    ],
   },
   // Keep V2 route available for comparison
   {
     path: '/admin/v2',
     element: <Navigate to="/dashboard" replace />,
-  },
-  {
-    path: '/admin/media',
-    element: (
-      <AdminRoute>
-        <AdminMediaLibraryPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/media-library',
-    element: (
-      <AdminRoute>
-        <AdminMediaLibraryPage />
-      </AdminRoute>
-    ),
-  },
-  {
-    path: '/admin/site-images',
-    element: (
-      <AdminRoute>
-        <SiteImagesPage />
-      </AdminRoute>
-    ),
   },
 ];
