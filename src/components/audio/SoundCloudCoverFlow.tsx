@@ -30,6 +30,8 @@ export function SoundCloudCoverFlow({
 }: SoundCloudCoverFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   // Filter to show only public playlists with tracks
   const publicPlaylists = playlists.filter(playlist => 
@@ -56,6 +58,46 @@ export function SoundCloudCoverFlow({
     onPlaylistSelect(playlist);
   };
 
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      handleNext();
+    } else if (isRightSwipe) {
+      handlePrevious();
+    }
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handlePrevious();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (publicPlaylists.length === 0) {
     return (
       <div className="text-center py-12">
@@ -67,7 +109,13 @@ export function SoundCloudCoverFlow({
   return (
     <div className="relative w-full">
       {/* Cover Flow Container */}
-      <div className="relative h-80 md:h-96 lg:h-[28rem] overflow-hidden" ref={containerRef}>
+      <div 
+        className="relative h-80 md:h-96 lg:h-[28rem] overflow-hidden select-none" 
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="flex items-center justify-center h-full perspective-1000">
           {publicPlaylists.map((playlist, index) => {
             const offset = index - currentIndex;
@@ -103,6 +151,7 @@ export function SoundCloudCoverFlow({
                         src={playlist.artwork_url} 
                         alt={playlist.name}
                         className="w-full h-full object-cover"
+                        draggable={false}
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 flex items-center justify-center">
@@ -165,6 +214,13 @@ export function SoundCloudCoverFlow({
         >
           <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
         </Button>
+      </div>
+
+      {/* Swipe Instruction for Mobile */}
+      <div className="text-center mt-4 md:hidden">
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Swipe left or right to browse playlists
+        </p>
       </div>
 
       {/* Current Playlist Info */}
