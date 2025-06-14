@@ -82,13 +82,15 @@ export default function HeroSlidesPage() {
 
   const fetchMediaFiles = async () => {
     try {
+      console.log('Fetching media files for thumbnails...');
       const { data, error } = await supabase
         .from('media_library')
-        .select('id, title, file_url')
-        .eq('file_type', 'image')
+        .select('id, title, file_url, file_type')
+        .in('file_type', ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'])
         .order('title');
 
       if (error) throw error;
+      console.log('Media files fetched:', data);
       setMediaFiles(data || []);
     } catch (error) {
       console.error('Error fetching media files:', error);
@@ -141,7 +143,9 @@ export default function HeroSlidesPage() {
 
   const getSlideImageUrl = (slide: HeroSlide) => {
     if (slide.media_id) {
+      console.log(`Looking for media_id: ${slide.media_id} in:`, mediaFiles.map(f => ({ id: f.id, title: f.title })));
       const mediaFile = mediaFiles.find(f => f.id === slide.media_id);
+      console.log(`Found media file:`, mediaFile);
       return mediaFile?.file_url;
     }
     return undefined;
@@ -288,96 +292,115 @@ export default function HeroSlidesPage() {
           </Button>
         </div>
 
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+            <p><strong>Debug:</strong> Found {mediaFiles.length} media files</p>
+            <p>Slides with media_id: {slides.filter(s => s.media_id).length}</p>
+          </div>
+        )}
+
         {/* Slides List */}
         <div className="grid gap-4">
-          {slides.map((slide) => (
-            <Card key={slide.id}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <div className="flex items-center gap-4">
-                  {/* Image Thumbnail */}
-                  <div className="w-16 h-16 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
-                    {getSlideImageUrl(slide) ? (
-                      <img
-                        src={getSlideImageUrl(slide)}
-                        alt={slide.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <ImageIcon className="h-6 w-6" />
-                      </div>
-                    )}
+          {slides.map((slide) => {
+            const imageUrl = getSlideImageUrl(slide);
+            return (
+              <Card key={slide.id}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="flex items-center gap-4">
+                    {/* Image Thumbnail */}
+                    <div className="w-16 h-16 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={slide.title}
+                          className="w-full h-full object-cover"
+                          onLoad={() => console.log(`Thumbnail loaded for slide: ${slide.title}`)}
+                          onError={() => console.error(`Failed to load thumbnail for slide: ${slide.title}, URL: ${imageUrl}`)}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <ImageIcon className="h-6 w-6" />
+                          {process.env.NODE_ENV === 'development' && (
+                            <span className="sr-only">No image (media_id: {slide.media_id || 'none'})</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {slide.visible ? (
+                        <Eye className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <EyeOff className="h-4 w-4 text-gray-400" />
+                      )}
+                      {slide.title || 'Untitled Slide'}
+                    </CardTitle>
                   </div>
                   
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    {slide.visible ? (
-                      <Eye className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    )}
-                    {slide.title || 'Untitled Slide'}
-                  </CardTitle>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleVisibility(slide)}
-                  >
-                    {slide.visible ? 'Hide' : 'Show'}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(slide)}
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Slide</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{slide.title || 'this slide'}"? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(slide.id)}
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleVisibility(slide)}
+                    >
+                      {slide.visible ? 'Hide' : 'Show'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(slide)}
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
                         >
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Order: {slide.slide_order} | Type: {slide.media_type}
-                  {slide.media_id && ' | Has Image'}
-                </p>
-                {slide.description && (
-                  <p className="text-sm mt-2">{slide.description}</p>
-                )}
-                {slide.button_text && (
-                  <p className="text-sm mt-1">Button: {slide.button_text}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Slide</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete "{slide.title || 'this slide'}"? This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(slide.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Order: {slide.slide_order} | Type: {slide.media_type}
+                    {slide.media_id && ' | Has Image'}
+                    {process.env.NODE_ENV === 'development' && slide.media_id && (
+                      <span> | Media ID: {slide.media_id}</span>
+                    )}
+                  </p>
+                  {slide.description && (
+                    <p className="text-sm mt-2">{slide.description}</p>
+                  )}
+                  {slide.button_text && (
+                    <p className="text-sm mt-1">Button: {slide.button_text}</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Create/Edit Form */}
