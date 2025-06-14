@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { Eye, Download, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
+import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
@@ -17,6 +17,9 @@ interface MediaGridViewProps {
 }
 
 export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
+  const [playingAudio, setPlayingAudio] = useState<{ [key: string]: HTMLAudioElement }>({});
+  const [playingStates, setPlayingStates] = useState<{ [key: string]: boolean }>({});
+
   const getMediaIcon = (type: MediaType, className: string = "h-8 w-8") => {
     switch (type) {
       case "image":
@@ -29,6 +32,39 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
         return <Video className={className} />;
       default:
         return <File className={className} />;
+    }
+  };
+
+  const handleAudioToggle = (file: MediaFile, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const audio = playingAudio[file.id];
+    const isPlaying = playingStates[file.id];
+    
+    if (!audio) {
+      const newAudio = new Audio(file.file_url);
+      newAudio.addEventListener('ended', () => {
+        setPlayingStates(prev => ({ ...prev, [file.id]: false }));
+      });
+      newAudio.addEventListener('loadstart', () => {
+        console.log(`Loading audio: ${file.title} from ${file.file_url}`);
+      });
+      newAudio.addEventListener('error', (e) => {
+        console.error(`Audio load error for ${file.title}:`, e);
+      });
+      
+      setPlayingAudio(prev => ({ ...prev, [file.id]: newAudio }));
+      newAudio.play();
+      setPlayingStates(prev => ({ ...prev, [file.id]: true }));
+    } else {
+      if (isPlaying) {
+        audio.pause();
+        setPlayingStates(prev => ({ ...prev, [file.id]: false }));
+      } else {
+        audio.play();
+        setPlayingStates(prev => ({ ...prev, [file.id]: true }));
+      }
     }
   };
   
@@ -57,6 +93,8 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
         const mediaType = getMediaType(file.file_type);
         const isImage = mediaType === "image";
         const isPdf = mediaType === "pdf";
+        const isAudio = mediaType === "audio";
+        const isPlaying = playingStates[file.id];
         
         return (
           <Card key={file.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
@@ -96,8 +134,26 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                 </div>
               )}
               
-              {/* Overlay with actions */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              {/* Audio play button overlay */}
+              {isAudio && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    onClick={(e) => handleAudioToggle(file, e)}
+                    className="h-16 w-16 rounded-full shadow-lg bg-white/90 hover:bg-white backdrop-blur-sm"
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-8 w-8 text-gray-800" />
+                    ) : (
+                      <Play className="h-8 w-8 text-gray-800 ml-1" />
+                    )}
+                  </Button>
+                </div>
+              )}
+              
+              {/* Regular overlay with actions for non-audio files or hover state */}
+              <div className={`absolute inset-0 bg-black/60 ${isAudio ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity flex items-center justify-center gap-2`}>
                 <Button 
                   size="sm" 
                   variant="secondary"
