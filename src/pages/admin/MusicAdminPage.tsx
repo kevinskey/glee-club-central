@@ -6,7 +6,7 @@ import { MusicPlayerAdmin } from "@/components/admin/MusicPlayerAdmin";
 
 export default function MusicAdminPage() {
   return (
-    <div className="space-y-6">
+    <>
       <PageHeader
         title="Music Administration"
         description="Manage music playlists, player settings, and analytics"
@@ -14,6 +14,6 @@ export default function MusicAdminPage() {
       />
       
       <MusicPlayerAdmin />
-    </div>
+    </>
   );
 }

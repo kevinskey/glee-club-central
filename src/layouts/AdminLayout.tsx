@@ -2,7 +2,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { MobileAdminDashboard } from '@/components/admin/MobileAdminDashboard';
 import { AdminUnifiedHeader } from '@/components/admin/AdminUnifiedHeader';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -13,26 +12,19 @@ interface AdminLayoutProps {
 export function AdminLayout({ children }: AdminLayoutProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  if (!isDesktop) {
-    return (
-      <div className="min-h-screen bg-background">
-        <AdminUnifiedHeader />
-        <main className="pt-16">
-          {children || <Outlet />}
+  return (
+    <div className="min-h-screen bg-background">
+      <AdminUnifiedHeader />
+      
+      <div className="flex">
+        {isDesktop && <AdminSidebar />}
+        
+        <main className={`flex-1 ${isDesktop ? 'ml-64' : ''}`}>
+          <div className="p-6">
+            {children || <Outlet />}
+          </div>
         </main>
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen flex">
-      <AdminSidebar />
-      <main className="flex-1 ml-64">
-        <AdminUnifiedHeader />
-        <div className="p-6">
-          {children || <Outlet />}
-        </div>
-      </main>
     </div>
   );
 }

@@ -12,10 +12,10 @@ export const AdminLayout: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminUnifiedHeader />
       
-      <div className="flex h-[calc(100vh-3rem)]">
+      <div className="flex">
         {!isMobile && <AdminSidebar />}
         
-        <main className={`flex-1 overflow-auto ${!isMobile ? 'ml-64' : ''}`}>
+        <main className={`flex-1 min-h-[calc(100vh-3rem)] ${!isMobile ? 'ml-64' : ''}`}>
           <div className="p-6">
             <Outlet />
           </div>
