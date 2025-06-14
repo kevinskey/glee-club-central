@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MediaFile } from "@/types/media";
@@ -17,8 +17,21 @@ interface MediaGridViewProps {
 }
 
 export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
-  const [playingAudio, setPlayingAudio] = useState<{[key: string]: HTMLAudioElement}>({});
   const [playingStates, setPlayingStates] = useState<{[key: string]: boolean}>({});
+  const audioRefs = useRef<{[key: string]: HTMLAudioElement}>({});
+
+  // Cleanup all audio when component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(audioRefs.current).forEach(audio => {
+        if (audio) {
+          audio.pause();
+          audio.src = '';
+        }
+      });
+      audioRefs.current = {};
+    };
+  }, []);
 
   const getMediaIcon = (type: MediaType, className: string = "h-12 w-12 text-muted-foreground") => {
     switch (type) {
@@ -38,25 +51,45 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
   const toggleAudioPlayback = (fileId: string, fileUrl: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    const currentAudio = playingAudio[fileId];
-    
-    if (!currentAudio) {
-      const newAudio = new Audio(fileUrl);
-      newAudio.addEventListener('ended', () => {
-        setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+    try {
+      // Stop all other playing audio first
+      Object.entries(audioRefs.current).forEach(([id, audio]) => {
+        if (id !== fileId && audio && !audio.paused) {
+          audio.pause();
+          setPlayingStates(prev => ({ ...prev, [id]: false }));
+        }
       });
       
-      setPlayingAudio(prev => ({ ...prev, [fileId]: newAudio }));
-      newAudio.play();
-      setPlayingStates(prev => ({ ...prev, [fileId]: true }));
-    } else {
+      let currentAudio = audioRefs.current[fileId];
+      
+      if (!currentAudio) {
+        currentAudio = new Audio(fileUrl);
+        audioRefs.current[fileId] = currentAudio;
+        
+        currentAudio.addEventListener('ended', () => {
+          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+        });
+        
+        currentAudio.addEventListener('error', (error) => {
+          console.error('Audio playback error:', error);
+          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+        });
+      }
+      
       if (playingStates[fileId]) {
         currentAudio.pause();
         setPlayingStates(prev => ({ ...prev, [fileId]: false }));
       } else {
-        currentAudio.play();
-        setPlayingStates(prev => ({ ...prev, [fileId]: true }));
+        currentAudio.play().then(() => {
+          setPlayingStates(prev => ({ ...prev, [fileId]: true }));
+        }).catch((error) => {
+          console.error('Audio play failed:', error);
+          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+        });
       }
+    } catch (error) {
+      console.error('Audio toggle error:', error);
+      setPlayingStates(prev => ({ ...prev, [fileId]: false }));
     }
   };
 
