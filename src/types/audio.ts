@@ -2,25 +2,40 @@
 export interface AudioFile {
   id: string;
   title: string;
-  description: string | null;
+  description: string;
   file_url: string;
   file_path: string;
-  created_at: string;
-  uploaded_by: string;
   category: string;
-  is_backing_track?: boolean;
+  is_backing_track: boolean;
+  uploaded_by: string;
+  created_at: string;
 }
 
 export interface AudioFileData {
   id: string;
   title: string;
+  description?: string;
   file_url: string;
-  description?: string | null;
+  file_path: string;
   category: string;
-  created_at: string;
-  file_path?: string;
-  uploaded_by?: string;
   is_backing_track?: boolean;
+  uploaded_by: string;
+  created_at: string;
 }
 
-export type AudioPageCategory = "part_tracks" | "recordings" | "my_tracks" | "all" | "backing_tracks";
+export interface PlaylistTrack {
+  id: string;
+  title: string;
+  artist: string;
+  audioUrl: string;
+  albumArt?: string;
+  duration?: string;
+  order?: number;
+  featured?: boolean;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  tracks: PlaylistTrack[];
+}
