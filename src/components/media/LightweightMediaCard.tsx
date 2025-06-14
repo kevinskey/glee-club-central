@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MediaFileLight } from "@/hooks/usePaginatedMediaLibrary";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
@@ -8,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { InlineMediaTitleEdit } from "@/components/media/InlineMediaTitleEdit";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LightweightMediaCardProps {
   file: MediaFileLight;
@@ -26,10 +26,15 @@ export function LightweightMediaCard({
   onPreview,
   onUpdateTitle
 }: LightweightMediaCardProps) {
+  const { isAdmin } = useAuth();
   const [playingAudio, setPlayingAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  // Super admins should always have edit access
+  const hasEditAccess = canEdit || isAdmin();
+  const hasDeleteAccess = canDelete || isAdmin();
 
   const mediaType = getMediaType(file.file_type);
   const isImage = mediaType === "image";
@@ -105,8 +110,8 @@ export function LightweightMediaCard({
 
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer relative" onClick={handlePreview}>
-      {/* Edit Pencil - Always visible when canEdit is true */}
-      {canEdit && onUpdateTitle && (
+      {/* Edit Pencil - Always visible when hasEditAccess is true */}
+      {hasEditAccess && onUpdateTitle && (
         <Button
           size="sm"
           variant="ghost"
@@ -182,7 +187,7 @@ export function LightweightMediaCard({
             </Button>
           )}
           
-          {canDelete && (
+          {hasDeleteAccess && (
             <Button 
               size="sm" 
               variant="destructive"
@@ -195,7 +200,7 @@ export function LightweightMediaCard({
       </div>
       
       <CardContent className="p-3">
-        {canEdit && onUpdateTitle && isEditingTitle ? (
+        {hasEditAccess && onUpdateTitle && isEditingTitle ? (
           <InlineMediaTitleEdit
             title={file.title}
             onSave={async (newTitle) => {
