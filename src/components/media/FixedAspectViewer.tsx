@@ -74,7 +74,7 @@ export function FixedAspectViewer({ fileId, onClose }: FixedAspectViewerProps) {
             src={file.file_url}
             alt={file.title}
             className="w-full h-full object-contain"
-            style={{ imageRendering: 'high-quality' }}
+            style={{ imageRendering: 'auto' }}
           />
         );
       
