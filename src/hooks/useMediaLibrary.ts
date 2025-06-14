@@ -31,7 +31,9 @@ export function useMediaLibrary() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
 
+  // Stable reference to prevent infinite re-renders
   const fetchMediaFiles = useCallback(async () => {
+    console.log('useMediaLibrary: Starting to fetch media files...');
     try {
       setIsLoading(true);
       setError(null);
@@ -42,8 +44,11 @@ export function useMediaLibrary() {
         .order('created_at', { ascending: false });
 
       if (fetchError) {
+        console.error('useMediaLibrary: Fetch error:', fetchError);
         throw fetchError;
       }
+
+      console.log('useMediaLibrary: Raw data received:', data?.length || 0, 'files');
 
       const files = (data || []).map(file => ({
         ...file,
@@ -56,22 +61,26 @@ export function useMediaLibrary() {
         tags: file.tags || []
       }));
       
+      console.log('useMediaLibrary: Processed files:', files.length);
       setAllMediaFiles(files);
     } catch (err) {
-      console.error('Error fetching media files:', err);
+      console.error('useMediaLibrary: Error fetching media files:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch media files');
       toast.error('Failed to load media files');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, []); // Empty dependency array to prevent infinite re-renders
 
+  // Separate function for manual refresh
   const fetchAllMedia = useCallback(() => {
+    console.log('useMediaLibrary: Manual refresh triggered');
     fetchMediaFiles();
   }, [fetchMediaFiles]);
 
   const deleteMediaItem = useCallback(async (id: string) => {
     try {
+      console.log('useMediaLibrary: Deleting media item:', id);
       const { error } = await supabase
         .from('media_library')
         .delete()
@@ -81,18 +90,19 @@ export function useMediaLibrary() {
         throw error;
       }
 
-      // Update local state instead of refetching
+      // Update local state immediately for better UX
       setAllMediaFiles(prev => prev.filter(file => file.id !== id));
       toast.success('Media file deleted successfully');
     } catch (err) {
-      console.error('Error deleting media file:', err);
+      console.error('useMediaLibrary: Error deleting media file:', err);
       toast.error('Failed to delete media file');
       throw err;
     }
   }, []);
 
-  // Memoized filtered results to prevent unnecessary recalculations
+  // Memoized filtered results
   const filteredMediaFiles = useMemo(() => {
+    console.log('useMediaLibrary: Filtering media files...');
     let filtered = [...allMediaFiles];
 
     if (searchQuery) {
@@ -118,38 +128,45 @@ export function useMediaLibrary() {
       filtered = filtered.filter(file => file.category === selectedCategory);
     }
 
+    console.log('useMediaLibrary: Filtered results:', filtered.length);
     return filtered;
   }, [allMediaFiles, searchQuery, selectedMediaType, selectedCategory]);
 
-  // Memoized stats to prevent recalculation
-  const mediaStats = useMemo(() => ({
-    total: allMediaFiles.length,
-    totalFiles: allMediaFiles.length,
-    totalSize: allMediaFiles.reduce((acc, file) => acc + (file.size || 0), 0),
-    images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
-    videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
-    documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
-    filesByType: {
-      image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
-      video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
-      pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
-      audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
-      application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
-    }
-  }), [allMediaFiles]);
+  // Memoized stats
+  const mediaStats = useMemo(() => {
+    const stats = {
+      total: allMediaFiles.length,
+      totalFiles: allMediaFiles.length,
+      totalSize: allMediaFiles.reduce((acc, file) => acc + (file.size || 0), 0),
+      images: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+      videos: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+      documents: allMediaFiles.filter(file => file.file_type.includes('pdf') || file.file_type.includes('document')).length,
+      filesByType: {
+        image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
+        video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
+        pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
+        audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
+        application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
+      }
+    };
+    console.log('useMediaLibrary: Media stats calculated:', stats);
+    return stats;
+  }, [allMediaFiles]);
 
-  // Memoized categories and types
-  const categories = useMemo(() => 
-    ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))],
-    [allMediaFiles]
-  );
+  // Memoized categories
+  const categories = useMemo(() => {
+    const cats = ['all', ...Array.from(new Set(allMediaFiles.map(file => file.category || 'general')))];
+    console.log('useMediaLibrary: Categories:', cats);
+    return cats;
+  }, [allMediaFiles]);
 
   const mediaTypes: MediaType[] = ['image', 'video', 'pdf', 'audio', 'document'];
 
-  // Only fetch on mount
+  // Fetch data only once on mount
   useEffect(() => {
+    console.log('useMediaLibrary: Component mounted, fetching initial data');
     fetchMediaFiles();
-  }, [fetchMediaFiles]);
+  }, []); // Only run once on mount
 
   return {
     mediaFiles: filteredMediaFiles,
