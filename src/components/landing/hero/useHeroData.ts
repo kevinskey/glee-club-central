@@ -25,6 +25,8 @@ export function useHeroData() {
 
   const fetchHeroSlides = async () => {
     try {
+      console.log('useHeroData: Fetching hero slides...');
+      
       // Fetch hero slides
       const { data: slidesData, error: slidesError } = await supabase
         .from('hero_slides')
@@ -33,7 +35,12 @@ export function useHeroData() {
         .eq('section_id', 'homepage-main')
         .order('slide_order', { ascending: true });
 
-      if (slidesError) throw slidesError;
+      if (slidesError) {
+        console.error('useHeroData: Error fetching slides:', slidesError);
+        throw slidesError;
+      }
+
+      console.log('useHeroData: Fetched slides:', slidesData);
 
       if (slidesData && slidesData.length > 0) {
         setSlides(slidesData);
@@ -43,25 +50,38 @@ export function useHeroData() {
           .filter(slide => slide.media_id)
           .map(slide => slide.media_id);
 
+        console.log('useHeroData: Media IDs to fetch:', mediaIds);
+
         if (mediaIds.length > 0) {
           const { data: mediaData, error: mediaError } = await supabase
             .from('media_library')
             .select('id, file_url, title')
             .in('id', mediaIds);
 
-          if (mediaError) throw mediaError;
+          if (mediaError) {
+            console.error('useHeroData: Error fetching media:', mediaError);
+            throw mediaError;
+          }
+
+          console.log('useHeroData: Fetched media data:', mediaData);
 
           if (mediaData) {
             const mediaMap = mediaData.reduce((acc, media) => {
               acc[media.id] = media;
               return acc;
             }, {} as Record<string, MediaFile>);
+            
+            console.log('useHeroData: Media map created:', mediaMap);
             setMediaFiles(mediaMap);
           }
+        } else {
+          console.warn('useHeroData: No media IDs found in slides - slides may not have background images');
         }
+      } else {
+        console.log('useHeroData: No visible hero slides found');
       }
     } catch (error) {
-      console.error('Error fetching hero slides:', error);
+      console.error('useHeroData: Error in fetchHeroSlides:', error);
     } finally {
       setIsLoading(false);
     }
@@ -71,6 +91,7 @@ export function useHeroData() {
     slides,
     mediaFiles,
     currentIndex,
-    isLoading
+    isLoading,
+    refetch: fetchHeroSlides
   };
 }

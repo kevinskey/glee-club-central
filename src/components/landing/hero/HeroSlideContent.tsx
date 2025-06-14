@@ -9,22 +9,54 @@ interface HeroSlideContentProps {
 }
 
 export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
-  const backgroundImage = slide.media_id && mediaFiles[slide.media_id] 
-    ? mediaFiles[slide.media_id].file_url 
-    : '/lovable-uploads/69a9fc5f-3edb-4cf9-bbb0-353dd208e064.png';
+  // Debug logging
+  console.log('HeroSlideContent: Current slide:', slide);
+  console.log('HeroSlideContent: Available media files:', mediaFiles);
+  console.log('HeroSlideContent: Looking for media_id:', slide.media_id);
+  
+  let backgroundImage;
+  
+  if (slide.media_id && mediaFiles[slide.media_id]) {
+    backgroundImage = mediaFiles[slide.media_id].file_url;
+    console.log('HeroSlideContent: Using slide image:', backgroundImage);
+  } else {
+    // Instead of using a fallback image, show an error state or placeholder
+    console.warn('HeroSlideContent: No valid background image found for slide:', slide.title);
+    console.warn('HeroSlideContent: media_id:', slide.media_id);
+    console.warn('HeroSlideContent: Available media file IDs:', Object.keys(mediaFiles));
+    
+    // Use a gradient background instead of a random image
+    backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  }
 
   return (
     <section className="relative min-h-[300px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden pb-8 sm:pb-12">
-      {/* Background Image - Mobile crops to image size, Desktop maintains aspect */}
+      {/* Background - either image or gradient */}
       <div className="absolute inset-0 sm:relative">
-        <img
-          src={backgroundImage}
-          alt={slide.title}
-          className="w-full h-auto min-h-[300px] object-cover sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
-          style={{
-            objectPosition: 'center center'
-          }}
-        />
+        {backgroundImage.startsWith('linear-gradient') ? (
+          <div 
+            className="w-full h-full"
+            style={{ background: backgroundImage }}
+          />
+        ) : (
+          <img
+            src={backgroundImage}
+            alt={slide.title}
+            className="w-full h-auto min-h-[300px] object-cover sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
+            style={{
+              objectPosition: 'center center'
+            }}
+            onError={(e) => {
+              console.error('HeroSlideContent: Failed to load image:', backgroundImage);
+              // Replace with gradient on error
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              if (target.parentElement) {
+                target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+              }
+            }}
+          />
+        )}
         <div className="absolute inset-0 bg-black/50 sm:bg-black/40"></div>
       </div>
       
@@ -63,6 +95,15 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             >
               {slide.button_text}
             </Button>
+          </div>
+        )}
+        
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && !slide.media_id && (
+          <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded text-yellow-100 text-sm">
+            <p><strong>Debug:</strong> No background image selected for this slide</p>
+            <p>Slide ID: {slide.id}</p>
+            <p>Go to Admin → Hero Slides to select a background image</p>
           </div>
         )}
       </div>
