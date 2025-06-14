@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
 import { Eye, Download, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
@@ -6,21 +7,15 @@ import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
-import { InlineTitleEditor } from "./InlineTitleEditor";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface MediaListViewProps {
   mediaFiles: MediaFile[];
   canEdit: boolean;
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
-  onRefresh?: () => void;
 }
 
-export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete, onRefresh }: MediaListViewProps) {
-  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
-
+export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: MediaListViewProps) {
   const getMediaIcon = (type: MediaType, className: string = "h-4 w-4") => {
     switch (type) {
       case "image":
@@ -42,35 +37,6 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete, onRefr
     
     if (confirm("Are you sure you want to delete this file?")) {
       await onDelete(id);
-    }
-  };
-
-  const handleTitleSave = async (fileId: string, newTitle: string) => {
-    try {
-      const { error } = await supabase
-        .from('media_library')
-        .update({ title: newTitle })
-        .eq('id', fileId);
-
-      if (error) throw error;
-
-      setEditingTitleId(null);
-      toast.success('Title updated successfully');
-      
-      if (onRefresh) {
-        onRefresh();
-      }
-    } catch (error) {
-      console.error('Failed to update title:', error);
-      toast.error('Failed to update title');
-      throw error;
-    }
-  };
-
-  const handleTitleClick = (fileId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (canEdit) {
-      setEditingTitleId(fileId);
     }
   };
 
@@ -119,22 +85,8 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete, onRefr
                         getMediaIcon(mediaType)
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      {editingTitleId === file.id ? (
-                        <InlineTitleEditor
-                          title={file.title}
-                          onSave={(newTitle) => handleTitleSave(file.id, newTitle)}
-                          onCancel={() => setEditingTitleId(null)}
-                        />
-                      ) : (
-                        <p 
-                          className={`font-medium text-sm truncate ${canEdit ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                          onClick={(e) => handleTitleClick(file.id, e)}
-                          title={canEdit ? 'Click to edit title' : file.title}
-                        >
-                          {file.title}
-                        </p>
-                      )}
+                    <div>
+                      <p className="font-medium text-sm">{file.title}</p>
                       <p className="text-xs text-muted-foreground truncate max-w-[200px]">
                         {file.description || file.file_path.split('/').pop()}
                       </p>

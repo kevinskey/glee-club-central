@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileIcon, Pencil, Trash2, Music, ArrowRight, Play, Pause } from "lucide-react";
@@ -39,7 +39,7 @@ export const MediaFileCard = ({
 }: MediaFileCardProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const navigate = useNavigate();
   
   // Determine the media type based on file_type
@@ -50,50 +50,26 @@ export const MediaFileCard = ({
     ? formatDistanceToNow(new Date(file.created_at), { addSuffix: true }) 
     : '';
   
-  // Cleanup audio when component unmounts or file changes
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
-    };
-  }, [file.id]);
-  
   // Handle audio play/pause
   const toggleAudioPlayback = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    try {
-      if (!audioRef.current) {
-        const audio = new Audio(file.file_url);
-        audioRef.current = audio;
-        
-        audio.addEventListener('ended', () => {
-          setIsPlaying(false);
-        });
-        
-        audio.addEventListener('error', (error) => {
-          console.error('Audio playback error:', error);
-          setIsPlaying(false);
-        });
-      }
-      
+    if (!audio) {
+      const newAudio = new Audio(file.file_url);
+      newAudio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+      setAudio(newAudio);
+      newAudio.play();
+      setIsPlaying(true);
+    } else {
       if (isPlaying) {
-        audioRef.current.pause();
+        audio.pause();
         setIsPlaying(false);
       } else {
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch((error) => {
-          console.error('Audio play failed:', error);
-          setIsPlaying(false);
-        });
+        audio.play();
+        setIsPlaying(true);
       }
-    } catch (error) {
-      console.error('Audio toggle error:', error);
-      setIsPlaying(false);
     }
   };
   

@@ -4,7 +4,6 @@ import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { DynamicHero } from "@/components/landing/DynamicHero";
-import { HeroDefault } from "@/components/landing/hero/HeroDefault";
 import { useHomePageData } from "@/hooks/useHomePageData";
 
 export default function HomePage() {
@@ -30,15 +29,16 @@ export default function HomePage() {
 
   return (
     <div className="relative min-h-screen">
+      {/* Content */}
       <div className="relative z-10 min-h-screen">
         <PublicPageWrapper showTopSlider={true}>
-          {/* Hero Section - Always show */}
+          {/* Dynamic Hero Section */}
           <DynamicHero />
           
           {/* Rest of homepage content */}
           <div className="bg-white/95 backdrop-blur-sm">
             <HomePageContent
-              heroImages={[]}
+              heroImages={[]} // No hero images needed anymore
               upcomingEvents={upcomingEvents}
               storeProducts={storeProducts}
               audioTracks={audioTracks}

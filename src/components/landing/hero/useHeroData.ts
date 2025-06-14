@@ -25,7 +25,7 @@ export function useHeroData() {
 
   const fetchHeroSlides = async () => {
     try {
-      console.log('useHeroData: Starting to fetch hero slides...');
+      console.log('useHeroData: Fetching hero slides...');
       
       // Fetch hero slides
       const { data: slidesData, error: slidesError } = await supabase
@@ -37,109 +37,51 @@ export function useHeroData() {
 
       if (slidesError) {
         console.error('useHeroData: Error fetching slides:', slidesError);
-        setSlides([]);
-        setIsLoading(false);
-        return;
+        throw slidesError;
       }
 
-      console.log('useHeroData: Fetched slides:', slidesData?.length || 0);
+      console.log('useHeroData: Fetched slides:', slidesData);
 
       if (slidesData && slidesData.length > 0) {
-        // Get unique media IDs from slides that have them
-        const mediaIds = [...new Set(
-          slidesData
-            .filter(slide => slide.media_id)
-            .map(slide => slide.media_id)
-        )];
+        setSlides(slidesData);
+
+        // Fetch media files for slides that have media_id
+        const mediaIds = slidesData
+          .filter(slide => slide.media_id)
+          .map(slide => slide.media_id);
 
         console.log('useHeroData: Media IDs to fetch:', mediaIds);
 
         if (mediaIds.length > 0) {
-          let mediaMap: Record<string, MediaFile> = {};
+          const { data: mediaData, error: mediaError } = await supabase
+            .from('media_library')
+            .select('id, file_url, title')
+            .in('id', mediaIds);
 
-          // Try media_library first
-          try {
-            const { data: mediaData, error: mediaError } = await supabase
-              .from('media_library')
-              .select('id, file_url, title')
-              .in('id', mediaIds);
-
-            if (mediaError) {
-              console.error('useHeroData: Error fetching from media_library:', mediaError);
-            } else if (mediaData && mediaData.length > 0) {
-              console.log('useHeroData: Found media files in media_library:', mediaData.length);
-              mediaData.forEach(media => {
-                mediaMap[media.id] = {
-                  id: media.id,
-                  file_url: media.file_url,
-                  title: media.title
-                };
-              });
-            }
-          } catch (error) {
-            console.error('useHeroData: Exception fetching from media_library:', error);
+          if (mediaError) {
+            console.error('useHeroData: Error fetching media:', mediaError);
+            throw mediaError;
           }
 
-          // Try site_images for any missing media files
-          const missingIds = mediaIds.filter(id => !mediaMap[id]);
-          
-          if (missingIds.length > 0) {
-            console.log('useHeroData: Trying site_images for missing IDs:', missingIds);
+          console.log('useHeroData: Fetched media data:', mediaData);
+
+          if (mediaData) {
+            const mediaMap = mediaData.reduce((acc, media) => {
+              acc[media.id] = media;
+              return acc;
+            }, {} as Record<string, MediaFile>);
             
-            try {
-              const { data: siteImagesData, error: siteImagesError } = await supabase
-                .from('site_images')
-                .select('id, file_url, name')
-                .in('id', missingIds);
-
-              if (siteImagesError) {
-                console.error('useHeroData: Error fetching from site_images:', siteImagesError);
-              } else if (siteImagesData && siteImagesData.length > 0) {
-                console.log('useHeroData: Found media files in site_images:', siteImagesData.length);
-                siteImagesData.forEach(media => {
-                  mediaMap[media.id] = {
-                    id: media.id,
-                    file_url: media.file_url,
-                    title: media.name
-                  };
-                });
-              }
-            } catch (error) {
-              console.error('useHeroData: Exception fetching from site_images:', error);
-            }
-          }
-
-          console.log('useHeroData: Final media map with', Object.keys(mediaMap).length, 'files');
-          setMediaFiles(mediaMap);
-
-          // Filter out slides that don't have valid media files
-          const validSlides = slidesData.filter(slide => {
-            if (!slide.media_id) return false; // Slide needs a media_id
-            return mediaMap[slide.media_id]; // Media file must exist
-          });
-
-          console.log('useHeroData: Valid slides with media:', validSlides.length);
-
-          if (validSlides.length > 0) {
-            setSlides(validSlides);
-          } else {
-            console.log('useHeroData: No valid slides with media found, showing empty');
-            setSlides([]);
+            console.log('useHeroData: Media map created:', mediaMap);
+            setMediaFiles(mediaMap);
           }
         } else {
-          console.log('useHeroData: No media IDs found in slides, showing empty');
-          setSlides([]);
-          setMediaFiles({});
+          console.warn('useHeroData: No media IDs found in slides - slides may not have background images');
         }
       } else {
         console.log('useHeroData: No visible hero slides found');
-        setSlides([]);
-        setMediaFiles({});
       }
     } catch (error) {
       console.error('useHeroData: Error in fetchHeroSlides:', error);
-      setSlides([]);
-      setMediaFiles({});
     } finally {
       setIsLoading(false);
     }

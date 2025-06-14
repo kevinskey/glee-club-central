@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MediaFile } from "@/types/media";
@@ -7,35 +8,17 @@ import { Eye, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "l
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
-import { InlineTitleEditor } from "./InlineTitleEditor";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface MediaGridViewProps {
   mediaFiles: MediaFile[];
   canEdit: boolean;
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
-  onRefresh?: () => void;
 }
 
-export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete, onRefresh }: MediaGridViewProps) {
+export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
+  const [playingAudio, setPlayingAudio] = useState<{[key: string]: HTMLAudioElement}>({});
   const [playingStates, setPlayingStates] = useState<{[key: string]: boolean}>({});
-  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
-  const audioRefs = useRef<{[key: string]: HTMLAudioElement}>({});
-
-  // Cleanup all audio when component unmounts
-  useEffect(() => {
-    return () => {
-      Object.values(audioRefs.current).forEach(audio => {
-        if (audio) {
-          audio.pause();
-          audio.src = '';
-        }
-      });
-      audioRefs.current = {};
-    };
-  }, []);
 
   const getMediaIcon = (type: MediaType, className: string = "h-12 w-12 text-muted-foreground") => {
     switch (type) {
@@ -55,74 +38,25 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete, onRefr
   const toggleAudioPlayback = (fileId: string, fileUrl: string, e: React.MouseEvent) => {
     e.stopPropagation();
     
-    try {
-      // Stop all other playing audio first
-      Object.entries(audioRefs.current).forEach(([id, audio]) => {
-        if (id !== fileId && audio && !audio.paused) {
-          audio.pause();
-          setPlayingStates(prev => ({ ...prev, [id]: false }));
-        }
+    const currentAudio = playingAudio[fileId];
+    
+    if (!currentAudio) {
+      const newAudio = new Audio(fileUrl);
+      newAudio.addEventListener('ended', () => {
+        setPlayingStates(prev => ({ ...prev, [fileId]: false }));
       });
       
-      let currentAudio = audioRefs.current[fileId];
-      
-      if (!currentAudio) {
-        currentAudio = new Audio(fileUrl);
-        audioRefs.current[fileId] = currentAudio;
-        
-        currentAudio.addEventListener('ended', () => {
-          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
-        });
-        
-        currentAudio.addEventListener('error', (error) => {
-          console.error('Audio playback error:', error);
-          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
-        });
-      }
-      
+      setPlayingAudio(prev => ({ ...prev, [fileId]: newAudio }));
+      newAudio.play();
+      setPlayingStates(prev => ({ ...prev, [fileId]: true }));
+    } else {
       if (playingStates[fileId]) {
         currentAudio.pause();
         setPlayingStates(prev => ({ ...prev, [fileId]: false }));
       } else {
-        currentAudio.play().then(() => {
-          setPlayingStates(prev => ({ ...prev, [fileId]: true }));
-        }).catch((error) => {
-          console.error('Audio play failed:', error);
-          setPlayingStates(prev => ({ ...prev, [fileId]: false }));
-        });
+        currentAudio.play();
+        setPlayingStates(prev => ({ ...prev, [fileId]: true }));
       }
-    } catch (error) {
-      console.error('Audio toggle error:', error);
-      setPlayingStates(prev => ({ ...prev, [fileId]: false }));
-    }
-  };
-
-  const handleTitleSave = async (fileId: string, newTitle: string) => {
-    try {
-      const { error } = await supabase
-        .from('media_library')
-        .update({ title: newTitle })
-        .eq('id', fileId);
-
-      if (error) throw error;
-
-      setEditingTitleId(null);
-      toast.success('Title updated successfully');
-      
-      if (onRefresh) {
-        onRefresh();
-      }
-    } catch (error) {
-      console.error('Failed to update title:', error);
-      toast.error('Failed to update title');
-      throw error;
-    }
-  };
-
-  const handleTitleClick = (fileId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (canEdit) {
-      setEditingTitleId(fileId);
     }
   };
 
@@ -211,22 +145,7 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete, onRefr
             </div>
             
             <CardContent className="p-4">
-              {editingTitleId === file.id ? (
-                <InlineTitleEditor
-                  title={file.title}
-                  onSave={(newTitle) => handleTitleSave(file.id, newTitle)}
-                  onCancel={() => setEditingTitleId(null)}
-                  className="mb-1"
-                />
-              ) : (
-                <h3 
-                  className={`font-medium text-sm truncate mb-1 ${canEdit ? 'cursor-pointer hover:text-blue-600' : ''}`}
-                  onClick={(e) => handleTitleClick(file.id, e)}
-                  title={canEdit ? 'Click to edit title' : file.title}
-                >
-                  {file.title}
-                </h3>
-              )}
+              <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
               
               {file.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
