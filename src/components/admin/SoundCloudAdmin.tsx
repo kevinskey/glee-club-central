@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,24 +8,26 @@ import { TrackList } from './soundcloud/TrackList';
 import { UploadTrackForm } from './soundcloud/UploadTrackForm';
 import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
 
-interface Track {
+interface SoundCloudTrack {
   id: string;
   title: string;
   artist: string;
-  duration: number;
   audioUrl: string;
-  coverArt?: string;
+  albumArt: string;
+  duration: number;
+  waveformData: number[];
   likes: number;
   plays: number;
-  genre?: string;
+  isLiked: boolean;
+  genre: string;
   uploadDate: string;
-  description?: string;
-  isPublic: boolean;
+  description: string;
+  permalink_url: string;
 }
 
 export function SoundCloudAdmin() {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
+  const [selectedTrack, setSelectedTrack] = useState<SoundCloudTrack | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleDeleteTrack = (trackId: string) => {
@@ -34,14 +35,10 @@ export function SoundCloudAdmin() {
   };
 
   const handleToggleVisibility = (trackId: string) => {
-    setTracks(tracks.map(track => 
-      track.id === trackId 
-        ? { ...track, isPublic: !track.isPublic }
-        : track
-    ));
+    console.log('Toggle visibility for track:', trackId);
   };
 
-  const handleEditTrack = (track: Track) => {
+  const handleEditTrack = (track: SoundCloudTrack) => {
     setSelectedTrack(track);
     setIsEditing(true);
   };
