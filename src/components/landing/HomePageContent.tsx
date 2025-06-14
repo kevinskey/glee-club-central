@@ -97,16 +97,11 @@ export function HomePageContent({
             {!isLoading && !error && playlists.length > 0 && (
               <div className="space-y-12">
                 {/* Cover Flow Display */}
-                <div>
-                  <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-8 text-center">
-                    Browse Our Playlists
-                  </h4>
-                  <SoundCloudCoverFlow 
-                    playlists={playlists}
-                    activePlaylistId={activePlaylist?.id}
-                    onPlaylistSelect={setActivePlaylist}
-                  />
-                </div>
+                <SoundCloudCoverFlow 
+                  playlists={playlists}
+                  activePlaylistId={activePlaylist?.id}
+                  onPlaylistSelect={setActivePlaylist}
+                />
 
                 {/* Active Player */}
                 {activePlaylist && (
