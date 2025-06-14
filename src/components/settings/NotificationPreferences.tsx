@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Bell, Mail, MessageSquare } from 'lucide-react';
+import { Bell, Mail, MessageSquare, Phone } from 'lucide-react';
 import { useUserSettings, UserSettings } from '@/hooks/useUserSettings';
 
 export function NotificationPreferences() {
@@ -36,7 +36,7 @@ export function NotificationPreferences() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bell className="w-5 h-5" />
-          Notification Preferences
+          Communication Preferences
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -47,7 +47,7 @@ export function NotificationPreferences() {
               <div>
                 <p className="font-medium">Email Updates</p>
                 <p className="text-sm text-muted-foreground">
-                  General email notifications and updates
+                  Receive general email notifications and updates
                 </p>
               </div>
             </div>
@@ -60,7 +60,7 @@ export function NotificationPreferences() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <MessageSquare className="w-4 h-4 text-muted-foreground" />
+              <Phone className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="font-medium">SMS Alerts</p>
                 <p className="text-sm text-muted-foreground">
@@ -111,6 +111,23 @@ export function NotificationPreferences() {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <MessageSquare className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Internal Messages</p>
+                <p className="text-sm text-muted-foreground">
+                  Messages from other members and internal announcements
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={settings.order_confirmations}
+              onCheckedChange={(checked) => handleToggle('order_confirmations', checked)}
+              disabled={saving}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <Mail className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="font-medium">Order Confirmations</p>
@@ -125,6 +142,12 @@ export function NotificationPreferences() {
               disabled={saving}
             />
           </div>
+        </div>
+
+        <div className="pt-4 border-t">
+          <p className="text-sm text-muted-foreground mb-4">
+            You can manage these preferences at any time. Critical notifications (like account security) will always be sent regardless of these settings.
+          </p>
         </div>
       </CardContent>
     </Card>
