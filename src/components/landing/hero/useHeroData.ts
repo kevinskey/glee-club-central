@@ -25,7 +25,7 @@ export function useHeroData() {
 
   const fetchHeroSlides = async () => {
     try {
-      console.log('useHeroData: Fetching hero slides...');
+      console.log('useHeroData: Starting to fetch hero slides...');
       
       // Fetch hero slides
       const { data: slidesData, error: slidesError } = await supabase
@@ -37,10 +37,13 @@ export function useHeroData() {
 
       if (slidesError) {
         console.error('useHeroData: Error fetching slides:', slidesError);
-        throw slidesError;
+        // Don't throw error, just continue with empty slides
+        setSlides([]);
+        setIsLoading(false);
+        return;
       }
 
-      console.log('useHeroData: Fetched slides:', slidesData);
+      console.log('useHeroData: Fetched slides:', slidesData?.length || 0);
 
       if (slidesData && slidesData.length > 0) {
         setSlides(slidesData);
@@ -60,28 +63,24 @@ export function useHeroData() {
 
           if (mediaError) {
             console.error('useHeroData: Error fetching media:', mediaError);
-            throw mediaError;
-          }
-
-          console.log('useHeroData: Fetched media data:', mediaData);
-
-          if (mediaData) {
+            // Continue without media files
+          } else if (mediaData) {
             const mediaMap = mediaData.reduce((acc, media) => {
               acc[media.id] = media;
               return acc;
             }, {} as Record<string, MediaFile>);
             
-            console.log('useHeroData: Media map created:', mediaMap);
+            console.log('useHeroData: Media map created:', Object.keys(mediaMap).length, 'files');
             setMediaFiles(mediaMap);
           }
-        } else {
-          console.warn('useHeroData: No media IDs found in slides - slides may not have background images');
         }
       } else {
-        console.log('useHeroData: No visible hero slides found');
+        console.log('useHeroData: No visible hero slides found, will show default');
+        setSlides([]);
       }
     } catch (error) {
       console.error('useHeroData: Error in fetchHeroSlides:', error);
+      setSlides([]);
     } finally {
       setIsLoading(false);
     }
