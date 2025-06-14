@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface SoundCloudTrack {
   id: string;
@@ -9,14 +8,14 @@ interface SoundCloudTrack {
   audioUrl: string;
   albumArt: string;
   duration: number;
-  waveformData?: number[];
+  waveformData: number[];
   likes: number;
   plays: number;
   isLiked: boolean;
   genre: string;
   uploadDate: string;
   description: string;
-  permalink_url?: string;
+  permalink_url: string;
 }
 
 interface SoundCloudPlaylist {
@@ -25,8 +24,8 @@ interface SoundCloudPlaylist {
   description: string;
   track_count: number;
   duration: number;
-  artwork_url?: string;
-  permalink_url?: string;
+  artwork_url: string;
+  permalink_url: string;
   is_public: boolean;
   created_at: string;
   tracks: SoundCloudTrack[];
@@ -39,50 +38,58 @@ export const useSoundCloudPlayer = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSoundCloudPlaylists = async () => {
+  const fetchSoundCloudData = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.functions.invoke('soundcloud-api', {
-        body: { action: 'get_user_playlists' }
-      });
-
-      if (error) throw error;
-
-      console.log('SoundCloud playlists fetched:', data.playlists);
-      setPlaylists(data.playlists || []);
+      setError(null);
       
-      // Set the first public playlist as active by default
-      const publicPlaylists = data.playlists?.filter((p: SoundCloudPlaylist) => p.is_public && p.tracks.length > 0);
-      if (publicPlaylists && publicPlaylists.length > 0) {
-        setActivePlaylist(publicPlaylists[0]);
+      // Try to fetch from Supabase edge function
+      const response = await fetch('/functions/v1/soundcloud-api');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch SoundCloud data');
       }
+      
+      const data = await response.json();
+      
+      if (data.playlists && Array.isArray(data.playlists)) {
+        console.log('SoundCloud playlists fetched:', data.playlists);
+        setPlaylists(data.playlists);
+        
+        // Set first playlist as active if available
+        if (data.playlists.length > 0) {
+          setActivePlaylist(data.playlists[0]);
+        }
+      }
+      
+      if (data.tracks && Array.isArray(data.tracks)) {
+        console.log('SoundCloud tracks fetched:', data.tracks);
+        setTracks(data.tracks);
+      }
+      
     } catch (err) {
-      console.error('Error fetching SoundCloud playlists:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch playlists');
+      console.error('Error fetching SoundCloud data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load SoundCloud content');
+      
+      // Clear any existing data on error
+      setPlaylists([]);
+      setTracks([]);
+      setActivePlaylist(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchSoundCloudTracks = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('soundcloud-api', {
-        body: { action: 'get_user_tracks' }
-      });
+  const refetchPlaylists = async () => {
+    await fetchSoundCloudData();
+  };
 
-      if (error) throw error;
-
-      console.log('SoundCloud tracks fetched:', data.tracks);
-      setTracks(data.tracks || []);
-    } catch (err) {
-      console.error('Error fetching SoundCloud tracks:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch tracks');
-    }
+  const refetchTracks = async () => {
+    await fetchSoundCloudData();
   };
 
   useEffect(() => {
-    fetchSoundCloudPlaylists();
-    fetchSoundCloudTracks();
+    fetchSoundCloudData();
   }, []);
 
   return {
@@ -92,7 +99,7 @@ export const useSoundCloudPlayer = () => {
     isLoading,
     error,
     setActivePlaylist,
-    refetchPlaylists: fetchSoundCloudPlaylists,
-    refetchTracks: fetchSoundCloudTracks
+    refetchPlaylists,
+    refetchTracks
   };
 };
