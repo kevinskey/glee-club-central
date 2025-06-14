@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
+import { InlineMediaTitleEdit } from "@/components/media/InlineMediaTitleEdit";
 
 interface LightweightMediaCardProps {
   file: MediaFileLight;
@@ -14,6 +15,7 @@ interface LightweightMediaCardProps {
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
   onPreview: (id: string) => void;
+  onUpdateTitle?: (id: string, newTitle: string) => Promise<void>;
 }
 
 export function LightweightMediaCard({ 
@@ -21,7 +23,8 @@ export function LightweightMediaCard({
   canEdit, 
   canDelete, 
   onDelete, 
-  onPreview 
+  onPreview,
+  onUpdateTitle
 }: LightweightMediaCardProps) {
   const [playingAudio, setPlayingAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -172,7 +175,16 @@ export function LightweightMediaCard({
       </div>
       
       <CardContent className="p-4">
-        <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+        {canEdit && onUpdateTitle ? (
+          <InlineMediaTitleEdit
+            title={file.title}
+            onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
+            className="mb-1"
+          />
+        ) : (
+          <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+        )}
+        
         <p className="text-xs text-muted-foreground truncate mb-2">
           {file.title.split('.').pop()}
         </p>

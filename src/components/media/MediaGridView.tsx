@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
@@ -8,15 +7,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { InlineMediaTitleEdit } from "@/components/media/InlineMediaTitleEdit";
 
 interface MediaGridViewProps {
   mediaFiles: MediaFile[];
   canEdit: boolean;
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
+  onUpdateTitle?: (id: string, newTitle: string) => Promise<void>;
 }
 
-export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
+export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete, onUpdateTitle }: MediaGridViewProps) {
   const [playingAudio, setPlayingAudio] = useState<{ [key: string]: HTMLAudioElement }>({});
   const [playingStates, setPlayingStates] = useState<{ [key: string]: boolean }>({});
 
@@ -190,7 +191,16 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
             </div>
             
             <CardContent className="p-4">
-              <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+              {canEdit && onUpdateTitle ? (
+                <InlineMediaTitleEdit
+                  title={file.title}
+                  onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
+                  className="mb-1"
+                />
+              ) : (
+                <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+              )}
+              
               <p className="text-xs text-muted-foreground truncate mb-2">
                 {file.description || file.file_path.split('/').pop()}
               </p>

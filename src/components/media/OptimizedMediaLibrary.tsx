@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { LightweightMediaCard } from '@/components/media/LightweightMediaCard';
 import { FilePreviewModal } from '@/components/media/FilePreviewModal';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OptimizedMediaLibraryProps {
   isAdminView?: boolean;
@@ -28,7 +28,8 @@ export function OptimizedMediaLibrary({ isAdminView = false }: OptimizedMediaLib
     setSelectedMediaType,
     loadMoreMedia,
     getFileDetails,
-    deleteMediaItem
+    deleteMediaItem,
+    refetch
   } = usePaginatedMediaLibrary();
 
   const [previewFile, setPreviewFile] = useState<MediaFileDetailed | null>(null);
@@ -65,6 +66,25 @@ export function OptimizedMediaLibrary({ isAdminView = false }: OptimizedMediaLib
       await deleteMediaItem(id);
     } catch (error) {
       // Error is already handled in the hook
+    }
+  };
+
+  const updateMediaTitle = async (id: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('media_library')
+        .update({ title: newTitle })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      // Refresh the media files
+      refetch();
+      toast.success('Title updated successfully');
+    } catch (error) {
+      console.error('Error updating media title:', error);
+      toast.error('Failed to update title');
+      throw error;
     }
   };
 
@@ -132,6 +152,7 @@ export function OptimizedMediaLibrary({ isAdminView = false }: OptimizedMediaLib
               canDelete={isAdminView}
               onDelete={handleDelete}
               onPreview={handlePreview}
+              onUpdateTitle={isAdminView ? updateMediaTitle : undefined}
             />
           ))}
         </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -155,6 +154,33 @@ export function useMediaLibrary() {
 
   const deleteMediaItem = deleteMediaFile;
 
+  const updateMediaFile = async (id: string, updates: { title?: string; description?: string }) => {
+    try {
+      const { error } = await supabase
+        .from('media_library')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setMediaFiles(prev => prev.map(file => 
+        file.id === id ? { ...file, ...updates } : file
+      ));
+      setAllMediaFiles(prev => prev.map(file => 
+        file.id === id ? { ...file, ...updates } : file
+      ));
+
+      toast.success('Media updated successfully');
+    } catch (err) {
+      console.error('Error updating media file:', err);
+      toast.error('Failed to update media file');
+      throw err;
+    }
+  };
+
   // Create comprehensive media stats
   const mediaStats = {
     total: allMediaFiles.length,
@@ -231,6 +257,7 @@ export function useMediaLibrary() {
     uploadMediaFile,
     deleteMediaFile,
     deleteMediaItem,
+    updateMediaFile,
     useMediaInContext: () => {}, // Placeholder function
   };
 }

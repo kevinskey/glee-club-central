@@ -22,7 +22,8 @@ export function EnhancedMediaLibrary({ isAdminView = false, viewMode = 'grid' }:
     selectedMediaType,
     setSelectedMediaType,
     isLoading,
-    deleteMediaItem
+    deleteMediaItem,
+    updateMediaFile
   } = useMediaLibrary();
 
   const [sortBy, setSortBy] = useState<'name' | 'date' | 'size' | 'type'>('date');
@@ -113,6 +114,14 @@ export function EnhancedMediaLibrary({ isAdminView = false, viewMode = 'grid' }:
     }
   };
 
+  const handleUpdateTitle = async (id: string, newTitle: string) => {
+    try {
+      await updateMediaFile(id, { title: newTitle });
+    } catch (error) {
+      // Error already handled in updateMediaFile
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -156,6 +165,7 @@ export function EnhancedMediaLibrary({ isAdminView = false, viewMode = 'grid' }:
           canEdit={isAdminView}
           canDelete={isAdminView}
           onDelete={handleDelete}
+          onUpdateTitle={isAdminView ? handleUpdateTitle : undefined}
         />
       ) : (
         <MediaGridView
@@ -163,6 +173,7 @@ export function EnhancedMediaLibrary({ isAdminView = false, viewMode = 'grid' }:
           canEdit={isAdminView}
           canDelete={isAdminView}
           onDelete={handleDelete}
+          onUpdateTitle={isAdminView ? handleUpdateTitle : undefined}
         />
       )}
     </div>

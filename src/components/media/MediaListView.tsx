@@ -1,4 +1,3 @@
-
 import React from "react";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { InlineMediaTitleEdit } from "@/components/media/InlineMediaTitleEdit";
 import {
   Table,
   TableBody,
@@ -21,9 +21,10 @@ interface MediaListViewProps {
   canEdit: boolean;
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
+  onUpdateTitle?: (id: string, newTitle: string) => Promise<void>;
 }
 
-export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: MediaListViewProps) {
+export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete, onUpdateTitle }: MediaListViewProps) {
   const getMediaIcon = (type: MediaType, className: string = "h-4 w-4") => {
     switch (type) {
       case "image":
@@ -115,7 +116,14 @@ export function MediaListView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-sm truncate">{file.title}</p>
+                      {canEdit && onUpdateTitle ? (
+                        <InlineMediaTitleEdit
+                          title={file.title}
+                          onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
+                        />
+                      ) : (
+                        <p className="font-medium text-sm truncate">{file.title}</p>
+                      )}
                       <p className="text-xs text-muted-foreground truncate">
                         {file.description || file.file_path.split('/').pop()}
                       </p>
