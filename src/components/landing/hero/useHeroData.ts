@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, MediaFile } from './types';
@@ -17,7 +16,7 @@ export function useHeroData() {
     if (slides.length > 1) {
       const timer = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-      }, 5000);
+      }, 8000); // Changed from 5000 to 8000 (8 seconds)
 
       return () => clearInterval(timer);
     }
