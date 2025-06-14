@@ -134,11 +134,16 @@ export function SoundCloudEmbedManager() {
       url: url,
       color: '#ff5500',
       auto_play: 'false',
-      hide_related: 'false',
-      show_comments: 'true',
-      show_user: 'true',
+      hide_related: 'true', // Hides related tracks
+      show_comments: 'false', // Hides comments section  
+      show_user: 'false', // Hides user info
       show_reposts: 'false',
-      show_teaser: 'true'
+      show_teaser: 'false', // Removes teaser for next track
+      visual: 'false', // Uses minimal waveform instead of artwork
+      show_artwork: 'false', // Hides large artwork
+      buying: 'false', // Removes buy buttons
+      sharing: 'false', // Removes share buttons
+      download: 'false' // Removes download button
     });
 
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
@@ -206,7 +211,7 @@ export function SoundCloudEmbedManager() {
                     <div className="rounded-lg overflow-hidden">
                       <iframe
                         width="100%"
-                        height="300"
+                        height="166"
                         scrolling="no"
                         frameBorder="no"
                         allow="autoplay"
