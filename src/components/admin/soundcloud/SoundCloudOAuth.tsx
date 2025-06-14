@@ -91,19 +91,25 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
-      const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth?action=authorize`, {
+      console.log('Initiating SoundCloud connection...');
+      
+      const response = await fetch(`/functions/v1/soundcloud-oauth?action=authorize`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
         }
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Request failed:', errorText);
+        throw new Error(`Request failed with status ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Authorization response:', data);
       
       if (data.error) {
         throw new Error(data.error);
@@ -112,13 +118,19 @@ export function SoundCloudOAuth() {
       // Store state for security verification
       localStorage.setItem('soundcloud_oauth_state', data.state);
       
+      console.log('Redirecting to SoundCloud OAuth...');
       // Redirect to SoundCloud OAuth
       window.location.href = data.authUrl;
       
     } catch (error) {
       console.error('SoundCloud connection error:', error);
       setIsConnecting(false);
-      toast.error('Failed to connect to SoundCloud. Please try again.');
+      
+      if (error instanceof Error) {
+        toast.error(`Connection failed: ${error.message}`);
+      } else {
+        toast.error('Failed to connect to SoundCloud. Please check your network connection and try again.');
+      }
     }
   };
 
@@ -128,11 +140,10 @@ export function SoundCloudOAuth() {
     try {
       const redirectUri = `${window.location.origin}/admin/music?callback=soundcloud`;
       
-      const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth?action=exchange`, {
+      const response = await fetch(`/functions/v1/soundcloud-oauth?action=exchange`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
         },
         body: JSON.stringify({
           code,
@@ -141,7 +152,8 @@ export function SoundCloudOAuth() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Token exchange failed: ${errorText}`);
       }
 
       const data = await response.json();
@@ -168,7 +180,11 @@ export function SoundCloudOAuth() {
       
     } catch (error) {
       console.error('OAuth callback error:', error);
-      toast.error('Failed to complete SoundCloud authentication.');
+      if (error instanceof Error) {
+        toast.error(`Authentication failed: ${error.message}`);
+      } else {
+        toast.error('Failed to complete SoundCloud authentication.');
+      }
     } finally {
       setIsConnecting(false);
     }
@@ -178,11 +194,10 @@ export function SoundCloudOAuth() {
     setIsLoadingData(true);
     
     try {
-      const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth?action=fetch-data`, {
+      const response = await fetch(`/functions/v1/soundcloud-oauth?action=fetch-data`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
         },
         body: JSON.stringify({
           accessToken: token
@@ -190,7 +205,8 @@ export function SoundCloudOAuth() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Data fetch failed: ${errorText}`);
       }
 
       const data = await response.json();
@@ -204,7 +220,11 @@ export function SoundCloudOAuth() {
       
     } catch (error) {
       console.error('Error loading user data:', error);
-      toast.error('Failed to load SoundCloud data.');
+      if (error instanceof Error) {
+        toast.error(`Failed to load data: ${error.message}`);
+      } else {
+        toast.error('Failed to load SoundCloud data.');
+      }
     } finally {
       setIsLoadingData(false);
     }

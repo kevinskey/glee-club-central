@@ -22,6 +22,10 @@ serve(async (req) => {
     const soundcloudClientId = Deno.env.get('SOUNDCLOUD_CLIENT_ID')
     const soundcloudClientSecret = Deno.env.get('SOUNDCLOUD_CLIENT_SECRET')
     
+    console.log('Environment check:')
+    console.log('SOUNDCLOUD_CLIENT_ID present:', !!soundcloudClientId)
+    console.log('SOUNDCLOUD_CLIENT_SECRET present:', !!soundcloudClientSecret)
+    
     if (!soundcloudClientId || !soundcloudClientSecret) {
       console.error('SoundCloud credentials not found')
       return new Response(
@@ -37,7 +41,7 @@ serve(async (req) => {
     if (action === 'authorize') {
       const redirectUri = `${url.origin}/admin/music?callback=soundcloud`
       const scope = 'non-expiring'
-      const state = crypto.randomUUID() // Generate random state for security
+      const state = crypto.randomUUID()
       
       const authUrl = new URL('https://soundcloud.com/connect')
       authUrl.searchParams.set('client_id', soundcloudClientId)
@@ -47,6 +51,7 @@ serve(async (req) => {
       authUrl.searchParams.set('state', state)
       
       console.log('Generated OAuth URL:', authUrl.toString())
+      console.log('Redirect URI:', redirectUri)
       
       return new Response(
         JSON.stringify({ 
