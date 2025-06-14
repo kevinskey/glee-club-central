@@ -3,7 +3,7 @@ import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { SoundCloudPlayer } from "@/components/audio/SoundCloudPlayer";
-import { SoundCloudPlaylistGrid } from "@/components/audio/SoundCloudPlaylistGrid";
+import { SoundCloudCoverFlow } from "@/components/audio/SoundCloudCoverFlow";
 import { useSoundCloudPlayer } from "@/hooks/useSoundCloudPlayer";
 
 interface Event {
@@ -96,12 +96,12 @@ export function HomePageContent({
             
             {!isLoading && !error && playlists.length > 0 && (
               <div className="space-y-12">
-                {/* Playlist Grid */}
+                {/* Cover Flow Display */}
                 <div>
-                  <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
-                    Our Playlists
+                  <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-8 text-center">
+                    Browse Our Playlists
                   </h4>
-                  <SoundCloudPlaylistGrid 
+                  <SoundCloudCoverFlow 
                     playlists={playlists}
                     activePlaylistId={activePlaylist?.id}
                     onPlaylistSelect={setActivePlaylist}
