@@ -37,7 +37,6 @@ export function useHeroData() {
 
       if (slidesError) {
         console.error('useHeroData: Error fetching slides:', slidesError);
-        // Don't throw error, just continue with empty slides
         setSlides([]);
         setIsLoading(false);
         return;
@@ -56,22 +55,44 @@ export function useHeroData() {
         console.log('useHeroData: Media IDs to fetch:', mediaIds);
 
         if (mediaIds.length > 0) {
+          // Try fetching from media_library table
           const { data: mediaData, error: mediaError } = await supabase
             .from('media_library')
             .select('id, file_url, title')
             .in('id', mediaIds);
 
           if (mediaError) {
-            console.error('useHeroData: Error fetching media:', mediaError);
-            // Continue without media files
-          } else if (mediaData) {
+            console.error('useHeroData: Error fetching media from media_library:', mediaError);
+          } else if (mediaData && mediaData.length > 0) {
             const mediaMap = mediaData.reduce((acc, media) => {
               acc[media.id] = media;
               return acc;
             }, {} as Record<string, MediaFile>);
             
-            console.log('useHeroData: Media map created:', Object.keys(mediaMap).length, 'files');
+            console.log('useHeroData: Media map created from media_library:', Object.keys(mediaMap).length, 'files');
             setMediaFiles(mediaMap);
+          } else {
+            console.log('useHeroData: No media found in media_library, trying site_images...');
+            
+            // Fallback: try site_images table
+            const { data: siteImagesData, error: siteImagesError } = await supabase
+              .from('site_images')
+              .select('id, file_url, name as title')
+              .in('id', mediaIds);
+
+            if (siteImagesError) {
+              console.error('useHeroData: Error fetching from site_images:', siteImagesError);
+            } else if (siteImagesData && siteImagesData.length > 0) {
+              const siteImagesMap = siteImagesData.reduce((acc, media) => {
+                acc[media.id] = media;
+                return acc;
+              }, {} as Record<string, MediaFile>);
+              
+              console.log('useHeroData: Media map created from site_images:', Object.keys(siteImagesMap).length, 'files');
+              setMediaFiles(siteImagesMap);
+            } else {
+              console.warn('useHeroData: No media files found in either table for IDs:', mediaIds);
+            }
           }
         }
       } else {
