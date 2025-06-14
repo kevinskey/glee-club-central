@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Trash2, Plus, Edit, Eye, EyeOff, Image } from 'lucide-react';
+import { Trash2, Plus, Edit, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeroSlideMediaPicker } from '@/components/admin/HeroSlideMediaPicker';
 import { AdminTopNavigation } from '@/components/admin/AdminTopNavigation';
@@ -196,7 +196,7 @@ export default function HeroSlidesPage() {
       youtube_url: slide.youtube_url || '',
       media_type: slide.media_type || 'image',
       visible: slide.visible,
-      show_title: slide.show_title !== false, // Default to true if undefined
+      show_title: slide.show_title !== false,
       slide_order: slide.slide_order,
       section_id: slide.section_id
     });
@@ -212,7 +212,16 @@ export default function HeroSlidesPage() {
       setSelectedMediaUrl('');
     }
     
+    // Ensure the form is visible
     setIsCreating(true);
+    
+    // Scroll to form
+    setTimeout(() => {
+      const formElement = document.getElementById('hero-slide-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const toggleVisibility = async (slide: HeroSlide) => {
@@ -298,6 +307,7 @@ export default function HeroSlidesPage() {
                     onClick={() => handleEdit(slide)}
                   >
                     <Edit className="h-4 w-4" />
+                    Edit
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -345,11 +355,18 @@ export default function HeroSlidesPage() {
 
         {/* Create/Edit Form */}
         {isCreating && (
-          <Card>
-            <CardHeader>
+          <Card id="hero-slide-form">
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>
                 {editingSlide ? 'Edit Slide' : 'Create New Slide'}
               </CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetForm}
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
