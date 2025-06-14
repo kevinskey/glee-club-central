@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileIcon, Pencil, Trash2, Music, ArrowRight } from "lucide-react";
+import { FileIcon, Pencil, Trash2, Music, ArrowRight, Play, Pause } from "lucide-react";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
 import { PDFPreview } from "@/components/pdf/PDFPreview";
 import { MediaFile } from "@/types/media";
@@ -38,6 +38,8 @@ export const MediaFileCard = ({
   canDelete = false
 }: MediaFileCardProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const navigate = useNavigate();
   
   // Determine the media type based on file_type
@@ -47,6 +49,29 @@ export const MediaFileCard = ({
   const formattedDate = file.created_at 
     ? formatDistanceToNow(new Date(file.created_at), { addSuffix: true }) 
     : '';
+  
+  // Handle audio play/pause
+  const toggleAudioPlayback = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!audio) {
+      const newAudio = new Audio(file.file_url);
+      newAudio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+      setAudio(newAudio);
+      newAudio.play();
+      setIsPlaying(true);
+    } else {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        audio.play();
+        setIsPlaying(true);
+      }
+    }
+  };
   
   // Handle file click, with different behavior based on file type
   const handleClick = () => {
@@ -109,8 +134,16 @@ export const MediaFileCard = ({
       
       case 'audio':
         return (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex items-center justify-center h-full relative">
             <Music className="h-16 w-16 text-muted-foreground" />
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8"
+              onClick={toggleAudioPlayback}
+            >
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
           </div>
         );
       

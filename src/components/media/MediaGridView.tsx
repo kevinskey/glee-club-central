@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MediaFile } from "@/types/media";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { Eye, Trash2, FileText, Image, Music, Video, File } from "lucide-react";
+import { Eye, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "lucide-react";
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
@@ -17,6 +17,9 @@ interface MediaGridViewProps {
 }
 
 export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
+  const [playingAudio, setPlayingAudio] = useState<{[key: string]: HTMLAudioElement}>({});
+  const [playingStates, setPlayingStates] = useState<{[key: string]: boolean}>({});
+
   const getMediaIcon = (type: MediaType, className: string = "h-12 w-12 text-muted-foreground") => {
     switch (type) {
       case "image":
@@ -29,6 +32,31 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
         return <Video className={className} />;
       default:
         return <File className={className} />;
+    }
+  };
+
+  const toggleAudioPlayback = (fileId: string, fileUrl: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const currentAudio = playingAudio[fileId];
+    
+    if (!currentAudio) {
+      const newAudio = new Audio(fileUrl);
+      newAudio.addEventListener('ended', () => {
+        setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+      });
+      
+      setPlayingAudio(prev => ({ ...prev, [fileId]: newAudio }));
+      newAudio.play();
+      setPlayingStates(prev => ({ ...prev, [fileId]: true }));
+    } else {
+      if (playingStates[fileId]) {
+        currentAudio.pause();
+        setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+      } else {
+        currentAudio.play();
+        setPlayingStates(prev => ({ ...prev, [fileId]: true }));
+      }
     }
   };
 
@@ -68,6 +96,21 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
               className="w-full h-full"
               aspectRatio={1}
             />
+          </div>
+        );
+      
+      case "audio":
+        return (
+          <div className="w-full h-full flex items-center justify-center bg-muted relative">
+            {getMediaIcon(mediaType)}
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8"
+              onClick={(e) => toggleAudioPlayback(file.id, file.file_url, e)}
+            >
+              {playingStates[file.id] ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            </Button>
           </div>
         );
       
