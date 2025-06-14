@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { AdminV2Layout } from '@/layouts/AdminV2Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -179,7 +180,7 @@ export default function AudioManagementPage() {
       // Delete from storage
       const { error: storageError } = await supabase.storage
         .from('media_library')
-        .remove([file.file_path]);
+        .remove([file.file_path || '']);
 
       if (storageError) console.error('Storage deletion error:', storageError);
 
@@ -202,10 +203,15 @@ export default function AudioManagementPage() {
   const renderFileCard = (file: AudioFileData) => {
     // Convert to AudioFile format for WaveSurferPlayer
     const audioFile: AudioFile = {
-      ...file,
+      id: file.id,
+      title: file.title,
       description: file.description || '',
+      file_url: file.file_url,
       file_path: file.file_path || '',
+      category: file.category,
       is_backing_track: file.is_backing_track || false,
+      uploaded_by: file.uploaded_by || '',
+      created_at: file.created_at,
     };
 
     return (
