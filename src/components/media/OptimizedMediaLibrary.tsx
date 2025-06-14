@@ -149,10 +149,13 @@ export function OptimizedMediaLibrary({ isAdminView = false, viewMode = 'grid' }
           mediaFiles={mediaFiles.map(file => ({
             ...file,
             file_url: file.file_url || '',
-            file_path: file.file_path || '',
-            uploaded_by: file.uploaded_by || '',
-            is_public: file.is_public || false,
-            updated_at: file.updated_at || file.created_at
+            file_path: file.file_url || '', // Use file_url as fallback for file_path
+            uploaded_by: '', // Default empty string since this info isn't in MediaFileLight
+            is_public: false, // Default to false
+            updated_at: file.created_at, // Use created_at as fallback
+            description: '', // Default empty description
+            folder: 'general', // Default folder
+            tags: [] // Default empty tags array
           }))}
           canEdit={isAdminView}
           canDelete={isAdminView}
