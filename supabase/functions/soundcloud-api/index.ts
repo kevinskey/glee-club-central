@@ -19,14 +19,19 @@ serve(async (req) => {
     const soundcloudClientId = Deno.env.get('SOUNDCLOUD_CLIENT_ID')
     const soundcloudClientSecret = Deno.env.get('SOUNDCLOUD_CLIENT_SECRET')
     
+    console.log('Environment check:')
+    console.log('SOUNDCLOUD_CLIENT_ID present:', !!soundcloudClientId)
+    console.log('SOUNDCLOUD_CLIENT_SECRET present:', !!soundcloudClientSecret)
+    
     if (!soundcloudClientId) {
-      console.error('SoundCloud Client ID not configured')
+      console.error('SoundCloud Client ID not found in environment')
       return new Response(
         JSON.stringify({
           playlists: [],
           tracks: [],
           status: 'error',
-          message: 'SoundCloud Client ID not configured. Please add your SoundCloud credentials in the admin settings.',
+          message: 'SoundCloud Client ID is not configured. Please add your SoundCloud Client ID to the edge function secrets.',
+          errorType: 'missing_credentials',
           requiresAuth: true
         }),
         { 
@@ -39,30 +44,53 @@ serve(async (req) => {
       )
     }
 
-    console.log('Attempting to fetch real SoundCloud data...')
+    console.log('Using Client ID:', soundcloudClientId.substring(0, 8) + '...')
     
     // Try to resolve user by username first
     const resolveUrl = `https://api.soundcloud.com/resolve?url=https://soundcloud.com/doctorkj&client_id=${soundcloudClientId}`
     
-    console.log('Resolving user...')
+    console.log('Attempting to resolve SoundCloud user...')
     const resolveResponse = await fetch(resolveUrl, {
       headers: {
-        'User-Agent': 'Spelman Glee Club Music App/1.0'
+        'User-Agent': 'Spelman Glee Club Music App/1.0',
+        'Accept': 'application/json'
       }
     })
+    
+    console.log('Resolve response status:', resolveResponse.status)
+    console.log('Resolve response headers:', Object.fromEntries(resolveResponse.headers.entries()))
     
     if (!resolveResponse.ok) {
       const errorText = await resolveResponse.text()
       console.error('Failed to resolve user:', resolveResponse.status, errorText)
+      
+      let errorMessage = 'Unable to access SoundCloud data.'
+      let errorType = 'api_error'
+      
+      if (resolveResponse.status === 401) {
+        errorMessage = 'Invalid SoundCloud Client ID. Please check your credentials in the edge function secrets.'
+        errorType = 'invalid_credentials'
+      } else if (resolveResponse.status === 403) {
+        errorMessage = 'SoundCloud API access denied. The API may require OAuth authentication or the Client ID may not have proper permissions.'
+        errorType = 'access_denied'
+      } else if (resolveResponse.status === 404) {
+        errorMessage = 'SoundCloud user "doctorkj" not found. Please verify the username is correct.'
+        errorType = 'user_not_found'
+      } else if (resolveResponse.status === 429) {
+        errorMessage = 'SoundCloud API rate limit exceeded. Please try again later.'
+        errorType = 'rate_limit'
+      }
       
       return new Response(
         JSON.stringify({
           playlists: [],
           tracks: [],
           status: 'error',
-          message: 'Unable to access SoundCloud data. SoundCloud now requires OAuth authentication for most API endpoints. Real-time data fetching is currently not available.',
+          message: errorMessage,
+          errorType: errorType,
+          httpStatus: resolveResponse.status,
           requiresAuth: true,
-          apiLimitation: true
+          details: errorText
         }),
         { 
           headers: { 
@@ -75,7 +103,7 @@ serve(async (req) => {
     }
 
     const userData = await resolveResponse.json()
-    console.log('User resolved:', userData.id)
+    console.log('User resolved successfully:', userData.id, userData.username)
 
     // Try to fetch tracks
     const tracksUrl = `https://api.soundcloud.com/users/${userData.id}/tracks?client_id=${soundcloudClientId}&limit=50`
@@ -83,35 +111,19 @@ serve(async (req) => {
     console.log('Fetching user tracks...')
     const tracksResponse = await fetch(tracksUrl, {
       headers: {
-        'User-Agent': 'Spelman Glee Club Music App/1.0'
+        'User-Agent': 'Spelman Glee Club Music App/1.0',
+        'Accept': 'application/json'
       }
     })
 
-    if (!tracksResponse.ok) {
+    let tracksData = []
+    if (tracksResponse.ok) {
+      tracksData = await tracksResponse.json()
+      console.log('Tracks fetched successfully:', tracksData.length)
+    } else {
       const errorText = await tracksResponse.text()
-      console.error('Failed to fetch tracks:', tracksResponse.status, errorText)
-      
-      return new Response(
-        JSON.stringify({
-          playlists: [],
-          tracks: [],
-          status: 'error',
-          message: 'SoundCloud API access denied. The platform now requires OAuth authentication which needs user consent. Consider implementing OAuth flow or using SoundCloud widgets for public content.',
-          requiresAuth: true,
-          needsOAuth: true
-        }),
-        { 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
-          },
-          status: 200 
-        }
-      )
+      console.warn('Failed to fetch tracks:', tracksResponse.status, errorText)
     }
-
-    const tracksData = await tracksResponse.json()
-    console.log('Tracks fetched:', tracksData.length)
 
     // Try to fetch playlists
     const playlistsUrl = `https://api.soundcloud.com/users/${userData.id}/playlists?client_id=${soundcloudClientId}&limit=50`
@@ -119,16 +131,18 @@ serve(async (req) => {
     console.log('Fetching user playlists...')
     const playlistsResponse = await fetch(playlistsUrl, {
       headers: {
-        'User-Agent': 'Spelman Glee Club Music App/1.0'
+        'User-Agent': 'Spelman Glee Club Music App/1.0',
+        'Accept': 'application/json'
       }
     })
 
     let playlistsData = []
     if (playlistsResponse.ok) {
       playlistsData = await playlistsResponse.json()
-      console.log('Playlists fetched:', playlistsData.length)
+      console.log('Playlists fetched successfully:', playlistsData.length)
     } else {
-      console.warn('Failed to fetch playlists, continuing with tracks only')
+      const errorText = await playlistsResponse.text()
+      console.warn('Failed to fetch playlists:', playlistsResponse.status, errorText)
     }
 
     // Transform the real data to match our expected format
@@ -162,7 +176,11 @@ serve(async (req) => {
       tracks: [] // Would need separate API calls to get track details
     }))
 
-    console.log('Real SoundCloud data processed successfully')
+    console.log('SoundCloud data processed successfully')
+    console.log('Final result:', {
+      tracksCount: transformedTracks.length,
+      playlistsCount: transformedPlaylists.length
+    })
     
     return new Response(
       JSON.stringify({
@@ -170,7 +188,12 @@ serve(async (req) => {
         tracks: transformedTracks,
         status: 'success',
         message: `Successfully loaded ${transformedTracks.length} tracks and ${transformedPlaylists.length} playlists from SoundCloud.`,
-        isRealData: true
+        isRealData: true,
+        userData: {
+          id: userData.id,
+          username: userData.username,
+          display_name: userData.full_name || userData.username
+        }
       }),
       { 
         headers: { 
@@ -189,8 +212,9 @@ serve(async (req) => {
         playlists: [],
         tracks: [],
         status: 'error',
-        message: 'Failed to connect to SoundCloud API. This may be due to API limitations or authentication requirements.',
+        message: 'Failed to connect to SoundCloud API. Please check your network connection and API credentials.',
         error: error instanceof Error ? error.message : 'Unknown error',
+        errorType: 'network_error',
         requiresAuth: true
       }),
       { 
