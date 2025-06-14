@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -142,25 +141,25 @@ export function UnifiedAdminModules() {
   const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+    <Card className="w-full">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center justify-between text-lg">
           Admin Modules
-          <Badge variant="secondary">{sortedModules.length} available</Badge>
+          <Badge variant="secondary" className="text-sm">{sortedModules.length} available</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <CardContent className="pt-0">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {sortedModules.map((module) => (
             <div
               key={module.id}
-              className="group cursor-pointer flex flex-col items-center justify-center p-6 border rounded-lg transition-all duration-200 hover:border-glee-spelman/30 hover:bg-glee-spelman/5 hover:shadow-lg hover:scale-105"
+              className="group cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => navigate(module.path)}
             >
-              <div className={`${module.color} text-white rounded-lg p-3 group-hover:scale-110 transition-transform duration-200 mb-3`}>
+              <div className={`${module.color} text-white rounded-xl p-4 group-hover:scale-110 transition-transform duration-200 mb-4 shadow-sm`}>
                 {module.icon}
               </div>
-              <span className="text-sm font-medium text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
+              <span className="text-sm font-semibold text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
                 {module.title}
               </span>
               <span className="text-xs text-muted-foreground text-center leading-tight">
@@ -171,11 +170,11 @@ export function UnifiedAdminModules() {
         </div>
         
         {sortedModules.length === 0 && (
-          <div className="p-8 text-center border rounded-lg">
-            <div className="text-muted-foreground mb-2">
+          <div className="p-12 text-center border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+            <div className="text-muted-foreground mb-3 text-base font-medium">
               No modules available for your role
             </div>
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground">
               Contact an administrator if you need access to specific features
             </p>
           </div>
