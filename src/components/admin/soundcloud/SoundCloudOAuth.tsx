@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ import {
   Users
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SoundCloudUser {
   id: string;
@@ -93,25 +93,18 @@ export function SoundCloudOAuth() {
     try {
       console.log('Initiating SoundCloud connection...');
       
-      const response = await fetch(`/functions/v1/soundcloud-oauth?action=authorize`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
+      const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
+        body: { action: 'authorize' }
       });
 
-      console.log('Response status:', response.status);
+      console.log('Response:', data);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Request failed:', errorText);
-        throw new Error(`Request failed with status ${response.status}: ${errorText}`);
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Failed to invoke OAuth function');
       }
 
-      const data = await response.json();
-      console.log('Authorization response:', data);
-      
-      if (data.error) {
+      if (data?.error) {
         throw new Error(data.error);
       }
 
@@ -140,25 +133,19 @@ export function SoundCloudOAuth() {
     try {
       const redirectUri = `${window.location.origin}/admin/music?callback=soundcloud`;
       
-      const response = await fetch(`/functions/v1/soundcloud-oauth?action=exchange`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
+        body: {
+          action: 'exchange',
           code,
           redirectUri
-        })
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Token exchange failed: ${errorText}`);
+      if (error) {
+        throw new Error(error.message || 'Token exchange failed');
       }
 
-      const data = await response.json();
-      
-      if (data.error) {
+      if (data?.error) {
         throw new Error(data.error);
       }
 
@@ -194,24 +181,18 @@ export function SoundCloudOAuth() {
     setIsLoadingData(true);
     
     try {
-      const response = await fetch(`/functions/v1/soundcloud-oauth?action=fetch-data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
+        body: {
+          action: 'fetch-data',
           accessToken: token
-        })
+        }
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Data fetch failed: ${errorText}`);
+      if (error) {
+        throw new Error(error.message || 'Data fetch failed');
       }
 
-      const data = await response.json();
-      
-      if (data.error) {
+      if (data?.error) {
         throw new Error(data.error);
       }
 

@@ -39,7 +39,9 @@ serve(async (req) => {
 
     // Generate OAuth authorization URL
     if (action === 'authorize') {
-      const redirectUri = `${url.origin}/admin/music?callback=soundcloud`
+      // Use the current origin from the request
+      const origin = req.headers.get('origin') || 'https://gleeworld.org'
+      const redirectUri = `${origin}/admin/music?callback=soundcloud`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
