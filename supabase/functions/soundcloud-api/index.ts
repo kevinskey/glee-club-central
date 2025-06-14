@@ -18,17 +18,17 @@ serve(async (req) => {
   try {
     console.log('Processing SoundCloud API request')
     
-    // Return empty data - no mock content
+    // Return empty data - no content available
     const emptyData = {
       playlists: [],
       tracks: [],
       status: 'success',
-      message: 'No SoundCloud content available at the moment'
+      message: 'No SoundCloud content configured'
     }
 
-    console.log('Returning empty data - no SoundCloud content')
+    console.log('Returning empty SoundCloud data')
     
-    const response = new Response(
+    return new Response(
       JSON.stringify(emptyData),
       { 
         headers: { 
@@ -38,9 +38,6 @@ serve(async (req) => {
         status: 200 
       }
     )
-    
-    console.log('Response created successfully')
-    return response
 
   } catch (error) {
     console.error('SoundCloud API Error:', error)
