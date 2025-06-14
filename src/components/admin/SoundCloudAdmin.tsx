@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,37 +37,7 @@ interface Track {
 }
 
 export function SoundCloudAdmin() {
-  const [tracks, setTracks] = useState<Track[]>([
-    {
-      id: '1',
-      title: 'Ave Maria - Soprano Solo',
-      artist: 'Spelman Glee Club',
-      duration: 240,
-      audioUrl: '/audio/ave-maria.mp3',
-      coverArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-      likes: 156,
-      plays: 2340,
-      genre: 'Classical',
-      uploadDate: '2024-01-15',
-      description: 'A beautiful rendition of Ave Maria performed by our soprano section.',
-      isPublic: true
-    },
-    {
-      id: '2',
-      title: 'Amazing Grace - Full Choir',
-      artist: 'Spelman Glee Club',
-      duration: 180,
-      audioUrl: '/audio/amazing-grace.mp3',
-      coverArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-      likes: 203,
-      plays: 3120,
-      genre: 'Spiritual',
-      uploadDate: '2024-01-10',
-      description: 'Our signature arrangement of Amazing Grace.',
-      isPublic: true
-    }
-  ]);
-
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -178,67 +149,79 @@ export function SoundCloudAdmin() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {tracks.map((track) => (
-                  <div
-                    key={track.id}
-                    className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50"
-                  >
-                    <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
-                      <img 
-                        src={track.coverArt} 
-                        alt={track.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{track.title}</h3>
-                      <p className="text-sm text-muted-foreground">{track.artist}</p>
-                      <div className="flex items-center gap-4 mt-1">
-                        <Badge variant="outline">{track.genre}</Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {track.plays.toLocaleString()} plays
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatDuration(track.duration)}
-                        </span>
+                {tracks.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Music className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <h3 className="text-lg font-semibold mb-2">No tracks found</h3>
+                    <p className="mb-4">Upload your first track to get started</p>
+                    <Button className="gap-2">
+                      <Upload className="w-4 h-4" />
+                      Upload Track
+                    </Button>
+                  </div>
+                ) : (
+                  tracks.map((track) => (
+                    <div
+                      key={track.id}
+                      className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50"
+                    >
+                      <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
+                        <img 
+                          src={track.coverArt} 
+                          alt={track.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{track.title}</h3>
+                        <p className="text-sm text-muted-foreground">{track.artist}</p>
+                        <div className="flex items-center gap-4 mt-1">
+                          <Badge variant="outline">{track.genre}</Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {track.plays.toLocaleString()} plays
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatDuration(track.duration)}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Badge variant={track.isPublic ? "default" : "secondary"}>
+                          {track.isPublic ? "Public" : "Private"}
+                        </Badge>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleVisibility(track.id)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedTrack(track);
+                            setIsEditing(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteTrack(track.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Badge variant={track.isPublic ? "default" : "secondary"}>
-                        {track.isPublic ? "Public" : "Private"}
-                      </Badge>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleToggleVisibility(track.id)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedTrack(track);
-                          setIsEditing(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteTrack(track.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
