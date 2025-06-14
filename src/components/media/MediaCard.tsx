@@ -19,7 +19,7 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(
     const [imageError, setImageError] = useState(false);
     const mediaType = getMediaType(file.file_type);
 
-    const getMediaIcon = (type: string, className: string = "h-8 w-8") => {
+    const getMediaIcon = (type: string, className: string = "h-6 w-6") => {
       switch (type) {
         case "image":
           return <Image className={className} />;
@@ -44,7 +44,7 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(
         className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer"
         onClick={handleClick}
       >
-        <div className="relative aspect-video bg-muted/40 overflow-hidden">
+        <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden">
           {mediaType === "image" && file.file_url && !imageError ? (
             <img 
               src={file.file_url} 
@@ -75,7 +75,7 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(
           </div>
         </div>
         
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
           <p className="text-xs text-muted-foreground truncate mb-2">
             {file.title.split('.').pop()?.toUpperCase()}

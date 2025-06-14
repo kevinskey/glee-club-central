@@ -35,7 +35,7 @@ export function LightweightMediaCard({
   const isPdf = mediaType === "pdf";
   const isAudio = mediaType === "audio";
 
-  const getMediaIcon = (type: MediaType, className: string = "h-8 w-8") => {
+  const getMediaIcon = (type: MediaType, className: string = "h-6 w-6") => {
     switch (type) {
       case "image":
         return <Image className={className} />;
@@ -98,7 +98,7 @@ export function LightweightMediaCard({
 
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer" onClick={handlePreview}>
-      <div className="relative aspect-video bg-muted/40 overflow-hidden">
+      <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden">
         {isImage && file.file_url && !imageError ? (
           <img 
             src={file.file_url} 
@@ -120,12 +120,12 @@ export function LightweightMediaCard({
               size="lg"
               variant="secondary"
               onClick={handleAudioToggle}
-              className="h-16 w-16 rounded-full shadow-lg bg-white/90 hover:bg-white backdrop-blur-sm"
+              className="h-12 w-12 rounded-full shadow-lg bg-white/90 hover:bg-white backdrop-blur-sm"
             >
               {isPlaying ? (
-                <Pause className="h-8 w-8 text-gray-800" />
+                <Pause className="h-6 w-6 text-gray-800" />
               ) : (
-                <Play className="h-8 w-8 text-gray-800 ml-1" />
+                <Play className="h-6 w-6 text-gray-800 ml-0.5" />
               )}
             </Button>
           </div>
@@ -174,7 +174,7 @@ export function LightweightMediaCard({
         </div>
       </div>
       
-      <CardContent className="p-4">
+      <CardContent className="p-3">
         {canEdit && onUpdateTitle ? (
           <InlineMediaTitleEdit
             title={file.title}
