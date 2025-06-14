@@ -60,25 +60,28 @@ export function useHeroData() {
 
           if (mediaError) {
             console.error('useHeroData: Error fetching media:', mediaError);
-            throw mediaError;
-          }
+            // Don't throw here, just log the error and continue
+            console.warn('useHeroData: Continuing without media files due to error');
+          } else {
+            console.log('useHeroData: Fetched media data:', mediaData);
 
-          console.log('useHeroData: Fetched media data:', mediaData);
-
-          if (mediaData) {
-            const mediaMap = mediaData.reduce((acc, media) => {
-              acc[media.id] = media;
-              return acc;
-            }, {} as Record<string, MediaFile>);
-            
-            console.log('useHeroData: Media map created:', mediaMap);
-            setMediaFiles(mediaMap);
+            if (mediaData && mediaData.length > 0) {
+              const mediaMap = mediaData.reduce((acc, media) => {
+                acc[media.id] = media;
+                return acc;
+              }, {} as Record<string, MediaFile>);
+              
+              console.log('useHeroData: Media map created:', mediaMap);
+              setMediaFiles(mediaMap);
+            } else {
+              console.warn('useHeroData: Media query returned no results');
+            }
           }
         } else {
           console.warn('useHeroData: No media IDs found in slides - slides may not have background images');
         }
       } else {
-        console.log('useHeroData: No visible hero slides found');
+        console.log('useHeroData: No visible hero slides found, will show default hero');
       }
     } catch (error) {
       console.error('useHeroData: Error in fetchHeroSlides:', error);

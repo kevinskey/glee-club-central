@@ -15,49 +15,43 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
   console.log('HeroSlideContent: Looking for media_id:', slide.media_id);
   
   let backgroundImage;
+  let hasValidImage = false;
   
   if (slide.media_id && mediaFiles[slide.media_id]) {
     backgroundImage = mediaFiles[slide.media_id].file_url;
+    hasValidImage = true;
     console.log('HeroSlideContent: Using slide image:', backgroundImage);
   } else {
-    // Instead of using a fallback image, show an error state or placeholder
     console.warn('HeroSlideContent: No valid background image found for slide:', slide.title);
     console.warn('HeroSlideContent: media_id:', slide.media_id);
     console.warn('HeroSlideContent: Available media file IDs:', Object.keys(mediaFiles));
-    
-    // Use a gradient background instead of a random image
-    backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
   }
 
   return (
-    <section className="relative min-h-[300px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden pb-8 sm:pb-12">
-      {/* Background - either image or gradient */}
-      <div className="absolute inset-0 sm:relative">
-        {backgroundImage.startsWith('linear-gradient') ? (
-          <div 
-            className="w-full h-full"
-            style={{ background: backgroundImage }}
-          />
+    <section className="relative min-h-[400px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0">
+        {hasValidImage ? (
+          <>
+            <img
+              src={backgroundImage}
+              alt={slide.title}
+              className="w-full h-full object-cover transition-all duration-1000"
+              onError={(e) => {
+                console.error('HeroSlideContent: Failed to load image:', backgroundImage);
+                // Hide the broken image
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+            <div className="absolute inset-0 bg-black/40"></div>
+          </>
         ) : (
-          <img
-            src={backgroundImage}
-            alt={slide.title}
-            className="w-full h-auto min-h-[300px] object-cover sm:w-full sm:h-full sm:object-contain transition-all duration-1000"
-            style={{
-              objectPosition: 'center center'
-            }}
-            onError={(e) => {
-              console.error('HeroSlideContent: Failed to load image:', backgroundImage);
-              // Replace with gradient on error
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              if (target.parentElement) {
-                target.parentElement.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-              }
-            }}
-          />
+          // Fallback gradient background
+          <div className="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
         )}
-        <div className="absolute inset-0 bg-black/50 sm:bg-black/40"></div>
       </div>
       
       {/* YouTube Video Background (if applicable) */}
@@ -70,28 +64,28 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
-          <div className="absolute inset-0 bg-black/50 sm:bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
       )}
       
-      {/* Content - Mobile Optimized */}
-      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-2 sm:px-4 sm:absolute">
+      {/* Content */}
+      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
         {(slide.show_title !== false) && (
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
             {slide.title}
           </h1>
         )}
         {slide.description && (
-          <p className="text-sm sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
             {slide.description}
           </p>
         )}
-        {slide.button_text && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+        {slide.button_text && slide.button_link && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              size="default"
-              className="bg-white text-primary hover:bg-white/90 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3"
-              onClick={() => slide.button_link && window.open(slide.button_link, '_blank')}
+              size="lg"
+              className="glass-button-primary text-base px-8 py-4"
+              onClick={() => window.open(slide.button_link, '_blank')}
             >
               {slide.button_text}
             </Button>
@@ -99,11 +93,13 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
         )}
         
         {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && !slide.media_id && (
-          <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded text-yellow-100 text-sm">
-            <p><strong>Debug:</strong> No background image selected for this slide</p>
+        {process.env.NODE_ENV === 'development' && !hasValidImage && (
+          <div className="mt-6 p-4 glass-card border border-yellow-500/50 rounded-2xl text-yellow-100 text-sm max-w-md mx-auto">
+            <p><strong>Debug:</strong> No background image loaded</p>
             <p>Slide ID: {slide.id}</p>
-            <p>Go to Admin → Hero Slides to select a background image</p>
+            <p>Media ID: {slide.media_id || 'None'}</p>
+            <p>Available media: {Object.keys(mediaFiles).length}</p>
+            <p className="mt-2 text-xs">Go to Admin → Hero Slides to fix this</p>
           </div>
         )}
       </div>
