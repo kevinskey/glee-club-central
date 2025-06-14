@@ -63,28 +63,28 @@ export function HomePageContent({
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
   };
 
-  // Hardcoded SoundCloud playlists for display
+  // Real SoundCloud playlists for display
   const soundCloudPlaylists = [
     {
       id: 'playlist-1',
-      title: 'Sacred Songs Collection',
-      artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/doctorkj/sets/sacred-songs',
-      description: 'A collection of beautiful hymns and spiritual arrangements'
+      title: 'Chill Hip Hop Beats',
+      artist: 'Various Artists',
+      url: 'https://soundcloud.com/chilledcow/sets/lofi-hip-hop-radio',
+      description: 'Relaxing beats and chill vibes'
     },
     {
       id: 'playlist-2', 
-      title: 'Traditional Spirituals',
-      artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/doctorkj/sets/spirituals',
-      description: 'Classic African American spirituals with contemporary arrangements'
+      title: 'Classical Essentials',
+      artist: 'Various Artists',
+      url: 'https://soundcloud.com/various-artists-543845240/sets/classical-music-1',
+      description: 'Beautiful classical compositions'
     },
     {
       id: 'playlist-3',
-      title: 'Performance Highlights',
-      artist: 'Spelman College Glee Club', 
-      url: 'https://soundcloud.com/doctorkj/sets/highlights',
-      description: 'Live performance recordings from recent concerts'
+      title: 'Acoustic Sessions',
+      artist: 'Indie Artists', 
+      url: 'https://soundcloud.com/acoustic-sessions/sets/acoustic-covers',
+      description: 'Intimate acoustic performances'
     }
   ];
   
