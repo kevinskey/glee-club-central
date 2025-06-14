@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -315,7 +314,7 @@ export default function HeroSlidesPage() {
       <div className="p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Hero Slides Management</h1>
-          <Button onClick={handleCreateNew}>
+          <Button onClick={handleCreateNew} variant="spelman">
             <Plus className="h-4 w-4 mr-2" />
             Add New Slide
           </Button>
