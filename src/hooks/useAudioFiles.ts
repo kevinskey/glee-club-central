@@ -6,7 +6,7 @@ export interface AudioFileData {
   id: string;
   title: string;
   file_url: string;
-  description?: string;
+  description?: string | null;
   category: string;
   created_at: string;
   file_path?: string;
