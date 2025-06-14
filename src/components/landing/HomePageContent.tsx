@@ -4,7 +4,7 @@ import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Music } from "lucide-react";
+import { ExternalLink, Music, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
@@ -51,6 +51,7 @@ export function HomePageContent({
   
   const [soundCloudEmbeds, setSoundCloudEmbeds] = useState<any[]>([]);
   const [isLoadingEmbeds, setIsLoadingEmbeds] = useState(true);
+  const [currentEmbedIndex, setCurrentEmbedIndex] = useState(0);
 
   useEffect(() => {
     loadSoundCloudEmbeds();
@@ -79,19 +80,43 @@ export function HomePageContent({
       url: url,
       color: '#ff5500',
       auto_play: 'false',
-      hide_related: 'true', // Hides related tracks
-      show_comments: 'false', // Hides comments section  
-      show_user: 'false', // Hides user info
+      hide_related: 'true',
+      show_comments: 'false',
+      show_user: 'false',
       show_reposts: 'false',
-      show_teaser: 'false', // Removes teaser for next track
-      visual: 'false', // Uses minimal waveform instead of artwork
-      show_artwork: 'false', // Hides large artwork
-      buying: 'false', // Removes buy buttons
-      sharing: 'false', // Removes share buttons
-      download: 'false' // Removes download button
+      show_teaser: 'false',
+      visual: 'false',
+      show_artwork: 'false',
+      buying: 'false',
+      sharing: 'false',
+      download: 'false'
     });
 
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
+  };
+
+  const handlePrevEmbed = () => {
+    setCurrentEmbedIndex((prev) => 
+      prev === 0 ? soundCloudEmbeds.length - 1 : prev - 1
+    );
+  };
+
+  const handleNextEmbed = () => {
+    setCurrentEmbedIndex((prev) => 
+      prev === soundCloudEmbeds.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // Mock playlist data - in a real implementation, this would come from SoundCloud API
+  const generateMockPlaylist = (embed: any) => {
+    const trackCount = Math.floor(Math.random() * 8) + 3; // 3-10 tracks
+    return Array.from({ length: trackCount }, (_, index) => ({
+      id: `${embed.id}-track-${index}`,
+      title: `Track ${index + 1} - ${embed.title}`,
+      duration: `${Math.floor(Math.random() * 4) + 2}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+      plays: Math.floor(Math.random() * 50000) + 1000,
+      likes: Math.floor(Math.random() * 5000) + 100
+    }));
   };
   
   return (
@@ -129,42 +154,120 @@ export function HomePageContent({
               </div>
             ) : soundCloudEmbeds.length > 0 ? (
               <div className="space-y-8">
-                {soundCloudEmbeds.map((embed) => (
-                  <Card key={embed.id} className="overflow-hidden">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {embed.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            by {embed.artist}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            {embed.description}
-                          </p>
-                        </div>
+                {/* Current Embed Display */}
+                <Card className="overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {soundCloudEmbeds[currentEmbedIndex].title}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          by {soundCloudEmbeds[currentEmbedIndex].artist}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                          {soundCloudEmbeds[currentEmbedIndex].description}
+                        </p>
+                      </div>
+                      
+                      {/* Navigation Controls */}
+                      <div className="flex items-center gap-2">
+                        {soundCloudEmbeds.length > 1 && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={handlePrevEmbed}
+                              disabled={soundCloudEmbeds.length <= 1}
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            <span className="text-xs text-gray-500 px-2">
+                              {currentEmbedIndex + 1} / {soundCloudEmbeds.length}
+                            </span>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={handleNextEmbed}
+                              disabled={soundCloudEmbeds.length <= 1}
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
                         <Button variant="outline" size="sm" asChild>
-                          <a href={embed.url} target="_blank" rel="noopener noreferrer">
+                          <a href={soundCloudEmbeds[currentEmbedIndex].url} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="w-4 h-4" />
                           </a>
                         </Button>
                       </div>
-                      <div className="rounded-lg overflow-hidden">
-                        <iframe
-                          width="100%"
-                          height="166"
-                          scrolling="no"
-                          frameBorder="no"
-                          allow="autoplay"
-                          src={generateEmbedCode(embed.url)}
-                          className="w-full border-0"
-                          title={`SoundCloud: ${embed.title}`}
-                        />
+                    </div>
+                    
+                    {/* SoundCloud Player */}
+                    <div className="rounded-lg overflow-hidden mb-6">
+                      <iframe
+                        width="100%"
+                        height="166"
+                        scrolling="no"
+                        frameBorder="no"
+                        allow="autoplay"
+                        src={generateEmbedCode(soundCloudEmbeds[currentEmbedIndex].url)}
+                        className="w-full border-0"
+                        title={`SoundCloud: ${soundCloudEmbeds[currentEmbedIndex].title}`}
+                      />
+                    </div>
+
+                    {/* Playlist Tracks */}
+                    <div className="border-t pt-6">
+                      <h5 className="text-md font-medium text-gray-900 dark:text-white mb-4">
+                        Playlist Tracks
+                      </h5>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {generateMockPlaylist(soundCloudEmbeds[currentEmbedIndex]).map((track, index) => (
+                          <div 
+                            key={track.id}
+                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-500 dark:text-gray-400 w-6">
+                                {index + 1}
+                              </span>
+                              <div>
+                                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {track.title}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                  {track.plays.toLocaleString()} plays • {track.likes.toLocaleString()} likes
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {track.duration}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  </Card>
-                ))}
+                  </div>
+                </Card>
+
+                {/* Playlist Navigation Dots */}
+                {soundCloudEmbeds.length > 1 && (
+                  <div className="flex justify-center gap-2 mt-6">
+                    {soundCloudEmbeds.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentEmbedIndex(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${
+                          index === currentEmbedIndex 
+                            ? 'bg-orange-500' 
+                            : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                        }`}
+                        aria-label={`Go to playlist ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
