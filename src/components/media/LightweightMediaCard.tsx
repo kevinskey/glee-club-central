@@ -1,0 +1,191 @@
+
+import React, { useState } from "react";
+import { MediaFileLight } from "@/hooks/usePaginatedMediaLibrary";
+import { MediaType, getMediaType } from "@/utils/mediaUtils";
+import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatFileSize } from "@/utils/file-utils";
+import { format } from "date-fns";
+
+interface LightweightMediaCardProps {
+  file: MediaFileLight;
+  canEdit: boolean;
+  canDelete: boolean;
+  onDelete: (id: string) => Promise<void>;
+  onPreview: (id: string) => void;
+}
+
+export function LightweightMediaCard({ 
+  file, 
+  canEdit, 
+  canDelete, 
+  onDelete, 
+  onPreview 
+}: LightweightMediaCardProps) {
+  const [playingAudio, setPlayingAudio] = useState<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const mediaType = getMediaType(file.file_type);
+  const isImage = mediaType === "image";
+  const isPdf = mediaType === "pdf";
+  const isAudio = mediaType === "audio";
+
+  const getMediaIcon = (type: MediaType, className: string = "h-8 w-8") => {
+    switch (type) {
+      case "image":
+        return <Image className={className} />;
+      case "pdf":
+        return <FileText className={className} />;
+      case "audio":
+        return <Music className={className} />;
+      case "video":
+        return <Video className={className} />;
+      default:
+        return <File className={className} />;
+    }
+  };
+
+  const handleAudioToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (!file.file_url) {
+      // File URL not loaded yet, need to preview first
+      onPreview(file.id);
+      return;
+    }
+    
+    if (!playingAudio) {
+      const audio = new Audio(file.file_url);
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+      });
+      audio.addEventListener('error', (e) => {
+        console.error(`Audio load error for ${file.title}:`, e);
+      });
+      
+      setPlayingAudio(audio);
+      audio.play();
+      setIsPlaying(true);
+    } else {
+      if (isPlaying) {
+        playingAudio.pause();
+        setIsPlaying(false);
+      } else {
+        playingAudio.play();
+        setIsPlaying(true);
+      }
+    }
+  };
+  
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    if (confirm("Are you sure you want to delete this file?")) {
+      await onDelete(file.id);
+    }
+  };
+
+  const handlePreview = () => {
+    onPreview(file.id);
+  };
+
+  return (
+    <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer" onClick={handlePreview}>
+      <div className="relative aspect-video bg-muted/40 overflow-hidden">
+        {isImage && file.file_url && !imageError ? (
+          <img 
+            src={file.file_url} 
+            alt={file.title}
+            loading="lazy"
+            className="object-cover w-full h-full"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            {getMediaIcon(mediaType)}
+          </div>
+        )}
+        
+        {/* Audio play button overlay */}
+        {isAudio && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={handleAudioToggle}
+              className="h-16 w-16 rounded-full shadow-lg bg-white/90 hover:bg-white backdrop-blur-sm"
+            >
+              {isPlaying ? (
+                <Pause className="h-8 w-8 text-gray-800" />
+              ) : (
+                <Play className="h-8 w-8 text-gray-800 ml-1" />
+              )}
+            </Button>
+          </div>
+        )}
+        
+        {/* Regular overlay with actions */}
+        <div className={`absolute inset-0 bg-black/60 ${isAudio ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity flex items-center justify-center gap-2`}>
+          <Button 
+            size="sm" 
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePreview();
+            }}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          
+          {file.file_url && (
+            <Button 
+              size="sm" 
+              variant="secondary"
+              onClick={(e) => {
+                e.stopPropagation();
+                const a = document.createElement('a');
+                a.href = file.file_url!;
+                a.download = file.title;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
+          
+          {canDelete && (
+            <Button 
+              size="sm" 
+              variant="destructive"
+              onClick={handleDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+      
+      <CardContent className="p-4">
+        <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+        <p className="text-xs text-muted-foreground truncate mb-2">
+          {file.title.split('.').pop()}
+        </p>
+        
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="capitalize">{mediaType}</span>
+          <span>{formatFileSize(file.size || 0)}</span>
+        </div>
+        
+        <div className="text-xs text-muted-foreground mt-1">
+          {format(new Date(file.created_at), 'MMM d, yyyy')}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

@@ -3,36 +3,26 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { PageHeader } from "@/components/ui/page-header";
-import { FileImage, Upload, RefreshCw, Grid, List, Image, FileText, Music, Video } from 'lucide-react';
-import { EnhancedMediaLibrary } from '@/components/media/EnhancedMediaLibrary';
+import { FileImage, Upload, RefreshCw } from 'lucide-react';
+import { OptimizedMediaLibrary } from '@/components/media/OptimizedMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
-import { useMediaLibrary } from '@/hooks/useMediaLibrary';
+import { usePaginatedMediaLibrary } from '@/hooks/usePaginatedMediaLibrary';
 import { toast } from 'sonner';
 
 const AdminMediaLibraryPage = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { fetchAllMedia, isLoading, mediaStats } = useMediaLibrary();
+  const { refetch } = usePaginatedMediaLibrary();
   
   const handleUploadComplete = () => {
     console.log("Admin: Upload complete");
     setIsUploadModalOpen(false);
-    fetchAllMedia();
+    refetch();
     toast.success("Media uploaded successfully!");
   };
 
   const handleRefresh = () => {
-    fetchAllMedia();
+    refetch();
     toast.success("Media library refreshed");
-  };
-
-  const handleViewModeToggle = () => {
-    setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
-  };
-
-  const getFileCount = (type: string): number => {
-    return (mediaStats.filesByType as Record<string, number>)?.[type] || 0;
   };
   
   return (
@@ -53,7 +43,7 @@ const AdminMediaLibraryPage = () => {
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="text-sm">
                 <FileImage className="h-3 w-3 mr-1" />
-                {mediaStats.totalFiles} Files
+                Optimized Loading
               </Badge>
               <Badge variant="outline" className="text-sm">
                 Admin Access
@@ -66,19 +56,10 @@ const AdminMediaLibraryPage = () => {
           <Button
             variant="outline"
             onClick={handleRefresh}
-            disabled={isLoading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className="h-4 w-4" />
             Refresh
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleViewModeToggle}
-            className="flex items-center gap-2"
-          >
-            {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-            {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
           <Button 
             onClick={() => setIsUploadModalOpen(true)}
@@ -90,65 +71,6 @@ const AdminMediaLibraryPage = () => {
         </div>
       </div>
 
-      {/* Media Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                <FileImage className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Files</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{mediaStats.totalFiles}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                <Image className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Images</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{getFileCount('image')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Documents</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{getFileCount('pdf')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-                <Music className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Audio</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{getFileCount('audio')}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Media Library */}
       <Card className="overflow-hidden">
         <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
@@ -158,7 +80,7 @@ const AdminMediaLibraryPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <EnhancedMediaLibrary isAdminView={true} viewMode={viewMode} />
+          <OptimizedMediaLibrary isAdminView={true} />
         </CardContent>
       </Card>
         
