@@ -237,6 +237,34 @@ export default function HeroSlidesPage() {
     }, 100);
   };
 
+  const handleCreateNew = () => {
+    console.log('Creating new slide...');
+    setEditingSlide(null);
+    setSelectedMediaUrl('');
+    setFormData({
+      title: '',
+      description: '',
+      button_text: '',
+      button_link: '',
+      media_id: '',
+      youtube_url: '',
+      media_type: 'image',
+      visible: true,
+      show_title: true,
+      slide_order: slides.length,
+      section_id: 'homepage-main'
+    });
+    setIsCreating(true);
+    
+    // Scroll to form after state updates
+    setTimeout(() => {
+      const formElement = document.getElementById('hero-slide-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
   const toggleVisibility = async (slide: HeroSlide) => {
     try {
       const { error } = await supabase
@@ -287,19 +315,11 @@ export default function HeroSlidesPage() {
       <div className="p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Hero Slides Management</h1>
-          <Button onClick={() => setIsCreating(true)}>
+          <Button onClick={handleCreateNew}>
             <Plus className="h-4 w-4 mr-2" />
             Add New Slide
           </Button>
         </div>
-
-        {/* Debug info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded text-sm">
-            <p><strong>Debug:</strong> Found {mediaFiles.length} media files</p>
-            <p>Slides with media_id: {slides.filter(s => s.media_id).length}</p>
-          </div>
-        )}
 
         {/* Slides List */}
         <div className="grid gap-4">
@@ -322,9 +342,6 @@ export default function HeroSlidesPage() {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <ImageIcon className="h-6 w-6" />
-                          {process.env.NODE_ENV === 'development' && (
-                            <span className="sr-only">No image (media_id: {slide.media_id || 'none'})</span>
-                          )}
                         </div>
                       )}
                     </div>
@@ -388,9 +405,6 @@ export default function HeroSlidesPage() {
                   <p className="text-sm text-muted-foreground">
                     Order: {slide.slide_order} | Type: {slide.media_type}
                     {slide.media_id && ' | Has Image'}
-                    {process.env.NODE_ENV === 'development' && slide.media_id && (
-                      <span> | Media ID: {slide.media_id}</span>
-                    )}
                   </p>
                   {slide.description && (
                     <p className="text-sm mt-2">{slide.description}</p>
