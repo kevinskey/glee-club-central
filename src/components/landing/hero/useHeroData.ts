@@ -57,59 +57,90 @@ export function useHeroData() {
         console.log('useHeroData: Media IDs to fetch:', mediaIds);
 
         if (mediaIds.length > 0) {
-          // First try media_library table
-          const { data: mediaData, error: mediaError } = await supabase
-            .from('media_library')
-            .select('id, file_url, title')
-            .in('id', mediaIds);
-
           let mediaMap: Record<string, MediaFile> = {};
 
-          if (mediaError) {
-            console.error('useHeroData: Error fetching from media_library:', mediaError);
-          } else if (mediaData && mediaData.length > 0) {
-            mediaMap = mediaData.reduce((acc, media) => {
-              acc[media.id] = {
-                id: media.id,
-                file_url: media.file_url,
-                title: media.title
-              };
-              return acc;
-            }, {} as Record<string, MediaFile>);
-            
-            console.log('useHeroData: Media map created from media_library:', Object.keys(mediaMap).length, 'files');
+          // Try media_library first
+          try {
+            const { data: mediaData, error: mediaError } = await supabase
+              .from('media_library')
+              .select('id, file_url, title')
+              .in('id', mediaIds);
+
+            if (mediaError) {
+              console.error('useHeroData: Error fetching from media_library:', mediaError);
+            } else if (mediaData && mediaData.length > 0) {
+              console.log('useHeroData: Found media files in media_library:', mediaData.length);
+              mediaData.forEach(media => {
+                mediaMap[media.id] = {
+                  id: media.id,
+                  file_url: media.file_url,
+                  title: media.title
+                };
+              });
+            }
+          } catch (error) {
+            console.error('useHeroData: Exception fetching from media_library:', error);
           }
 
-          // If we didn't get all media files, try site_images for the missing ones
+          // Try site_images for any missing media files
           const missingIds = mediaIds.filter(id => !mediaMap[id]);
           
           if (missingIds.length > 0) {
             console.log('useHeroData: Trying site_images for missing IDs:', missingIds);
             
-            const { data: siteImagesData, error: siteImagesError } = await supabase
-              .from('site_images')
-              .select('id, file_url, name')
-              .in('id', missingIds);
+            try {
+              const { data: siteImagesData, error: siteImagesError } = await supabase
+                .from('site_images')
+                .select('id, file_url, name')
+                .in('id', missingIds);
 
-            if (siteImagesError) {
-              console.error('useHeroData: Error fetching from site_images:', siteImagesError);
-            } else if (siteImagesData && siteImagesData.length > 0) {
-              const siteImagesMap = siteImagesData.reduce((acc, media) => {
-                acc[media.id] = {
-                  id: media.id,
-                  file_url: media.file_url,
-                  title: media.name
-                };
-                return acc;
-              }, {} as Record<string, MediaFile>);
-              
-              // Merge with existing media map
-              mediaMap = { ...mediaMap, ...siteImagesMap };
-              console.log('useHeroData: Added from site_images, total media files:', Object.keys(mediaMap).length);
+              if (siteImagesError) {
+                console.error('useHeroData: Error fetching from site_images:', siteImagesError);
+              } else if (siteImagesData && siteImagesData.length > 0) {
+                console.log('useHeroData: Found media files in site_images:', siteImagesData.length);
+                siteImagesData.forEach(media => {
+                  mediaMap[media.id] = {
+                    id: media.id,
+                    file_url: media.file_url,
+                    title: media.name
+                  };
+                });
+              }
+            } catch (error) {
+              console.error('useHeroData: Exception fetching from site_images:', error);
             }
           }
 
-          console.log('useHeroData: Final media map keys:', Object.keys(mediaMap));
+          // Final check - if we still don't have media files, let's see what's available
+          if (Object.keys(mediaMap).length === 0) {
+            console.warn('useHeroData: No media files found for any IDs. Let me check what media exists...');
+            
+            // Debug: Check what's actually in the media_library table
+            const { data: allMedia, error: allMediaError } = await supabase
+              .from('media_library')
+              .select('id, title, file_url')
+              .limit(10);
+              
+            if (allMediaError) {
+              console.error('useHeroData: Error checking available media:', allMediaError);
+            } else {
+              console.log('useHeroData: Sample media files available:', allMedia?.map(m => ({ id: m.id, title: m.title })));
+            }
+
+            // Also check site_images
+            const { data: allSiteImages, error: allSiteError } = await supabase
+              .from('site_images')
+              .select('id, name, file_url')
+              .limit(10);
+              
+            if (allSiteError) {
+              console.error('useHeroData: Error checking available site images:', allSiteError);
+            } else {
+              console.log('useHeroData: Sample site images available:', allSiteImages?.map(i => ({ id: i.id, name: i.name })));
+            }
+          }
+
+          console.log('useHeroData: Final media map with', Object.keys(mediaMap).length, 'files');
           setMediaFiles(mediaMap);
         } else {
           console.log('useHeroData: No media IDs found in slides');
