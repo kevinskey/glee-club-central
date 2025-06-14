@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
@@ -23,6 +24,7 @@ import {
   Image,
   Package,
   Palette,
+  Music,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
@@ -45,6 +47,7 @@ const navigationGroups = [
     items: [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
       { to: '/admin/media-library', icon: Image, label: 'Media Library' },
+      { to: '/admin/music', icon: Music, label: 'Music Player' },
       { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
     ]
   },
