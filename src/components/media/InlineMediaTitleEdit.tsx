@@ -24,17 +24,27 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
     }
   }, [isEditing]);
 
-  const handleStart = () => {
+  const handleStart = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setEditValue(title);
     setIsEditing(true);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setEditValue(title);
     setIsEditing(false);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    
     if (editValue.trim() === '') {
       toast.error('Title cannot be empty');
       return;
@@ -66,7 +76,7 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
 
   if (isEditing) {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
+      <div className={`flex items-center gap-2 ${className}`} onClick={(e) => e.stopPropagation()}>
         <Input
           ref={inputRef}
           value={editValue}
@@ -98,13 +108,18 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
   }
 
   return (
-    <div className={`flex items-center gap-2 group ${className}`}>
-      <span className="flex-1 font-medium text-sm truncate">{title}</span>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <span 
+        className="flex-1 font-medium text-sm truncate cursor-pointer"
+        onClick={handleStart}
+      >
+        {title}
+      </span>
       <Button
         size="sm"
         variant="ghost"
         onClick={handleStart}
-        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="h-6 w-6 p-0 opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
       >
         <Edit className="h-3 w-3" />
       </Button>
