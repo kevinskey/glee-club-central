@@ -1,10 +1,10 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Music } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
   id: string;
@@ -48,6 +48,31 @@ export function HomePageContent({
 }: HomePageContentProps) {
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
+  const [soundCloudEmbeds, setSoundCloudEmbeds] = useState<any[]>([]);
+  const [isLoadingEmbeds, setIsLoadingEmbeds] = useState(true);
+
+  useEffect(() => {
+    loadSoundCloudEmbeds();
+  }, []);
+
+  const loadSoundCloudEmbeds = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('soundcloud_embeds')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setSoundCloudEmbeds(data || []);
+    } catch (error) {
+      console.error('Error loading SoundCloud embeds:', error);
+      setSoundCloudEmbeds([]);
+    } finally {
+      setIsLoadingEmbeds(false);
+    }
+  };
+
   const generateEmbedCode = (url: string) => {
     const embedParams = new URLSearchParams({
       url: url,
@@ -62,31 +87,6 @@ export function HomePageContent({
 
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
   };
-
-  // Real Spelman Glee Club SoundCloud playlists
-  const soundCloudPlaylists = [
-    {
-      id: 'playlist-1',
-      title: 'Sacred Songs Collection',
-      artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/spelman-glee/sets/sacred-songs',
-      description: 'A collection of beautiful hymns and spiritual arrangements'
-    },
-    {
-      id: 'playlist-2', 
-      title: 'Traditional Spirituals',
-      artist: 'Spelman College Glee Club',
-      url: 'https://soundcloud.com/spelman-glee/sets/spirituals',
-      description: 'Classic African American spirituals with contemporary arrangements'
-    },
-    {
-      id: 'playlist-3',
-      title: 'Performance Highlights',
-      artist: 'Spelman College Glee Club', 
-      url: 'https://soundcloud.com/spelman-glee/sets/concert-highlights',
-      description: 'Live performance recordings from recent concerts'
-    }
-  ];
   
   return (
     <main className="w-full">
@@ -115,55 +115,59 @@ export function HomePageContent({
               </p>
             </div>
             
-            {/* Show SoundCloud playlist embeds */}
-            <div className="space-y-8">
-              {soundCloudPlaylists.map((playlist) => (
-                <Card key={playlist.id} className="overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {playlist.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          by {playlist.artist}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                          {playlist.description}
-                        </p>
+            {/* Show SoundCloud embeds from admin configuration */}
+            {isLoadingEmbeds ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">Loading music...</p>
+              </div>
+            ) : soundCloudEmbeds.length > 0 ? (
+              <div className="space-y-8">
+                {soundCloudEmbeds.map((embed) => (
+                  <Card key={embed.id} className="overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {embed.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            by {embed.artist}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                            {embed.description}
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={embed.url} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={playlist.url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </Button>
+                      <div className="rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="300"
+                          scrolling="no"
+                          frameBorder="no"
+                          allow="autoplay"
+                          src={generateEmbedCode(embed.url)}
+                          className="w-full border-0"
+                          title={`SoundCloud: ${embed.title}`}
+                        />
+                      </div>
                     </div>
-                    <div className="rounded-lg overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="300"
-                        scrolling="no"
-                        frameBorder="no"
-                        allow="autoplay"
-                        src={generateEmbedCode(playlist.url)}
-                        className="w-full border-0"
-                        title={`SoundCloud playlist: ${playlist.title}`}
-                      />
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            {/* Fallback message if no embeds */}
-            {soundCloudPlaylists.length === 0 && (
+                  </Card>
+                ))}
+              </div>
+            ) : (
               <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <Music className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 dark:text-gray-400 text-sm">
-                  No music available at the moment.
+                  No music embeds configured yet.
                 </p>
                 <p className="text-gray-500 dark:text-gray-500 text-xs mt-2">
-                  Check back soon for new tracks!
+                  Admins can add SoundCloud embeds through the admin panel.
                 </p>
               </div>
             )}
