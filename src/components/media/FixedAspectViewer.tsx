@@ -92,6 +92,7 @@ export function FixedAspectViewer({ fileId, onClose }: FixedAspectViewerProps) {
           <video
             src={file.file_url}
             controls
+            autoPlay
             className="w-full h-full"
             style={{ objectFit: 'contain' }}
           >
@@ -111,6 +112,7 @@ export function FixedAspectViewer({ fileId, onClose }: FixedAspectViewerProps) {
             <audio
               src={file.file_url}
               controls
+              autoPlay
               className="w-full max-w-md"
             >
               Your browser does not support the audio tag.
