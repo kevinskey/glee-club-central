@@ -16,8 +16,31 @@ serve(async (req) => {
   }
 
   try {
-    const url = new URL(req.url)
-    const action = url.searchParams.get('action')
+    // Get action from request body for POST requests, URL params for GET requests
+    let action: string | null = null
+    let requestBody: any = {}
+    
+    if (req.method === 'POST') {
+      try {
+        requestBody = await req.json()
+        action = requestBody.action
+      } catch (e) {
+        console.error('Failed to parse JSON body:', e)
+        return new Response(
+          JSON.stringify({ error: 'Invalid JSON in request body' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400 
+          }
+        )
+      }
+    } else {
+      const url = new URL(req.url)
+      action = url.searchParams.get('action')
+    }
+    
+    console.log('Action:', action)
+    console.log('Request body:', requestBody)
     
     const soundcloudClientId = Deno.env.get('SOUNDCLOUD_CLIENT_ID')
     const soundcloudClientSecret = Deno.env.get('SOUNDCLOUD_CLIENT_SECRET')
@@ -70,8 +93,7 @@ serve(async (req) => {
 
     // Exchange authorization code for access token
     if (action === 'exchange' && req.method === 'POST') {
-      const body = await req.json()
-      const { code, redirectUri } = body
+      const { code, redirectUri } = requestBody
       
       if (!code) {
         return new Response(
@@ -164,8 +186,7 @@ serve(async (req) => {
 
     // Fetch user's tracks and playlists with access token
     if (action === 'fetch-data' && req.method === 'POST') {
-      const body = await req.json()
-      const { accessToken } = body
+      const { accessToken } = requestBody
       
       if (!accessToken) {
         return new Response(
