@@ -183,7 +183,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
   }
 
   return (
-    <Card className={`${className} bg-gradient-to-r from-glee-spelman to-glee-gold`}>
+    <Card className={`${className} bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-xl`}>
       <CardContent className="p-6">
         <audio
           ref={audioRef}
@@ -192,23 +192,23 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
           onContextMenu={(e) => e.preventDefault()}
         />
         
-        <div className="flex flex-col space-y-4">
+        <div className="flex flex-col space-y-6">
           {/* Current Playlist Info */}
           <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="bg-white/20 text-white">
+            <Badge variant="default" className="bg-glee-purple text-white font-medium">
               {activePlaylist.playlist_name}
             </Badge>
             {playerSettings.show_visualizer && (
-              <div className="flex items-center gap-1">
-                <BarChart3 className="h-4 w-4 text-white" />
-                <span className="text-xs text-white/80">Visualizer</span>
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-glee-purple" />
+                <span className="text-xs text-gray-600 dark:text-gray-400">Visualizer</span>
               </div>
             )}
           </div>
 
           {/* Track Info */}
           <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-white/20 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden flex-shrink-0 border-2 border-gray-200 dark:border-gray-700">
               {currentTrack.albumArt ? (
                 <img 
                   src={currentTrack.albumArt} 
@@ -218,20 +218,20 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <Volume2 className="h-6 w-6 text-white" />
+                  <Volume2 className="h-6 w-6 text-gray-400" />
                 </div>
               )}
             </div>
             
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-white truncate">
+              <h3 className="font-semibold text-gray-900 dark:text-white truncate text-lg">
                 {currentTrack.title}
               </h3>
-              <p className="text-white/80 text-sm truncate">
+              <p className="text-gray-600 dark:text-gray-400 text-sm truncate">
                 {currentTrack.artist}
               </p>
               {currentTrack.featured && (
-                <Badge variant="outline" className="mt-1 text-xs border-white/40 text-white">
+                <Badge variant="outline" className="mt-1 text-xs border-glee-purple text-glee-purple">
                   Featured
                 </Badge>
               )}
@@ -245,9 +245,9 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               max={duration || 100}
               step={1}
               onValueChange={handleProgressChange}
-              className="w-full"
+              className="w-full [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
             />
-            <div className="flex justify-between text-xs text-white/80">
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
               <span>{formatTime(currentTime)}</span>
               <span>{formatTime(duration)}</span>
             </div>
@@ -259,7 +259,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={toggleShuffle}
-              className={`text-white hover:bg-white/20 ${isShuffled ? 'bg-white/20' : ''}`}
+              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${isShuffled ? 'bg-gray-100 dark:bg-gray-800 text-glee-purple' : ''}`}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -268,16 +268,16 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={handlePrevious}
-              className="text-white hover:bg-white/20"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <SkipBack className="h-4 w-4" />
             </Button>
 
             <Button
-              variant="ghost"
+              variant="default"
               size="lg"
               onClick={togglePlayPause}
-              className="text-white hover:bg-white/20 h-12 w-12 rounded-full"
+              className="bg-glee-purple hover:bg-glee-purple/90 text-white h-12 w-12 rounded-full"
             >
               {isPlaying ? (
                 <Pause className="h-6 w-6" />
@@ -290,7 +290,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={handleNext}
-              className="text-white hover:bg-white/20"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               <SkipForward className="h-4 w-4" />
             </Button>
@@ -299,7 +299,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               variant="ghost"
               size="sm"
               onClick={toggleRepeat}
-              className={`text-white hover:bg-white/20 ${repeatMode !== 'none' ? 'bg-white/20' : ''}`}
+              className={`text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 ${repeatMode !== 'none' ? 'bg-gray-100 dark:bg-gray-800 text-glee-purple' : ''}`}
             >
               <Repeat className="h-4 w-4" />
               {repeatMode === 'track' && <span className="text-xs ml-1">1</span>}
@@ -307,12 +307,12 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
           </div>
 
           {/* Volume Control */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleMute}
-              className="text-white hover:bg-white/20 p-2"
+              className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 p-2"
             >
               {isMuted || volume === 0 ? (
                 <VolumeX className="h-4 w-4" />
@@ -325,32 +325,32 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
               max={1}
               step={0.01}
               onValueChange={handleVolumeChange}
-              className="flex-1"
+              className="flex-1 [&_[role=slider]]:bg-glee-purple [&_[role=slider]]:border-glee-purple"
             />
           </div>
 
           {/* Track List Preview */}
           {activePlaylist.tracks.length > 1 && (
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              <div className="text-xs text-white/80 mb-2">
+            <div className="space-y-2 max-h-32 overflow-y-auto border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">
                 Track {currentTrackIndex + 1} of {activePlaylist.tracks.length}
               </div>
               {activePlaylist.tracks.slice(0, 3).map((track, index) => (
                 <button
                   key={track.id}
                   onClick={() => setCurrentTrackIndex(activePlaylist.tracks.findIndex(t => t.id === track.id))}
-                  className={`w-full text-left p-2 rounded text-sm transition-colors ${
+                  className={`w-full text-left p-3 rounded-lg text-sm transition-colors ${
                     index === currentTrackIndex
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/80 hover:bg-white/10'
+                      ? 'bg-glee-purple/10 text-glee-purple border border-glee-purple/20'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   }`}
                 >
-                  <div className="truncate">{track.title}</div>
-                  <div className="truncate text-xs opacity-70">{track.artist}</div>
+                  <div className="truncate font-medium">{track.title}</div>
+                  <div className="truncate text-xs opacity-70 mt-1">{track.artist}</div>
                 </button>
               ))}
               {activePlaylist.tracks.length > 3 && (
-                <div className="text-xs text-white/60 text-center py-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
                   +{activePlaylist.tracks.length - 3} more tracks
                 </div>
               )}
