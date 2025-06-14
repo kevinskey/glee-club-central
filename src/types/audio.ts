@@ -39,3 +39,11 @@ export interface Playlist {
   name: string;
   tracks: PlaylistTrack[];
 }
+
+// Add the missing AudioPageCategory type
+export type AudioPageCategory = 
+  | 'recordings' 
+  | 'backing_tracks' 
+  | 'practice' 
+  | 'performance' 
+  | 'all';

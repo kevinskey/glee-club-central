@@ -101,40 +101,45 @@ export const RecordingArchive: React.FC = () => {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredFiles.map((file) => (
-            <Card key={file.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{file.title}</CardTitle>
-                    {file.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {file.description}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant="secondary">
-                      {file.category}
-                    </Badge>
-                    {file.is_backing_track && (
-                      <Badge variant="outline">
-                        Backing Track
+          {filteredFiles.map((file) => {
+            // Convert AudioFileData to AudioFile for WaveSurferPlayer
+            const audioFile = {
+              ...file,
+              description: file.description || '',
+              file_path: file.file_path || '',
+              is_backing_track: file.is_backing_track || false,
+            };
+
+            return (
+              <Card key={file.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg">{file.title}</CardTitle>
+                      {file.description && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {file.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Badge variant="secondary">
+                        {file.category}
                       </Badge>
-                    )}
+                      {file.is_backing_track && (
+                        <Badge variant="outline">
+                          Backing Track
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <WaveSurferPlayer
-                  audio={{
-                    ...file,
-                    description: file.description || ''
-                  }}
-                />
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent>
+                  <WaveSurferPlayer audio={audioFile} />
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

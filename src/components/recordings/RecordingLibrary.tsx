@@ -21,7 +21,9 @@ export const RecordingLibrary: React.FC = () => {
       // Convert AudioFileData to AudioFile format
       const convertedFiles: AudioFile[] = audioFiles.map(file => ({
         ...file,
-        description: file.description || ''
+        description: file.description || '',
+        file_path: file.file_path || '',
+        is_backing_track: file.is_backing_track || false,
       }));
 
       const recordingFiles = convertedFiles.filter(file => !file.is_backing_track);

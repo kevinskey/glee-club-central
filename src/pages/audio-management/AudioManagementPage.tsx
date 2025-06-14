@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { AdminV2Layout } from '@/layouts/AdminV2Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { WaveSurferPlayer } from '@/components/audio/WaveSurferPlayer';
+import { InlineMediaTitleEdit } from '@/components/media/InlineMediaTitleEdit';
 import { useAudioFiles } from '@/hooks/useAudioFiles';
 import { AudioFile, AudioFileData } from '@/types/audio';
 import { supabase } from '@/integrations/supabase/client';
@@ -154,6 +154,24 @@ export default function AudioManagementPage() {
     }
   };
 
+  const handleTitleUpdate = async (id: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('audio_files')
+        .update({ title: newTitle })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success('Title updated successfully');
+      refetch();
+    } catch (error: any) {
+      console.error('Title update error:', error);
+      toast.error('Failed to update title');
+      throw error;
+    }
+  };
+
   const handleDelete = async (file: AudioFileData) => {
     if (!confirm('Are you sure you want to delete this audio file?')) return;
 
@@ -185,7 +203,9 @@ export default function AudioManagementPage() {
     // Convert to AudioFile format for WaveSurferPlayer
     const audioFile: AudioFile = {
       ...file,
-      description: file.description || ''
+      description: file.description || '',
+      file_path: file.file_path || '',
+      is_backing_track: file.is_backing_track || false,
     };
 
     return (
@@ -193,7 +213,11 @@ export default function AudioManagementPage() {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <CardTitle className="text-lg">{file.title}</CardTitle>
+              <InlineMediaTitleEdit
+                title={file.title}
+                onSave={(newTitle) => handleTitleUpdate(file.id, newTitle)}
+                className="mb-2"
+              />
               {file.description && (
                 <p className="text-sm text-muted-foreground mt-1">
                   {file.description}
