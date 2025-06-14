@@ -11,12 +11,14 @@ export function AdminDashboardContent() {
   const isAdminRole = profile?.role === 'admin' || user?.email === 'kevinskey@mac.com';
 
   return (
-    <div className="space-y-6">
-      {/* All Admin Modules - Alphabetically arranged */}
-      <UnifiedAdminModules />
+    <div className="w-full max-w-full space-y-8">
+      {/* Admin Modules - Full Width */}
+      <div className="w-full">
+        <UnifiedAdminModules />
+      </div>
 
       {/* Two Column Layout for Desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
         {/* Left Column */}
         <div className="space-y-6">
           {/* Edit Role Tags Panel - Only for Admin users */}

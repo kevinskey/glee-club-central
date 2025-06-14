@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -138,6 +139,7 @@ export function UnifiedAdminModules() {
     
     return true;
   });
+  
   const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
@@ -149,12 +151,12 @@ export function UnifiedAdminModules() {
             <Badge variant="secondary" className="text-sm font-medium">{sortedModules.length} available</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+        <CardContent className="pt-0 px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
             {sortedModules.map((module) => (
               <div
                 key={module.id}
-                className="group cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] min-h-[120px]"
+                className="group cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] min-h-[120px] aspect-square"
                 onClick={() => navigate(module.path)}
               >
                 <div className={`${module.color} text-white rounded-xl p-3 group-hover:scale-110 transition-transform duration-200 mb-3 shadow-sm`}>
