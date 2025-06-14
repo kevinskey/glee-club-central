@@ -25,6 +25,11 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     console.warn('HeroSlideContent: No valid background image found for slide:', slide.title);
     console.warn('HeroSlideContent: media_id:', slide.media_id);
     console.warn('HeroSlideContent: Available media file IDs:', Object.keys(mediaFiles));
+    
+    // Additional debugging - check if media_id exists but URL is missing
+    if (slide.media_id && mediaFiles[slide.media_id] && !mediaFiles[slide.media_id].file_url) {
+      console.error('HeroSlideContent: Media file found but no file_url:', mediaFiles[slide.media_id]);
+    }
   }
 
   return (
@@ -115,7 +120,10 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             {slide.media_id && !hasValidImage && (
               <p className="text-red-300 mt-2">⚠️ Media ID exists but image not found</p>
             )}
-            <p className="mt-2 text-xs">Go to Admin → Hero Slides to fix this</p>
+            {slide.media_id && mediaFiles[slide.media_id] && !mediaFiles[slide.media_id].file_url && (
+              <p className="text-red-300 mt-2">⚠️ Media found but no file URL</p>
+            )}
+            <p className="mt-2 text-xs">Check console for detailed logs or go to Admin → Hero Slides to fix this</p>
           </div>
         )}
       </div>
