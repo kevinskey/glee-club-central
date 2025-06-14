@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Music, Calendar, Settings, BarChart3, Cloud, Plus, Upload, Volume2, Shuffle } from 'lucide-react';
+import { Music, Calendar, Settings, BarChart3, Cloud, Plus, Volume2 } from 'lucide-react';
 import { ScheduledPlaylistManager } from '@/components/admin/ScheduledPlaylistManager';
 import { SoundCloudPlaylistManager } from '@/components/admin/SoundCloudPlaylistManager';
 import { toast } from 'sonner';
@@ -21,9 +21,9 @@ export function MusicPlayerAdmin() {
     scheduledPlaylists: 0,
     totalPlays: 0
   });
-  const [playlists, setPlaylists] = useState([]);
+  const [playlists, setPlaylists] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState({
-    mostPlayedTracks: [],
+    mostPlayedTracks: [] as Array<{ title: string; plays: number }>,
     avgListenTime: 0,
     completionRate: 0,
     skipRate: 0
@@ -114,28 +114,30 @@ export function MusicPlayerAdmin() {
           )
         `)
         .eq('event_type', 'play')
-        .limit(4);
+        .limit(50);
 
       if (mostPlayedError) throw mostPlayedError;
 
       // Process most played tracks
-      const trackCounts = {};
+      const trackCounts: Record<string, number> = {};
+      const trackDetails: Record<string, any> = {};
+      
       mostPlayed?.forEach(item => {
         if (item.audio_file_id) {
           trackCounts[item.audio_file_id] = (trackCounts[item.audio_file_id] || 0) + 1;
+          if (!trackDetails[item.audio_file_id]) {
+            trackDetails[item.audio_file_id] = item.audio_files;
+          }
         }
       });
 
       const mostPlayedTracks = Object.entries(trackCounts)
         .sort(([,a], [,b]) => b - a)
         .slice(0, 4)
-        .map(([audioFileId, plays]) => {
-          const track = mostPlayed?.find(item => item.audio_file_id === audioFileId);
-          return {
-            title: track?.audio_files?.title || 'Unknown Track',
-            plays: plays
-          };
-        });
+        .map(([audioFileId, plays]) => ({
+          title: trackDetails[audioFileId]?.title || 'Unknown Track',
+          plays: plays
+        }));
 
       // Get analytics metrics
       const { data: analytics, error: analyticsError } = await supabase
@@ -184,7 +186,7 @@ export function MusicPlayerAdmin() {
     try {
       // Update setting in database
       let settingKey = key;
-      let settingValue = value;
+      let settingValue: any = value;
 
       // Map local keys to database keys
       if (key === 'shuffle') {
