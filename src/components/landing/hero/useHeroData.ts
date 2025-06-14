@@ -68,13 +68,18 @@ export function useHeroData() {
             console.log('useHeroData: No media found in media_library, trying site_images...');
             const { data: siteImagesData, error: siteImagesError } = await supabase
               .from('site_images')
-              .select('id, file_url, name as title')
+              .select('id, file_url, name')
               .in('id', mediaIds);
 
             if (siteImagesError) {
               console.error('useHeroData: Error fetching from site_images:', siteImagesError);
-            } else {
-              mediaData = siteImagesData;
+            } else if (siteImagesData) {
+              // Map site_images data to match MediaFile interface
+              mediaData = siteImagesData.map(item => ({
+                id: item.id,
+                file_url: item.file_url,
+                title: item.name || 'Untitled'
+              }));
               console.log('useHeroData: Found media in site_images:', mediaData);
             }
           }
@@ -84,14 +89,19 @@ export function useHeroData() {
             console.log('useHeroData: No media found in site_images, trying products...');
             const { data: productData, error: productError } = await supabase
               .from('products')
-              .select('id, image_url as file_url, name as title')
+              .select('id, image_url, name')
               .in('id', mediaIds)
               .not('image_url', 'is', null);
 
             if (productError) {
               console.error('useHeroData: Error fetching from products:', productError);
-            } else {
-              mediaData = productData;
+            } else if (productData) {
+              // Map products data to match MediaFile interface
+              mediaData = productData.map(item => ({
+                id: item.id,
+                file_url: item.image_url,
+                title: item.name || 'Untitled'
+              }));
               console.log('useHeroData: Found media in products:', mediaData);
             }
           }
