@@ -44,7 +44,7 @@ export const MediaCard = forwardRef<HTMLDivElement, MediaCardProps>(
         className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer"
         onClick={handleClick}
       >
-        <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden">
+        <div className="relative aspect-[3/2] bg-muted/40 overflow-hidden">
           {mediaType === "image" && file.file_url && !imageError ? (
             <img 
               src={file.file_url} 

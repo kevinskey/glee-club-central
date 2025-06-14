@@ -98,7 +98,7 @@ export function LightweightMediaCard({
 
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer" onClick={handlePreview}>
-      <div className="relative aspect-[4/3] bg-muted/40 overflow-hidden">
+      <div className="relative aspect-[3/2] bg-muted/40 overflow-hidden">
         {isImage && file.file_url && !imageError ? (
           <img 
             src={file.file_url} 
