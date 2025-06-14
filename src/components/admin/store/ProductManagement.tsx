@@ -1,70 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Package, Lock, Image, Wand2, Loader2, FileText } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Search, Edit, Trash2, Package } from 'lucide-react';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { hasPermission } from '@/utils/permissionChecker';
-import { MediaPicker } from '@/components/media/MediaPicker';
 
 interface StoreItem {
   id: string;
   name: string;
   description?: string;
   price: number;
-  quantity_in_stock: number;
   image_url?: string;
-  tags: string[];
+  quantity_in_stock: number;
   is_active: boolean;
+  tags: string[];
   created_at: string;
-  updated_at: string;
 }
 
 export function ProductManagement() {
-  const { user, profile } = useAuth();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<StoreItem | null>(null);
-  const [showMediaPicker, setShowMediaPicker] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
-  const [aiImagePrompt, setAiImagePrompt] = useState('');
-  const [aiDescriptionPrompt, setAiDescriptionPrompt] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    quantity_in_stock: '',
-    image_url: '',
-    tags: '',
-    is_active: true
-  });
-
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
-  // Check if user has permission to manage shop
-  const canManageShop = () => {
-    if (!user || !profile) return false;
-    
-    // Create user object for permission checking
-    const currentUser = {
-      ...user,
-      role_tags: profile?.role_tags || []
-    };
-    
-    return hasPermission(currentUser, 'manage_shop') || profile?.is_super_admin;
-  };
-
-  const { data: storeItems, isLoading } = useQuery({
-    queryKey: ['admin-store-items'],
+  const { data: products, isLoading } = useQuery({
+    queryKey: ['store-items'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('store_items')
@@ -76,245 +38,54 @@ export function ProductManagement() {
     },
   });
 
-  const createItemMutation = useMutation({
-    mutationFn: async (itemData: any) => {
-      if (!canManageShop()) {
-        throw new Error('Access denied: You do not have permission to manage store items');
-      }
-      
-      const { error } = await supabase
-        .from('store_items')
-        .insert([{
-          name: itemData.name,
-          description: itemData.description || null,
-          price: parseFloat(itemData.price),
-          quantity_in_stock: parseInt(itemData.quantity_in_stock),
-          image_url: itemData.image_url || null,
-          tags: itemData.tags ? itemData.tags.split(',').map((tag: string) => tag.trim()) : [],
-          is_active: itemData.is_active
-        }]);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-store-items'] });
-      toast.success('Store item created successfully');
-      resetForm();
-      setIsCreateDialogOpen(false);
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to create store item');
-      console.error(error);
-    }
-  });
-
-  const updateItemMutation = useMutation({
-    mutationFn: async ({ id, ...itemData }: any) => {
-      if (!canManageShop()) {
-        throw new Error('Access denied: You do not have permission to manage store items');
-      }
-      
-      const { error } = await supabase
-        .from('store_items')
-        .update({
-          name: itemData.name,
-          description: itemData.description || null,
-          price: parseFloat(itemData.price),
-          quantity_in_stock: parseInt(itemData.quantity_in_stock),
-          image_url: itemData.image_url || null,
-          tags: itemData.tags ? itemData.tags.split(',').map((tag: string) => tag.trim()) : [],
-          is_active: itemData.is_active
-        })
-        .eq('id', id);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-store-items'] });
-      toast.success('Store item updated successfully');
-      resetForm();
-      setEditingItem(null);
-    },
-    onError: (error) => {
-      toast.error(error.message || 'Failed to update store item');
-      console.error(error);
-    }
-  });
-
-  const deleteItemMutation = useMutation({
-    mutationFn: async (itemId: string) => {
-      if (!canManageShop()) {
-        throw new Error('Access denied: You do not have permission to manage store items');
-      }
-      
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: string) => {
       const { error } = await supabase
         .from('store_items')
         .delete()
-        .eq('id', itemId);
+        .eq('id', productId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-store-items'] });
-      toast.success('Store item deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['store-items'] });
+      toast.success('Product deleted successfully');
     },
     onError: (error) => {
-      toast.error(error.message || 'Failed to delete store item');
+      toast.error('Failed to delete product');
       console.error(error);
-    }
+    },
   });
 
-  const generateProductImage = async () => {
-    if (!aiImagePrompt.trim()) {
-      toast.error('Please enter a description for the product image');
-      return;
-    }
+  const toggleProductStatusMutation = useMutation({
+    mutationFn: async ({ productId, isActive }: { productId: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from('store_items')
+        .update({ is_active: isActive })
+        .eq('id', productId);
 
-    setIsGeneratingImage(true);
-    
-    try {
-      console.log('Generating product image with AI:', aiImagePrompt);
-      
-      const enhancedPrompt = `Professional product photography of ${aiImagePrompt}. Clean white background, studio lighting, high quality, commercial photography style, centered composition, sharp focus, professional e-commerce product shot.`;
-      
-      const { data, error } = await supabase.functions.invoke('generate-design-image', {
-        body: { 
-          prompt: enhancedPrompt,
-          style: 'product'
-        }
-      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['store-items'] });
+      toast.success('Product status updated');
+    },
+    onError: (error) => {
+      toast.error('Failed to update product status');
+      console.error(error);
+    },
+  });
 
-      if (error) {
-        throw error;
-      }
-
-      if (data?.imageUrl) {
-        setFormData(prev => ({ ...prev, image_url: data.imageUrl }));
-        toast.success('Product image generated successfully!');
-        setAiImagePrompt('');
-      } else {
-        throw new Error('No image generated');
-      }
-    } catch (error) {
-      console.error('AI image generation error:', error);
-      toast.error(`Failed to generate image: ${error.message}`);
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
-
-  const generateProductDescription = async () => {
-    if (!aiDescriptionPrompt.trim()) {
-      toast.error('Please enter some details about the product');
-      return;
-    }
-
-    setIsGeneratingDescription(true);
-    
-    try {
-      console.log('Generating product description with AI:', aiDescriptionPrompt);
-      
-      const enhancedPrompt = `Write a compelling product description for e-commerce for: ${aiDescriptionPrompt}. The description should be professional, engaging, highlight key features and benefits, and encourage purchases. Keep it concise but informative, suitable for online store listings.`;
-      
-      const { data, error } = await supabase.functions.invoke('generate-design-image', {
-        body: { 
-          prompt: enhancedPrompt,
-          style: 'text'
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data?.generatedText || data?.imageUrl) {
-        // For text generation, we might get the response in different formats
-        const description = data.generatedText || data.description || 'Generated description';
-        setFormData(prev => ({ ...prev, description }));
-        toast.success('Product description generated successfully!');
-        setAiDescriptionPrompt('');
-      } else {
-        throw new Error('No description generated');
-      }
-    } catch (error) {
-      console.error('AI description generation error:', error);
-      toast.error(`Failed to generate description: ${error.message}`);
-    } finally {
-      setIsGeneratingDescription(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      quantity_in_stock: '',
-      image_url: '',
-      tags: '',
-      is_active: true
-    });
-  };
-
-  const handleEdit = (item: StoreItem) => {
-    setEditingItem(item);
-    setFormData({
-      name: item.name,
-      description: item.description || '',
-      price: item.price.toString(),
-      quantity_in_stock: item.quantity_in_stock.toString(),
-      image_url: item.image_url || '',
-      tags: item.tags.join(', '),
-      is_active: item.is_active
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!canManageShop()) {
-      toast.error('Access denied: You do not have permission to manage store items');
-      return;
-    }
-    
-    if (!formData.name || !formData.price || !formData.quantity_in_stock) {
-      toast.error('Name, price, and quantity are required');
-      return;
-    }
-
-    if (editingItem) {
-      updateItemMutation.mutate({ id: editingItem.id, ...formData });
-    } else {
-      createItemMutation.mutate(formData);
-    }
-  };
-
-  const handleImageSelect = (imageUrl: string) => {
-    setFormData(prev => ({ ...prev, image_url: imageUrl }));
-    setShowMediaPicker(false);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  const filteredProducts = products?.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading store items...</div>;
-  }
-
-  // Show access denied message if user doesn't have permission
-  if (!canManageShop()) {
     return (
       <Card>
-        <CardContent className="p-8 text-center">
-          <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-semibold mb-2">Access Restricted</h3>
-          <p className="text-muted-foreground">
-            You need Treasurer, Merchandise Manager, or Admin permissions to manage store items.
-          </p>
+        <CardContent className="p-6">
+          <div className="text-center">Loading products...</div>
         </CardContent>
       </Card>
     );
@@ -322,511 +93,122 @@ export function ProductManagement() {
 
   return (
     <div className="space-y-6">
+      {/* Header Actions */}
       <div className="flex justify-between items-center">
-        <div>
-          <h3 className="text-lg font-semibold">Store Items</h3>
-          <p className="text-muted-foreground">Manage your store inventory</p>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-80"
+            />
+          </div>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Create New Store Item</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Item Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter item name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="price">Price ($)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                    placeholder="0.00"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <Label>Product Description</Label>
-                
-                {/* AI Description Generation Section */}
-                <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-green-600" />
-                      <Label className="font-medium text-green-800">Generate Description with AI</Label>
-                    </div>
-                    <Textarea
-                      placeholder="Describe your product briefly (e.g., 'blue hoodie with Spelman logo, soft cotton material, available in sizes S-XL')"
-                      value={aiDescriptionPrompt}
-                      onChange={(e) => setAiDescriptionPrompt(e.target.value)}
-                      className="bg-white border-green-200"
-                      rows={2}
-                    />
-                    <Button
-                      type="button"
-                      onClick={generateProductDescription}
-                      disabled={isGeneratingDescription || !aiDescriptionPrompt.trim()}
-                      className="w-full bg-green-600 hover:bg-green-700"
-                    >
-                      {isGeneratingDescription ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating Description...
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="h-4 w-4 mr-2" />
-                          Generate Product Description
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </Card>
-
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter item description or generate one with AI above"
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="quantity_in_stock">Quantity in Stock</Label>
-                  <Input
-                    id="quantity_in_stock"
-                    type="number"
-                    min="0"
-                    value={formData.quantity_in_stock}
-                    onChange={(e) => setFormData(prev => ({ ...prev, quantity_in_stock: e.target.value }))}
-                    placeholder="0"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="tags"
-                    value={formData.tags}
-                    onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                    placeholder="hoodie, tour, merchandise"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <Label>Product Image</Label>
-                
-                {/* AI Image Generation Section */}
-                <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Wand2 className="h-5 w-5 text-blue-600" />
-                      <Label className="font-medium text-blue-800">Generate with AI</Label>
-                    </div>
-                    <Textarea
-                      placeholder="Describe your product (e.g., 'blue hoodie with Spelman logo', 'coffee mug with musical notes')"
-                      value={aiImagePrompt}
-                      onChange={(e) => setAiImagePrompt(e.target.value)}
-                      className="bg-white border-blue-200"
-                      rows={2}
-                    />
-                    <Button
-                      type="button"
-                      onClick={generateProductImage}
-                      disabled={isGeneratingImage || !aiImagePrompt.trim()}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                    >
-                      {isGeneratingImage ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating Image...
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="h-4 w-4 mr-2" />
-                          Generate Product Image
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </Card>
-
-                {/* Current Image Preview */}
-                {formData.image_url && (
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={formData.image_url}
-                      alt="Product preview"
-                      className="w-24 h-24 object-cover rounded border"
-                    />
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">Current product image</p>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                      >
-                        Remove Image
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Alternative Options */}
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowMediaPicker(true)}
-                    className="flex-1"
-                  >
-                    <Image className="h-4 w-4 mr-2" />
-                    Choose from Library
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
-              <div className="flex gap-2">
-                <Button type="submit" disabled={createItemMutation.isPending}>
-                  {createItemMutation.isPending ? 'Creating...' : 'Create Item'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button className="flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Add Product
+        </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Store Items ({storeItems?.length || 0})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {storeItems && storeItems.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {storeItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                            <Package className="h-5 w-5 text-gray-400" />
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-medium">{item.name}</span>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatPrice(item.price)}</TableCell>
-                    <TableCell>
-                      <span className={item.quantity_in_stock === 0 ? 'text-red-500' : ''}>
-                        {item.quantity_in_stock}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {item.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={item.is_active ? "default" : "secondary"}>
-                        {item.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(item)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => deleteItemMutation.mutate(item.id)}
-                          disabled={deleteItemMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No store items found. Create your first item to get started.
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Edit Item Dialog */}
-      <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Store Item</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-name">Item Name</Label>
-                <Input
-                  id="edit-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="Enter item name"
-                  required
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredProducts.map((product) => (
+          <Card key={product.id} className="overflow-hidden">
+            <div className="aspect-video bg-gray-100 relative">
+              {product.image_url ? (
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
                 />
-              </div>
-              <div>
-                <Label htmlFor="edit-price">Price ($)</Label>
-                <Input
-                  id="edit-price"
-                  type="number"
-                  step="0.01"
-                  value={formData.price}
-                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <Label>Product Description</Label>
-              
-              {/* AI Description Generation Section for Edit */}
-              <Card className="p-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-green-600" />
-                    <Label className="font-medium text-green-800">Generate New Description with AI</Label>
-                  </div>
-                  <Textarea
-                    placeholder="Describe your product briefly (e.g., 'blue hoodie with Spelman logo, soft cotton material, available in sizes S-XL')"
-                    value={aiDescriptionPrompt}
-                    onChange={(e) => setAiDescriptionPrompt(e.target.value)}
-                    className="bg-white border-green-200"
-                    rows={2}
-                  />
-                  <Button
-                    type="button"
-                    onClick={generateProductDescription}
-                    disabled={isGeneratingDescription || !aiDescriptionPrompt.trim()}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    {isGeneratingDescription ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating Description...
-                      </>
-                    ) : (
-                      <>
-                        <FileText className="h-4 w-4 mr-2" />
-                        Generate Product Description
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Enter item description or generate one with AI above"
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-quantity_in_stock">Quantity in Stock</Label>
-                <Input
-                  id="edit-quantity_in_stock"
-                  type="number"
-                  min="0"
-                  value={formData.quantity_in_stock}
-                  onChange={(e) => setFormData(prev => ({ ...prev, quantity_in_stock: e.target.value }))}
-                  placeholder="0"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-tags">Tags (comma-separated)</Label>
-                <Input
-                  id="edit-tags"
-                  value={formData.tags}
-                  onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                  placeholder="hoodie, tour, merchandise"
-                />
-              </div>
-            </div>
-            <div className="space-y-4">
-              <Label>Product Image</Label>
-              
-              {/* AI Image Generation Section for Edit */}
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Wand2 className="h-5 w-5 text-blue-600" />
-                    <Label className="font-medium text-blue-800">Generate New Image with AI</Label>
-                  </div>
-                  <Textarea
-                    placeholder="Describe your product (e.g., 'blue hoodie with Spelman logo', 'coffee mug with musical notes')"
-                    value={aiImagePrompt}
-                    onChange={(e) => setAiImagePrompt(e.target.value)}
-                    className="bg-white border-blue-200"
-                    rows={2}
-                  />
-                  <Button
-                    type="button"
-                    onClick={generateProductImage}
-                    disabled={isGeneratingImage || !aiImagePrompt.trim()}
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isGeneratingImage ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Generating Image...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="h-4 w-4 mr-2" />
-                        Generate Product Image
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Current Image Preview for Edit */}
-              {formData.image_url && (
-                <div className="flex items-center gap-4">
-                  <img
-                    src={formData.image_url}
-                    alt="Product preview"
-                    className="w-24 h-24 object-cover rounded border"
-                  />
-                  <div className="space-y-2">
-                    <p className="text-sm text-gray-600">Current product image</p>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
-                    >
-                      Remove Image
-                    </Button>
-                  </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <Package className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-
-              {/* Alternative Options for Edit */}
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowMediaPicker(true)}
-                  className="flex-1"
-                >
-                  <Image className="h-4 w-4 mr-2" />
-                  Choose from Library
-                </Button>
+              <div className="absolute top-2 right-2">
+                <Badge variant={product.is_active ? 'default' : 'secondary'}>
+                  {product.is_active ? 'Active' : 'Inactive'}
+                </Badge>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="edit-is_active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-              />
-              <Label htmlFor="edit-is_active">Active</Label>
-            </div>
-            <div className="flex gap-2">
-              <Button type="submit" disabled={updateItemMutation.isPending}>
-                {updateItemMutation.isPending ? 'Updating...' : 'Update Item'}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{product.name}</CardTitle>
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-green-600">
+                  ${product.price}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  Stock: {product.quantity_in_stock}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {product.description && (
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  {product.description}
+                </p>
+              )}
+              {product.tags && product.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {product.tags.slice(0, 3).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {product.tags.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{product.tags.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              )}
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => toggleProductStatusMutation.mutate({
+                      productId: product.id,
+                      isActive: !product.is_active
+                    })}
+                  >
+                    {product.is_active ? 'Deactivate' : 'Activate'}
+                  </Button>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => deleteProductMutation.mutate(product.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Media Picker */}
-      {showMediaPicker && (
-        <MediaPicker
-          isOpen={showMediaPicker}
-          onClose={() => setShowMediaPicker(false)}
-          onSelect={handleImageSelect}
-          currentImageUrl={formData.image_url}
-          allowedTypes={['image']}
-          showUpload={true}
-        />
+      {filteredProducts.length === 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="font-semibold mb-2">No Products Found</h3>
+            <p className="text-muted-foreground mb-4">
+              {searchQuery ? 'No products match your search.' : 'No products have been added yet.'}
+            </p>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Product
+            </Button>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

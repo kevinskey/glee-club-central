@@ -1,43 +1,33 @@
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { AlertTriangle, Package, Plus, Minus, Search, Filter } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Package, AlertTriangle, Plus, Minus } from 'lucide-react';
 import { toast } from 'sonner';
-import { LowStockAlertTrigger } from './LowStockAlertTrigger';
 
 interface StoreItem {
   id: string;
   name: string;
   price: number;
   quantity_in_stock: number;
-  tags: string[];
   is_active: boolean;
-  image_url?: string;
+  tags: string[];
 }
 
 export function InventoryManager() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedItem, setSelectedItem] = useState<StoreItem | null>(null);
-  const [adjustmentAmount, setAdjustmentAmount] = useState('');
-  const [adjustmentReason, setAdjustmentReason] = useState('');
-  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
-  
+  const [adjustments, setAdjustments] = useState<{[key: string]: number}>({});
   const queryClient = useQueryClient();
 
-  const { data: items, isLoading } = useQuery({
+  const { data: products, isLoading } = useQuery({
     queryKey: ['store-inventory'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('store_items')
-        .select('*')
+        .select('id, name, price, quantity_in_stock, is_active, tags')
         .order('name');
 
       if (error) throw error;
@@ -45,297 +35,186 @@ export function InventoryManager() {
     },
   });
 
-  const updateInventoryMutation = useMutation({
-    mutationFn: async ({ id, newQuantity, reason }: { id: string; newQuantity: number; reason: string }) => {
+  const updateStockMutation = useMutation({
+    mutationFn: async ({ productId, newQuantity }: { productId: string; newQuantity: number }) => {
       const { error } = await supabase
         .from('store_items')
-        .update({ quantity_in_stock: newQuantity })
-        .eq('id', id);
+        .update({ quantity_in_stock: Math.max(0, newQuantity) })
+        .eq('id', productId);
 
       if (error) throw error;
-
-      // Log inventory change (you could create an inventory_logs table for this)
-      console.log(`Inventory updated for item ${id}: ${newQuantity} (${reason})`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-inventory'] });
-      toast.success('Inventory updated successfully');
-      setSelectedItem(null);
-      setAdjustmentAmount('');
-      setAdjustmentReason('');
+      toast.success('Stock updated successfully');
     },
     onError: (error) => {
-      toast.error('Failed to update inventory');
+      toast.error('Failed to update stock');
       console.error(error);
-    }
+    },
   });
 
-  const filteredItems = items?.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFilter = !showLowStockOnly || item.quantity_in_stock <= 10;
-    return matchesSearch && matchesFilter;
-  });
-
-  const lowStockItems = items?.filter(item => item.quantity_in_stock <= 10) || [];
-
-  const handleAdjustment = (type: 'add' | 'subtract' | 'set') => {
-    if (!selectedItem || !adjustmentAmount) return;
-
-    const amount = parseInt(adjustmentAmount);
-    let newQuantity = selectedItem.quantity_in_stock;
-
-    switch (type) {
-      case 'add':
-        newQuantity += amount;
-        break;
-      case 'subtract':
-        newQuantity = Math.max(0, newQuantity - amount);
-        break;
-      case 'set':
-        newQuantity = Math.max(0, amount);
-        break;
-    }
-
-    updateInventoryMutation.mutate({
-      id: selectedItem.id,
-      newQuantity,
-      reason: adjustmentReason || `${type} ${amount}`
-    });
+  const handleStockAdjustment = (productId: string, currentStock: number, adjustment: number) => {
+    const newQuantity = currentStock + adjustment;
+    updateStockMutation.mutate({ productId, newQuantity });
   };
 
-  const getStockStatus = (quantity: number) => {
-    if (quantity === 0) return { label: 'Out of Stock', color: 'bg-red-500' };
-    if (quantity <= 5) return { label: 'Critical', color: 'bg-red-400' };
-    if (quantity <= 10) return { label: 'Low Stock', color: 'bg-yellow-500' };
-    return { label: 'In Stock', color: 'bg-green-500' };
+  const handleDirectStockUpdate = (productId: string, newQuantity: number) => {
+    updateStockMutation.mutate({ productId, newQuantity });
   };
+
+  const lowStockItems = products?.filter(product => product.quantity_in_stock < 10) || [];
+  const outOfStockItems = products?.filter(product => product.quantity_in_stock === 0) || [];
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading inventory...</div>;
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center">Loading inventory...</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Inventory Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Inventory Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Items</p>
-                <p className="text-2xl font-bold">{items?.length || 0}</p>
-              </div>
-              <Package className="h-8 w-8 text-blue-500" />
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{products?.length || 0}</div>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Low Stock Items</p>
-                <p className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-yellow-500" />
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Low Stock</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</div>
           </CardContent>
         </Card>
-        
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {items?.filter(item => item.quantity_in_stock === 0).length || 0}
-                </p>
-              </div>
-              <Package className="h-8 w-8 text-red-500" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Value</p>
-                <p className="text-2xl font-bold">
-                  ${items?.reduce((sum, item) => sum + (item.price * item.quantity_in_stock), 0).toFixed(2) || '0.00'}
-                </p>
-              </div>
-              <Package className="h-8 w-8 text-green-500" />
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Out of Stock</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-600">{outOfStockItems.length}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Low Stock Alert */}
-      {lowStockItems.length > 0 && (
-        <LowStockAlertTrigger items={lowStockItems} />
-      )}
-
-      {/* Search and Filters */}
+      {/* Inventory Table */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Inventory Management</span>
-            <div className="flex gap-2">
-              <Button
-                variant={showLowStockOnly ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Low Stock Only
-              </Button>
-            </div>
-          </CardTitle>
+          <CardTitle>Inventory Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Current Stock</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredItems?.map((item) => {
-                const status = getStockStatus(item.quantity_in_stock);
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {item.image_url ? (
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            className="w-10 h-10 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center">
-                            <Package className="h-5 w-5 text-gray-400" />
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-medium">{item.name}</span>
-                          <div className="flex gap-1 mt-1">
-                            {item.tags.map((tag, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
-                                {tag}
-                              </Badge>
-                            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">Product</th>
+                  <th className="text-left p-2">Price</th>
+                  <th className="text-left p-2">Current Stock</th>
+                  <th className="text-left p-2">Status</th>
+                  <th className="text-left p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products?.map((product) => {
+                  const isLowStock = product.quantity_in_stock < 10;
+                  const isOutOfStock = product.quantity_in_stock === 0;
+                  
+                  return (
+                    <tr key={product.id} className="border-b hover:bg-muted/50">
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            {product.tags && product.tags.length > 0 && (
+                              <div className="flex gap-1 mt-1">
+                                {product.tags.slice(0, 2).map((tag, index) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className={`font-bold ${item.quantity_in_stock <= 10 ? 'text-red-500' : ''}`}>
-                        {item.quantity_in_stock}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${status.color} text-white`}>
-                        {status.label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      ${(item.price * item.quantity_in_stock).toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button 
-                            variant="outline" 
+                      </td>
+                      <td className="p-2">
+                        <span className="font-medium">${product.price}</span>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            value={product.quantity_in_stock}
+                            onChange={(e) => handleDirectStockUpdate(product.id, parseInt(e.target.value) || 0)}
+                            className="w-20"
+                            min="0"
+                          />
+                          {isOutOfStock && (
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          )}
+                          {isLowStock && !isOutOfStock && (
+                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <Badge 
+                          variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
+                        >
+                          {isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock'}
+                        </Badge>
+                      </td>
+                      <td className="p-2">
+                        <div className="flex gap-1">
+                          <Button
                             size="sm"
-                            onClick={() => setSelectedItem(item)}
+                            variant="outline"
+                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, -1)}
+                            disabled={product.quantity_in_stock === 0}
                           >
-                            Adjust Stock
+                            <Minus className="h-3 w-3" />
                           </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Adjust Inventory - {selectedItem?.name}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label>Current Stock: {selectedItem?.quantity_in_stock}</Label>
-                            </div>
-                            <div>
-                              <Label htmlFor="amount">Adjustment Amount</Label>
-                              <Input
-                                id="amount"
-                                type="number"
-                                value={adjustmentAmount}
-                                onChange={(e) => setAdjustmentAmount(e.target.value)}
-                                placeholder="Enter amount"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="reason">Reason (Optional)</Label>
-                              <Input
-                                id="reason"
-                                value={adjustmentReason}
-                                onChange={(e) => setAdjustmentReason(e.target.value)}
-                                placeholder="e.g., 'Restock', 'Damaged items', 'Sale'"
-                              />
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => handleAdjustment('add')}
-                                disabled={!adjustmentAmount || updateInventoryMutation.isPending}
-                                className="flex-1"
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Stock
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => handleAdjustment('subtract')}
-                                disabled={!adjustmentAmount || updateInventoryMutation.isPending}
-                                className="flex-1"
-                              >
-                                <Minus className="h-4 w-4 mr-2" />
-                                Remove Stock
-                              </Button>
-                              <Button
-                                onClick={() => handleAdjustment('set')}
-                                disabled={!adjustmentAmount || updateInventoryMutation.isPending}
-                                className="flex-1"
-                              >
-                                Set to {adjustmentAmount}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, 10)}
+                          >
+                            +10
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {products?.length === 0 && (
+            <div className="text-center py-8">
+              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold mb-2">No Products Found</h3>
+              <p className="text-muted-foreground">
+                Add some products to manage inventory
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
