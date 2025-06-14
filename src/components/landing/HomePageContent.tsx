@@ -49,7 +49,7 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section with Integrated Music Player - Moved closer to hero */}
-      <section className="w-full py-8 md:py-12 lg:py-16">
+      <section className="w-full py-8 md:py-8 lg:py-10">
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
