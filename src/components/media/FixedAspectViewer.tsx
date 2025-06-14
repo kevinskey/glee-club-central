@@ -93,8 +93,19 @@ export function FixedAspectViewer({ fileId, onClose }: FixedAspectViewerProps) {
             src={file.file_url}
             controls
             autoPlay
+            muted
+            playsInline
             className="w-full h-full"
             style={{ objectFit: 'contain' }}
+            onLoadStart={() => {
+              // Attempt to play after a short delay to ensure the video is loaded
+              setTimeout(() => {
+                const video = document.querySelector('video');
+                if (video) {
+                  video.play().catch(console.error);
+                }
+              }, 100);
+            }}
           >
             Your browser does not support the video tag.
           </video>
@@ -114,6 +125,15 @@ export function FixedAspectViewer({ fileId, onClose }: FixedAspectViewerProps) {
               controls
               autoPlay
               className="w-full max-w-md"
+              onLoadStart={() => {
+                // Attempt to play after a short delay to ensure the audio is loaded
+                setTimeout(() => {
+                  const audio = document.querySelector('audio');
+                  if (audio) {
+                    audio.play().catch(console.error);
+                  }
+                }, 100);
+              }}
             >
               Your browser does not support the audio tag.
             </audio>
