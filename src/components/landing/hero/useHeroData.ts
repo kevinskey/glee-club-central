@@ -77,14 +77,18 @@ export function useHeroData() {
             // Fallback: try site_images table
             const { data: siteImagesData, error: siteImagesError } = await supabase
               .from('site_images')
-              .select('id, file_url, name as title')
+              .select('id, file_url, name')
               .in('id', mediaIds);
 
             if (siteImagesError) {
               console.error('useHeroData: Error fetching from site_images:', siteImagesError);
             } else if (siteImagesData && siteImagesData.length > 0) {
               const siteImagesMap = siteImagesData.reduce((acc, media) => {
-                acc[media.id] = media;
+                acc[media.id] = {
+                  id: media.id,
+                  file_url: media.file_url,
+                  title: media.name
+                };
                 return acc;
               }, {} as Record<string, MediaFile>);
               
