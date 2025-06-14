@@ -19,6 +19,8 @@ interface MediaFilterBarProps {
   setViewMode: (mode: 'grid' | 'list') => void;
   mediaTypes: MediaType[];
   categories: string[];
+  showAdvancedFilters?: boolean;
+  setShowAdvancedFilters?: (show: boolean) => void;
 }
 
 export function MediaFilterBar({
@@ -33,7 +35,9 @@ export function MediaFilterBar({
   viewMode,
   setViewMode,
   mediaTypes,
-  categories
+  categories,
+  showAdvancedFilters,
+  setShowAdvancedFilters
 }: MediaFilterBarProps) {
   return (
     <div className="flex flex-col lg:flex-row gap-4">
@@ -86,6 +90,17 @@ export function MediaFilterBar({
             <SelectItem value="oldest">Oldest</SelectItem>
           </SelectContent>
         </Select>
+
+        {setShowAdvancedFilters && (
+          <Button
+            variant="outline"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className="gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
+        )}
 
         <Button
           variant="outline"
