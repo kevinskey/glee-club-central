@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { MediaFileLight } from "@/hooks/usePaginatedMediaLibrary";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause, Edit } from "lucide-react";
+import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
@@ -175,31 +175,15 @@ export function LightweightMediaCard({
       </div>
       
       <CardContent className="p-3">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          {canEdit && onUpdateTitle ? (
-            <InlineMediaTitleEdit
-              title={file.title}
-              onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
-              className="flex-1"
-            />
-          ) : (
-            <h3 className="font-medium text-sm truncate flex-1">{file.title}</h3>
-          )}
-          
-          {canEdit && onUpdateTitle && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                // The InlineMediaTitleEdit component will handle the editing
-              }}
-              className="h-6 w-6 p-0 flex-shrink-0 opacity-70 hover:opacity-100"
-            >
-              <Edit className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
+        {canEdit && onUpdateTitle ? (
+          <InlineMediaTitleEdit
+            title={file.title}
+            onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
+            className="mb-1"
+          />
+        ) : (
+          <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+        )}
         
         <p className="text-xs text-muted-foreground truncate mb-2">
           {file.title.split('.').pop()}

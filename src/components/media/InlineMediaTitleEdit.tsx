@@ -24,24 +24,27 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
     }
   }, [isEditing]);
 
-  const handleStart = (e?: React.MouseEvent) => {
+  const handleStart = (e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
+      e.preventDefault();
       e.stopPropagation();
     }
     setEditValue(title);
     setIsEditing(true);
   };
 
-  const handleCancel = (e?: React.MouseEvent) => {
+  const handleCancel = (e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
+      e.preventDefault();
       e.stopPropagation();
     }
     setEditValue(title);
     setIsEditing(false);
   };
 
-  const handleSave = async (e?: React.MouseEvent) => {
+  const handleSave = async (e?: React.MouseEvent | React.TouchEvent) => {
     if (e) {
+      e.preventDefault();
       e.stopPropagation();
     }
     
@@ -59,8 +62,9 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
     try {
       await onSave(editValue.trim());
       setIsEditing(false);
+      toast.success('Title updated successfully');
     } catch (error) {
-      // Error already handled in parent
+      toast.error('Failed to update title');
     } finally {
       setIsSaving(false);
     }
@@ -76,7 +80,11 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
 
   if (isEditing) {
     return (
-      <div className={`flex items-center gap-2 ${className}`} onClick={(e) => e.stopPropagation()}>
+      <div 
+        className={`flex items-center gap-2 ${className}`} 
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
         <Input
           ref={inputRef}
           value={editValue}
@@ -89,6 +97,7 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
           size="sm"
           variant="ghost"
           onClick={handleSave}
+          onTouchStart={handleSave}
           disabled={isSaving}
           className="h-8 w-8 p-0"
         >
@@ -98,6 +107,7 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
           size="sm"
           variant="ghost"
           onClick={handleCancel}
+          onTouchStart={handleCancel}
           disabled={isSaving}
           className="h-8 w-8 p-0"
         >
@@ -110,8 +120,10 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <span 
-        className="flex-1 font-medium text-sm truncate cursor-pointer"
+        className="flex-1 font-medium text-sm truncate cursor-pointer select-none"
         onClick={handleStart}
+        onTouchStart={handleStart}
+        style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
       >
         {title}
       </span>
@@ -119,7 +131,8 @@ export function InlineMediaTitleEdit({ title, onSave, className = "" }: InlineMe
         size="sm"
         variant="ghost"
         onClick={handleStart}
-        className="h-6 w-6 p-0 opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
+        onTouchStart={handleStart}
+        className="h-6 w-6 p-0 opacity-70 hover:opacity-100 active:opacity-100 transition-opacity flex-shrink-0"
       >
         <Edit className="h-3 w-3" />
       </Button>
