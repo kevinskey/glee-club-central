@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface SoundCloudTrack {
   id: string;
@@ -37,15 +37,21 @@ export const useSoundCloudPlayer = () => {
   const [activePlaylist, setActivePlaylist] = useState<SoundCloudPlaylist | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const fetchedRef = useRef(false);
 
   const fetchSoundCloudData = async () => {
+    // Prevent multiple simultaneous requests
+    if (fetchedRef.current) {
+      return;
+    }
+    
     try {
       setIsLoading(true);
       setError(null);
+      fetchedRef.current = true;
       
       console.log('Fetching SoundCloud data...');
       
-      // Use the Supabase functions invoke method instead of direct fetch
       const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-api`, {
         method: 'GET',
         headers: {
@@ -55,15 +61,12 @@ export const useSoundCloudPlayer = () => {
       });
       
       console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const contentType = response.headers.get('content-type');
-      console.log('Content-Type:', contentType);
-      
       if (!contentType || !contentType.includes('application/json')) {
         const textResponse = await response.text();
         console.error('Non-JSON response received:', textResponse.substring(0, 500));
@@ -109,17 +112,19 @@ export const useSoundCloudPlayer = () => {
 
   const refetchPlaylists = async () => {
     console.log('Refetching SoundCloud playlists...');
+    fetchedRef.current = false;
     await fetchSoundCloudData();
   };
 
   const refetchTracks = async () => {
     console.log('Refetching SoundCloud tracks...');
+    fetchedRef.current = false;
     await fetchSoundCloudData();
   };
 
   useEffect(() => {
     fetchSoundCloudData();
-  }, []);
+  }, []); // Empty dependency array to prevent multiple calls
 
   return {
     playlists,
