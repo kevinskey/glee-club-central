@@ -1,5 +1,4 @@
 
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -19,7 +18,7 @@ serve(async (req) => {
   try {
     console.log('Processing SoundCloud API request')
     
-    // Return empty data instead of mock data
+    // Return empty data - no mock content
     const emptyData = {
       playlists: [],
       tracks: [],
@@ -27,7 +26,7 @@ serve(async (req) => {
       message: 'No SoundCloud content available at the moment'
     }
 
-    console.log('Returning empty data')
+    console.log('Returning empty data - no SoundCloud content')
     
     const response = new Response(
       JSON.stringify(emptyData),
@@ -66,4 +65,3 @@ serve(async (req) => {
     )
   }
 })
-
