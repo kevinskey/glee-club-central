@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { MediaFileLight } from "@/hooks/usePaginatedMediaLibrary";
 import { MediaType, getMediaType } from "@/utils/mediaUtils";
-import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "lucide-react";
+import { Eye, Download, Trash2, FileText, Image, Music, Video, File, Play, Pause, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatFileSize } from "@/utils/file-utils";
@@ -29,6 +29,7 @@ export function LightweightMediaCard({
   const [playingAudio, setPlayingAudio] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const mediaType = getMediaType(file.file_type);
   const isImage = mediaType === "image";
@@ -96,8 +97,27 @@ export function LightweightMediaCard({
     onPreview(file.id);
   };
 
+  const handleEditClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsEditingTitle(true);
+  };
+
   return (
-    <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer" onClick={handlePreview}>
+    <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer relative" onClick={handlePreview}>
+      {/* Edit Pencil - Always visible when canEdit is true */}
+      {canEdit && onUpdateTitle && (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleEditClick}
+          onTouchStart={handleEditClick}
+          className="absolute top-2 right-2 z-10 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-sm backdrop-blur-sm"
+        >
+          <Edit className="h-4 w-4 text-gray-700" />
+        </Button>
+      )}
+
       <div className="relative aspect-[3/2] bg-muted/40 overflow-hidden">
         {isImage && file.file_url && !imageError ? (
           <img 
@@ -175,10 +195,13 @@ export function LightweightMediaCard({
       </div>
       
       <CardContent className="p-3">
-        {canEdit && onUpdateTitle ? (
+        {canEdit && onUpdateTitle && isEditingTitle ? (
           <InlineMediaTitleEdit
             title={file.title}
-            onSave={(newTitle) => onUpdateTitle(file.id, newTitle)}
+            onSave={async (newTitle) => {
+              await onUpdateTitle(file.id, newTitle);
+              setIsEditingTitle(false);
+            }}
             className="mb-1"
           />
         ) : (
