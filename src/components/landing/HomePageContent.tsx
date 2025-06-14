@@ -3,7 +3,6 @@ import React from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
 import { SoundCloudPlayer } from "@/components/audio/SoundCloudPlayer";
-import { SoundCloudCoverFlow } from "@/components/audio/SoundCloudCoverFlow";
 import { useSoundCloudPlayer } from "@/hooks/useSoundCloudPlayer";
 
 interface Event {
@@ -68,15 +67,6 @@ export function HomePageContent({
           
           {/* SoundCloud Music Section */}
           <div className="mt-16 max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
-                Listen to the Glee
-              </h3>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
-                Experience our music collection from SoundCloud
-              </p>
-            </div>
-            
             {error && (
               <div className="text-center py-8 bg-red-50 dark:bg-red-900/20 rounded-lg mb-8">
                 <p className="text-red-600 dark:text-red-400 text-sm">
@@ -94,28 +84,16 @@ export function HomePageContent({
               </div>
             )}
             
-            {!isLoading && !error && playlists.length > 0 && (
-              <div className="space-y-12">
-                {/* Cover Flow Display */}
-                <SoundCloudCoverFlow 
-                  playlists={playlists}
-                  activePlaylistId={activePlaylist?.id}
-                  onPlaylistSelect={setActivePlaylist}
+            {!isLoading && !error && playlists.length > 0 && activePlaylist && (
+              <div>
+                <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
+                  Now Playing: {activePlaylist.name}
+                </h4>
+                <SoundCloudPlayer 
+                  tracks={activePlaylist.tracks}
+                  currentTrackIndex={0}
+                  onTrackChange={() => {}}
                 />
-
-                {/* Active Player */}
-                {activePlaylist && (
-                  <div>
-                    <h4 className="text-xl font-medium text-gray-900 dark:text-white mb-6">
-                      Now Playing: {activePlaylist.name}
-                    </h4>
-                    <SoundCloudPlayer 
-                      tracks={activePlaylist.tracks}
-                      currentTrackIndex={0}
-                      onTrackChange={() => {}}
-                    />
-                  </div>
-                )}
               </div>
             )}
             
