@@ -12,12 +12,13 @@ export function ThemeToggle() {
       variant="ghost" 
       size="icon" 
       onClick={toggleTheme}
+      className="glass-button hover:glass-hover rounded-xl w-10 h-10"
       aria-label={theme === "light" ? "Enable dark mode" : "Enable light mode"}
     >
       {theme === "light" ? (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <Sun className="h-5 w-5 text-royal-600 transition-all" />
       ) : (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <Moon className="h-5 w-5 text-powder-400 transition-all" />
       )}
       <span className="sr-only">{theme === "light" ? "Dark" : "Light"} mode</span>
     </Button>

@@ -2,7 +2,36 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* Apple-style text utilities */
+  /* Liquid Glass Effects */
+  .glass-card {
+    @apply bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 dark:border-white/10;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  .glass-button {
+    @apply bg-white/20 dark:bg-white/10 backdrop-blur-lg border border-white/30 dark:border-white/20 hover:bg-white/30 dark:hover:bg-white/20 transition-all duration-300;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  .glass-royal {
+    @apply bg-royal-500/20 border-royal-300/30 backdrop-blur-xl;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  .glass-powder {
+    @apply bg-powder-500/20 border-powder-300/30 backdrop-blur-xl;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.1));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Enhanced Apple-style text utilities */
   .text-balance {
     text-wrap: balance;
   }
@@ -11,12 +40,16 @@
     text-wrap: pretty;
   }
   
-  /* Apple typography hierarchy */
+  /* Apple typography hierarchy with glass enhancements */
   .text-display {
     font-size: clamp(2.5rem, 8vw, 6rem);
     font-weight: 300;
     letter-spacing: -0.03em;
     line-height: 0.9;
+    background: linear-gradient(135deg, theme(colors.royal.600), theme(colors.powder.500));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   .text-headline {
@@ -48,109 +81,85 @@
     color: hsl(var(--muted-foreground));
   }
 
-  /* Apple-style animations */
-  .animate-apple-fade-in {
-    animation: apple-fade-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Liquid Glass Animations */
+  .animate-glass-fade-in {
+    animation: glass-fade-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
-  .animate-apple-slide-up {
-    animation: apple-slide-up 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-  
-  .animate-apple-scale {
-    animation: apple-scale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  .animate-glass-scale {
+    animation: glass-scale 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  @keyframes apple-fade-in {
+  @keyframes glass-fade-in {
     0% {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(20px) scale(0.95);
+      backdrop-filter: blur(0px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
+      backdrop-filter: blur(20px);
     }
   }
 
-  @keyframes apple-slide-up {
+  @keyframes glass-scale {
     0% {
       opacity: 0;
-      transform: translateY(40px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes apple-scale {
-    0% {
-      opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.9);
+      backdrop-filter: blur(0px);
     }
     100% {
       opacity: 1;
       transform: scale(1);
+      backdrop-filter: blur(16px);
     }
   }
   
-  /* Apple-style hover effects */
-  .apple-hover {
+  /* Enhanced hover effects with glass */
+  .glass-hover {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   
-  .apple-hover:hover {
+  .glass-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15), 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
   
-  /* Apple-style glass effects */
-  .apple-glass {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .dark .apple-glass {
-    background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Apple-style container */
-  .apple-container {
+  /* Glass container styles */
+  .glass-container {
     @apply mx-auto px-6 md:px-8 w-full max-w-7xl;
   }
   
-  /* Apple-style section spacing */
-  .apple-section {
+  /* Glass section styling */
+  .glass-section {
     @apply py-16 md:py-24 lg:py-32;
   }
   
-  /* Apple-style card */
-  .apple-card {
-    @apply bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200/50 dark:border-gray-800/50 overflow-hidden transition-all duration-300;
+  /* Enhanced glass buttons */
+  .glass-button-primary {
+    @apply bg-royal-600/80 hover:bg-royal-700/90 text-white font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-royal-400/30;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.3);
   }
   
-  .apple-card:hover {
-    @apply shadow-lg border-gray-300/50 dark:border-gray-700/50 transform -translate-y-1;
+  .glass-button-secondary {
+    @apply bg-powder-500/20 hover:bg-powder-600/30 text-powder-700 dark:text-powder-300 font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-powder-400/30;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   
-  /* Apple-style button variants */
-  .apple-button-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-normal rounded-full px-6 py-3 transition-all duration-200 hover:scale-105 active:scale-95;
+  /* Glass form elements */
+  .glass-input {
+    @apply bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-royal-500/50 focus:border-royal-400/50 transition-all duration-200 backdrop-blur-lg;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   
-  .apple-button-secondary {
-    @apply bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-normal rounded-full px-6 py-3 transition-all duration-200 hover:scale-105 active:scale-95;
-  }
-  
-  /* Apple-style form elements */
-  .apple-input {
-    @apply bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
-  }
-  
-  /* Remove line clamp utilities for simplicity */
+  /* Text utilities for glass design */
   .line-clamp-1 {
     overflow: hidden;
     display: -webkit-box;
@@ -165,22 +174,18 @@
     -webkit-line-clamp: 2;
   }
   
-  /* Apple-style text shadows */
-  .text-shadow-sm {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* Glass text shadows */
+  .text-shadow-glass {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Apple-style responsive utilities */
-  .apple-responsive-text {
+  /* Responsive glass utilities */
+  .glass-responsive-text {
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     line-height: 1.5;
   }
   
-  .apple-responsive-heading {
+  .glass-responsive-heading {
     font-size: clamp(1.5rem, 4vw, 2rem);
     line-height: 1.1;
     font-weight: 300;

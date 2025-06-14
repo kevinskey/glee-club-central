@@ -1,3 +1,4 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import "./styles/base.css";
 @import "./styles/components.css";
@@ -19,33 +20,33 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 240 9% 9%;
+    --primary: 258 90% 66%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 258 90% 66%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --ring: 258 90% 66%;
+    --radius: 0.75rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     
-    /* Glee Club Brand Colors - Updated to Carolina blue */
-    --glee-columbia: 211 84% 61%;
-    --glee-columbia-foreground: 0 0% 98%;
-    --glee-light-blue: 211 89% 68%;
-    --glee-navy: 210 100% 12%;
-    --glee-gold: 45 93% 47%;
-    --glee-silver: 0 0% 60%;
+    /* Liquid Glass Brand Colors */
+    --glee-royal: 258 90% 66%;
+    --glee-royal-foreground: 0 0% 98%;
+    --glee-powder: 199 89% 48%;
+    --glee-powder-foreground: 0 0% 98%;
+    --glee-glass-white: 0 0% 100% / 0.1;
+    --glee-glass-dark: 0 0% 0% / 0.1;
   }
 
   .dark {
@@ -55,19 +56,19 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
+    --primary: 258 90% 66%;
     --primary-foreground: 240 5.9% 10%;
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
+    --accent: 258 90% 66%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --ring: 258 90% 66%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -81,12 +82,13 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-indigo-900 text-foreground;
     font-family: "Inter", system-ui, sans-serif;
+    min-height: 100vh;
   }
 }
 
-/* PDF Performance Optimizations */
+/* Enhanced PDF Performance Optimizations with Glass Effects */
 .react-pdf__Document {
   display: flex;
   flex-direction: column;
@@ -95,30 +97,37 @@
 
 .react-pdf__Page {
   max-width: none !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   margin: 1rem 0;
+  border-radius: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .react-pdf__Page canvas {
   display: block;
   max-width: 100%;
   height: auto;
+  border-radius: 16px;
 }
 
-/* Optimized scrolling and rendering */
+/* Optimized scrolling and rendering with glass aesthetics */
 * {
   scroll-behavior: smooth;
 }
 
-/* GPU acceleration for better performance */
+/* GPU acceleration for better performance with glass effects */
 .pdf-viewer-container,
-.annotation-layer {
+.annotation-layer,
+.glass-card,
+.glass-button {
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* Mobile-specific touch optimizations */
+/* Mobile-specific touch optimizations with glass design */
 @media (max-width: 768px) {
   /* Prevent zoom on input focus (iOS) */
   input[type="text"],
@@ -140,5 +149,11 @@
     -ms-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
+  }
+  
+  /* Glass effects optimizations for mobile */
+  .glass-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 }

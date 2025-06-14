@@ -27,77 +27,85 @@ const AdminMediaLibraryPage = () => {
   };
   
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-glee-spelman/10 rounded-xl">
-            <FileImage className="h-8 w-8 text-glee-spelman" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Media Library Management
-            </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-3">
-              Upload, organize, and manage all media files for the Glee Club
-            </p>
-            <div className="flex items-center gap-3">
-              <Badge variant="outline" className="text-sm">
-                <FileImage className="h-3 w-3 mr-1" />
-                Optimized Loading
-              </Badge>
-              <Badge variant="outline" className="text-sm">
-                Admin Access
-              </Badge>
+    <div className="space-y-8 p-6">
+      {/* Page Header with Liquid Glass Design */}
+      <div className="glass-card rounded-3xl p-8 animate-glass-fade-in">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex items-start gap-6">
+            <div className="p-4 glass-royal rounded-2xl">
+              <FileImage className="h-10 w-10 text-royal-600" />
+            </div>
+            <div>
+              <h1 className="text-headline font-bold text-gray-900 dark:text-white mb-2">
+                Media Library Management
+              </h1>
+              <p className="text-body text-gray-600 dark:text-gray-300 mb-4">
+                Upload, organize, and manage all media files for the Glee Club
+              </p>
+              <div className="flex items-center gap-3">
+                <Badge variant="outline" className="glass-button border-royal-300/30 text-royal-700 dark:text-royal-300">
+                  <FileImage className="h-3 w-3 mr-1" />
+                  Optimized Loading
+                </Badge>
+                <Badge variant="outline" className="glass-button border-powder-300/30 text-powder-700 dark:text-powder-300">
+                  Admin Access
+                </Badge>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* View Mode Toggle */}
-          <div className="flex rounded-lg border">
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            {/* View Mode Toggle with Glass Effect */}
+            <div className="flex rounded-2xl glass-card border border-white/20 overflow-hidden">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className={`rounded-none ${viewMode === 'grid' 
+                  ? 'glass-button-primary' 
+                  : 'glass-button hover:bg-white/20'
+                }`}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={`rounded-none ${viewMode === 'list' 
+                  ? 'glass-button-primary' 
+                  : 'glass-button hover:bg-white/20'
+                }`}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
+              variant="outline"
+              onClick={handleRefresh}
+              className="glass-button-secondary flex items-center gap-2"
             >
-              <Grid className="h-4 w-4" />
+              <RefreshCw className="h-4 w-4" />
+              Refresh
             </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-l-none"
+            <Button 
+              onClick={() => setIsUploadModalOpen(true)}
+              className="glass-button-primary shadow-lg hover:shadow-xl"
             >
-              <List className="h-4 w-4" />
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Media
             </Button>
           </div>
-          
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-          <Button 
-            onClick={() => setIsUploadModalOpen(true)}
-            className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload Media
-          </Button>
         </div>
       </div>
 
-      {/* Media Library */}
-      <Card className="overflow-hidden">
-        <CardHeader className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FileImage className="h-5 w-5 text-glee-spelman" />
-            Media Files
+      {/* Media Library with Enhanced Glass Design */}
+      <Card className="glass-card border-0 rounded-3xl overflow-hidden animate-glass-scale">
+        <CardHeader className="glass-powder border-b border-white/10 p-6">
+          <CardTitle className="flex items-center gap-3 text-xl">
+            <FileImage className="h-6 w-6 text-powder-600" />
+            <span className="text-gray-900 dark:text-white">Media Files</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
