@@ -5,26 +5,28 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Music, Upload, Eye, Edit, Trash2 } from 'lucide-react';
 
-interface Track {
+interface SoundCloudTrack {
   id: string;
   title: string;
   artist: string;
-  duration: number;
   audioUrl: string;
-  coverArt?: string;
+  albumArt: string;
+  duration: number;
+  waveformData: number[];
   likes: number;
   plays: number;
-  genre?: string;
+  isLiked: boolean;
+  genre: string;
   uploadDate: string;
-  description?: string;
-  isPublic: boolean;
+  description: string;
+  permalink_url: string;
 }
 
 interface TrackListProps {
-  tracks: Track[];
+  tracks: SoundCloudTrack[];
   onDeleteTrack: (trackId: string) => void;
   onToggleVisibility: (trackId: string) => void;
-  onEditTrack: (track: Track) => void;
+  onEditTrack: (track: SoundCloudTrack) => void;
 }
 
 export function TrackList({ tracks, onDeleteTrack, onToggleVisibility, onEditTrack }: TrackListProps) {
@@ -59,7 +61,7 @@ export function TrackList({ tracks, onDeleteTrack, onToggleVisibility, onEditTra
               >
                 <div className="w-16 h-16 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
                   <img 
-                    src={track.coverArt} 
+                    src={track.albumArt} 
                     alt={track.title}
                     className="w-full h-full object-cover"
                   />
@@ -80,8 +82,8 @@ export function TrackList({ tracks, onDeleteTrack, onToggleVisibility, onEditTra
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Badge variant={track.isPublic ? "default" : "secondary"}>
-                    {track.isPublic ? "Public" : "Private"}
+                  <Badge variant="default">
+                    Public
                   </Badge>
                   
                   <Button
