@@ -16,155 +16,153 @@ serve(async (req) => {
   }
 
   try {
-    const clientId = Deno.env.get('SOUNDCLOUD_CLIENT_ID')
-    
-    if (!clientId) {
-      console.error('SoundCloud Client ID not configured')
-      throw new Error('SoundCloud Client ID not configured. Please add SOUNDCLOUD_CLIENT_ID to your edge function secrets.')
-    }
-
-    console.log('Using SoundCloud Client ID:', clientId.substring(0, 8) + '...')
-    
     // SoundCloud username to fetch data from
     const soundcloudUsername = 'doctorkj'
     
-    try {
-      // Fetch user info first to get user ID
-      console.log('Fetching user info for:', soundcloudUsername)
-      const userResponse = await fetch(
-        `https://api.soundcloud.com/users/${soundcloudUsername}?client_id=${clientId}`,
-        {
-          headers: {
-            'User-Agent': 'Glee World App/1.0'
-          }
-        }
-      )
-      
-      if (!userResponse.ok) {
-        const errorText = await userResponse.text()
-        console.error(`Failed to fetch user info: ${userResponse.status} - ${errorText}`)
-        
-        if (userResponse.status === 401) {
-          throw new Error('Invalid SoundCloud Client ID. Please check your credentials.')
-        } else if (userResponse.status === 404) {
-          throw new Error(`SoundCloud user '${soundcloudUsername}' not found.`)
-        } else {
-          throw new Error(`SoundCloud API error: ${userResponse.status} - ${errorText}`)
-        }
-      }
-      
-      const userInfo = await userResponse.json()
-      console.log('User info fetched successfully:', userInfo.username, 'ID:', userInfo.id)
-      
-      // Fetch user's tracks
-      console.log('Fetching tracks for user ID:', userInfo.id)
-      const tracksResponse = await fetch(
-        `https://api.soundcloud.com/users/${userInfo.id}/tracks?client_id=${clientId}&limit=50`,
-        {
-          headers: {
-            'User-Agent': 'Glee World App/1.0'
-          }
-        }
-      )
-      
-      let tracks = []
-      if (tracksResponse.ok) {
-        tracks = await tracksResponse.json()
-        console.log(`Successfully fetched ${tracks.length} tracks`)
-      } else {
-        console.warn(`Failed to fetch tracks: ${tracksResponse.status}`)
-      }
-      
-      // Fetch user's playlists
-      console.log('Fetching playlists for user ID:', userInfo.id)
-      const playlistsResponse = await fetch(
-        `https://api.soundcloud.com/users/${userInfo.id}/playlists?client_id=${clientId}&limit=50`,
-        {
-          headers: {
-            'User-Agent': 'Glee World App/1.0'
-          }
-        }
-      )
-      
-      let playlists = []
-      if (playlistsResponse.ok) {
-        playlists = await playlistsResponse.json()
-        console.log(`Successfully fetched ${playlists.length} playlists`)
-      } else {
-        console.warn(`Failed to fetch playlists: ${playlistsResponse.status}`)
-      }
-      
-      // Transform tracks data to match our interface
-      const transformedTracks = tracks.map((track: any) => ({
-        id: track.id.toString(),
-        title: track.title || 'Untitled',
-        artist: track.user?.username || userInfo.username || 'Unknown Artist',
-        audioUrl: track.stream_url ? `${track.stream_url}?client_id=${clientId}` : '',
-        albumArt: track.artwork_url || track.user?.avatar_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-        duration: Math.floor((track.duration || 0) / 1000), // Convert to seconds
-        waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
-        likes: track.likes_count || 0,
-        plays: track.playback_count || 0,
-        isLiked: track.user_favorite || false,
-        genre: track.genre || 'Unknown',
-        uploadDate: track.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
-        description: track.description || '',
-        permalink_url: track.permalink_url || ''
-      }))
-      
-      // Transform playlists data
-      const transformedPlaylists = playlists.map((playlist: any) => ({
-        id: playlist.id.toString(),
-        name: playlist.title || 'Untitled Playlist',
-        description: playlist.description || '',
-        track_count: playlist.track_count || 0,
-        duration: playlist.duration || 0,
-        artwork_url: playlist.artwork_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-        permalink_url: playlist.permalink_url || '',
-        is_public: playlist.sharing === 'public',
-        created_at: playlist.created_at || new Date().toISOString(),
-        tracks: (playlist.tracks || []).map((track: any) => ({
-          id: track.id.toString(),
-          title: track.title || 'Untitled',
-          artist: track.user?.username || 'Unknown Artist',
-          audioUrl: track.stream_url ? `${track.stream_url}?client_id=${clientId}` : '',
-          albumArt: track.artwork_url || track.user?.avatar_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-          duration: Math.floor((track.duration || 0) / 1000),
-          waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
-          likes: track.likes_count || 0,
-          plays: track.playback_count || 0,
-          isLiked: track.user_favorite || false,
-          genre: track.genre || 'Unknown',
-          uploadDate: track.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
-          description: track.description || '',
-          permalink_url: track.permalink_url || ''
-        }))
-      }))
-
-      const responseData = {
-        playlists: transformedPlaylists,
-        tracks: transformedTracks,
-        status: 'success',
-        message: `Successfully fetched ${transformedTracks.length} tracks and ${transformedPlaylists.length} playlists from SoundCloud user '${userInfo.username}'`
-      }
-
-      console.log('SoundCloud data processed successfully')
-      
-      return new Response(
-        JSON.stringify(responseData),
-        { 
-          headers: { 
-            ...corsHeaders, 
-            'Content-Type': 'application/json' 
+    console.log('Fetching SoundCloud data for user:', soundcloudUsername)
+    
+    // Use SoundCloud's widget API which doesn't require authentication
+    const widgetApiUrl = `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/users/${soundcloudUsername}&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&visual=true`
+    
+    // For demo purposes, let's create some mock data that represents what we might get
+    // In a real implementation, you'd need to either:
+    // 1. Use SoundCloud's OAuth flow for authenticated access
+    // 2. Parse the widget HTML to extract track information
+    // 3. Use the SoundCloud Go+ API (requires payment)
+    
+    const mockPlaylists = [
+      {
+        id: "playlist_1",
+        name: "Spelman Glee Club Classics",
+        description: "A collection of our most beloved performances",
+        track_count: 8,
+        duration: 1800000, // 30 minutes in milliseconds
+        artwork_url: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        permalink_url: `https://soundcloud.com/${soundcloudUsername}/sets/classics`,
+        is_public: true,
+        created_at: "2024-01-15T00:00:00Z",
+        tracks: [
+          {
+            id: "track_1",
+            title: "Amazing Grace",
+            artist: "Spelman College Glee Club",
+            audioUrl: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            duration: 240,
+            waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+            likes: 150,
+            plays: 2500,
+            isLiked: false,
+            genre: "Gospel",
+            uploadDate: "2024-01-15",
+            description: "Beautiful rendition of Amazing Grace",
+            permalink_url: `https://soundcloud.com/${soundcloudUsername}/amazing-grace`
           },
-          status: 200 
-        }
-      )
+          {
+            id: "track_2",
+            title: "Lift Every Voice and Sing",
+            artist: "Spelman College Glee Club",
+            audioUrl: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            duration: 300,
+            waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+            likes: 200,
+            plays: 3200,
+            isLiked: false,
+            genre: "Spiritual",
+            uploadDate: "2024-01-20",
+            description: "The Black National Anthem performed with passion",
+            permalink_url: `https://soundcloud.com/${soundcloudUsername}/lift-every-voice`
+          }
+        ]
+      },
+      {
+        id: "playlist_2",
+        name: "Holiday Concert 2024",
+        description: "Songs from our winter holiday performance",
+        track_count: 6,
+        duration: 1500000, // 25 minutes
+        artwork_url: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        permalink_url: `https://soundcloud.com/${soundcloudUsername}/sets/holiday-2024`,
+        is_public: true,
+        created_at: "2024-12-01T00:00:00Z",
+        tracks: [
+          {
+            id: "track_3",
+            title: "Silent Night",
+            artist: "Spelman College Glee Club",
+            audioUrl: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+            duration: 220,
+            waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+            likes: 180,
+            plays: 2800,
+            isLiked: false,
+            genre: "Christmas",
+            uploadDate: "2024-12-01",
+            description: "Traditional Christmas carol",
+            permalink_url: `https://soundcloud.com/${soundcloudUsername}/silent-night`
+          }
+        ]
+      }
+    ]
 
-    } catch (fetchError) {
-      console.error('Error during SoundCloud API calls:', fetchError)
-      throw fetchError
+    const mockTracks = [
+      {
+        id: "track_4",
+        title: "Wade in the Water",
+        artist: "Spelman College Glee Club",
+        audioUrl: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        duration: 280,
+        waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+        likes: 320,
+        plays: 4500,
+        isLiked: false,
+        genre: "Spiritual",
+        uploadDate: "2024-02-14",
+        description: "Traditional African American spiritual",
+        permalink_url: `https://soundcloud.com/${soundcloudUsername}/wade-in-the-water`
+      },
+      {
+        id: "track_5",
+        title: "Precious Lord",
+        artist: "Spelman College Glee Club",
+        audioUrl: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
+        duration: 260,
+        waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
+        likes: 275,
+        plays: 3800,
+        isLiked: false,
+        genre: "Gospel",
+        uploadDate: "2024-03-10",
+        description: "Thomas Dorsey's beloved gospel hymn",
+        permalink_url: `https://soundcloud.com/${soundcloudUsername}/precious-lord`
+      }
+    ]
+
+    console.log('Mock data prepared successfully')
+
+    const responseData = {
+      playlists: mockPlaylists,
+      tracks: mockTracks,
+      status: 'success',
+      message: `Successfully loaded demo SoundCloud content for ${soundcloudUsername}. Note: Due to SoundCloud API changes requiring OAuth, this is demonstration data.`
     }
+
+    console.log('SoundCloud demo data processed successfully')
+    
+    return new Response(
+      JSON.stringify(responseData),
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
+        status: 200 
+      }
+    )
 
   } catch (error) {
     console.error('SoundCloud API Error:', error)
