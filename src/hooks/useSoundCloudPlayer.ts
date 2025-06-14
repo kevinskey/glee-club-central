@@ -80,6 +80,10 @@ export const useSoundCloudPlayer = () => {
     }
   };
 
+  const handlePlaylistSelect = (playlist: SoundCloudPlaylist) => {
+    setActivePlaylist(playlist);
+  };
+
   const refetchPlaylists = async () => {
     await fetchSoundCloudData();
   };
@@ -98,7 +102,7 @@ export const useSoundCloudPlayer = () => {
     activePlaylist,
     isLoading,
     error,
-    setActivePlaylist,
+    setActivePlaylist: handlePlaylistSelect,
     refetchPlaylists,
     refetchTracks
   };
