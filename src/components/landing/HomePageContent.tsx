@@ -7,7 +7,7 @@ import { useSoundCloudPlayer } from "@/hooks/useSoundCloudPlayer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Play, Music, Clock } from "lucide-react";
+import { Play, Music, Clock, ExternalLink } from "lucide-react";
 
 interface Event {
   id: string;
@@ -59,6 +59,37 @@ export function HomePageContent({
     const minutes = totalMinutes % 60;
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
+
+  // Sample SoundCloud embeds for demo
+  const sampleEmbeds = [
+    {
+      id: 'sample-1',
+      title: 'Beautiful Harmony',
+      url: 'https://soundcloud.com/doctorkj/beautiful-harmony',
+      description: 'Our latest choral arrangement'
+    },
+    {
+      id: 'sample-2',
+      title: 'Live Performance',
+      url: 'https://soundcloud.com/doctorkj/live-performance',
+      description: 'Live recording from our recent concert'
+    }
+  ];
+
+  const generateEmbedCode = (url: string) => {
+    const embedParams = new URLSearchParams({
+      url: url,
+      color: '#ff5500',
+      auto_play: 'false',
+      hide_related: 'false',
+      show_comments: 'true',
+      show_user: 'true',
+      show_reposts: 'false',
+      show_teaser: 'true'
+    });
+
+    return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
+  };
   
   return (
     <main className="w-full">
@@ -83,39 +114,59 @@ export function HomePageContent({
                 Listen to the Glee
               </h3>
               <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
-                Experience our music collection from SoundCloud
+                Experience our music collection
               </p>
             </div>
             
+            {/* SoundCloud Embeds */}
+            <div className="space-y-8">
+              {sampleEmbeds.map((embed) => (
+                <Card key={embed.id} className="overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {embed.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {embed.description}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={embed.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </Button>
+                    </div>
+                    <div className="rounded-lg overflow-hidden">
+                      <iframe
+                        width="100%"
+                        height="166"
+                        scrolling="no"
+                        frameBorder="no"
+                        allow="autoplay"
+                        src={generateEmbedCode(embed.url)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
             {error && (
-              <div className="text-center py-8 bg-red-50 dark:bg-red-900/20 rounded-lg mb-8">
+              <div className="text-center py-8 bg-red-50 dark:bg-red-900/20 rounded-lg mt-8">
                 <p className="text-red-600 dark:text-red-400 text-sm">
-                  Unable to load SoundCloud content: {error}
+                  Unable to load additional SoundCloud content: {error}
                 </p>
               </div>
             )}
             
             {isLoading && (
-              <div className="text-center py-12">
+              <div className="text-center py-12 mt-8">
                 <div className="inline-flex items-center gap-3">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading playlists...</p>
-                </div>
-              </div>
-            )}
-            
-            {!isLoading && !error && playlists.length === 0 && (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex flex-col items-center gap-4">
-                  <Music className="w-16 h-16 text-gray-400 dark:text-gray-500" />
-                  <div>
-                    <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      Coming Soon
-                    </h4>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm max-w-md">
-                      Our SoundCloud music library is being prepared. Check back soon to hear our beautiful performances!
-                    </p>
-                  </div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading additional content...</p>
                 </div>
               </div>
             )}
