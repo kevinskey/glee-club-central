@@ -61,7 +61,6 @@ export function WaveSurferPlayer({
         barGap: 1,
         minPxPerSec: 50,
         fillParent: true,
-        scrollParent: true,
         pixelRatio: window.devicePixelRatio || 1,
       });
 
@@ -75,7 +74,7 @@ export function WaveSurferPlayer({
         setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
       });
 
-      wavesurfer.current.on('seek', () => {
+      wavesurfer.current.on('interaction', () => {
         setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
       });
 

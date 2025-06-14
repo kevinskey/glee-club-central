@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +31,7 @@ export function MobileOptimizedEventsSection({
 
   if (loading) {
     return (
-      <section className={cn("py-8 md:py-12", className)}>
+      <section className={cn("py-8 md:py-12 pt-16 md:pt-20", className)}>
         <div className="container mx-auto px-4">
           {showHeader && (
             <div className="text-center mb-6 md:mb-8">
@@ -64,7 +63,7 @@ export function MobileOptimizedEventsSection({
 
   if (error) {
     return (
-      <section className={cn("py-8 md:py-12", className)}>
+      <section className={cn("py-8 md:py-12 pt-16 md:pt-20", className)}>
         <div className="container mx-auto px-4">
           <div className="text-center text-red-600 py-8">
             <p className="text-sm md:text-base">Unable to load events at this time</p>
@@ -76,7 +75,7 @@ export function MobileOptimizedEventsSection({
 
   if (upcomingEvents.length === 0) {
     return (
-      <section className={cn("py-8 md:py-12", className)}>
+      <section className={cn("py-8 md:py-12 pt-16 md:pt-20", className)}>
         <div className="container mx-auto px-4">
           {showHeader && (
             <div className="text-center mb-6 md:mb-8">
@@ -98,7 +97,7 @@ export function MobileOptimizedEventsSection({
   }
 
   return (
-    <section className={cn("py-8 md:py-12", className)}>
+    <section className={cn("py-8 md:py-12 pt-16 md:pt-20", className)}>
       <div className="container mx-auto px-4">
         {showHeader && (
           <div className="text-center mb-6 md:mb-8">
