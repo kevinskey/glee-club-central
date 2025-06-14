@@ -105,13 +105,14 @@ export function LightweightMediaCard({
   const handleEditClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    console.log('Edit clicked, setting isEditingTitle to true');
     setIsEditingTitle(true);
   };
 
   return (
     <Card className="overflow-hidden group hover:shadow-lg transition-shadow cursor-pointer relative" onClick={handlePreview}>
       {/* Edit Pencil - Always visible when hasEditAccess is true */}
-      {hasEditAccess && onUpdateTitle && (
+      {hasEditAccess && (
         <Button
           size="sm"
           variant="ghost"
@@ -200,11 +201,14 @@ export function LightweightMediaCard({
       </div>
       
       <CardContent className="p-3">
-        {hasEditAccess && onUpdateTitle && isEditingTitle ? (
+        {hasEditAccess && isEditingTitle ? (
           <InlineMediaTitleEdit
             title={file.title}
             onSave={async (newTitle) => {
-              await onUpdateTitle(file.id, newTitle);
+              console.log('Saving new title:', newTitle);
+              if (onUpdateTitle) {
+                await onUpdateTitle(file.id, newTitle);
+              }
               setIsEditingTitle(false);
             }}
             className="mb-1"
