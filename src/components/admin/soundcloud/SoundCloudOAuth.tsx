@@ -18,25 +18,46 @@ export function SoundCloudOAuth() {
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   useEffect(() => {
-    // Check for existing connection
+    console.log('SoundCloudOAuth component mounted');
+    
+    // Check for existing connection first
     const savedToken = localStorage.getItem('soundcloud_access_token');
     const savedUser = localStorage.getItem('soundcloud_user');
     
     if (savedToken && savedUser) {
-      setAccessToken(savedToken);
-      setConnectedUser(JSON.parse(savedUser));
-      loadUserData(savedToken);
+      console.log('Found existing SoundCloud connection');
+      try {
+        setAccessToken(savedToken);
+        setConnectedUser(JSON.parse(savedUser));
+        loadUserData(savedToken);
+      } catch (error) {
+        console.error('Error parsing saved user data:', error);
+        // Clear corrupted data
+        localStorage.removeItem('soundcloud_access_token');
+        localStorage.removeItem('soundcloud_user');
+      }
+      return;
     }
 
     // Check for OAuth callback
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const callback = urlParams.get('callback');
+    const error = urlParams.get('error');
     
-    if (code && callback === 'soundcloud') {
-      handleOAuthCallback(code);
+    console.log('URL params:', { code: !!code, callback, error });
+    
+    if (error) {
+      console.error('OAuth error:', error);
+      toast.error(`SoundCloud authentication failed: ${error}`);
       // Clean up URL
       window.history.replaceState({}, document.title, '/admin/music');
+      return;
+    }
+    
+    if (code && callback === 'soundcloud') {
+      console.log('Processing OAuth callback');
+      handleOAuthCallback(code);
     }
   }, []);
 
@@ -50,7 +71,7 @@ export function SoundCloudOAuth() {
         body: { action: 'authorize' }
       });
 
-      console.log('Response:', data);
+      console.log('OAuth response:', data, error);
 
       if (error) {
         console.error('Function invocation error:', error);
@@ -61,8 +82,14 @@ export function SoundCloudOAuth() {
         throw new Error(data.error);
       }
 
+      if (!data?.authUrl) {
+        throw new Error('No authorization URL received');
+      }
+
       // Store state for security verification
-      localStorage.setItem('soundcloud_oauth_state', data.state);
+      if (data.state) {
+        localStorage.setItem('soundcloud_oauth_state', data.state);
+      }
       
       console.log('Redirecting to SoundCloud OAuth...');
       // Redirect to SoundCloud OAuth
@@ -84,6 +111,8 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
+      console.log('Processing OAuth callback with code:', code.substring(0, 10) + '...');
+      
       const redirectUri = `${window.location.origin}/admin/music?callback=soundcloud`;
       
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
@@ -94,12 +123,21 @@ export function SoundCloudOAuth() {
         }
       });
 
+      console.log('Token exchange response:', { data, error });
+
       if (error) {
+        console.error('Token exchange error:', error);
         throw new Error(error.message || 'Token exchange failed');
       }
 
       if (data?.error) {
+        console.error('Token exchange data error:', data.error);
         throw new Error(data.error);
+      }
+
+      if (!data?.accessToken || !data?.user) {
+        console.error('Invalid token exchange response:', data);
+        throw new Error('Invalid response from token exchange');
       }
 
       // Store tokens and user data
@@ -113,10 +151,15 @@ export function SoundCloudOAuth() {
         localStorage.setItem('soundcloud_refresh_token', data.refreshToken);
       }
 
+      console.log('SoundCloud connection successful:', data.user.display_name);
+
       // Load user's tracks and playlists
       await loadUserData(data.accessToken);
 
       toast.success(`Successfully connected as ${data.user.display_name}!`);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, '/admin/music');
       
     } catch (error) {
       console.error('OAuth callback error:', error);
@@ -125,6 +168,9 @@ export function SoundCloudOAuth() {
       } else {
         toast.error('Failed to complete SoundCloud authentication.');
       }
+      
+      // Clean up URL on error
+      window.history.replaceState({}, document.title, '/admin/music');
     } finally {
       setIsConnecting(false);
     }
@@ -134,12 +180,16 @@ export function SoundCloudOAuth() {
     setIsLoadingData(true);
     
     try {
+      console.log('Loading SoundCloud user data...');
+      
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
           action: 'fetch-data',
           accessToken: token
         }
       });
+
+      console.log('User data response:', { data, error });
 
       if (error) {
         throw new Error(error.message || 'Data fetch failed');
@@ -151,6 +201,11 @@ export function SoundCloudOAuth() {
 
       setTracks(data.tracks || []);
       setPlaylists(data.playlists || []);
+      
+      console.log('User data loaded successfully:', {
+        tracks: data.tracks?.length || 0,
+        playlists: data.playlists?.length || 0
+      });
       
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -181,6 +236,18 @@ export function SoundCloudOAuth() {
     if (!accessToken) return;
     await loadUserData(accessToken);
   };
+
+  // Show loading state during OAuth processing
+  if (isConnecting && !connectedUser) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Connecting to SoundCloud...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (connectedUser) {
     return (
