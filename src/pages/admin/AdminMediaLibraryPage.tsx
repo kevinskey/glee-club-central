@@ -27,6 +27,10 @@ const AdminMediaLibraryPage = () => {
     toast.success("Media library refreshed");
   };
 
+  const handleViewModeToggle = () => {
+    setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
+  };
+
   const getFileCount = (type: string): number => {
     return (mediaStats.filesByType as Record<string, number>)?.[type] || 0;
   };
@@ -70,7 +74,7 @@ const AdminMediaLibraryPage = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+            onClick={handleViewModeToggle}
             className="flex items-center gap-2"
           >
             {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
@@ -154,7 +158,7 @@ const AdminMediaLibraryPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <EnhancedMediaLibrary isAdminView={true} />
+          <EnhancedMediaLibrary isAdminView={true} viewMode={viewMode} />
         </CardContent>
       </Card>
         
