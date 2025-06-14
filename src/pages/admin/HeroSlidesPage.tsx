@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -283,7 +284,7 @@ export default function HeroSlidesPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <AdminTopNavigation />
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Hero Slides Management</h1>
           <Button onClick={() => setIsCreating(true)}>
