@@ -2,17 +2,22 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Calendar, Settings, BarChart3 } from 'lucide-react';
+import { Music, Calendar, Settings, BarChart3, Cloud } from 'lucide-react';
 import { ScheduledPlaylistManager } from '@/components/admin/ScheduledPlaylistManager';
+import { SoundCloudPlaylistManager } from '@/components/admin/SoundCloudPlaylistManager';
 
 export function MusicPlayerAdmin() {
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="scheduled" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="soundcloud" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="soundcloud" className="flex items-center gap-2">
+            <Cloud className="h-4 w-4" />
+            SoundCloud
+          </TabsTrigger>
           <TabsTrigger value="scheduled" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
-            Scheduled Playlists
+            Scheduled
           </TabsTrigger>
           <TabsTrigger value="playlists" className="flex items-center gap-2">
             <Music className="h-4 w-4" />
@@ -20,13 +25,17 @@ export function MusicPlayerAdmin() {
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
-            Player Settings
+            Settings
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="soundcloud" className="space-y-6">
+          <SoundCloudPlaylistManager />
+        </TabsContent>
 
         <TabsContent value="scheduled" className="space-y-6">
           <ScheduledPlaylistManager />
@@ -35,11 +44,11 @@ export function MusicPlayerAdmin() {
         <TabsContent value="playlists" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Playlist Management</CardTitle>
+              <CardTitle>Local Playlist Management</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Playlist management features will be available here.
+                Local playlist management features will be available here.
               </p>
             </CardContent>
           </Card>
