@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -11,7 +12,8 @@ import {
   Megaphone,
   Image,
   Home,
-  Palette
+  Palette,
+  Music
 } from 'lucide-react';
 import { ViewSwitcher } from './ViewSwitcher';
 
@@ -21,6 +23,7 @@ const navItems = [
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/admin/members', icon: Users, label: 'Members' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
+  { to: '/admin/music', icon: Music, label: 'Music Player' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   { to: '/admin/design-studio', icon: Palette, label: 'Design Studio' },

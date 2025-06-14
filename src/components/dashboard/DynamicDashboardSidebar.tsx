@@ -86,6 +86,12 @@ export function DynamicDashboardSidebar() {
       requiredTags: ['Librarian'] 
     },
     { 
+      to: '/admin/music', 
+      icon: Music, 
+      label: 'Music Player Admin', 
+      requiredTags: ['President', 'Secretary', 'Librarian'] 
+    },
+    { 
       to: '/admin/announcements', 
       icon: Megaphone, 
       label: 'Announcements', 

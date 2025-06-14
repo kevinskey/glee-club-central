@@ -22,6 +22,7 @@ import {
   Home,
   Menu,
   ChevronDown,
+  Music,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +40,7 @@ const navigationGroups = [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
       { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
       { to: '/admin/media-library', icon: Image, label: 'Media Library' },
+      { to: '/admin/music', icon: Music, label: 'Music Player' },
       { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
     ]
   },
