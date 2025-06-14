@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Music, RefreshCw, ExternalLink, Play, Users } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Music, RefreshCw, ExternalLink, Play, Users, AlertCircle, Key } from 'lucide-react';
 import { useSoundCloudPlayer } from '@/hooks/useSoundCloudPlayer';
 import { toast } from 'sonner';
 
@@ -15,7 +16,7 @@ export function SoundCloudPlaylistManager() {
     setRefreshing(true);
     try {
       await Promise.all([refetchPlaylists(), refetchTracks()]);
-      toast.success('SoundCloud data refreshed successfully');
+      toast.success('SoundCloud data refreshed');
     } catch (err) {
       toast.error('Failed to refresh SoundCloud data');
     } finally {
@@ -39,30 +40,88 @@ export function SoundCloudPlaylistManager() {
         <CardContent className="flex items-center justify-center py-12">
           <div className="text-center">
             <Music className="w-12 h-12 mx-auto mb-4 animate-pulse text-muted-foreground" />
-            <p className="text-muted-foreground">Loading SoundCloud content...</p>
+            <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  // Show error state with no data
+  if (error || (playlists.length === 0 && tracks.length === 0)) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-red-600">
-            <Music className="w-5 h-5" />
-            SoundCloud Connection Error
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-600 mb-4">{error}</p>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">SoundCloud Integration</h3>
+            <p className="text-sm text-muted-foreground">
+              Connect to SoundCloud account: https://soundcloud.com/doctorkj
+            </p>
+          </div>
           <Button onClick={handleRefresh} disabled={refreshing}>
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Retry Connection
+            Try Again
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+
+        <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/30">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800 dark:text-orange-200">
+            <div className="space-y-2">
+              <p className="font-medium">No SoundCloud data available</p>
+              {error?.includes('Client ID') ? (
+                <p>SoundCloud Client ID may be missing or invalid. Please check your API credentials.</p>
+              ) : error?.includes('OAuth') || error?.includes('authentication') ? (
+                <div>
+                  <p>SoundCloud now requires OAuth authentication for API access.</p>
+                  <p className="text-sm mt-1">To display real data, you would need to:</p>
+                  <ul className="text-sm list-disc list-inside mt-1 space-y-1">
+                    <li>Implement OAuth 2.0 flow for user consent</li>
+                    <li>Use SoundCloud's Connect API</li>
+                    <li>Or embed SoundCloud widgets for public content</li>
+                  </ul>
+                </div>
+              ) : (
+                <p>Unable to fetch data from SoundCloud API. This may be due to API limitations or network issues.</p>
+              )}
+            </div>
+          </AlertDescription>
+        </Alert>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5" />
+              SoundCloud API Integration Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <h4 className="font-medium">API Connection</h4>
+                  <p className="text-sm text-muted-foreground">Status of SoundCloud API connectivity</p>
+                </div>
+                <Badge variant="destructive">Disconnected</Badge>
+              </div>
+              
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p><strong>Issue:</strong> {error || 'No data available from SoundCloud API'}</p>
+                
+                <div className="mt-4">
+                  <p className="font-medium mb-2">Recommended Solutions:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Verify SoundCloud Client ID in admin settings</li>
+                    <li>Consider implementing OAuth 2.0 for authenticated access</li>
+                    <li>Use SoundCloud embed widgets as an alternative</li>
+                    <li>Contact SoundCloud support for API access requirements</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -72,7 +131,7 @@ export function SoundCloudPlaylistManager() {
         <div>
           <h3 className="text-lg font-semibold">SoundCloud Integration</h3>
           <p className="text-sm text-muted-foreground">
-            Manage playlists and tracks from https://soundcloud.com/doctorkj
+            Live data from https://soundcloud.com/doctorkj
           </p>
         </div>
         <Button onClick={handleRefresh} disabled={refreshing}>
@@ -113,6 +172,14 @@ export function SoundCloudPlaylistManager() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Success indicator for real data */}
+      <Alert className="border-green-200 bg-green-50 dark:bg-green-950/30">
+        <Music className="h-4 w-4 text-green-600" />
+        <AlertDescription className="text-green-800 dark:text-green-200">
+          Successfully connected to SoundCloud! Showing {tracks.length} tracks and {playlists.length} playlists from live data.
+        </AlertDescription>
+      </Alert>
 
       {/* Playlists */}
       <Card>
@@ -155,30 +222,52 @@ export function SoundCloudPlaylistManager() {
                     <span>{formatDuration(Math.floor(playlist.duration / 1000))}</span>
                     <span>Created: {new Date(playlist.created_at).toLocaleDateString()}</span>
                   </div>
-                  <div className="mt-3">
-                    <p className="text-xs text-muted-foreground mb-2">Preview tracks:</p>
-                    <div className="space-y-1">
-                      {playlist.tracks.slice(0, 3).map((track) => (
-                        <div key={track.id} className="text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded">
-                          <span className="font-medium">{track.title}</span>
-                          <span className="text-muted-foreground ml-2">
-                            {formatNumber(track.plays)} plays
-                          </span>
-                        </div>
-                      ))}
-                      {playlist.tracks.length > 3 && (
-                        <p className="text-xs text-muted-foreground">
-                          +{playlist.tracks.length - 3} more tracks
-                        </p>
-                      )}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Tracks */}
+      {tracks.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Latest Tracks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {tracks.slice(0, 10).map((track) => (
+                <div key={track.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                  <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
+                    <img 
+                      src={track.albumArt} 
+                      alt={track.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium">{track.title}</h4>
+                    <p className="text-sm text-muted-foreground">{track.artist}</p>
+                    <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                      <span>{formatNumber(track.plays)} plays</span>
+                      <span>{formatNumber(track.likes)} likes</span>
+                      {track.genre && <Badge variant="outline" className="text-xs">{track.genre}</Badge>}
+                    </div>
+                  </div>
+                  {track.permalink_url && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={track.permalink_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
