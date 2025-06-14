@@ -2398,6 +2398,42 @@ export type Database = {
         }
         Relationships: []
       }
+      soundcloud_embeds: {
+        Row: {
+          artist: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          artist?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          artist?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       store_items: {
         Row: {
           created_at: string
