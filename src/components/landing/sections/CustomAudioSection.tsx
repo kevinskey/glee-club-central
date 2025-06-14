@@ -44,6 +44,15 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
     );
   }
 
+  // Helper function to get track properties
+  const getTrackUrl = (track: any) => {
+    return 'audioUrl' in track ? track.audioUrl : track.file_url;
+  };
+
+  const getTrackArtist = (track: any) => {
+    return 'artist' in track ? track.artist : track.description || 'Unknown Artist';
+  };
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -59,9 +68,9 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Main Player */}
           <WaveSurferPlayer
-            audioUrl={tracks.length > 0 ? currentTrack.audioUrl : currentTrack.file_url}
+            audioUrl={getTrackUrl(currentTrack)}
             title={currentTrack.title}
-            artist={tracks.length > 0 ? currentTrack.artist : currentTrack.description}
+            artist={getTrackArtist(currentTrack)}
             autoLoad={false}
             className="mb-6"
           />
@@ -74,7 +83,7 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
               </h3>
               {displayTracks.map((track, index) => (
                 <div
-                  key={tracks.length > 0 ? track.id : track.id}
+                  key={track.id}
                   className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                     index === currentTrackIndex
                       ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
@@ -86,7 +95,7 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
                     <div>
                       <h4 className="font-medium">{track.title}</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {tracks.length > 0 ? track.artist : track.description}
+                        {getTrackArtist(track)}
                       </p>
                     </div>
                     {index === currentTrackIndex && (

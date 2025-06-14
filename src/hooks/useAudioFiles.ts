@@ -9,6 +9,9 @@ export interface AudioFileData {
   description?: string;
   category: string;
   created_at: string;
+  file_path?: string;
+  uploaded_by?: string;
+  is_backing_track?: boolean;
 }
 
 export const useAudioFiles = () => {
@@ -48,7 +51,10 @@ export const useAudioFiles = () => {
           file_url: file.file_url,
           description: file.description,
           category: file.category,
-          created_at: file.created_at
+          created_at: file.created_at,
+          file_path: file.file_url,
+          uploaded_by: file.uploaded_by,
+          is_backing_track: file.is_backing_track
         })));
       }
 
@@ -60,7 +66,9 @@ export const useAudioFiles = () => {
           file_url: file.file_url,
           description: file.description,
           category: file.folder || 'general',
-          created_at: file.created_at
+          created_at: file.created_at,
+          file_path: file.file_url,
+          uploaded_by: file.uploaded_by
         })));
       }
 
@@ -73,6 +81,34 @@ export const useAudioFiles = () => {
     }
   };
 
+  const deleteAudioFile = async (id: string) => {
+    try {
+      // Try deleting from audio_files first
+      const { error: audioError } = await supabase
+        .from('audio_files')
+        .delete()
+        .eq('id', id);
+
+      if (audioError) {
+        // If not found in audio_files, try media_library
+        const { error: mediaError } = await supabase
+          .from('media_library')
+          .delete()
+          .eq('id', id);
+
+        if (mediaError) {
+          throw mediaError;
+        }
+      }
+
+      // Refresh the list
+      await fetchAudioFiles();
+    } catch (err) {
+      console.error('Error deleting audio file:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchAudioFiles();
   }, []);
@@ -80,7 +116,10 @@ export const useAudioFiles = () => {
   return {
     audioFiles,
     isLoading,
+    loading: isLoading, // Legacy compatibility
     error,
-    refetch: fetchAudioFiles
+    refetch: fetchAudioFiles,
+    fetchAudioFiles, // Legacy compatibility
+    deleteAudioFile
   };
 };

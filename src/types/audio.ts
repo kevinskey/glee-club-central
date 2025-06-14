@@ -11,4 +11,16 @@ export interface AudioFile {
   is_backing_track?: boolean;
 }
 
+export interface AudioFileData {
+  id: string;
+  title: string;
+  file_url: string;
+  description?: string;
+  category: string;
+  created_at: string;
+  file_path?: string;
+  uploaded_by?: string;
+  is_backing_track?: boolean;
+}
+
 export type AudioPageCategory = "part_tracks" | "recordings" | "my_tracks" | "all" | "backing_tracks";

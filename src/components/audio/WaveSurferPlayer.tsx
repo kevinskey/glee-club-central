@@ -52,7 +52,6 @@ export function WaveSurferPlayer({
         cursorColor: '#f97316',
         barWidth: 2,
         barRadius: 1,
-        responsive: true,
         height: 60,
         normalize: true,
         backend: 'WebAudio',
@@ -69,7 +68,7 @@ export function WaveSurferPlayer({
         setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
       });
 
-      wavesurfer.current.on('seek', () => {
+      wavesurfer.current.on('click', () => {
         setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
       });
 
