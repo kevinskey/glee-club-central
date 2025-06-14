@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Trash2, Plus, Edit, Eye, EyeOff, X } from 'lucide-react';
+import { Trash2, Plus, Edit, Eye, EyeOff, X, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { HeroSlideMediaPicker } from '@/components/admin/HeroSlideMediaPicker';
 import { AdminTopNavigation } from '@/components/admin/AdminTopNavigation';
@@ -135,6 +135,14 @@ export default function HeroSlidesPage() {
       if (existingFile) {
         return existingFile.file_url;
       }
+    }
+    return undefined;
+  };
+
+  const getSlideImageUrl = (slide: HeroSlide) => {
+    if (slide.media_id) {
+      const mediaFile = mediaFiles.find(f => f.id === slide.media_id);
+      return mediaFile?.file_url;
     }
     return undefined;
   };
@@ -285,14 +293,32 @@ export default function HeroSlidesPage() {
           {slides.map((slide) => (
             <Card key={slide.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  {slide.visible ? (
-                    <Eye className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  )}
-                  {slide.title || 'Untitled Slide'}
-                </CardTitle>
+                <div className="flex items-center gap-4">
+                  {/* Image Thumbnail */}
+                  <div className="w-16 h-16 rounded border overflow-hidden bg-gray-100 flex-shrink-0">
+                    {getSlideImageUrl(slide) ? (
+                      <img
+                        src={getSlideImageUrl(slide)}
+                        alt={slide.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <ImageIcon className="h-6 w-6" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    {slide.visible ? (
+                      <Eye className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    )}
+                    {slide.title || 'Untitled Slide'}
+                  </CardTitle>
+                </div>
+                
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
@@ -341,6 +367,7 @@ export default function HeroSlidesPage() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Order: {slide.slide_order} | Type: {slide.media_type}
+                  {slide.media_id && ' | Has Image'}
                 </p>
                 {slide.description && (
                   <p className="text-sm mt-2">{slide.description}</p>
