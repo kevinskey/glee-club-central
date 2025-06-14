@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -215,6 +214,7 @@ const AdminMediaLibraryPage = () => {
                   canEdit={true}
                   canDelete={true}
                   onDelete={handleDelete}
+                  onRefresh={fetchAllMedia}
                 />
               ) : (
                 <MediaListView 
@@ -222,6 +222,7 @@ const AdminMediaLibraryPage = () => {
                   canEdit={true}
                   canDelete={true}
                   onDelete={handleDelete}
+                  onRefresh={fetchAllMedia}
                 />
               )}
             </div>

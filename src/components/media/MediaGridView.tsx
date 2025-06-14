@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,16 +7,21 @@ import { Eye, Trash2, FileText, Image, Music, Video, File, Play, Pause } from "l
 import { formatFileSize } from "@/utils/file-utils";
 import { format } from "date-fns";
 import { PDFThumbnail } from "@/components/pdf/PDFThumbnail";
+import { InlineTitleEditor } from "./InlineTitleEditor";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MediaGridViewProps {
   mediaFiles: MediaFile[];
   canEdit: boolean;
   canDelete: boolean;
   onDelete: (id: string) => Promise<void>;
+  onRefresh?: () => void;
 }
 
-export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: MediaGridViewProps) {
+export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete, onRefresh }: MediaGridViewProps) {
   const [playingStates, setPlayingStates] = useState<{[key: string]: boolean}>({});
+  const [editingTitleId, setEditingTitleId] = useState<string | null>(null);
   const audioRefs = useRef<{[key: string]: HTMLAudioElement}>({});
 
   // Cleanup all audio when component unmounts
@@ -90,6 +94,35 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
     } catch (error) {
       console.error('Audio toggle error:', error);
       setPlayingStates(prev => ({ ...prev, [fileId]: false }));
+    }
+  };
+
+  const handleTitleSave = async (fileId: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('media_library')
+        .update({ title: newTitle })
+        .eq('id', fileId);
+
+      if (error) throw error;
+
+      setEditingTitleId(null);
+      toast.success('Title updated successfully');
+      
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Failed to update title:', error);
+      toast.error('Failed to update title');
+      throw error;
+    }
+  };
+
+  const handleTitleClick = (fileId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (canEdit) {
+      setEditingTitleId(fileId);
     }
   };
 
@@ -178,7 +211,22 @@ export function MediaGridView({ mediaFiles, canEdit, canDelete, onDelete }: Medi
             </div>
             
             <CardContent className="p-4">
-              <h3 className="font-medium text-sm truncate mb-1">{file.title}</h3>
+              {editingTitleId === file.id ? (
+                <InlineTitleEditor
+                  title={file.title}
+                  onSave={(newTitle) => handleTitleSave(file.id, newTitle)}
+                  onCancel={() => setEditingTitleId(null)}
+                  className="mb-1"
+                />
+              ) : (
+                <h3 
+                  className={`font-medium text-sm truncate mb-1 ${canEdit ? 'cursor-pointer hover:text-blue-600' : ''}`}
+                  onClick={(e) => handleTitleClick(file.id, e)}
+                  title={canEdit ? 'Click to edit title' : file.title}
+                >
+                  {file.title}
+                </h3>
+              )}
               
               {file.description && (
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
