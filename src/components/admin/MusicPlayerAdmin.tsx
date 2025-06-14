@@ -97,7 +97,7 @@ export function MusicPlayerAdmin() {
         supabase
           .from('media_library')
           .select('*')
-          .or('file_type.like.audio/*,file_type.eq.audio/mpeg,file_type.eq.audio/mp3')
+          .or('file_type.like.audio/*,file_type.eq.audio/mpeg,file_type.eq.audio/mp3,file_type.eq.audio/x-m4a')
           .order('title')
       ]);
 
@@ -115,16 +115,25 @@ export function MusicPlayerAdmin() {
         })));
       }
 
-      // Add media_library audio entries
+      // Add media_library audio entries with proper URL handling
       if (mediaLibraryResult.data) {
-        combinedAudioFiles.push(...mediaLibraryResult.data.map(file => ({
-          id: file.id,
-          title: file.title,
-          description: file.description || '',
-          file_url: file.file_url,
-          category: file.folder || 'general',
-          source: 'media_library' as const
-        })));
+        combinedAudioFiles.push(...mediaLibraryResult.data.map(file => {
+          // Ensure the file URL is properly formatted
+          const fileUrl = file.file_url.startsWith('http') 
+            ? file.file_url 
+            : `https://dzzptovqfqausipsgabw.supabase.co/storage/v1/object/public/media-library/${file.file_path}`;
+          
+          console.log(`Admin: Processing audio file - ${file.title}, URL: ${fileUrl}`);
+          
+          return {
+            id: file.id,
+            title: file.title,
+            description: file.description || '',
+            file_url: fileUrl,
+            category: file.folder || 'general',
+            source: 'media_library' as const
+          };
+        }));
       }
 
       console.log('Combined audio files:', combinedAudioFiles);
@@ -358,12 +367,17 @@ export function MusicPlayerAdmin() {
             .single();
 
           if (!existingAudioFile) {
+            // Ensure the file URL is properly formatted
+            const fileUrl = audioFile.file_url.startsWith('http') 
+              ? audioFile.file_url 
+              : `https://dzzptovqfqausipsgabw.supabase.co/storage/v1/object/public/media-library/${audioFile.file_url}`;
+            
             const { data: newAudioFile, error: audioFileError } = await supabase
               .from('audio_files')
               .insert({
                 title: audioFile.title,
                 description: audioFile.description,
-                file_url: audioFile.file_url,
+                file_url: fileUrl,
                 file_path: audioFile.file_url.split('/').pop() || 'unknown',
                 category: audioFile.category,
                 uploaded_by: user?.id || '00000000-0000-0000-0000-000000000000'

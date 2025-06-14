@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -46,16 +47,27 @@ export function useMediaLibrary() {
         throw fetchError;
       }
 
-      const files = (data || []).map(file => ({
-        ...file,
-        description: file.description || '',
-        file_path: file.file_path || '',
-        size: file.size || file.file_size || 0,
-        file_size: file.size || file.file_size || 0,
-        category: file.category || file.folder || 'general',
-        folder: file.folder || 'general',
-        tags: file.tags || []
-      }));
+      const files = (data || []).map(file => {
+        // Ensure file URLs are properly formatted for Supabase storage
+        let fileUrl = file.file_url;
+        if (!fileUrl.startsWith('http') && file.file_path) {
+          fileUrl = `https://dzzptovqfqausipsgabw.supabase.co/storage/v1/object/public/media-library/${file.file_path}`;
+        }
+        
+        console.log(`Processing media file: ${file.title}, Type: ${file.file_type}, URL: ${fileUrl}`);
+        
+        return {
+          ...file,
+          file_url: fileUrl,
+          description: file.description || '',
+          file_path: file.file_path || '',
+          size: file.size || file.file_size || 0,
+          file_size: file.size || file.file_size || 0,
+          category: file.category || file.folder || 'general',
+          folder: file.folder || 'general',
+          tags: file.tags || []
+        };
+      });
       
       setMediaFiles(files);
       setAllMediaFiles(files);
@@ -79,7 +91,7 @@ export function useMediaLibrary() {
       const filePath = `media/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('media')
+        .from('media-library')
         .upload(filePath, file);
 
       if (uploadError) {
@@ -88,7 +100,7 @@ export function useMediaLibrary() {
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('media')
+        .from('media-library')
         .getPublicUrl(filePath);
 
       // Insert media record
@@ -155,7 +167,12 @@ export function useMediaLibrary() {
       image: allMediaFiles.filter(file => file.file_type.startsWith('image/')).length,
       video: allMediaFiles.filter(file => file.file_type.startsWith('video/')).length,
       pdf: allMediaFiles.filter(file => file.file_type.includes('pdf')).length,
-      audio: allMediaFiles.filter(file => file.file_type.startsWith('audio/')).length,
+      audio: allMediaFiles.filter(file => 
+        file.file_type.startsWith('audio/') || 
+        file.file_type.includes('audio/mpeg') || 
+        file.file_type.includes('audio/mp3') || 
+        file.file_type.includes('audio/x-m4a')
+      ).length,
       application: allMediaFiles.filter(file => file.file_type.startsWith('application/') && !file.file_type.includes('pdf')).length,
     }
   };
@@ -179,7 +196,7 @@ export function useMediaLibrary() {
         if (selectedMediaType === 'image') return file.file_type.startsWith('image/');
         if (selectedMediaType === 'video') return file.file_type.startsWith('video/');
         if (selectedMediaType === 'pdf') return file.file_type.includes('pdf');
-        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/');
+        if (selectedMediaType === 'audio') return file.file_type.startsWith('audio/') || file.file_type.includes('audio/mpeg') || file.file_type.includes('audio/mp3') || file.file_type.includes('audio/x-m4a');
         if (selectedMediaType === 'document') return file.file_type.includes('pdf') || file.file_type.includes('document');
         return true;
       });

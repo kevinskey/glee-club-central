@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -94,27 +95,64 @@ export const useMusicPlayer = () => {
           tracks: Array.isArray(playlist.tracks) ? playlist.tracks : []
         });
       } else {
-        // Fallback to individual audio files if no playlist is active
-        const { data: audioFiles } = await supabase
-          .from('audio_files')
-          .select('*')
-          .eq('category', 'recordings')
-          .limit(5);
+        // Fallback to audio files from both audio_files and media_library tables
+        const [audioFilesResult, mediaLibraryResult] = await Promise.all([
+          supabase
+            .from('audio_files')
+            .select('*')
+            .eq('category', 'recordings')
+            .limit(10),
+          supabase
+            .from('media_library')
+            .select('*')
+            .or('file_type.like.audio/*,file_type.eq.audio/mpeg,file_type.eq.audio/mp3,file_type.eq.audio/x-m4a')
+            .limit(10)
+        ]);
 
-        if (audioFiles) {
-          setActivePlaylist({
-            playlist_id: 'fallback',
-            playlist_name: 'Featured Tracks',
-            tracks: audioFiles.map((track, index) => ({
+        const combinedTracks: PlaylistTrack[] = [];
+
+        // Add audio_files entries
+        if (audioFilesResult.data) {
+          combinedTracks.push(...audioFilesResult.data.map((track, index) => ({
+            id: track.id,
+            title: track.title,
+            artist: track.description || 'Spelman Glee Club',
+            audioUrl: track.file_url,
+            albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
+            duration: '3:45',
+            order: index,
+            featured: false
+          })));
+        }
+
+        // Add media_library audio entries with proper file URL handling
+        if (mediaLibraryResult.data) {
+          combinedTracks.push(...mediaLibraryResult.data.map((track, index) => {
+            // Ensure the file URL is correct - it should already be the full Supabase storage URL
+            const audioUrl = track.file_url.startsWith('http') 
+              ? track.file_url 
+              : `https://dzzptovqfqausipsgabw.supabase.co/storage/v1/object/public/media-library/${track.file_path}`;
+            
+            console.log(`Media Library Track: ${track.title}, Audio URL: ${audioUrl}`);
+            
+            return {
               id: track.id,
               title: track.title,
               artist: track.description || 'Spelman Glee Club',
-              audioUrl: track.file_url,
+              audioUrl: audioUrl,
               albumArt: '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
               duration: '3:45',
-              order: index,
+              order: index + (audioFilesResult.data?.length || 0),
               featured: false
-            }))
+            };
+          }));
+        }
+
+        if (combinedTracks.length > 0) {
+          setActivePlaylist({
+            playlist_id: 'fallback',
+            playlist_name: 'Featured Tracks',
+            tracks: combinedTracks
           });
         }
       }
