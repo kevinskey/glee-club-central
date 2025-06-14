@@ -52,22 +52,24 @@ export const useSoundCloudPlayer = () => {
         }
       });
       
+      // Always check if response is ok first
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
+      // Check content type before parsing
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        console.error('Response is not JSON:', contentType);
         const textResponse = await response.text();
-        console.error('Response body:', textResponse);
+        console.error('Non-JSON response received:', textResponse);
         throw new Error('Server returned non-JSON response');
       }
       
       const data = await response.json();
       console.log('SoundCloud data received:', data);
       
-      if (data.error) {
+      // Check for API-level errors
+      if (data.error || data.status === 'error') {
         throw new Error(data.message || 'Failed to load SoundCloud content');
       }
       

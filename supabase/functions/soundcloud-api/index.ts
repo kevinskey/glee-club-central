@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,7 +15,7 @@ serve(async (req) => {
   try {
     console.log('SoundCloud API endpoint called')
     
-    // For now, return enhanced mock data that matches the expected structure
+    // Return enhanced mock data that matches the expected structure
     const mockData = {
       playlists: [
         {
@@ -184,7 +183,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(mockData),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
         status: 200 
       }
     )
@@ -192,7 +194,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('SoundCloud API Error:', error)
     
-    // Return a structured error response that the frontend can handle
+    // Always return valid JSON, even for errors
     const errorResponse = {
       playlists: [],
       tracks: [],
@@ -204,7 +206,10 @@ serve(async (req) => {
     return new Response(
       JSON.stringify(errorResponse),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        },
         status: 200 // Return 200 with error data to avoid fetch failures
       }
     )
