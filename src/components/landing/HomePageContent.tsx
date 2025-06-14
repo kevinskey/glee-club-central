@@ -51,7 +51,7 @@ export function HomePageContent({
 }: HomePageContentProps) {
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
-  const { playlists, activePlaylist, isLoading, error, setActivePlaylist } = useSoundCloudPlayer();
+  const { playlists, tracks, activePlaylist, isLoading, error, setActivePlaylist } = useSoundCloudPlayer();
   
   const formatDuration = (milliseconds: number) => {
     const totalMinutes = Math.floor(milliseconds / 60000);
@@ -59,22 +59,6 @@ export function HomePageContent({
     const minutes = totalMinutes % 60;
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
-
-  // Sample SoundCloud embeds for demo
-  const sampleEmbeds = [
-    {
-      id: 'sample-1',
-      title: 'Beautiful Harmony',
-      url: 'https://soundcloud.com/doctorkj/beautiful-harmony',
-      description: 'Our latest choral arrangement'
-    },
-    {
-      id: 'sample-2',
-      title: 'Live Performance',
-      url: 'https://soundcloud.com/doctorkj/live-performance',
-      description: 'Live recording from our recent concert'
-    }
-  ];
 
   const generateEmbedCode = (url: string) => {
     const embedParams = new URLSearchParams({
@@ -118,56 +102,118 @@ export function HomePageContent({
               </p>
             </div>
             
-            {/* SoundCloud Embeds */}
-            <div className="space-y-8">
-              {sampleEmbeds.map((embed) => (
-                <Card key={embed.id} className="overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {embed.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {embed.description}
-                        </p>
-                      </div>
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={embed.url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    </div>
-                    <div className="rounded-lg overflow-hidden">
-                      <iframe
-                        width="100%"
-                        height="166"
-                        scrolling="no"
-                        frameBorder="no"
-                        allow="autoplay"
-                        src={generateEmbedCode(embed.url)}
-                        className="w-full"
-                      />
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            {/* Show loading state */}
+            {isLoading && (
+              <div className="text-center py-12">
+                <div className="inline-flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
+                  <p className="text-gray-600 dark:text-gray-400">Loading SoundCloud content...</p>
+                </div>
+              </div>
+            )}
 
-            {error && (
-              <div className="text-center py-8 bg-red-50 dark:bg-red-900/20 rounded-lg mt-8">
-                <p className="text-red-600 dark:text-red-400 text-sm">
-                  Unable to load additional SoundCloud content: {error}
+            {/* Show error state */}
+            {error && !isLoading && (
+              <div className="text-center py-8 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-red-600 dark:text-red-400 text-sm mb-4">
+                  Unable to load SoundCloud content: {error}
+                </p>
+                <p className="text-gray-600 dark:text-gray-400 text-xs">
+                  This may be due to API configuration or network issues.
                 </p>
               </div>
             )}
-            
-            {isLoading && (
-              <div className="text-center py-12 mt-8">
-                <div className="inline-flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500"></div>
-                  <p className="text-gray-600 dark:text-gray-400">Loading additional content...</p>
-                </div>
+
+            {/* Show SoundCloud tracks if available */}
+            {!isLoading && !error && tracks && tracks.length > 0 && (
+              <div className="space-y-8">
+                {tracks.slice(0, 3).map((track) => (
+                  <Card key={track.id} className="overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {track.title}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            by {track.artist}
+                          </p>
+                        </div>
+                        {track.permalink_url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={track.permalink_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                      <div className="rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="166"
+                          scrolling="no"
+                          frameBorder="no"
+                          allow="autoplay"
+                          src={generateEmbedCode(track.permalink_url)}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Show playlists if available and no tracks */}
+            {!isLoading && !error && (!tracks || tracks.length === 0) && playlists && playlists.length > 0 && (
+              <div className="space-y-8">
+                {playlists.slice(0, 2).map((playlist) => (
+                  <Card key={playlist.id} className="overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {playlist.name}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {playlist.description || `${playlist.track_count} tracks`}
+                          </p>
+                        </div>
+                        {playlist.permalink_url && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={playlist.permalink_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                      <div className="rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="400"
+                          scrolling="no"
+                          frameBorder="no"
+                          allow="autoplay"
+                          src={generateEmbedCode(playlist.permalink_url)}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Fallback message when no SoundCloud content is available */}
+            {!isLoading && !error && (!tracks || tracks.length === 0) && (!playlists || playlists.length === 0) && (
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Music className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  No SoundCloud content available at the moment.
+                </p>
+                <p className="text-gray-500 dark:text-gray-500 text-xs mt-2">
+                  Check back soon for new music!
+                </p>
               </div>
             )}
           </div>
