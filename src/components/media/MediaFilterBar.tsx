@@ -11,14 +11,6 @@ interface MediaFilterBarProps {
   setSearchQuery: (query: string) => void;
   selectedMediaType: MediaType | "all";
   setSelectedMediaType: (type: MediaType | "all") => void;
-  selectedCategory: string;
-  setSelectedCategory: (category: string) => void;
-  dateFilter: "newest" | "oldest";
-  setDateFilter: (filter: string) => void;
-  viewMode: 'grid' | 'list';
-  setViewMode: (mode: 'grid' | 'list') => void;
-  mediaTypes: MediaType[];
-  categories: string[];
   showAdvancedFilters?: boolean;
   setShowAdvancedFilters?: (show: boolean) => void;
 }
@@ -28,14 +20,6 @@ export function MediaFilterBar({
   setSearchQuery,
   selectedMediaType,
   setSelectedMediaType,
-  selectedCategory,
-  setSelectedCategory,
-  dateFilter,
-  setDateFilter,
-  viewMode,
-  setViewMode,
-  mediaTypes,
-  categories,
   showAdvancedFilters,
   setShowAdvancedFilters
 }: MediaFilterBarProps) {
@@ -61,33 +45,10 @@ export function MediaFilterBar({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
-            {mediaTypes.map(type => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedCategory || 'all'} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-32">
-            <Folder className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map(category => (
-              <SelectItem key={category} value={category}>{category}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={dateFilter} onValueChange={setDateFilter}>
-          <SelectTrigger className="w-32">
-            {dateFilter === 'newest' ? <SortDesc className="h-4 w-4 mr-2" /> : <SortAsc className="h-4 w-4 mr-2" />}
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest</SelectItem>
-            <SelectItem value="oldest">Oldest</SelectItem>
+            <SelectItem value="image">Images</SelectItem>
+            <SelectItem value="video">Videos</SelectItem>
+            <SelectItem value="audio">Audio</SelectItem>
+            <SelectItem value="pdf">Documents</SelectItem>
           </SelectContent>
         </Select>
 
@@ -101,14 +62,6 @@ export function MediaFilterBar({
             Filters
           </Button>
         )}
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-        >
-          {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-        </Button>
       </div>
     </div>
   );
