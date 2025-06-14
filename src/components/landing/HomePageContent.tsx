@@ -35,6 +35,22 @@ interface AudioTrack {
   duration: string;
 }
 
+interface SoundCloudTrack {
+  id: string;
+  title: string;
+  duration: string;
+  plays: number;
+  likes: number;
+  permalink_url: string;
+}
+
+interface SoundCloudPlaylistData {
+  id: string;
+  name: string;
+  tracks: SoundCloudTrack[];
+  track_count: number;
+}
+
 interface HomePageContentProps {
   heroImages: any[];
   upcomingEvents: Event[];
@@ -50,12 +66,20 @@ export function HomePageContent({
   console.log('🎭 HomePageContent: Rendering with events:', upcomingEvents);
   
   const [soundCloudEmbeds, setSoundCloudEmbeds] = useState<any[]>([]);
+  const [soundCloudPlaylists, setSoundCloudPlaylists] = useState<Record<string, SoundCloudPlaylistData>>({});
   const [isLoadingEmbeds, setIsLoadingEmbeds] = useState(true);
+  const [isLoadingPlaylists, setIsLoadingPlaylists] = useState(false);
   const [currentEmbedIndex, setCurrentEmbedIndex] = useState(0);
 
   useEffect(() => {
     loadSoundCloudEmbeds();
   }, []);
+
+  useEffect(() => {
+    if (soundCloudEmbeds.length > 0) {
+      loadSoundCloudPlaylists();
+    }
+  }, [soundCloudEmbeds]);
 
   const loadSoundCloudEmbeds = async () => {
     try {
@@ -73,6 +97,81 @@ export function HomePageContent({
     } finally {
       setIsLoadingEmbeds(false);
     }
+  };
+
+  const loadSoundCloudPlaylists = async () => {
+    setIsLoadingPlaylists(true);
+    try {
+      console.log('Fetching SoundCloud playlist data...');
+      
+      const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-api`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('SoundCloud API response:', data);
+        
+        if (data.playlists && Array.isArray(data.playlists)) {
+          const playlistsMap: Record<string, SoundCloudPlaylistData> = {};
+          
+          // Map SoundCloud playlists to our embeds by URL matching
+          data.playlists.forEach((playlist: any) => {
+            const matchingEmbed = soundCloudEmbeds.find(embed => 
+              embed.url.includes(playlist.permalink_url) || 
+              embed.title.toLowerCase().includes(playlist.name.toLowerCase())
+            );
+            
+            if (matchingEmbed) {
+              playlistsMap[matchingEmbed.id] = {
+                id: playlist.id,
+                name: playlist.name,
+                tracks: playlist.tracks || [],
+                track_count: playlist.track_count || 0
+              };
+            }
+          });
+          
+          // If we have individual tracks, create a playlist for the first embed
+          if (data.tracks && Array.isArray(data.tracks) && data.tracks.length > 0 && soundCloudEmbeds.length > 0) {
+            const firstEmbed = soundCloudEmbeds[0];
+            if (!playlistsMap[firstEmbed.id]) {
+              playlistsMap[firstEmbed.id] = {
+                id: 'tracks-collection',
+                name: 'Latest Tracks',
+                tracks: data.tracks.map((track: any) => ({
+                  id: track.id,
+                  title: track.title,
+                  duration: formatDuration(track.duration),
+                  plays: track.plays || 0,
+                  likes: track.likes || 0,
+                  permalink_url: track.permalink_url || ''
+                })),
+                track_count: data.tracks.length
+              };
+            }
+          }
+          
+          setSoundCloudPlaylists(playlistsMap);
+        }
+      } else {
+        console.error('SoundCloud API request failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Error loading SoundCloud playlists:', error);
+    } finally {
+      setIsLoadingPlaylists(false);
+    }
+  };
+
+  const formatDuration = (milliseconds: number): string => {
+    const minutes = Math.floor(milliseconds / 60000);
+    const seconds = Math.floor((milliseconds % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const generateEmbedCode = (url: string) => {
@@ -107,16 +206,10 @@ export function HomePageContent({
     );
   };
 
-  // Mock playlist data - in a real implementation, this would come from SoundCloud API
-  const generateMockPlaylist = (embed: any) => {
-    const trackCount = Math.floor(Math.random() * 8) + 3; // 3-10 tracks
-    return Array.from({ length: trackCount }, (_, index) => ({
-      id: `${embed.id}-track-${index}`,
-      title: `Track ${index + 1} - ${embed.title}`,
-      duration: `${Math.floor(Math.random() * 4) + 2}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
-      plays: Math.floor(Math.random() * 50000) + 1000,
-      likes: Math.floor(Math.random() * 5000) + 100
-    }));
+  const getCurrentPlaylist = (): SoundCloudPlaylistData | null => {
+    if (soundCloudEmbeds.length === 0) return null;
+    const currentEmbed = soundCloudEmbeds[currentEmbedIndex];
+    return soundCloudPlaylists[currentEmbed.id] || null;
   };
   
   return (
@@ -217,36 +310,64 @@ export function HomePageContent({
                       />
                     </div>
 
-                    {/* Playlist Tracks */}
+                    {/* Real Playlist Tracks */}
                     <div className="border-t pt-6">
-                      <h5 className="text-md font-medium text-gray-900 dark:text-white mb-4">
-                        Playlist Tracks
-                      </h5>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {generateMockPlaylist(soundCloudEmbeds[currentEmbedIndex]).map((track, index) => (
-                          <div 
-                            key={track.id}
-                            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm text-gray-500 dark:text-gray-400 w-6">
-                                {index + 1}
-                              </span>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {track.title}
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                  {track.plays.toLocaleString()} plays • {track.likes.toLocaleString()} likes
-                                </p>
-                              </div>
+                      {isLoadingPlaylists ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto mb-2"></div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Loading playlist tracks...</p>
+                        </div>
+                      ) : (() => {
+                        const currentPlaylist = getCurrentPlaylist();
+                        return currentPlaylist && currentPlaylist.tracks.length > 0 ? (
+                          <>
+                            <h5 className="text-md font-medium text-gray-900 dark:text-white mb-4">
+                              {currentPlaylist.name} ({currentPlaylist.track_count} tracks)
+                            </h5>
+                            <div className="space-y-2 max-h-64 overflow-y-auto">
+                              {currentPlaylist.tracks.map((track, index) => (
+                                <div 
+                                  key={track.id}
+                                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <span className="text-sm text-gray-500 dark:text-gray-400 w-6">
+                                      {index + 1}
+                                    </span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                        {track.title}
+                                      </p>
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        {track.plays.toLocaleString()} plays • {track.likes.toLocaleString()} likes
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                      {track.duration}
+                                    </span>
+                                    {track.permalink_url && (
+                                      <Button variant="ghost" size="sm" asChild>
+                                        <a href={track.permalink_url} target="_blank" rel="noopener noreferrer">
+                                          <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {track.duration}
-                            </span>
+                          </>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Music className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              No playlist tracks available for this embed.
+                            </p>
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </Card>
