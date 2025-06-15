@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Send, Users, Mail, Phone, Search } from 'lucide-react';
-import { useAdvancedMessaging } from '@/hooks/useAdvancedMessaging';
+import { useMessaging } from '@/hooks/useMessaging';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -37,8 +37,9 @@ export function BulkMessageComposer() {
   const [filterVoicePart, setFilterVoicePart] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
-  const { sendBulkMessage, isSending } = useAdvancedMessaging();
+  const { sendEmail, sendSMS } = useMessaging();
 
   useEffect(() => {
     loadMembers();
@@ -164,6 +165,60 @@ export function BulkMessageComposer() {
     setSelectedMembers([]);
   };
 
+  const sendBulkEmails = async (recipients: Member[]) => {
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const recipient of recipients) {
+      if (!recipient.email) continue;
+
+      // Personalize content
+      const personalizedContent = content
+        .replace(/{{first_name}}/g, recipient.first_name)
+        .replace(/{{last_name}}/g, recipient.last_name);
+
+      const result = await sendEmail(recipient.email, subject, personalizedContent);
+      
+      if (result.success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+
+      // Small delay to avoid overwhelming the email service
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    return { successCount, failCount };
+  };
+
+  const sendBulkSMS = async (recipients: Member[]) => {
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const recipient of recipients) {
+      if (!recipient.phone) continue;
+
+      // Personalize content
+      const personalizedContent = content
+        .replace(/{{first_name}}/g, recipient.first_name)
+        .replace(/{{last_name}}/g, recipient.last_name);
+
+      const result = await sendSMS(recipient.phone, personalizedContent);
+      
+      if (result.success) {
+        successCount++;
+      } else {
+        failCount++;
+      }
+
+      // Small delay to avoid overwhelming the SMS service
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+
+    return { successCount, failCount };
+  };
+
   const handleSend = async () => {
     if (!content.trim()) {
       toast.error("Please enter a message");
@@ -180,15 +235,8 @@ export function BulkMessageComposer() {
       return;
     }
 
-    const recipients = members
-      .filter(m => selectedMembers.includes(m.id))
-      .map(m => ({
-        id: m.id,
-        email: m.email,
-        phone: m.phone,
-        first_name: m.first_name,
-        last_name: m.last_name
-      }));
+    const recipients = members.filter(m => selectedMembers.includes(m.id));
+    setIsSending(true);
 
     try {
       if (messageType === "both") {
@@ -196,33 +244,46 @@ export function BulkMessageComposer() {
         const emailRecipients = recipients.filter(r => r.email);
         const smsRecipients = recipients.filter(r => r.phone);
 
+        let totalSuccess = 0;
+        let totalFail = 0;
+
         if (emailRecipients.length > 0) {
-          await sendBulkMessage({
-            type: "email",
-            recipients: emailRecipients,
-            subject,
-            content
-          });
+          const emailResults = await sendBulkEmails(emailRecipients);
+          totalSuccess += emailResults.successCount;
+          totalFail += emailResults.failCount;
         }
 
         if (smsRecipients.length > 0) {
-          await sendBulkMessage({
-            type: "sms",
-            recipients: smsRecipients,
-            content
-          });
+          const smsResults = await sendBulkSMS(smsRecipients);
+          totalSuccess += smsResults.successCount;
+          totalFail += smsResults.failCount;
         }
-      } else {
-        // Send single type
-        const result = await sendBulkMessage({
-          type: messageType as "email" | "sms",
-          recipients,
-          subject,
-          content
-        });
 
-        if (!result.success) {
-          return;
+        if (totalSuccess > 0) {
+          toast.success(`Successfully sent ${totalSuccess} message(s)`);
+        }
+        if (totalFail > 0) {
+          toast.error(`Failed to send ${totalFail} message(s)`);
+        }
+      } else if (messageType === "email") {
+        const emailRecipients = recipients.filter(r => r.email);
+        const results = await sendBulkEmails(emailRecipients);
+        
+        if (results.successCount > 0) {
+          toast.success(`Successfully sent ${results.successCount} email(s)`);
+        }
+        if (results.failCount > 0) {
+          toast.error(`Failed to send ${results.failCount} email(s)`);
+        }
+      } else if (messageType === "sms") {
+        const smsRecipients = recipients.filter(r => r.phone);
+        const results = await sendBulkSMS(smsRecipients);
+        
+        if (results.successCount > 0) {
+          toast.success(`Successfully sent ${results.successCount} SMS message(s)`);
+        }
+        if (results.failCount > 0) {
+          toast.error(`Failed to send ${results.failCount} SMS message(s)`);
         }
       }
 
@@ -233,6 +294,8 @@ export function BulkMessageComposer() {
     } catch (error) {
       console.error('Error sending messages:', error);
       toast.error('Failed to send messages');
+    } finally {
+      setIsSending(false);
     }
   };
 
