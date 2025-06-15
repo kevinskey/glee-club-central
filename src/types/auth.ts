@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   email?: string;
@@ -46,6 +45,9 @@ export interface Profile {
   current_cart_id?: string;
   default_shipping_address?: string;
   account_balance?: number;
+  // Executive Board fields
+  is_exec_board?: boolean;
+  exec_board_role?: string;
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
