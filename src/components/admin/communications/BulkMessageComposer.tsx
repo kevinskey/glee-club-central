@@ -22,6 +22,17 @@ interface Member {
   voice_part?: string;
 }
 
+interface ProfileWithUser {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone?: string;
+  role: string;
+  voice_part?: string;
+  user_id: string;
+  users: { email: string } | { email: string }[] | null;
+}
+
 export function BulkMessageComposer() {
   const [messageType, setMessageType] = useState<"email" | "sms" | "both">("email");
   const [subject, setSubject] = useState("");
@@ -59,15 +70,26 @@ export function BulkMessageComposer() {
       if (error) throw error;
       
       // Transform the data to flatten the email from the joined users table
-      const transformedData = data?.map(profile => ({
-        id: profile.id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        email: Array.isArray(profile.users) && profile.users.length > 0 ? profile.users[0].email : '',
-        phone: profile.phone,
-        role: profile.role,
-        voice_part: profile.voice_part
-      })) || [];
+      const transformedData = (data as ProfileWithUser[])?.map(profile => {
+        let email = '';
+        if (profile.users) {
+          if (Array.isArray(profile.users)) {
+            email = profile.users.length > 0 ? profile.users[0].email : '';
+          } else {
+            email = profile.users.email || '';
+          }
+        }
+        
+        return {
+          id: profile.id,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
+          email,
+          phone: profile.phone,
+          role: profile.role,
+          voice_part: profile.voice_part
+        };
+      }) || [];
 
       setMembers(transformedData);
     } catch (error) {
