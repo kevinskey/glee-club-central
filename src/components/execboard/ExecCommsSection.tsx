@@ -76,8 +76,8 @@ export function ExecCommsSection() {
       const formattedAnnouncements = (data ?? []).map(announcement => {
         let created_by = "Unknown";
         if (Array.isArray(announcement.profiles) && announcement.profiles[0]) {
-          const { first_name, last_name } = announcement.profiles[0];
-          created_by = `${first_name ?? ""} ${last_name ?? ""}`.trim() || "Unknown";
+          const pf = announcement.profiles[0];
+          created_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
         } else if (announcement.profiles?.first_name || announcement.profiles?.last_name) {
           created_by = `${announcement.profiles.first_name ?? ""} ${announcement.profiles.last_name ?? ""}`.trim() || "Unknown";
         }
