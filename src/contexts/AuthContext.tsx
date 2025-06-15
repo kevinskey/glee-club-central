@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,6 +47,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Helper: Fetch or create the profile for a given user
+  const ensureUserProfile = async (userObj: User) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userObj.id)
+        .maybeSingle();
+
+      if (profile) return profile;
+
+      // No profile: create one
+      const { data: insertedProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: userObj.id,
+            email: userObj.email,
+            first_name: userObj.user_metadata?.first_name || '',
+            last_name: userObj.user_metadata?.last_name || '',
+            role: 'user', // default role as 'user'
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error creating profile:', insertError);
+        return null;
+      }
+      return insertedProfile;
+    } catch (err) {
+      console.error('Error in ensureUserProfile:', err);
+      return null;
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -70,7 +108,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      const profileData = await fetchProfile(user.id);
+      // Always ensure a profile exists (create if missing)
+      const profileData = await ensureUserProfile(user);
       setProfile(profileData);
     }
   };
@@ -102,6 +141,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password
       });
+
+      if (!error) {
+        // Check for or create profile after login
+        const userObj = (await supabase.auth.getUser()).data?.user;
+        if (userObj) {
+          await ensureUserProfile(userObj);
+        }
+      }
       return { error };
     } catch (error) {
       return { error };
@@ -117,6 +164,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           emailRedirectTo: `${window.location.origin}/`
         }
       });
+
+      if (!error) {
+        // Check/create profile after signup
+        const userObj = (await supabase.auth.getUser()).data?.user;
+        if (userObj) {
+          await ensureUserProfile(userObj);
+        }
+      }
       return { error };
     } catch (error) {
       return { error };
@@ -227,12 +282,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (initialSession) {
             setSession(initialSession);
             setUser(initialSession.user);
-            
-            // Fetch profile
-            const profileData = await fetchProfile(initialSession.user.id);
-            if (mounted) {
-              setProfile(profileData);
-            }
+
+            // Fetch or create profile for session user
+            const profileData = await ensureUserProfile(initialSession.user);
+            if (mounted) setProfile(profileData);
           }
           
           setIsInitialized(true);

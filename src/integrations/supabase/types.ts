@@ -1814,8 +1814,10 @@ export type Database = {
           disabled: boolean | null
           dues_paid: boolean | null
           ecommerce_enabled: boolean | null
+          exec_board_role: string | null
           first_name: string | null
           id: string
+          is_exec_board: boolean | null
           is_super_admin: boolean | null
           join_date: string | null
           last_name: string | null
@@ -1842,8 +1844,10 @@ export type Database = {
           disabled?: boolean | null
           dues_paid?: boolean | null
           ecommerce_enabled?: boolean | null
+          exec_board_role?: string | null
           first_name?: string | null
           id: string
+          is_exec_board?: boolean | null
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
@@ -1870,8 +1874,10 @@ export type Database = {
           disabled?: boolean | null
           dues_paid?: boolean | null
           ecommerce_enabled?: boolean | null
+          exec_board_role?: string | null
           first_name?: string | null
           id?: string
+          is_exec_board?: boolean | null
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
@@ -3154,6 +3160,19 @@ export type Database = {
       }
     }
     Functions: {
+      admin_create_user: {
+        Args: {
+          user_email: string
+          user_password?: string
+          user_first_name?: string
+          user_last_name?: string
+          user_role?: string
+          user_voice_part?: string
+          user_phone?: string
+          user_class_year?: string
+        }
+        Returns: Json
+      }
       admin_invite_user: {
         Args: {
           user_email: string
@@ -3181,6 +3200,10 @@ export type Database = {
       }
       can_access_profile_safe: {
         Args: { profile_user_id: string }
+        Returns: boolean
+      }
+      can_manage_users: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       check_user_is_admin: {
@@ -3220,6 +3243,10 @@ export type Database = {
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_exec_board_role: {
+        Args: { user_id?: string }
         Returns: string
       }
       get_user_by_id: {
@@ -3274,32 +3301,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_by_email: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       is_admin_by_email_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_user: {
+      is_admin_email_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_user_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_current_user_admin_safe: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_current_user_admin_simple: {
-        Args: Record<PropertyKey, never>
+      is_exec_board_member: {
+        Args: { user_id?: string }
         Returns: boolean
       }
       is_self_or_admin: {
@@ -3307,7 +3318,7 @@ export type Database = {
         Returns: boolean
       }
       is_user_admin: {
-        Args: Record<PropertyKey, never> | { user_id: string }
+        Args: { user_id: string }
         Returns: boolean
       }
       update_user_status: {

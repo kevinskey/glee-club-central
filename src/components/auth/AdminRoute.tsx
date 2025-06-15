@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,7 +9,7 @@ interface AdminRouteProps {
 }
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
-  const { user, profile, isLoading, isInitialized, isAdmin, isAuthenticated } = useAuth();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
   
   console.log('🛡️ AdminRoute: Admin access check:', {
     hasUser: !!user,
@@ -50,9 +49,9 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
   
-  // Check admin access
-  const hasAdminAccess = isAdmin();
-  
+  // Only allow admin if role is exactly 'admin'
+  const hasAdminAccess = profile.role === 'admin';
+
   if (!hasAdminAccess) {
     console.log('🚫 AdminRoute: User does not have admin access, redirecting to member dashboard');
     toast.error("You don't have permission to access the admin dashboard");
