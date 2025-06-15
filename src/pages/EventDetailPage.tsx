@@ -24,7 +24,7 @@ import { format, isSameDay } from 'date-fns';
 import { EventRSVPForm } from '@/components/events/EventRSVPForm';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 function EventDetailPageContent() {
   const { id } = useParams<{ id: string }>();

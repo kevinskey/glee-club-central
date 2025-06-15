@@ -6,7 +6,7 @@ import { PageLoader } from "@/components/ui/page-loader";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { Header } from "@/components/landing/Header";
-import ErrorBoundary from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function MemberDashboardPage() {
   const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
