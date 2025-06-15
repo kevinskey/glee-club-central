@@ -22,17 +22,6 @@ interface Member {
   voice_part?: string;
 }
 
-interface ProfileWithUser {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone?: string;
-  role: string;
-  voice_part?: string;
-  user_id: string;
-  users: { email: string } | { email: string }[] | null;
-}
-
 export function BulkMessageComposer() {
   const [messageType, setMessageType] = useState<"email" | "sms" | "both">("email");
   const [subject, setSubject] = useState("");
@@ -51,45 +40,49 @@ export function BulkMessageComposer() {
 
   const loadMembers = async () => {
     try {
-      // Join profiles with auth.users to get email addresses
-      const { data, error } = await supabase
+      // Get profiles and then fetch corresponding user emails
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id, 
-          first_name, 
-          last_name, 
-          phone, 
-          role, 
-          voice_part,
-          user_id,
-          users:user_id (email)
-        `)
+        .select('id, first_name, last_name, phone, role, voice_part')
         .eq('status', 'active')
         .order('last_name');
 
-      if (error) throw error;
-      
-      // Transform the data to flatten the email from the joined users table
-      const transformedData = (data as ProfileWithUser[])?.map(profile => {
-        let email = '';
-        if (profile.users) {
-          if (Array.isArray(profile.users)) {
-            email = profile.users.length > 0 ? profile.users[0].email : '';
-          } else {
-            email = profile.users.email || '';
-          }
-        }
-        
-        return {
-          id: profile.id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          email,
-          phone: profile.phone,
-          role: profile.role,
-          voice_part: profile.voice_part
-        };
-      }) || [];
+      if (profilesError) throw profilesError;
+
+      if (!profilesData || profilesData.length === 0) {
+        setMembers([]);
+        return;
+      }
+
+      // Get user emails from auth.users for each profile
+      const { data: usersData, error: usersError } = await supabase
+        .from('auth.users')
+        .select('id, email')
+        .in('id', profilesData.map(p => p.id));
+
+      if (usersError) {
+        console.error('Error fetching user emails:', usersError);
+        // Continue without emails if we can't fetch them
+      }
+
+      // Create a map of user emails
+      const emailMap = new Map();
+      if (usersData) {
+        usersData.forEach(user => {
+          emailMap.set(user.id, user.email);
+        });
+      }
+
+      // Combine profile data with emails
+      const transformedData: Member[] = profilesData.map(profile => ({
+        id: profile.id,
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        email: emailMap.get(profile.id) || '',
+        phone: profile.phone,
+        role: profile.role || 'member',
+        voice_part: profile.voice_part
+      }));
 
       setMembers(transformedData);
     } catch (error) {
