@@ -107,16 +107,20 @@ export function SoundCloudCoverFlow({
   }
 
   return (
-    <div className="relative w-full">
-      {/* Cover Flow Container */}
+    <div className="relative w-full overflow-hidden">
+      {/* Cover Flow Container - Fixed overflow issues */}
       <div 
-        className="relative h-80 md:h-96 lg:h-[28rem] overflow-hidden select-none" 
+        className="relative h-80 md:h-96 lg:h-[28rem] select-none" 
         ref={containerRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        style={{ 
+          perspective: '1000px',
+          overflow: 'visible'
+        }}
       >
-        <div className="flex items-center justify-center h-full perspective-1000">
+        <div className="flex items-center justify-center h-full">
           {publicPlaylists.map((playlist, index) => {
             const offset = index - currentIndex;
             const isActive = index === currentIndex;

@@ -191,7 +191,7 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
 
   if (selectedPlaylist) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 overflow-auto">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -216,17 +216,19 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
           </CardHeader>
         </Card>
 
-        <SoundCloudPlayer 
-          tracks={selectedPlaylist.tracks}
-          currentTrackIndex={currentTrackIndex}
-          onTrackChange={setCurrentTrackIndex}
-        />
+        <div className="overflow-auto max-h-[calc(100vh-200px)]">
+          <SoundCloudPlayer 
+            tracks={selectedPlaylist.tracks}
+            currentTrackIndex={currentTrackIndex}
+            onTrackChange={setCurrentTrackIndex}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-auto max-h-screen">
       <Card>
         <CardHeader>
           <CardTitle>Your SoundCloud Library</CardTitle>
@@ -242,61 +244,63 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
         </CardHeader>
       </Card>
 
-      <Tabs defaultValue="playlists" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="playlists">Playlists</TabsTrigger>
-          <TabsTrigger value="tracks">Your Tracks</TabsTrigger>
-          <TabsTrigger value="likes">Liked Tracks</TabsTrigger>
-        </TabsList>
+      <div className="overflow-auto flex-1">
+        <Tabs defaultValue="playlists" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="playlists">Playlists</TabsTrigger>
+            <TabsTrigger value="tracks">Your Tracks</TabsTrigger>
+            <TabsTrigger value="likes">Liked Tracks</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="playlists" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPlaylists.map((playlist) => (
-              <Card 
-                key={playlist.id} 
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setSelectedPlaylist(playlist)}
-              >
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gradient-to-br from-orange-400 to-red-500 rounded-lg mb-3 overflow-hidden">
-                    <img 
-                      src={playlist.coverArt} 
-                      alt={playlist.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-semibold truncate">{playlist.title}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{playlist.description}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-xs text-muted-foreground">
-                      {playlist.trackCount} tracks
-                    </span>
-                    <Badge variant={playlist.isPublic ? "default" : "secondary"} className="text-xs">
-                      {playlist.isPublic ? "Public" : "Private"}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
+          <TabsContent value="playlists" className="space-y-4 overflow-auto max-h-[600px]">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPlaylists.map((playlist) => (
+                <Card 
+                  key={playlist.id} 
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => setSelectedPlaylist(playlist)}
+                >
+                  <CardContent className="p-4">
+                    <div className="aspect-square bg-gradient-to-br from-orange-400 to-red-500 rounded-lg mb-3 overflow-hidden">
+                      <img 
+                        src={playlist.coverArt} 
+                        alt={playlist.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <h3 className="font-semibold truncate">{playlist.title}</h3>
+                    <p className="text-sm text-muted-foreground truncate">{playlist.description}</p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-muted-foreground">
+                        {playlist.trackCount} tracks
+                      </span>
+                      <Badge variant={playlist.isPublic ? "default" : "secondary"} className="text-xs">
+                        {playlist.isPublic ? "Public" : "Private"}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
-        <TabsContent value="tracks" className="space-y-4">
-          <SoundCloudPlayer 
-            tracks={filteredTracks}
-            currentTrackIndex={currentTrackIndex}
-            onTrackChange={setCurrentTrackIndex}
-          />
-        </TabsContent>
+          <TabsContent value="tracks" className="space-y-4 overflow-auto max-h-[600px]">
+            <SoundCloudPlayer 
+              tracks={filteredTracks}
+              currentTrackIndex={currentTrackIndex}
+              onTrackChange={setCurrentTrackIndex}
+            />
+          </TabsContent>
 
-        <TabsContent value="likes" className="space-y-4">
-          <SoundCloudPlayer 
-            tracks={likedTracks}
-            currentTrackIndex={0}
-            onTrackChange={() => {}}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="likes" className="space-y-4 overflow-auto max-h-[600px]">
+            <SoundCloudPlayer 
+              tracks={likedTracks}
+              currentTrackIndex={0}
+              onTrackChange={() => {}}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
