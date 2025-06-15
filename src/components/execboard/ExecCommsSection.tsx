@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,12 +79,9 @@ export function ExecCommsSection() {
         title: announcement.title,
         content: announcement.content,
         created_at: announcement.created_at,
-        created_by:
-          Array.isArray(announcement.profiles) && announcement.profiles[0]
-            ? `${announcement.profiles[0].first_name ?? ''} ${announcement.profiles[0].last_name ?? ''}`.trim()
-            : (announcement.profiles?.first_name && announcement.profiles?.last_name)
-                ? `${announcement.profiles.first_name} ${announcement.profiles.last_name}`
-                : 'Unknown',
+        created_by: announcement.profiles && typeof announcement.profiles === 'object' && !Array.isArray(announcement.profiles)
+          ? `${announcement.profiles.first_name || ''} ${announcement.profiles.last_name || ''}`.trim()
+          : 'Unknown',
         target_audience: announcement.target_audience,
         delivery_methods: announcement.delivery_methods || []
       })) || [];

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,12 +67,9 @@ export function ExecMediaSection() {
         file_type: item.file_type,
         tags: item.tags || [],
         created_at: item.created_at,
-        uploaded_by:
-          Array.isArray(item.profiles) && item.profiles[0]
-            ? `${item.profiles[0].first_name ?? ''} ${item.profiles[0].last_name ?? ''}`.trim()
-            : (item.profiles?.first_name && item.profiles?.last_name)
-                ? `${item.profiles.first_name} ${item.profiles.last_name}`
-                : 'Unknown'
+        uploaded_by: item.profiles && typeof item.profiles === 'object' && !Array.isArray(item.profiles)
+          ? `${item.profiles.first_name || ''} ${item.profiles.last_name || ''}`.trim()
+          : 'Unknown'
       })) || [];
 
       setMediaItems(formattedMedia);

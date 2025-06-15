@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,12 +78,9 @@ export function ExecDocumentsSection() {
         file_name: doc.file_name,
         file_url: doc.file_url,
         document_type: 'other',
-        uploaded_by:
-          Array.isArray(doc.profiles) && doc.profiles[0]
-            ? `${doc.profiles[0].first_name ?? ''} ${doc.profiles[0].last_name ?? ''}`.trim()
-            : (doc.profiles?.first_name && doc.profiles?.last_name)
-                ? `${doc.profiles.first_name} ${doc.profiles.last_name}`
-                : 'Unknown',
+        uploaded_by: doc.profiles && typeof doc.profiles === 'object' && !Array.isArray(doc.profiles)
+          ? `${doc.profiles.first_name || ''} ${doc.profiles.last_name || ''}`.trim()
+          : 'Unknown',
         created_at: doc.created_at,
         description: doc.description
       })) || [];

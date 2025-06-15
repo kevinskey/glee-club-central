@@ -83,12 +83,9 @@ export function ExecBudgetSection() {
         purpose: entry.purpose,
         receipt_url: entry.receipt_url,
         created_at: entry.created_at,
-        uploaded_by:
-          Array.isArray(entry.profiles) && entry.profiles[0]
-            ? `${entry.profiles[0].first_name ?? ''} ${entry.profiles[0].last_name ?? ''}`.trim()
-            : (entry.profiles?.first_name && entry.profiles?.last_name)
-                ? `${entry.profiles.first_name} ${entry.profiles.last_name}`
-                : 'Unknown',
+        uploaded_by: entry.profiles && typeof entry.profiles === 'object' && !Array.isArray(entry.profiles)
+          ? `${entry.profiles.first_name || ''} ${entry.profiles.last_name || ''}`.trim()
+          : 'Unknown',
       })) || [];
 
       setEntries(formattedEntries);
