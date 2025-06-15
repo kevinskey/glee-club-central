@@ -101,7 +101,7 @@ export function ProfileForm({
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <p className="text-sm py-2 px-3 bg-muted rounded">
-            {user?.email || profile?.email || 'Not provided'}
+            {user?.email || 'Not provided'}
           </p>
         </div>
 

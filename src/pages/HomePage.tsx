@@ -23,7 +23,8 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading || dataLoading) {
+  // Show loader while initial page is loading, but don't wait for data indefinitely
+  if (isLoading) {
     return <HomePageLoader />;
   }
 
