@@ -1,3 +1,4 @@
+
 export interface AuthUser {
   id: string;
   email?: string;
@@ -75,3 +76,4 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
+
