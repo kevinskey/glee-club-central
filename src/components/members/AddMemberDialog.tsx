@@ -66,6 +66,23 @@ const titleOptions = [
   'Sgt.'
 ];
 
+const executiveTitles = [
+  'President',
+  'Vice President',
+  'Secretary',
+  'Treasurer',
+  'Chief of Staff',
+  'Historian',
+  'Librarian',
+  'Wardrobe Manager',
+  'Social Chair',
+  'Publicity Chair',
+  'Chaplain',
+  'Business Manager',
+  'Assistant Director',
+  'Director'
+];
+
 export function AddMemberDialog({
   isOpen,
   onOpenChange,
@@ -307,6 +324,36 @@ export function AddMemberDialog({
                         <SelectContent>
                           <SelectItem value="admin">Administrator</SelectItem>
                           <SelectItem value="member">Member</SelectItem>
+                          <SelectItem value="section_leader">Section Leader</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Executive Board Position</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value || undefined}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select executive position" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No Executive Position</SelectItem>
+                          {executiveTitles.map((title) => (
+                            <SelectItem key={title} value={title}>
+                              {title}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -392,66 +439,8 @@ export function AddMemberDialog({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="ecommerce_enabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>
-                          E-commerce Access
-                        </FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
               </div>
 
-              <FormField
-                control={form.control}
-                name="account_balance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Account Balance</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        placeholder="0.00"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="default_shipping_address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Shipping Address</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter default shipping address..."
-                        className="resize-none"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
               <FormField
                 control={form.control}
                 name="notes"
@@ -459,9 +448,8 @@ export function AddMemberDialog({
                   <FormItem>
                     <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Any additional notes about this member..."
-                        className="resize-none"
+                      <Textarea 
+                        placeholder="Add any additional notes about this member..."
                         {...field}
                       />
                     </FormControl>
@@ -471,15 +459,18 @@ export function AddMemberDialog({
               />
 
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
+                <Button 
+                  type="button" 
+                  variant="outline" 
                   onClick={() => onOpenChange(false)}
-                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-glee-spelman hover:bg-glee-spelman/90">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -495,7 +486,6 @@ export function AddMemberDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Photo Upload Modal */}
       <PhotoUploadModal
         isOpen={isPhotoModalOpen}
         onClose={() => setIsPhotoModalOpen(false)}
