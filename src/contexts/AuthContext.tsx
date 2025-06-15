@@ -50,30 +50,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper: Fetch or create the profile for a given user
   const ensureUserProfile = async (userObj: User) => {
     try {
+      // Only select with real columns, and use maybeSingle()
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userObj.id)
         .maybeSingle();
 
-      if (profile) return profile;
+      if (error) {
+        console.error('Error fetching profile:', error);
+      }
 
-      // No profile: create one
+      if (profile) {
+        return profile;
+      }
+
+      // No profile: create one. Only insert real columns!
       const { data: insertedProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([
           {
             id: userObj.id,
-            email: userObj.email,
             first_name: userObj.user_metadata?.first_name || '',
             last_name: userObj.user_metadata?.last_name || '',
-            role: 'user', // default role as 'user'
+            role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
+            is_super_admin: userObj.email === 'kevinskey@mac.com',
+            status: 'active',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
         ])
         .select()
-        .single();
+        .maybeSingle();
 
       if (insertError) {
         console.error('Error creating profile:', insertError);
@@ -88,11 +96,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
+      // Use maybeSingle and only existing columns
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
