@@ -53,7 +53,7 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
     }
   }, []);
 
-  // Simplified fetch profile function
+  // Fetch profile function with better error handling
   const fetchProfile = useCallback(async (userId: string, userEmail?: string): Promise<void> => {
     if (!userId || !mountedRef.current) {
       return;
@@ -64,7 +64,7 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
     setError(null);
 
     try {
-      // Try to get existing profile with a shorter timeout
+      // Try to get existing profile
       const { data: existingProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
@@ -73,76 +73,27 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
 
       if (fetchError) {
         console.error('❌ useUserProfile: Error fetching profile:', fetchError);
-        // Create a fallback profile immediately
-        const isAdminUser = userEmail === 'kevinskey@mac.com';
-        const fallbackProfile: Profile = {
-          id: userId,
-          first_name: userEmail?.split('@')[0] || 'User',
-          last_name: '',
-          role: isAdminUser ? 'admin' : 'member',
-          status: 'active',
-          is_super_admin: isAdminUser,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        if (mountedRef.current) {
-          setProfile(fallbackProfile);
-          setError(null); // Don't show error, we have a fallback
-        }
+        setError(fetchError.message);
         return;
       }
 
       let finalProfile = existingProfile;
 
-      // If no profile exists, create one quickly
+      // If no profile exists, create one
       if (!existingProfile) {
         console.log('🔧 useUserProfile: No profile found, creating new one...');
         finalProfile = await createProfile(userId, userEmail);
       }
 
-      if (mountedRef.current) {
-        if (finalProfile) {
-          setProfile(finalProfile as Profile);
-          console.log('✅ useUserProfile: Profile set successfully:', finalProfile.role);
-        } else {
-          // Emergency fallback
-          const isAdminUser = userEmail === 'kevinskey@mac.com';
-          const emergencyProfile: Profile = {
-            id: userId,
-            first_name: userEmail?.split('@')[0] || 'User',
-            last_name: '',
-            role: isAdminUser ? 'admin' : 'member',
-            status: 'active',
-            is_super_admin: isAdminUser,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-          setProfile(emergencyProfile);
-          console.log('🆘 useUserProfile: Using emergency fallback profile');
-        }
+      if (mountedRef.current && finalProfile) {
+        setProfile(finalProfile as Profile);
+        console.log('✅ useUserProfile: Profile set successfully:', finalProfile.role);
       }
 
     } catch (err) {
       console.error('💥 useUserProfile: Unexpected error:', err);
-      
       if (mountedRef.current) {
-        // Always provide a fallback profile instead of hanging
-        const isAdminUser = userEmail === 'kevinskey@mac.com';
-        const fallbackProfile: Profile = {
-          id: userId,
-          first_name: userEmail?.split('@')[0] || 'User',
-          last_name: '',
-          role: isAdminUser ? 'admin' : 'member',
-          status: 'active',
-          is_super_admin: isAdminUser,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        setProfile(fallbackProfile);
-        setError(null); // Don't show error, we have a fallback
-        console.log('🆘 useUserProfile: Using catch fallback profile');
+        setError(err instanceof Error ? err.message : 'Unknown error');
       }
     } finally {
       if (mountedRef.current) {
@@ -170,8 +121,7 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
         .eq('id', profile.id);
 
       if (error) {
-        console.error('❌ useUserProfile: Profile update failed:', error);
-        setError(error.message);
+        console.error('❌ useUserProfile: Update failed:', error);
         return false;
       }
 
@@ -183,44 +133,40 @@ export const useUserProfile = (user: AuthUser | null): UseUserProfileReturn => {
       console.log('✅ useUserProfile: Profile updated successfully');
       return true;
     } catch (err) {
-      console.error('💥 useUserProfile: Unexpected update error:', err);
-      setError(err instanceof Error ? err.message : 'Update failed');
+      console.error('💥 useUserProfile: Update error:', err);
       return false;
     }
-  }, [profile?.id]);
+  }, [profile]);
 
   // Refresh profile
   const refreshProfile = useCallback(async (): Promise<void> => {
     if (user?.id) {
       await fetchProfile(user.id, user.email);
     }
-  }, [user?.id, user?.email, fetchProfile]);
+  }, [user, fetchProfile]);
 
   // Effect to fetch profile when user changes
   useEffect(() => {
+    mountedRef.current = true;
+    
     if (user?.id) {
-      // Start fetching immediately, don't wait
       fetchProfile(user.id, user.email);
     } else {
-      // Clear everything when no user
       setProfile(null);
-      setError(null);
       setIsLoading(false);
+      setError(null);
     }
-  }, [user?.id, user?.email, fetchProfile]);
 
-  // Cleanup
-  useEffect(() => {
     return () => {
       mountedRef.current = false;
     };
-  }, []);
+  }, [user, fetchProfile]);
 
   return {
     profile,
     isLoading,
     error,
     refreshProfile,
-    updateProfile
+    updateProfile,
   };
 };
