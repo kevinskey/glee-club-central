@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { MemberManagement } from '@/components/admin/MemberManagement';
+import { EnhancedMemberManagement } from '@/components/admin/EnhancedMemberManagement';
 
 export default function MembersPage() {
-  return <MemberManagement />;
+  return <EnhancedMemberManagement />;
 }
