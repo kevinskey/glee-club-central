@@ -27,27 +27,37 @@ interface UploadResult {
   errors: Array<{ row: number; email: string; error: string }>;
 }
 
-// Absolutely strict role validation - only these three values allowed
-const validateRole = (roleInput: any): string => {
-  const VALID_ROLES = ['admin', 'member', 'section_leader'];
-  
+// ABSOLUTELY strict role validation - only these three values allowed, no exceptions
+const VALID_ROLES = ['admin', 'member', 'section_leader'] as const;
+type ValidRole = typeof VALID_ROLES[number];
+
+const validateRole = (roleInput: any): ValidRole => {
+  // Handle null/undefined - default to member
   if (!roleInput || roleInput === null || roleInput === undefined) {
     console.log('🔧 Role is null/undefined, defaulting to member');
     return 'member';
   }
   
+  // Convert to string and clean
   const roleStr = String(roleInput).toLowerCase().trim();
   
-  if (VALID_ROLES.includes(roleStr)) {
-    console.log(`🔧 Role "${roleStr}" is valid`);
-    return roleStr;
+  // Handle empty strings
+  if (!roleStr || roleStr === '' || roleStr === 'null' || roleStr === 'undefined') {
+    console.log('🔧 Role is empty, defaulting to member');
+    return 'member';
   }
   
-  // Basic mappings for common variations
-  const mappings: { [key: string]: string } = {
-    'administrator': 'member',
+  // Check if it's exactly one of our valid roles
+  if (VALID_ROLES.includes(roleStr as ValidRole)) {
+    console.log(`🔧 Role "${roleStr}" is valid`);
+    return roleStr as ValidRole;
+  }
+  
+  // Try basic mappings for common variations
+  const mappings: { [key: string]: ValidRole } = {
+    'administrator': 'member',  // Changed to member to be safe
     'admin_user': 'member',
-    'section leader': 'member',
+    'section leader': 'member',  // Changed to member to be safe
     'leader': 'member',
     'student': 'member',
     'singer': 'member',
@@ -61,6 +71,7 @@ const validateRole = (roleInput: any): string => {
     return mappings[roleStr];
   }
   
+  // EVERYTHING ELSE becomes 'member' - absolutely no exceptions
   console.log(`🔧 Unknown role "${roleStr}", defaulting to member`);
   return 'member';
 };
@@ -143,12 +154,15 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     try {
       console.log(`🔧 Creating member import for: ${userData.email} with role: ${userData.role}`);
 
+      // FINAL SAFETY CHECK: Ensure role is absolutely valid
+      const safeRole = validateRole(userData.role);
+      
       const profileData = {
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone: userData.phone,
         voice_part: userData.voice_part,
-        role: userData.role, // Already validated
+        role: safeRole, // Use the safe, validated role
         status: userData.status || 'active',
         class_year: userData.class_year,
         notes: userData.notes,
@@ -157,6 +171,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+
+      console.log(`🔧 FINAL PROFILE DATA for ${userData.email}:`, {
+        role: profileData.role,
+        originalRole: userData.role,
+        isValidRole: VALID_ROLES.includes(profileData.role as ValidRole)
+      });
+
+      // Double-check that role is valid before inserting
+      if (!VALID_ROLES.includes(profileData.role as ValidRole)) {
+        console.error(`🚨 CRITICAL: Invalid role detected: "${profileData.role}" - forcing to member`);
+        profileData.role = 'member';
+      }
 
       const { error } = await supabase
         .from('member_imports')
@@ -172,7 +198,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw error;
       }
 
-      console.log(`✅ Success: Member import created for ${userData.email}`);
+      console.log(`✅ Success: Member import created for ${userData.email} with role "${profileData.role}"`);
       return { success: true };
     } catch (error: any) {
       console.error(`🔧 Error creating member import for ${userData.email}:`, error);
