@@ -348,6 +348,7 @@ export function EditUserDialog({
                           <SelectItem value="Vice President">Vice President</SelectItem>
                           <SelectItem value="Secretary">Secretary</SelectItem>
                           <SelectItem value="Treasurer">Treasurer</SelectItem>
+                          <SelectItem value="Chief of Staff">Chief of Staff</SelectItem>
                           <SelectItem value="Historian">Historian</SelectItem>
                           <SelectItem value="Librarian">Librarian</SelectItem>
                           <SelectItem value="Wardrobe Manager">Wardrobe Manager</SelectItem>
