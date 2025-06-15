@@ -20,6 +20,7 @@ export interface AuthUser {
   created_at?: string;
 }
 
+// Updated Profile interface to include the expected fields
 export interface Profile {
   id: string;
   first_name?: string | null;
@@ -45,9 +46,9 @@ export interface Profile {
   current_cart_id?: string | null;
   default_shipping_address?: string | null;
   account_balance?: number;
-  // Executive Board fields
-  is_exec_board?: boolean;
-  exec_board_role?: string | null;
+  // Executive Board fields (add if missing)
+  is_exec_board?: boolean; // Add this
+  exec_board_role?: string | null; // Add this
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
