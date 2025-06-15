@@ -80,10 +80,12 @@ export function ExecBudgetSection() {
         let uploaded_by = "Unknown";
         if (Array.isArray(entry.profiles)) {
           if (entry.profiles.length > 0) {
-            uploaded_by = `${entry.profiles[0]?.first_name ?? ""} ${entry.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+            const pf = entry.profiles[0] as { first_name?: string; last_name?: string };
+            uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
           }
-        } else if (entry.profiles?.first_name || entry.profiles?.last_name) {
-          uploaded_by = `${entry.profiles.first_name ?? ""} ${entry.profiles.last_name ?? ""}`.trim() || "Unknown";
+        } else if ((entry.profiles as any)?.first_name || (entry.profiles as any)?.last_name) {
+          const pf = entry.profiles as { first_name?: string; last_name?: string };
+          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
         }
         return {
           id: entry.id,

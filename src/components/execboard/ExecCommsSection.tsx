@@ -77,10 +77,12 @@ export function ExecCommsSection() {
         let created_by = "Unknown";
         if (Array.isArray(announcement.profiles)) {
           if (announcement.profiles.length > 0) {
-            created_by = `${announcement.profiles[0]?.first_name ?? ""} ${announcement.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+            const pf = announcement.profiles[0] as { first_name?: string; last_name?: string };
+            created_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
           }
-        } else if (announcement.profiles?.first_name || announcement.profiles?.last_name) {
-          created_by = `${announcement.profiles.first_name ?? ""} ${announcement.profiles.last_name ?? ""}`.trim() || "Unknown";
+        } else if ((announcement.profiles as any)?.first_name || (announcement.profiles as any)?.last_name) {
+          const pf = announcement.profiles as { first_name?: string; last_name?: string };
+          created_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
         }
         return {
           id: announcement.id,

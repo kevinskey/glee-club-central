@@ -75,10 +75,12 @@ export function ExecDocumentsSection() {
         let uploaded_by = "Unknown";
         if (Array.isArray(doc.profiles)) {
           if (doc.profiles.length > 0) {
-            uploaded_by = `${doc.profiles[0]?.first_name ?? ""} ${doc.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+            const pf = doc.profiles[0] as { first_name?: string; last_name?: string };
+            uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
           }
-        } else if (doc.profiles?.first_name || doc.profiles?.last_name) {
-          uploaded_by = `${doc.profiles.first_name ?? ""} ${doc.profiles.last_name ?? ""}`.trim() || "Unknown";
+        } else if ((doc.profiles as any)?.first_name || (doc.profiles as any)?.last_name) {
+          const pf = doc.profiles as { first_name?: string; last_name?: string };
+          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
         }
         return {
           id: doc.id,

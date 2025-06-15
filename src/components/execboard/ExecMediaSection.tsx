@@ -63,10 +63,12 @@ export function ExecMediaSection() {
         let uploaded_by = "Unknown";
         if (Array.isArray(item.profiles)) {
           if (item.profiles.length > 0) {
-            uploaded_by = `${item.profiles[0]?.first_name ?? ""} ${item.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+            const pf = item.profiles[0] as { first_name?: string; last_name?: string };
+            uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
           }
-        } else if (item.profiles?.first_name || item.profiles?.last_name) {
-          uploaded_by = `${item.profiles.first_name ?? ""} ${item.profiles.last_name ?? ""}`.trim() || "Unknown";
+        } else if ((item.profiles as any)?.first_name || (item.profiles as any)?.last_name) {
+          const pf = item.profiles as { first_name?: string; last_name?: string };
+          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
         }
         return {
           id: item.id,
