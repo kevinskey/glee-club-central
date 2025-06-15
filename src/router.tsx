@@ -22,6 +22,7 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import SettingsPage from "./pages/admin/SettingsPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
@@ -91,6 +92,10 @@ const router = createBrowserRouter([
       {
         path: "admin/csv-upload",
         element: <MemberCSVUploadPage />,
+      },
+      {
+        path: "admin/settings",
+        element: <SettingsPage />,
       },
       {
         path: "attendance",
