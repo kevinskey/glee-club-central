@@ -83,7 +83,13 @@ export function ExecBudgetSection() {
         purpose: entry.purpose,
         receipt_url: entry.receipt_url,
         created_at: entry.created_at,
-        uploaded_by: `${entry.profiles?.first_name} ${entry.profiles?.last_name}`
+        // Fix: check if entry.profiles is an array (can happen w/ joins); fallback to default name
+        uploaded_by:
+          Array.isArray(entry.profiles) && entry.profiles[0]
+            ? `${entry.profiles[0].first_name ?? ''} ${entry.profiles[0].last_name ?? ''}`.trim()
+            : (entry.profiles?.first_name && entry.profiles?.last_name)
+                ? `${entry.profiles.first_name} ${entry.profiles.last_name}`
+                : 'Unknown',
       })) || [];
 
       setEntries(formattedEntries);

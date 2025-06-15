@@ -78,7 +78,13 @@ export function ExecCommsSection() {
         title: announcement.title,
         content: announcement.content,
         created_at: announcement.created_at,
-        created_by: `${announcement.profiles?.first_name} ${announcement.profiles?.last_name}`,
+        // Fix: array fallback for joined profiles
+        created_by:
+          Array.isArray(announcement.profiles) && announcement.profiles[0]
+            ? `${announcement.profiles[0].first_name ?? ''} ${announcement.profiles[0].last_name ?? ''}`.trim()
+            : (announcement.profiles?.first_name && announcement.profiles?.last_name)
+                ? `${announcement.profiles.first_name} ${announcement.profiles.last_name}`
+                : 'Unknown',
         target_audience: announcement.target_audience,
         delivery_methods: announcement.delivery_methods || []
       })) || [];

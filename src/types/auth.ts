@@ -1,4 +1,3 @@
-
 export interface AuthUser {
   id: string;
   email?: string;
@@ -22,33 +21,32 @@ export interface AuthUser {
 
 export interface Profile {
   id: string;
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  role?: string;
-  voice_part?: string;
-  avatar_url?: string;
-  status?: string;
-  class_year?: string;
-  notes?: string;
-  special_roles?: string;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  role?: string | null;
+  voice_part?: string | null;
+  avatar_url?: string | null;
+  status?: string | null;
+  class_year?: string | null;
+  notes?: string | null;
+  special_roles?: string | null;
   is_super_admin?: boolean;
-  title?: string;
+  title?: string | null;
   disabled?: boolean;
   updated_at?: string;
-  join_date?: string;
+  join_date?: string | null;
   dues_paid?: boolean;
   role_tags?: string[];
   created_at?: string;
-  // New e-commerce fields
   ecommerce_enabled?: boolean;
   design_history_ids?: string[];
-  current_cart_id?: string;
-  default_shipping_address?: string;
+  current_cart_id?: string | null;
+  default_shipping_address?: string | null;
   account_balance?: number;
   // Executive Board fields
-  is_exec_board?: boolean; // <--- added
-  exec_board_role?: string; // <--- added
+  is_exec_board?: boolean;
+  exec_board_role?: string | null;
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
@@ -77,4 +75,3 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
-
