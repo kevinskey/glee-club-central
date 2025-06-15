@@ -70,11 +70,6 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         updateData.role_tags = Array.isArray(userData.role_tags) ? userData.role_tags : [];
       }
       
-      // Skip title field for now as it might be causing issues
-      // if (userData.title !== undefined && userData.title !== 'none') {
-      //   updateData.title = userData.title;
-      // }
-      
       // Handle e-commerce fields if they exist in the database
       if (userData.ecommerce_enabled !== undefined) {
         updateData.ecommerce_enabled = userData.ecommerce_enabled;
