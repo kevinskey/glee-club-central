@@ -20,7 +20,7 @@ export interface AuthUser {
   created_at?: string;
 }
 
-// Updated Profile interface to include the expected fields
+// Updated Profile interface to support all required fields for member/admin/exec logic
 export interface Profile {
   id: string;
   first_name?: string | null;
@@ -46,9 +46,11 @@ export interface Profile {
   current_cart_id?: string | null;
   default_shipping_address?: string | null;
   account_balance?: number;
-  // Executive Board fields (add if missing)
-  is_exec_board?: boolean; // Add this
-  exec_board_role?: string | null; // Add this
+  // Executive Board fields
+  is_exec_board?: boolean; // Used in many places to check exec access
+  exec_board_role?: string | null; // Used for dashboard/tab access and quick actions
+
+  // Add any further fields needed but missed by current codebase
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
@@ -65,7 +67,13 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ data?: any; error?: any }>;
   signOut: () => Promise<void>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<{ data?: any; error?: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    userType?: UserType
+  ) => Promise<{ data?: any; error?: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
   getUserType: () => UserType;
@@ -77,4 +85,3 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
-
