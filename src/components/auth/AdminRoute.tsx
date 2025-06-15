@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,19 +11,19 @@ interface AdminRouteProps {
 
 export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
   const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
-  
+
+  // Improved logging for debugging
   console.log('🛡️ AdminRoute: Admin access check:', {
     hasUser: !!user,
     userEmail: user?.email,
     hasProfile: !!profile,
     profileRole: profile?.role,
-    profileIsAdmin: profile?.is_super_admin,
-    isAdminFunction: isAdmin(),
+    profileIsAdmin: profile?.role === 'admin',
     isAuthenticated,
     isLoading,
     isInitialized
   });
-  
+
   // Show loader during initialization
   if (!isInitialized || isLoading) {
     return (
@@ -32,13 +33,13 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       />
     );
   }
-  
+
   // Check authentication
   if (!isAuthenticated || !user) {
     console.log('🚫 AdminRoute: User not authenticated, redirecting to login');
     return <Navigate to="/auth/login" replace />;
   }
-  
+
   // Wait for profile to load before checking admin status
   if (!profile) {
     return (
@@ -48,7 +49,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
       />
     );
   }
-  
+
   // Only allow admin if role is exactly 'admin'
   const hasAdminAccess = profile.role === 'admin';
 
@@ -57,7 +58,7 @@ export const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     toast.error("You don't have permission to access the admin dashboard");
     return <Navigate to="/dashboard" replace />;
   }
-  
+
   console.log('✅ AdminRoute: Admin access granted');
   return <>{children}</>;
 };
