@@ -68,72 +68,66 @@ const VOICE_PART_MAPPING: { [key: string]: string } = {
   'bass': 'bass',
 };
 
-// These are the ONLY valid role values according to the database constraint
-const VALID_ROLES = ['admin', 'member', 'section_leader'];
+// Check the exact constraint by querying the database
+const checkRoleConstraint = async () => {
+  try {
+    const { data, error } = await supabase
+      .rpc('check_constraint_definition', { table_name: 'profiles', constraint_name: 'profiles_role_check' });
+    
+    if (error) {
+      console.log('⚠️ Could not fetch constraint definition:', error);
+    } else {
+      console.log('🔍 Role constraint definition:', data);
+    }
+  } catch (e) {
+    console.log('⚠️ Error checking constraint:', e);
+  }
+};
 
-// Comprehensive role mapping - EVERYTHING maps to one of the 3 valid values
-const ROLE_MAPPING: { [key: string]: string } = {
-  // Direct valid roles
-  'admin': 'member',
-  'administrator': 'member',
-  'member': 'member',
-  'section_leader': 'member',
-  'section leader': 'member',
-  'leader': 'member',
+// Absolutely ensure role is valid - FORCE it to be 'member' if anything is wrong
+const forceValidRole = (roleInput: any): string => {
+  // Handle completely null/undefined
+  if (roleInput === null || roleInput === undefined) {
+    console.log('🔧 FORCE: null/undefined role → member');
+    return 'member';
+  }
   
-  // All possible variations should map to 'member' (safest default)
-  'student': 'member',
-  'singer': 'member',
-  'general member': 'member',
-  'regular member': 'member',
-  'user': 'member',
-  'standard': 'member',
-  'basic': 'member',
-  'regular': 'member',
-  'default': 'member',
-  'alumni': 'member',
-  'alumna': 'member',
-  'alum': 'member',
-  'guest': 'member',
-  'visitor': 'member',
-  'fan': 'member',
-  'supporter': 'member',
-  'active': 'member',
-  'inactive': 'member',
-  'pending': 'member',
-  'new': 'member',
-  'current': 'member',
-  'former': 'member',
-  'participant': 'member',
-  'attendee': 'member',
-  'registered': 'member',
-  'enrolled': 'member',
-  'performer': 'member',
-  'vocalist': 'member',
-  'choir member': 'member',
-  'glee member': 'member',
-  'president': 'member',
-  'vice president': 'member',
-  'secretary': 'member',
-  'treasurer': 'member',
-  'historian': 'member',
-  'librarian': 'member',
-  'business manager': 'member',
-  'social chair': 'member',
-  'publicity': 'member',
-  'officer': 'member',
-  'executive': 'member',
-  // Empty or null-like values
-  '': 'member',
-  'null': 'member',
-  'undefined': 'member',
-  'none': 'member',
-  ' ': 'member',
-  'n/a': 'member',
-  'na': 'member',
-  'not specified': 'member',
-  'tbd': 'member',
-  'to be determined': 'member'
+  // Convert to string and clean
+  const roleStr = String(roleInput).toLowerCase().trim();
+  
+  // Handle empty strings
+  if (!roleStr || roleStr === '' || roleStr === 'null' || roleStr === 'undefined') {
+    console.log('🔧 FORCE: empty role → member');
+    return 'member';
+  }
+  
+  // Only allow these exact values - NOTHING ELSE
+  const EXACT_VALID_ROLES = ['admin', 'member', 'section_leader'];
+  
+  // If it's already exactly valid, return it
+  if (EXACT_VALID_ROLES.includes(roleStr)) {
+    console.log(`🔧 FORCE: "${roleStr}" is already valid`);
+    return roleStr;
+  }
+  
+  // Try basic mapping
+  const basicMappings: { [key: string]: string } = {
+    'administrator': 'member',
+    'section leader': 'member', 
+    'leader': 'member',
+    'student': 'member',
+    'alumni': 'member',
+    'alumna': 'member'
+  };
+  
+  if (basicMappings[roleStr]) {
+    console.log(`🔧 FORCE: "${roleStr}" mapped to "${basicMappings[roleStr]}"`);
+    return basicMappings[roleStr];
+  }
+  
+  // EVERYTHING ELSE becomes 'member' - no exceptions
+  console.log(`🔧 FORCE: "${roleStr}" → member (fallback)`);
+  return 'member';
 };
 
 export function EnhancedMemberCSVUpload() {
@@ -145,6 +139,11 @@ export function EnhancedMemberCSVUpload() {
   const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [step, setStep] = useState<'upload' | 'map' | 'preview' | 'complete'>('upload');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Check constraint on component mount
+  React.useEffect(() => {
+    checkRoleConstraint();
+  }, []);
 
   const downloadTemplate = () => {
     const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date
@@ -189,34 +188,6 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     if (!section) return '';
     const normalized = section.toLowerCase().trim();
     return VOICE_PART_MAPPING[normalized] || section;
-  };
-
-  const normalizeRole = (role: any): string => {
-    // Handle absolutely any input type
-    if (role === null || role === undefined) {
-      console.log('🔧 ROLE DEBUG: Null/undefined role, defaulting to member');
-      return 'member';
-    }
-    
-    // Convert to string and handle all whitespace/empty cases
-    const roleString = String(role).toLowerCase().trim();
-    
-    // Handle empty string variations
-    if (!roleString || roleString === '' || roleString === 'null' || roleString === 'undefined') {
-      console.log('🔧 ROLE DEBUG: Empty role string, defaulting to member');
-      return 'member';
-    }
-    
-    // Check our comprehensive mapping
-    if (ROLE_MAPPING.hasOwnProperty(roleString)) {
-      const mappedRole = ROLE_MAPPING[roleString];
-      console.log(`🔧 ROLE DEBUG: "${role}" (normalized: "${roleString}") mapped to "${mappedRole}"`);
-      return mappedRole;
-    }
-    
-    // If no mapping found, ALWAYS default to member and log it
-    console.warn(`🔧 ROLE DEBUG: Unknown role "${role}" (normalized: "${roleString}"), defaulting to "member"`);
-    return 'member';
   };
 
   const handleFileSelect = () => {
@@ -305,8 +276,8 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
               value = normalizeVoicePart(value);
             } else if (systemField === 'role') {
               const originalValue = value;
-              value = normalizeRole(value);
-              console.log(`🔧 ROW ${rowIndex}: Role transformation: "${originalValue}" → "${value}"`);
+              value = forceValidRole(value);
+              console.log(`🔧 ROW ${rowIndex}: Role "${originalValue}" → "${value}"`);
             } else if (systemField === 'dues_paid') {
               value = value.toLowerCase() === 'true' || value === '1' ? 'true' : 'false';
             } else if (systemField === 'status' && !value) {
@@ -323,22 +294,22 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error('Missing required fields');
       }
 
-      // CRITICAL: Ensure role is ALWAYS set to a valid value
+      // ABSOLUTE FINAL CHECK: Ensure role is valid
       if (!mappedData.role) {
-        console.warn(`🔧 ROW ${rowIndex}: No role specified for ${mappedData.email}, setting to "member"`);
+        console.warn(`🔧 ROW ${rowIndex}: No role for ${mappedData.email}, forcing to "member"`);
         mappedData.role = 'member';
       }
 
-      // FINAL VALIDATION: Absolutely ensure the role is valid
-      if (!VALID_ROLES.includes(mappedData.role)) {
-        console.error(`🔧 CRITICAL ERROR ROW ${rowIndex}: Invalid role "${mappedData.role}" for ${mappedData.email}. This should never happen!`);
+      // Validate the role one more time
+      const FINAL_VALID_ROLES = ['admin', 'member', 'section_leader'];
+      if (!FINAL_VALID_ROLES.includes(mappedData.role)) {
+        console.error(`🔧 CRITICAL: Invalid role "${mappedData.role}" for ${mappedData.email}. Forcing to "member"`);
         mappedData.role = 'member';
       }
 
-      console.log(`🔧 ROW ${rowIndex} FINAL DATA for ${mappedData.email}:`, {
+      console.log(`🔧 FINAL ROW ${rowIndex} for ${mappedData.email}:`, {
         role: mappedData.role,
-        isValidRole: VALID_ROLES.includes(mappedData.role),
-        validRolesList: VALID_ROLES
+        isValid: FINAL_VALID_ROLES.includes(mappedData.role)
       });
 
       return mappedData as MappedRow;
@@ -352,24 +323,15 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     try {
       console.log(`🔧 CREATING PROFILE for: ${userData.email}`);
 
-      // ULTIMATE ROLE VALIDATION - this is our last line of defense
-      let safeRole = userData.role || 'member';
+      // ULTIMATE SAFETY: Force role to be valid
+      const ultraSafeRole = forceValidRole(userData.role);
       
-      // Normalize one more time to be absolutely sure
-      safeRole = normalizeRole(safeRole);
-      
-      // Final check - if it's still not valid, force it to 'member'
-      if (!VALID_ROLES.includes(safeRole)) {
-        console.error(`🔧 FINAL SAFETY CHECK FAILED: Role "${safeRole}" is not valid. Forcing to "member"`);
-        safeRole = 'member';
-      }
-
       const profileData = {
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone: userData.phone || null,
         voice_part: userData.voice_part || null,
-        role: safeRole, // Use the ultra-safe role
+        role: ultraSafeRole, // Use ultra-safe role
         status: userData.status || 'active',
         class_year: userData.class_year || null,
         notes: userData.notes || null,
@@ -379,13 +341,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         updated_at: new Date().toISOString()
       };
 
-      // Log everything for debugging
       console.log(`🔧 FINAL PROFILE DATA for ${userData.email}:`, {
-        originalRole: userData.role,
-        safeRole: safeRole,
-        isValidRole: VALID_ROLES.includes(safeRole),
-        validRoles: VALID_ROLES,
-        profileDataRole: profileData.role
+        role: profileData.role,
+        originalRole: userData.role
       });
 
       // Insert into member_imports table
@@ -399,24 +357,14 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         });
 
       if (insertError) {
-        console.error(`🔧 INSERT ERROR for ${userData.email}:`, {
-          error: insertError,
-          profileData: profileData,
-          roleValue: profileData.role,
-          roleType: typeof profileData.role
-        });
+        console.error(`🔧 INSERT ERROR for ${userData.email}:`, insertError);
         throw insertError;
       }
 
       console.log(`✅ SUCCESS: Created member import for ${userData.email} with role "${profileData.role}"`);
       return { success: true };
     } catch (error: any) {
-      console.error(`🔧 PROFILE CREATION ERROR for ${userData.email}:`, {
-        error: error,
-        errorMessage: error.message,
-        errorDetails: error.details,
-        originalRole: userData.role
-      });
+      console.error(`🔧 PROFILE CREATION ERROR for ${userData.email}:`, error);
       return { 
         success: false, 
         error: `${error.message || 'Unknown error'}${error.details ? ` (${error.details})` : ''}` 
