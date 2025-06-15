@@ -59,7 +59,7 @@ export function ExecMediaSection() {
 
       if (error) throw error;
 
-      const formattedMedia = data?.map(item => {
+      const formattedMedia = (data ?? []).map(item => {
         let uploaded_by = "Unknown";
         if (Array.isArray(item.profiles) && item.profiles[0]) {
           const { first_name, last_name } = item.profiles[0];
@@ -76,7 +76,7 @@ export function ExecMediaSection() {
           created_at: item.created_at,
           uploaded_by,
         };
-      }) || [];
+      });
 
       setMediaItems(formattedMedia);
     } catch (error) {

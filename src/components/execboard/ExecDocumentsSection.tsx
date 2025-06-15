@@ -71,7 +71,7 @@ export function ExecDocumentsSection() {
 
       if (error) throw error;
 
-      const formattedDocs = data?.map(doc => {
+      const formattedDocs = (data ?? []).map(doc => {
         let uploaded_by = "Unknown";
         if (Array.isArray(doc.profiles) && doc.profiles[0]) {
           const { first_name, last_name } = doc.profiles[0];
@@ -89,7 +89,7 @@ export function ExecDocumentsSection() {
           created_at: doc.created_at,
           description: doc.description,
         };
-      }) || [];
+      });
 
       setDocuments(formattedDocs);
     } catch (error) {

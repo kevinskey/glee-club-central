@@ -76,7 +76,7 @@ export function ExecBudgetSection() {
 
       if (error) throw error;
 
-      const formattedEntries = data?.map(entry => {
+      const formattedEntries = (data ?? []).map(entry => {
         let uploaded_by = "Unknown";
         if (Array.isArray(entry.profiles) && entry.profiles[0]) {
           const { first_name, last_name } = entry.profiles[0];
@@ -93,7 +93,7 @@ export function ExecBudgetSection() {
           created_at: entry.created_at,
           uploaded_by,
         };
-      }) || [];
+      });
 
       setEntries(formattedEntries);
     } catch (error) {

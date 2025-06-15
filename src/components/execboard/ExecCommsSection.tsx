@@ -73,7 +73,7 @@ export function ExecCommsSection() {
 
       if (error) throw error;
 
-      const formattedAnnouncements = data?.map(announcement => {
+      const formattedAnnouncements = (data ?? []).map(announcement => {
         let created_by = "Unknown";
         if (Array.isArray(announcement.profiles) && announcement.profiles[0]) {
           const { first_name, last_name } = announcement.profiles[0];
@@ -90,7 +90,7 @@ export function ExecCommsSection() {
           target_audience: announcement.target_audience,
           delivery_methods: announcement.delivery_methods || [],
         };
-      }) || [];
+      });
 
       setAnnouncements(formattedAnnouncements);
     } catch (error) {
