@@ -1,7 +1,7 @@
+
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
-import { ErrorBoundary } from "./components/ErrorBoundary";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -22,21 +22,15 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import SettingsPage from "./pages/admin/SettingsPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
-import ExecBoardDashboard from "./pages/dashboard/ExecBoardDashboard";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    ErrorBoundary: () => (
-      <ErrorBoundary>
-        <NotFoundPage />
-      </ErrorBoundary>
-    ),
+    ErrorBoundary: NotFoundPage,
     children: [
       {
         index: true,
@@ -99,10 +93,6 @@ const router = createBrowserRouter([
         element: <MemberCSVUploadPage />,
       },
       {
-        path: "admin/settings",
-        element: <SettingsPage />,
-      },
-      {
         path: "attendance",
         element: <AttendancePage />,
       },
@@ -132,10 +122,6 @@ const router = createBrowserRouter([
       ...adminRoutes,
       // Add all v2 admin routes
       ...adminRoutesV2,
-      {
-        path: "dashboard/exec",
-        element: <ExecBoardDashboard />,
-      },
       {
         path: "*",
         element: <NotFoundPage />,

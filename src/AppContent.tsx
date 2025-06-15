@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
@@ -24,14 +25,13 @@ export default function AppContent({ children }: AppContentProps) {
     '/login', 
     '/signup', 
     '/', // HomePage manages its own header via PublicPageWrapper
-    '/contact', // ContactPage manages its own header and footer
-    '/calendar' // Calendar page manages its own header
+    '/contact' // ContactPage manages its own header and footer
   ];
   
   // Admin pages should NOT show any unified header as they use AdminLayout
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname) && 
                           !isDashboardPage &&
-                          !isAdminPage;
+                          !isAdminPage; // This is the key fix
 
   return (
     <div className="min-h-screen bg-background">

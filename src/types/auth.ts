@@ -20,37 +20,32 @@ export interface AuthUser {
   created_at?: string;
 }
 
-// Updated Profile interface to support all required fields for member/admin/exec logic
 export interface Profile {
   id: string;
-  first_name?: string | null;
-  last_name?: string | null;
-  phone?: string | null;
-  role?: string | null;
-  voice_part?: string | null;
-  avatar_url?: string | null;
-  status?: string | null;
-  class_year?: string | null;
-  notes?: string | null;
-  special_roles?: string | null;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  role?: string;
+  voice_part?: string;
+  avatar_url?: string;
+  status?: string;
+  class_year?: string;
+  notes?: string;
+  special_roles?: string;
   is_super_admin?: boolean;
-  title?: string | null;
+  title?: string;
   disabled?: boolean;
   updated_at?: string;
-  join_date?: string | null;
+  join_date?: string;
   dues_paid?: boolean;
   role_tags?: string[];
   created_at?: string;
+  // New e-commerce fields
   ecommerce_enabled?: boolean;
   design_history_ids?: string[];
-  current_cart_id?: string | null;
-  default_shipping_address?: string | null;
+  current_cart_id?: string;
+  default_shipping_address?: string;
   account_balance?: number;
-  // Executive Board fields
-  is_exec_board?: boolean; // Used in many places to check exec access
-  exec_board_role?: string | null; // Used for dashboard/tab access and quick actions
-
-  // Add any further fields needed but missed by current codebase
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
@@ -67,13 +62,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ data?: any; error?: any }>;
   signOut: () => Promise<void>;
-  signUp: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string,
-    userType?: UserType
-  ) => Promise<{ data?: any; error?: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, userType?: UserType) => Promise<{ data?: any; error?: any }>;
   isAdmin: () => boolean;
   isMember: () => boolean;
   getUserType: () => UserType;
