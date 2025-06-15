@@ -59,20 +59,24 @@ export function ExecMediaSection() {
 
       if (error) throw error;
 
-      const formattedMedia = data?.map(item => ({
-        id: item.id,
-        title: item.title,
-        file_url: item.file_url,
-        file_type: item.file_type,
-        tags: item.tags || [],
-        created_at: item.created_at,
-        uploaded_by:
-          Array.isArray(item.profiles) && item.profiles[0]
-            ? `${item.profiles[0].first_name ?? ''} ${item.profiles[0].last_name ?? ''}`.trim()
-            : (item.profiles?.first_name && item.profiles?.last_name)
-                ? `${item.profiles.first_name} ${item.profiles.last_name}`
-                : 'Unknown'
-      })) || [];
+      const formattedMedia = data?.map(item => {
+        let uploaded_by = "Unknown";
+        if (Array.isArray(item.profiles) && item.profiles[0]) {
+          const { first_name, last_name } = item.profiles[0];
+          uploaded_by = `${first_name ?? ""} ${last_name ?? ""}`.trim() || "Unknown";
+        } else if (item.profiles?.first_name || item.profiles?.last_name) {
+          uploaded_by = `${item.profiles.first_name ?? ""} ${item.profiles.last_name ?? ""}`.trim() || "Unknown";
+        }
+        return {
+          id: item.id,
+          title: item.title,
+          file_url: item.file_url,
+          file_type: item.file_type,
+          tags: item.tags || [],
+          created_at: item.created_at,
+          uploaded_by,
+        };
+      }) || [];
 
       setMediaItems(formattedMedia);
     } catch (error) {

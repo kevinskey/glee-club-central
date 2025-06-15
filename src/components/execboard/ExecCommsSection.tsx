@@ -73,20 +73,24 @@ export function ExecCommsSection() {
 
       if (error) throw error;
 
-      const formattedAnnouncements = data?.map(announcement => ({
-        id: announcement.id,
-        title: announcement.title,
-        content: announcement.content,
-        created_at: announcement.created_at,
-        created_by:
-          Array.isArray(announcement.profiles) && announcement.profiles[0]
-            ? `${announcement.profiles[0].first_name ?? ''} ${announcement.profiles[0].last_name ?? ''}`.trim()
-            : (announcement.profiles?.first_name && announcement.profiles?.last_name)
-                ? `${announcement.profiles.first_name} ${announcement.profiles.last_name}`
-                : 'Unknown',
-        target_audience: announcement.target_audience,
-        delivery_methods: announcement.delivery_methods || []
-      })) || [];
+      const formattedAnnouncements = data?.map(announcement => {
+        let created_by = "Unknown";
+        if (Array.isArray(announcement.profiles) && announcement.profiles[0]) {
+          const { first_name, last_name } = announcement.profiles[0];
+          created_by = `${first_name ?? ""} ${last_name ?? ""}`.trim() || "Unknown";
+        } else if (announcement.profiles?.first_name || announcement.profiles?.last_name) {
+          created_by = `${announcement.profiles.first_name ?? ""} ${announcement.profiles.last_name ?? ""}`.trim() || "Unknown";
+        }
+        return {
+          id: announcement.id,
+          title: announcement.title,
+          content: announcement.content,
+          created_at: announcement.created_at,
+          created_by,
+          target_audience: announcement.target_audience,
+          delivery_methods: announcement.delivery_methods || [],
+        };
+      }) || [];
 
       setAnnouncements(formattedAnnouncements);
     } catch (error) {
