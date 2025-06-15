@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,14 +40,36 @@ export function BulkMessageComposer() {
 
   const loadMembers = async () => {
     try {
+      // Join profiles with auth.users to get email addresses
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, phone, role, voice_part')
+        .select(`
+          id, 
+          first_name, 
+          last_name, 
+          phone, 
+          role, 
+          voice_part,
+          user_id,
+          users:user_id (email)
+        `)
         .eq('status', 'active')
         .order('last_name');
 
       if (error) throw error;
-      setMembers(data || []);
+      
+      // Transform the data to flatten the email from the joined users table
+      const transformedData = data?.map(profile => ({
+        id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        email: profile.users?.email || '',
+        phone: profile.phone,
+        role: profile.role,
+        voice_part: profile.voice_part
+      })) || [];
+
+      setMembers(transformedData);
     } catch (error) {
       console.error('Error loading members:', error);
       toast.error('Failed to load members');
