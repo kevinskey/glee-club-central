@@ -19,33 +19,40 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         return true;
       }
       
-      // Filter out undefined values and prepare the update object
+      // Prepare the update object with proper field mapping
       const updateData: Record<string, any> = {};
       
-      // Handle role conversion
-      if (userData.role !== undefined) {
-        updateData.role = userData.role;
-        // Also update is_super_admin based on role
-        updateData.is_super_admin = userData.role === 'admin';
-      }
+      // Handle standard profile fields
+      const allowedFields = [
+        'first_name', 'last_name', 'phone', 'voice_part', 'status', 
+        'class_year', 'notes', 'dues_paid', 'join_date'
+      ];
       
-      // Handle other fields
-      Object.entries(userData).forEach(([key, value]) => {
-        if (value !== undefined && key !== 'role') {
-          // Handle special field mappings
-          if (key === 'is_admin') {
-            updateData.is_super_admin = value;
-            updateData.role = value ? 'admin' : 'member';
-          } else if (key === 'email') {
-            // Skip email updates for now - they require special handling
-            console.log('Email updates require special auth handling, skipping for now');
-          } else {
-            updateData[key] = value;
-          }
+      allowedFields.forEach(field => {
+        if (userData[field] !== undefined) {
+          updateData[field] = userData[field];
         }
       });
       
-      console.log("Final update data:", updateData);
+      // Handle role field mapping
+      if (userData.role !== undefined) {
+        updateData.role = userData.role;
+        // Set is_super_admin based on role
+        updateData.is_super_admin = userData.role === 'admin';
+      }
+      
+      // Handle is_admin field (convert to role and is_super_admin)
+      if (userData.is_admin !== undefined) {
+        updateData.is_super_admin = userData.is_admin;
+        updateData.role = userData.is_admin ? 'admin' : 'member';
+      }
+      
+      // Handle role_tags array
+      if (userData.role_tags !== undefined) {
+        updateData.role_tags = Array.isArray(userData.role_tags) ? userData.role_tags : [];
+      }
+      
+      console.log("Prepared update data:", updateData);
       
       if (Object.keys(updateData).length === 0) {
         console.log("No valid fields to update");
@@ -62,7 +69,7 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         .select();
 
       if (error) {
-        console.error('Error updating user:', error);
+        console.error('Supabase error updating user:', error);
         toast.error(`Failed to update user: ${error.message}`);
         return false;
       }

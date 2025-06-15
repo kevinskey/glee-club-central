@@ -1,7 +1,7 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Users, 
-  Search, 
   Plus, 
   MoreVertical, 
   RefreshCw, 
@@ -81,25 +80,34 @@ export function MemberManagement() {
     
     setIsSubmitting(true);
     try {
-      console.log('Submitting user update:', data);
+      console.log('Submitting user update for user:', selectedUser.id);
+      console.log('Form data received:', data);
       
-      const updateData: any = {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone: data.phone,
-        voice_part: data.voice_part,
-        status: data.status,
-        class_year: data.class_year,
-        notes: data.notes,
-        dues_paid: data.dues_paid,
-        join_date: data.join_date,
-        role: data.role
-      };
-
-      // Handle admin status
-      if (data.is_admin !== undefined) {
-        updateData.is_super_admin = data.is_admin;
-        updateData.role = data.is_admin ? 'admin' : 'member';
+      // Create clean update object with only changed fields
+      const updateData: any = {};
+      
+      // Only include fields that have values
+      if (data.first_name?.trim()) updateData.first_name = data.first_name.trim();
+      if (data.last_name?.trim()) updateData.last_name = data.last_name.trim();
+      if (data.phone?.trim()) updateData.phone = data.phone.trim();
+      if (data.voice_part) updateData.voice_part = data.voice_part;
+      if (data.status) updateData.status = data.status;
+      if (data.class_year?.trim()) updateData.class_year = data.class_year.trim();
+      if (data.notes?.trim()) updateData.notes = data.notes.trim();
+      if (data.join_date) updateData.join_date = data.join_date;
+      
+      // Handle boolean fields properly
+      if (typeof data.dues_paid === 'boolean') {
+        updateData.dues_paid = data.dues_paid;
+      }
+      
+      // Handle role and admin status
+      if (data.role) {
+        updateData.role = data.role;
+      }
+      
+      if (typeof data.is_admin === 'boolean') {
+        updateData.is_admin = data.is_admin;
       }
 
       console.log('Prepared update data:', updateData);
@@ -110,7 +118,7 @@ export function MemberManagement() {
         setSelectedUser(null);
         toast.success('User updated successfully');
       } else {
-        toast.error('Failed to update user');
+        toast.error('Failed to update user - please check the console for details');
       }
     } catch (error) {
       console.error('Error updating user:', error);
