@@ -3301,11 +3301,11 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_by_email_safe: {
+      is_admin_by_email: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_email_safe: {
+      is_admin_by_email_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }

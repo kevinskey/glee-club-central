@@ -9,7 +9,7 @@ import { Header } from "@/components/landing/Header";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default function MemberDashboardPage() {
-  const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
+  const { user, profile, isLoading, isInitialized, isAuthenticated, refreshProfile } = useAuth();
   const navigate = useNavigate();
 
   console.log('📊 MemberDashboard: State check:', {
@@ -19,7 +19,8 @@ export default function MemberDashboardPage() {
     isAuthenticated,
     isInitialized,
     userEmail: user?.email,
-    profileRole: profile?.role
+    profileRole: profile?.role,
+    profileId: profile?.id
   });
 
   // Show loading during auth initialization
@@ -34,11 +35,19 @@ export default function MemberDashboardPage() {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated || !user) {
+    console.log('🔒 MemberDashboard: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  // Show loading while profile loads
+  // If we have a user but no profile, try to refresh
   if (!profile) {
+    console.log('⚠️ MemberDashboard: User authenticated but no profile, attempting refresh...');
+    
+    // Trigger a profile refresh
+    React.useEffect(() => {
+      refreshProfile();
+    }, [refreshProfile]);
+    
     return (
       <PageLoader 
         message="Loading your profile..."
@@ -46,6 +55,8 @@ export default function MemberDashboardPage() {
       />
     );
   }
+
+  console.log('✅ MemberDashboard: Ready to render dashboard');
 
   return (
     <ErrorBoundary>

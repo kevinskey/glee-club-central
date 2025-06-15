@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,7 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper: Fetch or create the profile for a given user
   const ensureUserProfile = async (userObj: User) => {
     try {
-      // Only select with real columns, and use maybeSingle()
+      console.log('🔍 ensureUserProfile: Fetching profile for user:', userObj.id);
+      
+      // Try to fetch existing profile first
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
@@ -58,20 +61,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ Error fetching profile:', error);
+        // Continue to create profile even if fetch fails
       }
 
       if (profile) {
+        console.log('✅ Profile found:', profile);
         return profile;
       }
 
+      console.log('🔧 No profile found, creating new profile...');
+      
       // No profile: create one. Only insert real columns!
       const { data: insertedProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([
           {
             id: userObj.id,
-            first_name: userObj.user_metadata?.first_name || '',
+            first_name: userObj.user_metadata?.first_name || userObj.email?.split('@')[0] || 'User',
             last_name: userObj.user_metadata?.last_name || '',
             role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
             is_super_admin: userObj.email === 'kevinskey@mac.com',
@@ -84,18 +91,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (insertError) {
-        console.error('Error creating profile:', insertError);
-        return null;
+        console.error('❌ Error creating profile:', insertError);
+        
+        // Return a fallback profile if creation fails
+        const fallbackProfile = {
+          id: userObj.id,
+          first_name: userObj.user_metadata?.first_name || userObj.email?.split('@')[0] || 'User',
+          last_name: userObj.user_metadata?.last_name || '',
+          role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
+          is_super_admin: userObj.email === 'kevinskey@mac.com',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        console.log('🆘 Using fallback profile:', fallbackProfile);
+        return fallbackProfile;
       }
+      
+      console.log('✅ Profile created successfully:', insertedProfile);
       return insertedProfile;
     } catch (err) {
-      console.error('Error in ensureUserProfile:', err);
-      return null;
+      console.error('💥 Error in ensureUserProfile:', err);
+      
+      // Emergency fallback profile
+      const emergencyProfile = {
+        id: userObj.id,
+        first_name: userObj.email?.split('@')[0] || 'User',
+        last_name: '',
+        role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
+        is_super_admin: userObj.email === 'kevinskey@mac.com',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
+      console.log('🆘 Using emergency fallback profile:', emergencyProfile);
+      return emergencyProfile;
     }
   };
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('📡 fetchProfile: Fetching profile for user:', userId);
+      
       // Use maybeSingle and only existing columns
       const { data, error } = await supabase
         .from('profiles')
@@ -104,19 +143,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ Error fetching profile:', error);
         return null;
       }
 
+      console.log('✅ Profile fetched successfully:', data);
       return data;
     } catch (error) {
-      console.error('Error in fetchProfile:', error);
+      console.error('💥 Error in fetchProfile:', error);
       return null;
     }
   };
 
   const refreshProfile = async () => {
     if (user) {
+      console.log('🔄 Refreshing profile for user:', user.id);
       // Always ensure a profile exists (create if missing)
       const profileData = await ensureUserProfile(user);
       setProfile(profileData);
@@ -146,26 +187,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
+      
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (!error) {
-        // Check for or create profile after login
-        const userObj = (await supabase.auth.getUser()).data?.user;
-        if (userObj) {
-          await ensureUserProfile(userObj);
-        }
+        // Profile will be fetched via auth state change
+        console.log('✅ Login successful');
       }
+      
       return { error };
     } catch (error) {
+      console.error('❌ Login error:', error);
       return { error };
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -175,15 +221,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!error) {
-        // Check/create profile after signup
-        const userObj = (await supabase.auth.getUser()).data?.user;
-        if (userObj) {
-          await ensureUserProfile(userObj);
-        }
+        console.log('✅ Signup successful');
       }
+      
       return { error };
     } catch (error) {
+      console.error('❌ Signup error:', error);
       return { error };
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -251,7 +297,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           async (event: AuthChangeEvent, session: Session | null) => {
             if (!mounted) return;
             
-            console.log('🔐 Auth state change:', event, { hasSession: !!session });
+            console.log('🔐 Auth state change:', event, { 
+              hasSession: !!session,
+              userEmail: session?.user?.email 
+            });
             
             setSession(session);
             setUser(session?.user ?? null);
@@ -260,18 +309,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               // Defer profile fetching to avoid deadlocks
               setTimeout(async () => {
                 if (mounted) {
-                  const profileData = await fetchProfile(session.user.id);
+                  console.log('📡 Fetching profile after auth change...');
+                  const profileData = await ensureUserProfile(session.user);
                   if (mounted) {
                     setProfile(profileData);
+                    setIsLoading(false);
                   }
                 }
               }, 100);
             } else {
               setProfile(null);
-            }
-            
-            if (mounted) {
-              setIsLoading(false);
+              if (mounted) {
+                setIsLoading(false);
+              }
             }
           }
         );
@@ -280,21 +330,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting initial session:', error);
+          console.error('❌ Error getting initial session:', error);
         }
         
         if (mounted) {
           console.log('🔐 AuthManager: Session check completed', {
-            hasSession: !!initialSession
+            hasSession: !!initialSession,
+            userEmail: initialSession?.user?.email
           });
           
-          if (initialSession) {
+          if (initialSession?.user) {
             setSession(initialSession);
             setUser(initialSession.user);
 
             // Fetch or create profile for session user
             const profileData = await ensureUserProfile(initialSession.user);
-            if (mounted) setProfile(profileData);
+            if (mounted) {
+              setProfile(profileData);
+            }
           }
           
           setIsInitialized(true);
@@ -306,7 +359,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subscription.unsubscribe();
         };
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('💥 Error initializing auth:', error);
         if (mounted) {
           setIsInitialized(true);
           setIsLoading(false);
