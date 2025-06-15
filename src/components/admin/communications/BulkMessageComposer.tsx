@@ -200,7 +200,7 @@ export function BulkMessageComposer() {
               rows={6}
             />
             <p className="text-sm text-muted-foreground">
-              Use {{first_name}} and {{last_name}} for personalization
+              Use {`{{first_name}}`} and {`{{last_name}}`} for personalization
             </p>
           </div>
         </CardContent>
