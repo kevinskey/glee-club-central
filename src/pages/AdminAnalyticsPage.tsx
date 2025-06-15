@@ -24,7 +24,7 @@ export default function AdminAnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto px-6 py-6 space-y-6">
         <PageHeader
           title="Analytics Dashboard"
           description="Track app usage and user engagement metrics"
@@ -45,7 +45,7 @@ export default function AdminAnalyticsPage() {
 
   if (!metrics) {
     return (
-      <div className="space-y-6">
+      <div className="container mx-auto px-6 py-6 space-y-6">
         <PageHeader
           title="Analytics Dashboard"
           description="Track app usage and user engagement metrics"
@@ -76,7 +76,7 @@ export default function AdminAnalyticsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-6 py-6 space-y-6">
       <PageHeader
         title="Analytics Dashboard"
         description="Track app usage and user engagement metrics"
