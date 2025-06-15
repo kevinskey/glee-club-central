@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Send, Users, Mail, Phone } from 'lucide-react';
+import { Send, Users, Mail, Phone, Search } from 'lucide-react';
 import { useAdvancedMessaging } from '@/hooks/useAdvancedMessaging';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ export function BulkMessageComposer() {
   const [members, setMembers] = useState<Member[]>([]);
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterVoicePart, setFilterVoicePart] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
   const { sendBulkMessage, isSending } = useAdvancedMessaging();
@@ -94,6 +96,7 @@ export function BulkMessageComposer() {
   };
 
   const filteredMembers = members.filter(member => {
+    // First apply role and voice part filters
     if (filterRole !== "all" && member.role !== filterRole) return false;
     if (filterVoicePart !== "all" && member.voice_part !== filterVoicePart) return false;
     
@@ -101,6 +104,14 @@ export function BulkMessageComposer() {
     if (messageType === "email" && !member.email) return false;
     if (messageType === "sms" && !member.phone) return false;
     if (messageType === "both" && (!member.email || !member.phone)) return false;
+    
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
+      const email = member.email?.toLowerCase() || '';
+      return fullName.includes(query) || email.includes(query);
+    }
     
     return true;
   });
@@ -261,6 +272,21 @@ export function BulkMessageComposer() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Search Field */}
+          <div className="space-y-2">
+            <Label htmlFor="search">Search Recipients</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name or email..."
+                className="pl-9"
+              />
+            </div>
+          </div>
+
           {/* Filters */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -333,7 +359,7 @@ export function BulkMessageComposer() {
           {filteredMembers.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No members match the current filters</p>
+              <p>No members match the current filters or search</p>
             </div>
           )}
         </CardContent>
