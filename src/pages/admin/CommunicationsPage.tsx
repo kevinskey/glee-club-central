@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { MessageSquare, Mail, Phone, Users, Send, Clock } from "lucide-react";
+import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { MessageTemplateManager } from "@/components/admin/communications/Messag
 import { MessageHistoryViewer } from "@/components/admin/communications/MessageHistoryViewer";
 import { CommunicationAnalytics } from "@/components/admin/communications/CommunicationAnalytics";
 import { InternalMessaging } from "@/components/admin/communications/InternalMessaging";
+import { QuickSMSComposer } from "@/components/admin/communications/QuickSMSComposer";
 
 const CommunicationsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("compose");
@@ -70,10 +71,14 @@ const CommunicationsPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="compose" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
-            Compose
+            Bulk
+          </TabsTrigger>
+          <TabsTrigger value="quick-sms" className="flex items-center gap-2">
+            <Zap className="h-4 w-4" />
+            Quick SMS
           </TabsTrigger>
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
@@ -98,6 +103,10 @@ const CommunicationsPage: React.FC = () => {
 
         <TabsContent value="compose">
           <BulkMessageComposer />
+        </TabsContent>
+
+        <TabsContent value="quick-sms">
+          <QuickSMSComposer />
         </TabsContent>
 
         <TabsContent value="templates">
