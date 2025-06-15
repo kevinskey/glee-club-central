@@ -58,6 +58,10 @@ export const adminRoutes: RouteObject[] = [
         element: <CommunicationsPage />,
       },
       {
+        path: 'news-items',
+        element: <CommunicationsPage />,
+      },
+      {
         path: 'media',
         element: <AdminMediaLibraryPage />,
       },
