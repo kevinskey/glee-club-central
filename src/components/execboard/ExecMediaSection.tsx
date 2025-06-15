@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,17 +59,22 @@ export function ExecMediaSection() {
 
       if (error) throw error;
 
-      const formattedMedia = data?.map(item => ({
-        id: item.id,
-        title: item.title,
-        file_url: item.file_url,
-        file_type: item.file_type,
-        tags: item.tags || [],
-        created_at: item.created_at,
-        uploaded_by: item.profiles && typeof item.profiles === 'object' && !Array.isArray(item.profiles)
-          ? `${item.profiles.first_name || ''} ${item.profiles.last_name || ''}`.trim()
-          : 'Unknown'
-      })) || [];
+      const formattedMedia = data?.map(item => {
+        // Safely handle profiles data - it could be an object or null
+        const profiles = item.profiles as any;
+        const firstName = profiles?.first_name || '';
+        const lastName = profiles?.last_name || '';
+        
+        return {
+          id: item.id,
+          title: item.title,
+          file_url: item.file_url,
+          file_type: item.file_type,
+          tags: item.tags || [],
+          created_at: item.created_at,
+          uploaded_by: `${firstName} ${lastName}`.trim() || 'Unknown'
+        };
+      }) || [];
 
       setMediaItems(formattedMedia);
     } catch (error) {

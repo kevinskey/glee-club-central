@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,17 +73,22 @@ export function ExecCommsSection() {
 
       if (error) throw error;
 
-      const formattedAnnouncements = data?.map(announcement => ({
-        id: announcement.id,
-        title: announcement.title,
-        content: announcement.content,
-        created_at: announcement.created_at,
-        created_by: announcement.profiles && typeof announcement.profiles === 'object' && !Array.isArray(announcement.profiles)
-          ? `${announcement.profiles.first_name || ''} ${announcement.profiles.last_name || ''}`.trim()
-          : 'Unknown',
-        target_audience: announcement.target_audience,
-        delivery_methods: announcement.delivery_methods || []
-      })) || [];
+      const formattedAnnouncements = data?.map(announcement => {
+        // Safely handle profiles data - it could be an object or null
+        const profiles = announcement.profiles as any;
+        const firstName = profiles?.first_name || '';
+        const lastName = profiles?.last_name || '';
+        
+        return {
+          id: announcement.id,
+          title: announcement.title,
+          content: announcement.content,
+          created_at: announcement.created_at,
+          created_by: `${firstName} ${lastName}`.trim() || 'Unknown',
+          target_audience: announcement.target_audience,
+          delivery_methods: announcement.delivery_methods || []
+        };
+      }) || [];
 
       setAnnouncements(formattedAnnouncements);
     } catch (error) {

@@ -76,17 +76,22 @@ export function ExecBudgetSection() {
 
       if (error) throw error;
 
-      const formattedEntries = data?.map(entry => ({
-        id: entry.id,
-        amount: entry.amount,
-        category: entry.category,
-        purpose: entry.purpose,
-        receipt_url: entry.receipt_url,
-        created_at: entry.created_at,
-        uploaded_by: entry.profiles && typeof entry.profiles === 'object' && !Array.isArray(entry.profiles)
-          ? `${entry.profiles.first_name || ''} ${entry.profiles.last_name || ''}`.trim()
-          : 'Unknown',
-      })) || [];
+      const formattedEntries = data?.map(entry => {
+        // Safely handle profiles data - it could be an object or null
+        const profiles = entry.profiles as any;
+        const firstName = profiles?.first_name || '';
+        const lastName = profiles?.last_name || '';
+        
+        return {
+          id: entry.id,
+          amount: entry.amount,
+          category: entry.category,
+          purpose: entry.purpose,
+          receipt_url: entry.receipt_url,
+          created_at: entry.created_at,
+          uploaded_by: `${firstName} ${lastName}`.trim() || 'Unknown',
+        };
+      }) || [];
 
       setEntries(formattedEntries);
     } catch (error) {

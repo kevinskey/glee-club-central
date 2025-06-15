@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,18 +71,23 @@ export function ExecDocumentsSection() {
 
       if (error) throw error;
 
-      const formattedDocs = data?.map(doc => ({
-        id: doc.id,
-        title: doc.file_name.replace(/\.[^/.]+$/, ""), // Remove extension
-        file_name: doc.file_name,
-        file_url: doc.file_url,
-        document_type: 'other',
-        uploaded_by: doc.profiles && typeof doc.profiles === 'object' && !Array.isArray(doc.profiles)
-          ? `${doc.profiles.first_name || ''} ${doc.profiles.last_name || ''}`.trim()
-          : 'Unknown',
-        created_at: doc.created_at,
-        description: doc.description
-      })) || [];
+      const formattedDocs = data?.map(doc => {
+        // Safely handle profiles data - it could be an object or null
+        const profiles = doc.profiles as any;
+        const firstName = profiles?.first_name || '';
+        const lastName = profiles?.last_name || '';
+        
+        return {
+          id: doc.id,
+          title: doc.file_name.replace(/\.[^/.]+$/, ""), // Remove extension
+          file_name: doc.file_name,
+          file_url: doc.file_url,
+          document_type: 'other',
+          uploaded_by: `${firstName} ${lastName}`.trim() || 'Unknown',
+          created_at: doc.created_at,
+          description: doc.description
+        };
+      }) || [];
 
       setDocuments(formattedDocs);
     } catch (error) {
