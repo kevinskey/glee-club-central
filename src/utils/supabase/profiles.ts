@@ -61,26 +61,35 @@ export const createProfile = async (userId: string, userEmail?: string, metadata
 
 export const updateProfile = async (profile: Partial<Profile>): Promise<{ success: boolean, error?: any }> => {
   if (!profile.id) {
-    return { success: false, error: 'Profile ID is required' };
+    return { success: false, error: { message: 'Profile ID is required' } };
   }
   
   try {
     console.log('📝 updateProfile: Updating profile for user:', profile.id);
+    console.log('📝 updateProfile: Update data:', profile);
     
-    const { error } = await supabase
+    // Prepare the update data, excluding the id field
+    const { id, ...updateData } = profile;
+    const finalUpdateData = {
+      ...updateData,
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('📝 updateProfile: Final update data:', finalUpdateData);
+    
+    const { data, error } = await supabase
       .from('profiles')
-      .update({
-        ...profile,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', profile.id);
+      .update(finalUpdateData)
+      .eq('id', id)
+      .select()
+      .single();
       
     if (error) {
       console.error('❌ updateProfile: Error updating profile:', error);
       return { success: false, error };
     }
     
-    console.log('✅ updateProfile: Profile updated successfully');
+    console.log('✅ updateProfile: Profile updated successfully:', data);
     return { success: true };
   } catch (error) {
     console.error('💥 updateProfile: Unexpected error:', error);

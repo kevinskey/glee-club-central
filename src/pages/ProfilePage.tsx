@@ -9,6 +9,7 @@ import { Profile } from '@/types/auth';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { ProfileForm } from '@/components/profile/ProfileForm';
+import { updateProfile } from '@/utils/supabase/profiles';
 
 export default function ProfilePage() {
   const { user, profile, isLoading, isInitialized, isAuthenticated, refreshProfile } = useAuth();
@@ -16,19 +17,14 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Create a properly typed default profile with e-commerce fields
+  // Create a properly typed default profile
   const defaultProfile: Partial<Profile> = {
     first_name: '',
     last_name: '',
     phone: '',
     voice_part: '',
     class_year: '',
-    notes: '',
-    ecommerce_enabled: false,
-    design_history_ids: [],
-    current_cart_id: '',
-    default_shipping_address: '',
-    account_balance: 0.00
+    notes: ''
   };
   
   const [editedProfile, setEditedProfile] = useState<Partial<Profile>>(profile || defaultProfile);
@@ -43,7 +39,6 @@ export default function ProfilePage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Don't wait forever for profile loading - proceed with what we have
   const getInitials = () => {
     if (profile?.first_name && profile?.last_name) {
       return `${profile.first_name[0]}${profile.last_name[0]}`.toUpperCase();
@@ -72,13 +67,28 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    if (!profile?.id) {
+      toast.error('Profile ID not found');
+      return;
+    }
+
     setIsSaving(true);
     try {
-      // For now, just refresh the profile since the actual update logic
-      // would require backend implementation
-      await refreshProfile();
-      setIsEditing(false);
-      toast.success('Profile updated successfully');
+      console.log('Updating profile with data:', editedProfile);
+      
+      const { success, error } = await updateProfile({
+        id: profile.id,
+        ...editedProfile
+      });
+
+      if (success) {
+        await refreshProfile();
+        setIsEditing(false);
+        toast.success('Profile updated successfully');
+      } else {
+        console.error('Profile update failed:', error);
+        toast.error('Failed to update profile: ' + (error?.message || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
