@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
@@ -20,7 +19,7 @@ import {
   Settings,
   BarChart3,
   ShoppingCart,
-  Megaphone,
+  MessageSquare,
   Image,
   Package,
   Palette,
@@ -48,7 +47,7 @@ const navigationGroups = [
       { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
       { to: '/admin/media-library', icon: Image, label: 'Media Library' },
       { to: '/admin/music', icon: Music, label: 'Music Player' },
-      { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
+      { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
     ]
   },
   {

@@ -22,7 +22,7 @@ const CommunicationsPage: React.FC = () => {
   });
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="container mx-auto px-6 py-6 space-y-6">
       <PageHeader
         title="Communications Center"
         description="Manage email, SMS, and internal messaging for the Glee Club"
@@ -30,7 +30,7 @@ const CommunicationsPage: React.FC = () => {
       />
       
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="flex items-center p-6">
             <Send className="h-8 w-8 text-blue-600 mr-3" />

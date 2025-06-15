@@ -9,7 +9,7 @@ import {
   Settings,
   BarChart3,
   ShoppingCart,
-  Megaphone,
+  MessageSquare,
   Image,
   Home,
   Music
@@ -25,7 +25,7 @@ const navItems = [
   { to: '/admin/music', icon: Music, label: 'Music Player' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-  { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+  { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
