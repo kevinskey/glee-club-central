@@ -1,88 +1,70 @@
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { Home, RefreshCw } from "lucide-react";
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-}
-
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
+  error?: Error;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    errorInfo: null
-  };
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error?: Error; resetError: () => void }>;
+}
 
-  public static getDerivedStateFromError(error: Error): State {
-    console.error("🚨 ErrorBoundary: Error caught:", error);
-    return { hasError: true, error, errorInfo: null };
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("🚨 ErrorBoundary: Component stack trace:", {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack
-    });
-
-    this.setState({ errorInfo });
-    
-    // Call optional error handler
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
   }
 
-  public resetError = () => {
-    console.log("🔄 ErrorBoundary: Resetting error state");
-    this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.href = '/';
-  };
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
 
-  public render() {
+  render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        const FallbackComponent = this.props.fallback;
+        return (
+          <FallbackComponent
+            error={this.state.error}
+            resetError={() => this.setState({ hasError: false, error: undefined })}
+          />
+        );
       }
-      
+
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
-          <div className="w-full max-w-md space-y-6 text-center">
-            <h1 className="text-3xl font-bold text-glee-purple">Something went wrong</h1>
-            <div className="p-4 bg-destructive/10 text-destructive rounded-md">
-              <p className="font-semibold mb-2">Error Details:</p>
-              <p className="font-mono text-sm text-left mb-2">
-                {this.state.error?.message || "Unknown error occurred"}
+        <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+          <div className="w-full max-w-md text-center space-y-6">
+            <div className="space-y-2">
+              <h1 className="text-5xl font-bold text-glee-purple">Error</h1>
+              <h2 className="text-2xl font-medium text-foreground mb-4">Something went wrong</h2>
+              <p className="text-muted-foreground mb-8">
+                An unexpected error occurred. Please try refreshing the page.
               </p>
-              {this.state.errorInfo && (
-                <details className="text-xs">
-                  <summary className="cursor-pointer">Component Stack</summary>
-                  <pre className="mt-2 whitespace-pre-wrap">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                </details>
-              )}
             </div>
-            <div className="space-y-4">
-              <p className="text-muted-foreground">
-                We're sorry for the inconvenience. Please try refreshing the page or return to home.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                  Refresh Page
-                </Button>
-                <Button onClick={this.resetError}>
-                  Go to Home Page
-                </Button>
-              </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                onClick={() => window.location.href = '/'}
+                variant="outline"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+              <Button 
+                onClick={() => window.location.reload()}
+                className="justify-center m-0"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Refresh Page
+              </Button>
             </div>
           </div>
         </div>
@@ -92,5 +74,3 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-export default ErrorBoundary;

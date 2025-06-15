@@ -1,7 +1,6 @@
 
 import React, { useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import { BackButton } from "@/components/ui/back-button";

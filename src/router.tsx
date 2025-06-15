@@ -2,6 +2,7 @@
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
@@ -31,7 +32,11 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    ErrorBoundary: NotFoundPage,
+    ErrorBoundary: () => (
+      <ErrorBoundary>
+        <NotFoundPage />
+      </ErrorBoundary>
+    ),
     children: [
       {
         index: true,
