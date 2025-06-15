@@ -71,24 +71,48 @@ const VOICE_PART_MAPPING: { [key: string]: string } = {
 // Valid roles according to database constraint - these are the ONLY valid values
 const VALID_ROLES = ['admin', 'member', 'section_leader'];
 
-// Updated role mapping to only include valid database values
+// Comprehensive role mapping to handle all possible variations
 const ROLE_MAPPING: { [key: string]: string } = {
+  // Exact matches for valid roles
   'member': 'member',
   'admin': 'admin',
   'administrator': 'admin',
   'section_leader': 'section_leader',
   'section leader': 'section_leader',
   'leader': 'section_leader',
+  
+  // Common variations that should map to 'member'
   'student': 'member',
   'singer': 'member',
   'general member': 'member',
   'regular member': 'member',
-  // Additional common variations that should map to 'member'
   'user': 'member',
   'standard': 'member',
   'basic': 'member',
   'regular': 'member',
   'default': 'member',
+  'alumni': 'member',
+  'alumna': 'member',
+  'alum': 'member',
+  'guest': 'member',
+  'visitor': 'member',
+  'fan': 'member',
+  'supporter': 'member',
+  'active': 'member',
+  'inactive': 'member',
+  'pending': 'member',
+  'new': 'member',
+  'current': 'member',
+  'former': 'member',
+  'participant': 'member',
+  'attendee': 'member',
+  'registered': 'member',
+  'enrolled': 'member',
+  // Empty or undefined values
+  '': 'member',
+  'null': 'member',
+  'undefined': 'member',
+  'none': 'member'
 };
 
 export function EnhancedMemberCSVUpload() {
@@ -147,20 +171,24 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
   };
 
   const normalizeRole = (role: string): string => {
-    if (!role) return 'member';
-    const normalized = role.toLowerCase().trim();
-    const mappedRole = ROLE_MAPPING[normalized];
-    
-    // If we have a mapping, use it, otherwise default to 'member'
-    const finalRole = mappedRole || 'member';
-    
-    // Final validation - ensure the role is in our valid list
-    if (!VALID_ROLES.includes(finalRole)) {
-      console.warn(`Role "${finalRole}" is not in valid roles list, defaulting to "member"`);
+    if (!role || role === null || role === undefined) {
+      console.log('Empty role detected, defaulting to "member"');
       return 'member';
     }
     
-    return finalRole;
+    // Convert to string and normalize
+    const roleString = String(role).toLowerCase().trim();
+    
+    // Check if we have a direct mapping
+    if (ROLE_MAPPING.hasOwnProperty(roleString)) {
+      const mappedRole = ROLE_MAPPING[roleString];
+      console.log(`Role "${role}" mapped to "${mappedRole}"`);
+      return mappedRole;
+    }
+    
+    // If no mapping found, default to member and log it
+    console.warn(`Unknown role "${role}" (normalized: "${roleString}"), defaulting to "member"`);
+    return 'member';
   };
 
   const handleFileSelect = () => {
@@ -248,7 +276,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             if (systemField === 'voice_part') {
               value = normalizeVoicePart(value);
             } else if (systemField === 'role') {
+              // Apply strict role normalization
               value = normalizeRole(value);
+              console.log(`Row ${rowIndex}: Original role "${row[columnIndex]}" normalized to "${value}"`);
             } else if (systemField === 'dues_paid') {
               value = value.toLowerCase() === 'true' || value === '1' ? 'true' : 'false';
             } else if (systemField === 'status' && !value) {
@@ -267,17 +297,21 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
       // Ensure role is always a valid value - this is critical
       if (!mappedData.role) {
+        console.warn(`No role specified for ${mappedData.email}, setting to "member"`);
         mappedData.role = 'member';
-      } else {
-        // Re-validate the role to ensure it's valid
-        mappedData.role = normalizeRole(mappedData.role);
       }
 
-      // Final safety check
+      // Final validation - ensure the role is absolutely valid
       if (!VALID_ROLES.includes(mappedData.role)) {
-        console.error(`Final role validation failed for ${mappedData.email}: "${mappedData.role}" not in valid roles`);
+        console.error(`CRITICAL: Invalid role "${mappedData.role}" for ${mappedData.email} after normalization. This should not happen!`);
         mappedData.role = 'member';
       }
+
+      console.log(`Final mapped data for ${mappedData.email}:`, {
+        email: mappedData.email,
+        role: mappedData.role,
+        isValidRole: VALID_ROLES.includes(mappedData.role)
+      });
 
       return mappedData as MappedRow;
     } catch (error) {
@@ -290,10 +324,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     try {
       console.log('Creating member import for:', userData.email);
 
-      // Triple-check role validation before any database operation
-      let validatedRole = userData.role || 'member';
+      // Final role validation with extra safety checks
+      let validatedRole = userData.role;
+      
+      if (!validatedRole || validatedRole === null || validatedRole === undefined) {
+        console.warn(`No role provided for ${userData.email}, using "member"`);
+        validatedRole = 'member';
+      }
+
+      // Ensure it's a string and validate against our list
+      validatedRole = String(validatedRole);
       if (!VALID_ROLES.includes(validatedRole)) {
-        console.warn(`Invalid role "${validatedRole}" for ${userData.email}, forcing to "member"`);
+        console.error(`FINAL VALIDATION FAILED: Role "${validatedRole}" for ${userData.email} is not in valid roles list: ${VALID_ROLES.join(', ')}`);
         validatedRole = 'member';
       }
 
@@ -302,7 +344,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         last_name: userData.last_name,
         phone: userData.phone || null,
         voice_part: userData.voice_part || null,
-        role: validatedRole, // Use the validated role
+        role: validatedRole,
         status: userData.status || 'active',
         class_year: userData.class_year || null,
         notes: userData.notes || null,
@@ -312,14 +354,17 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         updated_at: new Date().toISOString()
       };
 
-      // Log the exact data being inserted for debugging
-      console.log('Final profile data for member_imports:', {
+      // Comprehensive logging for debugging
+      console.log('FINAL INSERT ATTEMPT:', {
         email: userData.email,
-        role: profileData.role,
-        profileData
+        originalRole: userData.role,
+        validatedRole: validatedRole,
+        isValidRole: VALID_ROLES.includes(validatedRole),
+        validRolesList: VALID_ROLES,
+        profileDataRole: profileData.role
       });
 
-      // Insert into member_imports table (not profiles table)
+      // Insert into member_imports table
       const { error: insertError } = await supabase
         .from('member_imports')
         .insert({
@@ -330,16 +375,26 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         });
 
       if (insertError) {
-        console.error('Insert error for member_imports:', insertError);
+        console.error('Insert error for member_imports:', {
+          email: userData.email,
+          error: insertError,
+          profileData: profileData
+        });
         throw insertError;
       }
 
+      console.log(`✅ Successfully created member import for: ${userData.email}`);
       return { success: true };
     } catch (error: any) {
-      console.error('Error creating member import:', error);
+      console.error('Error creating member import:', {
+        email: userData.email,
+        error: error,
+        errorMessage: error.message,
+        errorDetails: error.details
+      });
       return { 
         success: false, 
-        error: error.message || 'Unknown error' 
+        error: `${error.message || 'Unknown error'}${error.details ? ` (${error.details})` : ''}` 
       };
     }
   };
