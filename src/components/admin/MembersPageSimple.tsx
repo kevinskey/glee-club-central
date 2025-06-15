@@ -1,16 +1,16 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, Search, Plus, Edit, Mail, Phone, Music } from 'lucide-react';
+import { Users, Plus, Edit, Mail, Phone, Music } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { EditUserDialog } from '@/components/members/EditUserDialog';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
+import { MembersFilters } from './MembersFilters';
+import { useMembersFiltering } from '@/hooks/useMembersFiltering';
 
 interface Member {
   id: string;
@@ -24,6 +24,7 @@ interface Member {
   avatar_url?: string;
   dues_paid?: boolean;
   class_year?: string;
+  notes?: string;
 }
 
 interface AuthUser {
@@ -34,12 +35,23 @@ interface AuthUser {
 export function MembersPageSimple() {
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    filters,
+    filteredMembers,
+    activeFilterCount,
+    updateSearch,
+    updateRoleFilter,
+    updateStatusFilter,
+    updateVoicePartFilter,
+    updateDuesPaidFilter,
+    clearFilters
+  } = useMembersFiltering(members);
 
   useEffect(() => {
     loadMembers();
@@ -106,7 +118,8 @@ export function MembersPageSimple() {
             status: profile.status || 'active',
             avatar_url: profile.avatar_url,
             dues_paid: profile.dues_paid || false,
-            class_year: profile.class_year
+            class_year: profile.class_year,
+            notes: profile.notes
           }));
         } catch (authError) {
           console.warn('Auth fetch failed, using profiles only:', authError);
@@ -121,7 +134,8 @@ export function MembersPageSimple() {
             status: profile.status || 'active',
             avatar_url: profile.avatar_url,
             dues_paid: profile.dues_paid || false,
-            class_year: profile.class_year
+            class_year: profile.class_year,
+            notes: profile.notes
           }));
         }
       } else {
@@ -139,7 +153,8 @@ export function MembersPageSimple() {
             status: profile.status || 'active',
             avatar_url: profile.avatar_url,
             dues_paid: profile.dues_paid || false,
-            class_year: profile.class_year
+            class_year: profile.class_year,
+            notes: profile.notes
           }));
       }
 
@@ -215,14 +230,6 @@ export function MembersPageSimple() {
     }
   };
 
-  const filteredMembers = members.filter(member => {
-    if (!searchTerm) return true;
-    const search = searchTerm.toLowerCase();
-    const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
-    const email = member.email?.toLowerCase() || '';
-    return fullName.includes(search) || email.includes(search);
-  });
-
   const formatVoicePart = (voicePart?: string) => {
     if (!voicePart) return '';
     return voicePart.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -284,22 +291,26 @@ export function MembersPageSimple() {
           </Button>
         </CardHeader>
         <CardContent>
-          {/* Search */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search members..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
+          {/* Filters */}
+          <MembersFilters
+            search={filters.search}
+            onSearchChange={updateSearch}
+            roleFilter={filters.roleFilter}
+            onRoleFilterChange={updateRoleFilter}
+            statusFilter={filters.statusFilter}
+            onStatusFilterChange={updateStatusFilter}
+            voicePartFilter={filters.voicePartFilter}
+            onVoicePartFilterChange={updateVoicePartFilter}
+            duesPaidFilter={filters.duesPaidFilter}
+            onDuesPaidFilterChange={updateDuesPaidFilter}
+            onClearFilters={clearFilters}
+            activeFilterCount={activeFilterCount}
+          />
 
           {/* Results Summary */}
-          <div className="text-sm text-muted-foreground mb-4">
+          <div className="text-sm text-muted-foreground my-4">
             Showing {filteredMembers.length} of {members.length} members
+            {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
           </div>
 
           {/* Members List */}
@@ -313,6 +324,11 @@ export function MembersPageSimple() {
                   : 'No members match your search criteria.'
                 }
               </p>
+              {activeFilterCount > 0 && (
+                <Button onClick={clearFilters} variant="outline" className="mt-4">
+                  Clear Filters
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid gap-4">
