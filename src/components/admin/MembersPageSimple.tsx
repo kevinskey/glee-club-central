@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,11 @@ interface Member {
   avatar_url?: string;
   dues_paid?: boolean;
   class_year?: string;
+}
+
+interface AuthUser {
+  id: string;
+  email?: string;
 }
 
 export function MembersPageSimple() {
@@ -78,7 +82,7 @@ export function MembersPageSimple() {
 
           const emailMap = new Map<string, string>();
           if (authUsers?.users) {
-            authUsers.users.forEach(authUser => {
+            (authUsers.users as AuthUser[]).forEach(authUser => {
               emailMap.set(authUser.id, authUser.email || '');
             });
           }
