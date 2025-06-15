@@ -78,7 +78,6 @@ export function ExecCommsSection() {
         title: announcement.title,
         content: announcement.content,
         created_at: announcement.created_at,
-        // Fix: array fallback for joined profiles
         created_by:
           Array.isArray(announcement.profiles) && announcement.profiles[0]
             ? `${announcement.profiles[0].first_name ?? ''} ${announcement.profiles[0].last_name ?? ''}`.trim()

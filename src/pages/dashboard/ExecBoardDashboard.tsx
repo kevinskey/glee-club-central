@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Profile } from '@/types/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader } from '@/components/ui/page-header';
 import { MobileOptimizedContainer } from '@/components/mobile/MobileOptimizedContainer';
