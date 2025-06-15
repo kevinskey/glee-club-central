@@ -3309,6 +3309,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_exec_board_member: {
         Args: { user_id?: string }
         Returns: boolean
