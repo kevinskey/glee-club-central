@@ -23,7 +23,7 @@ export interface User {
   personal_title?: string;
   title?: string;
   special_roles?: string[];
-  // New e-commerce fields
+  // E-commerce fields
   ecommerce_enabled?: boolean;
   design_history_ids?: string[];
   current_cart_id?: string;

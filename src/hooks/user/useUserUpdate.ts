@@ -12,10 +12,10 @@ interface UseUserUpdateResponse {
 export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateResponse => {
   const updateUser = useCallback(async (userId: string, userData: Partial<User>) => {
     try {
-      console.log(`Updating user ${userId} with data:`, userData);
+      console.log(`🔄 Updating user ${userId} with data:`, userData);
       
       if (!userData || Object.keys(userData).length === 0) {
-        console.log("No data provided for update, skipping");
+        console.log("⚠️ No data provided for update, skipping");
         return true;
       }
       
@@ -70,10 +70,10 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         updateData.role_tags = Array.isArray(userData.role_tags) ? userData.role_tags : [];
       }
       
-      // Handle title field - check if it exists in the database schema
-      if (userData.title !== undefined && userData.title !== 'none') {
-        updateData.title = userData.title;
-      }
+      // Skip title field for now as it might be causing issues
+      // if (userData.title !== undefined && userData.title !== 'none') {
+      //   updateData.title = userData.title;
+      // }
       
       // Handle e-commerce fields if they exist in the database
       if (userData.ecommerce_enabled !== undefined) {
@@ -86,15 +86,17 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         updateData.default_shipping_address = userData.default_shipping_address?.trim() || null;
       }
       
-      console.log("Prepared update data for database:", updateData);
+      console.log("📝 Prepared update data for database:", updateData);
       
       if (Object.keys(updateData).length === 0) {
-        console.log("No valid fields to update");
+        console.log("ℹ️ No valid fields to update");
         return true;
       }
       
       // Add updated_at timestamp
       updateData.updated_at = new Date().toISOString();
+      
+      console.log("🚀 Sending update to Supabase...");
       
       const { data, error } = await supabase
         .from('profiles')
@@ -103,22 +105,29 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         .select();
 
       if (error) {
-        console.error('Supabase error updating user:', error);
+        console.error('❌ Supabase error updating user:', error);
+        console.error('❌ Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         toast.error(`Failed to update user: ${error.message}`);
         return false;
       }
 
-      console.log('User updated successfully:', data);
+      console.log('✅ User updated successfully:', data);
       toast.success('User updated successfully');
 
       // Refresh users list if provided
       if (refreshUsers) {
+        console.log("🔄 Refreshing users list...");
         await refreshUsers();
       }
 
       return true;
     } catch (err) {
-      console.error('Unexpected error updating user:', err);
+      console.error('💥 Unexpected error updating user:', err);
       toast.error('An unexpected error occurred while updating the user');
       return false;
     }
