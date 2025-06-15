@@ -358,7 +358,13 @@ const AdminUsers: React.FC = () => {
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit Member
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive">
+                                  <DropdownMenuItem 
+                                    className="text-destructive"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toast.info('Delete functionality will be implemented soon');
+                                    }}
+                                  >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Delete Member
                                   </DropdownMenuItem>

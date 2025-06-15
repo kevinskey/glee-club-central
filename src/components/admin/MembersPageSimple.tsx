@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Users, Search, Plus, Edit, Mail, Phone, Music } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { EditUserDialog } from '@/components/members/EditUserDialog';
+import { AddMemberDialog } from '@/components/members/AddMemberDialog';
+import { UserFormValues } from '@/components/members/form/userFormSchema';
 
 interface Member {
   id: string;
@@ -32,6 +36,10 @@ export function MembersPageSimple() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     loadMembers();
@@ -147,6 +155,66 @@ export function MembersPageSimple() {
     }
   };
 
+  const handleEditMember = (member: Member) => {
+    setSelectedMember(member);
+    setShowEditDialog(true);
+  };
+
+  const handleSaveMember = async (data: UserFormValues) => {
+    if (!selectedMember) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone,
+          voice_part: data.voice_part,
+          status: data.status,
+          class_year: data.class_year,
+          notes: data.notes,
+          dues_paid: data.dues_paid,
+          role: data.role,
+          is_super_admin: data.is_admin,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedMember.id);
+
+      if (error) {
+        console.error('Error updating member:', error);
+        toast.error('Failed to update member');
+        return;
+      }
+
+      toast.success('Member updated successfully');
+      setShowEditDialog(false);
+      setSelectedMember(null);
+      await loadMembers(); // Refresh the list
+      
+    } catch (error) {
+      console.error('Error updating member:', error);
+      toast.error('Failed to update member');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAddMember = async (data: UserFormValues) => {
+    setIsSubmitting(true);
+    try {
+      // For now, just show success message as full user creation requires more setup
+      toast.success('Add member functionality will be implemented soon');
+      setShowAddDialog(false);
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast.error('Failed to add member');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredMembers = members.filter(member => {
     if (!searchTerm) return true;
     const search = searchTerm.toLowerCase();
@@ -210,7 +278,7 @@ export function MembersPageSimple() {
             <Users className="h-6 w-6" />
             Members Management ({members.length} members)
           </CardTitle>
-          <Button onClick={() => toast.info('Add member functionality coming soon')}>
+          <Button onClick={() => setShowAddDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Member
           </Button>
@@ -305,7 +373,7 @@ export function MembersPageSimple() {
                         <Button 
                           variant="ghost" 
                           size="sm"
-                          onClick={() => toast.info('Edit functionality coming soon')}
+                          onClick={() => handleEditMember(member)}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -318,6 +386,26 @@ export function MembersPageSimple() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <EditUserDialog
+        isOpen={showEditDialog}
+        onOpenChange={(open) => {
+          setShowEditDialog(open);
+          if (!open) setSelectedMember(null);
+        }}
+        onSave={handleSaveMember}
+        isSubmitting={isSubmitting}
+        user={selectedMember}
+      />
+
+      {/* Add Dialog */}
+      <AddMemberDialog
+        isOpen={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onMemberAdd={handleAddMember}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

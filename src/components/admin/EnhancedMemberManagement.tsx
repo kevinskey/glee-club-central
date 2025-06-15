@@ -121,7 +121,7 @@ export function EnhancedMemberManagement() {
       }
       
       if (typeof data.is_admin === 'boolean') {
-        updateData.is_admin = data.is_admin;
+        updateData.is_super_admin = data.is_admin;
       }
 
       const success = await updateUser(selectedUser.id, updateData);

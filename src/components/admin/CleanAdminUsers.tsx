@@ -137,6 +137,7 @@ const CleanAdminUsers: React.FC = () => {
 
   const handleDeleteUser = async (userId: string) => {
     console.log('Delete user:', userId);
+    toast.info('Delete functionality will be implemented soon');
   };
 
   if (isLoading) {
