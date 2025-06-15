@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -43,6 +42,12 @@ export function DynamicDashboardSidebar() {
 
   // Executive Board navigation items (role-based)
   const execNavItems: NavItem[] = [
+    { 
+      to: '/dashboard/exec', 
+      icon: Shield, 
+      label: 'Executive Board', 
+      requiredTags: [] // Will be handled by exec board check
+    },
     { 
       to: '/dashboard/executive', 
       icon: Crown, 
@@ -129,9 +134,17 @@ export function DynamicDashboardSidebar() {
 
   // Check if user is admin
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
+  
+  // Check if user is exec board member
+  const isExecBoard = profile?.is_exec_board === true;
 
-  // Filter exec items based on role tags
-  const visibleExecItems = execNavItems.filter(item => hasRequiredTag(item.requiredTags));
+  // Filter exec items based on role tags and exec board status
+  const visibleExecItems = execNavItems.filter(item => {
+    if (item.to === '/dashboard/exec') {
+      return isExecBoard;
+    }
+    return hasRequiredTag(item.requiredTags);
+  });
 
   // Check if user has any exec roles
   const hasExecRoles = visibleExecItems.length > 0;
@@ -247,10 +260,15 @@ export function DynamicDashboardSidebar() {
       {/* User Info Footer */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          {roleTags.length > 0 && (
+          {(roleTags.length > 0 || isExecBoard) && (
             <div>
               <span className="font-medium">Roles:</span>
               <div className="flex flex-wrap gap-1 mt-1">
+                {isExecBoard && (
+                  <span className="inline-block px-2 py-1 bg-glee-spelman/10 text-glee-spelman rounded text-xs">
+                    {profile?.exec_board_role || 'Executive Board'}
+                  </span>
+                )}
                 {roleTags.map((tag, index) => (
                   <span
                     key={index}

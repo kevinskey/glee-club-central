@@ -1,4 +1,3 @@
-
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "./App";
@@ -27,6 +26,7 @@ import SettingsPage from "./pages/admin/SettingsPage";
 import { adminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
+import ExecBoardDashboard from "./pages/dashboard/ExecBoardDashboard";
 
 const router = createBrowserRouter([
   {
@@ -132,6 +132,10 @@ const router = createBrowserRouter([
       ...adminRoutes,
       // Add all v2 admin routes
       ...adminRoutesV2,
+      {
+        path: "dashboard/exec",
+        element: <ExecBoardDashboard />,
+      },
       {
         path: "*",
         element: <NotFoundPage />,

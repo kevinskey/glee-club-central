@@ -1814,8 +1814,10 @@ export type Database = {
           disabled: boolean | null
           dues_paid: boolean | null
           ecommerce_enabled: boolean | null
+          exec_board_role: string | null
           first_name: string | null
           id: string
+          is_exec_board: boolean | null
           is_super_admin: boolean | null
           join_date: string | null
           last_name: string | null
@@ -1842,8 +1844,10 @@ export type Database = {
           disabled?: boolean | null
           dues_paid?: boolean | null
           ecommerce_enabled?: boolean | null
+          exec_board_role?: string | null
           first_name?: string | null
           id: string
+          is_exec_board?: boolean | null
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
@@ -1870,8 +1874,10 @@ export type Database = {
           disabled?: boolean | null
           dues_paid?: boolean | null
           ecommerce_enabled?: boolean | null
+          exec_board_role?: string | null
           first_name?: string | null
           id?: string
+          is_exec_board?: boolean | null
           is_super_admin?: boolean | null
           join_date?: string | null
           last_name?: string | null
@@ -3239,6 +3245,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_exec_board_role: {
+        Args: { user_id?: string }
+        Returns: string
+      }
       get_user_by_id: {
         Args: { p_user_id: string }
         Returns: {
@@ -3317,6 +3327,10 @@ export type Database = {
       }
       is_current_user_admin_simple: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_exec_board_member: {
+        Args: { user_id?: string }
         Returns: boolean
       }
       is_self_or_admin: {
