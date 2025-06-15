@@ -63,7 +63,7 @@ export function BulkMessageComposer() {
         id: profile.id,
         first_name: profile.first_name,
         last_name: profile.last_name,
-        email: profile.users?.email || '',
+        email: Array.isArray(profile.users) && profile.users.length > 0 ? profile.users[0].email : '',
         phone: profile.phone,
         role: profile.role,
         voice_part: profile.voice_part
