@@ -14,6 +14,7 @@ export interface User {
   updated_at?: string;
   last_sign_in_at?: string;
   is_super_admin?: boolean;
+  is_admin?: boolean;
   disabled?: boolean;
   class_year?: string;
   dues_paid?: boolean;
