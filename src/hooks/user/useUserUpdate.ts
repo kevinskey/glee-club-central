@@ -14,38 +14,52 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
     try {
       console.log(`Updating user ${userId} with data:`, userData);
       
-      if (!userData) {
+      if (!userData || Object.keys(userData).length === 0) {
         console.log("No data provided for update, skipping");
         return true;
       }
       
-      // Filter out undefined values to avoid issues with the database
-      const filteredData: Record<string, any> = {};
+      // Filter out undefined values and prepare the update object
+      const updateData: Record<string, any> = {};
+      
+      // Handle role conversion
+      if (userData.role !== undefined) {
+        updateData.role = userData.role;
+        // Also update is_super_admin based on role
+        updateData.is_super_admin = userData.role === 'admin';
+      }
+      
+      // Handle other fields
       Object.entries(userData).forEach(([key, value]) => {
-        // Only include properties that are defined
-        if (value !== undefined) {
-          // For date fields that come as strings, ensure proper format
-          if (key === 'join_date' && value) {
-            filteredData[key] = value;
+        if (value !== undefined && key !== 'role') {
+          // Handle special field mappings
+          if (key === 'is_admin') {
+            updateData.is_super_admin = value;
+            updateData.role = value ? 'admin' : 'member';
+          } else if (key === 'email') {
+            // Skip email updates for now - they require special handling
+            console.log('Email updates require special auth handling, skipping for now');
           } else {
-            filteredData[key] = value;
+            updateData[key] = value;
           }
         }
       });
       
-      // Convert role field to is_super_admin
-      if (userData.role === 'admin') {
-        filteredData.is_super_admin = true;
-      } else if (userData.role === 'member') {
-        filteredData.is_super_admin = false;
+      console.log("Final update data:", updateData);
+      
+      if (Object.keys(updateData).length === 0) {
+        console.log("No valid fields to update");
+        return true;
       }
       
-      console.log("Filtered data for update:", filteredData);
+      // Add updated_at timestamp
+      updateData.updated_at = new Date().toISOString();
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
-        .update(filteredData)
-        .eq('id', userId);
+        .update(updateData)
+        .eq('id', userId)
+        .select();
 
       if (error) {
         console.error('Error updating user:', error);
@@ -53,12 +67,14 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         return false;
       }
 
+      console.log('User updated successfully:', data);
+      toast.success('User updated successfully');
+
       // Refresh users list if provided
       if (refreshUsers) {
         await refreshUsers();
       }
 
-      console.log('User updated successfully');
       return true;
     } catch (err) {
       console.error('Unexpected error updating user:', err);
@@ -70,17 +86,24 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
   const updateUserStatus = useCallback(async (userId: string, status: string) => {
     try {
       console.log(`Updating user ${userId} status to ${status}`);
-      const { error } = await supabase
+      
+      const { data, error } = await supabase
         .from('profiles')
-        .update({ status })
-        .eq('id', userId);
+        .update({ 
+          status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select();
 
       if (error) {
         console.error('Error updating user status:', error);
+        toast.error(`Failed to update user status: ${error.message}`);
         return false;
       }
 
-      console.log('User status updated successfully');
+      console.log('User status updated successfully:', data);
+      toast.success('User status updated successfully');
       
       // Refresh the user list after update if a refresh function was provided
       if (refreshUsers) {
@@ -90,6 +113,7 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
       return true;
     } catch (err) {
       console.error('Unexpected error updating user status:', err);
+      toast.error('An unexpected error occurred while updating user status');
       return false;
     }
   }, [refreshUsers]);

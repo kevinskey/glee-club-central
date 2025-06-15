@@ -20,7 +20,7 @@ export interface User {
   updated_at?: string | null;
   last_sign_in_at?: string | null;
   is_super_admin?: boolean;
-  role?: string; // Added for backward compatibility
+  role?: string;
 }
 
 export const userManagementService = {
@@ -90,6 +90,8 @@ export const userManagementService = {
           dues_paid: userData.dues_paid || false,
           join_date: userData.join_date || new Date().toISOString().split('T')[0],
           is_super_admin: isAdmin,
+          role: userData.role,
+          updated_at: new Date().toISOString()
         })
         .eq('id', authData.user.id);
       
@@ -106,18 +108,44 @@ export const userManagementService = {
   
   async updateUser(userId: string, userData: Partial<User>): Promise<boolean> {
     try {
-      const { error } = await supabase
+      console.log('Updating user with data:', userData);
+      
+      // Prepare update data with proper field mapping
+      const updateData: Record<string, any> = {};
+      
+      Object.entries(userData).forEach(([key, value]) => {
+        if (value !== undefined) {
+          if (key === 'is_admin') {
+            updateData.is_super_admin = value;
+            updateData.role = value ? 'admin' : 'member';
+          } else if (key === 'email') {
+            // Skip email updates - they need special auth handling
+            console.log('Email updates require auth.updateUser, skipping');
+          } else {
+            updateData[key] = value;
+          }
+        }
+      });
+      
+      updateData.updated_at = new Date().toISOString();
+      
+      const { data, error } = await supabase
         .from('profiles')
-        .update(userData)
-        .eq('id', userId);
+        .update(updateData)
+        .eq('id', userId)
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
+      console.log('Update successful:', data);
       toast.success('User updated successfully');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      toast.error(`Failed to update user: ${error.message || 'Unknown error'}`);
       return false;
     }
   },
@@ -127,7 +155,10 @@ export const userManagementService = {
       // Mark as deleted in the profile
       const { error } = await supabase
         .from('profiles')
-        .update({ status: 'deleted' })
+        .update({ 
+          status: 'deleted',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', userId);
       
       if (error) throw error;

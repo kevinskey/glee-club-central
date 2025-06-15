@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,6 +63,9 @@ export function MemberManagement() {
         setShowAddDialog(false);
         toast.success('Member added successfully');
       }
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast.error('Failed to add member');
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +81,8 @@ export function MemberManagement() {
     
     setIsSubmitting(true);
     try {
+      console.log('Submitting user update:', data);
+      
       const updateData: any = {
         first_name: data.first_name,
         last_name: data.last_name,
@@ -88,16 +92,29 @@ export function MemberManagement() {
         class_year: data.class_year,
         notes: data.notes,
         dues_paid: data.dues_paid,
-        is_super_admin: data.is_admin,
-        role: data.is_admin ? 'admin' : 'member'
+        join_date: data.join_date,
+        role: data.role
       };
+
+      // Handle admin status
+      if (data.is_admin !== undefined) {
+        updateData.is_super_admin = data.is_admin;
+        updateData.role = data.is_admin ? 'admin' : 'member';
+      }
+
+      console.log('Prepared update data:', updateData);
 
       const success = await updateUser(selectedUser.id, updateData);
       if (success) {
         setShowEditDialog(false);
         setSelectedUser(null);
         toast.success('User updated successfully');
+      } else {
+        toast.error('Failed to update user');
       }
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,6 +126,18 @@ export function MemberManagement() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading members...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if there's an error
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error loading members: {error}</p>
+          <Button onClick={refetch}>Try Again</Button>
         </div>
       </div>
     );
