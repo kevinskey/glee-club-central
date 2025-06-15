@@ -69,6 +69,18 @@ const VOICE_PART_MAPPING: { [key: string]: string } = {
   'bass': 'bass',
 };
 
+// Map common role variations to database-accepted values
+const ROLE_MAPPING: { [key: string]: string } = {
+  'member': 'member',
+  'admin': 'admin',
+  'administrator': 'admin',
+  'section_leader': 'section_leader',
+  'section leader': 'section_leader',
+  'leader': 'section_leader',
+  'student': 'member',
+  'singer': 'member',
+};
+
 export function EnhancedMemberCSVUpload() {
   const [csvColumns, setCsvColumns] = useState<CSVColumn[]>([]);
   const [csvData, setCsvData] = useState<string[][]>([]);
@@ -122,6 +134,12 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     if (!section) return '';
     const normalized = section.toLowerCase().trim();
     return VOICE_PART_MAPPING[normalized] || section;
+  };
+
+  const normalizeRole = (role: string): string => {
+    if (!role) return 'member';
+    const normalized = role.toLowerCase().trim();
+    return ROLE_MAPPING[normalized] || 'member';
   };
 
   const handleFileSelect = () => {
@@ -208,10 +226,10 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             // Handle special field transformations
             if (systemField === 'voice_part') {
               value = normalizeVoicePart(value);
+            } else if (systemField === 'role') {
+              value = normalizeRole(value);
             } else if (systemField === 'dues_paid') {
               value = value.toLowerCase() === 'true' || value === '1' ? 'true' : 'false';
-            } else if (systemField === 'role' && !value) {
-              value = 'member';
             } else if (systemField === 'status' && !value) {
               value = 'active';
             }
@@ -226,6 +244,11 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error('Missing required fields');
       }
 
+      // Ensure role is set to a valid value
+      if (!mappedData.role) {
+        mappedData.role = 'member';
+      }
+
       return mappedData as MappedRow;
     } catch (error) {
       console.error(`Error mapping row ${rowIndex}:`, error);
@@ -235,24 +258,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
   const createProfile = async (userData: MappedRow): Promise<{ success: boolean; error?: string }> => {
     try {
-      console.log('Creating profile for:', userData.email);
+      console.log('Creating member import for:', userData.email);
 
-      // Check if user already exists in profiles
-      const { data: existingProfile, error: checkError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', userData.email) // This won't work, we need a different approach
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      // Create profile directly (this will require the auth user to exist)
-      // For now, we'll create a minimal profile entry
       const profileData = {
-        // We can't use email as ID, we need a proper UUID
-        // This approach won't work with the current schema
         first_name: userData.first_name,
         last_name: userData.last_name,
         phone: userData.phone || null,
@@ -267,8 +275,6 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         updated_at: new Date().toISOString()
       };
 
-      // Since we can't create auth users from the frontend, we need to use a different approach
-      // Let's create a temporary import record instead
       const { error: insertError } = await supabase
         .from('member_imports')
         .insert({
@@ -284,7 +290,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
       return { success: true };
     } catch (error: any) {
-      console.error('Error creating profile:', error);
+      console.error('Error creating member import:', error);
       return { 
         success: false, 
         error: error.message || 'Unknown error' 
@@ -296,7 +302,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     if (!validateMapping()) return;
 
     setIsUploading(true);
-    setProgress(0);
+    setUploadProgress(0);
     setUploadResult({ success: 0, errors: [] });
     setStep('preview');
 
@@ -328,7 +334,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         });
       }
 
-      setProgress(Math.round(((i + 1) / dataRows.length) * 100));
+      setUploadProgress(Math.round(((i + 1) / dataRows.length) * 100));
       setUploadResult({ ...results });
 
       // Small delay to prevent overwhelming the system
@@ -347,7 +353,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     setCsvColumns([]);
     setColumnMapping({});
     setUploadResult(null);
-    setProgress(0);
+    setUploadProgress(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -492,9 +498,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             <CardTitle>Processing Import...</CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={progress} className="mb-2" />
+            <Progress value={uploadProgress} className="mb-2" />
             <p className="text-sm text-muted-foreground">
-              {progress}% complete
+              {uploadProgress}% complete
             </p>
           </CardContent>
         </Card>
