@@ -75,9 +75,10 @@ export function ExecCommsSection() {
 
       const formattedAnnouncements = (data ?? []).map(announcement => {
         let created_by = "Unknown";
-        if (Array.isArray(announcement.profiles) && announcement.profiles[0]) {
-          const pf = announcement.profiles[0];
-          created_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
+        if (Array.isArray(announcement.profiles)) {
+          if (announcement.profiles.length > 0) {
+            created_by = `${announcement.profiles[0]?.first_name ?? ""} ${announcement.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+          }
         } else if (announcement.profiles?.first_name || announcement.profiles?.last_name) {
           created_by = `${announcement.profiles.first_name ?? ""} ${announcement.profiles.last_name ?? ""}`.trim() || "Unknown";
         }

@@ -73,9 +73,10 @@ export function ExecDocumentsSection() {
 
       const formattedDocs = (data ?? []).map(doc => {
         let uploaded_by = "Unknown";
-        if (Array.isArray(doc.profiles) && doc.profiles[0]) {
-          const pf = doc.profiles[0];
-          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
+        if (Array.isArray(doc.profiles)) {
+          if (doc.profiles.length > 0) {
+            uploaded_by = `${doc.profiles[0]?.first_name ?? ""} ${doc.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+          }
         } else if (doc.profiles?.first_name || doc.profiles?.last_name) {
           uploaded_by = `${doc.profiles.first_name ?? ""} ${doc.profiles.last_name ?? ""}`.trim() || "Unknown";
         }

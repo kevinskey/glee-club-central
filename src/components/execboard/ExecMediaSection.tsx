@@ -61,9 +61,10 @@ export function ExecMediaSection() {
 
       const formattedMedia = (data ?? []).map(item => {
         let uploaded_by = "Unknown";
-        if (Array.isArray(item.profiles) && item.profiles[0]) {
-          const pf = item.profiles[0];
-          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
+        if (Array.isArray(item.profiles)) {
+          if (item.profiles.length > 0) {
+            uploaded_by = `${item.profiles[0]?.first_name ?? ""} ${item.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+          }
         } else if (item.profiles?.first_name || item.profiles?.last_name) {
           uploaded_by = `${item.profiles.first_name ?? ""} ${item.profiles.last_name ?? ""}`.trim() || "Unknown";
         }

@@ -78,9 +78,10 @@ export function ExecBudgetSection() {
 
       const formattedEntries = (data ?? []).map(entry => {
         let uploaded_by = "Unknown";
-        if (Array.isArray(entry.profiles) && entry.profiles[0]) {
-          const pf = entry.profiles[0];
-          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
+        if (Array.isArray(entry.profiles)) {
+          if (entry.profiles.length > 0) {
+            uploaded_by = `${entry.profiles[0]?.first_name ?? ""} ${entry.profiles[0]?.last_name ?? ""}`.trim() || "Unknown";
+          }
         } else if (entry.profiles?.first_name || entry.profiles?.last_name) {
           uploaded_by = `${entry.profiles.first_name ?? ""} ${entry.profiles.last_name ?? ""}`.trim() || "Unknown";
         }
