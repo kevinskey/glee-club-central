@@ -70,6 +70,17 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         updateData.role_tags = Array.isArray(userData.role_tags) ? userData.role_tags : [];
       }
       
+      // Handle e-commerce fields if they exist in the database
+      if (userData.ecommerce_enabled !== undefined) {
+        updateData.ecommerce_enabled = userData.ecommerce_enabled;
+      }
+      if (userData.account_balance !== undefined) {
+        updateData.account_balance = userData.account_balance;
+      }
+      if (userData.default_shipping_address !== undefined) {
+        updateData.default_shipping_address = userData.default_shipping_address?.trim() || null;
+      }
+      
       console.log("Prepared update data for database:", updateData);
       
       if (Object.keys(updateData).length === 0) {
