@@ -71,28 +71,21 @@ export function ExecDocumentsSection() {
 
       if (error) throw error;
 
-      const formattedDocs = (data ?? []).map(doc => {
-        let uploaded_by = "Unknown";
-        if (Array.isArray(doc.profiles)) {
-          if (doc.profiles.length > 0) {
-            const pf = doc.profiles[0] as { first_name?: string; last_name?: string };
-            uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
-          }
-        } else if ((doc.profiles as any)?.first_name || (doc.profiles as any)?.last_name) {
-          const pf = doc.profiles as { first_name?: string; last_name?: string };
-          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
-        }
-        return {
-          id: doc.id,
-          title: doc.file_name.replace(/\.[^/.]+$/, ""), // Remove extension
-          file_name: doc.file_name,
-          file_url: doc.file_url,
-          document_type: 'other',
-          uploaded_by,
-          created_at: doc.created_at,
-          description: doc.description,
-        };
-      });
+      const formattedDocs = data?.map(doc => ({
+        id: doc.id,
+        title: doc.file_name.replace(/\.[^/.]+$/, ""), // Remove extension
+        file_name: doc.file_name,
+        file_url: doc.file_url,
+        document_type: 'other',
+        uploaded_by:
+          Array.isArray(doc.profiles) && doc.profiles[0]
+            ? `${doc.profiles[0].first_name ?? ''} ${doc.profiles[0].last_name ?? ''}`.trim()
+            : (doc.profiles?.first_name && doc.profiles?.last_name)
+                ? `${doc.profiles.first_name} ${doc.profiles.last_name}`
+                : 'Unknown',
+        created_at: doc.created_at,
+        description: doc.description
+      })) || [];
 
       setDocuments(formattedDocs);
     } catch (error) {

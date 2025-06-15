@@ -3301,11 +3301,31 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_by_email: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_admin_by_email_safe: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_admin_email_safe: {
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_user_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_user_admin_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_current_user_admin_simple: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
@@ -3318,7 +3338,7 @@ export type Database = {
         Returns: boolean
       }
       is_user_admin: {
-        Args: { user_id: string }
+        Args: Record<PropertyKey, never> | { user_id: string }
         Returns: boolean
       }
       update_user_status: {

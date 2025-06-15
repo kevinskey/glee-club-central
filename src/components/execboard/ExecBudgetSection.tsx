@@ -76,27 +76,20 @@ export function ExecBudgetSection() {
 
       if (error) throw error;
 
-      const formattedEntries = (data ?? []).map(entry => {
-        let uploaded_by = "Unknown";
-        if (Array.isArray(entry.profiles)) {
-          if (entry.profiles.length > 0) {
-            const pf = entry.profiles[0] as { first_name?: string; last_name?: string };
-            uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
-          }
-        } else if ((entry.profiles as any)?.first_name || (entry.profiles as any)?.last_name) {
-          const pf = entry.profiles as { first_name?: string; last_name?: string };
-          uploaded_by = `${pf.first_name ?? ""} ${pf.last_name ?? ""}`.trim() || "Unknown";
-        }
-        return {
-          id: entry.id,
-          amount: entry.amount,
-          category: entry.category,
-          purpose: entry.purpose,
-          receipt_url: entry.receipt_url,
-          created_at: entry.created_at,
-          uploaded_by,
-        };
-      });
+      const formattedEntries = data?.map(entry => ({
+        id: entry.id,
+        amount: entry.amount,
+        category: entry.category,
+        purpose: entry.purpose,
+        receipt_url: entry.receipt_url,
+        created_at: entry.created_at,
+        uploaded_by:
+          Array.isArray(entry.profiles) && entry.profiles[0]
+            ? `${entry.profiles[0].first_name ?? ''} ${entry.profiles[0].last_name ?? ''}`.trim()
+            : (entry.profiles?.first_name && entry.profiles?.last_name)
+                ? `${entry.profiles.first_name} ${entry.profiles.last_name}`
+                : 'Unknown',
+      })) || [];
 
       setEntries(formattedEntries);
     } catch (error) {
