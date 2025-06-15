@@ -143,7 +143,7 @@ export function BulkMessageComposer() {
       return;
     }
 
-    if (messageType === "email" && !subject.trim()) {
+    if ((messageType === "email" || messageType === "both") && !subject.trim()) {
       toast.error("Please enter an email subject");
       return;
     }
@@ -158,17 +158,49 @@ export function BulkMessageComposer() {
         last_name: m.last_name
       }));
 
-    const result = await sendBulkMessage({
-      type: messageType,
-      recipients,
-      subject,
-      content
-    });
+    try {
+      if (messageType === "both") {
+        // Send both email and SMS
+        const emailRecipients = recipients.filter(r => r.email);
+        const smsRecipients = recipients.filter(r => r.phone);
 
-    if (result.success) {
+        if (emailRecipients.length > 0) {
+          await sendBulkMessage({
+            type: "email",
+            recipients: emailRecipients,
+            subject,
+            content
+          });
+        }
+
+        if (smsRecipients.length > 0) {
+          await sendBulkMessage({
+            type: "sms",
+            recipients: smsRecipients,
+            content
+          });
+        }
+      } else {
+        // Send single type
+        const result = await sendBulkMessage({
+          type: messageType as "email" | "sms",
+          recipients,
+          subject,
+          content
+        });
+
+        if (!result.success) {
+          return;
+        }
+      }
+
+      // Reset form on success
       setContent("");
       setSubject("");
       setSelectedMembers([]);
+    } catch (error) {
+      console.error('Error sending messages:', error);
+      toast.error('Failed to send messages');
     }
   };
 
