@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,6 @@ export function PhotoUploadModal({
     try {
       console.log('🔐 Checking camera permissions...');
       
-      // Check if navigator.permissions is supported
       if ('permissions' in navigator) {
         const permission = await navigator.permissions.query({ name: 'camera' as PermissionName });
         console.log('📋 Camera permission status:', permission.state);
@@ -58,7 +56,6 @@ export function PhotoUploadModal({
       return true;
     } catch (error) {
       console.log('⚠️ Permission check not supported or failed:', error);
-      // Continue anyway, will handle in getUserMedia
       return true;
     }
   }, []);
@@ -70,14 +67,12 @@ export function PhotoUploadModal({
     setCameraError('');
     
     try {
-      // Check permissions first
       const hasPermission = await checkCameraPermissions();
       if (!hasPermission) {
         setIsCameraLoading(false);
         return;
       }
 
-      // iOS Safari optimized constraints
       const constraints: MediaStreamConstraints = {
         video: {
           width: { ideal: 640, max: 1280 },
@@ -107,7 +102,6 @@ export function PhotoUploadModal({
       if (videoRef.current) {
         const video = videoRef.current;
         
-        // Critical iOS Safari compatibility settings
         video.setAttribute('autoplay', 'true');
         video.setAttribute('playsinline', 'true');
         video.setAttribute('muted', 'true');
@@ -118,109 +112,69 @@ export function PhotoUploadModal({
         video.srcObject = mediaStream;
         console.log('📹 Video source set to element');
         
-        // Handle video loading events
-        const handleLoadedMetadata = () => {
-          console.log('📐 Video metadata loaded');
-          console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
-          console.log('Video ready state:', video.readyState);
-          console.log('Video network state:', video.networkState);
-        };
-
-        const handleCanPlay = () => {
-          console.log('🎬 Video can play event fired');
+        // Simplified event handling
+        const handleVideoReady = () => {
+          console.log('🎬 Video ready event fired');
           console.log('Video element state:', {
             videoWidth: video.videoWidth,
             videoHeight: video.videoHeight,
             readyState: video.readyState,
-            paused: video.paused,
-            ended: video.ended,
-            currentTime: video.currentTime
+            paused: video.paused
           });
           
           if (video.videoWidth > 0 && video.videoHeight > 0) {
             setIsVideoReady(true);
             setIsCameraLoading(false);
+            console.log('✅ Video is ready for capture');
           }
         };
 
-        const handleLoadedData = () => {
-          console.log('📊 Video loaded data event fired');
-          if (video.videoWidth > 0 && video.videoHeight > 0) {
-            setIsVideoReady(true);
-            setIsCameraLoading(false);
-          }
-        };
-
-        const handlePlay = () => {
-          console.log('▶️ Video play event fired');
-          setIsVideoReady(true);
-          setIsCameraLoading(false);
-        };
-
-        const handleError = (error: Event) => {
-          console.error('❌ Video element error:', error);
-          setCameraError('Video playback error occurred');
-        };
-
-        // Add all event listeners
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
-        video.addEventListener('canplay', handleCanPlay);
-        video.addEventListener('loadeddata', handleLoadedData);
-        video.addEventListener('play', handlePlay);
-        video.addEventListener('error', handleError);
+        // Multiple event listeners to catch video ready state
+        video.addEventListener('loadedmetadata', handleVideoReady);
+        video.addEventListener('canplay', handleVideoReady);
+        video.addEventListener('playing', handleVideoReady);
         
-        // Force load and play for iOS Safari
-        try {
-          video.load();
-          const playPromise = video.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                console.log('✅ Video play() succeeded');
-                setIsVideoReady(true);
-                setIsCameraLoading(false);
-              })
-              .catch(err => {
-                console.error('❌ Video play() failed:', err);
-                // Try to continue anyway
-                setTimeout(() => {
-                  if (video.videoWidth > 0 && video.videoHeight > 0) {
-                    setIsVideoReady(true);
-                    setIsCameraLoading(false);
-                  }
-                }, 1000);
-              });
-          }
-        } catch (error) {
-          console.error('❌ Video load/play error:', error);
+        // Force play
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('✅ Video play() succeeded');
+              // Give a small delay for video to fully initialize
+              setTimeout(() => {
+                if (video.videoWidth > 0 && video.videoHeight > 0) {
+                  setIsVideoReady(true);
+                  setIsCameraLoading(false);
+                }
+              }, 500);
+            })
+            .catch(err => {
+              console.error('❌ Video play() failed:', err);
+              // Still try to set ready state after delay
+              setTimeout(() => {
+                if (video.videoWidth > 0 && video.videoHeight > 0) {
+                  setIsVideoReady(true);
+                  setIsCameraLoading(false);
+                }
+              }, 1000);
+            });
         }
 
-        // Cleanup function
-        const cleanup = () => {
-          video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-          video.removeEventListener('canplay', handleCanPlay);
-          video.removeEventListener('loadeddata', handleLoadedData);
-          video.removeEventListener('play', handlePlay);
-          video.removeEventListener('error', handleError);
-        };
-
-        // Set a timeout to check if video is ready after some time
+        // Fallback timeout
         setTimeout(() => {
           console.log('⏰ Timeout check - Video state:', {
             readyState: video.readyState,
             videoWidth: video.videoWidth,
             videoHeight: video.videoHeight,
-            paused: video.paused,
-            currentTime: video.currentTime
+            paused: video.paused
           });
           
           if (video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
             console.log('✅ Video ready after timeout check');
             setIsVideoReady(true);
-            setIsCameraLoading(false);
           }
-          cleanup();
-        }, 5000);
+          setIsCameraLoading(false);
+        }, 3000);
       }
     } catch (error) {
       console.error('❌ Error accessing camera:', error);
@@ -232,8 +186,7 @@ export function PhotoUploadModal({
       if (error instanceof Error) {
         console.log('📋 Error details:', {
           name: error.name,
-          message: error.message,
-          stack: error.stack
+          message: error.message
         });
         
         switch (error.name) {
@@ -244,19 +197,12 @@ export function PhotoUploadModal({
             errorMessage = 'No camera found on this device.';
             break;
           case 'NotReadableError':
-            errorMessage = 'Camera is already in use by another application. Please close other apps using the camera.';
+            errorMessage = 'Camera is already in use by another application.';
             break;
           case 'OverconstrainedError':
             errorMessage = 'Camera constraints could not be satisfied. Trying with basic settings...';
-            // Try again with minimal constraints
             setTimeout(() => startCameraWithMinimalConstraints(), 1000);
             return;
-          case 'SecurityError':
-            errorMessage = 'Camera access blocked due to security restrictions. Please ensure you\'re using HTTPS.';
-            break;
-          case 'AbortError':
-            errorMessage = 'Camera access was interrupted.';
-            break;
           default:
             errorMessage = `Camera error: ${error.message}`;
         }
@@ -270,12 +216,11 @@ export function PhotoUploadModal({
   const startCameraWithMinimalConstraints = useCallback(async () => {
     console.log('🔄 Trying camera with minimal constraints...');
     try {
-      const minimalConstraints: MediaStreamConstraints = {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: false
-      };
+      });
       
-      const mediaStream = await navigator.mediaDevices.getUserMedia(minimalConstraints);
       console.log('✅ Camera working with minimal constraints');
       
       setStream(mediaStream);
@@ -296,7 +241,8 @@ export function PhotoUploadModal({
       }
     } catch (error) {
       console.error('❌ Minimal constraints also failed:', error);
-      setCameraError('Camera initialization failed completely. Please try using file upload instead.');
+      setCameraError('Camera initialization failed. Please try using file upload instead.');
+      setIsCameraLoading(false);
     }
   }, []);
 
@@ -342,9 +288,7 @@ export function PhotoUploadModal({
       videoWidth: video.videoWidth,
       videoHeight: video.videoHeight,
       readyState: video.readyState,
-      paused: video.paused,
-      currentTime: video.currentTime,
-      ended: video.ended
+      paused: video.paused
     });
 
     if (video.videoWidth === 0 || video.videoHeight === 0) {
@@ -372,17 +316,12 @@ export function PhotoUploadModal({
       const base64String = canvas.toDataURL('image/png', 1.0);
       
       console.log('✅ Photo captured successfully');
-      console.log('📊 Captured image data length:', base64String.length);
-      console.log('🔗 Image data preview:', base64String.substring(0, 100) + '...');
 
-      // Store the captured photo
       setCapturedPhotoForEnhancement(base64String);
       setPreviewUrl(base64String);
       
-      // Stop camera after successful capture
       stopCamera();
       
-      // Show enhancement modal
       setShowEnhancement(true);
       toast.success('Photo captured! Choose an enhancement option.');
       
