@@ -98,6 +98,45 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          feature_used: string | null
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          page_path: string | null
+          session_duration: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          feature_used?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          page_path?: string | null
+          session_duration?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          feature_used?: string | null
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          page_path?: string | null
+          session_duration?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       announcement_recipients: {
         Row: {
           announcement_id: string | null

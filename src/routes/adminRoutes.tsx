@@ -15,6 +15,7 @@ import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
 import MusicAdminPage from '@/pages/admin/MusicAdminPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
+import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -72,6 +73,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'site-images',
         element: <SiteImagesPage />,
+      },
+      {
+        path: 'analytics',
+        element: <AdminAnalyticsPage />,
       },
     ],
   },

@@ -5,6 +5,7 @@ import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { DynamicHero } from "@/components/landing/DynamicHero";
 import { useHomePageData } from "@/hooks/useHomePageData";
+import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,14 +15,22 @@ export default function HomePage() {
     audioTracks, 
     isLoading: dataLoading 
   } = useHomePageData();
+  
+  const { trackFeatureUsage } = useAnalyticsTracking();
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      // Track homepage feature usage
+      trackFeatureUsage('homepage_loaded', {
+        eventsCount: upcomingEvents.length,
+        productsCount: storeProducts.length,
+        tracksCount: audioTracks.length
+      });
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [upcomingEvents.length, storeProducts.length, audioTracks.length, trackFeatureUsage]);
 
   // Show loader while initial page is loading, but don't wait for data indefinitely
   if (isLoading) {

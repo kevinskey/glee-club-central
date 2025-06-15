@@ -1,89 +1,67 @@
-import React from "react";
-import {
-  LayoutDashboard,
-  Calendar,
-  Users,
-  Settings,
+
+import React from 'react';
+import { 
+  Users, 
+  Calendar, 
+  Music, 
+  ShoppingBag, 
+  MessageSquare, 
+  Image, 
+  FileImage,
   BarChart3,
-  DollarSign,
-  Music,
-  Image,
-  Newspaper,
-  ShoppingCart,
-  MapPin,
-  FileText,
-  Megaphone,
-  Clock
-} from "lucide-react";
+  Home
+} from 'lucide-react';
+import { NavItem } from './NavItem';
 
-interface NavItem {
-  title: string;
-  href: string;
-  icon: any;
-  description: string;
+export function AdminNavItems() {
+  return (
+    <>
+      <NavItem
+        to="/admin"
+        icon={<Home className="h-5 w-5" />}
+        label="Dashboard"
+        end={true}
+      />
+      <NavItem
+        to="/admin/members"
+        icon={<Users className="h-5 w-5" />}
+        label="Members"
+      />
+      <NavItem
+        to="/admin/calendar"
+        icon={<Calendar className="h-5 w-5" />}
+        label="Calendar"
+      />
+      <NavItem
+        to="/admin/music"
+        icon={<Music className="h-5 w-5" />}
+        label="Music Library"
+      />
+      <NavItem
+        to="/admin/store"
+        icon={<ShoppingBag className="h-5 w-5" />}
+        label="Store"
+      />
+      <NavItem
+        to="/admin/communications"
+        icon={<MessageSquare className="h-5 w-5" />}
+        label="Communications"
+      />
+      <NavItem
+        to="/admin/hero-slides"
+        icon={<Image className="h-5 w-5" />}
+        label="Hero Slides"
+      />
+      <NavItem
+        to="/admin/media"
+        icon={<FileImage className="h-5 w-5" />}
+        label="Media Library"
+      />
+      <NavItem
+        to="/admin/analytics"
+        icon={<BarChart3 className="h-5 w-5" />}
+        label="Analytics"
+      />
+    </>
+  );
 }
-
-const adminNavItems: NavItem[] = [
-  {
-    title: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-    description: "Overview of your store",
-  },
-  {
-    title: "Events Calendar",
-    href: "/admin/events",
-    icon: Calendar,
-    description: "Manage events and rehearsals",
-  },
-  {
-    title: "Members",
-    href: "/admin/members",
-    icon: Users,
-    description: "Manage members and roles",
-  },
-  {
-    title: "Finances",
-    href: "/admin/finances",
-    icon: DollarSign,
-    description: "Track income and expenses",
-  },
-  {
-    title: "Merch Store",
-    href: "/admin/store",
-    icon: ShoppingCart,
-    description: "Manage products and sales",
-  },
-  {
-    title: "News Ticker",
-    href: "/admin/news",
-    icon: Newspaper,
-    description: "Manage scrolling news items",
-  },
-  {
-    title: "Gallery",
-    href: "/admin/gallery",
-    icon: Image,
-    description: "Manage photos and albums",
-  },
-  {
-    title: "Sponsors",
-    href: "/admin/sponsors",
-    icon: DollarSign,
-    description: "Manage sponsors and donations",
-  },
-  {
-    title: "Glee Planner",
-    href: "/admin/glee-planner",
-    icon: Clock,
-    description: "Plan and organize events with smart modules"
-  },
-  {
-    title: "Site Settings",
-    href: "/admin/settings",
-    icon: Settings,
-    description: "Configure site-wide settings",
-  },
-];
-
-export default adminNavItems;

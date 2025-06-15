@@ -1,15 +1,23 @@
 
-import React from "react";
-import { Outlet } from "react-router-dom";
-import { ConsolidatedHeader } from "@/components/layout/ConsolidatedHeader";
+import React, { useEffect } from 'react';
+import { Outlet } from 'react-router-dom';
+import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 
-export function BaseLayout() {
+interface BaseLayoutProps {
+  children?: React.ReactNode;
+}
+
+export function BaseLayout({ children }: BaseLayoutProps) {
+  const { trackPageView } = useAnalyticsTracking();
+
+  // Track page views automatically when route changes
+  useEffect(() => {
+    trackPageView();
+  }, [trackPageView]);
+
   return (
-    <div className="min-h-screen">
-      <ConsolidatedHeader />
-      <main>
-        <Outlet />
-      </main>
+    <div className="min-h-screen bg-background">
+      {children || <Outlet />}
     </div>
   );
 }

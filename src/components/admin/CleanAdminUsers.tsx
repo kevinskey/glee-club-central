@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from "@/components/ui/page-header";
@@ -22,11 +21,13 @@ import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
 
 const CleanAdminUsers: React.FC = () => {
   console.log('🔧 CleanAdminUsers: Component rendering started');
   
   const [isAdmin, setIsAdmin] = useState(false);
+  const { trackFeatureUsage } = useAnalyticsTracking();
   
   // Check admin status
   React.useEffect(() => {
@@ -45,6 +46,10 @@ const CleanAdminUsers: React.FC = () => {
                              profile?.is_super_admin || 
                              profile?.role === 'admin';
           setIsAdmin(adminStatus);
+          
+          if (adminStatus) {
+            trackFeatureUsage('admin_user_management_viewed');
+          }
         }
       } catch (error) {
         console.error('Error checking admin status:', error);
@@ -52,7 +57,7 @@ const CleanAdminUsers: React.FC = () => {
     };
     
     checkAdminStatus();
-  }, []);
+  }, [trackFeatureUsage]);
 
   const {
     filteredUsers,
@@ -95,6 +100,7 @@ const CleanAdminUsers: React.FC = () => {
       if (success) {
         setShowAddMemberDialog(false);
         toast.success('Member added successfully');
+        trackFeatureUsage('admin_member_added', { memberRole: data.is_admin ? 'admin' : 'member' });
       }
     } finally {
       setIsSubmitting(false);
@@ -104,6 +110,7 @@ const CleanAdminUsers: React.FC = () => {
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
     setShowEditDialog(true);
+    trackFeatureUsage('admin_member_edit_opened', { userId: user.id });
   };
 
   const handleSaveUser = async (data: UserFormValues) => {
@@ -129,6 +136,10 @@ const CleanAdminUsers: React.FC = () => {
         setShowEditDialog(false);
         setSelectedUser(null);
         toast.success('User updated successfully');
+        trackFeatureUsage('admin_member_updated', { 
+          userId: selectedUser.id,
+          updatedRole: data.is_admin ? 'admin' : 'member'
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -138,6 +149,7 @@ const CleanAdminUsers: React.FC = () => {
   const handleDeleteUser = async (userId: string) => {
     console.log('Delete user:', userId);
     toast.info('Delete functionality will be implemented soon');
+    trackFeatureUsage('admin_member_delete_attempted', { userId });
   };
 
   if (isLoading) {
