@@ -1,3 +1,4 @@
+
 export interface AuthUser {
   id: string;
   email?: string;
@@ -46,8 +47,8 @@ export interface Profile {
   default_shipping_address?: string;
   account_balance?: number;
   // Executive Board fields
-  is_exec_board?: boolean;
-  exec_board_role?: string;
+  is_exec_board?: boolean; // <--- added
+  exec_board_role?: string; // <--- added
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
@@ -76,3 +77,4 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
+
