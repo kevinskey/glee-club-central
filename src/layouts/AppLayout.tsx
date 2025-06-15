@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
@@ -21,7 +20,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
     '/login', 
     '/signup', 
     '/', // HomePage manages its own header via PublicPageWrapper
-    '/contact' // ContactPage manages its own header and footer
+    '/contact', // ContactPage manages its own header and footer
+    '/calendar' // Calendar page manages its own header
   ];
   
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname);
