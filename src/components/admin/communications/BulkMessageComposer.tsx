@@ -42,37 +42,55 @@ export function BulkMessageComposer() {
 
   const loadMembers = async () => {
     try {
-      // Get profiles and then fetch corresponding user emails
+      setIsLoading(true);
+      console.log('Loading members for bulk messaging...');
+      
+      // Get current user first to check permissions
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('You must be logged in to access this feature');
+        return;
+      }
+
+      // Get profiles data
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, phone, role, voice_part')
         .eq('status', 'active')
         .order('last_name');
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
 
       if (!profilesData || profilesData.length === 0) {
+        console.log('No profiles found');
         setMembers([]);
         return;
       }
 
-      // Get user emails from auth.users for each profile
-      const { data: usersData, error: usersError } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .in('id', profilesData.map(p => p.id));
+      console.log('Profiles loaded:', profilesData.length);
 
-      if (usersError) {
-        console.error('Error fetching user emails:', usersError);
-        // Continue without emails if we can't fetch them
-      }
-
-      // Create a map of user emails
-      const emailMap = new Map();
-      if (usersData) {
-        usersData.forEach(user => {
-          emailMap.set(user.id, user.email);
-        });
+      // Try to get user emails from auth admin (will work for admin users)
+      let emailMap = new Map();
+      try {
+        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+        
+        if (authUsers?.users && !authError) {
+          authUsers.users.forEach(authUser => {
+            if (authUser.email) {
+              emailMap.set(authUser.id, authUser.email);
+            }
+          });
+        } else {
+          console.warn('Could not fetch auth users, using current user email only');
+          // Fall back to current user's email for their own profile
+          emailMap.set(user.id, user.email || '');
+        }
+      } catch (authError) {
+        console.warn('Auth admin access failed, using fallback:', authError);
+        emailMap.set(user.id, user.email || '');
       }
 
       // Combine profile data with emails
@@ -81,11 +99,15 @@ export function BulkMessageComposer() {
         first_name: profile.first_name || '',
         last_name: profile.last_name || '',
         email: emailMap.get(profile.id) || '',
-        phone: profile.phone,
+        phone: profile.phone || '',
         role: profile.role || 'member',
         voice_part: profile.voice_part
       }));
 
+      console.log('Members processed:', transformedData.length);
+      console.log('Members with phone numbers:', transformedData.filter(m => m.phone).length);
+      console.log('Members with emails:', transformedData.filter(m => m.email).length);
+      
       setMembers(transformedData);
     } catch (error) {
       console.error('Error loading members:', error);
@@ -96,11 +118,13 @@ export function BulkMessageComposer() {
   };
 
   const filteredMembers = members.filter(member => {
-    // First apply role and voice part filters
+    // Apply role filter
     if (filterRole !== "all" && member.role !== filterRole) return false;
+    
+    // Apply voice part filter  
     if (filterVoicePart !== "all" && member.voice_part !== filterVoicePart) return false;
     
-    // Filter by message type capabilities
+    // Apply message type filter - this was the main issue!
     if (messageType === "email" && !member.email) return false;
     if (messageType === "sms" && !member.phone) return false;
     if (messageType === "both" && (!member.email || !member.phone)) return false;
@@ -209,6 +233,7 @@ export function BulkMessageComposer() {
       <Card>
         <CardContent className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          <span className="ml-2">Loading members...</span>
         </CardContent>
       </Card>
     );
@@ -295,7 +320,7 @@ export function BulkMessageComposer() {
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleSelectAll}>
-                Select All
+                Select All ({filteredMembers.length})
               </Button>
               <Button variant="outline" size="sm" onClick={handleDeselectAll}>
                 Deselect All
@@ -352,6 +377,14 @@ export function BulkMessageComposer() {
             </div>
           </div>
 
+          {/* Filter Summary */}
+          <div className="text-sm text-muted-foreground">
+            Showing {filteredMembers.length} of {members.length} members
+            {messageType === "sms" && ` (${filteredMembers.filter(m => m.phone).length} with phone numbers)`}
+            {messageType === "email" && ` (${filteredMembers.filter(m => m.email).length} with email addresses)`}
+            {messageType === "both" && ` (${filteredMembers.filter(m => m.email && m.phone).length} with both email and phone)`}
+          </div>
+
           {/* Member List */}
           <div className="max-h-64 overflow-y-auto space-y-2">
             {filteredMembers.map((member) => (
@@ -381,8 +414,10 @@ export function BulkMessageComposer() {
                       </Badge>
                     )}
                     <span>{member.role}</span>
-                    {member.voice_part && <span>• {member.voice_part}</span>}
+                    {member.voice_part && <span>• {member.voice_part.replace('_', ' ')}</span>}
                   </div>
+                  {member.email && <p className="text-xs text-muted-foreground">{member.email}</p>}
+                  {member.phone && <p className="text-xs text-muted-foreground">{member.phone}</p>}
                 </div>
               </div>
             ))}
@@ -391,7 +426,12 @@ export function BulkMessageComposer() {
           {filteredMembers.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No members match the current filters or search</p>
+              <p>No members match the current filters</p>
+              {messageType === "sms" && (
+                <p className="text-sm mt-2">
+                  Make sure members have phone numbers in their profiles for SMS messaging
+                </p>
+              )}
             </div>
           )}
         </CardContent>
