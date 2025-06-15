@@ -3154,6 +3154,19 @@ export type Database = {
       }
     }
     Functions: {
+      admin_create_user: {
+        Args: {
+          user_email: string
+          user_password?: string
+          user_first_name?: string
+          user_last_name?: string
+          user_role?: string
+          user_voice_part?: string
+          user_phone?: string
+          user_class_year?: string
+        }
+        Returns: Json
+      }
       admin_invite_user: {
         Args: {
           user_email: string
@@ -3181,6 +3194,10 @@ export type Database = {
       }
       can_access_profile_safe: {
         Args: { profile_user_id: string }
+        Returns: boolean
+      }
+      can_manage_users: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       check_user_is_admin: {
