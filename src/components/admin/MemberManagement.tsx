@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,14 +17,17 @@ import {
   Edit, 
   Mail,
   Phone,
-  Music
+  Music,
+  Upload
 } from 'lucide-react';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
 import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
 import { MembersPagination } from '@/components/members/MembersPagination';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { EditUserDialog } from '@/components/members/EditUserDialog';
+import { MemberCSVUpload } from '@/components/members/MemberCSVUpload';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 export function MemberManagement() {
@@ -48,6 +50,7 @@ export function MemberManagement() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showBulkUploadDialog, setShowBulkUploadDialog] = useState(false);
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
     if (key === 'search') return value !== '';
@@ -168,6 +171,10 @@ export function MemberManagement() {
           <Button onClick={refetch} variant="outline" disabled={isLoading}>
             <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
+          </Button>
+          <Button onClick={() => setShowBulkUploadDialog(true)} variant="outline">
+            <Upload className="mr-2 h-4 w-4" />
+            Bulk Upload
           </Button>
           <Button onClick={() => setShowAddDialog(true)} className="bg-glee-spelman hover:bg-glee-spelman/90">
             <Plus className="mr-2 h-4 w-4" />
@@ -323,6 +330,15 @@ export function MemberManagement() {
         isSubmitting={isSubmitting}
         user={selectedUser}
       />
+
+      <Dialog open={showBulkUploadDialog} onOpenChange={setShowBulkUploadDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Bulk Upload Members</DialogTitle>
+          </DialogHeader>
+          <MemberCSVUpload />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
