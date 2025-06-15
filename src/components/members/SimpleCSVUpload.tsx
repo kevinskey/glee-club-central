@@ -18,7 +18,7 @@ interface CSVRow {
   status?: string;
   class_year?: string;
   notes?: string;
-  dues_paid?: string;
+  dues_paid?: boolean;
   join_date?: string;
 }
 
@@ -110,7 +110,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         status: row.status || 'active',
         class_year: row.class_year || null,
         notes: row.notes || null,
-        dues_paid: row.dues_paid === 'true',
+        dues_paid: row.dues_paid === 'true' || row.dues_paid === true,
         join_date: row.join_date || null
       };
     });
