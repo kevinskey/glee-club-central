@@ -17,50 +17,49 @@ export function AdminNavItems() {
   return (
     <>
       <NavItem
-        to="/admin"
+        href="/admin"
         icon={<Home className="h-5 w-5" />}
-        label="Dashboard"
-        end={true}
+        title="Dashboard"
       />
       <NavItem
-        to="/admin/members"
+        href="/admin/members"
         icon={<Users className="h-5 w-5" />}
-        label="Members"
+        title="Members"
       />
       <NavItem
-        to="/admin/calendar"
+        href="/admin/calendar"
         icon={<Calendar className="h-5 w-5" />}
-        label="Calendar"
+        title="Calendar"
       />
       <NavItem
-        to="/admin/music"
+        href="/admin/music"
         icon={<Music className="h-5 w-5" />}
-        label="Music Library"
+        title="Music Library"
       />
       <NavItem
-        to="/admin/store"
+        href="/admin/store"
         icon={<ShoppingBag className="h-5 w-5" />}
-        label="Store"
+        title="Store"
       />
       <NavItem
-        to="/admin/communications"
+        href="/admin/communications"
         icon={<MessageSquare className="h-5 w-5" />}
-        label="Communications"
+        title="Communications"
       />
       <NavItem
-        to="/admin/hero-slides"
+        href="/admin/hero-slides"
         icon={<Image className="h-5 w-5" />}
-        label="Hero Slides"
+        title="Hero Slides"
       />
       <NavItem
-        to="/admin/media"
+        href="/admin/media"
         icon={<FileImage className="h-5 w-5" />}
-        label="Media Library"
+        title="Media Library"
       />
       <NavItem
-        to="/admin/analytics"
+        href="/admin/analytics"
         icon={<BarChart3 className="h-5 w-5" />}
-        label="Analytics"
+        title="Analytics"
       />
     </>
   );
