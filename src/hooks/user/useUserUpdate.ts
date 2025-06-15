@@ -19,41 +19,58 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         return true;
       }
       
-      // Prepare the update object with proper field mapping
+      // Prepare the update object with only valid database fields
       const updateData: Record<string, any> = {};
       
-      // Handle standard profile fields
-      const allowedFields = [
-        'first_name', 'last_name', 'phone', 'voice_part', 'status', 
-        'class_year', 'notes', 'dues_paid', 'join_date'
-      ];
+      // Handle standard profile fields that exist in the database
+      if (userData.first_name !== undefined && userData.first_name?.trim()) {
+        updateData.first_name = userData.first_name.trim();
+      }
+      if (userData.last_name !== undefined && userData.last_name?.trim()) {
+        updateData.last_name = userData.last_name.trim();
+      }
+      if (userData.phone !== undefined) {
+        updateData.phone = userData.phone?.trim() || null;
+      }
+      if (userData.voice_part !== undefined) {
+        updateData.voice_part = userData.voice_part;
+      }
+      if (userData.status !== undefined) {
+        updateData.status = userData.status;
+      }
+      if (userData.class_year !== undefined) {
+        updateData.class_year = userData.class_year?.trim() || null;
+      }
+      if (userData.notes !== undefined) {
+        updateData.notes = userData.notes?.trim() || null;
+      }
+      if (userData.join_date !== undefined) {
+        updateData.join_date = userData.join_date;
+      }
+      if (userData.dues_paid !== undefined) {
+        updateData.dues_paid = userData.dues_paid;
+      }
       
-      allowedFields.forEach(field => {
-        if (userData[field] !== undefined) {
-          updateData[field] = userData[field];
-        }
-      });
-      
-      // Handle role field mapping
+      // Handle role field - this exists in the database
       if (userData.role !== undefined) {
         updateData.role = userData.role;
-        // Set is_super_admin based on role
-        updateData.is_super_admin = userData.role === 'admin';
       }
       
-      // Handle is_admin field (convert to role and is_super_admin)
-      // Note: is_admin doesn't exist in DB, we map it to is_super_admin
+      // Handle is_admin field - map to is_super_admin (which exists in DB)
       if (userData.is_admin !== undefined) {
         updateData.is_super_admin = userData.is_admin;
-        updateData.role = userData.is_admin ? 'admin' : 'member';
+        // Also set role based on admin status
+        if (!updateData.role) {
+          updateData.role = userData.is_admin ? 'admin' : 'member';
+        }
       }
       
-      // Handle role_tags array
+      // Handle role_tags array if provided
       if (userData.role_tags !== undefined) {
         updateData.role_tags = Array.isArray(userData.role_tags) ? userData.role_tags : [];
       }
       
-      console.log("Prepared update data:", updateData);
+      console.log("Prepared update data for database:", updateData);
       
       if (Object.keys(updateData).length === 0) {
         console.log("No valid fields to update");
