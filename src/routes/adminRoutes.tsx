@@ -15,6 +15,7 @@ import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
 import MusicAdminPage from '@/pages/admin/MusicAdminPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
+import MemberCSVUploadPage from '@/pages/admin/MemberCSVUploadPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -32,6 +33,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'members',
         element: <MembersPage />,
+      },
+      {
+        path: 'csv-upload',
+        element: <MemberCSVUploadPage />,
       },
       {
         path: 'users',
