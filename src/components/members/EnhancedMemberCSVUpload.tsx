@@ -68,6 +68,9 @@ const VOICE_PART_MAPPING: { [key: string]: string } = {
   'bass': 'bass',
 };
 
+// Valid roles according to database constraint - these are the ONLY valid values
+const VALID_ROLES = ['admin', 'member', 'section_leader'];
+
 // Updated role mapping to only include valid database values
 const ROLE_MAPPING: { [key: string]: string } = {
   'member': 'member',
@@ -80,10 +83,13 @@ const ROLE_MAPPING: { [key: string]: string } = {
   'singer': 'member',
   'general member': 'member',
   'regular member': 'member',
+  // Additional common variations that should map to 'member'
+  'user': 'member',
+  'standard': 'member',
+  'basic': 'member',
+  'regular': 'member',
+  'default': 'member',
 };
-
-// Valid roles according to database constraint
-const VALID_ROLES = ['admin', 'member', 'section_leader'];
 
 export function EnhancedMemberCSVUpload() {
   const [csvColumns, setCsvColumns] = useState<CSVColumn[]>([]);
@@ -143,15 +149,18 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
   const normalizeRole = (role: string): string => {
     if (!role) return 'member';
     const normalized = role.toLowerCase().trim();
-    const mappedRole = ROLE_MAPPING[normalized] || 'member';
+    const mappedRole = ROLE_MAPPING[normalized];
     
-    // Ensure the role is valid according to database constraint
-    if (!VALID_ROLES.includes(mappedRole)) {
-      console.warn(`Invalid role "${mappedRole}" for input "${role}", defaulting to "member"`);
+    // If we have a mapping, use it, otherwise default to 'member'
+    const finalRole = mappedRole || 'member';
+    
+    // Final validation - ensure the role is in our valid list
+    if (!VALID_ROLES.includes(finalRole)) {
+      console.warn(`Role "${finalRole}" is not in valid roles list, defaulting to "member"`);
       return 'member';
     }
     
-    return mappedRole;
+    return finalRole;
   };
 
   const handleFileSelect = () => {
@@ -256,9 +265,17 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error('Missing required fields');
       }
 
-      // Ensure role is set to a valid value
-      if (!mappedData.role || !VALID_ROLES.includes(mappedData.role)) {
-        console.warn(`Invalid or missing role for ${mappedData.email}, setting to "member"`);
+      // Ensure role is always a valid value - this is critical
+      if (!mappedData.role) {
+        mappedData.role = 'member';
+      } else {
+        // Re-validate the role to ensure it's valid
+        mappedData.role = normalizeRole(mappedData.role);
+      }
+
+      // Final safety check
+      if (!VALID_ROLES.includes(mappedData.role)) {
+        console.error(`Final role validation failed for ${mappedData.email}: "${mappedData.role}" not in valid roles`);
         mappedData.role = 'member';
       }
 
@@ -273,9 +290,11 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     try {
       console.log('Creating member import for:', userData.email);
 
-      // Validate role one more time before creating
-      if (!userData.role || !VALID_ROLES.includes(userData.role)) {
-        userData.role = 'member';
+      // Triple-check role validation before any database operation
+      let validatedRole = userData.role || 'member';
+      if (!VALID_ROLES.includes(validatedRole)) {
+        console.warn(`Invalid role "${validatedRole}" for ${userData.email}, forcing to "member"`);
+        validatedRole = 'member';
       }
 
       const profileData = {
@@ -283,7 +302,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         last_name: userData.last_name,
         phone: userData.phone || null,
         voice_part: userData.voice_part || null,
-        role: userData.role,
+        role: validatedRole, // Use the validated role
         status: userData.status || 'active',
         class_year: userData.class_year || null,
         notes: userData.notes || null,
@@ -293,9 +312,14 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         updated_at: new Date().toISOString()
       };
 
-      // Double-check that we're only inserting valid data
-      console.log('Profile data to insert:', profileData);
+      // Log the exact data being inserted for debugging
+      console.log('Final profile data for member_imports:', {
+        email: userData.email,
+        role: profileData.role,
+        profileData
+      });
 
+      // Insert into member_imports table (not profiles table)
       const { error: insertError } = await supabase
         .from('member_imports')
         .insert({
@@ -306,7 +330,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         });
 
       if (insertError) {
-        console.error('Insert error:', insertError);
+        console.error('Insert error for member_imports:', insertError);
         throw insertError;
       }
 
