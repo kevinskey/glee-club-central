@@ -78,8 +78,8 @@ export function MembersPageSimple() {
 
           const emailMap = new Map<string, string>();
           if (authUsers?.users) {
-            authUsers.users.forEach(user => {
-              emailMap.set(user.id, user.email || '');
+            authUsers.users.forEach(authUser => {
+              emailMap.set(authUser.id, authUser.email || '');
             });
           }
 
@@ -132,7 +132,7 @@ export function MembersPageSimple() {
       }
 
       setMembers(membersWithEmails);
-      console.log('✅ Members processed:', membersWithEmbers.length);
+      console.log('✅ Members processed:', membersWithEmails.length);
       
     } catch (error) {
       console.error('💥 Error loading members:', error);
