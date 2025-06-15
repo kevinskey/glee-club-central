@@ -7,7 +7,6 @@ import {
   Users,
   Settings,
   Package,
-  Wand2,
   Sliders,
 } from "lucide-react"
 
@@ -49,12 +48,6 @@ export const SidebarNavItems: NavItem[] = [
     href: "/store",
     icon: Package,
     roles: ["admin", "treasurer", "merchandise_manager", "section_leader", "member"],
-  },
-  {
-    title: "Auto Product Generator",
-    href: "/auto-generator",
-    icon: Wand2,
-    roles: ["treasurer", "merchandise_manager", "admin"],
   },
   {
     title: "Slider Console",

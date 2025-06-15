@@ -9,7 +9,6 @@ import LoginPage from "./pages/auth/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import AttendancePage from "./pages/AttendancePage";
 import StorePage from "./pages/StorePage";
-import DesignStudioPage from "./pages/DesignStudioPage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
@@ -104,10 +103,6 @@ const router = createBrowserRouter([
       {
         path: "store",
         element: <StorePage />,
-      },
-      {
-        path: "design-studio",
-        element: <DesignStudioPage />,
       },
       {
         path: "auto-generator",

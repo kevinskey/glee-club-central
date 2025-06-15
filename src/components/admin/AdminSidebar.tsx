@@ -12,7 +12,6 @@ import {
   Megaphone,
   Image,
   Home,
-  Palette,
   Music
 } from 'lucide-react';
 import { ViewSwitcher } from './ViewSwitcher';
@@ -25,7 +24,6 @@ const navItems = [
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/music', icon: Music, label: 'Music Player' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
-  { to: '/admin/design-studio', icon: Palette, label: 'Design Studio' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },

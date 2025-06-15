@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Palette, CreditCard, Package } from 'lucide-react';
+import { ShoppingCart, CreditCard, Package } from 'lucide-react';
 import { Profile } from '@/types/auth';
 
 interface EcommerceSectionProps {
@@ -28,7 +28,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Contact an administrator to enable access to the design studio and store features.
+            Contact an administrator to enable access to the store features.
           </p>
           <Badge variant="secondary">Access Disabled</Badge>
         </CardContent>
@@ -46,27 +46,6 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Design Studio */}
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/design-studio')}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Palette className="h-5 w-5 text-blue-600" />
-              Design Studio
-            </CardTitle>
-            <CardDescription>
-              Create custom designs for merchandise
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Design your own custom t-shirts and merchandise with our intuitive design tools.
-            </p>
-            <Button className="w-full">
-              Open Design Studio
-            </Button>
-          </CardContent>
-        </Card>
-
         {/* Store */}
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/store')}>
           <CardHeader>
@@ -80,7 +59,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Shop for official Glee Club merchandise, custom designs, and more.
+              Shop for official Glee Club merchandise and more.
             </p>
             <Button className="w-full">
               Browse Store
@@ -104,7 +83,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
               ${(profile.account_balance || 0).toFixed(2)}
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Use your credits for purchases and custom designs.
+              Use your credits for purchases.
             </p>
             <Button variant="outline" className="w-full">
               View Transaction History
@@ -112,33 +91,30 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
           </CardContent>
         </Card>
 
-        {/* Design History */}
+        {/* Order History */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5 text-orange-600" />
-              Saved Designs
+              Order History
             </CardTitle>
             <CardDescription>
-              Your design collection
+              Your purchase history
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold mb-2">
-              {profile.design_history_ids?.length || 0}
+              0
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              {profile.design_history_ids?.length ? 
-                'View and manage your saved designs.' : 
-                'Start creating designs to build your collection.'
-              }
+              View your past orders and track shipments.
             </p>
             <Button 
               variant="outline" 
               className="w-full"
-              onClick={() => navigate('/design-studio')}
+              onClick={() => navigate('/store')}
             >
-              {profile.design_history_ids?.length ? 'View Designs' : 'Create First Design'}
+              View Orders
             </Button>
           </CardContent>
         </Card>
