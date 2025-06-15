@@ -42,6 +42,7 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
       }
       
       // Handle is_admin field (convert to role and is_super_admin)
+      // Note: is_admin doesn't exist in DB, we map it to is_super_admin
       if (userData.is_admin !== undefined) {
         updateData.is_super_admin = userData.is_admin;
         updateData.role = userData.is_admin ? 'admin' : 'member';
