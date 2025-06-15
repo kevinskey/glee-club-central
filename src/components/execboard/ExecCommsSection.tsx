@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { Profile } from '@/types/auth';
 
 interface Announcement {
   id: string;
@@ -23,7 +23,7 @@ interface Announcement {
 }
 
 export function ExecCommsSection() {
-  const { profile } = useAuth();
+  const { profile } = useAuth() as { profile: Profile | null };
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [announcementDialog, setAnnouncementDialog] = useState(false);

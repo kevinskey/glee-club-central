@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Send, Sparkles, FileText, DollarSign, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import { Profile } from '@/types/auth';
 
 interface AIPrompt {
   id: string;
@@ -62,7 +62,7 @@ const predefinedPrompts: AIPrompt[] = [
 ];
 
 export function ExecAISection() {
-  const { profile } = useAuth();
+  const { profile } = useAuth() as { profile: Profile | null };
   const [userPrompt, setUserPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);

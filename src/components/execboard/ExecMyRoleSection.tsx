@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Users, FileText, DollarSign, Camera, Megaphone, Heart, UserCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Profile } from '@/types/auth';
 
 interface RoleInfo {
   title: string;
@@ -134,7 +134,7 @@ const roleDefinitions: { [key: string]: RoleInfo } = {
 };
 
 export function ExecMyRoleSection() {
-  const { profile } = useAuth();
+  const { profile } = useAuth() as { profile: Profile | null };
   const roleInfo = roleDefinitions[profile?.exec_board_role || ''];
 
   if (!roleInfo) {

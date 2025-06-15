@@ -18,6 +18,7 @@ import {
   Star,
   Home
 } from 'lucide-react';
+import { Profile } from '@/types/auth';
 
 interface NavItem {
   to: string;
@@ -136,7 +137,7 @@ export function DynamicDashboardSidebar() {
   const isAdmin = profile?.is_super_admin || profile?.role === 'admin';
   
   // Check if user is exec board member
-  const isExecBoard = profile?.is_exec_board === true;
+  const isExecBoard = (profile as Profile | undefined)?.is_exec_board === true;
 
   // Filter exec items based on role tags and exec board status
   const visibleExecItems = execNavItems.filter(item => {
@@ -266,7 +267,7 @@ export function DynamicDashboardSidebar() {
               <div className="flex flex-wrap gap-1 mt-1">
                 {isExecBoard && (
                   <span className="inline-block px-2 py-1 bg-glee-spelman/10 text-glee-spelman rounded text-xs">
-                    {profile?.exec_board_role || 'Executive Board'}
+                    {(profile as Profile)?.exec_board_role || 'Executive Board'}
                   </span>
                 )}
                 {roleTags.map((tag, index) => (

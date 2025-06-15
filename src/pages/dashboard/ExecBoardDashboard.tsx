@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader } from '@/components/ui/page-header';
@@ -17,7 +16,7 @@ import { ExecAISection } from '@/components/execboard/ExecAISection';
 import { ExecMyRoleSection } from '@/components/execboard/ExecMyRoleSection';
 
 export default function ExecBoardDashboard() {
-  const { profile } = useAuth();
+  const { profile } = useAuth() as { profile: Profile | null };
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
