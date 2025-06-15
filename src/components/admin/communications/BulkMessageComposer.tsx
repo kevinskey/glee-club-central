@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +20,11 @@ interface Member {
   phone?: string;
   role: string;
   voice_part?: string;
+}
+
+interface AuthUser {
+  id: string;
+  email?: string;
 }
 
 export function BulkMessageComposer() {
@@ -73,24 +77,28 @@ export function BulkMessageComposer() {
       console.log('Profiles loaded:', profilesData.length);
 
       // Try to get user emails from auth admin (will work for admin users)
-      let emailMap = new Map();
+      let emailMap = new Map<string, string>();
       try {
         const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
         
         if (authUsers?.users && !authError) {
-          authUsers.users.forEach(authUser => {
-            if (authUser.email) {
+          (authUsers.users as AuthUser[]).forEach((authUser: AuthUser) => {
+            if (authUser.email && authUser.id) {
               emailMap.set(authUser.id, authUser.email);
             }
           });
         } else {
           console.warn('Could not fetch auth users, using current user email only');
           // Fall back to current user's email for their own profile
-          emailMap.set(user.id, user.email || '');
+          if (user.email) {
+            emailMap.set(user.id, user.email);
+          }
         }
       } catch (authError) {
         console.warn('Auth admin access failed, using fallback:', authError);
-        emailMap.set(user.id, user.email || '');
+        if (user.email) {
+          emailMap.set(user.id, user.email);
+        }
       }
 
       // Combine profile data with emails
@@ -445,7 +453,7 @@ export function BulkMessageComposer() {
           size="lg"
           className="gap-2"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-4 w-4" />
           {isSending ? "Sending..." : `Send to ${selectedMembers.length} Recipients`}
         </Button>
       </div>
