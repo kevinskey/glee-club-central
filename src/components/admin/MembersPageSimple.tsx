@@ -1,321 +1,69 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Users, 
   Plus, 
-  MoreVertical, 
+  Upload, 
   RefreshCw, 
-  Edit, 
-  Mail,
-  Phone,
-  Music,
-  Settings
+  AlertCircle
 } from 'lucide-react';
-import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
-import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
-import { MembersPagination } from '@/components/members/MembersPagination';
-import { AddMemberDialog } from '@/components/members/AddMemberDialog';
-import { DetailedProfileEditor } from '@/components/members/DetailedProfileEditor';
-import { UserFormValues } from '@/components/members/form/userFormSchema';
-import { toast } from 'sonner';
+import { CleanMembersPage } from '@/components/members/CleanMembersPage';
+import { MemberBulkUpload } from './MemberBulkUpload';
+import { useAuthMigration } from '@/hooks/useAuthMigration';
 
 export default function MembersPageSimple() {
-  const {
-    filteredUsers,
-    isLoading,
-    error,
-    filters,
-    currentPage,
-    totalPages,
-    paginatedUsers,
-    setFilters,
-    setCurrentPage,
-    refetch,
-    addUser,
-    updateUser
-  } = useUnifiedUserManagement();
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const { isAdmin } = useAuthMigration();
 
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showDetailedEditor, setShowDetailedEditor] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'search') return value !== '';
-    return value !== 'all';
-  }).length;
-
-  const handleAddMember = async (data: UserFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const success = await addUser(data);
-      if (success) {
-        setShowAddDialog(false);
-        toast.success('Member added successfully');
-      }
-    } catch (error) {
-      console.error('Error adding member:', error);
-      toast.error('Failed to add member');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleBulkUploadComplete = () => {
+    setShowBulkUpload(false);
+    // Refresh the members list
+    window.location.reload();
   };
 
-  const handleEditUser = (user: any) => {
-    setSelectedUser(user);
-    setShowDetailedEditor(true);
-  };
-
-  const handleSaveDetailedProfile = async (data: any) => {
-    if (!selectedUser) return;
-    
-    setIsSubmitting(true);
-    try {
-      const updateData: any = {};
-      
-      // Map all the form fields
-      Object.keys(data).forEach(key => {
-        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
-          if (key === 'join_date' && data[key] instanceof Date) {
-            updateData[key] = data[key].toISOString().split('T')[0];
-          } else if (key === 'is_admin') {
-            updateData.is_super_admin = data[key];
-          } else {
-            updateData[key] = data[key];
-          }
-        }
-      });
-
-      const success = await updateUser(selectedUser.id, updateData);
-      if (success) {
-        setShowDetailedEditor(false);
-        setSelectedUser(null);
-        toast.success('Profile updated successfully');
-      } else {
-        toast.error('Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Safe function to get user initials
-  const getUserInitials = (user: any) => {
-    const firstName = user?.first_name || '';
-    const lastName = user?.last_name || '';
-    
-    const firstInitial = firstName ? firstName.charAt(0).toUpperCase() : '';
-    const lastInitial = lastName ? lastName.charAt(0).toUpperCase() : '';
-    
-    return firstInitial + lastInitial || '??';
-  };
-
-  if (isLoading) {
+  // Show bulk upload view
+  if (showBulkUpload) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading members...</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Button onClick={() => setShowBulkUpload(false)} variant="outline">
+            ← Back to Members
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Bulk Upload Members</h1>
+            <p className="text-muted-foreground">Import multiple members from a CSV file</p>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Error loading members: {error}</p>
-          <Button onClick={refetch}>Try Again</Button>
+        
+        <div className="max-w-4xl">
+          <MemberBulkUpload onMembersUploaded={handleBulkUploadComplete} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Member Management
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Manage Glee Club members ({filteredUsers.length} total)
-          </p>
+          <h1 className="text-2xl font-bold">Members</h1>
+          <p className="text-muted-foreground">Manage Glee Club members</p>
         </div>
         
-        <div className="flex gap-3">
-          <Button onClick={refetch} variant="outline" disabled={isLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-          <Button onClick={() => setShowAddDialog(true)} className="bg-glee-spelman hover:bg-glee-spelman/90">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Member
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <StreamlinedFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        activeFilterCount={activeFilterCount}
-      />
-
-      {/* Results Summary */}
-      <div className="flex items-center justify-between text-sm text-muted-foreground">
-        <p>
-          Showing {((currentPage - 1) * 6) + 1}-{Math.min(currentPage * 6, filteredUsers.length)} of {filteredUsers.length} members
-          {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
-        </p>
-        <p>Page {currentPage} of {totalPages}</p>
-      </div>
-
-      {/* Member List */}
-      {filteredUsers.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-semibold mb-2">No Members Found</h3>
-            <p className="text-muted-foreground mb-4">
-              {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
-            </p>
-            {activeFilterCount === 0 && (
-              <Button onClick={() => setShowAddDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Member
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <div className="grid gap-4">
-            {paginatedUsers.map((member) => (
-              <Card 
-                key={member.id} 
-                className="transition-all duration-200 cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-glee-spelman/50"
-                onClick={() => handleEditUser(member)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={member.avatar_url} />
-                        <AvatarFallback className="bg-glee-spelman/10 text-glee-spelman font-semibold">
-                          {getUserInitials(member)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {member.first_name || 'Unknown'} {member.last_name || 'User'}
-                        </h3>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          {member.email && (
-                            <div className="flex items-center">
-                              <Mail className="mr-1 h-3 w-3" />
-                              {member.email}
-                            </div>
-                          )}
-                          {member.phone && (
-                            <div className="flex items-center">
-                              <Phone className="mr-1 h-3 w-3" />
-                              {member.phone}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      {member.role && (
-                        <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
-                          {member.role}
-                        </Badge>
-                      )}
-                      {member.voice_part && (
-                        <Badge variant="outline">
-                          <Music className="mr-1 h-3 w-3" />
-                          {member.voice_part.replace('_', ' ')}
-                        </Badge>
-                      )}
-                      <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                        {member.status || 'active'}
-                      </Badge>
-                      {member.dues_paid && (
-                        <Badge variant="default" className="bg-green-600">
-                          Dues Paid
-                        </Badge>
-                      )}
-                      {member.class_year && (
-                        <Badge variant="outline">
-                          Class {member.class_year}
-                        </Badge>
-                      )}
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditUser(member);
-                          }}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            Edit Full Profile
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+        {isAdmin() && (
+          <div className="flex gap-2">
+            <Button onClick={() => setShowBulkUpload(true)} variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Upload
+            </Button>
           </div>
+        )}
+      </div>
 
-          <MembersPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </>
-      )}
-
-      {/* Dialogs */}
-      <AddMemberDialog
-        isOpen={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onMemberAdd={handleAddMember}
-        isSubmitting={isSubmitting}
-      />
-
-      <DetailedProfileEditor
-        isOpen={showDetailedEditor}
-        onOpenChange={(open) => {
-          setShowDetailedEditor(open);
-          if (!open) setSelectedUser(null);
-        }}
-        user={selectedUser}
-        onSave={handleSaveDetailedProfile}
-        isSubmitting={isSubmitting}
-      />
+      <CleanMembersPage />
     </div>
   );
 }
