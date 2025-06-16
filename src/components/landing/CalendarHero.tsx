@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarEvent } from '@/types/calendar';
 import { Card, CardContent } from '@/components/ui/card';
@@ -64,7 +63,7 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold font-playfair text-gray-900 mb-8">Upcoming Events</h2>
         
-        <p className="text-gray-600 max-w-2xl mb-8">
+        <p className="text-gray-600 max-w-2xl mb-8 text-sm">
           Join us for unforgettable musical experiences. Don't miss these upcoming performances and events.
         </p>
 
