@@ -44,13 +44,15 @@ export default function HomePage() {
       {/* News ticker at the very top */}
       <OptimizedNewsTicker autoHide={false} />
       
-      {/* Header */}
-      <UnifiedPublicHeader />
-      
       {/* Main content */}
       <main className="relative">
         {/* Dynamic Hero Section - Full Screen */}
         <DynamicHero />
+        
+        {/* Header positioned absolutely over the hero */}
+        <div className="absolute top-0 left-0 right-0 z-50">
+          <UnifiedPublicHeader />
+        </div>
         
         {/* Rest of homepage content */}
         <div className="bg-black/95 backdrop-blur-sm">
