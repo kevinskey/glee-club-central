@@ -51,23 +51,23 @@ export function Footer() {
   ];
   
   return (
-    <footer className="glee-footer py-12">
-      <div className="container px-6 max-w-7xl mx-auto">
+    <footer className="glee-footer py-8 md:py-12 mt-8 md:mt-16">
+      <div className="container px-4 sm:px-6 max-w-7xl mx-auto">
         {/* Main Footer Content */}
-        <div className="grid gap-8 md:grid-cols-3 mb-8">
+        <div className="grid gap-6 sm:gap-8 md:grid-cols-3 mb-6 sm:mb-8">
           {/* Logo & Tagline */}
-          <div>
-            <div className="flex items-center mb-4">
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start mb-4">
               <img 
                 src="/lovable-uploads/8aa13e63-fb9a-4c52-95cf-86b458c58f1c.png" 
                 alt="Spelman College Glee Club" 
-                className="h-16 mr-4"
+                className="h-12 sm:h-16 mr-3 sm:mr-4"
               />
               <div>
-                <h3 className="font-playfair text-2xl font-bold text-[#0072CE] mb-1">
+                <h3 className="font-playfair text-xl sm:text-2xl font-bold text-[#0072CE] mb-1">
                   Glee World
                 </h3>
-                <p className="text-base text-gray-700 dark:text-gray-300">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
                   Spelman College Glee Club Official Site
                 </p>
               </div>
@@ -75,14 +75,14 @@ export function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-black dark:text-white">Quick Links</h3>
-            <ul className="space-y-3">
+          <div className="text-center md:text-left">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-black dark:text-white">Quick Links</h3>
+            <ul className="space-y-2 sm:space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-base text-gray-700 dark:text-gray-300 hover:text-[#0072CE] transition-colors"
+                    className="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-[#0072CE] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -92,14 +92,14 @@ export function Footer() {
           </div>
 
           {/* Legal Links */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4 text-black dark:text-white">Legal</h3>
-            <ul className="space-y-3">
+          <div className="text-center md:text-left">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-black dark:text-white">Legal</h3>
+            <ul className="space-y-2 sm:space-y-3">
               {legalLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     to={link.href}
-                    className="text-base text-gray-700 dark:text-gray-300 hover:text-[#0072CE] transition-colors"
+                    className="text-sm sm:text-base text-gray-700 dark:text-gray-300 hover:text-[#0072CE] transition-colors"
                   >
                     {link.label}
                   </Link>
@@ -110,8 +110,8 @@ export function Footer() {
         </div>
         
         {/* Social media links */}
-        <div className="border-t border-gray-200 dark:border-gray-700 py-6 my-6">
-          <div className="flex justify-center gap-6">
+        <div className="border-t border-gray-200 dark:border-gray-700 py-4 sm:py-6 my-4 sm:my-6">
+          <div className="flex justify-center gap-4 sm:gap-6">
             {socialLinks.map((social) => (
               <a 
                 key={social.label}
@@ -128,11 +128,11 @@ export function Footer() {
         </div>
         
         {/* Bottom Bar */}
-        <div className="text-center border-t border-gray-200 dark:border-gray-700 pt-6">
-          <p className="text-gray-700 dark:text-gray-300 text-base mb-2">
+        <div className="text-center border-t border-gray-200 dark:border-gray-700 pt-4 sm:pt-6">
+          <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base mb-1 sm:mb-2">
             © {currentYear} Spelman College Glee Club. All rights reserved.
           </p>
-          <p className="text-base text-gray-700 dark:text-gray-300">
+          <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300">
             Built with ♪ for the Spelman Glee Club
           </p>
         </div>
