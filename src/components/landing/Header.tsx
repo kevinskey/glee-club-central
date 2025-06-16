@@ -39,12 +39,14 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
           <div className="flex h-16 items-center justify-between px-6">
-            {/* Logo */}
-            <HeaderLogo />
+            {/* Logo - Always visible */}
+            <div className="flex-shrink-0">
+              <HeaderLogo />
+            </div>
             
             {/* Desktop Navigation */}
             {!isMobile && (
-              <nav className="flex items-center space-x-8">
+              <nav className="flex items-center space-x-8 flex-1 justify-center">
                 <Link to="/" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
                   Home
                 </Link>
@@ -64,7 +66,7 @@ export function Header() {
             )}
             
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-shrink-0">
               {/* Desktop Auth Buttons */}
               {!isMobile && (
                 <>
