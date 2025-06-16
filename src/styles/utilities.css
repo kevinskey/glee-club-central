@@ -17,16 +17,9 @@
     -webkit-backdrop-filter: blur(16px);
   }
   
-  .glass-royal {
-    @apply bg-royal-500/20 border-royal-300/30 backdrop-blur-xl;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  
-  .glass-powder {
-    @apply bg-powder-500/20 border-powder-300/30 backdrop-blur-xl;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.1));
+  .glass-glee {
+    @apply bg-[#0072CE]/20 border-[#0072CE]/30 backdrop-blur-xl;
+    background: linear-gradient(135deg, rgba(0, 114, 206, 0.2), rgba(0, 114, 206, 0.1));
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
@@ -46,7 +39,7 @@
     font-weight: 300;
     letter-spacing: -0.03em;
     line-height: 0.9;
-    background: linear-gradient(135deg, theme(colors.royal.600), theme(colors.powder.500));
+    background: linear-gradient(135deg, #0072CE, #0072CE);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -123,7 +116,7 @@
   
   .glass-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15), 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    box-shadow: 0 20px 40px rgba(0, 114, 206, 0.15), 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
   }
@@ -140,21 +133,21 @@
   
   /* Enhanced glass buttons */
   .glass-button-primary {
-    @apply bg-royal-600/80 hover:bg-royal-700/90 text-white font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-royal-400/30;
+    @apply bg-[#0072CE]/80 hover:bg-[#0072CE]/90 text-white font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-[#0072CE]/30;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 16px 0 rgba(0, 114, 206, 0.3);
   }
   
   .glass-button-secondary {
-    @apply bg-powder-500/20 hover:bg-powder-600/30 text-powder-700 dark:text-powder-300 font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-powder-400/30;
+    @apply bg-[#0072CE]/20 hover:bg-[#0072CE]/30 text-[#0072CE] dark:text-[#0072CE] font-normal rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-lg border border-[#0072CE]/30;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
   
   /* Glass form elements */
   .glass-input {
-    @apply bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-royal-500/50 focus:border-royal-400/50 transition-all duration-200 backdrop-blur-lg;
+    @apply bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0072CE]/50 focus:border-[#0072CE]/50 transition-all duration-200 backdrop-blur-lg;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
   }
