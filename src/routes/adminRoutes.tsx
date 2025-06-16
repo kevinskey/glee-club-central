@@ -21,6 +21,7 @@ import AdminVideosPage from '@/pages/admin/AdminVideosPage';
 import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
 import UserRolesPage from '@/pages/admin/UserRolesPage';
 import FinancialPage from '@/pages/admin/FinancialPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -38,6 +39,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'members',
         element: <MembersPage />,
+      },
+      {
+        path: 'users',
+        element: <UserManagementPage />,
       },
       {
         path: 'user-roles',
