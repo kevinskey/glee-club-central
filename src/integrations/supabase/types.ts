@@ -789,6 +789,210 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_budgets: {
+        Row: {
+          academic_year: string
+          budgeted_amount: number
+          category: string
+          created_at: string | null
+          created_by: string
+          id: string
+          notes: string | null
+          semester: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          academic_year: string
+          budgeted_amount: number
+          category: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          notes?: string | null
+          semester?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          academic_year?: string
+          budgeted_amount?: number
+          category?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          notes?: string | null
+          semester?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_budgets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          category: string
+          created_at: string | null
+          created_by: string
+          date: string
+          description: string
+          id: string
+          member_id: string | null
+          notes: string | null
+          payment_method: string | null
+          receipt_url: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string | null
+          subcategory: string | null
+          transaction_type: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category: string
+          created_at?: string | null
+          created_by: string
+          date?: string
+          description: string
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          subcategory?: string | null
+          transaction_type: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          category?: string
+          created_at?: string | null
+          created_by?: string
+          date?: string
+          description?: string
+          id?: string
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          subcategory?: string | null
+          transaction_type?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "user_management_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hero_settings: {
         Row: {
           animation_style: string | null

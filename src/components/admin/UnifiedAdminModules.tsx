@@ -8,7 +8,7 @@ import { hasPermission } from "@/utils/permissionChecker";
 import { 
   ShoppingBag, Plus, Upload,
   Music, BarChart, Settings, Layout, Presentation, FileText,
-  Users, Calendar, Sliders, Bell, FileMusic, UserCog
+  Users, Calendar, Sliders, Bell, FileMusic, UserCog, DollarSign
 } from "lucide-react";
 
 interface ModuleItem {
@@ -60,6 +60,16 @@ export function UnifiedAdminModules() {
       color: "bg-green-500",
       path: "/admin/calendar",
       adminOnly: true
+    },
+    {
+      id: "financial",
+      title: "Financial Management",
+      description: "Track income, expenses, and budgets",
+      icon: <DollarSign className="h-5 w-5" />,
+      color: "bg-emerald-600",
+      path: "/admin/financial",
+      adminOnly: true,
+      isPriority: true
     },
     {
       id: "hero-slides",

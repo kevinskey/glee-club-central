@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -18,6 +19,7 @@ import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
 import AdminVideosPage from '@/pages/admin/AdminVideosPage';
 import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
 import UserRolesPage from '@/pages/admin/UserRolesPage';
+import FinancialPage from '@/pages/admin/FinancialPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -91,6 +93,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'settings',
         element: <SiteSettingsPage />,
+      },
+      {
+        path: 'financial',
+        element: <FinancialPage />,
       },
     ],
   },

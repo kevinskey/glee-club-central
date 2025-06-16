@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Users, 
@@ -11,7 +12,8 @@ import {
   Home,
   Video,
   Settings,
-  UserCog
+  UserCog,
+  DollarSign
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -32,6 +34,11 @@ export function AdminNavItems() {
         href="/admin/user-roles"
         icon={<UserCog className="h-5 w-5" />}
         title="User Roles"
+      />
+      <NavItem
+        href="/admin/financial"
+        icon={<DollarSign className="h-5 w-5" />}
+        title="Financial"
       />
       <NavItem
         href="/admin/calendar"
