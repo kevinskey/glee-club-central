@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, ExternalLink, Video, Save, X, List } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, Video, Save, X, List, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -28,6 +28,7 @@ interface YouTubeVideo {
 export function YouTubeVideoAdmin() {
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingVideoInfo, setIsLoadingVideoInfo] = useState(false);
   const [editingVideo, setEditingVideo] = useState<YouTubeVideo | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -65,6 +66,103 @@ export function YouTubeVideoAdmin() {
       toast.error('Failed to load videos');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to extract video ID from YouTube URL
+  const extractVideoId = (url: string): string | null => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  // Function to extract playlist ID from YouTube URL
+  const extractPlaylistId = (url: string): string | null => {
+    const regex = /[?&]list=([^"&?\/\s]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  // Function to fetch YouTube video information
+  const fetchYouTubeInfo = async (url: string) => {
+    setIsLoadingVideoInfo(true);
+    try {
+      const videoId = extractVideoId(url);
+      const playlistId = extractPlaylistId(url);
+      
+      if (!videoId && !playlistId) {
+        toast.error('Invalid YouTube URL');
+        return;
+      }
+
+      // For now, we'll extract basic info from the URL and use YouTube's oEmbed service
+      // In a production environment, you'd want to use the YouTube Data API
+      let title = '';
+      let description = '';
+      let thumbnailUrl = '';
+      let contentType: 'video' | 'playlist' = 'video';
+
+      if (playlistId) {
+        contentType = 'playlist';
+        title = 'YouTube Playlist';
+        description = 'Imported from YouTube playlist';
+        thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+      } else if (videoId) {
+        // Try to fetch video info using YouTube oEmbed
+        try {
+          const oEmbedResponse = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+          if (oEmbedResponse.ok) {
+            const oEmbedData = await oEmbedResponse.json();
+            title = oEmbedData.title || 'YouTube Video';
+            description = `By ${oEmbedData.author_name || 'Unknown Author'}`;
+            thumbnailUrl = oEmbedData.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+          } else {
+            throw new Error('oEmbed failed');
+          }
+        } catch (oEmbedError) {
+          console.log('oEmbed failed, using fallback');
+          title = 'YouTube Video';
+          description = 'Imported from YouTube';
+          thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+
+      // Update form data with fetched information
+      setFormData(prev => ({
+        ...prev,
+        title: title,
+        description: description,
+        thumbnail_url: thumbnailUrl,
+        content_type: contentType
+      }));
+
+      toast.success('Video information loaded successfully!');
+    } catch (error) {
+      console.error('Error fetching YouTube info:', error);
+      toast.error('Failed to fetch video information');
+    } finally {
+      setIsLoadingVideoInfo(false);
+    }
+  };
+
+  const detectContentType = (url: string): 'video' | 'playlist' => {
+    if (url.includes('list=') || url.includes('/playlist?')) {
+      return 'playlist';
+    }
+    return 'video';
+  };
+
+  const handleUrlChange = async (url: string) => {
+    const contentType = detectContentType(url);
+    setFormData({ 
+      ...formData, 
+      youtube_url: url, 
+      content_type: contentType 
+    });
+
+    // Auto-fetch video info if URL looks valid
+    if (url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+      await fetchYouTubeInfo(url);
     }
   };
 
@@ -141,34 +239,6 @@ export function YouTubeVideoAdmin() {
     setShowAddForm(true);
   };
 
-  const detectContentType = (url: string): 'video' | 'playlist' => {
-    if (url.includes('list=') || url.includes('/playlist?')) {
-      return 'playlist';
-    }
-    return 'video';
-  };
-
-  const handleUrlChange = (url: string) => {
-    const contentType = detectContentType(url);
-    setFormData({ 
-      ...formData, 
-      youtube_url: url, 
-      content_type: contentType 
-    });
-  };
-
-  const extractVideoId = (url: string): string | null => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
-  const extractPlaylistId = (url: string): string | null => {
-    const regex = /[?&]list=([^"&?\/\s]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
   const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist'): string => {
     if (contentType === 'playlist') {
       const playlistId = extractPlaylistId(url);
@@ -213,6 +283,27 @@ export function YouTubeVideoAdmin() {
                 <CardTitle>{editingVideo ? 'Edit Content' : 'Add New Content'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="youtube_url">YouTube URL</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="youtube_url"
+                      value={formData.youtube_url}
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      placeholder="Paste YouTube URL here - info will auto-populate"
+                      className="flex-1"
+                    />
+                    {isLoadingVideoInfo && (
+                      <div className="flex items-center px-3">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Paste a YouTube video or playlist URL and the title, description, and thumbnail will be automatically fetched
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Title</Label>
@@ -220,38 +311,28 @@ export function YouTubeVideoAdmin() {
                       id="title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="Content title"
+                      placeholder="Content title (auto-filled from URL)"
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="youtube_url">YouTube URL</Label>
-                    <Input
-                      id="youtube_url"
-                      value={formData.youtube_url}
-                      onChange={(e) => handleUrlChange(e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=... or playlist URL"
-                    />
+                    <Label htmlFor="content_type">Content Type</Label>
+                    <Select value={formData.content_type} onValueChange={(value: 'video' | 'playlist') => setFormData({ ...formData, content_type: value })}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="video">Single Video</SelectItem>
+                        <SelectItem value="playlist">Playlist</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500">
+                      Auto-detected from URL: {formData.content_type === 'playlist' 
+                        ? 'This will embed an entire YouTube playlist'
+                        : 'This will embed a single YouTube video'
+                      }
+                    </p>
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="content_type">Content Type</Label>
-                  <Select value={formData.content_type} onValueChange={(value: 'video' | 'playlist') => setFormData({ ...formData, content_type: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="video">Single Video</SelectItem>
-                      <SelectItem value="playlist">Playlist</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-gray-500">
-                    {formData.content_type === 'playlist' 
-                      ? 'This will embed an entire YouTube playlist'
-                      : 'This will embed a single YouTube video'
-                    }
-                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -260,10 +341,26 @@ export function YouTubeVideoAdmin() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Content description"
+                    placeholder="Content description (auto-filled from URL)"
                     rows={3}
                   />
                 </div>
+
+                {formData.thumbnail_url && (
+                  <div className="space-y-2">
+                    <Label>Preview Thumbnail</Label>
+                    <div className="max-w-sm">
+                      <img 
+                        src={formData.thumbnail_url} 
+                        alt="Video thumbnail"
+                        className="w-full rounded-lg"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -292,7 +389,7 @@ export function YouTubeVideoAdmin() {
                     <X className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
-                  <Button onClick={handleSave}>
+                  <Button onClick={handleSave} disabled={isLoadingVideoInfo}>
                     <Save className="h-4 w-4 mr-2" />
                     {editingVideo ? 'Update' : 'Add'} Content
                   </Button>
