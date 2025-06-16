@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function HeroDefault() {
   return (
-    <section className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[85vh] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] flex items-center justify-center overflow-hidden">
       {/* Liquid Glass Background */}
       <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
         <div className="absolute inset-0 bg-black/20"></div>
