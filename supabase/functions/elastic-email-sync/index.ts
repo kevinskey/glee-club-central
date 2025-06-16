@@ -60,12 +60,11 @@ async function loadAllData(apiKey: string) {
   console.log("Loading all Elastic Email data...");
   
   try {
-    const [accountInfo, statistics, contactLists, templates, campaigns] = await Promise.all([
+    const [accountInfo, statistics, contactLists, templates] = await Promise.all([
       fetchElasticEmailAPI(apiKey, 'account/load'),
-      fetchElasticEmailAPI(apiKey, 'account/statistics'),
+      fetchElasticEmailAPI(apiKey, 'account/profileoverview'),
       fetchElasticEmailAPI(apiKey, 'list/list'),
-      fetchElasticEmailAPI(apiKey, 'template/list'),
-      fetchElasticEmailAPI(apiKey, 'campaign/list', { limit: 10 })
+      fetchElasticEmailAPI(apiKey, 'template/getlist')
     ]);
 
     return new Response(JSON.stringify({
@@ -74,7 +73,7 @@ async function loadAllData(apiKey: string) {
       statistics: statistics.data || statistics,
       contactLists: contactLists.data || [],
       templates: templates.data || [],
-      campaigns: campaigns.data || []
+      campaigns: []
     }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -101,9 +100,10 @@ async function syncContacts(apiKey: string) {
 }
 
 async function syncTemplates(apiKey: string) {
-  const templates = await fetchElasticEmailAPI(apiKey, 'template/list');
+  console.log("Fetching templates using correct endpoint...");
+  const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
   
-  console.log("Syncing templates from Elastic Email");
+  console.log("Templates response:", templates);
   
   return new Response(JSON.stringify({
     success: true,
@@ -118,7 +118,7 @@ async function syncTemplates(apiKey: string) {
 async function getTemplates(apiKey: string) {
   console.log("Fetching templates from Elastic Email");
   
-  const templates = await fetchElasticEmailAPI(apiKey, 'template/list');
+  const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
   
   return new Response(JSON.stringify({
     success: true,
@@ -258,6 +258,8 @@ async function fetchElasticEmailAPI(apiKey: string, endpoint: string, params: an
     formData.append(key, params[key]);
   });
 
+  console.log(`Making request to Elastic Email endpoint: ${endpoint}`);
+  
   const response = await fetch(`https://api.elasticemail.com/v2/${endpoint}`, {
     method: 'POST',
     body: formData
@@ -265,10 +267,13 @@ async function fetchElasticEmailAPI(apiKey: string, endpoint: string, params: an
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error(`Elastic Email API error for ${endpoint}:`, errorText);
     throw new Error(`Elastic Email API error: ${errorText}`);
   }
 
   const responseText = await response.text();
+  console.log(`Elastic Email response for ${endpoint}:`, responseText);
+  
   try {
     return JSON.parse(responseText);
   } catch (e) {
