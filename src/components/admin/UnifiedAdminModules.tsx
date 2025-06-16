@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,25 +99,17 @@ export function UnifiedAdminModules() {
     },
     {
       id: "settings",
-      title: "Settings",
-      description: "Configure system settings",
+      title: "Site Settings",
+      description: "Configure system settings and preferences",
       icon: <Settings className="h-5 w-5" />,
       color: "bg-gray-500",
       path: "/admin/settings",
-      adminOnly: true
-    },
-    {
-      id: "sheet-music",
-      title: "Sheet Music",
-      description: "PDF viewer and music management",
-      icon: <FileMusic className="h-5 w-5" />,
-      color: "bg-violet-500",
-      path: "/sheet-music",
-      adminOnly: true
+      adminOnly: true,
+      isPriority: true
     },
     {
       id: "store",
-      title: "Store",
+      title: "Store Management",
       description: "Manage products and orders",
       icon: <ShoppingBag className="h-5 w-5" />,
       color: "bg-emerald-500",
@@ -127,8 +118,7 @@ export function UnifiedAdminModules() {
     }
   ];
 
-  // Filter modules based on admin status and permissions
-  const availableModules = moduleItems.filter(module => {
+  const filteredModules = moduleItems.filter(module => {
     if (module.adminOnly && !isAdmin()) {
       return false;
     }
@@ -140,7 +130,7 @@ export function UnifiedAdminModules() {
     return true;
   });
   
-  const sortedModules = [...availableModules].sort((a, b) => a.title.localeCompare(b.title));
+  const sortedModules = [...filteredModules].sort((a, b) => a.title.localeCompare(b.title));
 
   return (
     <div className="w-full">

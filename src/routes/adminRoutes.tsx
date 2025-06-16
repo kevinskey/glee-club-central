@@ -17,6 +17,7 @@ import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
 import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
 import AdminVideosPage from '@/pages/admin/AdminVideosPage';
+import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -82,6 +83,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'analytics',
         element: <AdminAnalyticsPage />,
+      },
+      {
+        path: 'settings',
+        element: <SiteSettingsPage />,
       },
     ],
   },
