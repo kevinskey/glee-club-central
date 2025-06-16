@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -147,7 +146,7 @@ export function SoundCloudCoverFlow({
                 onClick={() => handlePlaylistClick(playlist, index)}
               >
                 <Card className={`w-60 h-60 md:w-80 md:h-80 lg:w-96 lg:h-96 overflow-hidden shadow-2xl transition-shadow duration-300 ${
-                  isActive ? 'ring-2 ring-orange-500 shadow-orange-500/20' : ''
+                  isActive ? 'ring-2 ring-blue-500 shadow-blue-500/20' : ''
                 }`}>
                   <div className="relative w-full h-full">
                     {playlist.artwork_url ? (
@@ -158,7 +157,7 @@ export function SoundCloudCoverFlow({
                         draggable={false}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-orange-400 via-red-500 to-pink-600 flex items-center justify-center">
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center">
                         <Music className="w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 text-white/80" />
                       </div>
                     )}
@@ -204,7 +203,7 @@ export function SoundCloudCoverFlow({
               key={index}
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'
+                index === currentIndex ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
             />
           ))}
@@ -250,7 +249,7 @@ export function SoundCloudCoverFlow({
           </div>
           <Button
             onClick={() => onPlaylistSelect(publicPlaylists[currentIndex])}
-            className="mt-4 md:mt-6 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 md:px-8 md:py-3 text-sm md:text-base"
+            className="mt-4 md:mt-6 bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 md:px-8 md:py-3 text-sm md:text-base"
           >
             <Play className="w-4 h-4 md:w-5 md:h-5 mr-2" />
             Play Playlist

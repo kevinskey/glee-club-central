@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,10 +38,10 @@ export function SoundCloudPlaylistCard({ playlist, onPlay, isActive = false }: S
   };
 
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-300 cursor-pointer ${isActive ? 'ring-2 ring-orange-500 shadow-lg' : ''}`}>
+    <Card className={`group hover:shadow-lg transition-all duration-300 cursor-pointer ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}>
       <CardContent className="p-0">
         {/* Playlist Cover */}
-        <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gradient-to-br from-orange-400 via-red-500 to-pink-600">
+        <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
           {playlist.artwork_url ? (
             <img 
               src={playlist.artwork_url} 

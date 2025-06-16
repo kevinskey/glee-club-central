@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -193,7 +192,7 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-orange-500" />
+          <AlertCircle className="w-5 h-5 text-blue-500" />
           Connect Your SoundCloud Account
         </CardTitle>
       </CardHeader>
@@ -215,7 +214,7 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
         <Button 
           onClick={handleConnect} 
           disabled={isConnecting}
-          className="w-full bg-orange-500 hover:bg-orange-600"
+          className="w-full bg-blue-500 hover:bg-blue-600"
         >
           {isConnecting ? (
             <>

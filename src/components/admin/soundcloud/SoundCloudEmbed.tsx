@@ -33,7 +33,7 @@ export function SoundCloudEmbed() {
   const generateEmbedCode = (url: string) => {
     const embedParams = new URLSearchParams({
       url: url,
-      color: '#ff5500',
+      color: '#3b82f6', // Changed from orange to blue
       auto_play: autoPlay.toString(),
       hide_related: 'false',
       show_comments: showComments.toString(),
