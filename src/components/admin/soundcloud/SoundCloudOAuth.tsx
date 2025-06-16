@@ -16,44 +16,50 @@ export function SoundCloudOAuth() {
   const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
   const [playlists, setPlaylists] = useState<SoundCloudPlaylist[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     console.log('SoundCloudOAuth component mounted');
     
-    // Check for existing connection first
-    const savedToken = localStorage.getItem('soundcloud_access_token');
-    const savedUser = localStorage.getItem('soundcloud_user');
-    
-    if (savedToken && savedUser) {
-      console.log('Found existing SoundCloud connection');
-      try {
-        setAccessToken(savedToken);
-        setConnectedUser(JSON.parse(savedUser));
-        loadUserData(savedToken);
-        return;
-      } catch (error) {
-        console.error('Error parsing saved user data:', error);
-        localStorage.removeItem('soundcloud_access_token');
-        localStorage.removeItem('soundcloud_user');
+    try {
+      // Check for existing connection first
+      const savedToken = localStorage.getItem('soundcloud_access_token');
+      const savedUser = localStorage.getItem('soundcloud_user');
+      
+      if (savedToken && savedUser) {
+        console.log('Found existing SoundCloud connection');
+        try {
+          setAccessToken(savedToken);
+          setConnectedUser(JSON.parse(savedUser));
+          loadUserData(savedToken);
+          return;
+        } catch (error) {
+          console.error('Error parsing saved user data:', error);
+          localStorage.removeItem('soundcloud_access_token');
+          localStorage.removeItem('soundcloud_user');
+        }
       }
-    }
 
-    // Check for OAuth callback in current URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const callback = urlParams.get('callback');
-    
-    if (code && callback === 'soundcloud') {
-      console.log('OAuth callback detected in URL, processing...');
-      handleOAuthCallback(code);
-      return;
-    }
-    
-    // Also check for code without callback parameter (fallback)
-    if (code && !callback) {
-      console.log('OAuth code detected without callback parameter, processing...');
-      handleOAuthCallback(code);
-      return;
+      // Check for OAuth callback in current URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const callback = urlParams.get('callback');
+      
+      if (code && callback === 'soundcloud') {
+        console.log('OAuth callback detected in URL, processing...');
+        handleOAuthCallback(code);
+        return;
+      }
+      
+      // Also check for code without callback parameter (fallback)
+      if (code && !callback) {
+        console.log('OAuth code detected without callback parameter, processing...');
+        handleOAuthCallback(code);
+        return;
+      }
+    } catch (error) {
+      console.error('Error in SoundCloudOAuth useEffect:', error);
+      setHasError(true);
     }
   }, []);
 
@@ -72,6 +78,7 @@ export function SoundCloudOAuth() {
 
   const handleConnect = async () => {
     setIsConnecting(true);
+    setHasError(false);
     
     try {
       console.log('Initiating SoundCloud OAuth connection...');
@@ -96,6 +103,7 @@ export function SoundCloudOAuth() {
     } catch (error) {
       console.error('SoundCloud connection error:', error);
       setIsConnecting(false);
+      setHasError(true);
       
       if (error instanceof Error) {
         toast.error(`Connection failed: ${error.message}`);
@@ -108,6 +116,7 @@ export function SoundCloudOAuth() {
   const handleOAuthCallback = async (code: string) => {
     console.log('Processing SoundCloud OAuth callback with code:', code.substring(0, 10) + '...');
     setIsConnecting(true);
+    setHasError(false);
     
     try {
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
@@ -150,6 +159,7 @@ export function SoundCloudOAuth() {
       
     } catch (error) {
       console.error('OAuth callback error:', error);
+      setHasError(true);
       if (error instanceof Error) {
         toast.error(`Authentication failed: ${error.message}`);
       } else {
@@ -207,6 +217,7 @@ export function SoundCloudOAuth() {
     setConnectedUser(null);
     setTracks([]);
     setPlaylists([]);
+    setHasError(false);
     
     toast.success('Disconnected from SoundCloud');
   };
@@ -215,6 +226,26 @@ export function SoundCloudOAuth() {
     if (!accessToken) return;
     await loadUserData(accessToken);
   };
+
+  // Handle error state
+  if (hasError) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+          <p className="text-red-600 mb-4">Something went wrong loading the SoundCloud integration.</p>
+          <button 
+            onClick={() => {
+              setHasError(false);
+              handleConnect();
+            }}
+            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (connectedUser) {
     return (
