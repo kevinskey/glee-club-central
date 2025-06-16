@@ -3088,6 +3088,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_role_permissions: {
+        Row: {
+          created_at: string | null
+          enabled: boolean
+          id: string
+          permission_key: string
+          role: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          enabled?: boolean
+          id?: string
+          permission_key: string
+          role: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          enabled?: boolean
+          id?: string
+          permission_key?: string
+          role?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_setlists: {
         Row: {
           created_at: string

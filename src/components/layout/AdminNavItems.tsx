@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Users, 
@@ -11,7 +10,8 @@ import {
   BarChart3,
   Home,
   Video,
-  Settings
+  Settings,
+  UserCog
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -27,6 +27,11 @@ export function AdminNavItems() {
         href="/admin/members"
         icon={<Users className="h-5 w-5" />}
         title="Members"
+      />
+      <NavItem
+        href="/admin/user-roles"
+        icon={<UserCog className="h-5 w-5" />}
+        title="User Roles"
       />
       <NavItem
         href="/admin/calendar"

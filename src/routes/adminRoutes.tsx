@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -18,6 +17,7 @@ import CommunicationsPage from '@/pages/admin/CommunicationsPage';
 import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
 import AdminVideosPage from '@/pages/admin/AdminVideosPage';
 import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
+import UserRolesPage from '@/pages/admin/UserRolesPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -39,6 +39,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'users',
         element: <Navigate to="/admin/members" replace />,
+      },
+      {
+        path: 'user-roles',
+        element: <UserRolesPage />,
       },
       {
         path: 'calendar',
