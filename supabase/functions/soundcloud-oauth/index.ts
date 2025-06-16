@@ -79,14 +79,14 @@ serve(async (req) => {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // FIXED: Use the correct callback HTML file path
+      // CONSISTENT: Always use the soundcloud-callback.html file
       const redirectUri = `${origin}/soundcloud-callback.html`
       const state = crypto.randomUUID()
       
       console.log('Generated redirect URI:', redirectUri)
       
-      // Use the correct SoundCloud OAuth URL with proper scope
-      const authUrl = new URL('https://secure.soundcloud.com/connect')
+      // Use the standard SoundCloud authorization endpoint
+      const authUrl = new URL('https://soundcloud.com/connect')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
       authUrl.searchParams.set('response_type', 'code')
