@@ -38,24 +38,22 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Content */}
-      <div className="relative z-10 min-h-screen">
-        <PublicPageWrapper showTopSlider={true}>
-          {/* Dynamic Hero Section */}
-          <DynamicHero />
-          
-          {/* Rest of homepage content */}
-          <div className="bg-white/95 backdrop-blur-sm">
-            <HomePageContent
-              heroImages={[]} // No hero images needed anymore
-              upcomingEvents={upcomingEvents}
-              storeProducts={storeProducts}
-              audioTracks={audioTracks}
-            />
-          </div>
-        </PublicPageWrapper>
-      </div>
+    <div className="relative">
+      {/* Dynamic Hero Section - Full Screen */}
+      <DynamicHero />
+      
+      {/* Content Wrapper */}
+      <PublicPageWrapper showTopSlider={true}>
+        {/* Rest of homepage content */}
+        <div className="bg-white/95 backdrop-blur-sm">
+          <HomePageContent
+            heroImages={[]} // No hero images needed anymore
+            upcomingEvents={upcomingEvents}
+            storeProducts={storeProducts}
+            audioTracks={audioTracks}
+          />
+        </div>
+      </PublicPageWrapper>
     </div>
   );
 }
