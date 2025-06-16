@@ -40,10 +40,6 @@ export const adminRoutes: RouteObject[] = [
         element: <MembersPage />,
       },
       {
-        path: 'users',
-        element: <Navigate to="/admin/members" replace />,
-      },
-      {
         path: 'user-roles',
         element: <UserRolesPage />,
       },

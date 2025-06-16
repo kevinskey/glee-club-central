@@ -12,11 +12,13 @@ import {
 } from 'lucide-react';
 import { CleanMembersPage } from '@/components/members/CleanMembersPage';
 import { MemberBulkUpload } from './MemberBulkUpload';
-import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function MembersPageSimple() {
   const [showBulkUpload, setShowBulkUpload] = useState(false);
-  const { isAdmin } = useAuthMigration();
+  const { profile } = useAuth();
+  
+  const isAdmin = profile?.role === 'admin' || profile?.is_super_admin;
 
   const handleBulkUploadComplete = () => {
     setShowBulkUpload(false);
@@ -53,7 +55,7 @@ export default function MembersPageSimple() {
           <p className="text-muted-foreground">Manage Glee Club members</p>
         </div>
         
-        {isAdmin() && (
+        {isAdmin && (
           <div className="flex gap-2">
             <Button onClick={() => setShowBulkUpload(true)} variant="outline">
               <Upload className="mr-2 h-4 w-4" />
