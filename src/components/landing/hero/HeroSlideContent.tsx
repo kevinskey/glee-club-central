@@ -75,18 +75,18 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                 if (parent) {
                   parent.innerHTML = `
                     <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-                      ${hasTextContent ? '<div class="absolute inset-0 bg-black/30"></div>' : ''}
+                      ${hasTextContent ? '<div class="absolute inset-0 bg-black/90"></div>' : ''}
                     </div>
                   `;
                 }
               }}
             />
-            {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
+            {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
           </>
         ) : (
           // Fallback gradient background
           <div className="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-            {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
+            {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
           </div>
         )}
       </div>
@@ -108,7 +108,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
               console.error('HeroSlideContent: Failed to load mobile image:', backgroundImage);
             }}
           />
-          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
+          {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
           
           {/* Mobile Content Overlay */}
           {hasTextContent && (
@@ -144,7 +144,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       {/* Fallback for mobile when no image */}
       {!hasValidImage && (
         <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-          {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
+          {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
           {hasTextContent && (
             <div className="relative z-10 flex items-center justify-center h-full">
               <div className="text-center text-white max-w-[90%] mx-auto">
@@ -185,7 +185,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
-          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
+          {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
         </div>
       )}
       

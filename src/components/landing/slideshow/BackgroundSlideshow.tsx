@@ -10,11 +10,11 @@ interface BackgroundSlideshowProps {
 
 export function BackgroundSlideshow({
   images,
-  overlayOpacity = 0.5,
+  overlayOpacity = 0.9,
 }: BackgroundSlideshowProps) {
   // Handle empty images array
   if (!images || images.length === 0) {
-    return <div className="absolute inset-0 bg-black/50"></div>;
+    return <div className="absolute inset-0 bg-black/90"></div>;
   }
 
   // Always show only the first image with no cropping
@@ -32,7 +32,7 @@ export function BackgroundSlideshow({
         }}
       />
       
-      {/* Using a consistent black overlay */}
+      {/* Using a 90% black overlay */}
       <div 
         className="absolute inset-0 bg-black" 
         style={{ opacity: overlayOpacity }}

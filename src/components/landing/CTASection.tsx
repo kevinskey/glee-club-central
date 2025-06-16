@@ -17,6 +17,7 @@ export function CTASection() {
             backgroundImage: "url('/lovable-uploads/3ad02de0-04d1-4a5e-9279-898e9c317d80.png')", 
           }}
         ></div>
+        <div className="absolute inset-0 bg-black/90"></div>
       </div>
       <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8 relative z-10">
         <div className="text-center">
