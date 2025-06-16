@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { ExternalLink, Play, Video, List } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -211,7 +210,7 @@ export function YouTubeVideoSection() {
           </Card>
         </div>
       ) : (
-        /* Multiple Videos Carousel */
+        /* Multiple Videos Carousel - Navigation arrows removed */
         <div className="w-full max-w-6xl mx-auto">
           <Carousel 
             className="w-full"
@@ -300,10 +299,6 @@ export function YouTubeVideoSection() {
                 );
               })}
             </CarouselContent>
-            
-            {/* Navigation */}
-            <CarouselPrevious className="left-2 bg-white/90 dark:bg-gray-800/90 border shadow-lg hover:bg-white dark:hover:bg-gray-800" />
-            <CarouselNext className="right-2 bg-white/90 dark:bg-gray-800/90 border shadow-lg hover:bg-white dark:hover:bg-gray-800" />
           </Carousel>
         </div>
       )}
