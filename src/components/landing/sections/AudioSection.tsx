@@ -1,6 +1,6 @@
 
 import React from "react";
-import { CustomAudioSection } from "./CustomAudioSection";
+import { NewAudioSection } from "./NewAudioSection";
 
 interface AudioTrack {
   id: string;
@@ -16,6 +16,7 @@ interface AudioSectionProps {
   useSoundCloud?: boolean;
 }
 
-export function AudioSection({ tracks, useSoundCloud = true }: AudioSectionProps) {
-  return <CustomAudioSection tracks={tracks} useSoundCloud={useSoundCloud} />;
+export function AudioSection({ tracks, useSoundCloud = false }: AudioSectionProps) {
+  // Always use the new audio section now
+  return <NewAudioSection />;
 }
