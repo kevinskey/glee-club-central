@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -259,10 +258,14 @@ export function ElasticEmailDataManager() {
       </Card>
 
       <Tabs defaultValue="contacts" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="contacts" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Contacts
+          </TabsTrigger>
+          <TabsTrigger value="csv-import" className="flex items-center gap-2">
+            <Upload className="h-4 w-4" />
+            CSV Import
           </TabsTrigger>
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
@@ -355,6 +358,10 @@ export function ElasticEmailDataManager() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="csv-import">
+          <ElasticEmailCSVImport />
         </TabsContent>
 
         <TabsContent value="templates">
