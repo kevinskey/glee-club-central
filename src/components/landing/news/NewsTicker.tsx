@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NewsService } from "@/services/newsService";
@@ -205,7 +204,7 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-indigo-900/70 to-blue-900/60 backdrop-blur-sm"></div>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
         
-        <div className="relative py-3 w-full px-4 flex items-center justify-center">
+        <div className="relative py-3 w-full flex items-center justify-center">
           <div className="animate-pulse text-white drop-shadow-sm font-bold text-xs">
             <span className="inline-flex items-center">
               <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
@@ -224,9 +223,9 @@ export const NewsTicker: React.FC<NewsTickerProps> = ({
       <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-indigo-900/70 to-blue-900/60 backdrop-blur-sm"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
       
-      <div className="relative py-3 w-full px-4 flex items-center justify-between">
+      <div className="relative py-3 w-full flex items-center justify-between">
         {/* News Label */}
-        <div className="hidden sm:flex items-center text-blue-200 font-bold text-xs mr-4 whitespace-nowrap">
+        <div className="hidden sm:flex items-center text-blue-200 font-bold text-xs ml-6 whitespace-nowrap">
           <div className="w-2 h-2 bg-blue-300 rounded-full mr-2 animate-pulse"></div>
           {newsSource === 'google' ? 'LIVE NEWS' : newsSource === 'database' ? 'LATEST NEWS' : 'NEWS'}
         </div>
