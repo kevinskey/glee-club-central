@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { UnifiedContainer } from '@/components/ui/unified-container';
 
 export function HeroDefault() {
   return (
     <div className="w-full bg-background">
-      <div className="container mx-auto px-4">
+      <UnifiedContainer size="xl" padding="md">
         <section className="relative md:h-[60vh] md:min-h-[400px] flex items-center justify-center rounded-lg overflow-hidden">
           {/* Liquid Glass Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500 rounded-lg">
@@ -36,7 +37,7 @@ export function HeroDefault() {
             </div>
           </div>
         </section>
-      </div>
+      </UnifiedContainer>
     </div>
   );
 }

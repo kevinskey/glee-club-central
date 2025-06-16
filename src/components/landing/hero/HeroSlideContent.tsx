@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { UnifiedContainer } from '@/components/ui/unified-container';
 import { HeroSlide, MediaFile } from './types';
 
 interface HeroSlideContentProps {
@@ -39,7 +40,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
 
   return (
     <div className="w-full bg-background">
-      <div className="container mx-auto px-4">
+      <UnifiedContainer size="xl" padding="md">
         <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden rounded-lg">
           {/* Background */}
           <div className="absolute inset-0 md:block hidden">
@@ -206,7 +207,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             </div>
           )}
         </section>
-      </div>
+      </UnifiedContainer>
     </div>
   );
 }

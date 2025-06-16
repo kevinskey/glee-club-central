@@ -5,6 +5,7 @@ import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { Button } from "@/components/ui/button";
+import { UnifiedContainer } from "@/components/ui/unified-container";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -38,8 +39,8 @@ export function Header() {
   
   return (
     <header className="glee-header sticky top-0 left-0 right-0 w-full z-50 bg-background">
-      <div className="container mx-auto px-4">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
+      <UnifiedContainer size="xl" padding="md" background rounded>
+        <div className="shadow-sm border border-gray-200/50 dark:border-gray-700/50 rounded-lg">
           <div className="flex h-16 items-center justify-between px-6">
             {/* Logo - Always visible */}
             <div className="flex-shrink-0">
@@ -139,7 +140,7 @@ export function Header() {
             </div>
           </div>
         </div>
-      </div>
+      </UnifiedContainer>
     </header>
   );
 }

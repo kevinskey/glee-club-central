@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { X } from 'lucide-react';
+import { UnifiedContainer } from '@/components/ui/unified-container';
 
 interface NewsItem {
   id: string;
@@ -57,7 +58,7 @@ export function OptimizedNewsTicker({
 
   return (
     <div className={`w-full bg-background ${className}`}>
-      <div className="container mx-auto px-4">
+      <UnifiedContainer size="xl" padding="md">
         <div className="relative overflow-hidden rounded-lg">
           {/* Navy liquid glass background */}
           <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 backdrop-blur-md"></div>
@@ -89,7 +90,7 @@ export function OptimizedNewsTicker({
             </div>
           </div>
         </div>
-      </div>
+      </UnifiedContainer>
     </div>
   );
 }
