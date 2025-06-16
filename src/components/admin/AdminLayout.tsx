@@ -15,8 +15,10 @@ export const AdminLayout: React.FC = () => {
       <div className="flex">
         {!isMobile && <AdminSidebar />}
         
-        <main className={`flex-1 min-h-[calc(100vh-5rem)] ${!isMobile ? 'ml-64' : ''}`}>
-          <Outlet />
+        <main className={`flex-1 min-h-[calc(100vh-5rem)] admin-main ${!isMobile ? 'ml-64' : ''}`}>
+          <div className={isMobile ? 'p-4' : 'p-6'}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
