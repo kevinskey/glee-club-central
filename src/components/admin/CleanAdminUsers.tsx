@@ -19,6 +19,7 @@ import { MembersPagination } from '@/components/members/MembersPagination';
 import { EditUserDialog } from '@/components/members/EditUserDialog';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
+import { MemberBulkUpload } from './MemberBulkUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
@@ -27,6 +28,7 @@ const CleanAdminUsers: React.FC = () => {
   console.log('🔧 CleanAdminUsers: Component rendering started');
   
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const { trackFeatureUsage } = useAnalyticsTracking();
   
   // Check admin status
@@ -152,6 +154,12 @@ const CleanAdminUsers: React.FC = () => {
     trackFeatureUsage('admin_member_delete_attempted', { userId });
   };
 
+  const handleBulkUploadComplete = () => {
+    setShowBulkUpload(false);
+    refetch();
+    toast.success('Bulk upload completed successfully');
+  };
+
   if (isLoading) {
     console.log('🔄 CleanAdminUsers: Showing loading state');
     return (
@@ -165,6 +173,29 @@ const CleanAdminUsers: React.FC = () => {
   }
 
   console.log('🔧 CleanAdminUsers: Rendering main UI with', filteredUsers.length, 'filtered users');
+
+  // Show bulk upload view
+  if (showBulkUpload) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <PageHeader
+          title="Bulk Upload Members"
+          description="Import multiple members from a CSV file"
+          icon={<Upload className="h-6 w-6" />}
+        />
+        
+        <div className="mt-8 max-w-4xl">
+          <MemberBulkUpload onMembersUploaded={handleBulkUploadComplete} />
+          
+          <div className="mt-6">
+            <Button onClick={() => setShowBulkUpload(false)} variant="outline">
+              ← Back to Members
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -193,11 +224,9 @@ const CleanAdminUsers: React.FC = () => {
               <Plus className="mr-2 h-4 w-4" />
               Add Member
             </Button>
-            <Button asChild variant="outline">
-              <Link to="/admin/csv-upload">
-                <Upload className="mr-2 h-4 w-4" />
-                Import CSV
-              </Link>
+            <Button onClick={() => setShowBulkUpload(true)} variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Upload
             </Button>
           </div>
         </CardHeader>
@@ -224,10 +253,16 @@ const CleanAdminUsers: React.FC = () => {
                 {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
               </p>
               {activeFilterCount === 0 && (
-                <Button onClick={() => setShowAddMemberDialog(true)}>
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Add Your First Member
-                </Button>
+                <div className="flex gap-2 justify-center">
+                  <Button onClick={() => setShowAddMemberDialog(true)}>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Add Your First Member
+                  </Button>
+                  <Button onClick={() => setShowBulkUpload(true)} variant="outline">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Bulk Upload
+                  </Button>
+                </div>
               )}
             </div>
           ) : (
