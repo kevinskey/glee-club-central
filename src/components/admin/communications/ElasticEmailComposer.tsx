@@ -14,9 +14,9 @@ import {
   FileText, 
   Users, 
   Eye, 
-  Save,
   RefreshCw,
-  Mail
+  Mail,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -48,6 +48,7 @@ export function ElasticEmailComposer() {
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { filteredUsers } = useUnifiedUserManagement();
 
@@ -58,6 +59,7 @@ export function ElasticEmailComposer() {
 
   const loadTemplates = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase.functions.invoke('elastic-email-sync', {
         body: { action: 'sync_templates' }
@@ -65,11 +67,18 @@ export function ElasticEmailComposer() {
 
       if (error) throw error;
       
-      if (data?.templates) {
-        setTemplates(data.templates);
+      // Ensure templates is always an array
+      const templatesData = data?.templates || [];
+      if (Array.isArray(templatesData)) {
+        setTemplates(templatesData);
+      } else {
+        console.warn('Templates data is not an array:', templatesData);
+        setTemplates([]);
       }
     } catch (error) {
       console.error('Error loading templates:', error);
+      setError('Failed to load templates');
+      setTemplates([]);
       toast.error('Failed to load templates');
     } finally {
       setIsLoading(false);
@@ -77,17 +86,22 @@ export function ElasticEmailComposer() {
   };
 
   const loadRecipients = () => {
-    const memberRecipients: Recipient[] = filteredUsers
-      .filter(user => user.email)
-      .map(user => ({
-        id: user.id,
-        first_name: user.first_name || 'Unknown',
-        last_name: user.last_name || 'User',
-        email: user.email!,
-        selected: false
-      }));
-    
-    setRecipients(memberRecipients);
+    try {
+      const memberRecipients: Recipient[] = filteredUsers
+        .filter(user => user.email)
+        .map(user => ({
+          id: user.id,
+          first_name: user.first_name || 'Unknown',
+          last_name: user.last_name || 'User',
+          email: user.email!,
+          selected: false
+        }));
+      
+      setRecipients(memberRecipients);
+    } catch (error) {
+      console.error('Error loading recipients:', error);
+      setRecipients([]);
+    }
   };
 
   const handleTemplateSelect = (templateId: string) => {
@@ -198,6 +212,23 @@ export function ElasticEmailComposer() {
       setIsSending(false);
     }
   };
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            <span>{error}</span>
+          </div>
+          <Button onClick={loadTemplates} className="mt-4">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -357,9 +388,7 @@ export function ElasticEmailComposer() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            handleTemplateSelect(template.templateid);
-                          }}
+                          onClick={() => handleTemplateSelect(template.templateid)}
                         >
                           <FileText className="h-4 w-4 mr-2" />
                           Use Template
