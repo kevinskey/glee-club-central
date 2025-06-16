@@ -38,9 +38,9 @@ export function Header() {
   };
   
   return (
-    <header className="glee-header fixed top-0 left-0 right-0 w-full z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm" style={{ margin: 0, padding: 0, top: 0 }}>
+    <header className="glee-header fixed top-0 left-0 right-0 w-full z-50 bg-navy-900 backdrop-blur-sm" style={{ margin: 0, padding: 0, top: 0 }}>
       <div className="w-full" style={{ margin: 0, padding: 0 }}>
-        <div className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200/50 dark:border-gray-700/50" style={{ margin: 0, padding: 0 }}>
+        <div className="bg-navy-900 shadow-sm border-b border-navy-700" style={{ margin: 0, padding: 0 }}>
           <div className="flex h-16 items-center justify-between w-full px-6">
             {/* Logo - Always visible */}
             <div className="flex-shrink-0">
@@ -49,19 +49,19 @@ export function Header() {
             
             {/* Desktop Navigation - Hidden on mobile */}
             <nav className={`items-center space-x-8 flex-1 justify-center ${isMobile ? 'hidden' : 'flex'}`}>
-              <Link to="/" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+              <Link to="/" className="text-sm font-medium text-white hover:text-blue-300 transition-colors">
                 Home
               </Link>
-              <Link to="/about" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+              <Link to="/about" className="text-sm font-medium text-white hover:text-blue-300 transition-colors">
                 About
               </Link>
-              <Link to="/calendar" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+              <Link to="/calendar" className="text-sm font-medium text-white hover:text-blue-300 transition-colors">
                 Events
               </Link>
-              <Link to="/store" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+              <Link to="/store" className="text-sm font-medium text-white hover:text-blue-300 transition-colors">
                 Store
               </Link>
-              <Link to="/contact" className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+              <Link to="/contact" className="text-sm font-medium text-white hover:text-blue-300 transition-colors">
                 Contact
               </Link>
             </nav>
@@ -76,7 +76,7 @@ export function Header() {
                     <Button 
                       variant="ghost"
                       onClick={handleDashboardClick}
-                      className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+                      className="text-sm font-medium text-white hover:text-blue-300 hover:bg-navy-800"
                     >
                       <User className="w-4 h-4 mr-2" />
                       Dashboard
@@ -84,7 +84,7 @@ export function Header() {
                     <Button 
                       variant="ghost"
                       onClick={handleLogout}
-                      className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-[#0072CE] hover:bg-gray-100/50 dark:hover:bg-gray-800/50"
+                      className="text-sm font-medium text-white hover:text-blue-300 hover:bg-navy-800"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
@@ -96,7 +96,7 @@ export function Header() {
                     <Button 
                       variant="outline"
                       onClick={() => navigate("/signup")}
-                      className="text-sm"
+                      className="text-sm border-white text-white hover:bg-white hover:text-navy-900"
                     >
                       <UserPlus className="w-4 h-4 mr-2" />
                       Sign Up
@@ -104,7 +104,7 @@ export function Header() {
                     <Button 
                       variant="default"
                       onClick={() => navigate("/login")}
-                      className="text-sm"
+                      className="text-sm bg-blue-600 hover:bg-blue-700"
                     >
                       <LogIn className="w-4 h-4 mr-2" />
                       Login
@@ -121,7 +121,7 @@ export function Header() {
                     variant="default"
                     onClick={handleDashboardClick}
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 bg-blue-600 hover:bg-blue-700"
                   >
                     <User className="w-3.5 h-3.5" />
                   </Button>
@@ -130,7 +130,7 @@ export function Header() {
                     variant="default"
                     onClick={() => navigate("/login")}
                     size="sm"
-                    className="h-8 px-2 text-xs"
+                    className="h-8 px-2 text-xs bg-blue-600 hover:bg-blue-700"
                   >
                     <LogIn className="w-3.5 h-3.5 mr-1" />
                     Login
