@@ -1,11 +1,9 @@
-
 import React, { useState, useMemo } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventsListView } from '@/components/calendar/EventsListView';
 import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
-import { PageHeader } from '@/components/ui/page-header';
 import { Calendar, CalendarDays, CalendarCheck, List, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -114,7 +112,7 @@ export default function CalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <div className="mobile-container mobile-section-padding">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-32 sm:h-48">
             <div className="text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-glee-spelman mx-auto"></div>
@@ -129,7 +127,7 @@ export default function CalendarPage() {
   if (error) {
     return (
       <div className="min-h-screen">
-        <div className="mobile-container mobile-section-padding">
+        <div className="container mx-auto px-4 py-8">
           <Card className="mt-4">
             <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
               <div className="text-red-600 text-center">
@@ -148,14 +146,18 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="mobile-container mobile-section-padding space-y-3 sm:space-y-4 mobile-scroll">
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* Simple page title without header component */}
         <div className="flex items-center justify-between">
-          <PageHeader
-            title="Events & Performances"
-            description={`${isAuthenticated ? 'All events and performances' : 'Upcoming public events'}`}
-            icon={<Calendar className="h-4 w-4 sm:h-5 sm:w-5" />}
-            compact={true}
-          />
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Calendar className="h-6 w-6" />
+              Events & Performances
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {isAuthenticated ? 'All events and performances' : 'Upcoming public events'}
+            </p>
+          </div>
           
           {isAuthenticated && (
             <Button 
@@ -163,7 +165,7 @@ export default function CalendarPage() {
               size="sm"
               className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
             >
-              <Plus className="h-3 w-3 mr-1" />
+              <Plus className="h-4 w-4 mr-2" />
               Add Event
             </Button>
           )}
@@ -176,36 +178,36 @@ export default function CalendarPage() {
               variant={viewMode === 'month' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('month')}
-              className="text-xs px-2 py-1 h-7"
+              className="text-xs px-3 py-2"
             >
-              <CalendarDays className="h-3 w-3 mr-1" />
+              <CalendarDays className="h-4 w-4 mr-2" />
               Month
             </Button>
             <Button
               variant={viewMode === 'week' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('week')}
-              className="text-xs px-2 py-1 h-7"
+              className="text-xs px-3 py-2"
             >
-              <Calendar className="h-3 w-3 mr-1" />
+              <Calendar className="h-4 w-4 mr-2" />
               Week
             </Button>
             <Button
               variant={viewMode === 'day' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('day')}
-              className="text-xs px-2 py-1 h-7"
+              className="text-xs px-3 py-2"
             >
-              <CalendarCheck className="h-3 w-3 mr-1" />
+              <CalendarCheck className="h-4 w-4 mr-2" />
               Day
             </Button>
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode('list')}
-              className="text-xs px-2 py-1 h-7"
+              className="text-xs px-3 py-2"
             >
-              <List className="h-3 w-3 mr-1" />
+              <List className="h-4 w-4 mr-2" />
               List
             </Button>
           </div>
