@@ -113,7 +113,7 @@ export function Header() {
                 </>
               )}
               
-              {/* Mobile Actions - Simplified to prevent overflow */}
+              {/* Mobile Actions - Compact sizes */}
               {isMobile && (
                 <div className="flex items-center gap-1">
                   {isAuthenticated ? (
@@ -121,18 +121,18 @@ export function Header() {
                       variant="default"
                       onClick={handleDashboardClick}
                       size="sm"
-                      className="h-10 w-10 p-0"
+                      className="h-8 w-8 p-0"
                     >
-                      <User className="w-4 h-4" />
+                      <User className="w-3.5 h-3.5" />
                     </Button>
                   ) : (
                     <Button 
                       variant="default"
                       onClick={() => navigate("/login")}
                       size="sm"
-                      className="h-10 px-3"
+                      className="h-8 px-2 text-xs"
                     >
-                      <LogIn className="w-4 h-4 mr-1" />
+                      <LogIn className="w-3.5 h-3.5 mr-1" />
                       Login
                     </Button>
                   )}
