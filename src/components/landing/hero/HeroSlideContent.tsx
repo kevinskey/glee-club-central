@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { HeroSlide, MediaFile } from './types';
+import { useIsPad } from '@/hooks/useIsPad';
 
 interface HeroSlideContentProps {
   slide: HeroSlide;
@@ -9,10 +10,13 @@ interface HeroSlideContentProps {
 }
 
 export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
+  const isPad = useIsPad();
+  
   // Debug logging
   console.log('HeroSlideContent: Current slide:', slide);
   console.log('HeroSlideContent: Available media files:', mediaFiles);
   console.log('HeroSlideContent: Looking for media_id:', slide.media_id);
+  console.log('HeroSlideContent: isPad:', isPad);
   
   let backgroundImage;
   let hasValidImage = false;
@@ -37,6 +41,14 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                         slide.description || 
                         (slide.button_text && slide.button_link);
 
+  // Determine object-fit based on device type
+  const getObjectFit = () => {
+    if (isPad) {
+      return 'object-contain';
+    }
+    return 'object-contain sm:object-cover';
+  };
+
   return (
     <section className="relative md:h-[50vh] md:min-h-[300px] lg:h-[55vh] lg:min-h-[350px] flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -46,7 +58,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             <img
               src={backgroundImage}
               alt={slide.title}
-              className="w-full h-full object-contain sm:object-cover transition-all duration-1000"
+              className={`w-full h-full ${getObjectFit()} transition-all duration-1000`}
               style={{ 
                 objectPosition: 'center center'
               }}
