@@ -59,7 +59,6 @@ export function EnhancedEventsSection({
         <div className="text-center">
           <Button variant="outline">
             View All Events
-            <ExternalLink className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
