@@ -29,7 +29,7 @@ export function YouTubeVideoSection() {
 
   const loadYouTubeVideos = async () => {
     try {
-      console.log('🎬 Loading YouTube videos...');
+      console.log('🎬 Loading video content...');
       const { data, error } = await supabase
         .from('youtube_videos')
         .select('*')
@@ -37,14 +37,14 @@ export function YouTubeVideoSection() {
         .order('display_order', { ascending: true });
 
       if (error) {
-        console.error('Error loading YouTube content:', error);
+        console.error('Error loading video content:', error);
         throw error;
       }
       
-      console.log('🎬 YouTube videos loaded:', data?.length || 0);
+      console.log('🎬 Video content loaded:', data?.length || 0);
       setVideos(data || []);
     } catch (error) {
-      console.error('Error loading YouTube content:', error);
+      console.error('Error loading video content:', error);
       setVideos([]);
     } finally {
       setIsLoading(false);
@@ -52,7 +52,7 @@ export function YouTubeVideoSection() {
   };
 
   const extractVideoId = (url: string): string | null => {
-    // Enhanced YouTube URL parsing to handle more formats
+    // Enhanced video URL parsing to handle more formats
     const patterns = [
       // Standard watch URLs
       /(?:youtube\.com\/watch\?v=)([^"&?\/\s]{11})/,
@@ -100,7 +100,7 @@ export function YouTubeVideoSection() {
     if (contentType === 'playlist') {
       const playlistId = extractPlaylistId(url);
       if (playlistId) {
-        const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=0&rel=0&modestbranding=1`;
+        const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=0&rel=0&modestbranding=1&showinfo=0&controls=1&cc_load_policy=0&iv_load_policy=3&origin=${window.location.origin}`;
         console.log('🎬 Playlist embed URL created:', embedUrl);
         return embedUrl;
       }
@@ -109,7 +109,7 @@ export function YouTubeVideoSection() {
     // For both 'video' content type and fallback for playlists without list parameter
     const videoId = extractVideoId(url);
     if (videoId) {
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1&showinfo=0&controls=1&cc_load_policy=0&iv_load_policy=3&origin=${window.location.origin}`;
       console.log('🎬 Video embed URL created:', embedUrl);
       return embedUrl;
     }
@@ -212,7 +212,7 @@ export function YouTubeVideoSection() {
                       </div>
                     </div>
                     
-                    {/* YouTube Player/Playlist */}
+                    {/* Video Player */}
                     <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                       {embedUrl ? (
                         <iframe
@@ -237,7 +237,7 @@ export function YouTubeVideoSection() {
                             </p>
                             <Button variant="outline" size="sm" asChild>
                               <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
-                                Watch on YouTube
+                                Watch Video
                               </a>
                             </Button>
                           </div>
