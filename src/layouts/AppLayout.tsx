@@ -13,31 +13,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
   const { isAdmin } = useAuth();
   
-  // Determine if we're on an admin page
-  const isAdminPage = location.pathname.startsWith('/admin');
+  console.log('🚨 AppLayout: This component should not be rendering headers anymore!', location.pathname);
   
-  // Pages that manage their own headers completely (including TopSlider)
-  const pagesWithOwnHeaders = [
-    '/login', 
-    '/signup', 
-    '/', // HomePage manages its own header via PublicPageWrapper
-    '/contact' // ContactPage manages its own header and footer
-  ];
-  
-  const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname);
-
+  // AppLayout should not render any headers since AppContent handles this
+  // This component might be legacy and should be cleaned up
   return (
     <div className="min-h-screen bg-background">
-      {shouldShowHeader && (
-        <>
-          {isAdminPage ? (
-            <AdminUnifiedHeader />
-          ) : (
-            <UnifiedPublicHeader />
-          )}
-        </>
-      )}
-      <main className={shouldShowHeader ? "" : "pt-0"}>
+      <main>
         {children}
       </main>
     </div>

@@ -25,13 +25,22 @@ export default function AppContent({ children }: AppContentProps) {
     '/login', 
     '/signup', 
     '/', // HomePage manages its own header via PublicPageWrapper
-    '/contact' // ContactPage manages its own header and footer
+    '/contact', // ContactPage manages its own header and footer
+    '/calendar', // CalendarPage manages its own minimal header
+    '/events' // Events page manages its own header
   ];
   
   // Admin pages should NOT show any unified header as they use AdminLayout
   const shouldShowHeader = !pagesWithOwnHeaders.includes(location.pathname) && 
                           !isDashboardPage &&
-                          !isAdminPage; // This is the key fix
+                          !isAdminPage;
+
+  console.log('🎯 AppContent: Header decision for', location.pathname, {
+    shouldShowHeader,
+    isAdminPage,
+    isDashboardPage,
+    isInPagesWithOwnHeaders: pagesWithOwnHeaders.includes(location.pathname)
+  });
 
   return (
     <div className="min-h-screen bg-background">
