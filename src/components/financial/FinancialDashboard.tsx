@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,14 +15,17 @@ import {
   TrendingDown, 
   Plus,
   Download,
-  Upload,
-  Calculator
+  Calculator,
+  BarChart3,
+  FileText,
+  PiggyBank
 } from 'lucide-react';
 import { useFinancialTransactions } from '@/hooks/useFinancialTransactions';
 import { FinancialLedger } from './FinancialLedger';
 import { AddTransactionDialog } from './AddTransactionDialog';
 import { FinancialSummary } from './FinancialSummary';
 import { BudgetTracker } from './BudgetTracker';
+import { BudgetBuilder } from './BudgetBuilder';
 
 export const FinancialDashboard: React.FC = () => {
   const { totalIncome, totalExpenses, netBalance, loading } = useFinancialTransactions();
@@ -38,7 +42,7 @@ export const FinancialDashboard: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-glee-spelman mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading financial data...</p>
         </div>
       </div>
@@ -54,7 +58,7 @@ export const FinancialDashboard: React.FC = () => {
             Financial Management
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">
-            Comprehensive financial tracking and reporting
+            Comprehensive financial tracking, budgeting, and reporting
           </p>
         </div>
         
@@ -63,7 +67,7 @@ export const FinancialDashboard: React.FC = () => {
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
-          <Button onClick={() => setShowAddDialog(true)} className="bg-glee-spelman hover:bg-glee-spelman/90">
+          <Button onClick={() => setShowAddDialog(true)} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="mr-2 h-4 w-4" />
             Add Transaction
           </Button>
@@ -120,23 +124,43 @@ export const FinancialDashboard: React.FC = () => {
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="ledger" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="ledger">Transaction Ledger</TabsTrigger>
-          <TabsTrigger value="summary">Financial Summary</TabsTrigger>
-          <TabsTrigger value="budget">Budget Tracker</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="ledger" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Ledger
+          </TabsTrigger>
+          <TabsTrigger value="budget-builder" className="flex items-center gap-2">
+            <PiggyBank className="h-4 w-4" />
+            Budget Builder
+          </TabsTrigger>
+          <TabsTrigger value="budget-tracker" className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            Budget Tracker
+          </TabsTrigger>
+          <TabsTrigger value="summary" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Summary
+          </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Reports
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="ledger" className="space-y-4">
           <FinancialLedger />
         </TabsContent>
         
-        <TabsContent value="summary" className="space-y-4">
-          <FinancialSummary />
+        <TabsContent value="budget-builder" className="space-y-4">
+          <BudgetBuilder />
         </TabsContent>
         
-        <TabsContent value="budget" className="space-y-4">
+        <TabsContent value="budget-tracker" className="space-y-4">
           <BudgetTracker />
+        </TabsContent>
+        
+        <TabsContent value="summary" className="space-y-4">
+          <FinancialSummary />
         </TabsContent>
         
         <TabsContent value="reports" className="space-y-4">
