@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Music, Settings, BarChart3, ExternalLink, RefreshCw } from 'lucide-react';
+import { Music, Settings, BarChart3, ExternalLink, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SoundCloudOAuth } from './soundcloud/SoundCloudOAuth';
 import { SoundCloudPlayerSettings } from './soundcloud/SoundCloudPlayerSettings';
 import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
@@ -58,14 +59,40 @@ export function MusicPlayerAdmin() {
         </Button>
       </div>
 
-      <Tabs defaultValue="api-integration" className="space-y-6">
+      <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/30">
+        <AlertTriangle className="h-4 w-4 text-orange-600" />
+        <AlertDescription className="text-orange-800 dark:text-orange-200">
+          <div className="space-y-2">
+            <p className="font-medium">SoundCloud API Authentication Required</p>
+            <p>SoundCloud now requires OAuth authentication for API access. The basic Client ID method is no longer supported.</p>
+            <p>Please use the "OAuth Connect" tab below to authenticate with your SoundCloud account for full API access.</p>
+          </div>
+        </AlertDescription>
+      </Alert>
+
+      <Tabs defaultValue="oauth" className="space-y-6">
         <TabsList>
+          <TabsTrigger value="oauth">OAuth Connect</TabsTrigger>
           <TabsTrigger value="api-integration">API Integration</TabsTrigger>
           <TabsTrigger value="playlist-manager">Track Manager</TabsTrigger>
-          <TabsTrigger value="oauth">OAuth Connect</TabsTrigger>
           <TabsTrigger value="settings">Player Settings</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="oauth" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>SoundCloud OAuth Authentication</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm text-muted-foreground mb-4">
+                Connect your SoundCloud account to access your tracks, playlists, and manage your music content.
+                This is now required due to SoundCloud's updated API authentication requirements.
+              </div>
+              <SoundCloudOAuth />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="api-integration" className="space-y-4">
           <Card>
@@ -75,15 +102,20 @@ export function MusicPlayerAdmin() {
             <CardContent>
               <div className="space-y-4">
                 <div className="text-sm text-muted-foreground">
-                  <p><strong>Current Mode:</strong> SoundCloud API Feed</p>
+                  <p><strong>Current Mode:</strong> OAuth Authentication Required</p>
                   <p><strong>Profile:</strong> https://soundcloud.com/doctorkj</p>
-                  <p><strong>Integration Type:</strong> Client ID Authentication</p>
+                  <p><strong>Integration Type:</strong> OAuth 2.0 (Client ID method deprecated)</p>
                 </div>
-                <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
-                  <p className="text-green-800 dark:text-green-200 text-sm">
-                    ✅ SoundCloud API integration is active. Tracks are now loaded directly from your SoundCloud profile instead of embeds.
-                  </p>
-                </div>
+                <Alert className="border-red-200 bg-red-50 dark:bg-red-950/30">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800 dark:text-red-200">
+                    <p className="font-medium">⚠️ Client ID Authentication No Longer Supported</p>
+                    <p className="text-sm mt-1">
+                      SoundCloud has deprecated basic Client ID authentication. You must use OAuth to access the API.
+                      Please switch to the "OAuth Connect" tab to authenticate properly.
+                    </p>
+                  </AlertDescription>
+                </Alert>
                 <div className="flex gap-2">
                   <Button 
                     variant="outline" 
@@ -92,7 +124,7 @@ export function MusicPlayerAdmin() {
                     disabled={isRefreshing}
                   >
                     <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                    {isRefreshing ? 'Refreshing...' : 'Refresh API Data'}
+                    {isRefreshing ? 'Testing API...' : 'Test API Connection'}
                   </Button>
                   <Button variant="outline" asChild className="gap-2">
                     <a href="https://developers.soundcloud.com/" target="_blank" rel="noopener noreferrer">
@@ -108,21 +140,6 @@ export function MusicPlayerAdmin() {
 
         <TabsContent value="playlist-manager" className="space-y-4">
           <SoundCloudPlaylistManager />
-        </TabsContent>
-
-        <TabsContent value="oauth" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>OAuth Authentication (Optional)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground mb-4">
-                OAuth connection allows you to access private tracks and manage your SoundCloud account directly. 
-                The current API integration works with public content using Client ID authentication.
-              </div>
-              <SoundCloudOAuth />
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-4">
