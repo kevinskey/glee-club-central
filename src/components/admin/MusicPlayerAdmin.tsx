@@ -18,7 +18,7 @@ export function MusicPlayerAdmin() {
           <p className="text-muted-foreground">Manage your SoundCloud content and API integration</p>
         </div>
         <Button className="gap-2" asChild>
-          <a href="https://soundcloud.com/spelman-glee" target="_blank" rel="noopener noreferrer">
+          <a href="https://soundcloud.com/doctorkj" target="_blank" rel="noopener noreferrer">
             <Music className="w-4 h-4" />
             Visit SoundCloud
           </a>
@@ -43,7 +43,7 @@ export function MusicPlayerAdmin() {
               <div className="space-y-4">
                 <div className="text-sm text-muted-foreground">
                   <p><strong>Current Mode:</strong> SoundCloud API Feed</p>
-                  <p><strong>Profile:</strong> https://soundcloud.com/spelman-glee</p>
+                  <p><strong>Profile:</strong> https://soundcloud.com/doctorkj</p>
                   <p><strong>Integration Type:</strong> Client ID Authentication</p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
