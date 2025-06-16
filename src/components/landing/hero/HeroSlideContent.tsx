@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { UnifiedContainer } from '@/components/ui/unified-container';
 import { HeroSlide, MediaFile } from './types';
 
 interface HeroSlideContentProps {
@@ -39,175 +38,171 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                         (slide.button_text && slide.button_link);
 
   return (
-    <div className="w-full bg-background">
-      <UnifiedContainer size="xl" padding="md">
-        <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden rounded-lg">
-          {/* Background */}
-          <div className="absolute inset-0 md:block hidden">
-            {hasValidImage ? (
-              <>
-                <img
-                  src={backgroundImage}
-                  alt={slide.title}
-                  className="w-full h-full object-contain sm:object-cover transition-all duration-1000 rounded-lg"
-                  style={{ 
-                    objectPosition: 'center center'
-                  }}
-                  onLoad={() => {
-                    console.log('HeroSlideContent: Image loaded successfully:', backgroundImage);
-                  }}
-                  onError={(e) => {
-                    console.error('HeroSlideContent: Failed to load image:', backgroundImage);
-                    // Hide the broken image and show fallback
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    // Show gradient background instead
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `
-                        <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500 rounded-lg">
-                          ${hasTextContent ? '<div class="absolute inset-0 bg-black/30 rounded-lg"></div>' : ''}
-                        </div>
-                      `;
-                    }
-                  }}
-                />
-                {hasTextContent && <div className="absolute inset-0 bg-black/40 rounded-lg"></div>}
-              </>
-            ) : (
-              // Fallback gradient background
-              <div className="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500 rounded-lg">
-                {hasTextContent && <div className="absolute inset-0 bg-black/30 rounded-lg"></div>}
-              </div>
-            )}
+    <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 md:block hidden">
+        {hasValidImage ? (
+          <>
+            <img
+              src={backgroundImage}
+              alt={slide.title}
+              className="w-full h-full object-contain sm:object-cover transition-all duration-1000"
+              style={{ 
+                objectPosition: 'center center'
+              }}
+              onLoad={() => {
+                console.log('HeroSlideContent: Image loaded successfully:', backgroundImage);
+              }}
+              onError={(e) => {
+                console.error('HeroSlideContent: Failed to load image:', backgroundImage);
+                // Hide the broken image and show fallback
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                // Show gradient background instead
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+                      ${hasTextContent ? '<div class="absolute inset-0 bg-black/30"></div>' : ''}
+                    </div>
+                  `;
+                }
+              }}
+            />
+            {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
+          </>
+        ) : (
+          // Fallback gradient background
+          <div className="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+            {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
           </div>
+        )}
+      </div>
+      
+      {/* Mobile: Image with natural height */}
+      {hasValidImage && (
+        <div className="block md:hidden relative w-full">
+          <img
+            src={backgroundImage}
+            alt={slide.title}
+            className="w-full h-auto object-contain"
+            style={{ 
+              objectPosition: 'center center'
+            }}
+            onLoad={() => {
+              console.log('HeroSlideContent: Mobile image loaded successfully:', backgroundImage);
+            }}
+            onError={(e) => {
+              console.error('HeroSlideContent: Failed to load mobile image:', backgroundImage);
+            }}
+          />
+          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
           
-          {/* Mobile: Image with natural height */}
-          {hasValidImage && (
-            <div className="block md:hidden relative w-full">
-              <img
-                src={backgroundImage}
-                alt={slide.title}
-                className="w-full h-auto object-contain rounded-lg"
-                style={{ 
-                  objectPosition: 'center center'
-                }}
-                onLoad={() => {
-                  console.log('HeroSlideContent: Mobile image loaded successfully:', backgroundImage);
-                }}
-                onError={(e) => {
-                  console.error('HeroSlideContent: Failed to load mobile image:', backgroundImage);
-                }}
-              />
-              {hasTextContent && <div className="absolute inset-0 bg-black/40 rounded-lg"></div>}
-              
-              {/* Mobile Content Overlay */}
-              {hasTextContent && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-white max-w-[90%] mx-auto px-10">
-                    {(slide.show_title !== false) && (
-                      <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
-                        {slide.title}
-                      </h1>
-                    )}
-                    {slide.description && (
-                      <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-                        {slide.description}
-                      </p>
-                    )}
-                    {slide.button_text && slide.button_link && (
-                      <div className="flex flex-col gap-3 justify-center">
-                        <Button 
-                          size="lg"
-                          className="glass-button-primary text-sm px-6 py-3"
-                          onClick={() => window.open(slide.button_link, '_blank')}
-                        >
-                          {slide.button_text}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Fallback for mobile when no image */}
-          {!hasValidImage && (
-            <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500 rounded-lg">
-              {hasTextContent && <div className="absolute inset-0 bg-black/30 rounded-lg"></div>}
-              {hasTextContent && (
-                <div className="relative z-10 flex items-center justify-center h-full">
-                  <div className="text-center text-white max-w-[90%] mx-auto px-10 py-8">
-                    {(slide.show_title !== false) && (
-                      <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
-                        {slide.title}
-                      </h1>
-                    )}
-                    {slide.description && (
-                      <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-                        {slide.description}
-                      </p>
-                    )}
-                    {slide.button_text && slide.button_link && (
-                      <div className="flex flex-col gap-3 justify-center">
-                        <Button 
-                          size="lg"
-                          className="glass-button-primary text-sm px-6 py-3"
-                          onClick={() => window.open(slide.button_link, '_blank')}
-                        >
-                          {slide.button_text}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* YouTube Video Background (if applicable) */}
-          {slide.youtube_url && slide.media_type === 'video' && (
-            <div className="absolute inset-0">
-              <iframe
-                src={`${slide.youtube_url}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
-                className="w-full h-full object-cover rounded-lg"
-                frameBorder="0"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-              />
-              {hasTextContent && <div className="absolute inset-0 bg-black/40 rounded-lg"></div>}
-            </div>
-          )}
-          
-          {/* Desktop Content */}
+          {/* Mobile Content Overlay */}
           {hasTextContent && (
-            <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-10">
-              {(slide.show_title !== false) && (
-                <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
-                  {slide.title}
-                </h1>
-              )}
-              {slide.description && (
-                <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-                  {slide.description}
-                </p>
-              )}
-              {slide.button_text && slide.button_link && (
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                  <Button 
-                    size="lg"
-                    className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                    onClick={() => window.open(slide.button_link, '_blank')}
-                  >
-                    {slide.button_text}
-                  </Button>
-                </div>
-              )}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white max-w-[90%] mx-auto px-10">
+                {(slide.show_title !== false) && (
+                  <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                    {slide.title}
+                  </h1>
+                )}
+                {slide.description && (
+                  <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                    {slide.description}
+                  </p>
+                )}
+                {slide.button_text && slide.button_link && (
+                  <div className="flex flex-col gap-3 justify-center">
+                    <Button 
+                      size="lg"
+                      className="glass-button-primary text-sm px-6 py-3"
+                      onClick={() => window.open(slide.button_link, '_blank')}
+                    >
+                      {slide.button_text}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-        </section>
-      </UnifiedContainer>
-    </div>
+        </div>
+      )}
+      
+      {/* Fallback for mobile when no image */}
+      {!hasValidImage && (
+        <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+          {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
+          {hasTextContent && (
+            <div className="relative z-10 flex items-center justify-center h-full">
+              <div className="text-center text-white max-w-[90%] mx-auto px-10 py-8">
+                {(slide.show_title !== false) && (
+                  <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                    {slide.title}
+                  </h1>
+                )}
+                {slide.description && (
+                  <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                    {slide.description}
+                  </p>
+                )}
+                {slide.button_text && slide.button_link && (
+                  <div className="flex flex-col gap-3 justify-center">
+                    <Button 
+                      size="lg"
+                      className="glass-button-primary text-sm px-6 py-3"
+                      onClick={() => window.open(slide.button_link, '_blank')}
+                    >
+                      {slide.button_text}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* YouTube Video Background (if applicable) */}
+      {slide.youtube_url && slide.media_type === 'video' && (
+        <div className="absolute inset-0">
+          <iframe
+            src={`${slide.youtube_url}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1`}
+            className="w-full h-full object-cover"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+          />
+          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
+        </div>
+      )}
+      
+      {/* Desktop Content */}
+      {hasTextContent && (
+        <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-10">
+          {(slide.show_title !== false) && (
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
+              {slide.title}
+            </h1>
+          )}
+          {slide.description && (
+            <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+              {slide.description}
+            </p>
+          )}
+          {slide.button_text && slide.button_link && (
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Button 
+                size="lg"
+                className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                onClick={() => window.open(slide.button_link, '_blank')}
+              >
+                {slide.button_text}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </section>
   );
 }
