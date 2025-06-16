@@ -38,7 +38,7 @@ export function Header() {
   };
   
   return (
-    <header className="w-full bg-white shadow-sm border-b border-gray-200">
+    <header className="w-full bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="flex h-16 items-center justify-between w-full px-6">
         {/* Logo - Always visible */}
         <div className="flex-shrink-0">
@@ -48,25 +48,25 @@ export function Header() {
               alt="Spelman College Glee Club Logo" 
               className="h-7 w-auto" 
             />
-            <span className="text-base ml-2 text-black font-semibold">Glee World</span>
+            <span className="text-base ml-2 text-black dark:text-white font-semibold">Glee World</span>
           </Link>
         </div>
         
         {/* Desktop Navigation - Hidden on mobile */}
         <nav className={`items-center space-x-8 flex-1 justify-center ${isMobile ? 'hidden' : 'flex'}`}>
-          <Link to="/" className="text-sm font-medium text-black hover:text-gray-600 transition-colors">
+          <Link to="/" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Home
           </Link>
-          <Link to="/about" className="text-sm font-medium text-black hover:text-gray-600 transition-colors">
+          <Link to="/about" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             About
           </Link>
-          <Link to="/calendar" className="text-sm font-medium text-black hover:text-gray-600 transition-colors">
+          <Link to="/calendar" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Events
           </Link>
-          <Link to="/store" className="text-sm font-medium text-black hover:text-gray-600 transition-colors">
+          <Link to="/store" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Store
           </Link>
-          <Link to="/contact" className="text-sm font-medium text-black hover:text-gray-600 transition-colors">
+          <Link to="/contact" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Contact
           </Link>
         </nav>
@@ -83,7 +83,7 @@ export function Header() {
                 <Button 
                   variant="ghost"
                   onClick={handleDashboardClick}
-                  className="text-sm font-medium text-black hover:text-gray-600 hover:bg-gray-100"
+                  className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <User className="w-4 h-4 mr-2" />
                   Dashboard
@@ -91,7 +91,7 @@ export function Header() {
                 <Button 
                   variant="ghost"
                   onClick={handleLogout}
-                  className="text-sm font-medium text-black hover:text-gray-600 hover:bg-gray-100"
+                  className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
@@ -102,7 +102,7 @@ export function Header() {
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/signup")}
-                  className="text-sm border-black text-black hover:bg-black hover:text-white"
+                  className="text-sm border-black dark:border-white text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   Sign Up
@@ -110,7 +110,7 @@ export function Header() {
                 <Button 
                   variant="default"
                   onClick={() => navigate("/login")}
-                  className="text-sm bg-black hover:bg-gray-800 text-white"
+                  className="text-sm bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
@@ -126,7 +126,7 @@ export function Header() {
                 variant="default"
                 onClick={handleDashboardClick}
                 size="sm"
-                className="h-8 w-8 p-0 bg-black hover:bg-gray-800"
+                className="h-8 w-8 p-0 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
               >
                 <User className="w-3.5 h-3.5" />
               </Button>
@@ -135,7 +135,7 @@ export function Header() {
                 variant="default"
                 onClick={() => navigate("/login")}
                 size="sm"
-                className="h-8 px-2 text-xs bg-black hover:bg-gray-800"
+                className="h-8 px-2 text-xs bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
               >
                 <LogIn className="w-3.5 h-3.5 mr-1" />
                 Login
