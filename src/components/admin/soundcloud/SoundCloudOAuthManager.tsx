@@ -39,26 +39,42 @@ export function SoundCloudOAuthManager() {
   // Check for connection success from URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('connected') === 'soundcloud') {
+    const connected = urlParams.get('connected');
+    const accessTokenParam = urlParams.get('access_token');
+    const userParam = urlParams.get('user');
+    const error = urlParams.get('error');
+    const errorDetails = urlParams.get('details');
+    
+    if (error) {
+      console.error('SoundCloud OAuth error:', error, errorDetails);
+      toast.error(`SoundCloud connection failed: ${error}${errorDetails ? ` - ${errorDetails}` : ''}`);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+    
+    if (connected === 'soundcloud' && accessTokenParam && userParam) {
       console.log('SoundCloud connection detected from URL');
       
-      const savedToken = localStorage.getItem('soundcloud_access_token');
-      const savedUser = localStorage.getItem('soundcloud_user');
-      
-      if (savedToken && savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          setAccessToken(savedToken);
-          setConnectedUser(user);
-          loadUserData(savedToken);
-          toast.success(`Connected as ${user.display_name}!`);
-          
-          // Clean up URL
-          window.history.replaceState({}, '', window.location.pathname);
-        } catch (error) {
-          console.error('Error processing connection:', error);
-          toast.error('Connection successful but failed to load user data');
-        }
+      try {
+        const user = JSON.parse(decodeURIComponent(userParam));
+        
+        // Store in localStorage
+        localStorage.setItem('soundcloud_access_token', accessTokenParam);
+        localStorage.setItem('soundcloud_user', JSON.stringify(user));
+        
+        setAccessToken(accessTokenParam);
+        setConnectedUser(user);
+        loadUserData(accessTokenParam);
+        toast.success(`Connected as ${user.display_name}!`);
+        
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      } catch (error) {
+        console.error('Error processing connection:', error);
+        toast.error('Connection successful but failed to parse user data');
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
       }
     }
   }, []);
@@ -70,8 +86,7 @@ export function SoundCloudOAuthManager() {
       console.log('Starting SoundCloud OAuth flow...');
       
       const soundcloudClientId = 'UixjjV8UKe8mD5jaxrg6nLOjqpB4iYbC'; // This is a public client ID
-      const redirectUri = `${window.location.origin}/functions/v1/soundcloud-callback`;
-      const state = crypto.randomUUID();
+      const redirectUri = `${window.location.origin}/functions/v1/api-soundcloud-callback`;
       
       // Build authorization URL
       const authUrl = new URL('https://soundcloud.com/connect');
@@ -79,71 +94,12 @@ export function SoundCloudOAuthManager() {
       authUrl.searchParams.set('redirect_uri', redirectUri);
       authUrl.searchParams.set('response_type', 'code');
       authUrl.searchParams.set('scope', 'non-expiring');
-      authUrl.searchParams.set('state', state);
       
       console.log('Authorization URL:', authUrl.toString());
       console.log('Redirect URI:', redirectUri);
 
-      // Calculate popup position
-      const width = 600;
-      const height = 700;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
-      
-      // Open OAuth popup
-      const popup = window.open(
-        authUrl.toString(),
-        'soundcloud-oauth',
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,location=yes,status=yes,toolbar=no,menubar=no`
-      );
-
-      if (!popup) {
-        throw new Error('Failed to open popup. Please allow popups and try again.');
-      }
-
-      // Monitor popup
-      let checkCount = 0;
-      const maxChecks = 300; // 5 minutes at 1 second intervals
-      
-      const checkClosed = setInterval(() => {
-        checkCount++;
-        
-        try {
-          if (popup.closed) {
-            clearInterval(checkClosed);
-            console.log('Popup was closed');
-            setIsConnecting(false);
-            return;
-          }
-          
-          // Check if we're back at our domain (successful redirect)
-          try {
-            const currentUrl = popup.location.href;
-            if (currentUrl.includes('connected=soundcloud')) {
-              clearInterval(checkClosed);
-              popup.close();
-              console.log('OAuth flow completed successfully');
-              setIsConnecting(false);
-              // The useEffect will handle the rest
-              return;
-            }
-          } catch (e) {
-            // Cross-origin restriction, this is expected during OAuth flow
-          }
-          
-        } catch (error) {
-          console.error('Error checking popup status:', error);
-        }
-        
-        if (checkCount >= maxChecks) {
-          clearInterval(checkClosed);
-          if (!popup.closed) {
-            popup.close();
-          }
-          setIsConnecting(false);
-          toast.error('OAuth process timed out after 5 minutes');
-        }
-      }, 1000);
+      // Redirect to SoundCloud OAuth
+      window.location.href = authUrl.toString();
       
     } catch (error) {
       console.error('Connection error:', error);
@@ -196,10 +152,7 @@ export function SoundCloudOAuthManager() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           <p className="text-xs text-muted-foreground mt-2">
-            Complete the authorization in the popup window.
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            If you see a white screen, please check if popups are blocked.
+            You will be redirected to SoundCloud to authorize access.
           </p>
         </div>
       </div>
