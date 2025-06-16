@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -22,6 +21,7 @@ import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
 import UserRolesPage from '@/pages/admin/UserRolesPage';
 import FinancialPage from '@/pages/admin/FinancialPage';
 import UserManagementPage from '@/pages/admin/UserManagementPage';
+import MyProfilePage from '@/pages/admin/MyProfilePage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -35,6 +35,10 @@ export const adminRoutes: RouteObject[] = [
       {
         index: true,
         element: <AdminDashboard />,
+      },
+      {
+        path: 'profile',
+        element: <MyProfilePage />,
       },
       {
         path: 'members',

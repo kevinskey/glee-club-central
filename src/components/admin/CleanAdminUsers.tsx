@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from "@/components/ui/page-header";
@@ -20,6 +21,7 @@ import { EditUserDialog } from '@/components/members/EditUserDialog';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { MemberBulkUpload } from './MemberBulkUpload';
+import { UserProfileView } from './UserProfileView';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
@@ -29,6 +31,7 @@ const CleanAdminUsers: React.FC = () => {
   
   const [isAdmin, setIsAdmin] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const { trackFeatureUsage } = useAnalyticsTracking();
   
   // Check admin status
@@ -115,6 +118,15 @@ const CleanAdminUsers: React.FC = () => {
     trackFeatureUsage('admin_member_edit_opened', { userId: user.id });
   };
 
+  const handleViewUserProfile = (user: any) => {
+    setSelectedUserId(user.id);
+    trackFeatureUsage('admin_member_profile_viewed', { userId: user.id });
+  };
+
+  const handleBackFromProfile = () => {
+    setSelectedUserId(null);
+  };
+
   const handleSaveUser = async (data: UserFormValues) => {
     if (!selectedUser) return;
     
@@ -197,6 +209,22 @@ const CleanAdminUsers: React.FC = () => {
     );
   }
 
+  // Show user profile view
+  if (selectedUserId) {
+    const selectedUserForProfile = filteredUsers.find(u => u.id === selectedUserId);
+    if (selectedUserForProfile) {
+      return (
+        <div className="container mx-auto px-4 py-8">
+          <UserProfileView
+            user={selectedUserForProfile}
+            onBack={handleBackFromProfile}
+            onEdit={() => handleEditUser(selectedUserForProfile)}
+          />
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <PageHeader
@@ -272,6 +300,7 @@ const CleanAdminUsers: React.FC = () => {
                 isAdmin={isAdmin}
                 onEditUser={handleEditUser}
                 onDeleteUser={handleDeleteUser}
+                onViewProfile={handleViewUserProfile}
               />
 
               <MembersPagination

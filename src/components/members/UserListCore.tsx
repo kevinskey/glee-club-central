@@ -16,7 +16,8 @@ import {
   Phone,
   Music,
   Edit,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { UnifiedUser } from '@/hooks/user/useUnifiedUserManagement';
 
