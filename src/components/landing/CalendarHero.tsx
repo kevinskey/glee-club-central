@@ -63,10 +63,6 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold font-playfair text-gray-900 mb-8">Upcoming Events</h2>
         
-        <p className="text-gray-600 max-w-2xl mb-8 text-sm">
-          Join us for unforgettable musical experiences. Don't miss these upcoming performances and events.
-        </p>
-
         {/* Mobile: Scrollable cards */}
         <div className="block lg:hidden">
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
