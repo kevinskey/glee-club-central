@@ -5,21 +5,21 @@ import { cn } from '@/lib/utils';
 interface MobileOptimizedContainerProps {
   children: React.ReactNode;
   className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  padding?: 'none' | 'xs' | 'sm' | 'md';
   maxWidth?: 'full' | 'sm' | 'md' | 'lg' | 'xl';
 }
 
 export function MobileOptimizedContainer({ 
   children, 
   className,
-  padding = 'md',
+  padding = 'sm',
   maxWidth = 'full'
 }: MobileOptimizedContainerProps) {
   const paddingClasses = {
     none: '',
-    sm: 'mobile-padding-sm',
-    md: 'mobile-padding-md',
-    lg: 'mobile-padding-lg'
+    xs: 'p-1',
+    sm: 'p-2',
+    md: 'p-3'
   };
 
   const maxWidthClasses = {
@@ -33,7 +33,7 @@ export function MobileOptimizedContainer({
   return (
     <div className={cn(
       'w-full mx-auto overflow-x-hidden box-border',
-      'max-w-[100vw]', // Ensure container never exceeds viewport width
+      'max-w-[100vw]',
       paddingClasses[padding],
       maxWidthClasses[maxWidth],
       className
