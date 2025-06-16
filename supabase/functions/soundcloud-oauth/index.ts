@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -84,8 +85,8 @@ serve(async (req) => {
       
       console.log('Generated redirect URI:', redirectUri)
       
-      // Use the correct SoundCloud OAuth URL - this is the key fix
-      const authUrl = new URL('https://api.soundcloud.com/connect')
+      // Use the correct SoundCloud OAuth URL that actually works
+      const authUrl = new URL('https://secure.soundcloud.com/authorize')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
       authUrl.searchParams.set('response_type', 'code')
