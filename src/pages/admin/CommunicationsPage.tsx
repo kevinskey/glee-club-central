@@ -87,85 +87,80 @@ const CommunicationsPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-10">
-          <TabsTrigger value="compose" className="flex items-center gap-2">
-            <Send className="h-4 w-4" />
-            Bulk
-          </TabsTrigger>
-          <TabsTrigger value="elastic-composer" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Elastic Email
-          </TabsTrigger>
-          <TabsTrigger value="quick-sms" className="flex items-center gap-2">
-            <Zap className="h-4 w-4" />
-            Quick SMS
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <Mail className="h-4 w-4" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger value="history" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            History
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="internal" className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Internal
-          </TabsTrigger>
-          <TabsTrigger value="elastic-data" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            Data Sync
-          </TabsTrigger>
-          <TabsTrigger value="elastic-email" className="flex items-center gap-2">
-            <Database className="h-4 w-4" />
-            Integration
-          </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center gap-2">
-            Settings
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto">
+          <TabsList className="grid grid-cols-5 lg:grid-cols-9 w-full min-w-max gap-1">
+            <TabsTrigger value="compose" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Send className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Bulk</span>
+            </TabsTrigger>
+            <TabsTrigger value="elastic-composer" className="flex items-center gap-2 text-xs lg:text-sm">
+              <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Elastic</span>
+            </TabsTrigger>
+            <TabsTrigger value="quick-sms" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Zap className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">SMS</span>
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Mail className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Templates</span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Clock className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">History</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Users className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger value="internal" className="flex items-center gap-2 text-xs lg:text-sm">
+              <MessageSquare className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Internal</span>
+            </TabsTrigger>
+            <TabsTrigger value="elastic-data" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Database className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Data</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2 text-xs lg:text-sm">
+              <Settings className="h-3 w-3 lg:h-4 lg:w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <TabsContent value="compose">
+        <TabsContent value="compose" className="space-y-4">
           <BulkMessageComposer />
         </TabsContent>
 
-        <TabsContent value="elastic-composer">
+        <TabsContent value="elastic-composer" className="space-y-4">
           <ElasticEmailComposer />
         </TabsContent>
 
-        <TabsContent value="quick-sms">
+        <TabsContent value="quick-sms" className="space-y-4">
           <QuickSMSComposer />
         </TabsContent>
 
-        <TabsContent value="templates">
+        <TabsContent value="templates" className="space-y-4">
           <MessageTemplateManager />
         </TabsContent>
 
-        <TabsContent value="history">
+        <TabsContent value="history" className="space-y-4">
           <MessageHistoryViewer />
         </TabsContent>
 
-        <TabsContent value="analytics">
+        <TabsContent value="analytics" className="space-y-4">
           <CommunicationAnalytics />
         </TabsContent>
 
-        <TabsContent value="internal">
+        <TabsContent value="internal" className="space-y-4">
           <InternalMessaging />
         </TabsContent>
 
-        <TabsContent value="elastic-data">
+        <TabsContent value="elastic-data" className="space-y-4">
           <ElasticEmailDataManager />
         </TabsContent>
 
-        <TabsContent value="elastic-email">
-          <ElasticEmailIntegration />
-        </TabsContent>
-
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Communication Settings</CardTitle>
