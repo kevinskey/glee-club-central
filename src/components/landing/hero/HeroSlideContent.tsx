@@ -38,7 +38,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                         (slide.button_text && slide.button_link);
 
   return (
-    <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden">
+    <section className="relative md:h-[50vh] md:min-h-[300px] lg:h-[55vh] lg:min-h-[350px] flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 md:block hidden">
         {hasValidImage ? (
@@ -181,12 +181,12 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       {hasTextContent && (
         <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-10">
           {(slide.show_title !== false) && (
-            <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
+            <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
               {slide.title}
             </h1>
           )}
           {slide.description && (
-            <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+            <p className="text-sm sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
               {slide.description}
             </p>
           )}

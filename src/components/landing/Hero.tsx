@@ -4,16 +4,16 @@ import { Button } from '@/components/ui/button';
 
 export function Hero() {
   return (
-    <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center bg-gradient-to-br from-primary to-orange-500">
+    <section className="relative h-[50vh] min-h-[300px] md:h-[55vh] md:min-h-[350px] flex items-center justify-center bg-gradient-to-br from-primary to-orange-500">
       {/* Background overlay */}
       <div className="absolute inset-0 bg-black/20"></div>
       
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-        <h1 className="text-4xl md:text-6xl font-bold mb-6">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-6">
           Spelman College Glee Club
         </h1>
-        <p className="text-xl md:text-2xl mb-8 opacity-90">
+        <p className="text-lg md:text-xl lg:text-2xl mb-8 opacity-90">
           To Amaze and Inspire
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
