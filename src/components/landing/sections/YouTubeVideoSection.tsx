@@ -52,32 +52,59 @@ export function YouTubeVideoSection() {
   };
 
   const extractVideoId = (url: string): string | null => {
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    // More comprehensive YouTube URL parsing
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^"&?\/\s]{11})/,
+      /youtube\.com\/watch\?.*v=([^"&?\/\s]{11})/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   };
 
   const extractPlaylistId = (url: string): string | null => {
-    const regex = /[?&]list=([^"&?\/\s]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
+    const patterns = [
+      /[?&]list=([^"&?\/\s]+)/,
+      /youtube\.com\/playlist\?list=([^"&?\/\s]+)/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) return match[1];
+    }
+    return null;
   };
 
   const getEmbedUrl = (url: string, contentType: 'video' | 'playlist' = 'video'): string => {
+    console.log('🎬 Creating embed URL for:', url, 'type:', contentType);
+    
     if (contentType === 'playlist') {
       const playlistId = extractPlaylistId(url);
-      return playlistId ? `https://www.youtube.com/embed/videoseries?list=${playlistId}` : '';
+      if (playlistId) {
+        const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=0&rel=0&modestbranding=1`;
+        console.log('🎬 Playlist embed URL:', embedUrl);
+        return embedUrl;
+      }
     } else {
       const videoId = extractVideoId(url);
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+      if (videoId) {
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+        console.log('🎬 Video embed URL:', embedUrl);
+        return embedUrl;
+      }
     }
+    
+    console.warn('🎬 Could not create embed URL for:', url);
+    return '';
   };
 
   const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist' = 'video'): string => {
     if (contentType === 'playlist') {
-      // For playlists, we'll use a generic playlist thumbnail or try to get the first video
       const playlistId = extractPlaylistId(url);
-      const videoId = extractVideoId(url); // Sometimes playlist URLs also contain a video ID
+      const videoId = extractVideoId(url);
       return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
     } else {
       const videoId = extractVideoId(url);
@@ -112,79 +139,99 @@ export function YouTubeVideoSection() {
     <div className="space-y-8">
       <Carousel className="w-full max-w-6xl mx-auto">
         <CarouselContent>
-          {videos.map((video, index) => (
-            <CarouselItem key={video.id}>
-              <Card className="overflow-hidden">
-                <div className="p-6">
-                  {/* Content Header */}
-                  <div className="flex items-start gap-6 mb-6">
-                    {/* Content Thumbnail */}
-                    <div className="flex-shrink-0 w-32 h-24 md:w-40 md:h-30 relative">
-                      <img
-                        src={video.thumbnail_url || getThumbnailUrl(video.youtube_url, video.content_type)}
-                        alt={video.title}
-                        className="w-full h-full object-cover rounded-lg shadow-sm"
-                        onError={(e) => {
-                          e.currentTarget.src = `https://via.placeholder.com/320x240/f3f4f6/9ca3af?text=${video.content_type === 'playlist' ? 'Playlist' : 'Video'}`;
-                        }}
-                      />
-                      <div className="absolute top-1 left-1">
-                        <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'} className="text-xs">
-                          {video.content_type === 'playlist' ? (
-                            <>
-                              <List className="h-3 w-3 mr-1" />
-                              Playlist
-                            </>
-                          ) : (
-                            <>
-                              <Video className="h-3 w-3 mr-1" />
-                              Video
-                            </>
-                          )}
-                        </Badge>
+          {videos.map((video, index) => {
+            const embedUrl = getEmbedUrl(video.youtube_url, video.content_type);
+            
+            return (
+              <CarouselItem key={video.id}>
+                <Card className="overflow-hidden">
+                  <div className="p-6">
+                    {/* Content Header */}
+                    <div className="flex items-start gap-6 mb-6">
+                      {/* Content Thumbnail */}
+                      <div className="flex-shrink-0 w-32 h-24 md:w-40 md:h-30 relative">
+                        <img
+                          src={video.thumbnail_url || getThumbnailUrl(video.youtube_url, video.content_type)}
+                          alt={video.title}
+                          className="w-full h-full object-cover rounded-lg shadow-sm"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://via.placeholder.com/320x240/f3f4f6/9ca3af?text=${video.content_type === 'playlist' ? 'Playlist' : 'Video'}`;
+                          }}
+                        />
+                        <div className="absolute top-1 left-1">
+                          <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'} className="text-xs">
+                            {video.content_type === 'playlist' ? (
+                              <>
+                                <List className="h-3 w-3 mr-1" />
+                                Playlist
+                              </>
+                            ) : (
+                              <>
+                                <Video className="h-3 w-3 mr-1" />
+                                Video
+                              </>
+                            )}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      {/* Content Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                              {video.title}
+                            </h4>
+                            {video.description && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
+                                {video.description}
+                              </p>
+                            )}
+                          </div>
+                          
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
-                    {/* Content Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                            {video.title}
-                          </h4>
-                          {video.description && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">
-                              {video.description}
-                            </p>
-                          )}
+                    {/* YouTube Player/Playlist */}
+                    <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      {embedUrl ? (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={embedUrl}
+                          title={video.title}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="w-full h-full"
+                          onLoad={() => console.log('🎬 Video iframe loaded successfully')}
+                          onError={() => console.error('🎬 Video iframe failed to load')}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
+                          <div className="text-center">
+                            <Video className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                            <p className="text-gray-500 text-sm">Unable to load video</p>
+                            <Button variant="outline" size="sm" className="mt-2" asChild>
+                              <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
+                                Watch on YouTube
+                              </a>
+                            </Button>
+                          </div>
                         </div>
-                        
-                        <Button variant="outline" size="sm" asChild>
-                          <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      </div>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* YouTube Player/Playlist */}
-                  <div className="aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <iframe
-                      width="100%"
-                      height="100%"
-                      src={getEmbedUrl(video.youtube_url, video.content_type)}
-                      title={video.title}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="w-full h-full"
-                    />
-                  </div>
-                </div>
-              </Card>
-            </CarouselItem>
-          ))}
+                </Card>
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
         <CarouselPrevious className="left-2" />
         <CarouselNext className="right-2" />
