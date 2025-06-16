@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -56,6 +55,12 @@ export function MobileDashboardSidebar({ open, onOpenChange }: MobileDashboardSi
       icon: Crown, 
       label: 'President Tools', 
       requiredTags: ['President'] 
+    },
+    { 
+      to: '/admin/financial', 
+      icon: DollarSign, 
+      label: 'Financial Management', 
+      requiredTags: ['Treasurer'] 
     },
     { 
       to: '/exec/treasurer', 

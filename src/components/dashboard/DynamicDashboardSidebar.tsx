@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,6 +53,12 @@ export function DynamicDashboardSidebar() {
       icon: Crown, 
       label: 'President Tools', 
       requiredTags: ['President'] 
+    },
+    { 
+      to: '/admin/financial', 
+      icon: DollarSign, 
+      label: 'Financial Management', 
+      requiredTags: ['Treasurer'] 
     },
     { 
       to: '/exec/treasurer', 
