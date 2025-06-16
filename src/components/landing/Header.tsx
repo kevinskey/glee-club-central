@@ -5,6 +5,7 @@ import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
 import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -71,6 +72,7 @@ export function Header() {
               <div className={`items-center gap-3 ${isMobile ? 'hidden' : 'flex'}`}>
                 {isAuthenticated ? (
                   <div className="flex items-center gap-3">
+                    <ThemeToggle />
                     <Button 
                       variant="ghost"
                       onClick={handleDashboardClick}
@@ -90,6 +92,7 @@ export function Header() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
+                    <ThemeToggle />
                     <Button 
                       variant="outline"
                       onClick={() => navigate("/signup")}
@@ -108,11 +111,11 @@ export function Header() {
                     </Button>
                   </div>
                 )}
-                <HeaderActions />
               </div>
               
               {/* Mobile Actions - Shown only on mobile */}
               <div className={`items-center gap-1 ${isMobile ? 'flex' : 'hidden'}`}>
+                <ThemeToggle />
                 {isAuthenticated ? (
                   <Button 
                     variant="default"
@@ -133,7 +136,6 @@ export function Header() {
                     Login
                   </Button>
                 )}
-                <HeaderActions />
                 <MobileNavDropdown />
               </div>
             </div>
