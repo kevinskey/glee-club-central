@@ -1,68 +1,37 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React from "react";
+import { cn } from "@/lib/utils";
 
 interface PageHeaderProps {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  compact?: boolean;
   className?: string;
   children?: React.ReactNode;
-  actions?: React.ReactNode;
 }
 
 export function PageHeader({ 
   title, 
   description, 
   icon, 
-  compact = false, 
   className,
-  children,
-  actions
+  children 
 }: PageHeaderProps) {
   return (
-    <div className={cn(
-      "flex flex-col gap-1",
-      compact ? "mb-3" : "mb-4 sm:mb-6",
-      className
-    )}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {icon && (
-            <div className={cn(
-              "flex items-center justify-center rounded-lg",
-              compact 
-                ? "p-1.5 bg-glee-spelman/10" 
-                : "p-2 bg-glee-spelman/10"
-            )}>
-              {icon}
-            </div>
-          )}
-          <h1 className={cn(
-            "font-bold text-gray-900 dark:text-white",
-            compact 
-              ? "text-lg sm:text-xl" 
-              : "text-2xl md:text-3xl"
-          )}>
-            {title}
-          </h1>
-        </div>
-        
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
+    <div className={cn("space-y-4", className)}>
+      <div className="flex items-center gap-3">
+        {icon && (
+          <div className="h-8 w-8 text-[#0072CE] flex-shrink-0">
+            {icon}
           </div>
         )}
+        <h1 className="text-3xl font-bold text-[#0072CE] font-playfair">
+          {title}
+        </h1>
       </div>
       
       {description && (
-        <p className={cn(
-          "text-gray-600 dark:text-gray-400",
-          compact 
-            ? "text-xs sm:text-sm" 
-            : "text-sm sm:text-base"
-        )}>
+        <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed max-w-3xl">
           {description}
         </p>
       )}

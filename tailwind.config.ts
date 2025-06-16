@@ -57,61 +57,25 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Liquid Glass Color Scheme
-        royal: {
-          50: "#f0f4ff",
-          100: "#e0e7ff", 
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1", // Main royal blue
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-          950: "#1e1b4b",
-        },
-        powder: {
-          50: "#f0f9ff",
+        // Glee Club Brand Colors
+        'glee-blue': '#0072CE',
+        'glee-white': '#FFFFFF',
+        'glee-black': '#000000',
+        'glee-gray': '#888888',
+        // Legacy aliases for compatibility
+        'glee-spelman': '#0072CE',
+        'glee-columbia': '#0072CE',
+        'columbia-blue': '#0072CE',
+        'blue': {
           100: "#e0f2fe",
           200: "#bae6fd",
           300: "#7dd3fc",
           400: "#38bdf8",
-          500: "#0ea5e9", // Main powder blue
-          600: "#0284c7",
-          700: "#0369a1",
+          500: "#0072CE",
+          600: "#0369a1",
+          700: "#0c4a6e",
           800: "#075985",
           900: "#0c4a6e",
-          950: "#082f49",
-        },
-        glass: {
-          white: "rgba(255, 255, 255, 0.1)",
-          dark: "rgba(0, 0, 0, 0.1)",
-          royal: "rgba(99, 102, 241, 0.1)",
-          powder: "rgba(14, 165, 233, 0.1)",
-        },
-        glee: {
-          orange: "#6366f1", // Royal blue
-          carolina: "#6366f1", // Royal blue  
-          purple: "#6366f1", // Royal blue
-          darkPurple: "#4338ca", // Darker royal blue
-          lightPurple: "#a5b4fc", // Lighter royal blue
-          gray: "#8E9196",
-          columbia: "#0ea5e9", // Powder blue
-        },
-        'glee-spelman': "#6366f1", // Royal blue
-        'glee-columbia': "#0ea5e9", // Powder blue
-        'columbia-blue': "#0ea5e9", // Powder blue
-        'blue': {
-          100: "#e0f2fe", // Very light powder blue
-          200: "#bae6fd", // Light powder blue
-          300: "#7dd3fc", // Medium light powder blue
-          400: "#38bdf8", // Medium powder blue
-          500: "#0ea5e9", // Powder blue
-          600: "#0284c7", // Darker powder blue
-          700: "#0369a1", // Dark blue
-          800: "#075985", // Very dark blue
-          900: "#0c4a6e", // Very dark blue
         }
       },
       borderRadius: {
@@ -128,22 +92,10 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
         },
-        "glass-shimmer": {
-          "0%": { transform: "translateX(-100%)" },
-          "100%": { transform: "translateX(100%)" }
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "glass-shimmer": "glass-shimmer 2s ease-in-out infinite",
-      },
-      backdropBlur: {
-        xs: "2px",
-      },
-      boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        'glass-inset': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
       },
     },
   },

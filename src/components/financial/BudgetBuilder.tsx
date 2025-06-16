@@ -117,8 +117,8 @@ export const BudgetBuilder: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading budget builder...</p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0072CE] mx-auto mb-4"></div>
+            <p className="text-gray-700 dark:text-gray-300">Loading budget builder...</p>
           </div>
         </CardContent>
       </Card>
@@ -126,28 +126,28 @@ export const BudgetBuilder: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Budget Summary */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
+            <Calculator className="h-5 w-5 text-[#0072CE]" />
             Budget Summary
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Budget Categories</p>
-              <p className="text-2xl font-bold text-blue-600">{budgets.length}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Total Budget Categories</p>
+              <p className="text-2xl font-bold text-[#0072CE]">{budgets.length}</p>
             </div>
-            <div className="text-center p-4 bg-green-50 dark:bg-green-950/30 rounded-lg">
-              <p className="text-sm text-muted-foreground">Total Budgeted Amount</p>
+            <div className="text-center p-6 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Total Budgeted Amount</p>
               <p className="text-2xl font-bold text-green-600">{formatCurrency(getTotalBudget())}</p>
             </div>
-            <div className="text-center p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg">
-              <p className="text-sm text-muted-foreground">Academic Year</p>
-              <p className="text-lg font-semibold">{newBudget.academic_year}</p>
+            <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Academic Year</p>
+              <p className="text-lg font-semibold text-black dark:text-white">{newBudget.academic_year}</p>
             </div>
           </div>
         </CardContent>
@@ -157,14 +157,14 @@ export const BudgetBuilder: React.FC = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
+            <Plus className="h-5 w-5 text-[#0072CE]" />
             Create New Budget Category
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
+              <Label htmlFor="category" className="text-sm font-medium text-black dark:text-white">Category</Label>
               <Select
                 value={newBudget.category}
                 onValueChange={(value) => setNewBudget({ ...newBudget, category: value })}
@@ -181,7 +181,7 @@ export const BudgetBuilder: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Budgeted Amount</Label>
+              <Label htmlFor="amount" className="text-sm font-medium text-black dark:text-white">Budgeted Amount</Label>
               <Input
                 id="amount"
                 type="number"
@@ -189,11 +189,12 @@ export const BudgetBuilder: React.FC = () => {
                 placeholder="0.00"
                 value={newBudget.budgeted_amount}
                 onChange={(e) => setNewBudget({ ...newBudget, budgeted_amount: e.target.value })}
+                className="border-gray-300 dark:border-gray-600"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="semester">Semester</Label>
+              <Label htmlFor="semester" className="text-sm font-medium text-black dark:text-white">Semester</Label>
               <Select
                 value={newBudget.semester}
                 onValueChange={(value) => setNewBudget({ ...newBudget, semester: value })}
@@ -210,29 +211,31 @@ export const BudgetBuilder: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="academic_year">Academic Year</Label>
+              <Label htmlFor="academic_year" className="text-sm font-medium text-black dark:text-white">Academic Year</Label>
               <Input
                 id="academic_year"
                 value={newBudget.academic_year}
                 onChange={(e) => setNewBudget({ ...newBudget, academic_year: e.target.value })}
                 placeholder="2024-2025"
+                className="border-gray-300 dark:border-gray-600"
               />
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="text-sm font-medium text-black dark:text-white">Notes</Label>
               <Textarea
                 id="notes"
                 value={newBudget.notes}
                 onChange={(e) => setNewBudget({ ...newBudget, notes: e.target.value })}
                 placeholder="Additional notes about this budget category..."
                 rows={3}
+                className="border-gray-300 dark:border-gray-600"
               />
             </div>
           </div>
 
-          <div className="flex justify-end mt-4">
-            <Button onClick={handleAddBudget} className="bg-blue-600 hover:bg-blue-700">
+          <div className="flex justify-end mt-6">
+            <Button onClick={handleAddBudget}>
               <Plus className="mr-2 h-4 w-4" />
               Add Budget Category
             </Button>
@@ -243,25 +246,25 @@ export const BudgetBuilder: React.FC = () => {
       {/* Budget List */}
       <Card>
         <CardHeader>
-          <CardTitle>Budget Categories</CardTitle>
+          <CardTitle className="text-xl font-semibold text-black dark:text-white">Budget Categories</CardTitle>
         </CardHeader>
         <CardContent>
           {budgets.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No budget categories created yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">
+            <div className="text-center py-12">
+              <p className="text-gray-700 dark:text-gray-300">No budget categories created yet.</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                 Create your first budget category above to get started.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {budgets.map((budget) => (
-                <div key={budget.id} className="border rounded-lg p-4">
+                <div key={budget.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                   {editingBudget?.id === budget.id ? (
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Category</Label>
+                          <Label className="text-sm font-medium text-black dark:text-white">Category</Label>
                           <Select
                             value={editingBudget.category}
                             onValueChange={(value) => setEditingBudget({ ...editingBudget, category: value })}
@@ -277,16 +280,17 @@ export const BudgetBuilder: React.FC = () => {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label>Amount</Label>
+                          <Label className="text-sm font-medium text-black dark:text-white">Amount</Label>
                           <Input
                             type="number"
                             step="0.01"
                             value={editingBudget.budgeted_amount}
                             onChange={(e) => setEditingBudget({ ...editingBudget, budgeted_amount: e.target.value })}
+                            className="border-gray-300 dark:border-gray-600"
                           />
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <Button onClick={handleUpdateBudget} size="sm">
                           <Save className="mr-2 h-4 w-4" />
                           Save
@@ -299,16 +303,20 @@ export const BudgetBuilder: React.FC = () => {
                   ) : (
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">{budget.category}</h3>
-                          <Badge variant="outline">{budget.semester || 'Full Year'}</Badge>
-                          <Badge variant="secondary">{budget.academic_year}</Badge>
+                        <div className="flex items-center gap-3 mb-3">
+                          <h3 className="text-lg font-semibold text-black dark:text-white">{budget.category}</h3>
+                          <Badge variant="outline" className="border-[#0072CE] text-[#0072CE]">
+                            {budget.semester || 'Full Year'}
+                          </Badge>
+                          <Badge variant="secondary" className="bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                            {budget.academic_year}
+                          </Badge>
                         </div>
-                        <p className="text-2xl font-bold text-blue-600">
+                        <p className="text-2xl font-bold text-[#0072CE] mb-2">
                           {formatCurrency(budget.budgeted_amount)}
                         </p>
                         {budget.notes && (
-                          <p className="text-sm text-muted-foreground mt-1">{budget.notes}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{budget.notes}</p>
                         )}
                       </div>
                       <div className="flex gap-2">
@@ -316,6 +324,7 @@ export const BudgetBuilder: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => duplicateBudget(budget)}
+                          className="border-[#0072CE] text-[#0072CE] hover:bg-[#0072CE]/10"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -323,6 +332,7 @@ export const BudgetBuilder: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => setEditingBudget({ ...budget, budgeted_amount: budget.budgeted_amount.toString() })}
+                          className="border-[#0072CE] text-[#0072CE] hover:bg-[#0072CE]/10"
                         >
                           Edit
                         </Button>
