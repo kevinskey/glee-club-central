@@ -47,12 +47,18 @@ export function YouTubeVideoAdmin() {
 
   const loadVideos = async () => {
     try {
+      console.log('🎬 Loading all YouTube videos for admin...');
       const { data, error } = await supabase
         .from('youtube_videos')
         .select('*')
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading videos:', error);
+        throw error;
+      }
+      
+      console.log('🎬 Admin videos loaded:', data?.length || 0, data);
       setVideos(data || []);
     } catch (error) {
       console.error('Error loading videos:', error);
@@ -166,7 +172,8 @@ export function YouTubeVideoAdmin() {
   const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist'): string => {
     if (contentType === 'playlist') {
       const playlistId = extractPlaylistId(url);
-      return playlistId ? `https://img.youtube.com/vi/${playlistId}/maxresdefault.jpg` : '';
+      const videoId = extractVideoId(url); // Sometimes playlist URLs also contain a video ID
+      return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
     } else {
       const videoId = extractVideoId(url);
       return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
@@ -296,76 +303,87 @@ export function YouTubeVideoAdmin() {
 
           {/* Content List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {videos.map((video) => (
-              <Card key={video.id} className="overflow-hidden">
-                <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative">
-                  <img
-                    src={video.thumbnail_url || getThumbnailUrl(video.youtube_url, video.content_type || 'video')}
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = `https://via.placeholder.com/320x180/f3f4f6/9ca3af?text=${video.content_type === 'playlist' ? 'Playlist' : 'Video'}`;
-                    }}
-                  />
-                  <div className="absolute top-2 left-2">
-                    <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'}>
-                      {video.content_type === 'playlist' ? (
-                        <>
-                          <List className="h-3 w-3 mr-1" />
-                          Playlist
-                        </>
-                      ) : (
-                        <>
-                          <Video className="h-3 w-3 mr-1" />
-                          Video
-                        </>
-                      )}
-                    </Badge>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-sm line-clamp-2">{video.title}</h3>
-                    <Badge variant={video.is_active ? "default" : "secondary"}>
-                      {video.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                  
-                  {video.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                      {video.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Order: {video.display_order}</span>
-                    <div className="flex space-x-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.open(video.youtube_url, '_blank')}
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => startEdit(video)}
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(video.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+            {videos.map((video) => {
+              const thumbnailUrl = video.thumbnail_url || getThumbnailUrl(video.youtube_url, video.content_type || 'video');
+              const fallbackUrl = `https://via.placeholder.com/320x180/f3f4f6/9ca3af?text=${video.content_type === 'playlist' ? 'Playlist' : 'Video'}`;
+              
+              return (
+                <Card key={video.id} className="overflow-hidden">
+                  <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative">
+                    <img
+                      src={thumbnailUrl || fallbackUrl}
+                      alt={video.title || 'YouTube Content'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.log('Thumbnail failed to load, using fallback');
+                        e.currentTarget.src = fallbackUrl;
+                      }}
+                    />
+                    <div className="absolute top-2 left-2">
+                      <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'}>
+                        {video.content_type === 'playlist' ? (
+                          <>
+                            <List className="h-3 w-3 mr-1" />
+                            Playlist
+                          </>
+                        ) : (
+                          <>
+                            <Video className="h-3 w-3 mr-1" />
+                            Video
+                          </>
+                        )}
+                      </Badge>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-sm line-clamp-2 flex-1 mr-2">
+                        {video.title || 'Untitled'}
+                      </h3>
+                      <Badge variant={video.is_active ? "default" : "secondary"}>
+                        {video.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    
+                    {video.description && (
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                        {video.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">Order: {video.display_order}</span>
+                      <div className="flex space-x-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(video.youtube_url, '_blank')}
+                          title="Open in YouTube"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => startEdit(video)}
+                          title="Edit"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDelete(video.id)}
+                          title="Delete"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {videos.length === 0 && (
