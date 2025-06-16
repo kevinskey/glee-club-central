@@ -52,16 +52,29 @@ export function YouTubeVideoSection() {
   };
 
   const extractVideoId = (url: string): string | null => {
-    // More comprehensive YouTube URL parsing
+    // Enhanced YouTube URL parsing to handle more formats
     const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^"&?\/\s]{11})/,
-      /youtube\.com\/watch\?.*v=([^"&?\/\s]{11})/
+      // Standard watch URLs
+      /(?:youtube\.com\/watch\?v=)([^"&?\/\s]{11})/,
+      // Short URLs
+      /(?:youtu\.be\/)([^"&?\/\s]{11})/,
+      // Embed URLs
+      /(?:youtube\.com\/embed\/)([^"&?\/\s]{11})/,
+      // Live URLs
+      /(?:youtube\.com\/live\/)([^"&?\/\s]{11})/,
+      // Watch URLs with additional parameters
+      /(?:youtube\.com\/watch\?.*v=)([^"&?\/\s]{11})/
     ];
     
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match) return match[1];
+      if (match) {
+        console.log('🎬 Extracted video ID:', match[1], 'from URL:', url);
+        return match[1];
+      }
     }
+    
+    console.warn('🎬 Could not extract video ID from URL:', url);
     return null;
   };
 
@@ -73,7 +86,10 @@ export function YouTubeVideoSection() {
     
     for (const pattern of patterns) {
       const match = url.match(pattern);
-      if (match) return match[1];
+      if (match) {
+        console.log('🎬 Extracted playlist ID:', match[1], 'from URL:', url);
+        return match[1];
+      }
     }
     return null;
   };
@@ -85,31 +101,29 @@ export function YouTubeVideoSection() {
       const playlistId = extractPlaylistId(url);
       if (playlistId) {
         const embedUrl = `https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=0&rel=0&modestbranding=1`;
-        console.log('🎬 Playlist embed URL:', embedUrl);
-        return embedUrl;
-      }
-    } else {
-      const videoId = extractVideoId(url);
-      if (videoId) {
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
-        console.log('🎬 Video embed URL:', embedUrl);
+        console.log('🎬 Playlist embed URL created:', embedUrl);
         return embedUrl;
       }
     }
     
-    console.warn('🎬 Could not create embed URL for:', url);
+    // For both 'video' content type and fallback for playlists without list parameter
+    const videoId = extractVideoId(url);
+    if (videoId) {
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+      console.log('🎬 Video embed URL created:', embedUrl);
+      return embedUrl;
+    }
+    
+    console.error('🎬 Could not create embed URL for:', url);
     return '';
   };
 
   const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist' = 'video'): string => {
-    if (contentType === 'playlist') {
-      const playlistId = extractPlaylistId(url);
-      const videoId = extractVideoId(url);
-      return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
-    } else {
-      const videoId = extractVideoId(url);
-      return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+    const videoId = extractVideoId(url);
+    if (videoId) {
+      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
     }
+    return '';
   };
 
   if (isLoading) {
@@ -139,7 +153,7 @@ export function YouTubeVideoSection() {
     <div className="space-y-8">
       <Carousel className="w-full max-w-6xl mx-auto">
         <CarouselContent>
-          {videos.map((video, index) => {
+          {videos.map((video) => {
             const embedUrl = getEmbedUrl(video.youtube_url, video.content_type);
             
             return (
@@ -210,15 +224,18 @@ export function YouTubeVideoSection() {
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                           allowFullScreen
                           className="w-full h-full"
-                          onLoad={() => console.log('🎬 Video iframe loaded successfully')}
-                          onError={() => console.error('🎬 Video iframe failed to load')}
+                          onLoad={() => console.log('🎬 Video iframe loaded successfully for:', video.title)}
+                          onError={() => console.error('🎬 Video iframe failed to load for:', video.title)}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                           <div className="text-center">
                             <Video className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-500 text-sm">Unable to load video</p>
-                            <Button variant="outline" size="sm" className="mt-2" asChild>
+                            <p className="text-gray-500 text-sm mb-2">Unable to load video</p>
+                            <p className="text-gray-400 text-xs mb-3">
+                              URL format not recognized: {video.youtube_url}
+                            </p>
+                            <Button variant="outline" size="sm" asChild>
                               <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
                                 Watch on YouTube
                               </a>
