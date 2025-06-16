@@ -3,7 +3,6 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
-import { Header } from '@/components/landing/Header';
 import CleanAdminUsers from '@/components/admin/CleanAdminUsers';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -41,7 +40,6 @@ export default function MembersPage() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <CleanAdminUsers />
         </div>
