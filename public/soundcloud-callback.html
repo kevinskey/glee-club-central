@@ -23,42 +23,101 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
     <div class="spinner"></div>
     <h2>Processing SoundCloud Authorization...</h2>
-    <p>You can close this window once authentication is complete.</p>
+    <div id="status"></div>
     
     <script>
         (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const error = urlParams.get('error');
-            const callback = urlParams.get('callback');
+            const statusDiv = document.getElementById('status');
             
-            console.log('Callback page loaded:', { code: !!code, error, callback });
+            function showStatus(message, type = 'info') {
+                statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
             
-            if (window.opener) {
+            try {
+                console.log('SoundCloud callback page loaded');
+                console.log('Current URL:', window.location.href);
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const error = urlParams.get('error');
+                const callback = urlParams.get('callback');
+                
+                console.log('URL parameters:', { 
+                    code: code ? code.substring(0, 10) + '...' : null, 
+                    error, 
+                    callback 
+                });
+                
                 if (error) {
-                    window.opener.postMessage({
-                        type: 'SOUNDCLOUD_OAUTH_ERROR',
-                        error: error
-                    }, window.location.origin);
+                    showStatus(`Authentication failed: ${error}`, 'error');
+                    
+                    if (window.opener) {
+                        console.log('Sending error message to parent window');
+                        window.opener.postMessage({
+                            type: 'SOUNDCLOUD_OAUTH_ERROR',
+                            error: error
+                        }, window.location.origin);
+                    }
                 } else if (code && callback === 'soundcloud') {
-                    window.opener.postMessage({
-                        type: 'SOUNDCLOUD_OAUTH_SUCCESS',
-                        code: code
-                    }, window.location.origin);
+                    showStatus('Authentication successful! Processing...', 'success');
+                    
+                    if (window.opener) {
+                        console.log('Sending success message to parent window');
+                        window.opener.postMessage({
+                            type: 'SOUNDCLOUD_OAUTH_SUCCESS',
+                            code: code
+                        }, window.location.origin);
+                    } else {
+                        console.log('No parent window found, redirecting to main app');
+                        // If no opener, redirect to main app with parameters
+                        window.location.href = '/admin/music?code=' + encodeURIComponent(code) + '&callback=soundcloud';
+                        return;
+                    }
+                } else {
+                    showStatus('Invalid callback parameters', 'error');
+                    console.log('Missing required parameters');
                 }
                 
-                // Close the popup after a short delay
+                // Close the popup after a delay
                 setTimeout(() => {
-                    window.close();
-                }, 1000);
-            } else {
-                // If no opener, redirect to main app
-                window.location.href = '/admin/music?code=' + (code || '') + '&callback=soundcloud';
+                    console.log('Closing popup window');
+                    showStatus('You can close this window', 'info');
+                    if (window.opener) {
+                        window.close();
+                    }
+                }, 2000);
+                
+            } catch (e) {
+                console.error('Error in callback handler:', e);
+                showStatus(`Error: ${e.message}`, 'error');
+                
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'SOUNDCLOUD_OAUTH_ERROR',
+                        error: e.message
+                    }, window.location.origin);
+                }
             }
         })();
     </script>

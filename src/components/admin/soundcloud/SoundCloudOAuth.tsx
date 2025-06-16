@@ -44,16 +44,20 @@ export function SoundCloudOAuth() {
     const callback = urlParams.get('callback');
     
     if (code && callback === 'soundcloud') {
-      console.log('OAuth callback detected, processing...');
+      console.log('OAuth callback detected in URL, processing...');
       handleOAuthCallback(code);
+      return;
     }
 
     // Listen for popup authentication completion
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from our domain for security
-      if (event.origin !== window.location.origin) return;
+      console.log('Received message from popup:', event);
       
-      console.log('Received popup message:', event.data);
+      // Only accept messages from our domain for security
+      if (event.origin !== window.location.origin) {
+        console.log('Ignoring message from different origin:', event.origin);
+        return;
+      }
       
       if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
         console.log('Popup authentication successful, processing callback...');
@@ -66,7 +70,10 @@ export function SoundCloudOAuth() {
     };
 
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    return () => {
+      console.log('Cleaning up message listener');
+      window.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   const cleanupUrl = () => {
@@ -100,22 +107,26 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Opening SoundCloud OAuth popup...');
+      console.log('Opening SoundCloud OAuth popup with URL:', data.authUrl);
       
       // Open popup with specific dimensions and features
       const popup = window.open(
         data.authUrl, 
         'soundcloud-oauth',
-        'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes'
+        'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes,status=no'
       );
       
       if (!popup) {
         throw new Error('Popup was blocked. Please allow popups for this site and try again.');
       }
 
-      // Monitor popup for closure or completion
+      // Focus the popup
+      popup.focus();
+
+      // Monitor popup for closure
       const checkPopup = setInterval(() => {
         if (popup.closed) {
+          console.log('Popup was closed');
           clearInterval(checkPopup);
           setIsConnecting(false);
           
@@ -124,26 +135,9 @@ export function SoundCloudOAuth() {
             const savedToken = localStorage.getItem('soundcloud_access_token');
             if (!savedToken) {
               console.log('Popup closed without successful authentication');
+              toast.error('Authentication was cancelled or failed');
             }
           }, 1000);
-        } else {
-          // Check if popup has been redirected to our callback URL
-          try {
-            const popupUrl = popup.location.href;
-            const popupParams = new URLSearchParams(new URL(popupUrl).search);
-            const code = popupParams.get('code');
-            const callback = popupParams.get('callback');
-            
-            if (code && callback === 'soundcloud') {
-              console.log('Popup reached callback URL, processing...');
-              clearInterval(checkPopup);
-              popup.close();
-              handleOAuthCallback(code);
-            }
-          } catch (e) {
-            // This is expected due to CORS when popup is on different domain
-            // We'll rely on the message listener instead
-          }
         }
       }, 1000);
       
@@ -177,7 +171,7 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
-      console.log('Processing SoundCloud OAuth callback...');
+      console.log('Processing SoundCloud OAuth callback with code:', code.substring(0, 10) + '...');
       
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
@@ -187,14 +181,16 @@ export function SoundCloudOAuth() {
       });
 
       if (error || data?.error) {
+        console.error('Token exchange error:', error || data?.error);
         throw new Error(error?.message || data?.error || 'Token exchange failed');
       }
 
       if (!data?.accessToken || !data?.user) {
+        console.error('Invalid authentication response:', data);
         throw new Error('Invalid authentication response');
       }
 
-      console.log('Authentication successful!');
+      console.log('Authentication successful for user:', data.user.username);
 
       // Store tokens and user data
       setAccessToken(data.accessToken);
