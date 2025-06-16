@@ -1,9 +1,8 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, Bell, Search, Sun, Moon, Home, ChevronDown } from "lucide-react";
+import { Menu, Bell, Search, Home, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -69,7 +68,6 @@ const navigationGroups = [
 
 export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps) {
   const { user, logout, profile } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const isTablet = useMediaQuery('(max-width: 1024px)');
@@ -120,17 +118,6 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6">
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-12 w-12 p-0"
-            aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-          >
-            {theme === 'light' ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-          </Button>
-
           {/* Notifications */}
           <Button
             variant="ghost"
