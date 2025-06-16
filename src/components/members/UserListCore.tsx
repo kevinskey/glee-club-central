@@ -26,12 +26,13 @@ interface UserListCoreProps {
   isAdmin: boolean;
   onEditUser: (user: UnifiedUser) => void;
   onDeleteUser: (userId: string) => void;
+  onViewProfile?: (user: UnifiedUser) => void;
 }
 
-export function UserListCore({ users, isAdmin, onEditUser, onDeleteUser }: UserListCoreProps) {
+export function UserListCore({ users, isAdmin, onEditUser, onDeleteUser, onViewProfile }: UserListCoreProps) {
   const handleUserCardClick = (user: UnifiedUser) => {
-    if (isAdmin) {
-      onEditUser(user);
+    if (isAdmin && onViewProfile) {
+      onViewProfile(user);
     }
   };
 
@@ -105,6 +106,15 @@ export function UserListCore({ users, isAdmin, onEditUser, onDeleteUser }: UserL
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {onViewProfile && (
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          onViewProfile(user);
+                        }}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Profile
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem onClick={(e) => {
                         e.stopPropagation();
                         onEditUser(user);

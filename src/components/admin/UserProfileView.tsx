@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { 
   User, 
@@ -16,6 +15,7 @@ import {
   Edit,
   Shield
 } from 'lucide-react';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface UserProfileViewProps {
   user: any;
@@ -54,12 +54,7 @@ export function UserProfileView({ user, onBack, onEdit }: UserProfileViewProps) 
         </CardHeader>
         <CardContent>
           <div className="flex items-start gap-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={user.avatar_url} />
-              <AvatarFallback className="text-2xl">
-                {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar user={user} size="xl" className="h-24 w-24" />
             
             <div className="flex-1 space-y-4">
               <div>

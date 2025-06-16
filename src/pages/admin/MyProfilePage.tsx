@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { 
   User, 
@@ -12,9 +11,11 @@ import {
   Music, 
   GraduationCap,
   Settings,
-  Shield
+  Shield,
+  DollarSign
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 export default function MyProfilePage() {
   const { profile, user } = useAuth();
@@ -54,12 +55,7 @@ export default function MyProfilePage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-start gap-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src={profile.avatar_url} />
-              <AvatarFallback className="text-2xl">
-                {`${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar user={profile} size="xl" className="h-24 w-24" />
             
             <div className="flex-1 space-y-4">
               <div>
@@ -76,9 +72,11 @@ export default function MyProfilePage() {
                 <Badge variant={profile.role === 'admin' ? 'destructive' : 'outline'}>
                   {profile.is_super_admin ? 'Super Admin' : profile.role || 'Member'}
                 </Badge>
-                <Badge variant={profile.status === 'active' ? 'default' : 'secondary'}>
-                  {profile.status || 'Active'}
-                </Badge>
+                {profile.status && (
+                  <Badge variant={profile.status === 'active' ? 'default' : 'secondary'}>
+                    {profile.status}
+                  </Badge>
+                )}
                 {profile.dues_paid && (
                   <Badge variant="default" className="bg-green-600">
                     Dues Paid
@@ -168,7 +166,10 @@ export default function MyProfilePage() {
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Account Balance</label>
-              <p className="mt-1">${profile.account_balance || '0.00'}</p>
+              <p className="mt-1 flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                ${profile.account_balance || '0.00'}
+              </p>
             </div>
           </div>
         </CardContent>

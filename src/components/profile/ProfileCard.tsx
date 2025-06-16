@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { AuthUser, Profile } from '@/types/auth';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface ProfileCardProps {
   user: AuthUser;
@@ -25,12 +25,7 @@ export function ProfileCard({ user, profile, getInitials, getDisplayName }: Prof
   return (
     <Card>
       <CardHeader className="text-center">
-        <Avatar className="w-24 h-24 mx-auto mb-4">
-          <AvatarImage src={profile?.avatar_url} alt="Profile" />
-          <AvatarFallback className="text-2xl font-semibold">
-            {getInitials()}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar user={profile} size="xl" className="w-24 h-24 mx-auto mb-4" />
         <CardTitle>{getDisplayName()}</CardTitle>
         <p className="text-muted-foreground">{user?.email}</p>
         {profile?.role && (
