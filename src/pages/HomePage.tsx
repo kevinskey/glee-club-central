@@ -42,10 +42,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* News ticker at the very top */}
-      <OptimizedNewsTicker autoHide={false} />
+      <div className="relative z-40">
+        <OptimizedNewsTicker autoHide={false} />
+      </div>
       
-      {/* Main content */}
-      <main className="relative">
+      {/* Main content - no margin or padding */}
+      <main className="relative -mt-px">
         {/* Dynamic Hero Section - Full Screen */}
         <DynamicHero />
         
