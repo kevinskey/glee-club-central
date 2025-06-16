@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2, ExternalLink, Video, Save, X, List, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, Video, Save, X, List, Loader2, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -69,6 +68,107 @@ export function YouTubeVideoAdmin() {
     }
   };
 
+  // Function to fetch YouTube video information using our Edge Function
+  const fetchYouTubeInfo = async (url: string) => {
+    setIsLoadingVideoInfo(true);
+    try {
+      console.log('🎬 Fetching YouTube info from API for:', url);
+      
+      const { data, error } = await supabase.functions.invoke('youtube-info', {
+        body: { url }
+      });
+
+      if (error) {
+        console.error('YouTube API Error:', error);
+        throw new Error(error.message || 'Failed to fetch video information');
+      }
+
+      if (data) {
+        console.log('🎬 YouTube API response:', data);
+        
+        // Update form data with fetched information
+        setFormData(prev => ({
+          ...prev,
+          title: data.title || prev.title,
+          description: data.description || prev.description,
+          thumbnail_url: data.thumbnail_url || prev.thumbnail_url,
+          content_type: data.content_type || prev.content_type
+        }));
+
+        toast.success(
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4" />
+            <span>Video information loaded from YouTube API!</span>
+          </div>
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching YouTube info:', error);
+      toast.error(`Failed to fetch video information: ${error.message}`);
+      
+      // Fallback to basic extraction if API fails
+      await fetchYouTubeInfoFallback(url);
+    } finally {
+      setIsLoadingVideoInfo(false);
+    }
+  };
+
+  // Fallback method using oEmbed (keeping the original logic)
+  const fetchYouTubeInfoFallback = async (url: string) => {
+    try {
+      console.log('🎬 Using fallback oEmbed method');
+      const videoId = extractVideoId(url);
+      const playlistId = extractPlaylistId(url);
+      
+      if (!videoId && !playlistId) {
+        toast.error('Invalid YouTube URL');
+        return;
+      }
+
+      let title = '';
+      let description = '';
+      let thumbnailUrl = '';
+      let contentType: 'video' | 'playlist' = 'video';
+
+      if (playlistId) {
+        contentType = 'playlist';
+        title = 'YouTube Playlist';
+        description = 'Imported from YouTube playlist';
+        thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+      } else if (videoId) {
+        try {
+          const oEmbedResponse = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+          if (oEmbedResponse.ok) {
+            const oEmbedData = await oEmbedResponse.json();
+            title = oEmbedData.title || 'YouTube Video';
+            description = `By ${oEmbedData.author_name || 'Unknown Author'}`;
+            thumbnailUrl = oEmbedData.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+          } else {
+            throw new Error('oEmbed failed');
+          }
+        } catch (oEmbedError) {
+          console.log('oEmbed failed, using basic fallback');
+          title = 'YouTube Video';
+          description = 'Imported from YouTube';
+          thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        }
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        title: title,
+        description: description,
+        thumbnail_url: thumbnailUrl,
+        content_type: contentType
+      }));
+
+      toast.success('Basic video information loaded (fallback method)');
+    } catch (error) {
+      console.error('Fallback method failed:', error);
+      toast.error('Failed to fetch video information');
+    }
+  };
+
   // Function to extract video ID from YouTube URL
   const extractVideoId = (url: string): string | null => {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -81,68 +181,6 @@ export function YouTubeVideoAdmin() {
     const regex = /[?&]list=([^"&?\/\s]+)/;
     const match = url.match(regex);
     return match ? match[1] : null;
-  };
-
-  // Function to fetch YouTube video information
-  const fetchYouTubeInfo = async (url: string) => {
-    setIsLoadingVideoInfo(true);
-    try {
-      const videoId = extractVideoId(url);
-      const playlistId = extractPlaylistId(url);
-      
-      if (!videoId && !playlistId) {
-        toast.error('Invalid YouTube URL');
-        return;
-      }
-
-      // For now, we'll extract basic info from the URL and use YouTube's oEmbed service
-      // In a production environment, you'd want to use the YouTube Data API
-      let title = '';
-      let description = '';
-      let thumbnailUrl = '';
-      let contentType: 'video' | 'playlist' = 'video';
-
-      if (playlistId) {
-        contentType = 'playlist';
-        title = 'YouTube Playlist';
-        description = 'Imported from YouTube playlist';
-        thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
-      } else if (videoId) {
-        // Try to fetch video info using YouTube oEmbed
-        try {
-          const oEmbedResponse = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
-          if (oEmbedResponse.ok) {
-            const oEmbedData = await oEmbedResponse.json();
-            title = oEmbedData.title || 'YouTube Video';
-            description = `By ${oEmbedData.author_name || 'Unknown Author'}`;
-            thumbnailUrl = oEmbedData.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-          } else {
-            throw new Error('oEmbed failed');
-          }
-        } catch (oEmbedError) {
-          console.log('oEmbed failed, using fallback');
-          title = 'YouTube Video';
-          description = 'Imported from YouTube';
-          thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-        }
-      }
-
-      // Update form data with fetched information
-      setFormData(prev => ({
-        ...prev,
-        title: title,
-        description: description,
-        thumbnail_url: thumbnailUrl,
-        content_type: contentType
-      }));
-
-      toast.success('Video information loaded successfully!');
-    } catch (error) {
-      console.error('Error fetching YouTube info:', error);
-      toast.error('Failed to fetch video information');
-    } finally {
-      setIsLoadingVideoInfo(false);
-    }
   };
 
   const detectContentType = (url: string): 'video' | 'playlist' => {
@@ -242,7 +280,7 @@ export function YouTubeVideoAdmin() {
   const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist'): string => {
     if (contentType === 'playlist') {
       const playlistId = extractPlaylistId(url);
-      const videoId = extractVideoId(url); // Sometimes playlist URLs also contain a video ID
+      const videoId = extractVideoId(url);
       return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
     } else {
       const videoId = extractVideoId(url);
@@ -290,7 +328,7 @@ export function YouTubeVideoAdmin() {
                       id="youtube_url"
                       value={formData.youtube_url}
                       onChange={(e) => handleUrlChange(e.target.value)}
-                      placeholder="Paste YouTube URL here - info will auto-populate"
+                      placeholder="Paste YouTube URL here - info will auto-populate from YouTube API"
                       className="flex-1"
                     />
                     {isLoadingVideoInfo && (
@@ -300,7 +338,7 @@ export function YouTubeVideoAdmin() {
                     )}
                   </div>
                   <p className="text-xs text-gray-500">
-                    Paste a YouTube video or playlist URL and the title, description, and thumbnail will be automatically fetched
+                    Paste a YouTube video or playlist URL and detailed information will be automatically fetched from YouTube's API
                   </p>
                 </div>
 
@@ -311,7 +349,7 @@ export function YouTubeVideoAdmin() {
                       id="title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="Content title (auto-filled from URL)"
+                      placeholder="Content title (auto-filled from YouTube API)"
                     />
                   </div>
                   
@@ -341,7 +379,7 @@ export function YouTubeVideoAdmin() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Content description (auto-filled from URL)"
+                    placeholder="Content description (auto-filled from YouTube API)"
                     rows={3}
                   />
                 </div>
