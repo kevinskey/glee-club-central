@@ -11,21 +11,21 @@ interface SoundCloudConnectionButtonProps {
 
 export function SoundCloudConnectionButton({ isConnecting, onConnect }: SoundCloudConnectionButtonProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="max-w-md">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <AlertCircle className="w-5 h-5 text-orange-500" />
           Connect Your SoundCloud Account
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Connect your SoundCloud account to access your tracks, playlists, and manage your music content.
         </p>
         
         <div className="space-y-2">
-          <h4 className="font-medium">What you'll get:</h4>
-          <ul className="text-sm text-muted-foreground space-y-1">
+          <h4 className="text-sm font-medium">What you'll get:</h4>
+          <ul className="text-xs text-muted-foreground space-y-1 ml-2">
             <li>• Access to all your SoundCloud tracks and playlists</li>
             <li>• Embedded SoundCloud players for seamless playback</li>
             <li>• Real-time sync with your SoundCloud account</li>
@@ -37,6 +37,7 @@ export function SoundCloudConnectionButton({ isConnecting, onConnect }: SoundClo
           onClick={onConnect} 
           disabled={isConnecting}
           className="w-full bg-orange-500 hover:bg-orange-600"
+          size="sm"
         >
           {isConnecting ? (
             <>

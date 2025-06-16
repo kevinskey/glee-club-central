@@ -48,29 +48,6 @@ export function SoundCloudOAuth() {
       handleOAuthCallback(code);
       return;
     }
-
-    // Listen for popup authentication completion
-    const handleMessage = (event: MessageEvent) => {
-      console.log('Received message from popup:', event.data, 'from origin:', event.origin);
-      
-      if (event.data && typeof event.data === 'object') {
-        if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
-          console.log('Popup authentication successful, processing callback...');
-          handleOAuthCallback(event.data.code);
-        } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
-          console.error('Popup authentication failed:', event.data.error);
-          setIsConnecting(false);
-          toast.error(`Authentication failed: ${event.data.error}`);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    
-    return () => {
-      console.log('Cleaning up message listener');
-      window.removeEventListener('message', handleMessage);
-    };
   }, []);
 
   const cleanupUrl = () => {
@@ -232,14 +209,14 @@ export function SoundCloudOAuth() {
     await loadUserData(accessToken);
   };
 
-  // Show loading state during OAuth processing
+  // Show compact loading state during OAuth processing
   if (isConnecting && !connectedUser) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Connecting to SoundCloud...</p>
-          <p className="text-sm text-muted-foreground mt-2">
+      <div className="flex items-center justify-center p-6 max-w-md mx-auto">
+        <div className="text-center space-y-3">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Connecting to SoundCloud...</p>
+          <p className="text-xs text-muted-foreground">
             You will be redirected to SoundCloud to authorize the connection.
           </p>
         </div>
@@ -267,9 +244,11 @@ export function SoundCloudOAuth() {
   }
 
   return (
-    <SoundCloudConnectionButton 
-      isConnecting={isConnecting}
-      onConnect={handleConnect}
-    />
+    <div className="flex justify-center">
+      <SoundCloudConnectionButton 
+        isConnecting={isConnecting}
+        onConnect={handleConnect}
+      />
+    </div>
   );
 }
