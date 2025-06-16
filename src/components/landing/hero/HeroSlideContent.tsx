@@ -33,7 +33,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
   }
 
   return (
-    <section className="relative min-h-[400px] sm:h-[70vh] sm:min-h-[500px] flex items-center justify-center overflow-hidden">
+    <section className="relative h-[40vh] sm:h-[60vh] md:h-[70vh] min-h-[300px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0">
         {hasValidImage ? (
@@ -91,20 +91,20 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       {/* Content */}
       <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
         {(slide.show_title !== false) && (
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
             {slide.title}
           </h1>
         )}
         {slide.description && (
-          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+          <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
             {slide.description}
           </p>
         )}
         {slide.button_text && slide.button_link && (
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button 
               size="lg"
-              className="glass-button-primary text-base px-8 py-4"
+              className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
               onClick={() => window.open(slide.button_link, '_blank')}
             >
               {slide.button_text}
