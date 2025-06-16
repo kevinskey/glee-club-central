@@ -129,6 +129,8 @@ export function ElasticEmailComposer() {
     // Open preview in new window/modal
     const previewWindow = window.open('', '_blank');
     if (previewWindow) {
+      const recipientsList = selectedRecipientsData.map(r => `${r.first_name} ${r.last_name} (${r.email})`).join(', ');
+      
       previewWindow.document.write(`
         <html>
           <head><title>Email Preview</title></head>
@@ -136,6 +138,7 @@ export function ElasticEmailComposer() {
             <h2>Email Preview</h2>
             <p><strong>Subject:</strong> ${subject}</p>
             <p><strong>Recipients:</strong> ${selectedRecipientsData.length} members</p>
+            <p><strong>Recipient List:</strong> ${recipientsList}</p>
             <hr>
             <div style="border: 1px solid #ddd; padding: 20px; margin-top: 20px;">
               ${content}
