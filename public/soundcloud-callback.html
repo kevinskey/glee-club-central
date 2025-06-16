@@ -6,12 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SoundCloud Authorization</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             background: linear-gradient(135deg, #ff5500, #ff7700);
@@ -19,6 +13,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
             padding: 20px;
         }
         
@@ -53,12 +48,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        .message {
-            color: #666;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
         .success {
             color: #155724;
             background: #d4edda;
@@ -91,77 +80,36 @@
         button:hover {
             background: #e04400;
         }
-        
-        .debug {
-            font-size: 12px;
-            color: #666;
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 20px;
-            text-align: left;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>SoundCloud Authorization</h1>
         <div class="spinner" id="spinner"></div>
-        <div class="message" id="message">Processing your authorization...</div>
+        <div id="message">Processing authorization...</div>
         <div id="result"></div>
         <button id="closeBtn" onclick="closeWindow()" style="display: none;">Close Window</button>
-        <div id="debug" class="debug" style="display: none;"></div>
     </div>
 
     <script>
-        console.log('SoundCloud callback page loaded');
-        console.log('Current URL:', window.location.href);
-        
-        const spinner = document.getElementById('spinner');
-        const message = document.getElementById('message');
-        const result = document.getElementById('result');
-        const closeBtn = document.getElementById('closeBtn');
-        const debug = document.getElementById('debug');
-        
-        // Show debug info
-        debug.innerHTML = `
-            <strong>Debug Info:</strong><br>
-            URL: ${window.location.href}<br>
-            Has opener: ${!!window.opener}<br>
-            Has parent: ${window.parent !== window}<br>
-            Origin: ${window.location.origin}
-        `;
-        debug.style.display = 'block';
-        
         function showResult(type, msg) {
-            spinner.style.display = 'none';
-            result.innerHTML = `<div class="${type}">${msg}</div>`;
-            closeBtn.style.display = 'inline-block';
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('result').innerHTML = `<div class="${type}">${msg}</div>`;
+            document.getElementById('closeBtn').style.display = 'inline-block';
         }
         
         function closeWindow() {
             try {
-                if (window.opener && !window.opener.closed) {
-                    window.close();
-                } else if (window.parent && window.parent !== window) {
-                    window.close();
-                } else {
-                    showResult('error', 'Please close this window manually.');
-                }
+                window.close();
             } catch (e) {
                 showResult('error', 'Please close this window manually.');
             }
         }
         
         function sendMessage(data) {
-            console.log('Sending message:', data);
             try {
                 if (window.opener && !window.opener.closed) {
                     window.opener.postMessage(data, window.location.origin);
-                    return true;
-                }
-                if (window.parent && window.parent !== window) {
-                    window.parent.postMessage(data, window.location.origin);
                     return true;
                 }
                 return false;
@@ -179,11 +127,8 @@
                 const error = urlParams.get('error');
                 const errorDescription = urlParams.get('error_description');
                 
-                console.log('Processing callback with params:', { code: !!code, error, errorDescription });
-                
                 if (error) {
                     const errorMsg = errorDescription || error;
-                    console.error('OAuth error:', errorMsg);
                     showResult('error', `Authorization failed: ${errorMsg}`);
                     sendMessage({
                         type: 'SOUNDCLOUD_OAUTH_ERROR',
@@ -194,7 +139,6 @@
                 }
                 
                 if (code) {
-                    console.log('Authorization code received');
                     showResult('success', 'Authorization successful! Processing...');
                     
                     const messageSent = sendMessage({
@@ -203,7 +147,7 @@
                     });
                     
                     if (messageSent) {
-                        message.textContent = 'Success! You can close this window.';
+                        document.getElementById('message').textContent = 'Success! Closing window...';
                         setTimeout(closeWindow, 2000);
                     } else {
                         showResult('error', 'Authorization successful, but unable to communicate with main window. Please close this window.');
@@ -211,7 +155,6 @@
                     return;
                 }
                 
-                // No code or error - might be initial load
                 showResult('error', 'No authorization code received. Please try again.');
                 sendMessage({
                     type: 'SOUNDCLOUD_OAUTH_ERROR',
@@ -239,7 +182,7 @@
         
         // Fallback timeout
         setTimeout(() => {
-            if (spinner.style.display !== 'none') {
+            if (document.getElementById('spinner').style.display !== 'none') {
                 showResult('error', 'Timeout processing authorization. Please try again.');
                 setTimeout(closeWindow, 2000);
             }
