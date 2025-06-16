@@ -11,7 +11,7 @@ export function HeroDefault() {
       </div>
       
       {/* Content with Liquid Glass Styling */}
-      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4 py-8 md:py-0">
+      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-10 py-8 md:py-0">
         <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 leading-tight text-shadow-glass">
           Spelman College Glee Club
         </h1>

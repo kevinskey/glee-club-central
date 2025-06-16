@@ -101,7 +101,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
           {/* Mobile Content Overlay */}
           {hasTextContent && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white max-w-[90%] mx-auto px-4">
+              <div className="text-center text-white max-w-[90%] mx-auto px-10">
                 {(slide.show_title !== false) && (
                   <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
                     {slide.title}
@@ -135,7 +135,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
           {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
           {hasTextContent && (
             <div className="relative z-10 flex items-center justify-center h-full">
-              <div className="text-center text-white max-w-[90%] mx-auto px-4 py-8">
+              <div className="text-center text-white max-w-[90%] mx-auto px-10 py-8">
                 {(slide.show_title !== false) && (
                   <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
                     {slide.title}
@@ -179,7 +179,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       
       {/* Desktop Content */}
       {hasTextContent && (
-        <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
+        <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-10">
           {(slide.show_title !== false) && (
             <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
               {slide.title}
