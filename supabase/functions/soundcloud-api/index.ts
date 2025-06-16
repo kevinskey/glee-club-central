@@ -45,10 +45,10 @@ serve(async (req) => {
 
     console.log('Using Client ID:', soundcloudClientId.substring(0, 8) + '...')
     
-    // Try to resolve the user first with basic client_id
-    const resolveUrl = `https://api.soundcloud.com/resolve?url=https://soundcloud.com/spelman-glee&client_id=${soundcloudClientId}`
+    // Try to resolve the user first with basic client_id - updated to doctorkj profile
+    const resolveUrl = `https://api.soundcloud.com/resolve?url=https://soundcloud.com/doctorkj&client_id=${soundcloudClientId}`
     
-    console.log('Attempting to resolve Spelman Glee Club profile...')
+    console.log('Attempting to resolve doctorkj profile...')
     const resolveResponse = await fetch(resolveUrl, {
       headers: {
         'User-Agent': 'Spelman Glee Club Music App/1.0',
@@ -67,9 +67,10 @@ serve(async (req) => {
           playlists: [],
           tracks: [],
           status: 'error',
-          message: `SoundCloud API authentication failed. Status: ${resolveResponse.status}. The SoundCloud API may require additional authentication or the profile may not be accessible.`,
-          errorType: 'api_error',
-          isRealData: false
+          message: `SoundCloud API authentication failed for profile https://soundcloud.com/doctorkj. Status: ${resolveResponse.status}. SoundCloud now requires OAuth authentication for API access. Consider using SoundCloud embeds or implementing OAuth flow.`,
+          errorType: 'api_auth_required',
+          isRealData: false,
+          profileUrl: 'https://soundcloud.com/doctorkj'
         }),
         { 
           headers: { 
@@ -124,7 +125,7 @@ serve(async (req) => {
     const transformedTracks = tracksData.map((track: any) => ({
       id: track.id.toString(),
       title: track.title || 'Untitled Track',
-      artist: track.user?.username || 'Spelman College Glee Club',
+      artist: track.user?.username || 'doctorkj',
       audioUrl: track.stream_url ? `${track.stream_url}?client_id=${soundcloudClientId}` : '',
       albumArt: track.artwork_url || track.user?.avatar_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
       duration: Math.floor((track.duration || 0) / 1000),
@@ -158,9 +159,10 @@ serve(async (req) => {
         playlists: transformedPlaylists,
         tracks: transformedTracks,
         status: 'success',
-        message: `Successfully loaded ${transformedTracks.length} tracks and ${transformedPlaylists.length} playlists from SoundCloud API.`,
+        message: `Successfully loaded ${transformedTracks.length} tracks and ${transformedPlaylists.length} playlists from SoundCloud profile: https://soundcloud.com/doctorkj`,
         isRealData: true,
         authMethod: 'client_id',
+        profileUrl: 'https://soundcloud.com/doctorkj',
         userData: {
           id: userData.id,
           username: userData.username,
@@ -184,10 +186,11 @@ serve(async (req) => {
         playlists: [],
         tracks: [],
         status: 'error',
-        message: 'An unexpected error occurred while fetching SoundCloud data.',
+        message: 'An unexpected error occurred while fetching SoundCloud data from https://soundcloud.com/doctorkj.',
         errorType: 'unexpected_error',
         details: err instanceof Error ? err.message : 'Unknown error',
-        isRealData: false
+        isRealData: false,
+        profileUrl: 'https://soundcloud.com/doctorkj'
       }),
       { 
         headers: { 
