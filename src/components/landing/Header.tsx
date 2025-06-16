@@ -73,8 +73,10 @@ export function Header() {
         
         {/* Right Side Actions */}
         <div className="flex items-center gap-4 flex-shrink-0">
-          {/* Theme Toggle - Always visible */}
-          <ThemeToggle />
+          {/* Theme Toggle - Now wider */}
+          <div className="flex items-center">
+            <ThemeToggle />
+          </div>
           
           {/* Desktop Auth Buttons - Hidden on mobile */}
           <div className={`items-center gap-3 ${isMobile ? 'hidden' : 'flex'}`}>
