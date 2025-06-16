@@ -87,7 +87,12 @@ export function SoundCloudOAuth() {
       }
 
       console.log('Redirecting to SoundCloud OAuth...');
-      // Use window.open for better compatibility instead of direct navigation
+      // Store state for verification
+      if (data.state) {
+        localStorage.setItem('soundcloud_oauth_state', data.state);
+      }
+      
+      // Redirect to SoundCloud for authorization
       window.location.href = data.authUrl;
       
     } catch (error) {

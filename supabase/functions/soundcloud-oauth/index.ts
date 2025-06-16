@@ -76,11 +76,15 @@ serve(async (req) => {
 
     // Generate OAuth authorization URL
     if (finalAction === 'authorize') {
-      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
-      // Use simple redirect URI without query parameters to avoid issues
+      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
+      console.log('Request origin:', origin)
+      
+      // Use a more specific redirect URI to match SoundCloud's requirements
       const redirectUri = `${origin}/admin/music`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
+      
+      console.log('Generated redirect URI:', redirectUri)
       
       // Use the standard SoundCloud Connect URL
       const authUrl = new URL('https://soundcloud.com/connect')
@@ -91,7 +95,6 @@ serve(async (req) => {
       authUrl.searchParams.set('state', state)
       
       console.log('Generated OAuth URL:', authUrl.toString())
-      console.log('Redirect URI:', redirectUri)
       
       return new Response(
         JSON.stringify({ 
@@ -128,12 +131,11 @@ serve(async (req) => {
         )
       }
 
-      // Use the origin to construct redirect URI (same as in authorize)
-      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
+      // Use the same redirect URI as in authorize step
+      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       const redirectUri = `${origin}/admin/music`
       
-      console.log('Exchanging code for access token')
-      console.log('Using redirect URI:', redirectUri)
+      console.log('Token exchange - using redirect URI:', redirectUri)
       
       try {
         const tokenResponse = await fetch('https://api.soundcloud.com/oauth2/token', {
