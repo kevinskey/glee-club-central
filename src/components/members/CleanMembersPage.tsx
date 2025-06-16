@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import {
   RefreshCw,
   Plus
 } from 'lucide-react';
-import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useAuth } from '@/contexts/AuthContext';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
 import { UserListCore } from './UserListCore';
 import { StreamlinedFilters } from './StreamlinedFilters';
@@ -23,7 +22,10 @@ import { toast } from 'sonner';
 export function CleanMembersPage() {
   console.log('🔧 CleanMembersPage: Component started rendering');
   
-  const { isAdmin, isLoading: authLoading, isAuthenticated } = useAuthMigration();
+  const { profile, isLoading: authLoading, user } = useAuth();
+  const isAuthenticated = !!user;
+  const isAdmin = profile?.role === 'admin' || profile?.is_super_admin;
+
   const {
     filteredUsers,
     isLoading: usersLoading,
@@ -53,8 +55,6 @@ export function CleanMembersPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const isAdminUser = isAdmin();
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
     if (key === 'search') return value !== '';
@@ -155,7 +155,7 @@ export function CleanMembersPage() {
                 <span className="ml-1 sm:ml-2">Refresh</span>
               </Button>
               
-              {isAdminUser && (
+              {isAdmin && (
                 <>
                   <Button 
                     onClick={() => setShowAddMemberDialog(true)} 
@@ -215,7 +215,7 @@ export function CleanMembersPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
                 </p>
-                {isAdminUser && activeFilterCount === 0 && (
+                {isAdmin && activeFilterCount === 0 && (
                   <Button 
                     onClick={() => setShowAddMemberDialog(true)}
                     size="sm"
@@ -231,7 +231,7 @@ export function CleanMembersPage() {
             <>
               <UserListCore
                 users={paginatedUsers}
-                isAdmin={isAdminUser}
+                isAdmin={isAdmin}
                 onEditUser={handleEditUser}
                 onDeleteUser={handleDeleteUser}
               />
