@@ -1,29 +1,43 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>SoundCloud Authorization</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundCloud Authorization</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            text-align: center;
-            padding: 40px 20px;
             background: linear-gradient(135deg, #ff5500, #ff7700);
-            margin: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
+        
         .container {
-            max-width: 400px;
             background: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
         }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #ff5500;
@@ -33,102 +47,114 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .status {
-            margin: 20px 0;
+        
+        .message {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
             padding: 15px;
             border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.4;
+            margin-bottom: 20px;
         }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+        
         .error {
-            background: #f8d7da;
             color: #721c24;
+            background: #f8d7da;
             border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        h2 {
-            color: #333;
-            margin: 0 0 15px;
-            font-size: 18px;
-        }
-        .close-button {
+        
+        button {
             background: #ff5500;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 20px;
             font-size: 14px;
             font-weight: 500;
         }
-        .close-button:hover {
+        
+        button:hover {
             background: #e04400;
         }
-        .debug-info {
+        
+        .debug {
             font-size: 12px;
             color: #666;
-            margin-top: 15px;
-            padding: 10px;
             background: #f8f9fa;
+            padding: 10px;
             border-radius: 4px;
+            margin-top: 20px;
             text-align: left;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <h1>SoundCloud Authorization</h1>
         <div class="spinner" id="spinner"></div>
-        <h2>Processing SoundCloud Authorization...</h2>
-        <div id="status">
-            <div class="status info">
-                Connecting to SoundCloud and processing your authorization...
-            </div>
-        </div>
-        <button id="closeButton" class="close-button" style="display: none;" onclick="closeWindow()">Close Window</button>
-        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+        <div class="message" id="message">Processing your authorization...</div>
+        <div id="result"></div>
+        <button id="closeBtn" onclick="closeWindow()" style="display: none;">Close Window</button>
+        <div id="debug" class="debug" style="display: none;"></div>
     </div>
-    
+
     <script>
         console.log('SoundCloud callback page loaded');
-        console.log('URL:', window.location.href);
-        console.log('Has opener:', !!window.opener);
+        console.log('Current URL:', window.location.href);
         
-        const statusDiv = document.getElementById('status');
-        const closeButton = document.getElementById('closeButton');
         const spinner = document.getElementById('spinner');
-        const debugInfo = document.getElementById('debugInfo');
+        const message = document.getElementById('message');
+        const result = document.getElementById('result');
+        const closeBtn = document.getElementById('closeBtn');
+        const debug = document.getElementById('debug');
         
-        function showStatus(message, type = 'info') {
-            if (spinner) spinner.style.display = 'none';
-            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-            if (type === 'success' || type === 'error') {
-                closeButton.style.display = 'inline-block';
-            }
+        // Show debug info
+        debug.innerHTML = `
+            <strong>Debug Info:</strong><br>
+            URL: ${window.location.href}<br>
+            Has opener: ${!!window.opener}<br>
+            Has parent: ${window.parent !== window}<br>
+            Origin: ${window.location.origin}
+        `;
+        debug.style.display = 'block';
+        
+        function showResult(type, msg) {
+            spinner.style.display = 'none';
+            result.innerHTML = `<div class="${type}">${msg}</div>`;
+            closeBtn.style.display = 'inline-block';
         }
         
         function closeWindow() {
             try {
-                window.close();
+                if (window.opener && !window.opener.closed) {
+                    window.close();
+                } else if (window.parent && window.parent !== window) {
+                    window.close();
+                } else {
+                    showResult('error', 'Please close this window manually.');
+                }
             } catch (e) {
-                showStatus('Please close this window manually.', 'info');
+                showResult('error', 'Please close this window manually.');
             }
         }
         
         function sendMessage(data) {
+            console.log('Sending message:', data);
             try {
                 if (window.opener && !window.opener.closed) {
                     window.opener.postMessage(data, window.location.origin);
@@ -145,60 +171,76 @@
             }
         }
         
-        // Process the callback immediately
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const error = urlParams.get('error');
-            const errorDescription = urlParams.get('error_description');
-            
-            console.log('URL params:', { code: !!code, error, errorDescription });
-            
-            if (error) {
-                const errorMessage = errorDescription || error;
-                showStatus(`Authentication failed: ${errorMessage}`, 'error');
+        // Process callback immediately
+        function processCallback() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                const error = urlParams.get('error');
+                const errorDescription = urlParams.get('error_description');
+                
+                console.log('Processing callback with params:', { code: !!code, error, errorDescription });
+                
+                if (error) {
+                    const errorMsg = errorDescription || error;
+                    console.error('OAuth error:', errorMsg);
+                    showResult('error', `Authorization failed: ${errorMsg}`);
+                    sendMessage({
+                        type: 'SOUNDCLOUD_OAUTH_ERROR',
+                        error: errorMsg
+                    });
+                    setTimeout(closeWindow, 3000);
+                    return;
+                }
+                
+                if (code) {
+                    console.log('Authorization code received');
+                    showResult('success', 'Authorization successful! Processing...');
+                    
+                    const messageSent = sendMessage({
+                        type: 'SOUNDCLOUD_OAUTH_SUCCESS',
+                        code: code
+                    });
+                    
+                    if (messageSent) {
+                        message.textContent = 'Success! You can close this window.';
+                        setTimeout(closeWindow, 2000);
+                    } else {
+                        showResult('error', 'Authorization successful, but unable to communicate with main window. Please close this window.');
+                    }
+                    return;
+                }
+                
+                // No code or error - might be initial load
+                showResult('error', 'No authorization code received. Please try again.');
                 sendMessage({
                     type: 'SOUNDCLOUD_OAUTH_ERROR',
-                    error: errorMessage
+                    error: 'No authorization code received'
                 });
                 setTimeout(closeWindow, 3000);
                 
-            } else if (code) {
-                showStatus('Authorization successful! Processing...', 'success');
-                const messageSent = sendMessage({
-                    type: 'SOUNDCLOUD_OAUTH_SUCCESS',
-                    code: code
-                });
-                
-                if (messageSent) {
-                    showStatus('Success! Closing window...', 'success');
-                    setTimeout(closeWindow, 1500);
-                } else {
-                    showStatus('Authorization successful, but having trouble communicating with the main window. You can close this window.', 'info');
-                }
-            } else {
-                showStatus('Invalid callback - missing authorization code', 'error');
+            } catch (e) {
+                console.error('Callback processing error:', e);
+                showResult('error', `Processing error: ${e.message}`);
                 sendMessage({
                     type: 'SOUNDCLOUD_OAUTH_ERROR',
-                    error: 'Missing authorization code'
+                    error: e.message
                 });
                 setTimeout(closeWindow, 3000);
             }
-            
-        } catch (e) {
-            console.error('Callback processing error:', e);
-            showStatus(`Processing error: ${e.message}`, 'error');
-            sendMessage({
-                type: 'SOUNDCLOUD_OAUTH_ERROR',
-                error: e.message
-            });
-            setTimeout(closeWindow, 3000);
+        }
+        
+        // Process callback when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', processCallback);
+        } else {
+            processCallback();
         }
         
         // Fallback timeout
         setTimeout(() => {
-            if (spinner && spinner.style.display !== 'none') {
-                showStatus('Timeout: No response from SoundCloud. Please try again.', 'error');
+            if (spinner.style.display !== 'none') {
+                showResult('error', 'Timeout processing authorization. Please try again.');
                 setTimeout(closeWindow, 2000);
             }
         }, 10000);
