@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 import { Footer } from "@/components/landing/Footer";
-import { OptimizedNewsTicker } from "@/components/landing/news/OptimizedNewsTicker";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { DynamicHero } from "@/components/landing/DynamicHero";
@@ -41,9 +40,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* News ticker at the very top */}
-      <OptimizedNewsTicker autoHide={false} />
-      
       {/* Main content - no spacing around hero */}
       <main className="relative">
         {/* Dynamic Hero Section - Full Screen */}
