@@ -7,7 +7,7 @@ import {
   Tabs, 
   TabsContent, 
   TabsList, 
-  TabsTab 
+  TabsTrigger 
 } from '@/components/ui/tabs';
 import { 
   DollarSign, 
@@ -122,10 +122,10 @@ export const FinancialDashboard: React.FC = () => {
       {/* Main Content Tabs */}
       <Tabs defaultValue="ledger" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTab value="ledger">Transaction Ledger</TabsTab>
-          <TabsTab value="summary">Financial Summary</TabsTab>
-          <TabsTab value="budget">Budget Tracker</TabsTab>
-          <TabsTab value="reports">Reports</TabsTab>
+          <TabsTrigger value="ledger">Transaction Ledger</TabsTrigger>
+          <TabsTrigger value="summary">Financial Summary</TabsTrigger>
+          <TabsTrigger value="budget">Budget Tracker</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         
         <TabsContent value="ledger" className="space-y-4">
