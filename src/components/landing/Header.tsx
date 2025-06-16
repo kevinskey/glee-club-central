@@ -39,9 +39,9 @@ export function Header() {
   
   return (
     <header className="glee-header sticky top-0 left-0 right-0 w-full z-50">
-      <div className="container mx-auto">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex h-16 items-center justify-between">
+      <div className="w-full">
+        <div className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
+          <div className="flex h-16 items-center justify-between w-full">
             {/* Logo - Always visible */}
             <div className="flex-shrink-0 pl-6">
               <HeaderLogo />
