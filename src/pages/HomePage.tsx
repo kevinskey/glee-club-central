@@ -42,9 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* News ticker at the very top */}
-      <div className="relative z-40">
-        <OptimizedNewsTicker autoHide={false} />
-      </div>
+      <OptimizedNewsTicker autoHide={false} />
       
       {/* Main content - no margin or padding */}
       <main className="relative -mt-px">
