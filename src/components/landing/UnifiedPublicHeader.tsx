@@ -12,9 +12,9 @@ export function UnifiedPublicHeader({
   className = "" 
 }: UnifiedPublicHeaderProps) {
   return (
-    <>
+    <div className="py-4">
       {/* Main Navigation Header */}
       <Header />
-    </>
+    </div>
   );
 }
