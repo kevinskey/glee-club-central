@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function Hero() {
   return (
-    <section className="relative h-[46vh] min-h-[280px] md:h-[51vh] md:min-h-[325px] flex items-center justify-center bg-gradient-to-br from-primary to-orange-500">
+    <section className="relative h-[37vh] min-h-[225px] md:h-[41vh] md:min-h-[260px] flex items-center justify-center bg-gradient-to-br from-primary to-orange-500">
       {/* Background overlay */}
       <div className="absolute inset-0 bg-black/20"></div>
       
