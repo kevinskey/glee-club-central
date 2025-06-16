@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventsListView } from '@/components/calendar/EventsListView';
@@ -10,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { PageLoader } from '@/components/ui/page-loader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ResponsiveContainer } from '@/components/ui/responsive-container';
+import { useIsPad } from '@/hooks/useIsPad';
 import { getNationalHolidays } from '@/utils/nationalHolidays';
 import { getReligiousHolidays } from '@/utils/religiousHolidays';
 import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
@@ -17,6 +20,7 @@ import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
 export default function CalendarPage() {
   const { events, loading, error, fetchEvents, createEvent } = useCalendarEvents();
   const { isAuthenticated, user } = useAuth();
+  const isPad = useIsPad();
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'list'>('month');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -112,14 +116,14 @@ export default function CalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <ResponsiveContainer padding={isPad ? 'lg' : 'md'}>
           <div className="flex items-center justify-center h-32 sm:h-48">
             <div className="text-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-glee-spelman mx-auto"></div>
               <p className="mt-3 text-muted-foreground text-xs sm:text-sm">Loading calendar...</p>
             </div>
           </div>
-        </div>
+        </ResponsiveContainer>
       </div>
     );
   }
@@ -127,7 +131,7 @@ export default function CalendarPage() {
   if (error) {
     return (
       <div className="min-h-screen">
-        <div className="container mx-auto px-4 py-8">
+        <ResponsiveContainer padding={isPad ? 'lg' : 'md'}>
           <Card className="mt-4">
             <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
               <div className="text-red-600 text-center">
@@ -139,22 +143,28 @@ export default function CalendarPage() {
               </Button>
             </CardContent>
           </Card>
-        </div>
+        </ResponsiveContainer>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Simple page title without header component */}
+      <ResponsiveContainer padding={isPad ? 'xl' : 'lg'} className="space-y-6">
+        {/* Page title optimized for iPad */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Calendar className="h-6 w-6" />
+            <h1 className={cn(
+              "font-bold flex items-center gap-2",
+              isPad ? "text-3xl" : "text-2xl"
+            )}>
+              <Calendar className={isPad ? "h-8 w-8" : "h-6 w-6"} />
               Events & Performances
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className={cn(
+              "text-muted-foreground mt-1",
+              isPad ? "text-lg" : "text-base"
+            )}>
               {isAuthenticated ? 'All events and performances' : 'Upcoming public events'}
             </p>
           </div>
@@ -162,68 +172,77 @@ export default function CalendarPage() {
           {isAuthenticated && (
             <Button 
               onClick={() => handleCreateEvent()}
-              size="sm"
+              size={isPad ? "default" : "sm"}
               className="bg-glee-spelman hover:bg-glee-spelman/90 text-white"
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className={cn("mr-2", isPad ? "h-5 w-5" : "h-4 w-4")} />
               Add Event
             </Button>
           )}
         </div>
 
-        {/* View Toggle */}
+        {/* View Toggle with iPad spacing */}
         <div className="flex items-center justify-between">
-          <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-800">
+          <div className={cn(
+            "flex rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800",
+            isPad ? "p-2" : "p-1"
+          )}>
             <Button
               variant={viewMode === 'month' ? 'default' : 'ghost'}
-              size="sm"
+              size={isPad ? "default" : "sm"}
               onClick={() => setViewMode('month')}
-              className="text-xs px-3 py-2"
+              className={cn("px-3 py-2", isPad ? "text-sm" : "text-xs")}
             >
-              <CalendarDays className="h-4 w-4 mr-2" />
+              <CalendarDays className={cn("mr-2", isPad ? "h-5 w-5" : "h-4 w-4")} />
               Month
             </Button>
             <Button
               variant={viewMode === 'week' ? 'default' : 'ghost'}
-              size="sm"
+              size={isPad ? "default" : "sm"}
               onClick={() => setViewMode('week')}
-              className="text-xs px-3 py-2"
+              className={cn("px-3 py-2", isPad ? "text-sm" : "text-xs")}
             >
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className={cn("mr-2", isPad ? "h-5 w-5" : "h-4 w-4")} />
               Week
             </Button>
             <Button
               variant={viewMode === 'day' ? 'default' : 'ghost'}
-              size="sm"
+              size={isPad ? "default" : "sm"}
               onClick={() => setViewMode('day')}
-              className="text-xs px-3 py-2"
+              className={cn("px-3 py-2", isPad ? "text-sm" : "text-xs")}
             >
-              <CalendarCheck className="h-4 w-4 mr-2" />
+              <CalendarCheck className={cn("mr-2", isPad ? "h-5 w-5" : "h-4 w-4")} />
               Day
             </Button>
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
+              size={isPad ? "default" : "sm"}
               onClick={() => setViewMode('list')}
-              className="text-xs px-3 py-2"
+              className={cn("px-3 py-2", isPad ? "text-sm" : "text-xs")}
             >
-              <List className="h-4 w-4 mr-2" />
+              <List className={cn("mr-2", isPad ? "h-5 w-5" : "h-4 w-4")} />
               List
             </Button>
           </div>
           
-          <Badge variant="secondary" className="text-xs">
+          <Badge variant="secondary" className={isPad ? "text-sm" : "text-xs"}>
             {filteredEvents.length} events
           </Badge>
         </div>
 
+        {/* Calendar content with responsive spacing */}
         {filteredEvents.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
-              <Calendar className="h-8 w-8 text-gray-400" />
+            <CardContent className={cn(
+              "flex flex-col items-center justify-center space-y-3",
+              isPad ? "h-48 p-8" : "h-32 p-4"
+            )}>
+              <Calendar className={cn("text-gray-400", isPad ? "h-12 w-12" : "h-8 w-8")} />
               <div className="text-center">
-                <h3 className="text-sm font-semibold text-gray-900">No Events Found</h3>
-                <p className="text-gray-500 mt-1 text-xs">
+                <h3 className={cn("font-semibold text-gray-900", isPad ? "text-lg" : "text-sm")}>
+                  No Events Found
+                </h3>
+                <p className={cn("text-gray-500 mt-1", isPad ? "text-base" : "text-xs")}>
                   {isAuthenticated 
                     ? "There are no upcoming events at this time." 
                     : "There are no upcoming public events. Log in to see member events."
@@ -233,10 +252,10 @@ export default function CalendarPage() {
                   <Button 
                     onClick={() => handleCreateEvent()}
                     variant="outline" 
-                    size="sm" 
+                    size={isPad ? "default" : "sm"}
                     className="mt-2"
                   >
-                    <Plus className="h-3 w-3 mr-1" />
+                    <Plus className={cn("mr-1", isPad ? "h-4 w-4" : "h-3 w-3")} />
                     Create First Event
                   </Button>
                 )}
@@ -262,7 +281,7 @@ export default function CalendarPage() {
           </>
         )}
 
-        {/* Event View Dialog */}
+        {/* Event dialogs */}
         <EventEditor
           event={selectedEvent}
           isOpen={!!selectedEvent}
@@ -270,14 +289,13 @@ export default function CalendarPage() {
           onSave={handleSaveEvent}
         />
 
-        {/* Event Create Dialog */}
         <EventEditor
           event={null}
           isOpen={showCreateDialog}
           onClose={() => setShowCreateDialog(false)}
           onSave={handleSaveEvent}
         />
-      </div>
+      </ResponsiveContainer>
     </div>
   );
 }
