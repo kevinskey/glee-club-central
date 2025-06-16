@@ -81,7 +81,7 @@ serve(async (req) => {
       
       // Use the exact current page URL with callback parameter
       const redirectUri = `${origin}/admin/music`
-      const scope = 'non-expiring'
+      const scope = '' // Changed from 'non-expiring' to empty string
       const state = crypto.randomUUID()
       
       console.log('Generated redirect URI:', redirectUri)
