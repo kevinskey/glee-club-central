@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,8 +8,41 @@ import { SoundCloudOAuth } from './soundcloud/SoundCloudOAuth';
 import { SoundCloudPlayerSettings } from './soundcloud/SoundCloudPlayerSettings';
 import { SoundCloudAnalytics } from './soundcloud/SoundCloudAnalytics';
 import { SoundCloudPlaylistManager } from './SoundCloudPlaylistManager';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export function MusicPlayerAdmin() {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefreshApiData = async () => {
+    setIsRefreshing(true);
+    try {
+      console.log('Refreshing SoundCloud API data...');
+      
+      const { data, error } = await supabase.functions.invoke('soundcloud-api');
+      
+      if (error) {
+        console.error('API refresh error:', error);
+        throw error;
+      }
+      
+      console.log('API refresh response:', data);
+      
+      if (data?.status === 'success') {
+        toast.success(`Successfully refreshed SoundCloud data: ${data.tracks?.length || 0} tracks, ${data.playlists?.length || 0} playlists`);
+      } else if (data?.status === 'error') {
+        toast.error(`API refresh failed: ${data.message}`);
+      } else {
+        toast.success('API data refresh completed');
+      }
+    } catch (error) {
+      console.error('Failed to refresh API data:', error);
+      toast.error('Failed to refresh SoundCloud data. Please try again.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -52,9 +85,14 @@ export function MusicPlayerAdmin() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    Refresh API Data
+                  <Button 
+                    variant="outline" 
+                    className="gap-2"
+                    onClick={handleRefreshApiData}
+                    disabled={isRefreshing}
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? 'Refreshing...' : 'Refresh API Data'}
                   </Button>
                   <Button variant="outline" asChild className="gap-2">
                     <a href="https://developers.soundcloud.com/" target="_blank" rel="noopener noreferrer">
