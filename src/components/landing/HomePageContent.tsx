@@ -198,7 +198,7 @@ export function HomePageContent({
   return (
     <main className="w-full">
       {/* Events Section */}
-      <section className="w-full pt-[10px] pb-4 md:pb-6 lg:pb-8">
+      <section className="w-full pb-4 md:pb-6 lg:pb-8">
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Debug info - remove in production */}
           {upcomingEvents.length === 0 && (
