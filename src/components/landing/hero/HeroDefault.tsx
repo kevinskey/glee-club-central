@@ -4,14 +4,14 @@ import { Button } from '@/components/ui/button';
 
 export function HeroDefault() {
   return (
-    <section className="relative h-[40vh] sm:h-[60vh] md:h-[70vh] min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
+    <section className="relative md:h-[60vh] md:min-h-[400px] flex items-center justify-center">
       {/* Liquid Glass Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
       
       {/* Content with Liquid Glass Styling */}
-      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
+      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4 py-8 md:py-0">
         <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 leading-tight text-shadow-glass">
           Spelman College Glee Club
         </h1>

@@ -33,9 +33,9 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
   }
 
   return (
-    <section className="relative h-[40vh] sm:h-[60vh] md:h-[70vh] min-h-[300px] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
+    <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 md:block hidden">
         {hasValidImage ? (
           <>
             <img
@@ -74,6 +74,86 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
         )}
       </div>
       
+      {/* Mobile: Image with natural height */}
+      {hasValidImage && (
+        <div className="block md:hidden relative w-full">
+          <img
+            src={backgroundImage}
+            alt={slide.title}
+            className="w-full h-auto object-contain"
+            style={{ 
+              objectPosition: 'center center'
+            }}
+            onLoad={() => {
+              console.log('HeroSlideContent: Mobile image loaded successfully:', backgroundImage);
+            }}
+            onError={(e) => {
+              console.error('HeroSlideContent: Failed to load mobile image:', backgroundImage);
+            }}
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+          
+          {/* Mobile Content Overlay */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center text-white max-w-[90%] mx-auto px-4">
+              {(slide.show_title !== false) && (
+                <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                  {slide.title}
+                </h1>
+              )}
+              {slide.description && (
+                <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                  {slide.description}
+                </p>
+              )}
+              {slide.button_text && slide.button_link && (
+                <div className="flex flex-col gap-3 justify-center">
+                  <Button 
+                    size="lg"
+                    className="glass-button-primary text-sm px-6 py-3"
+                    onClick={() => window.open(slide.button_link, '_blank')}
+                  >
+                    {slide.button_text}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Fallback for mobile when no image */}
+      {!hasValidImage && (
+        <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="relative z-10 flex items-center justify-center h-full">
+            <div className="text-center text-white max-w-[90%] mx-auto px-4 py-8">
+              {(slide.show_title !== false) && (
+                <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                  {slide.title}
+                </h1>
+              )}
+              {slide.description && (
+                <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                  {slide.description}
+                </p>
+              )}
+              {slide.button_text && slide.button_link && (
+                <div className="flex flex-col gap-3 justify-center">
+                  <Button 
+                    size="lg"
+                    className="glass-button-primary text-sm px-6 py-3"
+                    onClick={() => window.open(slide.button_link, '_blank')}
+                  >
+                    {slide.button_text}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* YouTube Video Background (if applicable) */}
       {slide.youtube_url && slide.media_type === 'video' && (
         <div className="absolute inset-0">
@@ -88,8 +168,8 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
         </div>
       )}
       
-      {/* Content */}
-      <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
+      {/* Desktop Content */}
+      <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
         {(slide.show_title !== false) && (
           <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
             {slide.title}
