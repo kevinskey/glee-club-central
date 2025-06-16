@@ -38,18 +38,25 @@ export function SoundCloudOAuth() {
       return;
     }
 
-    // Check for OAuth callback - parse ALL URL parameters to handle SoundCloud's OAuth 2.1 behavior
+    // Parse URL parameters with improved detection
     const urlParams = new URLSearchParams(window.location.search);
+    const allParams = Object.fromEntries(urlParams.entries());
+    console.log('All URL parameters:', allParams);
+    
     const code = urlParams.get('code');
     const error = urlParams.get('error');
-    const callback = urlParams.get('callback'); // SoundCloud OAuth 2.1 adds this
+    const callback = urlParams.get('callback');
+    const state = urlParams.get('state');
     
-    console.log('URL params check:', { 
-      code: !!code, 
-      error, 
+    console.log('OAuth callback check:', { 
+      hasCode: !!code,
+      codeLength: code?.length,
+      error,
       callback,
-      hasCallback: callback === 'soundcloud',
-      fullUrl: window.location.href 
+      state,
+      fullUrl: window.location.href,
+      pathname: window.location.pathname,
+      search: window.location.search
     });
     
     // Handle error cases
@@ -61,10 +68,18 @@ export function SoundCloudOAuth() {
       return;
     }
     
-    // Handle OAuth callback with code - check for SoundCloud's callback parameter too
-    if (code && (callback === 'soundcloud' || !callback)) {
-      console.log('Processing SoundCloud OAuth 2.1 callback with code');
+    // Handle OAuth callback - be more permissive in detection
+    if (code) {
+      console.log('Authorization code detected, processing OAuth callback...');
       handleOAuthCallback(code);
+    } else if (window.location.search.includes('code=')) {
+      // Fallback detection in case URLSearchParams doesn't work properly
+      console.log('Fallback: Found code in URL search, attempting manual extraction...');
+      const match = window.location.search.match(/code=([^&]+)/);
+      if (match && match[1]) {
+        console.log('Manually extracted code, processing callback...');
+        handleOAuthCallback(match[1]);
+      }
     }
   }, []);
 
@@ -78,7 +93,7 @@ export function SoundCloudOAuth() {
         body: { action: 'authorize' }
       });
 
-      console.log('OAuth response:', { data, error });
+      console.log('OAuth authorize response:', { data, error });
 
       if (error) {
         console.error('Function invocation error:', error);
@@ -94,15 +109,19 @@ export function SoundCloudOAuth() {
       }
 
       console.log('Redirecting to SoundCloud OAuth 2.1...');
-      console.log('Expected redirect URI will be:', data.redirectUri);
+      console.log('Auth URL:', data.authUrl);
+      console.log('Expected redirect back to:', data.redirectUri);
       
       // Store state for verification
       if (data.state) {
         localStorage.setItem('soundcloud_oauth_state', data.state);
       }
       
-      // Redirect to SoundCloud for authorization
-      window.location.href = data.authUrl;
+      // Add a small delay to ensure the state is stored
+      setTimeout(() => {
+        // Redirect to SoundCloud for authorization
+        window.location.href = data.authUrl;
+      }, 100);
       
     } catch (error) {
       console.error('SoundCloud connection error:', error);
@@ -120,7 +139,9 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
-      console.log('Processing SoundCloud OAuth 2.1 callback with code:', code.substring(0, 10) + '...');
+      console.log('Processing SoundCloud OAuth 2.1 callback...');
+      console.log('Authorization code length:', code.length);
+      console.log('Code preview:', code.substring(0, 20) + '...');
       
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
@@ -129,22 +150,31 @@ export function SoundCloudOAuth() {
         }
       });
 
-      console.log('Callback response:', { data, error });
+      console.log('Token exchange response:', { 
+        hasData: !!data, 
+        hasError: !!error,
+        dataKeys: data ? Object.keys(data) : [],
+        error 
+      });
 
       if (error) {
-        console.error('Callback error:', error);
-        throw new Error(error.message || 'Callback failed');
+        console.error('Token exchange error:', error);
+        throw new Error(error.message || 'Token exchange failed');
       }
 
       if (data?.error) {
-        console.error('Callback data error:', data.error);
+        console.error('Token exchange data error:', data.error);
         throw new Error(data.error);
       }
 
       if (!data?.accessToken || !data?.user) {
-        console.error('Invalid callback response:', data);
-        throw new Error('Invalid response from authentication callback');
+        console.error('Invalid token exchange response:', data);
+        throw new Error('Invalid response from authentication - missing token or user data');
       }
+
+      console.log('Token exchange successful!');
+      console.log('User:', data.user.display_name);
+      console.log('Token received:', !!data.accessToken);
 
       // Store tokens and user data
       setAccessToken(data.accessToken);
@@ -156,8 +186,6 @@ export function SoundCloudOAuth() {
       if (data.refreshToken) {
         localStorage.setItem('soundcloud_refresh_token', data.refreshToken);
       }
-
-      console.log('SoundCloud OAuth 2.1 connection successful:', data.user.display_name);
 
       // Load user's tracks and playlists
       await loadUserData(data.accessToken);
