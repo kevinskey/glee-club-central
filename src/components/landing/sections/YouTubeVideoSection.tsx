@@ -150,29 +150,21 @@ export function YouTubeVideoSection() {
           <Card className="overflow-hidden">
             <div className="p-6">
               {/* Video Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Badge variant={videos[0].content_type === 'playlist' ? 'default' : 'secondary'}>
-                    {videos[0].content_type === 'playlist' ? (
-                      <>
-                        <List className="h-3 w-3 mr-1" />
-                        Playlist
-                      </>
-                    ) : (
-                      <>
-                        <Video className="h-3 w-3 mr-1" />
-                        Video
-                      </>
-                    )}
-                  </Badge>
-                  <h3 className="text-xl font-semibold">{videos[0].title}</h3>
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={videos[0].youtube_url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Watch Video
-                  </a>
-                </Button>
+              <div className="flex items-center gap-3 mb-4">
+                <Badge variant={videos[0].content_type === 'playlist' ? 'default' : 'secondary'}>
+                  {videos[0].content_type === 'playlist' ? (
+                    <>
+                      <List className="h-3 w-3 mr-1" />
+                      Playlist
+                    </>
+                  ) : (
+                    <>
+                      <Video className="h-3 w-3 mr-1" />
+                      Video
+                    </>
+                  )}
+                </Badge>
+                <h3 className="text-xl font-semibold">{videos[0].title}</h3>
               </div>
               
               {videos[0].description && (
@@ -196,12 +188,7 @@ export function YouTubeVideoSection() {
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center">
                       <Video className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500 text-sm mb-2">Unable to load video</p>
-                      <Button variant="outline" size="sm" asChild>
-                        <a href={videos[0].youtube_url} target="_blank" rel="noopener noreferrer">
-                          Watch Video
-                        </a>
-                      </Button>
+                      <p className="text-gray-500 text-sm">Unable to load video</p>
                     </div>
                   </div>
                 )}
@@ -228,28 +215,21 @@ export function YouTubeVideoSection() {
                     <Card className="overflow-hidden h-full">
                       <div className="p-4 md:p-6">
                         {/* Video Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
-                            <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'} className="flex-shrink-0">
-                              {video.content_type === 'playlist' ? (
-                                <>
-                                  <List className="h-3 w-3 mr-1" />
-                                  Playlist
-                                </>
-                              ) : (
-                                <>
-                                  <Video className="h-3 w-3 mr-1" />
-                                  Video
-                                </>
-                              )}
-                            </Badge>
-                            <h3 className="text-lg md:text-xl font-semibold truncate">{video.title}</h3>
-                          </div>
-                          <Button variant="outline" size="sm" asChild className="flex-shrink-0 ml-2">
-                            <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
-                          </Button>
+                        <div className="flex items-center gap-3 mb-4">
+                          <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'} className="flex-shrink-0">
+                            {video.content_type === 'playlist' ? (
+                              <>
+                                <List className="h-3 w-3 mr-1" />
+                                Playlist
+                              </>
+                            ) : (
+                              <>
+                                <Video className="h-3 w-3 mr-1" />
+                                Video
+                              </>
+                            )}
+                          </Badge>
+                          <h3 className="text-lg md:text-xl font-semibold">{video.title}</h3>
                         </div>
                         
                         {video.description && (
@@ -276,12 +256,7 @@ export function YouTubeVideoSection() {
                             <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-gray-700">
                               <div className="text-center p-4">
                                 <Video className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                <p className="text-gray-500 text-sm mb-2">Unable to load video</p>
-                                <Button variant="outline" size="sm" asChild>
-                                  <a href={video.youtube_url} target="_blank" rel="noopener noreferrer">
-                                    Watch Video
-                                  </a>
-                                </Button>
+                                <p className="text-gray-500 text-sm">Unable to load video</p>
                               </div>
                             </div>
                           )}
