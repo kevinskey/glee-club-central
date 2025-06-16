@@ -11,6 +11,7 @@ export interface HeroSlide {
   visible: boolean;
   show_title?: boolean;
   slide_order: number;
+  text_position?: string;
 }
 
 export interface MediaFile {

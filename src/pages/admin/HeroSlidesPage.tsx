@@ -27,6 +27,7 @@ interface HeroSlide {
   show_title?: boolean;
   slide_order: number;
   section_id: string;
+  text_position?: string;
 }
 
 interface MediaFile {
@@ -55,7 +56,8 @@ export default function HeroSlidesPage() {
     visible: true,
     show_title: true,
     slide_order: 0,
-    section_id: 'homepage-main'
+    section_id: 'homepage-main',
+    text_position: 'center'
   });
 
   useEffect(() => {
@@ -210,7 +212,8 @@ export default function HeroSlidesPage() {
       visible: slide.visible,
       show_title: slide.show_title !== false,
       slide_order: slide.slide_order,
-      section_id: slide.section_id
+      section_id: slide.section_id,
+      text_position: slide.text_position || 'center'
     });
     
     // Set the selected media URL if editing
@@ -251,7 +254,8 @@ export default function HeroSlidesPage() {
       visible: true,
       show_title: true,
       slide_order: slides.length,
-      section_id: 'homepage-main'
+      section_id: 'homepage-main',
+      text_position: 'center'
     });
     setIsCreating(true);
     
@@ -292,7 +296,8 @@ export default function HeroSlidesPage() {
       visible: true,
       show_title: true,
       slide_order: slides.length,
-      section_id: 'homepage-main'
+      section_id: 'homepage-main',
+      text_position: 'center'
     });
     setSelectedMediaUrl('');
     setEditingSlide(null);
@@ -451,6 +456,29 @@ export default function HeroSlidesPage() {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Enter slide description"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="text_position">Text Position</Label>
+                <Select
+                  value={formData.text_position}
+                  onValueChange={(value) => setFormData({ ...formData, text_position: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="top-left">Top Left</SelectItem>
+                    <SelectItem value="top-center">Top Center</SelectItem>
+                    <SelectItem value="top-right">Top Right</SelectItem>
+                    <SelectItem value="center-left">Middle Left</SelectItem>
+                    <SelectItem value="center">Middle Center</SelectItem>
+                    <SelectItem value="center-right">Middle Right</SelectItem>
+                    <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                    <SelectItem value="bottom-center">Bottom Center</SelectItem>
+                    <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

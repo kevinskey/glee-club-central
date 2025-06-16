@@ -41,8 +41,31 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                         slide.description || 
                         (slide.button_text && slide.button_link);
 
+  // Get position classes based on text_position
+  const getPositionClasses = (position: string = 'center') => {
+    const positionMap = {
+      'top-left': 'items-start justify-start',
+      'top-center': 'items-start justify-center',
+      'top-right': 'items-start justify-end',
+      'center-left': 'items-center justify-start',
+      'center': 'items-center justify-center',
+      'center-right': 'items-center justify-end',
+      'bottom-left': 'items-end justify-start',
+      'bottom-center': 'items-end justify-center',
+      'bottom-right': 'items-end justify-end'
+    };
+    return positionMap[position] || positionMap['center'];
+  };
+
+  // Get text alignment based on position
+  const getTextAlignment = (position: string = 'center') => {
+    if (position.includes('left')) return 'text-left';
+    if (position.includes('right')) return 'text-right';
+    return 'text-center';
+  };
+
   return (
-    <section className="relative w-full h-[40vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full h-[40vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] flex overflow-hidden">
       {/* Background Image or Video */}
       <div className="absolute inset-0 w-full h-full flex items-center justify-center">
         {hasValidImage ? (
@@ -97,30 +120,32 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
         </div>
       )}
       
-      {/* Content */}
+      {/* Content with dynamic positioning */}
       {hasTextContent && (
-        <div className="relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-6 sm:px-10">
-          {(slide.show_title !== false) && (
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
-              {slide.title}
-            </h1>
-          )}
-          {slide.description && (
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-              {slide.description}
-            </p>
-          )}
-          {slide.button_text && slide.button_link && (
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
-              <Button 
-                size="lg"
-                className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                onClick={() => window.open(slide.button_link, '_blank')}
-              >
-                {slide.button_text}
-              </Button>
-            </div>
-          )}
+        <div className={`relative z-10 w-full h-full flex ${getPositionClasses(slide.text_position)} p-6 sm:p-10`}>
+          <div className={`text-white max-w-[90%] sm:max-w-4xl ${getTextAlignment(slide.text_position)}`}>
+            {(slide.show_title !== false) && (
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
+                {slide.title}
+              </h1>
+            )}
+            {slide.description && (
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                {slide.description}
+              </p>
+            )}
+            {slide.button_text && slide.button_link && (
+              <div className={`flex gap-4 sm:gap-6 ${getTextAlignment(slide.text_position) === 'text-left' ? 'justify-start' : getTextAlignment(slide.text_position) === 'text-right' ? 'justify-end' : 'justify-center'}`}>
+                <Button 
+                  size="lg"
+                  className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                  onClick={() => window.open(slide.button_link, '_blank')}
+                >
+                  {slide.button_text}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </section>
