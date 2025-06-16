@@ -10,6 +10,7 @@ import MembersV2Page from '@/pages/admin/MembersV2Page';
 import SheetMusicV2Page from '@/pages/admin/SheetMusicV2Page';
 import MusicStudioPage from '@/pages/admin/MusicStudioPage';
 import StoreV2Page from '@/pages/admin/StoreV2Page';
+import PermissionsPage from '@/pages/admin/PermissionsPage';
 
 export const adminRoutesV2: RouteObject[] = [
   {
@@ -57,6 +58,14 @@ export const adminRoutesV2: RouteObject[] = [
     element: (
       <AdminRoute>
         <StoreV2Page />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/permissions',
+    element: (
+      <AdminRoute>
+        <PermissionsPage />
       </AdminRoute>
     ),
   },

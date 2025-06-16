@@ -13,7 +13,8 @@ import {
   Video,
   Settings,
   UserCog,
-  DollarSign
+  DollarSign,
+  Shield
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -34,6 +35,11 @@ export function AdminNavItems() {
         href="/admin/user-roles"
         icon={<UserCog className="h-5 w-5" />}
         title="User Roles"
+      />
+      <NavItem
+        href="/admin/permissions"
+        icon={<Shield className="h-5 w-5" />}
+        title="Permissions"
       />
       <NavItem
         href="/admin/financial"
