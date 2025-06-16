@@ -32,6 +32,11 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     }
   }
 
+  // Check if there's any text content to display
+  const hasTextContent = (slide.show_title !== false && slide.title) || 
+                        slide.description || 
+                        (slide.button_text && slide.button_link);
+
   return (
     <section className="relative md:h-[70vh] md:min-h-[400px] flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -58,18 +63,18 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                 if (parent) {
                   parent.innerHTML = `
                     <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-                      <div class="absolute inset-0 bg-black/30"></div>
+                      ${hasTextContent ? '<div class="absolute inset-0 bg-black/30"></div>' : ''}
                     </div>
                   `;
                 }
               }}
             />
-            <div className="absolute inset-0 bg-black/40"></div>
+            {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
           </>
         ) : (
           // Fallback gradient background
           <div className="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-            <div className="absolute inset-0 bg-black/30"></div>
+            {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
           </div>
         )}
       </div>
@@ -91,66 +96,70 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
               console.error('HeroSlideContent: Failed to load mobile image:', backgroundImage);
             }}
           />
-          <div className="absolute inset-0 bg-black/40"></div>
+          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
           
           {/* Mobile Content Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center text-white max-w-[90%] mx-auto px-4">
-              {(slide.show_title !== false) && (
-                <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
-                  {slide.title}
-                </h1>
-              )}
-              {slide.description && (
-                <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-                  {slide.description}
-                </p>
-              )}
-              {slide.button_text && slide.button_link && (
-                <div className="flex flex-col gap-3 justify-center">
-                  <Button 
-                    size="lg"
-                    className="glass-button-primary text-sm px-6 py-3"
-                    onClick={() => window.open(slide.button_link, '_blank')}
-                  >
-                    {slide.button_text}
-                  </Button>
-                </div>
-              )}
+          {hasTextContent && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white max-w-[90%] mx-auto px-4">
+                {(slide.show_title !== false) && (
+                  <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                    {slide.title}
+                  </h1>
+                )}
+                {slide.description && (
+                  <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                    {slide.description}
+                  </p>
+                )}
+                {slide.button_text && slide.button_link && (
+                  <div className="flex flex-col gap-3 justify-center">
+                    <Button 
+                      size="lg"
+                      className="glass-button-primary text-sm px-6 py-3"
+                      onClick={() => window.open(slide.button_link, '_blank')}
+                    >
+                      {slide.button_text}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       
       {/* Fallback for mobile when no image */}
       {!hasValidImage && (
         <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-          <div className="absolute inset-0 bg-black/30"></div>
-          <div className="relative z-10 flex items-center justify-center h-full">
-            <div className="text-center text-white max-w-[90%] mx-auto px-4 py-8">
-              {(slide.show_title !== false) && (
-                <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
-                  {slide.title}
-                </h1>
-              )}
-              {slide.description && (
-                <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-                  {slide.description}
-                </p>
-              )}
-              {slide.button_text && slide.button_link && (
-                <div className="flex flex-col gap-3 justify-center">
-                  <Button 
-                    size="lg"
-                    className="glass-button-primary text-sm px-6 py-3"
-                    onClick={() => window.open(slide.button_link, '_blank')}
-                  >
-                    {slide.button_text}
-                  </Button>
-                </div>
-              )}
+          {hasTextContent && <div className="absolute inset-0 bg-black/30"></div>}
+          {hasTextContent && (
+            <div className="relative z-10 flex items-center justify-center h-full">
+              <div className="text-center text-white max-w-[90%] mx-auto px-4 py-8">
+                {(slide.show_title !== false) && (
+                  <h1 className="text-2xl font-bold mb-3 transition-all duration-500 leading-tight text-shadow-glass">
+                    {slide.title}
+                  </h1>
+                )}
+                {slide.description && (
+                  <p className="text-base mb-4 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+                    {slide.description}
+                  </p>
+                )}
+                {slide.button_text && slide.button_link && (
+                  <div className="flex flex-col gap-3 justify-center">
+                    <Button 
+                      size="lg"
+                      className="glass-button-primary text-sm px-6 py-3"
+                      onClick={() => window.open(slide.button_link, '_blank')}
+                    >
+                      {slide.button_text}
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       
@@ -164,34 +173,36 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             allow="autoplay; encrypted-media"
             allowFullScreen
           />
-          <div className="absolute inset-0 bg-black/40"></div>
+          {hasTextContent && <div className="absolute inset-0 bg-black/40"></div>}
         </div>
       )}
       
       {/* Desktop Content */}
-      <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
-        {(slide.show_title !== false) && (
-          <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
-            {slide.title}
-          </h1>
-        )}
-        {slide.description && (
-          <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
-            {slide.description}
-          </p>
-        )}
-        {slide.button_text && slide.button_link && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-            <Button 
-              size="lg"
-              className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-              onClick={() => window.open(slide.button_link, '_blank')}
-            >
-              {slide.button_text}
-            </Button>
-          </div>
-        )}
-      </div>
+      {hasTextContent && (
+        <div className="hidden md:block relative z-10 text-center text-white max-w-[90%] sm:max-w-4xl mx-auto px-4">
+          {(slide.show_title !== false) && (
+            <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 sm:mb-6 transition-all duration-500 leading-tight text-shadow-glass">
+              {slide.title}
+            </h1>
+          )}
+          {slide.description && (
+            <p className="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8 opacity-90 transition-all duration-500 leading-relaxed text-shadow-glass">
+              {slide.description}
+            </p>
+          )}
+          {slide.button_text && slide.button_link && (
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+              <Button 
+                size="lg"
+                className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
+                onClick={() => window.open(slide.button_link, '_blank')}
+              >
+                {slide.button_text}
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
