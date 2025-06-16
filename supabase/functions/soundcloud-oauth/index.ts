@@ -77,10 +77,12 @@ serve(async (req) => {
     // Generate OAuth authorization URL
     if (finalAction === 'authorize') {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
+      // Use simple redirect URI without query parameters to avoid issues
       const redirectUri = `${origin}/admin/music`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
+      // Use the standard SoundCloud Connect URL
       const authUrl = new URL('https://soundcloud.com/connect')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
@@ -126,7 +128,7 @@ serve(async (req) => {
         )
       }
 
-      // Use the origin to construct redirect URI
+      // Use the origin to construct redirect URI (same as in authorize)
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
       const redirectUri = `${origin}/admin/music`
       

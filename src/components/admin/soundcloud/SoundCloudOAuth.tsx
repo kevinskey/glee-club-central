@@ -38,7 +38,7 @@ export function SoundCloudOAuth() {
       return;
     }
 
-    // Check for URL parameters
+    // Check for URL parameters (OAuth callback)
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
@@ -87,6 +87,7 @@ export function SoundCloudOAuth() {
       }
 
       console.log('Redirecting to SoundCloud OAuth...');
+      // Use window.open for better compatibility instead of direct navigation
       window.location.href = data.authUrl;
       
     } catch (error) {
