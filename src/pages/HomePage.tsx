@@ -44,8 +44,8 @@ export default function HomePage() {
       {/* News ticker at the very top */}
       <OptimizedNewsTicker autoHide={false} />
       
-      {/* Main content - no margin or padding */}
-      <main className="relative -mt-px">
+      {/* Main content - no spacing around hero */}
+      <main className="relative">
         {/* Dynamic Hero Section - Full Screen */}
         <DynamicHero />
         
