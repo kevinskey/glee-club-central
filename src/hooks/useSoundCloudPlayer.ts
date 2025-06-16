@@ -78,7 +78,11 @@ export const useSoundCloudPlayer = () => {
       console.log('SoundCloud data received:', data);
       
       if (data.error || data.status === 'error') {
-        throw new Error(data.message || 'Failed to load SoundCloud content');
+        setError(data.message || 'Failed to load SoundCloud content');
+        setPlaylists([]);
+        setTracks([]);
+        setActivePlaylist(null);
+        return;
       }
       
       if (data.playlists && Array.isArray(data.playlists)) {
@@ -112,10 +116,7 @@ export const useSoundCloudPlayer = () => {
         setTracks(legacyTracks);
       }
 
-      // Show success message based on data status
-      if (data.status === 'demo_mode') {
-        console.warn('Running in demo mode with sample data');
-      } else if (data.status === 'success') {
+      if (data.status === 'success') {
         console.log('Successfully loaded real SoundCloud data');
       }
       

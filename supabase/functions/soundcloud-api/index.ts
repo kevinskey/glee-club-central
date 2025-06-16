@@ -62,81 +62,14 @@ serve(async (req) => {
       const errorText = await resolveResponse.text()
       console.error('Failed to resolve user:', resolveResponse.status, errorText)
       
-      // Return mock data for development/demo purposes
-      const mockTracks = [
-        {
-          id: "demo-1",
-          title: "Amazing Grace",
-          artist: "Spelman College Glee Club",
-          audioUrl: "/api/placeholder/audio1.mp3",
-          albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-          duration: 240,
-          waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
-          likes: 1250,
-          plays: 15420,
-          isLiked: false,
-          genre: "Gospel",
-          uploadDate: "2024-01-15",
-          description: "A beautiful rendition of the classic hymn",
-          permalink_url: "https://soundcloud.com/spelman-glee/amazing-grace"
-        },
-        {
-          id: "demo-2", 
-          title: "Lift Every Voice and Sing",
-          artist: "Spelman College Glee Club",
-          audioUrl: "/api/placeholder/audio2.mp3",
-          albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-          duration: 195,
-          waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
-          likes: 890,
-          plays: 12300,
-          isLiked: false,
-          genre: "Traditional",
-          uploadDate: "2024-02-01",
-          description: "The Black National Anthem performed by our talented choir",
-          permalink_url: "https://soundcloud.com/spelman-glee/lift-every-voice"
-        },
-        {
-          id: "demo-3",
-          title: "Wade in the Water",
-          artist: "Spelman College Glee Club", 
-          audioUrl: "/api/placeholder/audio3.mp3",
-          albumArt: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-          duration: 280,
-          waveformData: Array.from({ length: 200 }, () => Math.random() * 0.8 + 0.1),
-          likes: 765,
-          plays: 9840,
-          isLiked: false,
-          genre: "Spiritual",
-          uploadDate: "2024-01-28",
-          description: "Traditional spiritual with contemporary arrangements",
-          permalink_url: "https://soundcloud.com/spelman-glee/wade-in-the-water"
-        }
-      ]
-
-      const mockPlaylists = [
-        {
-          id: "playlist-1",
-          name: "Featured Performances 2024",
-          description: "Our best performances from this year",
-          track_count: 8,
-          duration: 1920000,
-          artwork_url: "/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png",
-          permalink_url: "https://soundcloud.com/spelman-glee/sets/featured-2024",
-          is_public: true,
-          created_at: "2024-01-01T00:00:00Z",
-          tracks: []
-        }
-      ]
-
       return new Response(
         JSON.stringify({
-          playlists: mockPlaylists,
-          tracks: mockTracks,
-          status: 'demo_mode',
-          message: `Demo mode active - using sample tracks. SoundCloud API returned: ${resolveResponse.status}`,
-          isRealData: false,
-          authMethod: 'demo'
+          playlists: [],
+          tracks: [],
+          status: 'error',
+          message: `SoundCloud API authentication failed. Status: ${resolveResponse.status}. The SoundCloud API may require additional authentication or the profile may not be accessible.`,
+          errorType: 'api_error',
+          isRealData: false
         }),
         { 
           headers: { 
@@ -253,7 +186,8 @@ serve(async (req) => {
         status: 'error',
         message: 'An unexpected error occurred while fetching SoundCloud data.',
         errorType: 'unexpected_error',
-        details: err instanceof Error ? err.message : 'Unknown error'
+        details: err instanceof Error ? err.message : 'Unknown error',
+        isRealData: false
       }),
       { 
         headers: { 
