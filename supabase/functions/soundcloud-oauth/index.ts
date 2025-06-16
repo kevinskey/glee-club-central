@@ -79,20 +79,23 @@ serve(async (req) => {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // Use direct redirect to admin/music page for simpler flow
-      const redirectUri = `${origin}/admin/music?callback=soundcloud`
+      // Use the exact current page URL with callback parameter
+      const redirectUri = `${origin}/admin/music`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
-      console.log('Generated redirect URI for direct OAuth:', redirectUri)
+      console.log('Generated redirect URI:', redirectUri)
       
-      // Use the standard SoundCloud Connect URL
-      const authUrl = new URL('https://soundcloud.com/connect')
+      // Use the direct SoundCloud OAuth URL
+      const authUrl = new URL('https://api.soundcloud.com/connect')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
       authUrl.searchParams.set('response_type', 'code')
       authUrl.searchParams.set('scope', scope)
       authUrl.searchParams.set('state', state)
+      
+      // Add callback parameter to distinguish this from other redirects
+      authUrl.searchParams.set('callback', 'soundcloud')
       
       console.log('Generated OAuth URL:', authUrl.toString())
       
@@ -131,9 +134,9 @@ serve(async (req) => {
         )
       }
 
-      // Use the direct redirect URI for token exchange
+      // Use the same redirect URI for token exchange
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
-      const redirectUri = `${origin}/admin/music?callback=soundcloud`
+      const redirectUri = `${origin}/admin/music`
       
       console.log('Token exchange - using redirect URI:', redirectUri)
       

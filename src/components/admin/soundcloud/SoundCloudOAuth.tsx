@@ -81,9 +81,9 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Opening SoundCloud OAuth in same window...');
+      console.log('Redirecting to SoundCloud OAuth...');
       
-      // Instead of popup, redirect in same window for better compatibility
+      // Use window.location.href to redirect the entire page
       window.location.href = data.authUrl;
       
     } catch (error) {
