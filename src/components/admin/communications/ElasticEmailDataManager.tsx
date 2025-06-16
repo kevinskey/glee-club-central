@@ -19,6 +19,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
 import { toast } from 'sonner';
+import { ElasticEmailCSVImport } from './ElasticEmailCSVImport';
 
 interface SyncStatus {
   contacts: 'idle' | 'syncing' | 'success' | 'error';
