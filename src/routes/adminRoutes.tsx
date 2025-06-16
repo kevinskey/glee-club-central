@@ -16,6 +16,7 @@ import MusicAdminPage from '@/pages/admin/MusicAdminPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
 import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
+import AdminVideosPage from '@/pages/admin/AdminVideosPage';
 
 export const adminRoutes: RouteObject[] = [
   {
@@ -49,6 +50,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'music',
         element: <MusicAdminPage />,
+      },
+      {
+        path: 'videos',
+        element: <AdminVideosPage />,
       },
       {
         path: 'store',

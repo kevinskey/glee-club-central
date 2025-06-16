@@ -9,7 +9,8 @@ import {
   Image, 
   FileImage,
   BarChart3,
-  Home
+  Home,
+  Video
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -35,6 +36,11 @@ export function AdminNavItems() {
         href="/admin/music"
         icon={<Music className="h-5 w-5" />}
         title="Music Library"
+      />
+      <NavItem
+        href="/admin/videos"
+        icon={<Video className="h-5 w-5" />}
+        title="Videos"
       />
       <NavItem
         href="/admin/store"

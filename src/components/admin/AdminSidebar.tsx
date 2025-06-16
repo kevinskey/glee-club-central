@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Image,
   Home,
-  Music
+  Music,
+  Video
 } from 'lucide-react';
 import { ViewSwitcher } from './ViewSwitcher';
 
@@ -23,6 +24,7 @@ const navItems = [
   { to: '/admin/members', icon: Users, label: 'Members' },
   { to: '/admin/media', icon: Image, label: 'Media Library' },
   { to: '/admin/music', icon: Music, label: 'Music Player' },
+  { to: '/admin/videos', icon: Video, label: 'Videos' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
   { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
