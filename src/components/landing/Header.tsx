@@ -38,9 +38,9 @@ export function Header() {
   
   return (
     <header className="glee-header sticky top-0 left-0 right-0 w-full z-50">
-      <div className="container mx-auto px-4">
+      <div className={`container mx-auto ${isMobile ? 'px-4 py-3' : 'px-4'}`}>
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex h-16 items-center justify-between px-6">
+          <div className={`flex items-center justify-between ${isMobile ? 'h-14 px-4' : 'h-16 px-6'}`}>
             {/* Logo - Always visible */}
             <div className="flex-shrink-0">
               <HeaderLogo />
@@ -111,25 +111,25 @@ export function Header() {
                 <HeaderActions />
               </div>
               
-              {/* Mobile Actions - Shown only on mobile */}
-              <div className={`items-center gap-1 ${isMobile ? 'flex' : 'hidden'}`}>
+              {/* Mobile Actions - Shown only on mobile with proper spacing */}
+              <div className={`items-center ${isMobile ? 'flex gap-2' : 'hidden'}`}>
                 {isAuthenticated ? (
                   <Button 
                     variant="default"
                     onClick={handleDashboardClick}
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-9 w-9 p-0"
                   >
-                    <User className="w-3.5 h-3.5" />
+                    <User className="w-4 h-4" />
                   </Button>
                 ) : (
                   <Button 
                     variant="default"
                     onClick={() => navigate("/login")}
                     size="sm"
-                    className="h-8 px-2 text-xs"
+                    className="h-9 px-3 text-xs"
                   >
-                    <LogIn className="w-3.5 h-3.5 mr-1" />
+                    <LogIn className="w-4 h-4 mr-1" />
                     Login
                   </Button>
                 )}
