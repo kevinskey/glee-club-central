@@ -64,9 +64,9 @@ export function SoundCloudPlaylistManager() {
           </Button>
         </div>
 
-        <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/30">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800 dark:text-orange-200">
+        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
+          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800 dark:text-blue-200">
             <div className="space-y-2">
               <p className="font-medium">No SoundCloud data available</p>
               {error?.includes('Client ID') ? (
@@ -239,7 +239,7 @@ export function SoundCloudPlaylistManager() {
             <div className="space-y-4">
               {tracks.slice(0, 10).map((track) => (
                 <div key={track.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                  <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-orange-400 to-red-500">
+                  <div className="w-12 h-12 rounded overflow-hidden bg-gradient-to-br from-blue-400 to-blue-500">
                     <img 
                       src={track.albumArt} 
                       alt={track.title}

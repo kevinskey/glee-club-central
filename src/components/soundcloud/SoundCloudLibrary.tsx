@@ -261,7 +261,7 @@ export function SoundCloudLibrary({ accessToken }: SoundCloudLibraryProps) {
                   onClick={() => setSelectedPlaylist(playlist)}
                 >
                   <CardContent className="p-4">
-                    <div className="aspect-square bg-gradient-to-br from-orange-400 to-red-500 rounded-lg mb-3 overflow-hidden">
+                    <div className="aspect-square bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg mb-3 overflow-hidden">
                       <img 
                         src={playlist.coverArt} 
                         alt={playlist.title}
