@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, ExternalLink, Video, Save, X } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Edit, Trash2, ExternalLink, Video, Save, X, List } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -20,6 +21,7 @@ interface YouTubeVideo {
   thumbnail_url?: string;
   is_active: boolean;
   display_order: number;
+  content_type: 'video' | 'playlist';
   created_at: string;
 }
 
@@ -35,7 +37,8 @@ export function YouTubeVideoAdmin() {
     youtube_url: '',
     thumbnail_url: '',
     is_active: true,
-    display_order: 1
+    display_order: 1,
+    content_type: 'video' as 'video' | 'playlist'
   });
 
   useEffect(() => {
@@ -68,26 +71,26 @@ export function YouTubeVideoAdmin() {
           .eq('id', editingVideo.id);
 
         if (error) throw error;
-        toast.success('Video updated successfully');
+        toast.success('Content updated successfully');
       } else {
         const { error } = await supabase
           .from('youtube_videos')
           .insert([formData]);
 
         if (error) throw error;
-        toast.success('Video added successfully');
+        toast.success('Content added successfully');
       }
 
       resetForm();
       loadVideos();
     } catch (error) {
-      console.error('Error saving video:', error);
-      toast.error('Failed to save video');
+      console.error('Error saving content:', error);
+      toast.error('Failed to save content');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this video?')) return;
+    if (!confirm('Are you sure you want to delete this content?')) return;
 
     try {
       const { error } = await supabase
@@ -96,11 +99,11 @@ export function YouTubeVideoAdmin() {
         .eq('id', id);
 
       if (error) throw error;
-      toast.success('Video deleted successfully');
+      toast.success('Content deleted successfully');
       loadVideos();
     } catch (error) {
-      console.error('Error deleting video:', error);
-      toast.error('Failed to delete video');
+      console.error('Error deleting content:', error);
+      toast.error('Failed to delete content');
     }
   };
 
@@ -111,7 +114,8 @@ export function YouTubeVideoAdmin() {
       youtube_url: '',
       thumbnail_url: '',
       is_active: true,
-      display_order: 1
+      display_order: 1,
+      content_type: 'video'
     });
     setEditingVideo(null);
     setShowAddForm(false);
@@ -124,10 +128,27 @@ export function YouTubeVideoAdmin() {
       youtube_url: video.youtube_url,
       thumbnail_url: video.thumbnail_url || '',
       is_active: video.is_active,
-      display_order: video.display_order
+      display_order: video.display_order,
+      content_type: video.content_type || 'video'
     });
     setEditingVideo(video);
     setShowAddForm(true);
+  };
+
+  const detectContentType = (url: string): 'video' | 'playlist' => {
+    if (url.includes('list=') || url.includes('/playlist?')) {
+      return 'playlist';
+    }
+    return 'video';
+  };
+
+  const handleUrlChange = (url: string) => {
+    const contentType = detectContentType(url);
+    setFormData({ 
+      ...formData, 
+      youtube_url: url, 
+      content_type: contentType 
+    });
   };
 
   const extractVideoId = (url: string): string | null => {
@@ -136,16 +157,27 @@ export function YouTubeVideoAdmin() {
     return match ? match[1] : null;
   };
 
-  const getThumbnailUrl = (url: string): string => {
-    const videoId = extractVideoId(url);
-    return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+  const extractPlaylistId = (url: string): string | null => {
+    const regex = /[?&]list=([^"&?\/\s]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const getThumbnailUrl = (url: string, contentType: 'video' | 'playlist'): string => {
+    if (contentType === 'playlist') {
+      const playlistId = extractPlaylistId(url);
+      return playlistId ? `https://img.youtube.com/vi/${playlistId}/maxresdefault.jpg` : '';
+    } else {
+      const videoId = extractVideoId(url);
+      return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '';
+    }
   };
 
   if (isLoading) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-400 text-sm">Loading videos...</p>
+        <p className="text-gray-600 dark:text-gray-400 text-sm">Loading content...</p>
       </div>
     );
   }
@@ -153,25 +185,25 @@ export function YouTubeVideoAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">YouTube Videos</h2>
+        <h2 className="text-2xl font-bold">YouTube Content</h2>
         <Button onClick={() => setShowAddForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Video
+          Add Content
         </Button>
       </div>
 
-      <Tabs defaultValue="videos" className="space-y-4">
+      <Tabs defaultValue="content" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="videos">Manage Videos</TabsTrigger>
+          <TabsTrigger value="content">Manage Content</TabsTrigger>
           <TabsTrigger value="preview">Preview</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="videos" className="space-y-4">
+        <TabsContent value="content" className="space-y-4">
           {/* Add/Edit Form */}
           {showAddForm && (
             <Card>
               <CardHeader>
-                <CardTitle>{editingVideo ? 'Edit Video' : 'Add New Video'}</CardTitle>
+                <CardTitle>{editingVideo ? 'Edit Content' : 'Add New Content'}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,7 +213,7 @@ export function YouTubeVideoAdmin() {
                       id="title"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="Video title"
+                      placeholder="Content title"
                     />
                   </div>
                   
@@ -190,10 +222,29 @@ export function YouTubeVideoAdmin() {
                     <Input
                       id="youtube_url"
                       value={formData.youtube_url}
-                      onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=... or playlist URL"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="content_type">Content Type</Label>
+                  <Select value={formData.content_type} onValueChange={(value: 'video' | 'playlist') => setFormData({ ...formData, content_type: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="video">Single Video</SelectItem>
+                      <SelectItem value="playlist">Playlist</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-gray-500">
+                    {formData.content_type === 'playlist' 
+                      ? 'This will embed an entire YouTube playlist'
+                      : 'This will embed a single YouTube video'
+                    }
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -202,7 +253,7 @@ export function YouTubeVideoAdmin() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Video description"
+                    placeholder="Content description"
                     rows={3}
                   />
                 </div>
@@ -236,26 +287,41 @@ export function YouTubeVideoAdmin() {
                   </Button>
                   <Button onClick={handleSave}>
                     <Save className="h-4 w-4 mr-2" />
-                    {editingVideo ? 'Update' : 'Add'} Video
+                    {editingVideo ? 'Update' : 'Add'} Content
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Videos List */}
+          {/* Content List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {videos.map((video) => (
               <Card key={video.id} className="overflow-hidden">
-                <div className="aspect-video bg-gray-100 dark:bg-gray-800">
+                <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative">
                   <img
-                    src={video.thumbnail_url || getThumbnailUrl(video.youtube_url)}
+                    src={video.thumbnail_url || getThumbnailUrl(video.youtube_url, video.content_type || 'video')}
                     alt={video.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = `https://via.placeholder.com/320x180/f3f4f6/9ca3af?text=Video`;
+                      e.currentTarget.src = `https://via.placeholder.com/320x180/f3f4f6/9ca3af?text=${video.content_type === 'playlist' ? 'Playlist' : 'Video'}`;
                     }}
                   />
+                  <div className="absolute top-2 left-2">
+                    <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'}>
+                      {video.content_type === 'playlist' ? (
+                        <>
+                          <List className="h-3 w-3 mr-1" />
+                          Playlist
+                        </>
+                      ) : (
+                        <>
+                          <Video className="h-3 w-3 mr-1" />
+                          Video
+                        </>
+                      )}
+                    </Badge>
+                  </div>
                 </div>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-2">
@@ -306,7 +372,7 @@ export function YouTubeVideoAdmin() {
             <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                No videos added yet. Add your first YouTube video to get started.
+                No content added yet. Add your first YouTube video or playlist to get started.
               </p>
             </div>
           )}
@@ -319,7 +385,7 @@ export function YouTubeVideoAdmin() {
             </CardHeader>
             <CardContent>
               <div className="text-center text-gray-600 dark:text-gray-400">
-                This shows how the videos will appear on the homepage.
+                This shows how the content will appear on the homepage.
                 <br />
                 Visit the homepage to see the actual implementation.
               </div>
