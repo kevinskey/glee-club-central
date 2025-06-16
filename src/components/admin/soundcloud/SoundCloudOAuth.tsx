@@ -53,12 +53,6 @@ export function SoundCloudOAuth() {
     const handleMessage = (event: MessageEvent) => {
       console.log('Received message from popup:', event.data, 'from origin:', event.origin);
       
-      // Only accept messages from our domain or SoundCloud
-      if (event.origin !== window.location.origin && !event.origin.includes('soundcloud.com')) {
-        console.log('Ignoring message from unauthorized origin:', event.origin);
-        return;
-      }
-      
       if (event.data && typeof event.data === 'object') {
         if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
           console.log('Popup authentication successful, processing callback...');
@@ -110,104 +104,17 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Opening SoundCloud OAuth popup with URL:', data.authUrl);
+      console.log('Opening SoundCloud OAuth in same window...');
       
-      // Create a unique popup name to avoid conflicts
-      const popupName = `soundcloud-oauth-${Date.now()}`;
-      
-      // Open popup with optimized settings
-      const popup = window.open(
-        data.authUrl, 
-        popupName,
-        'width=500,height=600,scrollbars=yes,resizable=no,toolbar=no,menubar=no,location=no,status=no,left=' + 
-        (window.screen.width / 2 - 250) + ',top=' + (window.screen.height / 2 - 300)
-      );
-      
-      if (!popup) {
-        throw new Error('Popup was blocked. Please allow popups for this site and try again.');
-      }
-
-      // Focus the popup
-      popup.focus();
-
-      // Monitor popup with better error handling
-      let checkCount = 0;
-      const maxChecks = 300; // 5 minutes max
-      
-      const checkPopupStatus = () => {
-        checkCount++;
-        
-        try {
-          if (popup.closed) {
-            console.log('Popup was closed by user after', checkCount, 'checks');
-            setIsConnecting(false);
-            
-            // Only show error if we haven't successfully authenticated
-            setTimeout(() => {
-              const token = localStorage.getItem('soundcloud_access_token');
-              if (!token) {
-                toast.error('Authentication was cancelled or failed');
-              }
-            }, 500);
-            return;
-          }
-          
-          // Check if we can access the popup URL (same-origin)
-          try {
-            const popupUrl = popup.location.href;
-            if (popupUrl && popupUrl.includes(window.location.origin)) {
-              // Popup has returned to our domain, check for auth code
-              const popupParams = new URL(popupUrl).searchParams;
-              const code = popupParams.get('code');
-              const error = popupParams.get('error');
-              
-              if (code) {
-                console.log('Found auth code in popup URL, processing...');
-                popup.close();
-                handleOAuthCallback(code);
-                return;
-              } else if (error) {
-                console.error('Found error in popup URL:', error);
-                popup.close();
-                setIsConnecting(false);
-                toast.error(`Authentication failed: ${error}`);
-                return;
-              }
-            }
-          } catch (e) {
-            // Cross-origin access blocked, this is expected for SoundCloud domain
-          }
-          
-          if (checkCount < maxChecks) {
-            setTimeout(checkPopupStatus, 1000);
-          } else {
-            // Timeout
-            console.log('Popup monitoring timed out');
-            if (!popup.closed) {
-              popup.close();
-            }
-            setIsConnecting(false);
-            toast.error('Authentication timed out');
-          }
-        } catch (error) {
-          console.error('Error checking popup status:', error);
-          setIsConnecting(false);
-        }
-      };
-      
-      // Start monitoring the popup
-      setTimeout(checkPopupStatus, 1000);
+      // Instead of popup, redirect in same window for better compatibility
+      window.location.href = data.authUrl;
       
     } catch (error) {
       console.error('SoundCloud connection error:', error);
       setIsConnecting(false);
       
       if (error instanceof Error) {
-        if (error.message.includes('popup')) {
-          toast.error('Please allow popups for this site and try again.');
-        } else {
-          toast.error(`Connection failed: ${error.message}`);
-        }
+        toast.error(`Connection failed: ${error.message}`);
       } else {
         toast.error('Failed to connect to SoundCloud');
       }
@@ -333,7 +240,7 @@ export function SoundCloudOAuth() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Complete the authorization in the popup window.
+            You will be redirected to SoundCloud to authorize the connection.
           </p>
         </div>
       </div>

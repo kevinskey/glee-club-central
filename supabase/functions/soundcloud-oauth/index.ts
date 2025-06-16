@@ -79,12 +79,12 @@ serve(async (req) => {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // Use the callback HTML page for better popup handling
-      const redirectUri = `${origin}/soundcloud-callback.html?callback=soundcloud`
+      // Use direct redirect to admin/music page for simpler flow
+      const redirectUri = `${origin}/admin/music?callback=soundcloud`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
-      console.log('Generated redirect URI for popup OAuth:', redirectUri)
+      console.log('Generated redirect URI for direct OAuth:', redirectUri)
       
       // Use the standard SoundCloud Connect URL
       const authUrl = new URL('https://soundcloud.com/connect')
@@ -131,9 +131,9 @@ serve(async (req) => {
         )
       }
 
-      // Use the callback HTML page redirect URI for token exchange
+      // Use the direct redirect URI for token exchange
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
-      const redirectUri = `${origin}/soundcloud-callback.html?callback=soundcloud`
+      const redirectUri = `${origin}/admin/music?callback=soundcloud`
       
       console.log('Token exchange - using redirect URI:', redirectUri)
       
