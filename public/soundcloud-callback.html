@@ -38,6 +38,11 @@
             color: #721c24;
             border: 1px solid #f5c6cb;
         }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
@@ -54,9 +59,26 @@
                 console.log(`[${type.toUpperCase()}] ${message}`);
             }
             
+            function sendMessageToParent(messageData) {
+                try {
+                    if (window.opener && !window.opener.closed) {
+                        console.log('Sending message to parent:', messageData);
+                        window.opener.postMessage(messageData, window.location.origin);
+                        return true;
+                    } else {
+                        console.log('No valid parent window found');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error sending message to parent:', error);
+                    return false;
+                }
+            }
+            
             try {
                 console.log('SoundCloud callback page loaded');
                 console.log('Current URL:', window.location.href);
+                console.log('Window opener available:', !!window.opener);
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
@@ -70,54 +92,68 @@
                 });
                 
                 if (error) {
-                    showStatus(`Authentication failed: ${error}`, 'error');
+                    const errorMessage = `Authentication failed: ${error}`;
+                    showStatus(errorMessage, 'error');
                     
-                    if (window.opener) {
-                        console.log('Sending error message to parent window');
-                        window.opener.postMessage({
-                            type: 'SOUNDCLOUD_OAUTH_ERROR',
-                            error: error
-                        }, window.location.origin);
+                    const messageSent = sendMessageToParent({
+                        type: 'SOUNDCLOUD_OAUTH_ERROR',
+                        error: error
+                    });
+                    
+                    if (!messageSent) {
+                        showStatus('Error communicating with main window. Please close this popup and try again.', 'error');
                     }
+                    
                 } else if (code && callback === 'soundcloud') {
                     showStatus('Authentication successful! Processing...', 'success');
                     
-                    if (window.opener) {
-                        console.log('Sending success message to parent window');
-                        window.opener.postMessage({
-                            type: 'SOUNDCLOUD_OAUTH_SUCCESS',
-                            code: code
-                        }, window.location.origin);
+                    const messageSent = sendMessageToParent({
+                        type: 'SOUNDCLOUD_OAUTH_SUCCESS',
+                        code: code
+                    });
+                    
+                    if (messageSent) {
+                        showStatus('Success! You can close this window or it will close automatically.', 'success');
+                        
+                        // Auto-close after successful message
+                        setTimeout(() => {
+                            try {
+                                window.close();
+                            } catch (e) {
+                                console.log('Could not auto-close window');
+                            }
+                        }, 2000);
                     } else {
-                        console.log('No parent window found, redirecting to main app');
-                        // If no opener, redirect to main app with parameters
-                        window.location.href = '/admin/music?code=' + encodeURIComponent(code) + '&callback=soundcloud';
-                        return;
+                        showStatus('Success, but could not communicate with main window. Please close this popup manually.', 'info');
+                        // If no opener, try redirecting to main app
+                        setTimeout(() => {
+                            try {
+                                window.location.href = '/admin/music?code=' + encodeURIComponent(code) + '&callback=soundcloud';
+                            } catch (e) {
+                                console.log('Could not redirect');
+                            }
+                        }, 3000);
                     }
                 } else {
-                    showStatus('Invalid callback parameters', 'error');
+                    const errorMessage = 'Invalid callback parameters - missing code or callback identifier';
+                    showStatus(errorMessage, 'error');
                     console.log('Missing required parameters');
+                    
+                    sendMessageToParent({
+                        type: 'SOUNDCLOUD_OAUTH_ERROR',
+                        error: errorMessage
+                    });
                 }
-                
-                // Close the popup after a delay
-                setTimeout(() => {
-                    console.log('Closing popup window');
-                    showStatus('You can close this window', 'info');
-                    if (window.opener) {
-                        window.close();
-                    }
-                }, 2000);
                 
             } catch (e) {
+                const errorMessage = `Callback processing error: ${e.message}`;
                 console.error('Error in callback handler:', e);
-                showStatus(`Error: ${e.message}`, 'error');
+                showStatus(errorMessage, 'error');
                 
-                if (window.opener) {
-                    window.opener.postMessage({
-                        type: 'SOUNDCLOUD_OAUTH_ERROR',
-                        error: e.message
-                    }, window.location.origin);
-                }
+                sendMessageToParent({
+                    type: 'SOUNDCLOUD_OAUTH_ERROR',
+                    error: errorMessage
+                });
             }
         })();
     </script>

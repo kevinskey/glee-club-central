@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,7 +50,7 @@ export function SoundCloudOAuth() {
 
     // Listen for popup authentication completion
     const handleMessage = (event: MessageEvent) => {
-      console.log('Received message from popup:', event);
+      console.log('Received message from popup:', event.data, 'from origin:', event.origin);
       
       // Only accept messages from our domain for security
       if (event.origin !== window.location.origin) {
@@ -59,17 +58,20 @@ export function SoundCloudOAuth() {
         return;
       }
       
-      if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
-        console.log('Popup authentication successful, processing callback...');
-        handleOAuthCallback(event.data.code);
-      } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
-        console.error('Popup authentication failed:', event.data.error);
-        setIsConnecting(false);
-        toast.error(`Authentication failed: ${event.data.error}`);
+      if (event.data && typeof event.data === 'object') {
+        if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
+          console.log('Popup authentication successful, processing callback...');
+          handleOAuthCallback(event.data.code);
+        } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
+          console.error('Popup authentication failed:', event.data.error);
+          setIsConnecting(false);
+          toast.error(`Authentication failed: ${event.data.error}`);
+        }
       }
     };
 
     window.addEventListener('message', handleMessage);
+    
     return () => {
       console.log('Cleaning up message listener');
       window.removeEventListener('message', handleMessage);
@@ -123,28 +125,48 @@ export function SoundCloudOAuth() {
       // Focus the popup
       popup.focus();
 
-      // Monitor popup for closure
-      const checkPopup = setInterval(() => {
-        if (popup.closed) {
-          console.log('Popup was closed');
-          clearInterval(checkPopup);
-          setIsConnecting(false);
+      // Set up popup monitoring with better error handling
+      const pollPopup = () => {
+        try {
+          if (popup.closed) {
+            console.log('Popup was closed by user');
+            setIsConnecting(false);
+            
+            // Check if we got a successful connection after popup closed
+            setTimeout(() => {
+              const savedToken = localStorage.getItem('soundcloud_access_token');
+              if (!savedToken) {
+                console.log('Popup closed without successful authentication');
+                toast.error('Authentication was cancelled or failed');
+              }
+            }, 1000);
+            return;
+          }
           
-          // Check if we got a successful connection after popup closed
-          setTimeout(() => {
-            const savedToken = localStorage.getItem('soundcloud_access_token');
-            if (!savedToken) {
-              console.log('Popup closed without successful authentication');
-              toast.error('Authentication was cancelled or failed');
+          // Try to access popup location to detect redirect
+          try {
+            const popupUrl = popup.location.href;
+            if (popupUrl && popupUrl.includes('soundcloud-callback.html')) {
+              console.log('Detected callback page loaded in popup');
             }
-          }, 1000);
+          } catch (e) {
+            // Cross-origin error is expected during redirect
+          }
+          
+          // Continue polling
+          setTimeout(pollPopup, 1000);
+        } catch (error) {
+          console.error('Error polling popup:', error);
+          setIsConnecting(false);
         }
-      }, 1000);
+      };
+      
+      // Start polling
+      setTimeout(pollPopup, 1000);
       
       // Cleanup after 5 minutes
       setTimeout(() => {
-        clearInterval(checkPopup);
-        if (!popup.closed) {
+        if (popup && !popup.closed) {
           popup.close();
           setIsConnecting(false);
           toast.error('Authentication timed out');
