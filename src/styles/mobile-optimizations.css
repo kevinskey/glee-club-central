@@ -176,7 +176,7 @@ body {
 
 /* Mobile Header Fixes */
 @media (max-width: 768px) {
-  /* Static header - no longer fixed */
+  /* Header positioning and spacing */
   header {
     position: static !important;
     top: auto !important;
@@ -192,8 +192,8 @@ body {
     -webkit-backdrop-filter: blur(20px) !important;
     margin: 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
+    padding: 1rem !important;
+    min-height: 64px !important;
   }
   
   .dark header {
@@ -201,14 +201,18 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
   
+  /* Header content spacing */
+  header .flex {
+    min-height: 48px !important;
+    align-items: center !important;
+  }
+  
   /* Admin header specific styling */
   header.admin-header,
   .admin-header,
   .admin-unified-header {
-    padding-left: 1rem !important;
-    padding-right: 1rem !important;
-    padding-top: 0.5rem !important;
-    padding-bottom: 0.5rem !important;
+    padding: 1rem !important;
+    min-height: 80px !important;
   }
   
   /* News Ticker */
@@ -230,26 +234,23 @@ body {
     padding-right: 1rem !important;
   }
   
-  /* Main header height */
-  header .h-14,
-  header .h-16 {
-    height: 48px !important;
-  }
-  
-  /* Admin header height adjustment */
-  .admin-header .h-20,
-  header.admin-header {
-    min-height: 80px !important;
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-  }
-  
-  /* Main content - remove padding since header is no longer fixed */
+  /* Main content spacing - add top padding to prevent header overlap */
   main {
     margin: 0 !important;
-    padding-top: 0 !important;
+    padding-top: 2rem !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+  
+  /* Body content spacing */
+  body main {
+    padding-top: 2rem !important;
+  }
+  
+  /* Page wrapper content spacing */
+  .min-h-screen > main,
+  .bg-background > main {
+    padding-top: 2rem !important;
   }
   
   /* Admin main content gets padding */
@@ -257,22 +258,22 @@ body {
   .admin-layout main {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
-    padding-top: 1rem !important;
+    padding-top: 2rem !important;
   }
   
-  /* Home page specific adjustments - remove padding and ensure hero has no spacing */
+  /* Home page specific adjustments */
   .home-page main {
-    padding-top: 0 !important;
+    padding-top: 1rem !important;
   }
   
   .min-h-screen.home-page {
     padding-top: 0 !important;
   }
   
-  /* Hero section - ensure no extra spacing */
+  /* Hero section - ensure proper spacing */
   .home-page main > *:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
   }
   
   /* Dashboard and admin pages - add proper padding */
@@ -280,9 +281,17 @@ body {
   .admin-content,
   [class*="dashboard"],
   [class*="admin"] {
-    padding-top: 1rem !important;
+    padding-top: 2rem !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+  }
+  
+  /* Prevent content from being hidden behind header */
+  .content-wrapper,
+  .page-content,
+  section:first-child {
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
   }
 }
 
