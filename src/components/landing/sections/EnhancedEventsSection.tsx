@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar, MapPin, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Event } from '@/types/common';
 import { format } from 'date-fns';
@@ -39,7 +39,7 @@ export function EnhancedEventsSection({
               )}
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg mb-3">{event.title}</h3>
-                <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span>{format(new Date(event.date), 'MMM dd, yyyy')}</span>
@@ -51,10 +51,6 @@ export function EnhancedEventsSection({
                     </div>
                   )}
                 </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  Learn More
-                  <ExternalLink className="h-4 w-4 ml-2" />
-                </Button>
               </CardContent>
             </Card>
           ))}
