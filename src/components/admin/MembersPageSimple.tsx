@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,13 +17,14 @@ import {
   Edit, 
   Mail,
   Phone,
-  Music
+  Music,
+  Settings
 } from 'lucide-react';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
 import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
 import { MembersPagination } from '@/components/members/MembersPagination';
 import { AddMemberDialog } from '@/components/members/AddMemberDialog';
-import { EditUserDialog } from '@/components/members/EditUserDialog';
+import { DetailedProfileEditor } from '@/components/members/DetailedProfileEditor';
 import { UserFormValues } from '@/components/members/form/userFormSchema';
 import { toast } from 'sonner';
 
@@ -45,7 +45,7 @@ export default function MembersPageSimple() {
   } = useUnifiedUserManagement();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDetailedEditor, setShowDetailedEditor] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -72,48 +72,40 @@ export default function MembersPageSimple() {
 
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
-    setShowEditDialog(true);
+    setShowDetailedEditor(true);
   };
 
-  const handleSaveUser = async (data: UserFormValues) => {
+  const handleSaveDetailedProfile = async (data: any) => {
     if (!selectedUser) return;
     
     setIsSubmitting(true);
     try {
       const updateData: any = {};
       
-      if (data.first_name?.trim()) updateData.first_name = data.first_name.trim();
-      if (data.last_name?.trim()) updateData.last_name = data.last_name.trim();
-      if (data.phone?.trim()) updateData.phone = data.phone.trim();
-      if (data.voice_part) updateData.voice_part = data.voice_part;
-      if (data.status) updateData.status = data.status;
-      if (data.class_year?.trim()) updateData.class_year = data.class_year.trim();
-      if (data.notes?.trim()) updateData.notes = data.notes.trim();
-      if (data.join_date) updateData.join_date = data.join_date;
-      
-      if (typeof data.dues_paid === 'boolean') {
-        updateData.dues_paid = data.dues_paid;
-      }
-      
-      if (data.role) {
-        updateData.role = data.role;
-      }
-      
-      if (typeof data.is_admin === 'boolean') {
-        updateData.is_super_admin = data.is_admin;
-      }
+      // Map all the form fields
+      Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+          if (key === 'join_date' && data[key] instanceof Date) {
+            updateData[key] = data[key].toISOString().split('T')[0];
+          } else if (key === 'is_admin') {
+            updateData.is_super_admin = data[key];
+          } else {
+            updateData[key] = data[key];
+          }
+        }
+      });
 
       const success = await updateUser(selectedUser.id, updateData);
       if (success) {
-        setShowEditDialog(false);
+        setShowDetailedEditor(false);
         setSelectedUser(null);
-        toast.success('User updated successfully');
+        toast.success('Profile updated successfully');
       } else {
-        toast.error('Failed to update user');
+        toast.error('Failed to update profile');
       }
     } catch (error) {
-      console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
     } finally {
       setIsSubmitting(false);
     }
@@ -286,8 +278,8 @@ export default function MembersPageSimple() {
                             e.stopPropagation();
                             handleEditUser(member);
                           }}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Member
+                            <Settings className="mr-2 h-4 w-4" />
+                            Edit Full Profile
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -314,15 +306,15 @@ export default function MembersPageSimple() {
         isSubmitting={isSubmitting}
       />
 
-      <EditUserDialog
-        isOpen={showEditDialog}
+      <DetailedProfileEditor
+        isOpen={showDetailedEditor}
         onOpenChange={(open) => {
-          setShowEditDialog(open);
+          setShowDetailedEditor(open);
           if (!open) setSelectedUser(null);
         }}
-        onSave={handleSaveUser}
-        isSubmitting={isSubmitting}
         user={selectedUser}
+        onSave={handleSaveDetailedProfile}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
