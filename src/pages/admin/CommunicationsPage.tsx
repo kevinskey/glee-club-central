@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap } from "lucide-react";
+import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap, Settings } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from 'react-router-dom';
 import { BulkMessageComposer } from "@/components/admin/communications/BulkMessageComposer";
 import { MessageTemplateManager } from "@/components/admin/communications/MessageTemplateManager";
 import { MessageHistoryViewer } from "@/components/admin/communications/MessageHistoryViewer";
@@ -14,6 +15,7 @@ import { InternalMessaging } from "@/components/admin/communications/InternalMes
 import { QuickSMSComposer } from "@/components/admin/communications/QuickSMSComposer";
 
 const CommunicationsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("compose");
   const [messageStats, setMessageStats] = useState({
     totalSent: 0,
@@ -24,11 +26,22 @@ const CommunicationsPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-6 py-6 space-y-6">
-      <PageHeader
-        title="Communications Center"
-        description="Manage email, SMS, and internal messaging for the Glee Club"
-        icon={<MessageSquare className="h-6 w-6" />}
-      />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <PageHeader
+          title="Communications Center"
+          description="Manage email, SMS, and internal messaging for the Glee Club"
+          icon={<MessageSquare className="h-6 w-6" />}
+        />
+        
+        <Button 
+          onClick={() => navigate('/admin/email-services')}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          Email Service Settings
+        </Button>
+      </div>
       
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -137,10 +150,13 @@ const CommunicationsPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium">Elastic Email</h3>
-                    <p className="text-sm text-muted-foreground">Email service provider</p>
+                    <h3 className="font-medium">Email Service Management</h3>
+                    <p className="text-sm text-muted-foreground">Configure Elastic Email, MailChimp, SendGrid, and other providers</p>
                   </div>
-                  <Badge variant="default">Connected</Badge>
+                  <Button onClick={() => navigate('/admin/email-services')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Services
+                  </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>

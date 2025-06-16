@@ -15,6 +15,7 @@ import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
 import MusicAdminPage from '@/pages/admin/MusicAdminPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
+import EmailServiceManagementPage from '@/pages/admin/EmailServiceManagementPage';
 import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
 import AdminVideosPage from '@/pages/admin/AdminVideosPage';
 import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
@@ -69,6 +70,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'communications',
         element: <CommunicationsPage />,
+      },
+      {
+        path: 'email-services',
+        element: <EmailServiceManagementPage />,
       },
       {
         path: 'news-items',
