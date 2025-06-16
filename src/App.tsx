@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { FloatingThemeToggle } from "@/components/ui/floating-theme-toggle";
 import AppContent from "./AppContent";
 
 const queryClient = new QueryClient({
@@ -26,7 +25,6 @@ function App() {
             <Outlet />
           </AppContent>
           <Toaster />
-          <FloatingThemeToggle position="bottom-right" />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
