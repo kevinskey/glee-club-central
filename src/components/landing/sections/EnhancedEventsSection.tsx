@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin, ExternalLink } from 'lucide-react';
@@ -24,7 +23,7 @@ export function EnhancedEventsSection({
   const displayEvents = events.slice(0, 6);
 
   return (
-    <section className={`py-16 pt-20 md:pt-24 bg-background ${className}`}>
+    <section className={`py-16 pt-[35pt] md:pt-[40pt] bg-background ${className}`}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">{title}</h2>
