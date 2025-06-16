@@ -52,9 +52,14 @@ export function SoundCloudOAuth() {
     const handleMessage = (event: MessageEvent) => {
       console.log('Received message from popup:', event.data, 'from origin:', event.origin);
       
-      // Only accept messages from our domain for security
-      if (event.origin !== window.location.origin) {
-        console.log('Ignoring message from different origin:', event.origin);
+      // Accept messages from our domain AND SoundCloud domain
+      const allowedOrigins = [
+        window.location.origin,
+        'https://soundcloud.com'
+      ];
+      
+      if (!allowedOrigins.includes(event.origin)) {
+        console.log('Ignoring message from unauthorized origin:', event.origin);
         return;
       }
       
@@ -125,44 +130,29 @@ export function SoundCloudOAuth() {
       // Focus the popup
       popup.focus();
 
-      // Set up popup monitoring with better error handling
-      const pollPopup = () => {
-        try {
-          if (popup.closed) {
-            console.log('Popup was closed by user');
-            setIsConnecting(false);
-            
-            // Check if we got a successful connection after popup closed
-            setTimeout(() => {
-              const savedToken = localStorage.getItem('soundcloud_access_token');
-              if (!savedToken) {
-                console.log('Popup closed without successful authentication');
-                toast.error('Authentication was cancelled or failed');
-              }
-            }, 1000);
-            return;
-          }
-          
-          // Try to access popup location to detect redirect
-          try {
-            const popupUrl = popup.location.href;
-            if (popupUrl && popupUrl.includes('soundcloud-callback.html')) {
-              console.log('Detected callback page loaded in popup');
-            }
-          } catch (e) {
-            // Cross-origin error is expected during redirect
-          }
-          
-          // Continue polling
-          setTimeout(pollPopup, 1000);
-        } catch (error) {
-          console.error('Error polling popup:', error);
+      // Improved popup monitoring
+      const checkClosed = () => {
+        if (popup.closed) {
+          console.log('Popup was closed');
           setIsConnecting(false);
+          
+          // Check if we got a successful connection after popup closed
+          setTimeout(() => {
+            const savedToken = localStorage.getItem('soundcloud_access_token');
+            if (!savedToken && isConnecting) {
+              console.log('Popup closed without successful authentication');
+              toast.error('Authentication was cancelled');
+            }
+          }, 1000);
+          return;
         }
+        
+        // Continue checking
+        setTimeout(checkClosed, 1000);
       };
       
-      // Start polling
-      setTimeout(pollPopup, 1000);
+      // Start checking if popup is closed
+      setTimeout(checkClosed, 1000);
       
       // Cleanup after 5 minutes
       setTimeout(() => {
@@ -190,11 +180,10 @@ export function SoundCloudOAuth() {
   };
 
   const handleOAuthCallback = async (code: string) => {
+    console.log('Processing SoundCloud OAuth callback with code:', code.substring(0, 10) + '...');
     setIsConnecting(true);
     
     try {
-      console.log('Processing SoundCloud OAuth callback with code:', code.substring(0, 10) + '...');
-      
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
           action: 'callback',

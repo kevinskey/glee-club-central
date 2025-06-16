@@ -61,16 +61,24 @@
             
             function sendMessageToParent(messageData) {
                 try {
+                    // Try to message the opener first
                     if (window.opener && !window.opener.closed) {
-                        console.log('Sending message to parent:', messageData);
-                        window.opener.postMessage(messageData, window.location.origin);
+                        console.log('Sending message to opener:', messageData);
+                        window.opener.postMessage(messageData, '*');
                         return true;
-                    } else {
-                        console.log('No valid parent window found');
-                        return false;
                     }
+                    
+                    // Try to message the parent
+                    if (window.parent && window.parent !== window) {
+                        console.log('Sending message to parent:', messageData);
+                        window.parent.postMessage(messageData, '*');
+                        return true;
+                    }
+                    
+                    console.log('No valid parent or opener found');
+                    return false;
                 } catch (error) {
-                    console.error('Error sending message to parent:', error);
+                    console.error('Error sending message:', error);
                     return false;
                 }
             }
@@ -79,6 +87,7 @@
                 console.log('SoundCloud callback page loaded');
                 console.log('Current URL:', window.location.href);
                 console.log('Window opener available:', !!window.opener);
+                console.log('Window parent available:', window.parent !== window);
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
@@ -102,6 +111,14 @@
                     
                     if (!messageSent) {
                         showStatus('Error communicating with main window. Please close this popup and try again.', 'error');
+                    } else {
+                        setTimeout(() => {
+                            try {
+                                window.close();
+                            } catch (e) {
+                                console.log('Could not auto-close window');
+                            }
+                        }, 3000);
                     }
                     
                 } else if (code && callback === 'soundcloud') {
@@ -113,7 +130,7 @@
                     });
                     
                     if (messageSent) {
-                        showStatus('Success! You can close this window or it will close automatically.', 'success');
+                        showStatus('Success! Closing window...', 'success');
                         
                         // Auto-close after successful message
                         setTimeout(() => {
@@ -121,14 +138,18 @@
                                 window.close();
                             } catch (e) {
                                 console.log('Could not auto-close window');
+                                showStatus('Success! You can close this window manually.', 'success');
                             }
                         }, 2000);
                     } else {
                         showStatus('Success, but could not communicate with main window. Please close this popup manually.', 'info');
-                        // If no opener, try redirecting to main app
+                        
+                        // Try redirecting back to the main app with the code
                         setTimeout(() => {
                             try {
-                                window.location.href = '/admin/music?code=' + encodeURIComponent(code) + '&callback=soundcloud';
+                                const redirectUrl = `${window.location.origin}/admin/music?code=${encodeURIComponent(code)}&callback=soundcloud`;
+                                console.log('Attempting redirect to:', redirectUrl);
+                                window.location.href = redirectUrl;
                             } catch (e) {
                                 console.log('Could not redirect');
                             }
@@ -143,6 +164,14 @@
                         type: 'SOUNDCLOUD_OAUTH_ERROR',
                         error: errorMessage
                     });
+                    
+                    setTimeout(() => {
+                        try {
+                            window.close();
+                        } catch (e) {
+                            console.log('Could not auto-close window');
+                        }
+                    }, 5000);
                 }
                 
             } catch (e) {
@@ -154,6 +183,14 @@
                     type: 'SOUNDCLOUD_OAUTH_ERROR',
                     error: errorMessage
                 });
+                
+                setTimeout(() => {
+                    try {
+                        window.close();
+                    } catch (e) {
+                        console.log('Could not auto-close window');
+                    }
+                }, 5000);
             }
         })();
     </script>
