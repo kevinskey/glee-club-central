@@ -1,20 +1,51 @@
 
 import React from 'react';
-import { useAuthMigration } from '@/hooks/useAuthMigration';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
-import { AdminLayout } from '@/layouts/AdminLayout';
-import { CleanMembersPage } from '@/components/members/CleanMembersPage';
+import { Header } from '@/components/landing/Header';
+import CleanAdminUsers from '@/components/admin/CleanAdminUsers';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function MembersPage() {
-  const { isLoading } = useAuthMigration();
+  const { user, profile, isLoading, isInitialized, isAuthenticated } = useAuth();
 
-  if (isLoading) {
-    return <PageLoader message="Loading members..." />;
+  console.log('👥 MembersPage: State check:', {
+    hasUser: !!user,
+    hasProfile: !!profile,
+    isLoading,
+    isAuthenticated,
+    isInitialized,
+    userEmail: user?.email,
+    profileRole: profile?.role
+  });
+
+  // Show loading during auth initialization
+  if (!isInitialized || isLoading) {
+    return (
+      <PageLoader 
+        message="Loading members..."
+        className="min-h-screen"
+      />
+    );
   }
 
+  // Redirect to login if not authenticated
+  if (!isAuthenticated || !user) {
+    console.log('🔒 MembersPage: User not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+
+  console.log('✅ MembersPage: Ready to render members page');
+
   return (
-    <AdminLayout>
-      <CleanMembersPage />
-    </AdminLayout>
+    <ErrorBoundary>
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <CleanAdminUsers />
+        </div>
+      </div>
+    </ErrorBoundary>
   );
 }
