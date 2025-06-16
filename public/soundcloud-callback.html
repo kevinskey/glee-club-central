@@ -75,10 +75,21 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
+            margin-top: 10px;
         }
         
         button:hover {
             background: #e04400;
+        }
+        
+        .debug {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -88,47 +99,78 @@
         <div class="spinner" id="spinner"></div>
         <div id="message">Processing authorization...</div>
         <div id="result"></div>
+        <div id="debug" class="debug" style="display: none;"></div>
         <button id="closeBtn" onclick="closeWindow()" style="display: none;">Close Window</button>
+        <button id="debugBtn" onclick="toggleDebug()" style="display: none;">Show Debug Info</button>
     </div>
 
     <script>
+        let debugInfo = [];
+        
+        function addDebug(msg) {
+            debugInfo.push(new Date().toISOString() + ': ' + msg);
+            console.log(msg);
+        }
+        
+        function toggleDebug() {
+            const debugEl = document.getElementById('debug');
+            debugEl.style.display = debugEl.style.display === 'none' ? 'block' : 'none';
+            debugEl.innerHTML = debugInfo.join('<br>');
+        }
+        
         function showResult(type, msg) {
             document.getElementById('spinner').style.display = 'none';
             document.getElementById('result').innerHTML = `<div class="${type}">${msg}</div>`;
             document.getElementById('closeBtn').style.display = 'inline-block';
+            document.getElementById('debugBtn').style.display = 'inline-block';
         }
         
         function closeWindow() {
             try {
                 window.close();
             } catch (e) {
+                addDebug('Error closing window: ' + e.message);
                 showResult('error', 'Please close this window manually.');
             }
         }
         
         function sendMessage(data) {
             try {
+                addDebug('Attempting to send message: ' + JSON.stringify(data));
+                
                 if (window.opener && !window.opener.closed) {
                     window.opener.postMessage(data, window.location.origin);
+                    addDebug('Message sent to opener successfully');
                     return true;
+                } else {
+                    addDebug('No opener window available or opener is closed');
+                    return false;
                 }
-                return false;
             } catch (error) {
-                console.error('Error sending message:', error);
+                addDebug('Error sending message: ' + error.message);
                 return false;
             }
         }
         
-        // Process callback immediately
+        // Process callback immediately when page loads
         function processCallback() {
             try {
+                addDebug('Starting callback processing');
+                addDebug('Current URL: ' + window.location.href);
+                
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const error = urlParams.get('error');
                 const errorDescription = urlParams.get('error_description');
+                const state = urlParams.get('state');
+                
+                addDebug('URL parameters - code: ' + (code ? 'present' : 'missing') + 
+                        ', error: ' + (error || 'none') + 
+                        ', state: ' + (state ? 'present' : 'missing'));
                 
                 if (error) {
                     const errorMsg = errorDescription || error;
+                    addDebug('OAuth error detected: ' + errorMsg);
                     showResult('error', `Authorization failed: ${errorMsg}`);
                     sendMessage({
                         type: 'SOUNDCLOUD_OAUTH_ERROR',
@@ -139,22 +181,27 @@
                 }
                 
                 if (code) {
+                    addDebug('Authorization code received: ' + code.substring(0, 10) + '...');
                     showResult('success', 'Authorization successful! Processing...');
                     
                     const messageSent = sendMessage({
                         type: 'SOUNDCLOUD_OAUTH_SUCCESS',
-                        code: code
+                        code: code,
+                        state: state
                     });
                     
                     if (messageSent) {
                         document.getElementById('message').textContent = 'Success! Closing window...';
+                        addDebug('Success message sent, scheduling window close');
                         setTimeout(closeWindow, 2000);
                     } else {
-                        showResult('error', 'Authorization successful, but unable to communicate with main window. Please close this window.');
+                        addDebug('Failed to send success message to parent');
+                        showResult('error', 'Authorization successful, but unable to communicate with main window. Please close this window manually.');
                     }
                     return;
                 }
                 
+                addDebug('No authorization code or error found in URL');
                 showResult('error', 'No authorization code received. Please try again.');
                 sendMessage({
                     type: 'SOUNDCLOUD_OAUTH_ERROR',
@@ -163,6 +210,7 @@
                 setTimeout(closeWindow, 3000);
                 
             } catch (e) {
+                addDebug('Callback processing error: ' + e.message);
                 console.error('Callback processing error:', e);
                 showResult('error', `Processing error: ${e.message}`);
                 sendMessage({
@@ -173,20 +221,31 @@
             }
         }
         
-        // Process callback when page loads
+        // Initialize when DOM is ready
+        addDebug('DOM loading state: ' + document.readyState);
+        
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', processCallback);
         } else {
-            processCallback();
+            // DOM already loaded
+            setTimeout(processCallback, 100);
         }
         
-        // Fallback timeout
+        // Fallback timeout with better messaging
         setTimeout(() => {
             if (document.getElementById('spinner').style.display !== 'none') {
+                addDebug('Processing timeout reached');
                 showResult('error', 'Timeout processing authorization. Please try again.');
                 setTimeout(closeWindow, 2000);
             }
-        }, 10000);
+        }, 15000); // Increased timeout to 15 seconds
+        
+        // Additional debugging for popup communication
+        window.addEventListener('beforeunload', function() {
+            addDebug('Window is being unloaded');
+        });
+        
+        addDebug('Callback page initialized');
     </script>
 </body>
 </html>

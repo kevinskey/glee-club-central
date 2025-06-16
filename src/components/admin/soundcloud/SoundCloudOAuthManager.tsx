@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -62,6 +61,8 @@ export function SoundCloudOAuthManager() {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
       
+      console.log('Received message:', event.data);
+      
       if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
         handleOAuthCallback(event.data.code);
       } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
@@ -82,6 +83,12 @@ export function SoundCloudOAuthManager() {
     setIsConnecting(true);
     
     try {
+      // Close any existing auth window first
+      if (authWindow && !authWindow.closed) {
+        authWindow.close();
+        setAuthWindow(null);
+      }
+
       // Generate PKCE parameters for OAuth 2.1
       const codeVerifier = generateCodeVerifier();
       const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -89,6 +96,7 @@ export function SoundCloudOAuthManager() {
       // Store code verifier for later use
       sessionStorage.setItem('soundcloud_code_verifier', codeVerifier);
 
+      console.log('Requesting OAuth authorization...');
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: { 
           action: 'authorize',
@@ -97,13 +105,17 @@ export function SoundCloudOAuthManager() {
         }
       });
 
-      if (error) throw new Error(error.message);
-      if (!data?.authUrl) throw new Error('No authorization URL received');
-
-      // Close any existing auth window
-      if (authWindow && !authWindow.closed) {
-        authWindow.close();
+      if (error) {
+        console.error('OAuth request error:', error);
+        throw new Error(error.message);
       }
+      
+      if (!data?.authUrl) {
+        console.error('No authorization URL received:', data);
+        throw new Error('No authorization URL received');
+      }
+
+      console.log('Opening OAuth popup with URL:', data.authUrl);
 
       // Calculate popup position
       const width = 600;
@@ -111,11 +123,11 @@ export function SoundCloudOAuthManager() {
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
       
-      // Open OAuth popup
+      // Open OAuth popup with additional features for better compatibility
       const popup = window.open(
         data.authUrl,
         'soundcloud-oauth',
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,location=yes,status=yes,toolbar=no,menubar=no`
       );
 
       if (!popup) {
@@ -124,40 +136,65 @@ export function SoundCloudOAuthManager() {
 
       setAuthWindow(popup);
 
-      // Monitor popup closure
+      // Monitor popup more frequently and handle focus issues
+      let checkCount = 0;
+      const maxChecks = 300; // 5 minutes at 1 second intervals
+      
       const checkClosed = setInterval(() => {
-        if (popup.closed) {
+        checkCount++;
+        
+        try {
+          if (popup.closed) {
+            clearInterval(checkClosed);
+            console.log('Popup was closed by user or completed');
+            setIsConnecting(false);
+            setAuthWindow(null);
+            return;
+          }
+          
+          // Try to detect if popup is on callback page
+          try {
+            const currentUrl = popup.location.href;
+            if (currentUrl.includes('soundcloud-callback.html')) {
+              console.log('Popup is on callback page, waiting for processing...');
+            }
+          } catch (e) {
+            // Cross-origin restriction, this is expected
+          }
+          
+        } catch (error) {
+          console.error('Error checking popup status:', error);
+        }
+        
+        if (checkCount >= maxChecks) {
           clearInterval(checkClosed);
+          if (!popup.closed) {
+            popup.close();
+          }
           setIsConnecting(false);
           setAuthWindow(null);
+          toast.error('OAuth process timed out after 5 minutes');
         }
       }, 1000);
-
-      // Auto-close after 5 minutes
-      setTimeout(() => {
-        if (!popup.closed) {
-          popup.close();
-          clearInterval(checkClosed);
-          setIsConnecting(false);
-          setAuthWindow(null);
-          toast.error('OAuth process timed out');
-        }
-      }, 300000);
       
     } catch (error) {
       console.error('Connection error:', error);
       setIsConnecting(false);
+      sessionStorage.removeItem('soundcloud_code_verifier');
       toast.error(error instanceof Error ? error.message : 'Failed to connect to SoundCloud');
     }
   }, [authWindow]);
 
   const handleOAuthCallback = useCallback(async (code: string) => {
+    console.log('Processing OAuth callback with code:', code);
+    
     try {
       const codeVerifier = sessionStorage.getItem('soundcloud_code_verifier');
       if (!codeVerifier) {
         throw new Error('Missing code verifier for PKCE');
       }
 
+      console.log('Exchanging code for token...');
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: { 
           action: 'callback', 
@@ -166,9 +203,17 @@ export function SoundCloudOAuthManager() {
         }
       });
 
-      if (error) throw new Error(error.message);
-      if (!data?.accessToken || !data?.user) throw new Error('Invalid authentication response');
+      if (error) {
+        console.error('Token exchange error:', error);
+        throw new Error(error.message);
+      }
+      
+      if (!data?.accessToken || !data?.user) {
+        console.error('Invalid authentication response:', data);
+        throw new Error('Invalid authentication response');
+      }
 
+      console.log('Authentication successful, setting up user...');
       setAccessToken(data.accessToken);
       setConnectedUser(data.user);
       
@@ -186,7 +231,8 @@ export function SoundCloudOAuthManager() {
       
       toast.success(`Connected as ${data.user.display_name}!`);
       
-      if (authWindow) {
+      // Close popup
+      if (authWindow && !authWindow.closed) {
         authWindow.close();
         setAuthWindow(null);
       }
@@ -246,6 +292,9 @@ export function SoundCloudOAuthManager() {
           <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           <p className="text-xs text-muted-foreground mt-2">
             Complete the authorization in the popup window.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            If you see a white screen, please check if popups are blocked.
           </p>
         </div>
       </div>
