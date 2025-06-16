@@ -48,7 +48,6 @@ export function ElasticEmailComposer() {
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [activeTab, setActiveTab] = useState('compose');
 
   const { filteredUsers } = useUnifiedUserManagement();
 
@@ -210,7 +209,7 @@ export function ElasticEmailComposer() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs defaultValue="compose" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="compose">Compose</TabsTrigger>
               <TabsTrigger value="recipients">Recipients ({selectedRecipients.length})</TabsTrigger>
@@ -262,7 +261,7 @@ export function ElasticEmailComposer() {
                     placeholder="Enter your email content here... You can use {{first_name}}, {{last_name}}, {{email}} for personalization."
                   />
                   <p className="text-sm text-muted-foreground">
-                    Use personalization tags: {{first_name}}, {{last_name}}, {{email}}
+                    Use personalization tags: {`{{first_name}}, {{last_name}}, {{email}}`}
                   </p>
                 </div>
               </div>
@@ -360,7 +359,6 @@ export function ElasticEmailComposer() {
                           size="sm"
                           onClick={() => {
                             handleTemplateSelect(template.templateid);
-                            setActiveTab('compose');
                           }}
                         >
                           <FileText className="h-4 w-4 mr-2" />
