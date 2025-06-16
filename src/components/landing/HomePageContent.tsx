@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
+import { YouTubeVideoSection } from "./sections/YouTubeVideoSection";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { ExternalLink, Music, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, Music, ChevronLeft, ChevronRight, Video } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Event {
@@ -384,6 +386,20 @@ export function HomePageContent({
                 </p>
               </div>
             )}
+          </div>
+
+          {/* YouTube Video Section */}
+          <div className="mt-16 max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
+                Watch the Glee
+              </h3>
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
+                Performance videos and behind-the-scenes content
+              </p>
+            </div>
+            
+            <YouTubeVideoSection />
           </div>
         </div>
       </section>
