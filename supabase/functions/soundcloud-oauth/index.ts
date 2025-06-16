@@ -60,7 +60,7 @@ serve(async (req) => {
       )
     }
 
-    if (!soundcloudClientSecret && (finalAction === 'exchange' || finalAction === 'fetch-data')) {
+    if (!soundcloudClientSecret && (finalAction === 'callback' || finalAction === 'exchange' || finalAction === 'fetch-data')) {
       console.error('SoundCloud Client Secret not found for action requiring authentication')
       return new Response(
         JSON.stringify({ 
@@ -117,8 +117,7 @@ serve(async (req) => {
         console.error('No authorization code provided')
         return new Response(
           JSON.stringify({ 
-            error: 'No authorization code provided in callback',
-            redirect: '/admin/music?error=no_code'
+            error: 'No authorization code provided in callback'
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -157,13 +156,11 @@ serve(async (req) => {
           const errorText = await tokenResponse.text()
           console.error('Token exchange failed:', errorText)
           
-          // Redirect to admin page with error
           return new Response(
             JSON.stringify({ 
               error: 'Failed to exchange authorization code for access token', 
               details: errorText,
-              status: tokenResponse.status,
-              redirect: '/admin/music?error=token_exchange_failed'
+              status: tokenResponse.status
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -190,8 +187,7 @@ serve(async (req) => {
           return new Response(
             JSON.stringify({ 
               error: 'Failed to fetch user data after successful token exchange', 
-              details: errorText,
-              redirect: '/admin/music?error=user_fetch_failed'
+              details: errorText
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -203,7 +199,7 @@ serve(async (req) => {
         const userData = await userResponse.json()
         console.log('User data fetched successfully:', userData.username)
 
-        // Return success with redirect
+        // Return success with user data and tokens
         return new Response(
           JSON.stringify({
             success: true,
@@ -219,8 +215,7 @@ serve(async (req) => {
               followings_count: userData.followings_count || 0,
               track_count: userData.track_count || 0,
               playlist_count: userData.playlist_count || 0
-            },
-            redirect: '/admin/music?success=connected'
+            }
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -232,8 +227,7 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({ 
             error: 'Network error during authentication', 
-            details: fetchError instanceof Error ? fetchError.message : 'Unknown network error',
-            redirect: '/admin/music?error=network_error'
+            details: fetchError instanceof Error ? fetchError.message : 'Unknown network error'
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -243,13 +237,13 @@ serve(async (req) => {
       }
     }
 
-    // Exchange authorization code for access token (alternative endpoint)
-    if (finalAction === 'exchange' && req.method === 'POST') {
-      const { code, redirectUri } = requestBody
+    // Fetch user data with existing access token
+    if (finalAction === 'fetch-data') {
+      const { accessToken } = requestBody
       
-      if (!code) {
+      if (!accessToken) {
         return new Response(
-          JSON.stringify({ error: 'Authorization code is required' }),
+          JSON.stringify({ error: 'Access token is required' }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400 
@@ -257,93 +251,79 @@ serve(async (req) => {
         )
       }
       
-      console.log('Exchanging authorization code for access token (POST)')
-      
       try {
-        const tokenResponse = await fetch('https://api.soundcloud.com/oauth2/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json',
-            'User-Agent': 'Spelman Glee Club Music App/1.0',
-          },
-          body: new URLSearchParams({
-            'grant_type': 'authorization_code',
-            'client_id': soundcloudClientId,
-            'client_secret': soundcloudClientSecret!,
-            'redirect_uri': redirectUri,
-            'code': code
+        // Fetch tracks and playlists
+        const [tracksResponse, playlistsResponse] = await Promise.all([
+          fetch('https://api.soundcloud.com/me/tracks?limit=20', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+              'User-Agent': 'Spelman Glee Club Music App/1.0',
+            }
+          }),
+          fetch('https://api.soundcloud.com/me/playlists?limit=10', {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+              'User-Agent': 'Spelman Glee Club Music App/1.0',
+            }
           })
-        })
+        ])
 
-        if (!tokenResponse.ok) {
-          const errorText = await tokenResponse.text()
-          console.error('Token exchange failed:', errorText)
-          return new Response(
-            JSON.stringify({ 
-              error: 'Failed to exchange authorization code', 
-              details: errorText,
-              status: tokenResponse.status 
-            }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 400 
-            }
-          )
+        let tracks = []
+        let playlists = []
+
+        if (tracksResponse.ok) {
+          const tracksData = await tracksResponse.json()
+          tracks = tracksData.map((track: any) => ({
+            id: track.id.toString(),
+            title: track.title || 'Untitled Track',
+            artist: track.user?.username || 'Unknown Artist',
+            stream_url: track.stream_url,
+            artwork_url: track.artwork_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
+            duration: Math.floor((track.duration || 0) / 1000),
+            likes: track.likes_count || 0,
+            plays: track.playback_count || 0,
+            genre: track.genre || 'Music',
+            uploadDate: track.created_at ? new Date(track.created_at).toISOString().split('T')[0] : '',
+            description: track.description || '',
+            permalink_url: track.permalink_url || ''
+          }))
         }
 
-        const tokenData = await tokenResponse.json()
-        
-        // Fetch user data
-        const userResponse = await fetch('https://api.soundcloud.com/me', {
-          headers: {
-            'Authorization': `Bearer ${tokenData.access_token}`,
-            'Accept': 'application/json',
-            'User-Agent': 'Spelman Glee Club Music App/1.0',
-          }
-        })
-
-        if (!userResponse.ok) {
-          const errorText = await userResponse.text()
-          console.error('Failed to fetch user data:', errorText)
-          return new Response(
-            JSON.stringify({ error: 'Failed to fetch user data', details: errorText }),
-            { 
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-              status: 400 
-            }
-          )
+        if (playlistsResponse.ok) {
+          const playlistsData = await playlistsResponse.json()
+          playlists = playlistsData.map((playlist: any) => ({
+            id: playlist.id.toString(),
+            name: playlist.title || 'Untitled Playlist',
+            description: playlist.description || '',
+            track_count: playlist.track_count || 0,
+            duration: playlist.duration || 0,
+            artwork_url: playlist.artwork_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
+            permalink_url: playlist.permalink_url || '',
+            is_public: playlist.sharing === 'public',
+            created_at: playlist.created_at || new Date().toISOString(),
+            tracks: []
+          }))
         }
-
-        const userData = await userResponse.json()
 
         return new Response(
           JSON.stringify({
-            accessToken: tokenData.access_token,
-            refreshToken: tokenData.refresh_token,
-            expiresIn: tokenData.expires_in,
-            user: {
-              id: userData.id,
-              username: userData.username,
-              display_name: userData.full_name || userData.username,
-              avatar_url: userData.avatar_url,
-              followers_count: userData.followers_count || 0,
-              followings_count: userData.followings_count || 0,
-              track_count: userData.track_count || 0,
-              playlist_count: userData.playlist_count || 0
-            }
+            tracks,
+            playlists,
+            status: 'success'
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200 
           }
         )
-      } catch (fetchError) {
-        console.error('Network error during token exchange:', fetchError)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
         return new Response(
           JSON.stringify({ 
-            error: 'Network error during authentication', 
-            details: fetchError instanceof Error ? fetchError.message : 'Unknown network error' 
+            error: 'Failed to fetch user data', 
+            details: error instanceof Error ? error.message : 'Unknown error' 
           }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -356,7 +336,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: `Invalid action "${finalAction}" or method "${req.method}"`,
-        availableActions: ['authorize', 'callback', 'exchange'],
+        availableActions: ['authorize', 'callback', 'fetch-data'],
         receivedAction: finalAction,
         method: req.method
       }),
@@ -372,8 +352,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: 'Internal server error',
-        message: error instanceof Error ? error.message : 'Unknown error',
-        redirect: '/admin/music?error=internal_error'
+        message: error instanceof Error ? error.message : 'Unknown error'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

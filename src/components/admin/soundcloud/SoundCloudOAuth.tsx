@@ -42,44 +42,13 @@ export function SoundCloudOAuth() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
-    const success = urlParams.get('success');
     
-    console.log('URL params:', { code: !!code, error, success });
+    console.log('URL params:', { code: !!code, error });
     
     // Handle error cases
     if (error) {
       console.error('OAuth error from URL:', error);
-      let errorMessage = 'SoundCloud authentication failed';
-      
-      switch (error) {
-        case 'no_code':
-          errorMessage = 'No authorization code received from SoundCloud';
-          break;
-        case 'token_exchange_failed':
-          errorMessage = 'Failed to exchange authorization code for access token';
-          break;
-        case 'user_fetch_failed':
-          errorMessage = 'Failed to fetch user data from SoundCloud';
-          break;
-        case 'network_error':
-          errorMessage = 'Network error during SoundCloud authentication';
-          break;
-        case 'internal_error':
-          errorMessage = 'Internal server error during authentication';
-          break;
-        default:
-          errorMessage = `SoundCloud authentication failed: ${error}`;
-      }
-      
-      toast.error(errorMessage);
-      // Clean up URL
-      window.history.replaceState({}, document.title, '/admin/music');
-      return;
-    }
-    
-    // Handle success case
-    if (success === 'connected') {
-      toast.success('Successfully connected to SoundCloud!');
+      toast.error(`SoundCloud authentication failed: ${error}`);
       // Clean up URL
       window.history.replaceState({}, document.title, '/admin/music');
       return;
@@ -138,7 +107,6 @@ export function SoundCloudOAuth() {
     try {
       console.log('Processing OAuth callback with code:', code.substring(0, 10) + '...');
       
-      // Call the callback handler directly
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
           action: 'callback',
@@ -156,23 +124,6 @@ export function SoundCloudOAuth() {
       if (data?.error) {
         console.error('Callback data error:', data.error);
         throw new Error(data.error);
-      }
-
-      if (data?.redirect) {
-        // Handle redirect from server
-        const redirectUrl = new URL(data.redirect, window.location.origin);
-        window.history.replaceState({}, document.title, redirectUrl.pathname + redirectUrl.search);
-        
-        if (data.redirect.includes('error=')) {
-          throw new Error('Authentication failed on server');
-        }
-        
-        if (data.redirect.includes('success=connected')) {
-          toast.success('Successfully connected to SoundCloud!');
-        }
-        
-        setIsConnecting(false);
-        return;
       }
 
       if (!data?.accessToken || !data?.user) {
