@@ -9,6 +9,15 @@
             text-align: center;
             padding: 50px;
             background: #f8f9fa;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .spinner {
             border: 4px solid #f3f3f3;
@@ -25,8 +34,9 @@
         }
         .status {
             margin: 20px 0;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
         }
         .success {
             background: #d4edda;
@@ -43,40 +53,74 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .close-button {
+            background: #ff5500;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .close-button:hover {
+            background: #e04400;
+        }
     </style>
 </head>
 <body>
-    <div class="spinner"></div>
-    <h2>Processing SoundCloud Authorization...</h2>
-    <div id="status"></div>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Processing SoundCloud Authorization...</h2>
+        <div id="status"></div>
+        <button id="closeButton" class="close-button" style="display: none;" onclick="window.close()">Close Window</button>
+    </div>
     
     <script>
         (function() {
+            console.log('SoundCloud callback page loaded');
+            console.log('Current URL:', window.location.href);
+            console.log('Window opener available:', !!window.opener);
+            console.log('Window parent available:', window.parent !== window);
+            
             const statusDiv = document.getElementById('status');
+            const closeButton = document.getElementById('closeButton');
             
             function showStatus(message, type = 'info') {
                 statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
                 console.log(`[${type.toUpperCase()}] ${message}`);
+                
+                if (type === 'success' || type === 'error') {
+                    closeButton.style.display = 'inline-block';
+                }
             }
             
             function sendMessageToParent(messageData) {
+                let messageSent = false;
+                
                 try {
-                    // Try to message the opener first
+                    // Try to message the opener first (popup scenario)
                     if (window.opener && !window.opener.closed) {
                         console.log('Sending message to opener:', messageData);
-                        window.opener.postMessage(messageData, '*');
-                        return true;
+                        window.opener.postMessage(messageData, window.location.origin);
+                        messageSent = true;
                     }
                     
-                    // Try to message the parent
+                    // Also try to message the parent (iframe scenario)
                     if (window.parent && window.parent !== window) {
                         console.log('Sending message to parent:', messageData);
-                        window.parent.postMessage(messageData, '*');
-                        return true;
+                        window.parent.postMessage(messageData, window.location.origin);
+                        messageSent = true;
                     }
                     
-                    console.log('No valid parent or opener found');
-                    return false;
+                    if (!messageSent) {
+                        console.log('No valid parent or opener found');
+                    }
+                    
+                    return messageSent;
                 } catch (error) {
                     console.error('Error sending message:', error);
                     return false;
@@ -84,11 +128,6 @@
             }
             
             try {
-                console.log('SoundCloud callback page loaded');
-                console.log('Current URL:', window.location.href);
-                console.log('Window opener available:', !!window.opener);
-                console.log('Window parent available:', window.parent !== window);
-                
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const error = urlParams.get('error');
@@ -104,22 +143,18 @@
                     const errorMessage = `Authentication failed: ${error}`;
                     showStatus(errorMessage, 'error');
                     
-                    const messageSent = sendMessageToParent({
+                    sendMessageToParent({
                         type: 'SOUNDCLOUD_OAUTH_ERROR',
                         error: error
                     });
                     
-                    if (!messageSent) {
-                        showStatus('Error communicating with main window. Please close this popup and try again.', 'error');
-                    } else {
-                        setTimeout(() => {
-                            try {
-                                window.close();
-                            } catch (e) {
-                                console.log('Could not auto-close window');
-                            }
-                        }, 3000);
-                    }
+                    setTimeout(() => {
+                        try {
+                            window.close();
+                        } catch (e) {
+                            console.log('Could not auto-close window');
+                        }
+                    }, 3000);
                     
                 } else if (code && callback === 'soundcloud') {
                     showStatus('Authentication successful! Processing...', 'success');
@@ -132,7 +167,6 @@
                     if (messageSent) {
                         showStatus('Success! Closing window...', 'success');
                         
-                        // Auto-close after successful message
                         setTimeout(() => {
                             try {
                                 window.close();
@@ -142,9 +176,9 @@
                             }
                         }, 2000);
                     } else {
-                        showStatus('Success, but could not communicate with main window. Please close this popup manually.', 'info');
+                        showStatus('Authentication successful, but having trouble communicating with the main window.', 'info');
                         
-                        // Try redirecting back to the main app with the code
+                        // Try redirect fallback
                         setTimeout(() => {
                             try {
                                 const redirectUrl = `${window.location.origin}/admin/music?code=${encodeURIComponent(code)}&callback=soundcloud`;
@@ -152,11 +186,12 @@
                                 window.location.href = redirectUrl;
                             } catch (e) {
                                 console.log('Could not redirect');
+                                showStatus('Please close this window and check the main application.', 'info');
                             }
                         }, 3000);
                     }
                 } else {
-                    const errorMessage = 'Invalid callback parameters - missing code or callback identifier';
+                    const errorMessage = 'Invalid callback parameters - missing authorization code';
                     showStatus(errorMessage, 'error');
                     console.log('Missing required parameters');
                     

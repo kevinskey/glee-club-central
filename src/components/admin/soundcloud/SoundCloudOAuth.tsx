@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,13 +53,8 @@ export function SoundCloudOAuth() {
     const handleMessage = (event: MessageEvent) => {
       console.log('Received message from popup:', event.data, 'from origin:', event.origin);
       
-      // Accept messages from our domain AND SoundCloud domain
-      const allowedOrigins = [
-        window.location.origin,
-        'https://soundcloud.com'
-      ];
-      
-      if (!allowedOrigins.includes(event.origin)) {
+      // Only accept messages from our domain or SoundCloud
+      if (event.origin !== window.location.origin && !event.origin.includes('soundcloud.com')) {
         console.log('Ignoring message from unauthorized origin:', event.origin);
         return;
       }
@@ -116,11 +112,15 @@ export function SoundCloudOAuth() {
 
       console.log('Opening SoundCloud OAuth popup with URL:', data.authUrl);
       
-      // Open popup with specific dimensions and features
+      // Create a unique popup name to avoid conflicts
+      const popupName = `soundcloud-oauth-${Date.now()}`;
+      
+      // Open popup with optimized settings
       const popup = window.open(
         data.authUrl, 
-        'soundcloud-oauth',
-        'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes,status=no'
+        popupName,
+        'width=500,height=600,scrollbars=yes,resizable=no,toolbar=no,menubar=no,location=no,status=no,left=' + 
+        (window.screen.width / 2 - 250) + ',top=' + (window.screen.height / 2 - 300)
       );
       
       if (!popup) {
@@ -130,38 +130,73 @@ export function SoundCloudOAuth() {
       // Focus the popup
       popup.focus();
 
-      // Improved popup monitoring
-      const checkClosed = () => {
-        if (popup.closed) {
-          console.log('Popup was closed');
-          setIsConnecting(false);
-          
-          // Check if we got a successful connection after popup closed
-          setTimeout(() => {
-            const savedToken = localStorage.getItem('soundcloud_access_token');
-            if (!savedToken && isConnecting) {
-              console.log('Popup closed without successful authentication');
-              toast.error('Authentication was cancelled');
-            }
-          }, 1000);
-          return;
-        }
+      // Monitor popup with better error handling
+      let checkCount = 0;
+      const maxChecks = 300; // 5 minutes max
+      
+      const checkPopupStatus = () => {
+        checkCount++;
         
-        // Continue checking
-        setTimeout(checkClosed, 1000);
+        try {
+          if (popup.closed) {
+            console.log('Popup was closed by user after', checkCount, 'checks');
+            setIsConnecting(false);
+            
+            // Only show error if we haven't successfully authenticated
+            setTimeout(() => {
+              const token = localStorage.getItem('soundcloud_access_token');
+              if (!token) {
+                toast.error('Authentication was cancelled or failed');
+              }
+            }, 500);
+            return;
+          }
+          
+          // Check if we can access the popup URL (same-origin)
+          try {
+            const popupUrl = popup.location.href;
+            if (popupUrl && popupUrl.includes(window.location.origin)) {
+              // Popup has returned to our domain, check for auth code
+              const popupParams = new URL(popupUrl).searchParams;
+              const code = popupParams.get('code');
+              const error = popupParams.get('error');
+              
+              if (code) {
+                console.log('Found auth code in popup URL, processing...');
+                popup.close();
+                handleOAuthCallback(code);
+                return;
+              } else if (error) {
+                console.error('Found error in popup URL:', error);
+                popup.close();
+                setIsConnecting(false);
+                toast.error(`Authentication failed: ${error}`);
+                return;
+              }
+            }
+          } catch (e) {
+            // Cross-origin access blocked, this is expected for SoundCloud domain
+          }
+          
+          if (checkCount < maxChecks) {
+            setTimeout(checkPopupStatus, 1000);
+          } else {
+            // Timeout
+            console.log('Popup monitoring timed out');
+            if (!popup.closed) {
+              popup.close();
+            }
+            setIsConnecting(false);
+            toast.error('Authentication timed out');
+          }
+        } catch (error) {
+          console.error('Error checking popup status:', error);
+          setIsConnecting(false);
+        }
       };
       
-      // Start checking if popup is closed
-      setTimeout(checkClosed, 1000);
-      
-      // Cleanup after 5 minutes
-      setTimeout(() => {
-        if (popup && !popup.closed) {
-          popup.close();
-          setIsConnecting(false);
-          toast.error('Authentication timed out');
-        }
-      }, 300000);
+      // Start monitoring the popup
+      setTimeout(checkPopupStatus, 1000);
       
     } catch (error) {
       console.error('SoundCloud connection error:', error);
