@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -60,19 +59,46 @@ async function loadAllData(apiKey: string) {
   console.log("Loading all Elastic Email data...");
   
   try {
-    const [accountInfo, statistics, contactLists, templates] = await Promise.all([
-      fetchElasticEmailAPI(apiKey, 'account/load'),
-      fetchElasticEmailAPI(apiKey, 'account/profileoverview'),
-      fetchElasticEmailAPI(apiKey, 'list/list'),
-      fetchElasticEmailAPI(apiKey, 'template/getlist')
-    ]);
+    // Start with account info to test the connection
+    const accountInfo = await fetchElasticEmailAPI(apiKey, 'account/load');
+    console.log("Account info loaded successfully");
+    
+    // Try to get templates - this is the most commonly used feature
+    let templates = [];
+    try {
+      const templatesResponse = await fetchElasticEmailAPI(apiKey, 'template/getlist');
+      templates = templatesResponse.data || templatesResponse || [];
+      console.log(`Templates loaded: ${templates.length} found`);
+    } catch (templateError) {
+      console.warn("Failed to load templates:", templateError);
+    }
+
+    // Try to get contact lists
+    let contactLists = [];
+    try {
+      const listsResponse = await fetchElasticEmailAPI(apiKey, 'list/list');
+      contactLists = listsResponse.data || listsResponse || [];
+      console.log(`Contact lists loaded: ${contactLists.length} found`);
+    } catch (listError) {
+      console.warn("Failed to load contact lists:", listError);
+    }
+
+    // Try to get account statistics
+    let statistics = {};
+    try {
+      const statsResponse = await fetchElasticEmailAPI(apiKey, 'account/profileoverview');
+      statistics = statsResponse.data || statsResponse || {};
+      console.log("Account statistics loaded");
+    } catch (statsError) {
+      console.warn("Failed to load statistics:", statsError);
+    }
 
     return new Response(JSON.stringify({
       success: true,
       accountInfo: accountInfo.data || accountInfo,
-      statistics: statistics.data || statistics,
-      contactLists: contactLists.data || [],
-      templates: templates.data || [],
+      statistics: statistics,
+      contactLists: contactLists,
+      templates: templates,
       campaigns: []
     }), {
       status: 200,
@@ -80,53 +106,99 @@ async function loadAllData(apiKey: string) {
     });
   } catch (error) {
     console.error("Error loading all data:", error);
-    throw error;
+    return new Response(JSON.stringify({
+      success: false,
+      error: `Failed to connect to Elastic Email: ${error.message}`,
+      accountInfo: null,
+      statistics: null,
+      contactLists: [],
+      templates: [],
+      campaigns: []
+    }), {
+      status: 200, // Return 200 but with error info so the UI can handle it
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 }
 
 async function syncContacts(apiKey: string) {
-  const contactLists = await fetchElasticEmailAPI(apiKey, 'list/list');
-  
-  console.log("Syncing contacts from Elastic Email");
-  
-  return new Response(JSON.stringify({
-    success: true,
-    message: "Contacts synced successfully",
-    data: contactLists.data || []
-  }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+  try {
+    const contactLists = await fetchElasticEmailAPI(apiKey, 'list/list');
+    console.log("Syncing contacts from Elastic Email");
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Contacts synced successfully",
+      data: contactLists.data || contactLists || []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error syncing contacts:", error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 }
 
 async function syncTemplates(apiKey: string) {
   console.log("Fetching templates using correct endpoint...");
-  const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
   
-  console.log("Templates response:", templates);
-  
-  return new Response(JSON.stringify({
-    success: true,
-    message: "Templates synced successfully",
-    templates: templates.data || templates
-  }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+  try {
+    const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
+    console.log("Templates response:", templates);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Templates synced successfully",
+      templates: templates.data || templates || []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error syncing templates:", error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      templates: []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 }
 
 async function getTemplates(apiKey: string) {
   console.log("Fetching templates from Elastic Email");
   
-  const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
-  
-  return new Response(JSON.stringify({
-    success: true,
-    templates: templates.data || templates
-  }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+  try {
+    const templates = await fetchElasticEmailAPI(apiKey, 'template/getlist');
+    
+    return new Response(JSON.stringify({
+      success: true,
+      templates: templates.data || templates || []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error getting templates:", error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      templates: []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
 }
 
 async function exportMembers(apiKey: string, memberData: any) {
@@ -260,24 +332,38 @@ async function fetchElasticEmailAPI(apiKey: string, endpoint: string, params: an
 
   console.log(`Making request to Elastic Email endpoint: ${endpoint}`);
   
-  const response = await fetch(`https://api.elasticemail.com/v2/${endpoint}`, {
-    method: 'POST',
-    body: formData
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error(`Elastic Email API error for ${endpoint}:`, errorText);
-    throw new Error(`Elastic Email API error: ${errorText}`);
-  }
-
-  const responseText = await response.text();
-  console.log(`Elastic Email response for ${endpoint}:`, responseText);
-  
   try {
-    return JSON.parse(responseText);
-  } catch (e) {
-    return { data: responseText };
+    const response = await fetch(`https://api.elasticemail.com/v2/${endpoint}`, {
+      method: 'POST',
+      body: formData
+    });
+
+    const responseText = await response.text();
+    console.log(`Elastic Email response for ${endpoint}:`, responseText.substring(0, 500));
+
+    if (!response.ok) {
+      console.error(`Elastic Email API error for ${endpoint}:`, responseText);
+      throw new Error(`Elastic Email API error (${response.status}): ${responseText}`);
+    }
+    
+    // Try to parse as JSON
+    try {
+      const jsonResponse = JSON.parse(responseText);
+      
+      // Check for API-level errors in the JSON response
+      if (jsonResponse.success === false) {
+        throw new Error(`Elastic Email API returned error: ${jsonResponse.error || 'Unknown error'}`);
+      }
+      
+      return jsonResponse;
+    } catch (parseError) {
+      // If it's not JSON, return the raw text
+      console.warn(`Response from ${endpoint} is not valid JSON:`, parseError);
+      return { data: responseText };
+    }
+  } catch (fetchError) {
+    console.error(`Network error for ${endpoint}:`, fetchError);
+    throw new Error(`Failed to connect to Elastic Email API: ${fetchError.message}`);
   }
 }
 

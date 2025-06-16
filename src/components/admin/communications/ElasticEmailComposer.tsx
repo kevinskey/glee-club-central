@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,8 @@ import {
   Mail,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
+  XCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -75,8 +77,18 @@ export function ElasticEmailComposer() {
       console.log('📧 Elastic Email Response:', { data, error });
 
       if (error) {
-        console.error('❌ Elastic Email Error:', error);
-        throw error;
+        console.error('❌ Supabase Function Error:', error);
+        throw new Error(`Function error: ${error.message}`);
+      }
+      
+      // Check if the response indicates success or failure
+      if (data?.success === false) {
+        console.error('❌ Elastic Email API Error:', data.error);
+        setConnectionStatus('error');
+        setDebugInfo(`❌ API Error: ${data.error}`);
+        setError(`Elastic Email API Error: ${data.error}`);
+        toast.error(`Connection failed: ${data.error}`);
+        return;
       }
       
       // Ensure templates is always an array
@@ -86,26 +98,27 @@ export function ElasticEmailComposer() {
       if (Array.isArray(templatesData)) {
         setTemplates(templatesData);
         setConnectionStatus('connected');
-        setDebugInfo(`✅ Successfully loaded ${templatesData.length} templates from Elastic Email`);
+        setDebugInfo(`✅ Successfully connected! Found ${templatesData.length} templates`);
         
         if (templatesData.length === 0) {
           toast.info('Connected to Elastic Email, but no templates found');
         } else {
-          toast.success(`Loaded ${templatesData.length} templates from Elastic Email`);
+          toast.success(`Connected! Loaded ${templatesData.length} templates`);
         }
       } else {
         console.warn('⚠️ Templates data is not an array:', templatesData);
         setTemplates([]);
-        setConnectionStatus('error');
-        setDebugInfo('⚠️ Invalid data format received from Elastic Email');
+        setConnectionStatus('connected'); // Still connected, just no templates
+        setDebugInfo('✅ Connected to Elastic Email (no templates found)');
+        toast.info('Connected to Elastic Email, but no templates available');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('💥 Error loading templates:', error);
-      setError('Failed to load templates from Elastic Email');
+      setError('Failed to connect to Elastic Email');
       setTemplates([]);
       setConnectionStatus('error');
       setDebugInfo(`❌ Connection failed: ${error.message || 'Unknown error'}`);
-      toast.error('Failed to connect to Elastic Email');
+      toast.error('Failed to connect to Elastic Email - check your API key');
     } finally {
       setIsLoading(false);
     }
@@ -246,29 +259,48 @@ export function ElasticEmailComposer() {
       case 'connected':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Info className="h-4 w-4 text-gray-500" />;
     }
   };
 
-  if (error) {
+  const getConnectionStatusColor = () => {
+    switch (connectionStatus) {
+      case 'connected':
+        return 'text-green-600';
+      case 'error':
+        return 'text-red-600';
+      case 'checking':
+        return 'text-blue-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  if (error && connectionStatus === 'error') {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 text-red-600">
-            <AlertCircle className="h-5 w-5" />
-            <span>{error}</span>
+          <div className="flex items-center gap-2 text-red-600 mb-4">
+            <XCircle className="h-5 w-5" />
+            <span className="font-medium">Connection Failed</span>
           </div>
+          <p className="text-sm text-muted-foreground mb-3">{error}</p>
           {debugInfo && (
-            <div className="mt-3 p-3 bg-gray-50 rounded text-sm">
-              <strong>Debug Info:</strong> {debugInfo}
+            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-sm">
+              <strong>Details:</strong> {debugInfo}
             </div>
           )}
-          <Button onClick={loadTemplates} className="mt-4">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try Again
-          </Button>
+          <div className="mt-4 space-y-2">
+            <Button onClick={loadTemplates} className="w-full">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Make sure your Elastic Email API key is valid and has the correct permissions
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -283,7 +315,7 @@ export function ElasticEmailComposer() {
             Elastic Email Composer
             <div className="flex items-center gap-2 ml-auto">
               {getConnectionStatusIcon()}
-              <span className="text-sm text-muted-foreground">
+              <span className={`text-sm font-medium ${getConnectionStatusColor()}`}>
                 {connectionStatus === 'connected' && 'Connected'}
                 {connectionStatus === 'checking' && 'Connecting...'}
                 {connectionStatus === 'error' && 'Connection Error'}
@@ -292,7 +324,13 @@ export function ElasticEmailComposer() {
             </div>
           </CardTitle>
           {debugInfo && (
-            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+            <div className={`mt-2 p-3 rounded text-sm border ${
+              connectionStatus === 'connected' 
+                ? 'bg-green-50 border-green-200 text-green-800' 
+                : connectionStatus === 'error'
+                ? 'bg-red-50 border-red-200 text-red-800'
+                : 'bg-blue-50 border-blue-200 text-blue-800'
+            }`}>
               <strong>Status:</strong> {debugInfo}
             </div>
           )}
