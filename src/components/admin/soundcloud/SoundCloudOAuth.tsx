@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +16,6 @@ export function SoundCloudOAuth() {
   const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
   const [playlists, setPlaylists] = useState<SoundCloudPlaylist[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const [hasProcessedCallback, setHasProcessedCallback] = useState(false);
 
   useEffect(() => {
     console.log('SoundCloudOAuth component mounted');
@@ -38,51 +38,44 @@ export function SoundCloudOAuth() {
       }
     }
 
-    // Check for OAuth callback - handle both search params and hash
+    // Check for OAuth callback in current URL
     const urlParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const code = urlParams.get('code');
+    const callback = urlParams.get('callback');
     
-    const code = urlParams.get('code') || hashParams.get('code');
-    const error = urlParams.get('error') || hashParams.get('error');
-    const callback = urlParams.get('callback') || hashParams.get('callback');
-    
-    console.log('OAuth callback check:', { 
-      hasCode: !!code,
-      error,
-      callback,
-      search: window.location.search,
-      hash: window.location.hash
-    });
-    
-    // Handle error cases
-    if (error) {
-      console.error('OAuth error from URL:', error);
-      toast.error(`SoundCloud authentication failed: ${error}`);
-      cleanupUrl();
-      return;
+    if (code && callback === 'soundcloud') {
+      console.log('OAuth callback detected, processing...');
+      handleOAuthCallback(code);
     }
-    
-    // Handle OAuth callback - only if we have code and callback=soundcloud
-    if (code && (callback === 'soundcloud' || window.location.pathname.includes('/admin/music'))) {
-      console.log('Authorization code detected, processing OAuth callback...');
-      if (!hasProcessedCallback) {
-        setHasProcessedCallback(true);
-        handleOAuthCallback(code);
+
+    // Listen for popup authentication completion
+    const handleMessage = (event: MessageEvent) => {
+      // Only accept messages from our domain for security
+      if (event.origin !== window.location.origin) return;
+      
+      console.log('Received popup message:', event.data);
+      
+      if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
+        console.log('Popup authentication successful, processing callback...');
+        handleOAuthCallback(event.data.code);
+      } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
+        console.error('Popup authentication failed:', event.data.error);
+        setIsConnecting(false);
+        toast.error(`Authentication failed: ${event.data.error}`);
       }
-    }
-  }, [hasProcessedCallback]);
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const cleanupUrl = () => {
     try {
-      // Create a clean URL without OAuth parameters
       const url = new URL(window.location.href);
       url.searchParams.delete('code');
       url.searchParams.delete('error');
       url.searchParams.delete('state');
       url.searchParams.delete('callback');
-      url.hash = '';
-      
-      // Use replaceState to avoid triggering navigation
       window.history.replaceState({}, document.title, url.toString());
     } catch (error) {
       console.error('Error cleaning up URL:', error);
@@ -99,79 +92,64 @@ export function SoundCloudOAuth() {
         body: { action: 'authorize' }
       });
 
-      console.log('OAuth authorize response:', { data, error });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to invoke OAuth function');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
+      if (error || data?.error) {
+        throw new Error(error?.message || data?.error || 'Failed to get authorization URL');
       }
 
       if (!data?.authUrl) {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Opening SoundCloud OAuth in new tab...');
+      console.log('Opening SoundCloud OAuth popup...');
       
-      // Store state for verification
-      if (data.state) {
-        localStorage.setItem('soundcloud_oauth_state', data.state);
-      }
-      
-      // Open in new tab instead of redirect to avoid CSP issues
+      // Open popup with specific dimensions and features
       const popup = window.open(
         data.authUrl, 
         'soundcloud-oauth',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
+        'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=yes'
       );
       
       if (!popup) {
-        // Fallback: try direct redirect if popup is blocked
-        console.log('Popup blocked, trying direct redirect...');
-        window.location.href = data.authUrl;
-        return;
+        throw new Error('Popup was blocked. Please allow popups for this site and try again.');
       }
-      
-      // Monitor the popup for completion
-      const checkClosed = setInterval(() => {
+
+      // Monitor popup for closure or completion
+      const checkPopup = setInterval(() => {
         if (popup.closed) {
-          clearInterval(checkClosed);
+          clearInterval(checkPopup);
           setIsConnecting(false);
           
           // Check if we got a successful connection after popup closed
           setTimeout(() => {
             const savedToken = localStorage.getItem('soundcloud_access_token');
             if (!savedToken) {
-              toast.error('SoundCloud authentication was cancelled or failed');
+              console.log('Popup closed without successful authentication');
             }
           }, 1000);
+        } else {
+          // Check if popup has been redirected to our callback URL
+          try {
+            const popupUrl = popup.location.href;
+            const popupParams = new URLSearchParams(new URL(popupUrl).search);
+            const code = popupParams.get('code');
+            const callback = popupParams.get('callback');
+            
+            if (code && callback === 'soundcloud') {
+              console.log('Popup reached callback URL, processing...');
+              clearInterval(checkPopup);
+              popup.close();
+              handleOAuthCallback(code);
+            }
+          } catch (e) {
+            // This is expected due to CORS when popup is on different domain
+            // We'll rely on the message listener instead
+          }
         }
       }, 1000);
       
-      // Also listen for messages from the popup
-      const messageHandler = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS') {
-          clearInterval(checkClosed);
-          popup.close();
-          handleOAuthSuccess(event.data.code);
-        } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
-          clearInterval(checkClosed);
-          popup.close();
-          setIsConnecting(false);
-          toast.error(`Authentication failed: ${event.data.error}`);
-        }
-      };
-      
-      window.addEventListener('message', messageHandler);
-      
       // Cleanup after 5 minutes
       setTimeout(() => {
-        clearInterval(checkClosed);
-        window.removeEventListener('message', messageHandler);
+        clearInterval(checkPopup);
         if (!popup.closed) {
           popup.close();
           setIsConnecting(false);
@@ -184,8 +162,8 @@ export function SoundCloudOAuth() {
       setIsConnecting(false);
       
       if (error instanceof Error) {
-        if (error.message.includes('refused to connect')) {
-          toast.error('SoundCloud blocked the connection. Please disable ad blockers or try a different browser.');
+        if (error.message.includes('popup')) {
+          toast.error('Please allow popups for this site and try again.');
         } else {
           toast.error(`Connection failed: ${error.message}`);
         }
@@ -193,10 +171,6 @@ export function SoundCloudOAuth() {
         toast.error('Failed to connect to SoundCloud');
       }
     }
-  };
-
-  const handleOAuthSuccess = async (code: string) => {
-    await handleOAuthCallback(code);
   };
 
   const handleOAuthCallback = async (code: string) => {
@@ -212,25 +186,15 @@ export function SoundCloudOAuth() {
         }
       });
 
-      console.log('Token exchange response:', { 
-        hasData: !!data, 
-        hasError: !!error,
-        error 
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Token exchange failed');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
+      if (error || data?.error) {
+        throw new Error(error?.message || data?.error || 'Token exchange failed');
       }
 
       if (!data?.accessToken || !data?.user) {
-        throw new Error('Invalid response from authentication');
+        throw new Error('Invalid authentication response');
       }
 
-      console.log('Token exchange successful!');
+      console.log('Authentication successful!');
 
       // Store tokens and user data
       setAccessToken(data.accessToken);
@@ -243,7 +207,7 @@ export function SoundCloudOAuth() {
         localStorage.setItem('soundcloud_refresh_token', data.refreshToken);
       }
 
-      // Load user's tracks and playlists
+      // Load user data
       await loadUserData(data.accessToken);
 
       toast.success(`Successfully connected as ${data.user.display_name}!`);
@@ -256,7 +220,7 @@ export function SoundCloudOAuth() {
       if (error instanceof Error) {
         toast.error(`Authentication failed: ${error.message}`);
       } else {
-        toast.error('Failed to complete SoundCloud authentication');
+        toast.error('Failed to complete authentication');
       }
       
       cleanupUrl();
@@ -278,14 +242,8 @@ export function SoundCloudOAuth() {
         }
       });
 
-      console.log('User data response:', { data, error });
-
-      if (error) {
-        throw new Error(error.message || 'Data fetch failed');
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
+      if (error || data?.error) {
+        throw new Error(error?.message || data?.error || 'Data fetch failed');
       }
 
       setTracks(data.tracks || []);
@@ -312,12 +270,10 @@ export function SoundCloudOAuth() {
     localStorage.removeItem('soundcloud_access_token');
     localStorage.removeItem('soundcloud_user');
     localStorage.removeItem('soundcloud_refresh_token');
-    localStorage.removeItem('soundcloud_oauth_state');
     setAccessToken(null);
     setConnectedUser(null);
     setTracks([]);
     setPlaylists([]);
-    setHasProcessedCallback(false);
     
     toast.success('Disconnected from SoundCloud');
   };
@@ -333,11 +289,9 @@ export function SoundCloudOAuth() {
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
-            {isConnecting ? 'Connecting to SoundCloud...' : 'Processing authentication...'}
-          </p>
+          <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           <p className="text-sm text-muted-foreground mt-2">
-            If a popup opened, please complete the authorization there.
+            Complete the authorization in the popup window.
           </p>
         </div>
       </div>

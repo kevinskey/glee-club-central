@@ -79,13 +79,12 @@ serve(async (req) => {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // Include the callback parameter that SoundCloud OAuth 2.1 automatically appends
-      // This ensures the redirect URI matches exactly what SoundCloud expects
-      const redirectUri = `${origin}/admin/music?callback=soundcloud`
+      // Use the callback HTML page for better popup handling
+      const redirectUri = `${origin}/soundcloud-callback.html?callback=soundcloud`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
-      console.log('Generated redirect URI for OAuth 2.1:', redirectUri)
+      console.log('Generated redirect URI for popup OAuth:', redirectUri)
       
       // Use the standard SoundCloud Connect URL
       const authUrl = new URL('https://soundcloud.com/connect')
@@ -132,9 +131,9 @@ serve(async (req) => {
         )
       }
 
-      // Use the same redirect URI as in authorize step (with callback parameter)
+      // Use the callback HTML page redirect URI for token exchange
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
-      const redirectUri = `${origin}/admin/music?callback=soundcloud`
+      const redirectUri = `${origin}/soundcloud-callback.html?callback=soundcloud`
       
       console.log('Token exchange - using redirect URI:', redirectUri)
       

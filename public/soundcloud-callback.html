@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SoundCloud Authorization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: #f8f9fa;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff5500;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+    <h2>Processing SoundCloud Authorization...</h2>
+    <p>You can close this window once authentication is complete.</p>
+    
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+            const callback = urlParams.get('callback');
+            
+            console.log('Callback page loaded:', { code: !!code, error, callback });
+            
+            if (window.opener) {
+                if (error) {
+                    window.opener.postMessage({
+                        type: 'SOUNDCLOUD_OAUTH_ERROR',
+                        error: error
+                    }, window.location.origin);
+                } else if (code && callback === 'soundcloud') {
+                    window.opener.postMessage({
+                        type: 'SOUNDCLOUD_OAUTH_SUCCESS',
+                        code: code
+                    }, window.location.origin);
+                }
+                
+                // Close the popup after a short delay
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            } else {
+                // If no opener, redirect to main app
+                window.location.href = '/admin/music?code=' + (code || '') + '&callback=soundcloud';
+            }
+        })();
+    </script>
+</body>
+</html>
