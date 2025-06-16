@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -146,9 +145,29 @@ export const FinancialDashboard: React.FC = () => {
               <CardTitle>Financial Reports</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Advanced reporting features coming soon...
-              </p>
+              <div className="space-y-4">
+                <p className="text-muted-foreground">
+                  Generate comprehensive financial reports and export data.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="h-20 flex-col">
+                    <span className="font-semibold">Income Report</span>
+                    <span className="text-sm text-muted-foreground">Monthly and yearly income breakdown</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col">
+                    <span className="font-semibold">Expense Report</span>
+                    <span className="text-sm text-muted-foreground">Detailed expense analysis</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col">
+                    <span className="font-semibold">Budget vs Actual</span>
+                    <span className="text-sm text-muted-foreground">Compare budgets to actual spending</span>
+                  </Button>
+                  <Button variant="outline" className="h-20 flex-col">
+                    <span className="font-semibold">Export Data</span>
+                    <span className="text-sm text-muted-foreground">Download CSV/Excel reports</span>
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
