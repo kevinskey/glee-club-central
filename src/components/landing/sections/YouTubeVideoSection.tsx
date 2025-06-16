@@ -29,13 +29,19 @@ export function YouTubeVideoSection() {
 
   const loadYouTubeVideos = async () => {
     try {
+      console.log('🎬 Loading YouTube videos...');
       const { data, error } = await supabase
         .from('youtube_videos')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading YouTube content:', error);
+        throw error;
+      }
+      
+      console.log('🎬 YouTube videos loaded:', data?.length || 0);
       setVideos(data || []);
     } catch (error) {
       console.error('Error loading YouTube content:', error);
@@ -93,7 +99,7 @@ export function YouTubeVideoSection() {
       <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
         <Video className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <p className="text-gray-600 dark:text-gray-400 text-sm">
-          No content available yet.
+          No video content available yet.
         </p>
         <p className="text-gray-500 dark:text-gray-500 text-xs mt-2">
           Check back soon for performance videos and playlists.
