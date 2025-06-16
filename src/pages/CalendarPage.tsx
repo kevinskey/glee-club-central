@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { EventsListView } from '@/components/calendar/EventsListView';
@@ -13,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ResponsiveContainer } from '@/components/ui/responsive-container';
 import { useIsPad } from '@/hooks/useIsPad';
+import { cn } from '@/lib/utils';
 import { getNationalHolidays } from '@/utils/nationalHolidays';
 import { getReligiousHolidays } from '@/utils/religiousHolidays';
 import { getSpelmanAcademicDates } from '@/utils/spelmanAcademicDates';
