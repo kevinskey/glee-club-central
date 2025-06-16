@@ -6,7 +6,6 @@ import { EventEditor } from '@/components/admin/EventEditor';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
 import { CalendarEvent } from '@/types/calendar';
 import { PageHeader } from '@/components/ui/page-header';
-import { PageNavigationHeader } from '@/components/ui/page-navigation-header';
 import { Calendar, CalendarDays, CalendarCheck, List, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -115,7 +114,6 @@ export default function CalendarPage() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <PageNavigationHeader title="Calendar" />
         <div className="mobile-container mobile-section-padding">
           <div className="flex items-center justify-center h-32 sm:h-48">
             <div className="text-center">
@@ -131,7 +129,6 @@ export default function CalendarPage() {
   if (error) {
     return (
       <div className="min-h-screen">
-        <PageNavigationHeader title="Calendar" />
         <div className="mobile-container mobile-section-padding">
           <Card className="mt-4">
             <CardContent className="flex flex-col items-center justify-center h-32 space-y-3">
@@ -151,8 +148,6 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen">
-      <PageNavigationHeader title="Calendar" />
-      
       <div className="mobile-container mobile-section-padding space-y-3 sm:space-y-4 mobile-scroll">
         <div className="flex items-center justify-between">
           <PageHeader
