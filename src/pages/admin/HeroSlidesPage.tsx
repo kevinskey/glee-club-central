@@ -157,20 +157,32 @@ export default function HeroSlidesPage() {
     try {
       console.log('Saving slide with data:', formData);
       
+      // Validate text_position before saving
+      if (formData.text_position && !['top-left', 'top-center', 'top-right', 'center-left', 'center', 'center-right', 'bottom-left', 'bottom-center', 'bottom-right'].includes(formData.text_position)) {
+        toast.error('Invalid text position selected');
+        return;
+      }
+      
       if (editingSlide) {
         const { error } = await supabase
           .from('hero_slides')
           .update(formData)
           .eq('id', editingSlide.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating slide:', error);
+          throw error;
+        }
         toast.success('Slide updated successfully');
       } else {
         const { error } = await supabase
           .from('hero_slides')
           .insert(formData);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating slide:', error);
+          throw error;
+        }
         toast.success('Slide created successfully');
       }
 
@@ -178,7 +190,11 @@ export default function HeroSlidesPage() {
       fetchSlides();
     } catch (error) {
       console.error('Error saving slide:', error);
-      toast.error('Failed to save slide');
+      if (error.message?.includes('text_position_check')) {
+        toast.error('Invalid text position. Please select a valid position from the dropdown.');
+      } else {
+        toast.error('Failed to save slide: ' + (error.message || 'Unknown error'));
+      }
     }
   };
 
