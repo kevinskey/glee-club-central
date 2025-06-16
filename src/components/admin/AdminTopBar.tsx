@@ -100,54 +100,54 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
       {/* Top Bar with improved spacing */}
-      <div className="h-14 flex items-center justify-between px-6">
-        <div className="flex items-center gap-4">
+      <div className="h-16 flex items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Home Button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/")}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-9 w-9 p-0"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-10 w-10 p-0"
             title="Go to Public Homepage"
           >
-            <Home className="h-4 w-4" />
+            <Home className="h-5 w-5" />
           </Button>
 
-          <div className="flex items-center gap-3">
-            <Search className="h-4 w-4 text-gray-400" />
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Search className="h-5 w-5 text-gray-400" />
             <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:inline">Search...</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="sm"
             onClick={toggleTheme}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-9 w-9 p-0"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-10 w-10 p-0"
             aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
           >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
           </Button>
 
           {/* Notifications */}
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative h-9 w-9 p-0"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 relative h-10 w-10 p-0"
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full"></span>
           </Button>
 
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-                <Avatar className="h-9 w-9">
+              <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                <Avatar className="h-10 w-10">
                   <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
-                  <AvatarFallback className="bg-orange-500 text-white text-xs">
+                  <AvatarFallback className="bg-orange-500 text-white text-sm">
                     {getInitials(profile?.first_name, profile?.last_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -173,7 +173,7 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
 
       {/* Mobile Navigation with improved spacing */}
       {isMobile && (
-        <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
               Admin Panel
@@ -181,11 +181,11 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-                  <Menu className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+                  <Menu className="h-6 w-6" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuContent align="end" className="w-72">
                 {navigationGroups.map((group, groupIndex) => (
                   <div key={group.label}>
                     <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -199,7 +199,7 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
                           key={item.to}
                           onClick={() => handleNavigate(item.to)}
                           className={cn(
-                            "flex items-center gap-3 cursor-pointer ml-3 py-2",
+                            "flex items-center gap-3 cursor-pointer ml-3 py-3",
                             isActive && "bg-glee-spelman text-white"
                           )}
                         >
