@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
@@ -211,12 +212,12 @@ export function HomePageContent({
           <EnhancedEventsSection events={upcomingEvents} />
           
           {/* SoundCloud Music Section */}
-          <div className="mt-16 max-w-7xl mx-auto">
+          <div className="mt-16 max-w-7xl mx-auto bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-8 md:p-12">
             <div className="text-center mb-12">
-              <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
+              <h3 className="text-3xl md:text-4xl font-light text-white mb-4 tracking-tight">
                 Listen to the Glee
               </h3>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
+              <p className="text-lg text-blue-100 max-w-2xl mx-auto font-light">
                 Experience our music collection
               </p>
             </div>
@@ -224,8 +225,8 @@ export function HomePageContent({
             {/* Show SoundCloud embeds from admin configuration */}
             {isLoadingEmbeds ? (
               <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm">Loading music...</p>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+                <p className="text-blue-100 text-sm">Loading music...</p>
               </div>
             ) : soundCloudEmbeds.length > 0 ? (
               <div className="space-y-8">
@@ -236,7 +237,7 @@ export function HomePageContent({
                       const currentPlaylist = soundCloudPlaylists[embed.id];
                       return (
                         <CarouselItem key={embed.id}>
-                          <Card className="overflow-hidden">
+                          <Card className="overflow-hidden bg-white/10 backdrop-blur-sm border-white/20">
                             <div className="p-6">
                               {/* Header with playlist image and info */}
                               <div className="flex items-start gap-6 mb-6">
@@ -256,23 +257,23 @@ export function HomePageContent({
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between mb-2">
                                     <div>
-                                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                      <h4 className="text-lg font-semibold text-white truncate">
                                         {embed.title}
                                       </h4>
-                                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      <p className="text-sm text-blue-100">
                                         by {embed.artist}
                                       </p>
-                                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                      <p className="text-xs text-blue-200 mt-1">
                                         {embed.description}
                                       </p>
                                       {currentPlaylist && (
-                                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                                        <p className="text-xs text-blue-200 mt-1">
                                           {currentPlaylist.track_count} tracks
                                         </p>
                                       )}
                                     </div>
                                     
-                                    <Button variant="outline" size="sm" asChild>
+                                    <Button variant="outline" size="sm" asChild className="border-white/30 text-white hover:bg-white/20">
                                       <a href={embed.url} target="_blank" rel="noopener noreferrer">
                                         <ExternalLink className="w-4 h-4" />
                                       </a>
@@ -296,42 +297,42 @@ export function HomePageContent({
                               </div>
 
                               {/* Real Playlist Tracks */}
-                              <div className="border-t pt-6">
+                              <div className="border-t border-white/20 pt-6">
                                 {isLoadingPlaylists ? (
                                   <div className="text-center py-8">
-                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto mb-2"></div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">Loading playlist tracks...</p>
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mx-auto mb-2"></div>
+                                    <p className="text-sm text-blue-100">Loading playlist tracks...</p>
                                   </div>
                                 ) : currentPlaylist && currentPlaylist.tracks.length > 0 ? (
                                   <>
-                                    <h5 className="text-md font-medium text-gray-900 dark:text-white mb-4">
+                                    <h5 className="text-md font-medium text-white mb-4">
                                       {currentPlaylist.name} ({currentPlaylist.track_count} tracks)
                                     </h5>
                                     <div className="space-y-2 max-h-64 overflow-y-auto">
                                       {currentPlaylist.tracks.map((track, trackIndex) => (
                                         <div 
                                           key={track.id}
-                                          className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                          className="flex items-center justify-between p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
                                         >
                                           <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400 w-6">
+                                            <span className="text-sm text-blue-200 w-6">
                                               {trackIndex + 1}
                                             </span>
                                             <div className="flex-1 min-w-0">
-                                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                              <p className="text-sm font-medium text-white truncate">
                                                 {track.title}
                                               </p>
-                                              <p className="text-xs text-gray-500 dark:text-gray-400">
+                                              <p className="text-xs text-blue-200">
                                                 {track.plays.toLocaleString()} plays • {track.likes.toLocaleString()} likes
                                               </p>
                                             </div>
                                           </div>
                                           <div className="flex items-center gap-2">
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            <span className="text-xs text-blue-200">
                                               {track.duration}
                                             </span>
                                             {track.permalink_url && (
-                                              <Button variant="ghost" size="sm" asChild>
+                                              <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/20">
                                                 <a href={track.permalink_url} target="_blank" rel="noopener noreferrer">
                                                   <ExternalLink className="w-3 h-3" />
                                                 </a>
@@ -344,8 +345,8 @@ export function HomePageContent({
                                   </>
                                 ) : (
                                   <div className="text-center py-8">
-                                    <Music className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    <Music className="w-8 h-8 text-blue-200 mx-auto mb-2" />
+                                    <p className="text-sm text-blue-100">
                                       No playlist tracks available for this embed.
                                     </p>
                                   </div>
@@ -358,13 +359,13 @@ export function HomePageContent({
                     })}
                   </CarouselContent>
                   {/* Hide arrows on mobile, show on desktop */}
-                  <CarouselPrevious className="hidden md:flex left-2" />
-                  <CarouselNext className="hidden md:flex right-2" />
+                  <CarouselPrevious className="hidden md:flex left-2 border-white/30 text-white hover:bg-white/20" />
+                  <CarouselNext className="hidden md:flex right-2 border-white/30 text-white hover:bg-white/20" />
                 </Carousel>
 
                 {/* Mobile swipe instruction */}
                 <div className="block md:hidden text-center">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-blue-200">
                     Swipe left or right to browse music
                   </p>
                 </div>
@@ -375,7 +376,7 @@ export function HomePageContent({
                     {soundCloudEmbeds.map((_, index) => (
                       <div
                         key={index}
-                        className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600"
+                        className="w-3 h-3 rounded-full bg-white/30"
                         aria-label={`Playlist ${index + 1}`}
                       />
                     ))}
@@ -383,12 +384,12 @@ export function HomePageContent({
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <Music className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+              <div className="text-center py-12 bg-white/10 backdrop-blur-sm rounded-lg">
+                <Music className="w-12 h-12 text-blue-200 mx-auto mb-4" />
+                <p className="text-blue-100 text-sm">
                   No music embeds configured yet.
                 </p>
-                <p className="text-gray-500 dark:text-gray-500 text-xs mt-2">
+                <p className="text-blue-200 text-xs mt-2">
                   Admins can add SoundCloud embeds through the admin panel.
                 </p>
               </div>
