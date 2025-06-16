@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import { PublicPageWrapper } from "@/components/landing/PublicPageWrapper";
+import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
+import { Footer } from "@/components/landing/Footer";
+import { OptimizedNewsTicker } from "@/components/landing/news/OptimizedNewsTicker";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { DynamicHero } from "@/components/landing/DynamicHero";
@@ -38,8 +40,15 @@ export default function HomePage() {
   }
 
   return (
-    <PublicPageWrapper showTopSlider={true}>
-      <div className="relative">
+    <div className="min-h-screen bg-background">
+      {/* News ticker at the very top */}
+      <OptimizedNewsTicker autoHide={false} />
+      
+      {/* Header */}
+      <UnifiedPublicHeader />
+      
+      {/* Main content */}
+      <main className="relative">
         {/* Dynamic Hero Section - Full Screen */}
         <DynamicHero />
         
@@ -52,7 +61,10 @@ export default function HomePage() {
             audioTracks={audioTracks}
           />
         </div>
-      </div>
-    </PublicPageWrapper>
+      </main>
+      
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 }
