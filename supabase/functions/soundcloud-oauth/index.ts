@@ -16,15 +16,14 @@ serve(async (req) => {
   }
 
   try {
-    // Get action from request body for POST requests, URL params for GET requests
-    let action: string | null = null
+    const url = new URL(req.url)
+    const action = url.searchParams.get('action')
     let requestBody: any = {}
     
     if (req.method === 'POST') {
       try {
         requestBody = await req.json()
-        action = requestBody.action
-        console.log('POST request action:', action)
+        console.log('POST request body:', requestBody)
       } catch (e) {
         console.error('Failed to parse JSON body:', e)
         return new Response(
@@ -35,14 +34,10 @@ serve(async (req) => {
           }
         )
       }
-    } else {
-      const url = new URL(req.url)
-      action = url.searchParams.get('action')
-      console.log('GET request action:', action)
     }
     
-    console.log('Processing action:', action)
-    console.log('Request body:', requestBody)
+    const finalAction = action || requestBody.action
+    console.log('Processing action:', finalAction)
     
     const soundcloudClientId = Deno.env.get('SOUNDCLOUD_CLIENT_ID')
     const soundcloudClientSecret = Deno.env.get('SOUNDCLOUD_CLIENT_SECRET')
@@ -54,7 +49,10 @@ serve(async (req) => {
     if (!soundcloudClientId) {
       console.error('SoundCloud Client ID not found')
       return new Response(
-        JSON.stringify({ error: 'SoundCloud Client ID not configured. Please add SOUNDCLOUD_CLIENT_ID to your environment variables.' }),
+        JSON.stringify({ 
+          error: 'SoundCloud Client ID not configured. Please add SOUNDCLOUD_CLIENT_ID to your environment variables.',
+          needsSetup: true 
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
@@ -62,10 +60,13 @@ serve(async (req) => {
       )
     }
 
-    if (!soundcloudClientSecret && (action === 'exchange' || action === 'fetch-data')) {
+    if (!soundcloudClientSecret && (finalAction === 'exchange' || finalAction === 'fetch-data')) {
       console.error('SoundCloud Client Secret not found for action requiring authentication')
       return new Response(
-        JSON.stringify({ error: 'SoundCloud Client Secret not configured. Please add SOUNDCLOUD_CLIENT_SECRET to your environment variables.' }),
+        JSON.stringify({ 
+          error: 'SoundCloud Client Secret not configured. Please add SOUNDCLOUD_CLIENT_SECRET to your environment variables.',
+          needsSetup: true 
+        }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
@@ -74,10 +75,9 @@ serve(async (req) => {
     }
 
     // Generate OAuth authorization URL
-    if (action === 'authorize') {
-      // Use the current origin from the request
+    if (finalAction === 'authorize') {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
-      const redirectUri = `${origin}/admin/music?callback=soundcloud`
+      const redirectUri = `${origin}/admin/music`
       const scope = 'non-expiring'
       const state = crypto.randomUUID()
       
@@ -104,23 +104,35 @@ serve(async (req) => {
       )
     }
 
-    // Exchange authorization code for access token
-    if (action === 'exchange' && req.method === 'POST') {
-      const { code, redirectUri } = requestBody
+    // Handle OAuth callback - check both URL params and request body
+    const code = url.searchParams.get('code') || requestBody.code
+    const state = url.searchParams.get('state') || requestBody.state
+    
+    if (finalAction === 'callback' || code) {
+      console.log('Processing OAuth callback')
+      console.log('Code present:', !!code)
+      console.log('State present:', !!state)
       
       if (!code) {
+        console.error('No authorization code provided')
         return new Response(
-          JSON.stringify({ error: 'Authorization code is required' }),
+          JSON.stringify({ 
+            error: 'No authorization code provided in callback',
+            redirect: '/admin/music?error=no_code'
+          }),
           { 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400 
           }
         )
       }
+
+      // Use the origin to construct redirect URI
+      const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || 'https://gleeworld.org'
+      const redirectUri = `${origin}/admin/music`
       
-      console.log('Exchanging authorization code for access token')
-      console.log('Code:', code.substring(0, 10) + '...')
-      console.log('Redirect URI:', redirectUri)
+      console.log('Exchanging code for access token')
+      console.log('Using redirect URI:', redirectUri)
       
       try {
         const tokenResponse = await fetch('https://api.soundcloud.com/oauth2/token', {
@@ -128,6 +140,7 @@ serve(async (req) => {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
+            'User-Agent': 'Spelman Glee Club Music App/1.0',
           },
           body: new URLSearchParams({
             'grant_type': 'authorization_code',
@@ -140,6 +153,129 @@ serve(async (req) => {
 
         console.log('Token exchange response status:', tokenResponse.status)
         
+        if (!tokenResponse.ok) {
+          const errorText = await tokenResponse.text()
+          console.error('Token exchange failed:', errorText)
+          
+          // Redirect to admin page with error
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to exchange authorization code for access token', 
+              details: errorText,
+              status: tokenResponse.status,
+              redirect: '/admin/music?error=token_exchange_failed'
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 400 
+            }
+          )
+        }
+
+        const tokenData = await tokenResponse.json()
+        console.log('Token exchange successful, fetching user data...')
+        
+        // Fetch user data with the access token
+        const userResponse = await fetch('https://api.soundcloud.com/me', {
+          headers: {
+            'Authorization': `Bearer ${tokenData.access_token}`,
+            'Accept': 'application/json',
+            'User-Agent': 'Spelman Glee Club Music App/1.0',
+          }
+        })
+
+        if (!userResponse.ok) {
+          const errorText = await userResponse.text()
+          console.error('Failed to fetch user data:', errorText)
+          return new Response(
+            JSON.stringify({ 
+              error: 'Failed to fetch user data after successful token exchange', 
+              details: errorText,
+              redirect: '/admin/music?error=user_fetch_failed'
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 400 
+            }
+          )
+        }
+
+        const userData = await userResponse.json()
+        console.log('User data fetched successfully:', userData.username)
+
+        // Return success with redirect
+        return new Response(
+          JSON.stringify({
+            success: true,
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            expiresIn: tokenData.expires_in,
+            user: {
+              id: userData.id,
+              username: userData.username,
+              display_name: userData.full_name || userData.username,
+              avatar_url: userData.avatar_url,
+              followers_count: userData.followers_count || 0,
+              followings_count: userData.followings_count || 0,
+              track_count: userData.track_count || 0,
+              playlist_count: userData.playlist_count || 0
+            },
+            redirect: '/admin/music?success=connected'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200 
+          }
+        )
+      } catch (fetchError) {
+        console.error('Network error during token exchange:', fetchError)
+        return new Response(
+          JSON.stringify({ 
+            error: 'Network error during authentication', 
+            details: fetchError instanceof Error ? fetchError.message : 'Unknown network error',
+            redirect: '/admin/music?error=network_error'
+          }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 500 
+          }
+        )
+      }
+    }
+
+    // Exchange authorization code for access token (alternative endpoint)
+    if (finalAction === 'exchange' && req.method === 'POST') {
+      const { code, redirectUri } = requestBody
+      
+      if (!code) {
+        return new Response(
+          JSON.stringify({ error: 'Authorization code is required' }),
+          { 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400 
+          }
+        )
+      }
+      
+      console.log('Exchanging authorization code for access token (POST)')
+      
+      try {
+        const tokenResponse = await fetch('https://api.soundcloud.com/oauth2/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'User-Agent': 'Spelman Glee Club Music App/1.0',
+          },
+          body: new URLSearchParams({
+            'grant_type': 'authorization_code',
+            'client_id': soundcloudClientId,
+            'client_secret': soundcloudClientSecret!,
+            'redirect_uri': redirectUri,
+            'code': code
+          })
+        })
+
         if (!tokenResponse.ok) {
           const errorText = await tokenResponse.text()
           console.error('Token exchange failed:', errorText)
@@ -157,13 +293,13 @@ serve(async (req) => {
         }
 
         const tokenData = await tokenResponse.json()
-        console.log('Token exchange successful')
         
-        // Fetch user data with the access token
+        // Fetch user data
         const userResponse = await fetch('https://api.soundcloud.com/me', {
           headers: {
             'Authorization': `Bearer ${tokenData.access_token}`,
             'Accept': 'application/json',
+            'User-Agent': 'Spelman Glee Club Music App/1.0',
           }
         })
 
@@ -180,7 +316,6 @@ serve(async (req) => {
         }
 
         const userData = await userResponse.json()
-        console.log('User data fetched successfully:', userData.username)
 
         return new Response(
           JSON.stringify({
@@ -218,116 +353,13 @@ serve(async (req) => {
       }
     }
 
-    // Fetch user's tracks and playlists with access token
-    if (action === 'fetch-data' && req.method === 'POST') {
-      const { accessToken } = requestBody
-      
-      if (!accessToken) {
-        return new Response(
-          JSON.stringify({ error: 'Access token is required' }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 400 
-          }
-        )
-      }
-
-      console.log('Fetching user data with access token')
-
-      try {
-        // Fetch user's tracks and playlists
-        const [tracksResponse, playlistsResponse] = await Promise.all([
-          fetch('https://api.soundcloud.com/me/tracks?limit=50', {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Accept': 'application/json',
-            }
-          }),
-          fetch('https://api.soundcloud.com/me/playlists?limit=50', {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Accept': 'application/json',
-            }
-          })
-        ])
-
-        let tracksData = []
-        let playlistsData = []
-
-        if (tracksResponse.ok) {
-          tracksData = await tracksResponse.json()
-          console.log('Tracks fetched:', tracksData.length)
-        } else {
-          console.warn('Failed to fetch tracks:', tracksResponse.status, await tracksResponse.text())
-        }
-
-        if (playlistsResponse.ok) {
-          playlistsData = await playlistsResponse.json()
-          console.log('Playlists fetched:', playlistsData.length)
-        } else {
-          console.warn('Failed to fetch playlists:', playlistsResponse.status, await playlistsResponse.text())
-        }
-
-        // Transform tracks data
-        const transformedTracks = tracksData.map((track: any) => ({
-          id: track.id.toString(),
-          title: track.title || 'Untitled Track',
-          artist: track.user?.username || 'Unknown Artist',
-          permalink_url: track.permalink_url || '',
-          artwork_url: track.artwork_url || track.user?.avatar_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-          duration: Math.floor((track.duration || 0) / 1000),
-          likes: track.likes_count || 0,
-          plays: track.playback_count || 0,
-          genre: track.genre || 'Unknown',
-          uploadDate: track.created_at ? new Date(track.created_at).toISOString().split('T')[0] : '',
-          description: track.description || '',
-          embeddable_by: track.embeddable_by || 'all',
-          stream_url: track.stream_url || ''
-        }))
-
-        // Transform playlists data
-        const transformedPlaylists = playlistsData.map((playlist: any) => ({
-          id: playlist.id.toString(),
-          name: playlist.title || 'Untitled Playlist',
-          description: playlist.description || '',
-          track_count: playlist.track_count || 0,
-          duration: playlist.duration || 0,
-          artwork_url: playlist.artwork_url || '/lovable-uploads/bf415f6e-790e-4f30-9259-940f17e208d0.png',
-          permalink_url: playlist.permalink_url || '',
-          is_public: playlist.sharing === 'public',
-          created_at: playlist.created_at || new Date().toISOString(),
-          tracks: playlist.tracks || []
-        }))
-
-        return new Response(
-          JSON.stringify({
-            tracks: transformedTracks,
-            playlists: transformedPlaylists,
-            status: 'success',
-            message: `Successfully loaded ${transformedTracks.length} tracks and ${transformedPlaylists.length} playlists`
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200 
-          }
-        )
-      } catch (fetchError) {
-        console.error('Error fetching user data:', fetchError)
-        return new Response(
-          JSON.stringify({
-            error: 'Failed to fetch SoundCloud data',
-            details: fetchError instanceof Error ? fetchError.message : 'Unknown error'
-          }),
-          { 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 500 
-          }
-        )
-      }
-    }
-
     return new Response(
-      JSON.stringify({ error: `Invalid action "${action}" or method "${req.method}"` }),
+      JSON.stringify({ 
+        error: `Invalid action "${finalAction}" or method "${req.method}"`,
+        availableActions: ['authorize', 'callback', 'exchange'],
+        receivedAction: finalAction,
+        method: req.method
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400 
@@ -341,7 +373,7 @@ serve(async (req) => {
       JSON.stringify({
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        redirect: '/admin/music?error=internal_error'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
