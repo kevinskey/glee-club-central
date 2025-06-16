@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap, Settings } from "lucide-react";
+import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap, Settings, Database } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { MessageHistoryViewer } from "@/components/admin/communications/MessageH
 import { CommunicationAnalytics } from "@/components/admin/communications/CommunicationAnalytics";
 import { InternalMessaging } from "@/components/admin/communications/InternalMessaging";
 import { QuickSMSComposer } from "@/components/admin/communications/QuickSMSComposer";
+import { ElasticEmailIntegration } from "@/components/admin/communications/ElasticEmailIntegration";
 
 const CommunicationsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const CommunicationsPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="compose" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
             Bulk
@@ -108,6 +109,10 @@ const CommunicationsPage: React.FC = () => {
           <TabsTrigger value="internal" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
             Internal
+          </TabsTrigger>
+          <TabsTrigger value="elastic-email" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Elastic Email
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             Settings
@@ -136,6 +141,10 @@ const CommunicationsPage: React.FC = () => {
 
         <TabsContent value="internal">
           <InternalMessaging />
+        </TabsContent>
+
+        <TabsContent value="elastic-email">
+          <ElasticEmailIntegration />
         </TabsContent>
 
         <TabsContent value="settings">
