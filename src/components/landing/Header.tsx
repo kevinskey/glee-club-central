@@ -41,9 +41,9 @@ export function Header() {
     <header className="glee-header sticky top-0 left-0 right-0 w-full z-50">
       <div className="container mx-auto">
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-          <div className="flex h-16 items-center justify-between px-6">
+          <div className="flex h-16 items-center justify-between">
             {/* Logo - Always visible */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 pl-6">
               <HeaderLogo />
             </div>
             
@@ -67,7 +67,7 @@ export function Header() {
             </nav>
             
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4 flex-shrink-0">
+            <div className="flex items-center gap-4 flex-shrink-0 pr-6">
               {/* Desktop Auth Buttons - Hidden on mobile */}
               <div className={`items-center gap-3 ${isMobile ? 'hidden' : 'flex'}`}>
                 {isAuthenticated ? (
