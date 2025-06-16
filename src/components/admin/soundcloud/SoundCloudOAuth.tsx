@@ -38,12 +38,19 @@ export function SoundCloudOAuth() {
       return;
     }
 
-    // Check for URL parameters (OAuth callback)
+    // Check for OAuth callback - parse ALL URL parameters to handle SoundCloud's OAuth 2.1 behavior
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
+    const callback = urlParams.get('callback'); // SoundCloud OAuth 2.1 adds this
     
-    console.log('URL params:', { code: !!code, error });
+    console.log('URL params check:', { 
+      code: !!code, 
+      error, 
+      callback,
+      hasCallback: callback === 'soundcloud',
+      fullUrl: window.location.href 
+    });
     
     // Handle error cases
     if (error) {
@@ -54,9 +61,9 @@ export function SoundCloudOAuth() {
       return;
     }
     
-    // Handle OAuth callback with code
-    if (code) {
-      console.log('Processing OAuth callback with code');
+    // Handle OAuth callback with code - check for SoundCloud's callback parameter too
+    if (code && (callback === 'soundcloud' || !callback)) {
+      console.log('Processing SoundCloud OAuth 2.1 callback with code');
       handleOAuthCallback(code);
     }
   }, []);
@@ -65,7 +72,7 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
-      console.log('Initiating SoundCloud connection...');
+      console.log('Initiating SoundCloud OAuth 2.1 connection...');
       
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: { action: 'authorize' }
@@ -86,7 +93,9 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Redirecting to SoundCloud OAuth...');
+      console.log('Redirecting to SoundCloud OAuth 2.1...');
+      console.log('Expected redirect URI will be:', data.redirectUri);
+      
       // Store state for verification
       if (data.state) {
         localStorage.setItem('soundcloud_oauth_state', data.state);
@@ -111,7 +120,7 @@ export function SoundCloudOAuth() {
     setIsConnecting(true);
     
     try {
-      console.log('Processing OAuth callback with code:', code.substring(0, 10) + '...');
+      console.log('Processing SoundCloud OAuth 2.1 callback with code:', code.substring(0, 10) + '...');
       
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
         body: {
@@ -148,14 +157,14 @@ export function SoundCloudOAuth() {
         localStorage.setItem('soundcloud_refresh_token', data.refreshToken);
       }
 
-      console.log('SoundCloud connection successful:', data.user.display_name);
+      console.log('SoundCloud OAuth 2.1 connection successful:', data.user.display_name);
 
       // Load user's tracks and playlists
       await loadUserData(data.accessToken);
 
       toast.success(`Successfully connected as ${data.user.display_name}!`);
       
-      // Clean up URL
+      // Clean up URL - remove all OAuth-related parameters
       window.history.replaceState({}, document.title, '/admin/music');
       
     } catch (error) {
