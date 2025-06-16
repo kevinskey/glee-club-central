@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap, Settings, Database } from "lucide-react";
+import { MessageSquare, Mail, Phone, Users, Send, Clock, Zap, Settings, Database, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { CommunicationAnalytics } from "@/components/admin/communications/Commun
 import { InternalMessaging } from "@/components/admin/communications/InternalMessaging";
 import { QuickSMSComposer } from "@/components/admin/communications/QuickSMSComposer";
 import { ElasticEmailIntegration } from "@/components/admin/communications/ElasticEmailIntegration";
+import { ElasticEmailComposer } from "@/components/admin/communications/ElasticEmailComposer";
+import { ElasticEmailDataManager } from "@/components/admin/communications/ElasticEmailDataManager";
 
 const CommunicationsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -85,10 +87,14 @@ const CommunicationsPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-10">
           <TabsTrigger value="compose" className="flex items-center gap-2">
             <Send className="h-4 w-4" />
             Bulk
+          </TabsTrigger>
+          <TabsTrigger value="elastic-composer" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Elastic Email
           </TabsTrigger>
           <TabsTrigger value="quick-sms" className="flex items-center gap-2">
             <Zap className="h-4 w-4" />
@@ -110,9 +116,13 @@ const CommunicationsPage: React.FC = () => {
             <MessageSquare className="h-4 w-4" />
             Internal
           </TabsTrigger>
+          <TabsTrigger value="elastic-data" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Data Sync
+          </TabsTrigger>
           <TabsTrigger value="elastic-email" className="flex items-center gap-2">
             <Database className="h-4 w-4" />
-            Elastic Email
+            Integration
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             Settings
@@ -121,6 +131,10 @@ const CommunicationsPage: React.FC = () => {
 
         <TabsContent value="compose">
           <BulkMessageComposer />
+        </TabsContent>
+
+        <TabsContent value="elastic-composer">
+          <ElasticEmailComposer />
         </TabsContent>
 
         <TabsContent value="quick-sms">
@@ -141,6 +155,10 @@ const CommunicationsPage: React.FC = () => {
 
         <TabsContent value="internal">
           <InternalMessaging />
+        </TabsContent>
+
+        <TabsContent value="elastic-data">
+          <ElasticEmailDataManager />
         </TabsContent>
 
         <TabsContent value="elastic-email">

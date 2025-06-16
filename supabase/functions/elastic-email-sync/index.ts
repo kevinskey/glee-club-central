@@ -37,6 +37,10 @@ const handler = async (req: Request): Promise<Response> => {
         return await exportMembers(apiKey, data);
       case 'export_templates':
         return await exportTemplates(apiKey, data);
+      case 'get_templates':
+        return await getTemplates(apiKey);
+      case 'create_campaign':
+        return await createCampaign(apiKey, data);
       default:
         throw new Error(`Unknown action: ${action}`);
     }
@@ -53,31 +57,37 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 async function loadAllData(apiKey: string) {
-  const [accountInfo, statistics, contactLists, templates, campaigns] = await Promise.all([
-    fetchElasticEmailAPI(apiKey, 'account/load'),
-    fetchElasticEmailAPI(apiKey, 'account/statistics'),
-    fetchElasticEmailAPI(apiKey, 'list/list'),
-    fetchElasticEmailAPI(apiKey, 'template/list'),
-    fetchElasticEmailAPI(apiKey, 'campaign/list', { limit: 10 })
-  ]);
+  console.log("Loading all Elastic Email data...");
+  
+  try {
+    const [accountInfo, statistics, contactLists, templates, campaigns] = await Promise.all([
+      fetchElasticEmailAPI(apiKey, 'account/load'),
+      fetchElasticEmailAPI(apiKey, 'account/statistics'),
+      fetchElasticEmailAPI(apiKey, 'list/list'),
+      fetchElasticEmailAPI(apiKey, 'template/list'),
+      fetchElasticEmailAPI(apiKey, 'campaign/list', { limit: 10 })
+    ]);
 
-  return new Response(JSON.stringify({
-    success: true,
-    accountInfo,
-    statistics,
-    contactLists: contactLists.data || [],
-    templates: templates.data || [],
-    campaigns: campaigns.data || []
-  }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+    return new Response(JSON.stringify({
+      success: true,
+      accountInfo: accountInfo.data || accountInfo,
+      statistics: statistics.data || statistics,
+      contactLists: contactLists.data || [],
+      templates: templates.data || [],
+      campaigns: campaigns.data || []
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error loading all data:", error);
+    throw error;
+  }
 }
 
 async function syncContacts(apiKey: string) {
   const contactLists = await fetchElasticEmailAPI(apiKey, 'list/list');
   
-  // Here you could sync contacts to your local database if needed
   console.log("Syncing contacts from Elastic Email");
   
   return new Response(JSON.stringify({
@@ -93,13 +103,26 @@ async function syncContacts(apiKey: string) {
 async function syncTemplates(apiKey: string) {
   const templates = await fetchElasticEmailAPI(apiKey, 'template/list');
   
-  // Here you could sync templates to your local template manager
   console.log("Syncing templates from Elastic Email");
   
   return new Response(JSON.stringify({
     success: true,
     message: "Templates synced successfully",
-    data: templates.data || []
+    templates: templates.data || templates
+  }), {
+    status: 200,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
+}
+
+async function getTemplates(apiKey: string) {
+  console.log("Fetching templates from Elastic Email");
+  
+  const templates = await fetchElasticEmailAPI(apiKey, 'template/list');
+  
+  return new Response(JSON.stringify({
+    success: true,
+    templates: templates.data || templates
   }), {
     status: 200,
     headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -107,23 +130,68 @@ async function syncTemplates(apiKey: string) {
 }
 
 async function exportMembers(apiKey: string, memberData: any) {
-  // Export Glee Club members to Elastic Email contact list
   console.log("Exporting members to Elastic Email");
   
-  // This would create a new contact list in Elastic Email
-  // and add all your members to it
+  if (!memberData?.data?.members) {
+    throw new Error("No member data provided");
+  }
+
+  const members = memberData.data.members;
   
-  return new Response(JSON.stringify({
-    success: true,
-    message: "Members exported to Elastic Email successfully"
-  }), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
+  // Create a contact list for Glee Club members
+  const listName = `Spelman-Glee-Club-${new Date().toISOString().split('T')[0]}`;
+  
+  try {
+    // Create the list first
+    const createListData = new FormData();
+    createListData.append('apikey', apiKey);
+    createListData.append('listname', listName);
+    createListData.append('allowunsubscribe', 'true');
+    
+    const listResponse = await fetch('https://api.elasticemail.com/v2/list/add', {
+      method: 'POST',
+      body: createListData
+    });
+
+    if (!listResponse.ok) {
+      throw new Error(`Failed to create list: ${await listResponse.text()}`);
+    }
+
+    // Add contacts to the list
+    for (const member of members) {
+      if (member.email) {
+        const contactData = new FormData();
+        contactData.append('apikey', apiKey);
+        contactData.append('email', member.email);
+        contactData.append('listname', listName);
+        contactData.append('firstname', member.firstName || '');
+        contactData.append('lastname', member.lastName || '');
+        
+        const contactResponse = await fetch('https://api.elasticemail.com/v2/contact/add', {
+          method: 'POST',
+          body: contactData
+        });
+
+        if (!contactResponse.ok) {
+          console.warn(`Failed to add contact ${member.email}:`, await contactResponse.text());
+        }
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `Successfully exported ${members.length} members to Elastic Email list: ${listName}`
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error exporting members:", error);
+    throw error;
+  }
 }
 
 async function exportTemplates(apiKey: string, templateData: any) {
-  // Export local templates to Elastic Email
   console.log("Exporting templates to Elastic Email");
   
   return new Response(JSON.stringify({
@@ -133,6 +201,52 @@ async function exportTemplates(apiKey: string, templateData: any) {
     status: 200,
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
+}
+
+async function createCampaign(apiKey: string, campaignData: any) {
+  console.log("Creating campaign in Elastic Email");
+  
+  const { subject, content, recipients, from } = campaignData;
+  
+  try {
+    const formData = new FormData();
+    formData.append('apikey', apiKey);
+    formData.append('subject', subject);
+    formData.append('from', from || 'noreply@gleeworld.org');
+    formData.append('fromName', 'Spelman College Glee Club');
+    formData.append('template', content);
+    formData.append('channel', 'glee-club-campaigns');
+    
+    // Add recipients
+    recipients.forEach((email: string, index: number) => {
+      formData.append(`to[${index}]`, email);
+    });
+
+    const response = await fetch('https://api.elasticemail.com/v2/email/send', {
+      method: 'POST',
+      body: formData
+    });
+
+    const responseText = await response.text();
+    
+    if (!response.ok) {
+      throw new Error(`Campaign creation failed: ${responseText}`);
+    }
+
+    const result = JSON.parse(responseText);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Campaign created and sent successfully",
+      data: result
+    }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  } catch (error) {
+    console.error("Error creating campaign:", error);
+    throw error;
+  }
 }
 
 async function fetchElasticEmailAPI(apiKey: string, endpoint: string, params: any = {}) {
