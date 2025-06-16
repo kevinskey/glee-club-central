@@ -85,7 +85,7 @@ serve(async (req) => {
       
       console.log('Generated redirect URI:', redirectUri)
       
-      // Use the correct SoundCloud OAuth URL that actually works
+      // Use the correct SoundCloud OAuth URL
       const authUrl = new URL('https://secure.soundcloud.com/authorize')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
@@ -136,8 +136,11 @@ serve(async (req) => {
       console.log('Token exchange - using redirect URI:', redirectUri)
       
       try {
-        // Use the OAuth2 token endpoint
-        const tokenResponse = await fetch('https://api.soundcloud.com/oauth2/token', {
+        // Use the OAuth2 token endpoint - this is the correct endpoint for SoundCloud
+        const tokenUrl = 'https://api.soundcloud.com/oauth2/token'
+        console.log('Making token exchange request to:', tokenUrl)
+        
+        const tokenResponse = await fetch(tokenUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -150,20 +153,25 @@ serve(async (req) => {
             'client_secret': soundcloudClientSecret!,
             'redirect_uri': redirectUri,
             'code': code
-          })
+          }).toString()
         })
 
         console.log('Token exchange response status:', tokenResponse.status)
+        console.log('Token exchange response headers:', Object.fromEntries(tokenResponse.headers.entries()))
+        
+        const responseText = await tokenResponse.text()
+        console.log('Token exchange raw response:', responseText)
         
         if (!tokenResponse.ok) {
-          const errorText = await tokenResponse.text()
-          console.error('Token exchange failed:', errorText)
+          console.error('Token exchange failed with status:', tokenResponse.status)
+          console.error('Token exchange error response:', responseText)
           
           return new Response(
             JSON.stringify({ 
               error: 'Failed to exchange authorization code for access token', 
-              details: errorText,
-              status: tokenResponse.status
+              details: responseText,
+              status: tokenResponse.status,
+              url: tokenUrl
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -172,7 +180,38 @@ serve(async (req) => {
           )
         }
 
-        const tokenData = await tokenResponse.json()
+        let tokenData
+        try {
+          tokenData = JSON.parse(responseText)
+          console.log('Token data parsed successfully:', Object.keys(tokenData))
+        } catch (parseError) {
+          console.error('Failed to parse token response as JSON:', parseError)
+          return new Response(
+            JSON.stringify({ 
+              error: 'Invalid JSON response from SoundCloud token endpoint',
+              details: responseText
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 500 
+            }
+          )
+        }
+        
+        if (!tokenData.access_token) {
+          console.error('No access token in response:', tokenData)
+          return new Response(
+            JSON.stringify({ 
+              error: 'No access token received from SoundCloud',
+              details: tokenData
+            }),
+            { 
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+              status: 400 
+            }
+          )
+        }
+        
         console.log('Token exchange successful, fetching user data...')
         
         // Fetch user data with the access token
@@ -184,13 +223,16 @@ serve(async (req) => {
           }
         })
 
+        console.log('User data response status:', userResponse.status)
+        
         if (!userResponse.ok) {
           const errorText = await userResponse.text()
           console.error('Failed to fetch user data:', errorText)
           return new Response(
             JSON.stringify({ 
               error: 'Failed to fetch user data after successful token exchange', 
-              details: errorText
+              details: errorText,
+              status: userResponse.status
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
