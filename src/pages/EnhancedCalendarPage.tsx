@@ -50,15 +50,6 @@ export default function EnhancedCalendarPage() {
   return (
     <PublicPageWrapper showTopSlider={false}>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Events & Performances
-          </h1>
-          <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Stay updated with our upcoming performances, rehearsals, and special events
-          </p>
-        </div>
-        
         <EnhancedCalendarView
           events={publicEvents}
           onEventClick={handleEventClick}
