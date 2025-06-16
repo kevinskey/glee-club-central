@@ -79,8 +79,8 @@ serve(async (req) => {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // Use the exact current page URL with callback parameter
-      const redirectUri = `${origin}/admin/music`
+      // Use the dedicated callback HTML file
+      const redirectUri = `${origin}/soundcloud-callback.html`
       const state = crypto.randomUUID()
       
       console.log('Generated redirect URI:', redirectUri)
@@ -130,9 +130,9 @@ serve(async (req) => {
         )
       }
 
-      // Use the same redirect URI for token exchange
+      // Use the same redirect URI for token exchange (the callback HTML file)
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
-      const redirectUri = `${origin}/admin/music`
+      const redirectUri = `${origin}/soundcloud-callback.html`
       
       console.log('Token exchange - using redirect URI:', redirectUri)
       
