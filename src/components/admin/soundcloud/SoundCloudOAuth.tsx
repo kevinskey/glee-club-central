@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +19,7 @@ export function SoundCloudOAuth() {
   useEffect(() => {
     console.log('SoundCloud OAuth component initialized');
     
-    // Check for existing connection
+    // Check for existing connection first
     const savedToken = localStorage.getItem('soundcloud_access_token');
     const savedUser = localStorage.getItem('soundcloud_user');
     
@@ -31,20 +30,35 @@ export function SoundCloudOAuth() {
         setAccessToken(savedToken);
         setConnectedUser(user);
         loadUserData(savedToken);
+        return;
       } catch (error) {
         console.error('Invalid saved user data:', error);
         localStorage.removeItem('soundcloud_access_token');
         localStorage.removeItem('soundcloud_user');
       }
-      return;
     }
 
-    // Check for OAuth callback
+    // Check for OAuth callback parameters
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const error = urlParams.get('error');
+    
+    console.log('URL params check:', { code: !!code, error, fullUrl: window.location.href });
+    
+    if (error) {
+      console.error('OAuth error:', error);
+      toast.error(`OAuth error: ${error}`);
+      // Clean up URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('code');
+      url.searchParams.delete('error');
+      url.searchParams.delete('state');
+      window.history.replaceState({}, document.title, url.toString());
+      return;
+    }
     
     if (code) {
-      console.log('OAuth callback detected');
+      console.log('OAuth callback detected with code');
       handleOAuthCallback(code);
     }
   }, []);
@@ -66,7 +80,7 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Redirecting to SoundCloud OAuth...');
+      console.log('Redirecting to SoundCloud OAuth:', data.authUrl);
       window.location.href = data.authUrl;
       
     } catch (error) {
@@ -77,7 +91,7 @@ export function SoundCloudOAuth() {
   };
 
   const handleOAuthCallback = async (code: string) => {
-    console.log('Processing OAuth callback...');
+    console.log('Processing OAuth callback with code...');
     setIsConnecting(true);
     
     try {
@@ -87,6 +101,8 @@ export function SoundCloudOAuth() {
           code: code
         }
       });
+
+      console.log('OAuth callback response:', { data, error });
 
       if (error) {
         throw new Error(error.message);
@@ -112,17 +128,17 @@ export function SoundCloudOAuth() {
       
       toast.success(`Connected as ${data.user.display_name}!`);
       
-      // Clean up URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('code');
-      url.searchParams.delete('callback');
-      window.history.replaceState({}, document.title, url.toString());
-      
     } catch (error) {
       console.error('OAuth callback error:', error);
       toast.error(error instanceof Error ? error.message : 'Authentication failed');
     } finally {
       setIsConnecting(false);
+      
+      // Clean up URL parameters
+      const url = new URL(window.location.href);
+      url.searchParams.delete('code');
+      url.searchParams.delete('state');
+      window.history.replaceState({}, document.title, url.toString());
     }
   };
 
@@ -174,6 +190,18 @@ export function SoundCloudOAuth() {
     if (!accessToken) return;
     await loadUserData(accessToken);
   };
+
+  // Show loading state during connection process
+  if (isConnecting) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Connecting to SoundCloud...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show connected state
   if (connectedUser) {
