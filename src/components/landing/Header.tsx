@@ -113,34 +113,28 @@ export function Header() {
                 </>
               )}
               
-              {/* Mobile Actions */}
+              {/* Mobile Actions - Simplified to prevent overflow */}
               {isMobile && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   {isAuthenticated ? (
                     <Button 
                       variant="default"
                       onClick={handleDashboardClick}
                       size="sm"
+                      className="h-10 w-10 p-0"
                     >
                       <User className="w-4 h-4" />
                     </Button>
                   ) : (
-                    <div className="flex items-center gap-1">
-                      <Button 
-                        variant="outline"
-                        onClick={() => navigate("/signup")}
-                        size="sm"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="default"
-                        onClick={() => navigate("/login")}
-                        size="sm"
-                      >
-                        <LogIn className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="default"
+                      onClick={() => navigate("/login")}
+                      size="sm"
+                      className="h-10 px-3"
+                    >
+                      <LogIn className="w-4 h-4 mr-1" />
+                      Login
+                    </Button>
                   )}
                   <HeaderActions />
                   <MobileNavDropdown />
