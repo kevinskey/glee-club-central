@@ -85,11 +85,12 @@ serve(async (req) => {
       
       console.log('Generated redirect URI:', redirectUri)
       
-      // Use the correct SoundCloud OAuth URL
+      // Use the correct SoundCloud OAuth URL with proper scope
       const authUrl = new URL('https://secure.soundcloud.com/authorize')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
       authUrl.searchParams.set('response_type', 'code')
+      authUrl.searchParams.set('scope', 'non-expiring')
       authUrl.searchParams.set('state', state)
       
       console.log('Generated OAuth URL:', authUrl.toString())
@@ -136,24 +137,24 @@ serve(async (req) => {
       console.log('Token exchange - using redirect URI:', redirectUri)
       
       try {
-        // Use the OAuth2 token endpoint - this is the correct endpoint for SoundCloud
+        // Prepare the token exchange request with proper format
         const tokenUrl = 'https://api.soundcloud.com/oauth2/token'
         console.log('Making token exchange request to:', tokenUrl)
         
+        const formData = new FormData()
+        formData.append('grant_type', 'authorization_code')
+        formData.append('client_id', soundcloudClientId)
+        formData.append('client_secret', soundcloudClientSecret!)
+        formData.append('redirect_uri', redirectUri)
+        formData.append('code', code)
+        
         const tokenResponse = await fetch(tokenUrl, {
           method: 'POST',
+          body: formData,
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
             'Accept': 'application/json',
-            'User-Agent': 'Spelman Glee Club Music App/1.0',
-          },
-          body: new URLSearchParams({
-            'grant_type': 'authorization_code',
-            'client_id': soundcloudClientId,
-            'client_secret': soundcloudClientSecret!,
-            'redirect_uri': redirectUri,
-            'code': code
-          }).toString()
+            'User-Agent': 'Spelman-Glee-Club-App/1.0',
+          }
         })
 
         console.log('Token exchange response status:', tokenResponse.status)
@@ -171,7 +172,8 @@ serve(async (req) => {
               error: 'Failed to exchange authorization code for access token', 
               details: responseText,
               status: tokenResponse.status,
-              url: tokenUrl
+              url: tokenUrl,
+              hint: 'Check if your SoundCloud app credentials are correct and the redirect URI matches'
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -217,9 +219,9 @@ serve(async (req) => {
         // Fetch user data with the access token
         const userResponse = await fetch('https://api.soundcloud.com/me', {
           headers: {
-            'Authorization': `Bearer ${tokenData.access_token}`,
+            'Authorization': `OAuth ${tokenData.access_token}`,
             'Accept': 'application/json',
-            'User-Agent': 'Spelman Glee Club Music App/1.0',
+            'User-Agent': 'Spelman-Glee-Club-App/1.0',
           }
         })
 
@@ -301,16 +303,16 @@ serve(async (req) => {
         const [tracksResponse, playlistsResponse] = await Promise.all([
           fetch('https://api.soundcloud.com/me/tracks?limit=20', {
             headers: {
-              'Authorization': `Bearer ${accessToken}`,
+              'Authorization': `OAuth ${accessToken}`,
               'Accept': 'application/json',
-              'User-Agent': 'Spelman Glee Club Music App/1.0',
+              'User-Agent': 'Spelman-Glee-Club-App/1.0',
             }
           }),
           fetch('https://api.soundcloud.com/me/playlists?limit=10', {
             headers: {
-              'Authorization': `Bearer ${accessToken}`,
+              'Authorization': `OAuth ${accessToken}`,
               'Accept': 'application/json',
-              'User-Agent': 'Spelman Glee Club Music App/1.0',
+              'User-Agent': 'Spelman-Glee-Club-App/1.0',
             }
           })
         ])
