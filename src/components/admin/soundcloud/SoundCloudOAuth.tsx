@@ -39,39 +39,18 @@ export function SoundCloudOAuth() {
       }
     }
 
-    // Check for OAuth callback parameters in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const code = urlParams.get('code');
-    const error = urlParams.get('error');
-    const callback = urlParams.get('callback');
-    
-    console.log('URL params check:', { 
-      code: !!code, 
-      error, 
-      callback,
-      fullUrl: window.location.href 
-    });
-    
-    if (error) {
-      console.error('OAuth error:', error);
-      toast.error(`OAuth error: ${error}`);
-      cleanupUrl();
-      return;
-    }
-    
-    if (code && callback === 'soundcloud') {
-      console.log('OAuth callback detected with code');
-      handleOAuthCallback(code);
-    }
-
     // Set up message listener for popup callback
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      console.log('Received message event:', event);
       
-      console.log('Received message:', event.data);
+      // Only accept messages from our own origin for security
+      if (event.origin !== window.location.origin) {
+        console.log('Message from different origin, ignoring:', event.origin);
+        return;
+      }
       
       if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
-        console.log('OAuth success message received');
+        console.log('OAuth success message received with code');
         handleOAuthCallback(event.data.code);
       } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
         console.error('OAuth error message received:', event.data.error);
@@ -86,20 +65,6 @@ export function SoundCloudOAuth() {
       window.removeEventListener('message', handleMessage);
     };
   }, []);
-
-  const cleanupUrl = () => {
-    try {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('code');
-      url.searchParams.delete('error');
-      url.searchParams.delete('state');
-      url.searchParams.delete('callback');
-      window.history.replaceState({}, document.title, url.toString());
-      console.log('URL cleaned up');
-    } catch (error) {
-      console.error('Error cleaning up URL:', error);
-    }
-  };
 
   const handleConnect = async () => {
     console.log('Starting SoundCloud connection...');
@@ -123,27 +88,60 @@ export function SoundCloudOAuth() {
         throw new Error('No authorization URL received');
       }
 
-      console.log('Opening SoundCloud OAuth in popup:', data.authUrl);
+      console.log('Opening SoundCloud OAuth popup with URL:', data.authUrl);
       
-      // Open OAuth in a popup window
+      // Calculate popup position (center of screen)
+      const width = 600;
+      const height = 700;
+      const left = (screen.width / 2) - (width / 2);
+      const top = (screen.height / 2) - (height / 2);
+      
+      // Open OAuth in a popup window with better positioning
       const popup = window.open(
         data.authUrl,
         'soundcloud-oauth',
-        'width=600,height=700,scrollbars=yes,resizable=yes'
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes,status=yes,location=yes`
       );
 
       if (!popup) {
-        throw new Error('Failed to open popup window. Please allow popups and try again.');
+        throw new Error('Failed to open popup window. Please allow popups for this site and try again.');
       }
 
-      // Monitor popup for closure
-      const checkClosed = setInterval(() => {
+      console.log('Popup opened successfully');
+
+      // Monitor popup for closure and focus
+      let pollTimer: NodeJS.Timeout;
+      const checkClosed = () => {
         if (popup.closed) {
-          clearInterval(checkClosed);
-          console.log('Popup was closed');
+          console.log('Popup was closed by user');
+          clearInterval(pollTimer);
           setIsConnecting(false);
+          return;
         }
-      }, 1000);
+        
+        // Check if popup has been redirected to our callback
+        try {
+          if (popup.location && popup.location.pathname === '/soundcloud-callback.html') {
+            console.log('Popup redirected to callback page');
+          }
+        } catch (e) {
+          // Cross-origin error is expected when popup navigates to SoundCloud
+          console.log('Popup navigated (cross-origin access blocked, this is normal)');
+        }
+      };
+
+      // Check popup status every second
+      pollTimer = setInterval(checkClosed, 1000);
+      
+      // Set a timeout to close the popup if no response after 5 minutes
+      setTimeout(() => {
+        if (!popup.closed) {
+          popup.close();
+          clearInterval(pollTimer);
+          setIsConnecting(false);
+          toast.error('OAuth process timed out. Please try again.');
+        }
+      }, 300000); // 5 minutes
       
     } catch (error) {
       console.error('Connection error:', error);
@@ -200,7 +198,6 @@ export function SoundCloudOAuth() {
       toast.error(errorMessage);
     } finally {
       setIsConnecting(false);
-      cleanupUrl();
     }
   };
 
@@ -263,7 +260,7 @@ export function SoundCloudOAuth() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Connecting to SoundCloud...</p>
           <p className="text-xs text-muted-foreground mt-2">
-            If a popup opened, please complete the authorization there.
+            Complete the authorization in the popup window.
           </p>
         </div>
       </div>
