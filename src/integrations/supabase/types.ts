@@ -3172,6 +3172,45 @@ export type Database = {
         }
         Relationships: []
       }
+      youtube_videos: {
+        Row: {
+          content_type: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          youtube_url: string
+        }
+        Insert: {
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          youtube_url: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          youtube_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       user_management_view: {
