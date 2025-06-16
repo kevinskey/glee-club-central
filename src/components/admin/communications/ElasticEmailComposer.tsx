@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,9 @@ import {
   Eye, 
   RefreshCw,
   Mail,
-  AlertCircle
+  AlertCircle,
+  CheckCircle,
+  Info
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -49,6 +50,8 @@ export function ElasticEmailComposer() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'unknown'>('unknown');
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   const { filteredUsers } = useUnifiedUserManagement();
 
@@ -60,26 +63,49 @@ export function ElasticEmailComposer() {
   const loadTemplates = async () => {
     setIsLoading(true);
     setError(null);
+    setConnectionStatus('checking');
+    
     try {
+      console.log('🔄 Fetching templates from Elastic Email...');
+      
       const { data, error } = await supabase.functions.invoke('elastic-email-sync', {
         body: { action: 'sync_templates' }
       });
 
-      if (error) throw error;
+      console.log('📧 Elastic Email Response:', { data, error });
+
+      if (error) {
+        console.error('❌ Elastic Email Error:', error);
+        throw error;
+      }
       
       // Ensure templates is always an array
       const templatesData = data?.templates || [];
+      console.log('📝 Templates received:', templatesData);
+      
       if (Array.isArray(templatesData)) {
         setTemplates(templatesData);
+        setConnectionStatus('connected');
+        setDebugInfo(`✅ Successfully loaded ${templatesData.length} templates from Elastic Email`);
+        
+        if (templatesData.length === 0) {
+          toast.info('Connected to Elastic Email, but no templates found');
+        } else {
+          toast.success(`Loaded ${templatesData.length} templates from Elastic Email`);
+        }
       } else {
-        console.warn('Templates data is not an array:', templatesData);
+        console.warn('⚠️ Templates data is not an array:', templatesData);
         setTemplates([]);
+        setConnectionStatus('error');
+        setDebugInfo('⚠️ Invalid data format received from Elastic Email');
       }
     } catch (error) {
-      console.error('Error loading templates:', error);
-      setError('Failed to load templates');
+      console.error('💥 Error loading templates:', error);
+      setError('Failed to load templates from Elastic Email');
       setTemplates([]);
-      toast.error('Failed to load templates');
+      setConnectionStatus('error');
+      setDebugInfo(`❌ Connection failed: ${error.message || 'Unknown error'}`);
+      toast.error('Failed to connect to Elastic Email');
     } finally {
       setIsLoading(false);
     }
@@ -213,6 +239,19 @@ export function ElasticEmailComposer() {
     }
   };
 
+  const getConnectionStatusIcon = () => {
+    switch (connectionStatus) {
+      case 'checking':
+        return <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />;
+      case 'connected':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Info className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
   if (error) {
     return (
       <Card>
@@ -221,6 +260,11 @@ export function ElasticEmailComposer() {
             <AlertCircle className="h-5 w-5" />
             <span>{error}</span>
           </div>
+          {debugInfo && (
+            <div className="mt-3 p-3 bg-gray-50 rounded text-sm">
+              <strong>Debug Info:</strong> {debugInfo}
+            </div>
+          )}
           <Button onClick={loadTemplates} className="mt-4">
             <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
@@ -237,14 +281,33 @@ export function ElasticEmailComposer() {
           <CardTitle className="flex items-center gap-2">
             <Mail className="h-5 w-5" />
             Elastic Email Composer
+            <div className="flex items-center gap-2 ml-auto">
+              {getConnectionStatusIcon()}
+              <span className="text-sm text-muted-foreground">
+                {connectionStatus === 'connected' && 'Connected'}
+                {connectionStatus === 'checking' && 'Connecting...'}
+                {connectionStatus === 'error' && 'Connection Error'}
+                {connectionStatus === 'unknown' && 'Not Connected'}
+              </span>
+            </div>
           </CardTitle>
+          {debugInfo && (
+            <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+              <strong>Status:</strong> {debugInfo}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="compose" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="compose">Compose</TabsTrigger>
               <TabsTrigger value="recipients">Recipients ({selectedRecipients.length})</TabsTrigger>
-              <TabsTrigger value="templates">Templates ({templates.length})</TabsTrigger>
+              <TabsTrigger value="templates">
+                Templates ({templates.length})
+                {connectionStatus === 'connected' && templates.length === 0 && (
+                  <Badge variant="outline" className="ml-2">Empty</Badge>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="compose" className="space-y-6">
@@ -368,36 +431,44 @@ export function ElasticEmailComposer() {
                 </Button>
               </div>
 
-              <div className="grid gap-4">
-                {templates.map((template) => (
-                  <Card key={template.templateid} className="cursor-pointer hover:shadow-md">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{template.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {template.subject}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline">{template.templatetype}</Badge>
-                            <span className="text-xs text-muted-foreground">
-                              Created {new Date(template.datecreated).toLocaleDateString()}
-                            </span>
+              {templates.length === 0 && connectionStatus === 'connected' ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No templates found in your Elastic Email account</p>
+                  <p className="text-sm">Create templates in Elastic Email to use them here</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {templates.map((template) => (
+                    <Card key={template.templateid} className="cursor-pointer hover:shadow-md">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className="font-semibold">{template.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {template.subject}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Badge variant="outline">{template.templatetype}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                Created {new Date(template.datecreated).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTemplateSelect(template.templateid)}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            Use Template
+                          </Button>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleTemplateSelect(template.templateid)}
-                        >
-                          <FileText className="h-4 w-4 mr-2" />
-                          Use Template
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
