@@ -7,7 +7,7 @@ import { PublicPageWrapper } from '@/components/landing/PublicPageWrapper';
 export default function StorePage() {
   return (
     <CartProvider>
-      <PublicPageWrapper showTopSlider={true}>
+      <PublicPageWrapper showTopSlider={false}>
         <div className="container mx-auto px-4 py-8">
           <EnhancedStorefront />
         </div>
