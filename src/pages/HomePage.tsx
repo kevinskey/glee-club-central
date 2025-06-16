@@ -46,7 +46,7 @@ export default function HomePage() {
         <DynamicHero />
         
         {/* Header positioned absolutely over the hero */}
-        <div className="absolute top-0 left-0 right-0 z-50">
+        <div className="absolute top-0 left-0 right-0 z-0">
           <UnifiedPublicHeader />
         </div>
         
