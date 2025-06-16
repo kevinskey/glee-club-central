@@ -209,21 +209,6 @@ export function SoundCloudOAuth() {
     await loadUserData(accessToken);
   };
 
-  // Show compact loading state during OAuth processing
-  if (isConnecting && !connectedUser) {
-    return (
-      <div className="flex items-center justify-center p-6 max-w-md mx-auto">
-        <div className="text-center space-y-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
-          <p className="text-sm text-muted-foreground">Connecting to SoundCloud...</p>
-          <p className="text-xs text-muted-foreground">
-            You will be redirected to SoundCloud to authorize the connection.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   if (connectedUser) {
     return (
       <div className="space-y-6">
@@ -244,7 +229,7 @@ export function SoundCloudOAuth() {
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="max-w-md mx-auto">
       <SoundCloudConnectionButton 
         isConnecting={isConnecting}
         onConnect={handleConnect}
