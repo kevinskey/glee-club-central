@@ -38,12 +38,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative">
-      {/* Dynamic Hero Section - Full Screen */}
-      <DynamicHero />
-      
-      {/* Content Wrapper */}
-      <PublicPageWrapper showTopSlider={true}>
+    <PublicPageWrapper showTopSlider={true}>
+      <div className="relative">
+        {/* Dynamic Hero Section - Full Screen */}
+        <DynamicHero />
+        
         {/* Rest of homepage content */}
         <div className="bg-black/95 backdrop-blur-sm">
           <HomePageContent
@@ -53,7 +52,7 @@ export default function HomePage() {
             audioTracks={audioTracks}
           />
         </div>
-      </PublicPageWrapper>
-    </div>
+      </div>
+    </PublicPageWrapper>
   );
 }
