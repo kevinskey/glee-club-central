@@ -48,6 +48,13 @@ export function SoundCloudOAuth() {
       handleOAuthCallback(code);
       return;
     }
+    
+    // Also check for code without callback parameter (fallback)
+    if (code && !callback) {
+      console.log('OAuth code detected without callback parameter, processing...');
+      handleOAuthCallback(code);
+      return;
+    }
   }, []);
 
   const cleanupUrl = () => {
