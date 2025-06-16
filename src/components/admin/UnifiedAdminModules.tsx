@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { hasPermission } from "@/utils/permissionChecker";
 import { 
   ShoppingBag, Plus, Upload,
   Music, BarChart, Settings, Layout, Presentation, FileText,
-  Users, Calendar, Sliders, Bell, FileMusic
+  Users, Calendar, Sliders, Bell, FileMusic, UserCog
 } from "lucide-react";
 
 interface ModuleItem {
@@ -115,6 +116,16 @@ export function UnifiedAdminModules() {
       color: "bg-emerald-500",
       path: "/admin/store",
       adminOnly: true
+    },
+    {
+      id: "user-roles",
+      title: "User Roles",
+      description: "Manage user permissions and roles",
+      icon: <UserCog className="h-5 w-5" />,
+      color: "bg-purple-500",
+      path: "/admin/user-roles",
+      adminOnly: true,
+      isPriority: true
     }
   ];
 
