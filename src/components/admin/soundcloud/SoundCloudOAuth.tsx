@@ -16,11 +16,9 @@ export function SoundCloudOAuth() {
   const [tracks, setTracks] = useState<SoundCloudTrack[]>([]);
   const [playlists, setPlaylists] = useState<SoundCloudPlaylist[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     console.log('SoundCloud OAuth component initialized');
-    setDebugInfo('Component initialized');
     
     // Check for existing connection first
     const savedToken = localStorage.getItem('soundcloud_access_token');
@@ -30,49 +28,63 @@ export function SoundCloudOAuth() {
       try {
         const user = JSON.parse(savedUser);
         console.log('Found existing connection:', user.username);
-        setDebugInfo(`Found existing connection: ${user.username}`);
         setAccessToken(savedToken);
         setConnectedUser(user);
         loadUserData(savedToken);
         return;
       } catch (error) {
         console.error('Invalid saved user data:', error);
-        setDebugInfo(`Error parsing saved user data: ${error}`);
         localStorage.removeItem('soundcloud_access_token');
         localStorage.removeItem('soundcloud_user');
       }
     }
 
-    // Check for OAuth callback parameters
+    // Check for OAuth callback parameters in URL
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
     const error = urlParams.get('error');
-    const state = urlParams.get('state');
+    const callback = urlParams.get('callback');
     
     console.log('URL params check:', { 
       code: !!code, 
       error, 
-      state: !!state,
+      callback,
       fullUrl: window.location.href 
     });
     
-    setDebugInfo(`URL check - Code: ${!!code}, Error: ${error}, State: ${!!state}`);
-    
     if (error) {
       console.error('OAuth error:', error);
-      setDebugInfo(`OAuth error: ${error}`);
       toast.error(`OAuth error: ${error}`);
       cleanupUrl();
       return;
     }
     
-    if (code) {
+    if (code && callback === 'soundcloud') {
       console.log('OAuth callback detected with code');
-      setDebugInfo('OAuth callback detected, processing...');
       handleOAuthCallback(code);
-    } else {
-      setDebugInfo('No OAuth callback detected');
     }
+
+    // Set up message listener for popup callback
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      
+      console.log('Received message:', event.data);
+      
+      if (event.data.type === 'SOUNDCLOUD_OAUTH_SUCCESS' && event.data.code) {
+        console.log('OAuth success message received');
+        handleOAuthCallback(event.data.code);
+      } else if (event.data.type === 'SOUNDCLOUD_OAUTH_ERROR') {
+        console.error('OAuth error message received:', event.data.error);
+        toast.error(`OAuth error: ${event.data.error}`);
+        setIsConnecting(false);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
   }, []);
 
   const cleanupUrl = () => {
@@ -81,6 +93,7 @@ export function SoundCloudOAuth() {
       url.searchParams.delete('code');
       url.searchParams.delete('error');
       url.searchParams.delete('state');
+      url.searchParams.delete('callback');
       window.history.replaceState({}, document.title, url.toString());
       console.log('URL cleaned up');
     } catch (error) {
@@ -91,7 +104,6 @@ export function SoundCloudOAuth() {
   const handleConnect = async () => {
     console.log('Starting SoundCloud connection...');
     setIsConnecting(true);
-    setDebugInfo('Starting connection...');
     
     try {
       console.log('Calling soundcloud-oauth function with authorize action');
@@ -103,28 +115,39 @@ export function SoundCloudOAuth() {
 
       if (error) {
         console.error('Supabase function error:', error);
-        setDebugInfo(`Function error: ${error.message}`);
         throw new Error(error.message);
       }
 
       if (!data?.authUrl) {
         console.error('No authorization URL received:', data);
-        setDebugInfo('No authorization URL received');
         throw new Error('No authorization URL received');
       }
 
-      console.log('Redirecting to SoundCloud OAuth:', data.authUrl);
-      setDebugInfo('Redirecting to SoundCloud...');
+      console.log('Opening SoundCloud OAuth in popup:', data.authUrl);
       
-      // Add a small delay to ensure state is saved
-      setTimeout(() => {
-        window.location.href = data.authUrl;
-      }, 100);
+      // Open OAuth in a popup window
+      const popup = window.open(
+        data.authUrl,
+        'soundcloud-oauth',
+        'width=600,height=700,scrollbars=yes,resizable=yes'
+      );
+
+      if (!popup) {
+        throw new Error('Failed to open popup window. Please allow popups and try again.');
+      }
+
+      // Monitor popup for closure
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          console.log('Popup was closed');
+          setIsConnecting(false);
+        }
+      }, 1000);
       
     } catch (error) {
       console.error('Connection error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to connect to SoundCloud';
-      setDebugInfo(`Connection error: ${errorMessage}`);
       setIsConnecting(false);
       toast.error(errorMessage);
     }
@@ -133,7 +156,6 @@ export function SoundCloudOAuth() {
   const handleOAuthCallback = async (code: string) => {
     console.log('Processing OAuth callback with code...');
     setIsConnecting(true);
-    setDebugInfo('Processing OAuth callback...');
     
     try {
       console.log('Calling soundcloud-oauth function with callback action');
@@ -148,18 +170,15 @@ export function SoundCloudOAuth() {
 
       if (error) {
         console.error('Callback function error:', error);
-        setDebugInfo(`Callback error: ${error.message}`);
         throw new Error(error.message);
       }
 
       if (!data?.accessToken || !data?.user) {
         console.error('Invalid authentication response:', data);
-        setDebugInfo('Invalid authentication response');
         throw new Error('Invalid authentication response');
       }
 
       console.log('Authentication successful:', data.user.username);
-      setDebugInfo(`Authentication successful: ${data.user.username}`);
 
       setAccessToken(data.accessToken);
       setConnectedUser(data.user);
@@ -178,7 +197,6 @@ export function SoundCloudOAuth() {
     } catch (error) {
       console.error('OAuth callback error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
-      setDebugInfo(`OAuth callback error: ${errorMessage}`);
       toast.error(errorMessage);
     } finally {
       setIsConnecting(false);
@@ -189,7 +207,6 @@ export function SoundCloudOAuth() {
   const loadUserData = async (token: string) => {
     console.log('Loading user data...');
     setIsLoadingData(true);
-    setDebugInfo('Loading user data...');
     
     try {
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
@@ -201,7 +218,6 @@ export function SoundCloudOAuth() {
 
       if (error) {
         console.error('Data loading error:', error);
-        setDebugInfo(`Data loading error: ${error.message}`);
         throw new Error(error.message);
       }
 
@@ -213,12 +229,9 @@ export function SoundCloudOAuth() {
         playlists: data.playlists?.length || 0
       });
       
-      setDebugInfo(`Data loaded: ${data.tracks?.length || 0} tracks, ${data.playlists?.length || 0} playlists`);
-      
     } catch (error) {
       console.error('Error loading data:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to load SoundCloud data';
-      setDebugInfo(`Data loading error: ${errorMessage}`);
       toast.error(errorMessage);
     } finally {
       setIsLoadingData(false);
@@ -234,7 +247,6 @@ export function SoundCloudOAuth() {
     setConnectedUser(null);
     setTracks([]);
     setPlaylists([]);
-    setDebugInfo('Disconnected');
     toast.success('Disconnected from SoundCloud');
   };
 
@@ -250,9 +262,9 @@ export function SoundCloudOAuth() {
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Connecting to SoundCloud...</p>
-          {debugInfo && (
-            <p className="text-xs text-muted-foreground mt-2">{debugInfo}</p>
-          )}
+          <p className="text-xs text-muted-foreground mt-2">
+            If a popup opened, please complete the authorization there.
+          </p>
         </div>
       </div>
     );
@@ -285,11 +297,6 @@ export function SoundCloudOAuth() {
         isConnecting={isConnecting}
         onConnect={handleConnect}
       />
-      {debugInfo && (
-        <div className="mt-4 p-3 bg-muted rounded-lg">
-          <p className="text-xs text-muted-foreground">Debug: {debugInfo}</p>
-        </div>
-      )}
     </div>
   );
 }
