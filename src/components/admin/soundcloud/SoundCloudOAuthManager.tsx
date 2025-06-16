@@ -9,6 +9,26 @@ import { SoundCloudTracks } from './SoundCloudTracks';
 import { SoundCloudPlaylists } from './SoundCloudPlaylists';
 import { SoundCloudUser, SoundCloudTrack, SoundCloudPlaylist } from './types';
 
+// PKCE helper functions for OAuth 2.1
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode.apply(null, Array.from(array)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest))))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
 export function SoundCloudOAuthManager() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedUser, setConnectedUser] = useState<SoundCloudUser | null>(null);
@@ -62,8 +82,19 @@ export function SoundCloudOAuthManager() {
     setIsConnecting(true);
     
     try {
+      // Generate PKCE parameters for OAuth 2.1
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      
+      // Store code verifier for later use
+      sessionStorage.setItem('soundcloud_code_verifier', codeVerifier);
+
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
-        body: { action: 'authorize' }
+        body: { 
+          action: 'authorize',
+          codeChallenge,
+          codeChallengeMethod: 'S256'
+        }
       });
 
       if (error) throw new Error(error.message);
@@ -122,8 +153,17 @@ export function SoundCloudOAuthManager() {
 
   const handleOAuthCallback = useCallback(async (code: string) => {
     try {
+      const codeVerifier = sessionStorage.getItem('soundcloud_code_verifier');
+      if (!codeVerifier) {
+        throw new Error('Missing code verifier for PKCE');
+      }
+
       const { data, error } = await supabase.functions.invoke('soundcloud-oauth', {
-        body: { action: 'callback', code }
+        body: { 
+          action: 'callback', 
+          code,
+          codeVerifier
+        }
       });
 
       if (error) throw new Error(error.message);
@@ -139,6 +179,9 @@ export function SoundCloudOAuthManager() {
         localStorage.setItem('soundcloud_refresh_token', data.refreshToken);
       }
 
+      // Clean up PKCE verifier
+      sessionStorage.removeItem('soundcloud_code_verifier');
+
       await loadUserData(data.accessToken);
       
       toast.success(`Connected as ${data.user.display_name}!`);
@@ -151,6 +194,7 @@ export function SoundCloudOAuthManager() {
     } catch (error) {
       console.error('OAuth callback error:', error);
       toast.error(error instanceof Error ? error.message : 'Authentication failed');
+      sessionStorage.removeItem('soundcloud_code_verifier');
     } finally {
       setIsConnecting(false);
     }
@@ -181,6 +225,7 @@ export function SoundCloudOAuthManager() {
     localStorage.removeItem('soundcloud_access_token');
     localStorage.removeItem('soundcloud_user');
     localStorage.removeItem('soundcloud_refresh_token');
+    sessionStorage.removeItem('soundcloud_code_verifier');
     setAccessToken(null);
     setConnectedUser(null);
     setTracks([]);

@@ -74,18 +74,19 @@ serve(async (req) => {
       )
     }
 
-    // Generate OAuth authorization URL
+    // Generate OAuth 2.1 authorization URL with PKCE
     if (finalAction === 'authorize') {
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       console.log('Request origin:', origin)
       
-      // CONSISTENT: Always use the soundcloud-callback.html file
       const redirectUri = `${origin}/soundcloud-callback.html`
       const state = crypto.randomUUID()
+      const { codeChallenge, codeChallengeMethod } = requestBody
       
       console.log('Generated redirect URI:', redirectUri)
+      console.log('Using PKCE with code challenge method:', codeChallengeMethod)
       
-      // Use the standard SoundCloud authorization endpoint
+      // Use OAuth 2.1 with PKCE - SoundCloud's connect endpoint
       const authUrl = new URL('https://soundcloud.com/connect')
       authUrl.searchParams.set('client_id', soundcloudClientId)
       authUrl.searchParams.set('redirect_uri', redirectUri)
@@ -93,13 +94,20 @@ serve(async (req) => {
       authUrl.searchParams.set('scope', 'non-expiring')
       authUrl.searchParams.set('state', state)
       
-      console.log('Generated OAuth URL:', authUrl.toString())
+      // Add PKCE parameters for OAuth 2.1
+      if (codeChallenge && codeChallengeMethod) {
+        authUrl.searchParams.set('code_challenge', codeChallenge)
+        authUrl.searchParams.set('code_challenge_method', codeChallengeMethod)
+      }
+      
+      console.log('Generated OAuth 2.1 URL with PKCE:', authUrl.toString())
       
       return new Response(
         JSON.stringify({ 
           authUrl: authUrl.toString(),
           state: state,
-          redirectUri: redirectUri
+          redirectUri: redirectUri,
+          usePKCE: !!(codeChallenge && codeChallengeMethod)
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -108,14 +116,16 @@ serve(async (req) => {
       )
     }
 
-    // Handle OAuth callback - check both URL params and request body
+    // Handle OAuth 2.1 callback with PKCE
     const code = url.searchParams.get('code') || requestBody.code
     const state = url.searchParams.get('state') || requestBody.state
+    const codeVerifier = requestBody.codeVerifier
     
     if (finalAction === 'callback' || code) {
-      console.log('Processing OAuth callback')
+      console.log('Processing OAuth 2.1 callback with PKCE')
       console.log('Code present:', !!code)
       console.log('State present:', !!state)
+      console.log('Code verifier present:', !!codeVerifier)
       
       if (!code) {
         console.error('No authorization code provided')
@@ -130,29 +140,35 @@ serve(async (req) => {
         )
       }
 
-      // Use the same redirect URI for token exchange (the callback HTML file)
       const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/')
       const redirectUri = `${origin}/soundcloud-callback.html`
       
       console.log('Token exchange - using redirect URI:', redirectUri)
       
       try {
-        // Prepare the token exchange request with proper format
+        // Prepare OAuth 2.1 token exchange request with PKCE
         const tokenUrl = 'https://api.soundcloud.com/oauth2/token'
-        console.log('Making token exchange request to:', tokenUrl)
+        console.log('Making OAuth 2.1 token exchange request to:', tokenUrl)
         
-        const formData = new FormData()
-        formData.append('grant_type', 'authorization_code')
-        formData.append('client_id', soundcloudClientId)
-        formData.append('client_secret', soundcloudClientSecret!)
-        formData.append('redirect_uri', redirectUri)
-        formData.append('code', code)
+        const tokenData = new URLSearchParams()
+        tokenData.append('grant_type', 'authorization_code')
+        tokenData.append('client_id', soundcloudClientId)
+        tokenData.append('client_secret', soundcloudClientSecret!)
+        tokenData.append('redirect_uri', redirectUri)
+        tokenData.append('code', code)
+        
+        // Add PKCE code verifier for OAuth 2.1
+        if (codeVerifier) {
+          tokenData.append('code_verifier', codeVerifier)
+          console.log('Using PKCE code verifier for token exchange')
+        }
         
         const tokenResponse = await fetch(tokenUrl, {
           method: 'POST',
-          body: formData,
+          body: tokenData,
           headers: {
             'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             'User-Agent': 'Spelman-Glee-Club-App/1.0',
           }
         })
@@ -173,7 +189,7 @@ serve(async (req) => {
               details: responseText,
               status: tokenResponse.status,
               url: tokenUrl,
-              hint: 'Check if your SoundCloud app credentials are correct and the redirect URI matches'
+              hint: 'OAuth 2.1 with PKCE token exchange failed. Check credentials and PKCE implementation.'
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -182,10 +198,10 @@ serve(async (req) => {
           )
         }
 
-        let tokenData
+        let tokenDataResponse
         try {
-          tokenData = JSON.parse(responseText)
-          console.log('Token data parsed successfully:', Object.keys(tokenData))
+          tokenDataResponse = JSON.parse(responseText)
+          console.log('Token data parsed successfully:', Object.keys(tokenDataResponse))
         } catch (parseError) {
           console.error('Failed to parse token response as JSON:', parseError)
           return new Response(
@@ -200,12 +216,12 @@ serve(async (req) => {
           )
         }
         
-        if (!tokenData.access_token) {
-          console.error('No access token in response:', tokenData)
+        if (!tokenDataResponse.access_token) {
+          console.error('No access token in response:', tokenDataResponse)
           return new Response(
             JSON.stringify({ 
               error: 'No access token received from SoundCloud',
-              details: tokenData
+              details: tokenDataResponse
             }),
             { 
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -214,12 +230,12 @@ serve(async (req) => {
           )
         }
         
-        console.log('Token exchange successful, fetching user data...')
+        console.log('OAuth 2.1 token exchange successful, fetching user data...')
         
         // Fetch user data with the access token
         const userResponse = await fetch('https://api.soundcloud.com/me', {
           headers: {
-            'Authorization': `OAuth ${tokenData.access_token}`,
+            'Authorization': `OAuth ${tokenDataResponse.access_token}`,
             'Accept': 'application/json',
             'User-Agent': 'Spelman-Glee-Club-App/1.0',
           }
@@ -250,9 +266,9 @@ serve(async (req) => {
         return new Response(
           JSON.stringify({
             success: true,
-            accessToken: tokenData.access_token,
-            refreshToken: tokenData.refresh_token,
-            expiresIn: tokenData.expires_in,
+            accessToken: tokenDataResponse.access_token,
+            refreshToken: tokenDataResponse.refresh_token,
+            expiresIn: tokenDataResponse.expires_in,
             user: {
               id: userData.id,
               username: userData.username,
