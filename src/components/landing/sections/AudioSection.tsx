@@ -12,9 +12,10 @@ interface AudioTrack {
 }
 
 interface AudioSectionProps {
-  tracks: AudioTrack[];
+  tracks?: AudioTrack[];
+  useSoundCloud?: boolean;
 }
 
-export function AudioSection({ tracks }: AudioSectionProps) {
-  return <CustomAudioSection tracks={tracks} />;
+export function AudioSection({ tracks, useSoundCloud = true }: AudioSectionProps) {
+  return <CustomAudioSection tracks={tracks} useSoundCloud={useSoundCloud} />;
 }

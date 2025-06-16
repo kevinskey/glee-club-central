@@ -51,7 +51,7 @@ export const useSoundCloudPlayer = () => {
       setError(null);
       fetchedRef.current = true;
       
-      console.log('Fetching SoundCloud data...');
+      console.log('Fetching SoundCloud data from API...');
       
       const response = await fetch(`https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-api`, {
         method: 'GET',
@@ -110,6 +110,13 @@ export const useSoundCloudPlayer = () => {
           permalink_url: track.permalink_url
         }));
         setTracks(legacyTracks);
+      }
+
+      // Show success message based on data status
+      if (data.status === 'demo_mode') {
+        console.warn('Running in demo mode with sample data');
+      } else if (data.status === 'success') {
+        console.log('Successfully loaded real SoundCloud data');
       }
       
     } catch (err) {
