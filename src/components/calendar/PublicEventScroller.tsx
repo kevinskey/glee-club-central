@@ -1,12 +1,13 @@
 
 import React from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import { format, isAfter } from "date-fns";
+import { useIsPad } from "@/hooks/useIsPad";
 
 interface PublicEventScrollerProps {
   title?: string;
@@ -23,6 +24,7 @@ export function PublicEventScroller({
 }: PublicEventScrollerProps) {
   const navigate = useNavigate();
   const { events, loading, error } = useCalendarEvents();
+  const isPad = useIsPad();
 
   // Filter for public events only and upcoming dates
   const publicEvents = events
@@ -113,12 +115,14 @@ export function PublicEventScroller({
           opts={{
             align: "start",
             dragFree: true,
+            containScroll: "trimSnaps",
           }}
           className="w-full"
+          showArrows={false}
         >
           <CarouselContent className="-ml-2 md:-ml-4">
             {publicEvents.map((event) => (
-              <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 touch-manipulation">
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="p-0">
                     <div className="aspect-[4/3] overflow-hidden rounded-t-lg bg-gradient-to-br from-glee-spelman/20 to-glee-purple/20">
@@ -175,9 +179,13 @@ export function PublicEventScroller({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden sm:flex -left-4" />
-          <CarouselNext className="hidden sm:flex -right-4" />
         </Carousel>
+        
+        {isPad && publicEvents.length > 0 && (
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Swipe left or right to browse events
+          </p>
+        )}
       </div>
     </section>
   );

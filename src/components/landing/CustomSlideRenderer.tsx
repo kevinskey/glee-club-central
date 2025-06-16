@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsPad } from "@/hooks/useIsPad";
 
 interface Slide {
   id: string;
@@ -19,6 +19,9 @@ export function CustomSlideRenderer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [height, setHeight] = useState(400);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+  const isPad = useIsPad();
 
   useEffect(() => {
     const fetchSlides = async () => {
@@ -69,22 +72,50 @@ export function CustomSlideRenderer() {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
-    }, 5000);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
 
-    return () => clearTimeout(timer);
-  }, [currentIndex, currentSlides.length]);
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const distance = touchStartX.current - touchEndX.current;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe && currentSlides.length > 1) {
+      goToNext();
+    }
+    if (isRightSwipe && currentSlides.length > 1) {
+      goToPrevious();
+    }
+  };
+
+  useEffect(() => {
+    if (!isPad) {
+      const timer = setTimeout(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, currentSlides.length, isPad]);
 
   return (
     <div className="relative w-full">
-      {/* Desktop View */}
+      {/* Desktop/iPad View */}
       <div className="hidden md:block">
         <div 
-          className="relative w-full overflow-hidden shadow-2xl cursor-pointer"
+          className="relative w-full overflow-hidden shadow-2xl cursor-pointer select-none"
           style={{ height, margin: 0, padding: 0 }}
-          onClick={goToNext}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={!isPad ? goToNext : undefined}
         >
           {currentSlides.map((slide, index) => (
             <div
@@ -115,34 +146,6 @@ export function CustomSlideRenderer() {
             </div>
           ))}
 
-          {/* Navigation Arrows */}
-          {currentSlides.length > 1 && (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToPrevious();
-                }}
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/20 hover:bg-black/40 text-white border-none h-12 w-12"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goToNext();
-                }}
-              >
-                <ChevronRight className="h-6 w-6" />
-              </Button>
-            </>
-          )}
-
           {/* Slide Indicators */}
           {currentSlides.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
@@ -165,17 +168,20 @@ export function CustomSlideRenderer() {
         </div>
       </div>
 
-      {/* Mobile View - Horizontal Scroll */}
+      {/* Mobile View - Enhanced swipe support */}
       <div className="block md:hidden">
         <div 
           ref={scrollContainerRef}
           className="flex gap-4 pb-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {currentSlides.map((slide) => (
             <div
               key={slide.id}
-              className="flex-shrink-0 w-80 h-64 rounded-lg overflow-hidden shadow-lg snap-start relative cursor-pointer"
+              className="flex-shrink-0 w-80 h-64 rounded-lg overflow-hidden shadow-lg snap-start relative cursor-pointer select-none"
               style={{
                 backgroundImage: `url(${slide.background_image || slide.image})`,
                 backgroundSize: 'cover',

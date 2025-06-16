@@ -5,6 +5,33 @@
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait),
        (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
   
+  /* Enhanced Touch Support for iPad */
+  * {
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Carousel and Slider Touch Optimizations */
+  .embla,
+  .embla__container,
+  .embla__slide,
+  [class*="carousel"],
+  [class*="slider"] {
+    touch-action: pan-x !important;
+    -webkit-overflow-scrolling: touch !important;
+    overflow-scrolling: touch !important;
+  }
+  
+  /* Remove arrow visibility on iPad */
+  .carousel-arrow,
+  .slider-arrow,
+  [class*="arrow"],
+  button[aria-label*="Previous"],
+  button[aria-label*="Next"] {
+    display: none !important;
+  }
+  
   /* iPad Container System - More generous spacing than mobile */
   .container, 
   .max-w-7xl, 
@@ -348,4 +375,30 @@
     width: 8px !important;
     border-radius: 4px !important;
   }
+  
+  /* Enhanced swipe areas */
+  .swipe-area {
+    padding: 1rem !important;
+    touch-action: pan-x !important;
+  }
+}
+
+/* Horizontal scroll containers optimized for touch */
+.horizontal-scroll {
+  -webkit-overflow-scrolling: touch !important;
+  scroll-behavior: smooth !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Disable text selection during touch interactions */
+.no-select {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
 }
