@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { EnhancedEventsSection } from "./sections/EnhancedEventsSection";
 import { StoreSection } from "./sections/StoreSection";
@@ -231,7 +230,7 @@ export function HomePageContent({
             ) : soundCloudEmbeds.length > 0 ? (
               <div className="space-y-8">
                 {/* Swipeable Carousel for Embeds */}
-                <Carousel className="w-full max-w-6xl mx-auto">
+                <Carousel className="w-full max-w-6xl mx-auto" opts={{ dragFree: true, align: "center" }}>
                   <CarouselContent>
                     {soundCloudEmbeds.map((embed, index) => {
                       const currentPlaylist = soundCloudPlaylists[embed.id];
@@ -358,9 +357,17 @@ export function HomePageContent({
                       );
                     })}
                   </CarouselContent>
-                  <CarouselPrevious className="left-2" />
-                  <CarouselNext className="right-2" />
+                  {/* Hide arrows on mobile, show on desktop */}
+                  <CarouselPrevious className="hidden md:flex left-2" />
+                  <CarouselNext className="hidden md:flex right-2" />
                 </Carousel>
+
+                {/* Mobile swipe instruction */}
+                <div className="block md:hidden text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Swipe left or right to browse music
+                  </p>
+                </div>
 
                 {/* Playlist Navigation Dots */}
                 {soundCloudEmbeds.length > 1 && (
