@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Icons } from "@/components/Icons";
 
 export function Header() {
   const navigate = useNavigate();
@@ -43,11 +44,7 @@ export function Header() {
         {/* Logo - Always visible */}
         <div className="flex-shrink-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
-            <img 
-              src="/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png"
-              alt="Spelman College Glee Club Logo" 
-              className="h-7 w-auto" 
-            />
+            <Icons.logo className="h-7 w-auto" />
             <span className="text-base ml-2 text-black dark:text-white font-semibold">Glee World</span>
           </Link>
         </div>
