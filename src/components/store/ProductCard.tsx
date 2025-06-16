@@ -33,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow bg-black border-gray-700">
       <CardContent className="p-0">
         <div className="relative">
           {product.image_url ? (
@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         
         <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+          <h3 className="font-semibold text-lg mb-2 text-white">{product.name}</h3>
           <p className="text-2xl font-bold text-glee-purple">
             ${product.price.toFixed(2)}
           </p>

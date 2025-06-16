@@ -73,7 +73,7 @@ export function StorePreview({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="animate-pulse bg-black border-gray-700">
               <CardHeader>
                 <div className="w-full h-48 bg-gray-200 rounded"></div>
               </CardHeader>
@@ -107,7 +107,7 @@ export function StorePreview({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {featuredItems.map((item) => (
-          <Card key={item.id} className="group hover:shadow-lg transition-shadow">
+          <Card key={item.id} className="group hover:shadow-lg transition-shadow bg-black border-gray-700">
             <CardHeader className="p-0">
               <div className="relative overflow-hidden rounded-t-lg">
                 {item.image_url ? (
@@ -135,9 +135,9 @@ export function StorePreview({
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-lg mb-2 line-clamp-1">{item.name}</h3>
+              <h3 className="font-semibold text-lg mb-2 line-clamp-1 text-white">{item.name}</h3>
               {item.description && (
-                <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                <p className="text-sm text-gray-300 mb-2 line-clamp-2">
                   {item.description}
                 </p>
               )}
@@ -145,7 +145,7 @@ export function StorePreview({
                 <span className="text-lg font-bold text-glee-purple">
                   {formatPrice(item.price)}
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-gray-300">
                   {item.quantity_in_stock} in stock
                 </span>
               </div>
