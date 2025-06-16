@@ -50,7 +50,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
   };
 
   return (
-    <section className="relative w-full h-screen md:h-[80vh] lg:h-[85vh] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image or Video */}
       <div className="absolute inset-0 w-full h-full">
         {hasValidImage ? (
