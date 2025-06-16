@@ -26,6 +26,7 @@ export default function AppContent({ children }: AppContentProps) {
     '/signup', 
     '/', // HomePage manages its own header via PublicPageWrapper
     '/contact', // ContactPage manages its own header and footer
+    '/about', // AboutPage uses PublicPageWrapper which manages its own header
     '/calendar', // CalendarPage manages its own minimal header
     '/events' // Events page manages its own header
   ];
