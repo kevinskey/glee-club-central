@@ -11,7 +11,7 @@ import {
   Send, 
   Download, 
   Upload,
-  Sync,
+  RefreshCw,
   Eye,
   TrendingUp
 } from 'lucide-react';
@@ -173,7 +173,7 @@ export function ElasticEmailIntegration() {
                     variant="outline"
                     size="sm"
                   >
-                    <Sync className="w-4 h-4 mr-2" />
+                    <RefreshCw className="w-4 h-4 mr-2" />
                     {activeSync === 'contacts' ? 'Syncing...' : 'Sync from Elastic Email'}
                   </Button>
                   <Button
