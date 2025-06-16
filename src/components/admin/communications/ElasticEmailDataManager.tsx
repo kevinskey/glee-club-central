@@ -14,7 +14,8 @@ import {
   AlertCircle,
   Users,
   FileText,
-  BarChart3
+  BarChart3,
+  Send
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
@@ -61,17 +62,31 @@ export function ElasticEmailDataManager() {
     setSyncProgress(10);
     
     try {
+      console.log('🔄 Loading all Elastic Email data...');
+      
       const { data: response, error } = await supabase.functions.invoke('elastic-email-sync', {
         body: { action: 'load_all' }
       });
 
-      if (error) throw error;
+      console.log('📧 Load all response:', response);
+
+      if (error) {
+        console.error('❌ Error loading data:', error);
+        toast.error('Failed to load Elastic Email data');
+        throw error;
+      }
       
-      setData(response);
+      setData(response || {
+        accountInfo: null,
+        statistics: null,
+        contactLists: [],
+        templates: [],
+        campaigns: []
+      });
       setSyncProgress(100);
       toast.success('Elastic Email data loaded successfully');
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('💥 Error loading data:', error);
       toast.error('Failed to load Elastic Email data');
     } finally {
       setIsLoading(false);
@@ -79,46 +94,60 @@ export function ElasticEmailDataManager() {
     }
   };
 
-  const syncToElasticEmail = async (type: 'contacts' | 'templates') => {
-    setSyncStatus(prev => ({ ...prev, [type]: 'syncing' }));
+  const syncMembersToElasticEmail = async () => {
+    setSyncStatus(prev => ({ ...prev, contacts: 'syncing' }));
     
     try {
-      let payload = {};
+      console.log('🔄 Syncing members to Elastic Email...');
+      console.log('👥 Members to sync:', filteredUsers.length);
       
-      if (type === 'contacts') {
-        // Prepare member data for export
-        payload = {
-          action: 'export_members',
-          data: {
-            members: filteredUsers.filter(user => user.email).map(user => ({
-              email: user.email,
-              firstName: user.first_name,
-              lastName: user.last_name,
-              voicePart: user.voice_part,
-              role: user.role,
-              status: user.status
-            }))
-          }
-        };
-      } else {
-        payload = { action: 'export_templates' };
+      // Filter members with email addresses
+      const membersWithEmails = filteredUsers.filter(user => user.email && user.email !== 'Email access limited');
+      
+      console.log('📧 Members with valid emails:', membersWithEmails.length);
+      
+      if (membersWithEmails.length === 0) {
+        toast.error('No members with valid email addresses found');
+        setSyncStatus(prev => ({ ...prev, contacts: 'error' }));
+        return;
       }
 
-      const { error } = await supabase.functions.invoke('elastic-email-sync', {
+      const payload = {
+        action: 'export_members',
+        data: {
+          members: membersWithEmails.map(user => ({
+            email: user.email,
+            firstName: user.first_name || 'Member',
+            lastName: user.last_name || '',
+            voicePart: user.voice_part || '',
+            role: user.role || 'member',
+            status: user.status || 'active'
+          }))
+        }
+      };
+
+      console.log('📤 Sending payload:', payload);
+
+      const { data: response, error } = await supabase.functions.invoke('elastic-email-sync', {
         body: payload
       });
 
-      if (error) throw error;
+      console.log('📧 Export response:', response);
+
+      if (error) {
+        console.error('❌ Export error:', error);
+        throw error;
+      }
       
-      setSyncStatus(prev => ({ ...prev, [type]: 'success' }));
-      toast.success(`${type} synced to Elastic Email successfully`);
+      setSyncStatus(prev => ({ ...prev, contacts: 'success' }));
+      toast.success(`Successfully exported ${membersWithEmails.length} members to Elastic Email!`);
       
-      // Reload data after sync
+      // Reload data after successful sync
       await loadAllData();
     } catch (error) {
-      console.error(`Error syncing ${type}:`, error);
-      setSyncStatus(prev => ({ ...prev, [type]: 'error' }));
-      toast.error(`Failed to sync ${type}`);
+      console.error('💥 Error syncing members:', error);
+      setSyncStatus(prev => ({ ...prev, contacts: 'error' }));
+      toast.error(`Failed to sync members: ${error.message || 'Unknown error'}`);
     }
   };
 
@@ -138,8 +167,8 @@ export function ElasticEmailDataManager() {
       // Update local data
       if (type === 'contacts' && response.data) {
         setData(prev => ({ ...prev, contactLists: response.data }));
-      } else if (type === 'templates' && response.data) {
-        setData(prev => ({ ...prev, templates: response.data }));
+      } else if (type === 'templates' && response.templates) {
+        setData(prev => ({ ...prev, templates: response.templates }));
       }
     } catch (error) {
       console.error(`Error syncing ${type}:`, error);
@@ -160,6 +189,8 @@ export function ElasticEmailDataManager() {
         return null;
     }
   };
+
+  const membersWithEmails = filteredUsers.filter(user => user.email && user.email !== 'Email access limited');
 
   return (
     <div className="space-y-6">
@@ -246,17 +277,41 @@ export function ElasticEmailDataManager() {
         <TabsContent value="contacts">
           <Card>
             <CardHeader>
-              <CardTitle>Contact Management</CardTitle>
+              <CardTitle>Member Sync Management</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Member Summary */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-5 w-5 text-blue-600" />
+                  <h3 className="font-semibold text-blue-900">Local Members Summary</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Total Members:</span> {filteredUsers.length}
+                  </div>
+                  <div>
+                    <span className="font-medium">With Email:</span> {membersWithEmails.length}
+                  </div>
+                  <div>
+                    <span className="font-medium">Elastic Email Lists:</span> {data.contactLists.length}
+                  </div>
+                  <div>
+                    <span className="font-medium">Last Sync:</span> {syncStatus.contacts === 'success' ? 'Recently' : 'Never'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Sync Actions */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  onClick={() => syncToElasticEmail('contacts')}
-                  disabled={syncStatus.contacts === 'syncing'}
+                  onClick={syncMembersToElasticEmail}
+                  disabled={syncStatus.contacts === 'syncing' || membersWithEmails.length === 0}
                   className="flex-1"
+                  size="lg"
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Export Members to Elastic Email
+                  <Send className="w-4 h-4 mr-2" />
+                  Export {membersWithEmails.length} Members to Elastic Email
                   {getSyncIcon(syncStatus.contacts)}
                 </Button>
                 <Button
@@ -264,6 +319,7 @@ export function ElasticEmailDataManager() {
                   disabled={syncStatus.contacts === 'syncing'}
                   variant="outline"
                   className="flex-1"
+                  size="lg"
                 >
                   <Download className="w-4 h-4 mr-2" />
                   Import from Elastic Email
@@ -271,20 +327,30 @@ export function ElasticEmailDataManager() {
                 </Button>
               </div>
 
-              <div className="text-sm text-muted-foreground">
-                <p><strong>Local Members:</strong> {filteredUsers.filter(u => u.email).length} with email addresses</p>
-                <p><strong>Elastic Email Lists:</strong> {data.contactLists.length} contact lists</p>
-              </div>
+              {membersWithEmails.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-yellow-600" />
+                    <span className="font-medium text-yellow-900">No members with email addresses found</span>
+                  </div>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Make sure your members have valid email addresses before syncing to Elastic Email.
+                  </p>
+                </div>
+              )}
 
+              {/* Contact Lists from Elastic Email */}
               {data.contactLists.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium">Contact Lists in Elastic Email:</h4>
-                  {data.contactLists.map((list: any) => (
-                    <div key={list.listid} className="flex justify-between items-center p-2 border rounded">
-                      <span>{list.listname}</span>
-                      <Badge variant="outline">{list.count} contacts</Badge>
-                    </div>
-                  ))}
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {data.contactLists.map((list: any) => (
+                      <div key={list.listid || list.name} className="flex justify-between items-center p-3 border rounded">
+                        <span className="font-medium">{list.listname || list.name}</span>
+                        <Badge variant="outline">{list.count || list.size || 0} contacts</Badge>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -307,16 +373,6 @@ export function ElasticEmailDataManager() {
                   Import Templates from Elastic Email
                   {getSyncIcon(syncStatus.templates)}
                 </Button>
-                <Button
-                  onClick={() => syncToElasticEmail('templates')}
-                  disabled={syncStatus.templates === 'syncing'}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Export Templates to Elastic Email
-                  {getSyncIcon(syncStatus.templates)}
-                </Button>
               </div>
 
               <div className="text-sm text-muted-foreground">
@@ -326,20 +382,22 @@ export function ElasticEmailDataManager() {
               {data.templates.length > 0 && (
                 <div className="space-y-2">
                   <h4 className="font-medium">Available Templates:</h4>
-                  {data.templates.slice(0, 5).map((template: any) => (
-                    <div key={template.templateid} className="flex justify-between items-center p-2 border rounded">
-                      <div>
-                        <span className="font-medium">{template.name}</span>
-                        <p className="text-sm text-muted-foreground">{template.subject}</p>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {data.templates.slice(0, 5).map((template: any) => (
+                      <div key={template.templateid} className="flex justify-between items-center p-2 border rounded">
+                        <div>
+                          <span className="font-medium">{template.name}</span>
+                          <p className="text-sm text-muted-foreground">{template.subject}</p>
+                        </div>
+                        <Badge variant="outline">{template.templatetype}</Badge>
                       </div>
-                      <Badge variant="outline">{template.templatetype}</Badge>
-                    </div>
-                  ))}
-                  {data.templates.length > 5 && (
-                    <p className="text-sm text-muted-foreground">
-                      ...and {data.templates.length - 5} more templates
-                    </p>
-                  )}
+                    ))}
+                    {data.templates.length > 5 && (
+                      <p className="text-sm text-muted-foreground">
+                        ...and {data.templates.length - 5} more templates
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </CardContent>
