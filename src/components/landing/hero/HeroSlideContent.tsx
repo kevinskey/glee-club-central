@@ -51,7 +51,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
 
   return (
     <section className="relative md:h-[50vh] md:min-h-[300px] lg:h-[55vh] lg:min-h-[350px] flex items-center justify-center overflow-hidden">
-      {/* Background */}
+      {/* Desktop Background */}
       <div className="absolute inset-0 md:block hidden">
         {hasValidImage ? (
           <>
@@ -97,7 +97,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
           <img
             src={backgroundImage}
             alt={slide.title}
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-contain max-h-[70vh]"
             style={{ 
               objectPosition: 'center center'
             }}
@@ -143,7 +143,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       
       {/* Fallback for mobile when no image */}
       {!hasValidImage && (
-        <div className="block md:hidden w-full min-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
+        <div className="block md:hidden w-full h-[40vh] max-h-[300px] relative bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
           {hasTextContent && <div className="absolute inset-0 bg-black/90"></div>}
           {hasTextContent && (
             <div className="relative z-10 flex items-center justify-center h-full">
