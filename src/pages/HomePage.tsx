@@ -45,7 +45,7 @@ export default function HomePage() {
       {/* Content Wrapper */}
       <PublicPageWrapper showTopSlider={true}>
         {/* Rest of homepage content */}
-        <div className="bg-white/95 backdrop-blur-sm">
+        <div className="bg-black/95 backdrop-blur-sm">
           <HomePageContent
             heroImages={[]} // No hero images needed anymore
             upcomingEvents={upcomingEvents}
