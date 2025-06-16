@@ -2,7 +2,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Event } from '@/types/common';
 import { format } from 'date-fns';
 
@@ -54,12 +53,6 @@ export function EnhancedEventsSection({
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        <div className="text-center">
-          <Button variant="outline">
-            View All Events
-          </Button>
         </div>
       </div>
     </section>
