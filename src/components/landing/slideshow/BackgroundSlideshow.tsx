@@ -27,8 +27,7 @@ export function BackgroundSlideshow({
         alt="Background slide"
         className="w-full h-full object-contain"
         style={{ 
-          objectPosition: 'center center',
-          objectFit: 'contain'
+          objectPosition: 'center center'
         }}
       />
       

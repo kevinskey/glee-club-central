@@ -41,14 +41,6 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
                         slide.description || 
                         (slide.button_text && slide.button_link);
 
-  // Determine object-fit based on device type
-  const getObjectFit = () => {
-    if (isPad) {
-      return 'object-contain';
-    }
-    return 'object-cover';
-  };
-
   return (
     <section className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] lg:h-[85vh] flex items-center justify-center overflow-hidden">
       {/* Background Image or Video */}
@@ -58,7 +50,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             <img
               src={backgroundImage}
               alt={slide.title}
-              className={`w-full h-full ${getObjectFit()} transition-all duration-1000`}
+              className="w-full h-full object-contain transition-all duration-1000"
               style={{ 
                 objectPosition: 'center center'
               }}
