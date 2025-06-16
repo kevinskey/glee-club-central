@@ -38,7 +38,7 @@ export function Header() {
   };
   
   return (
-    <header className="glee-header sticky top-0 left-0 right-0 w-full z-50">
+    <header className="glee-header sticky top-0 left-0 right-0 w-full z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
       <div className="w-full">
         <div className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200/50 dark:border-gray-700/50">
           <div className="flex h-16 items-center justify-between w-full">

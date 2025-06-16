@@ -40,15 +40,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Main content - no spacing around hero */}
+      {/* Header - will be sticky on its own */}
+      <UnifiedPublicHeader />
+      
+      {/* Main content */}
       <main className="relative">
         {/* Dynamic Hero Section - Full Screen */}
         <DynamicHero />
-        
-        {/* Header positioned absolutely over the hero */}
-        <div className="absolute top-0 left-0 right-0 z-0">
-          <UnifiedPublicHeader />
-        </div>
         
         {/* Rest of homepage content */}
         <div className="bg-black/95 backdrop-blur-sm">
