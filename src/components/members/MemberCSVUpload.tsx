@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +19,11 @@ interface CSVRow {
   notes?: string;
   dues_paid?: string;
   join_date?: string;
+  title?: string;
+  account_balance?: string;
+  avatar_url?: string;
+  special_roles?: string;
+  role_tags?: string;
 }
 
 interface UploadResult {
@@ -35,9 +39,10 @@ export function MemberCSVUpload() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const downloadTemplate = () => {
-    const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date
-example@spelman.edu,Jane,Doe,555-0123,soprano_1,member,active,2025,Sample notes,true,2024-01-15
-student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member,false,2024-02-01`;
+    const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date,title,account_balance,avatar_url,special_roles,role_tags
+example@spelman.edu,Jane,Doe,555-0123,soprano_1,member,active,2025,Sample notes,true,2024-01-15,General Member,0.00,,Section Leader,"member,student"
+student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member,false,2024-02-01,General Member,25.50,,,"member"
+admin@spelman.edu,Sarah,Johnson,555-0125,soprano_2,admin,active,2024,Administrator account,true,2023-08-01,Administrator,0.00,,Director,"admin,faculty"`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -124,9 +129,11 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
 
         console.log('Auth user created:', authData.user.id);
 
-        // Parse boolean and date values
+        // Parse complex fields
         const duesPaid = userData.dues_paid?.toLowerCase() === 'true';
         const joinDate = userData.join_date || new Date().toISOString().split('T')[0];
+        const accountBalance = userData.account_balance ? parseFloat(userData.account_balance) : 0.00;
+        const roleTags = userData.role_tags ? userData.role_tags.split(',').map(tag => tag.trim()) : [];
 
         // Create/update profile with additional data
         const profileData = {
@@ -142,6 +149,11 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
           join_date: joinDate,
           role: userData.role || 'member',
           is_super_admin: userData.role === 'admin',
+          title: userData.title || 'General Member',
+          account_balance: accountBalance,
+          avatar_url: userData.avatar_url || null,
+          special_roles: userData.special_roles || null,
+          role_tags: roleTags,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -224,9 +236,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       errors: []
     };
 
-    const batchSize = 5; // Increased from 3 to 5
-    const batchDelay = 3000; // Reduced from 10s to 3s
-    const userDelay = 500; // Reduced from 2s to 0.5s
+    const batchSize = 5;
+    const batchDelay = 3000;
+    const userDelay = 500;
 
     console.log(`Starting batch upload of ${csvData.length} users in batches of ${batchSize}`);
 
@@ -315,7 +327,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               Upload a CSV file to create multiple members at once. Required fields: email, first_name, last_name.
-              Optional fields: phone, voice_part, role, status, class_year, notes, dues_paid, join_date.
+              Optional fields: phone, voice_part, role, status, class_year, notes, dues_paid, join_date, title, account_balance, avatar_url, special_roles, role_tags.
             </AlertDescription>
           </Alert>
 

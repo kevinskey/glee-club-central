@@ -23,6 +23,16 @@ interface CSVMember {
   phone?: string;
   voice_part?: string;
   class_year?: string;
+  role?: string;
+  status?: string;
+  notes?: string;
+  dues_paid?: string;
+  join_date?: string;
+  title?: string;
+  account_balance?: string;
+  avatar_url?: string;
+  special_roles?: string;
+  role_tags?: string;
   [key: string]: any;
 }
 
@@ -69,15 +79,6 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
       const lastNameCol = headers.findIndex(h => 
         h.toLowerCase().includes('last') || h.toLowerCase().includes('lastname')
       );
-      const phoneCol = headers.findIndex(h => 
-        h.toLowerCase().includes('phone')
-      );
-      const voicePartCol = headers.findIndex(h => 
-        h.toLowerCase().includes('voice') || h.toLowerCase().includes('part')
-      );
-      const classYearCol = headers.findIndex(h => 
-        h.toLowerCase().includes('class') || h.toLowerCase().includes('year')
-      );
 
       if (emailCol === -1) {
         toast.error('CSV must contain an email column');
@@ -91,11 +92,16 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
           const member: CSVMember = {
             email: values[emailCol],
             first_name: firstNameCol !== -1 ? values[firstNameCol] || '' : '',
-            last_name: lastNameCol !== -1 ? values[lastNameCol] || '' : '',
-            phone: phoneCol !== -1 ? values[phoneCol] || undefined : undefined,
-            voice_part: voicePartCol !== -1 ? values[voicePartCol] || undefined : undefined,
-            class_year: classYearCol !== -1 ? values[classYearCol] || undefined : undefined
+            last_name: lastNameCol !== -1 ? values[lastNameCol] || '' : ''
           };
+
+          // Add any additional columns as member fields
+          headers.forEach((header, index) => {
+            if (index !== emailCol && index !== firstNameCol && index !== lastNameCol) {
+              const fieldName = header.toLowerCase().replace(/\s+/g, '_');
+              member[fieldName] = values[index] || '';
+            }
+          });
 
           members.push(member);
         }
@@ -144,7 +150,11 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
   };
 
   const downloadTemplate = () => {
-    const csvContent = 'email,first_name,last_name,phone,voice_part,class_year\njohn.doe@example.com,John,Doe,555-0123,soprano,2025\njane.smith@example.com,Jane,Smith,555-0124,alto,2026';
+    const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date,title,account_balance,avatar_url,special_roles,role_tags
+example@spelman.edu,Jane,Doe,555-0123,soprano_1,member,active,2025,Sample notes,true,2024-01-15,General Member,0.00,,Section Leader,"member,student"
+student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member,false,2024-02-01,General Member,25.50,,,"member"
+admin@spelman.edu,Sarah,Johnson,555-0125,soprano_2,admin,active,2024,Administrator account,true,2023-08-01,Administrator,0.00,,Director,"admin,faculty"`;
+    
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -177,7 +187,7 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
                   className="cursor-pointer"
                 />
                 <p className="text-sm text-muted-foreground">
-                  CSV should contain: email (required), first_name, last_name, phone, voice_part, class_year
+                  CSV should contain: email (required), first_name, last_name, and any additional profile fields
                 </p>
               </div>
               <Button onClick={downloadTemplate} variant="outline" className="ml-4">
@@ -197,12 +207,14 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>CSV Format Requirements:</strong>
+                <strong>Enhanced CSV Format:</strong>
                 <ul className="list-disc list-inside mt-2 space-y-1">
-                  <li>Email column is required</li>
-                  <li>Voice parts: soprano, alto, tenor, bass</li>
-                  <li>Phone numbers can include any format</li>
-                  <li>Class year should be a 4-digit year</li>
+                  <li>Required: email, first_name, last_name</li>
+                  <li>Optional: phone, voice_part, role, status, class_year, notes, dues_paid, join_date</li>
+                  <li>Profile: title, account_balance, avatar_url, special_roles, role_tags</li>
+                  <li>Voice parts: soprano_1, soprano_2, alto_1, alto_2, tenor, bass</li>
+                  <li>Roles: admin, member, section_leader</li>
+                  <li>Status: active, pending, inactive, alumni</li>
                 </ul>
               </AlertDescription>
             </Alert>
@@ -235,6 +247,8 @@ export function MemberBulkUpload({ onMembersUploaded }: MemberBulkUploadProps) {
                       {member.first_name} {member.last_name}
                       {member.voice_part && ` • ${member.voice_part}`}
                       {member.class_year && ` • Class ${member.class_year}`}
+                      {member.role && ` • ${member.role}`}
+                      {member.title && ` • ${member.title}`}
                     </div>
                   </div>
                 ))}

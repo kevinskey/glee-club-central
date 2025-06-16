@@ -31,6 +31,11 @@ interface MappedRow {
   notes?: string;
   dues_paid?: string;
   join_date?: string;
+  title?: string;
+  account_balance?: string;
+  avatar_url?: string;
+  special_roles?: string;
+  role_tags?: string;
 }
 
 interface UploadResult {
@@ -50,6 +55,11 @@ const SYSTEM_FIELDS = [
   { key: 'notes', label: 'Notes', required: false },
   { key: 'dues_paid', label: 'Dues Paid', required: false },
   { key: 'join_date', label: 'Join Date', required: false },
+  { key: 'title', label: 'Title', required: false },
+  { key: 'account_balance', label: 'Account Balance', required: false },
+  { key: 'avatar_url', label: 'Avatar URL', required: false },
+  { key: 'special_roles', label: 'Special Roles', required: false },
+  { key: 'role_tags', label: 'Role Tags', required: false },
 ];
 
 const VOICE_PART_MAPPING: { [key: string]: string } = {
@@ -83,9 +93,10 @@ export function EnhancedMemberCSVUpload() {
   const { addUser } = useUserCreate();
 
   const downloadTemplate = () => {
-    const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date
-example@spelman.edu,Jane,Doe,555-0123,soprano_1,member,active,2025,Sample notes,true,2024-01-15
-student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member,false,2024-02-01`;
+    const csvContent = `email,first_name,last_name,phone,voice_part,role,status,class_year,notes,dues_paid,join_date,title,account_balance,avatar_url,special_roles,role_tags
+example@spelman.edu,Jane,Doe,555-0123,soprano_1,member,active,2025,Sample notes,true,2024-01-15,General Member,0.00,,Section Leader,"member,student"
+student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member,false,2024-02-01,General Member,25.50,,,"member"
+admin@spelman.edu,Sarah,Johnson,555-0125,soprano_2,admin,active,2024,Administrator account,true,2023-08-01,Administrator,0.00,,Director,"admin,faculty"`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -180,19 +191,39 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       columns.forEach(col => {
         const header = col.header.toLowerCase().trim();
         
-        // Map common variations
+        // Enhanced auto-mapping for all profile fields
         if (header.includes('first') && header.includes('name') || header === 'first name') {
           autoMapping[col.header] = 'first_name';
         } else if (header.includes('last') && header.includes('name') || header === 'last name') {
           autoMapping[col.header] = 'last_name';
         } else if (header === 'email') {
           autoMapping[col.header] = 'email';
-        } else if (header === 'number' || header.includes('phone')) {
+        } else if (header === 'phone' || header.includes('phone')) {
           autoMapping[col.header] = 'phone';
-        } else if (header === 'section') {
+        } else if (header === 'voice_part' || header === 'section') {
           autoMapping[col.header] = 'voice_part';
-        } else if (header.includes('birthday')) {
+        } else if (header === 'role') {
+          autoMapping[col.header] = 'role';
+        } else if (header === 'status') {
+          autoMapping[col.header] = 'status';
+        } else if (header === 'class_year' || header.includes('class')) {
+          autoMapping[col.header] = 'class_year';
+        } else if (header === 'notes') {
+          autoMapping[col.header] = 'notes';
+        } else if (header === 'dues_paid' || header.includes('dues')) {
+          autoMapping[col.header] = 'dues_paid';
+        } else if (header === 'join_date' || header.includes('join')) {
           autoMapping[col.header] = 'join_date';
+        } else if (header === 'title') {
+          autoMapping[col.header] = 'title';
+        } else if (header === 'account_balance' || header.includes('balance')) {
+          autoMapping[col.header] = 'account_balance';
+        } else if (header === 'avatar_url' || header.includes('avatar')) {
+          autoMapping[col.header] = 'avatar_url';
+        } else if (header === 'special_roles' || header.includes('special')) {
+          autoMapping[col.header] = 'special_roles';
+        } else if (header === 'role_tags' || header.includes('tags')) {
+          autoMapping[col.header] = 'role_tags';
         }
       });
 
@@ -245,23 +276,23 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         if (colIndex !== undefined && row[colIndex]) {
           let value = row[colIndex].trim();
           
-          // Special transformations
+          // Special transformations based on field type
           if (systemField === 'voice_part') {
             value = normalizeVoicePart(value);
           } else if (systemField === 'join_date') {
             value = convertBirthdayToJoinDate(value);
           } else if (systemField === 'dues_paid') {
             value = value.toLowerCase() === 'true' ? 'true' : 'false';
+          } else if (systemField === 'account_balance') {
+            value = parseFloat(value) ? value : '0.00';
           } else if (systemField === 'status' && !value) {
             value = 'active';
           } else if (systemField === 'role' && !value) {
             value = 'member';
+          } else if (systemField === 'title' && !value) {
+            value = 'General Member';
           } else if (systemField === 'email') {
-            // Ensure email is properly formatted and normalized
             value = value.toLowerCase().trim();
-            console.log('Processing email from CSV:', value);
-            
-            // Additional email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(value)) {
               console.error('Invalid email format in CSV:', value);
@@ -274,30 +305,22 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       }
     });
 
-    // Validate required fields with detailed logging
     if (!mapped.email || !mapped.first_name || !mapped.last_name) {
       console.error('Missing required fields for row:', {
         row: index + 2,
         email: mapped.email,
         first_name: mapped.first_name,
-        last_name: mapped.last_name,
-        allMapped: mapped
+        last_name: mapped.last_name
       });
       return null;
     }
 
-    console.log('Successfully mapped row data:', {
-      email: mapped.email,
-      first_name: mapped.first_name,
-      last_name: mapped.last_name
-    });
     return mapped as MappedRow;
   };
 
   const createUser = async (userData: MappedRow): Promise<void> => {
     try {
-      console.log('Creating user with email:', userData.email);
-      console.log('User data being processed:', userData);
+      console.log('Creating user with enhanced profile data:', userData.email);
       
       // Validate email format before proceeding
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -323,9 +346,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         ? userData.status as UserFormValues['status']
         : 'active';
 
-      // Transform the data to match UserFormValues interface
+      // Transform the data to match UserFormValues interface with enhanced profile fields
       const userFormData: UserFormValues = {
-        email: userData.email.toLowerCase().trim(), // Ensure email is normalized
+        email: userData.email.toLowerCase().trim(),
         password: `Temp${Math.random().toString(36).substring(2, 8)}Glee!1`,
         first_name: userData.first_name,
         last_name: userData.last_name,
@@ -337,10 +360,14 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         notes: userData.notes || '',
         dues_paid: userData.dues_paid?.toLowerCase() === 'true',
         join_date: userData.join_date || new Date().toISOString().split('T')[0],
-        is_admin: validRole === 'admin'
+        is_admin: validRole === 'admin',
+        title: userData.title || 'General Member',
+        account_balance: userData.account_balance ? parseFloat(userData.account_balance) : 0,
+        avatar_url: userData.avatar_url || '',
+        role_tags: userData.role_tags ? userData.role_tags.split(',').map(tag => tag.trim()) : []
       };
 
-      console.log('Submitting user form data with email:', userFormData.email);
+      console.log('Submitting enhanced user form data:', userFormData.email);
 
       // Create user using the existing hook
       const success = await addUser(userFormData);
@@ -349,7 +376,7 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
         throw new Error('Failed to create user - addUser returned false');
       }
       
-      console.log('User creation successful for email:', userData.email);
+      console.log('Enhanced user creation successful for email:', userData.email);
     } catch (error: any) {
       console.error('Error in createUser for email:', userData.email, error);
       throw error;
@@ -368,9 +395,9 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
     setUploadResult(null);
 
     const result: UploadResult = { success: 0, errors: [] };
-    const batchSize = 5; // Increased batch size from 3 to 5
-    const batchDelay = 3000; // Reduced delay from 10s to 3s
-    const userDelay = 500; // Reduced delay from 2s to 0.5s
+    const batchSize = 5;
+    const batchDelay = 3000;
+    const userDelay = 500;
 
     console.log(`Starting batch upload of ${dataRows.length} users in batches of ${batchSize}`);
 
@@ -461,46 +488,36 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Upload your member list CSV. The system will help you map your columns to the required fields.
+                Upload your member list CSV with enhanced profile data. The system will help you map your columns to the correct user profile fields including roles, status, financial info, and more.
               </AlertDescription>
             </Alert>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={downloadTemplate}>
-                <Download className="h-4 w-4 mr-2" />
-                Download Template
+              <Button
+                variant="outline"
+                onClick={downloadTemplate}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Enhanced Template
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv"
                 onChange={handleFileUpload}
                 className="hidden"
                 id="csv-upload"
               />
-              
-              <div 
-                className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                onClick={handleFileSelect}
-              >
-                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <div className="space-y-2">
-                  <p className="text-lg font-medium">Click to select your CSV file</p>
-                  <p className="text-sm text-gray-500">
-                    Supports files with columns like: First name, Last name, Email, Number, Section, etc.
-                  </p>
-                </div>
-              </div>
-
-              <div className="text-center">
-                <Button onClick={handleFileSelect} className="w-full max-w-sm">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Choose CSV File
-                </Button>
-              </div>
+              <label htmlFor="csv-upload" className="cursor-pointer">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">
+                  Click to select a CSV file or drag and drop
+                </p>
+              </label>
             </div>
           </CardContent>
         </Card>
@@ -509,54 +526,49 @@ student@spelman.edu,Mary,Smith,555-0124,alto_1,member,active,2026,Another member
       {step === 'map' && (
         <Card>
           <CardHeader>
-            <CardTitle>Map Your Columns</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowRight className="h-5 w-5" />
+              Map CSV Columns
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Map your CSV columns to the system fields. Required fields must be mapped.
-              </AlertDescription>
-            </Alert>
-
+            <p className="text-sm text-muted-foreground">
+              Map your CSV columns to the correct user profile fields. Required fields are marked with *.
+            </p>
+            
             <div className="grid gap-4">
               {csvColumns.map((column) => (
                 <div key={column.index} className="flex items-center gap-4 p-3 border rounded">
                   <div className="flex-1">
-                    <div className="font-medium">{column.header}</div>
-                    {column.sample && (
-                      <div className="text-sm text-gray-500">Sample: {column.sample}</div>
-                    )}
+                    <p className="font-medium">{column.header}</p>
+                    <p className="text-sm text-muted-foreground">Sample: {column.sample}</p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-gray-400" />
-                  <div className="flex-1">
-                    <Select
-                      value={columnMapping[column.header] || 'none'}
-                      onValueChange={(value) => handleMappingChange(column.header, value === 'none' ? null : value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select system field..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Don't map</SelectItem>
-                        {SYSTEM_FIELDS.map((field) => (
-                          <SelectItem key={field.key} value={field.key}>
-                            {field.label} {field.required && '*'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select
+                    value={columnMapping[column.header] || ''}
+                    onValueChange={(value) => handleMappingChange(column.header, value || null)}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Skip this column</SelectItem>
+                      {SYSTEM_FIELDS.map((field) => (
+                        <SelectItem key={field.key} value={field.key}>
+                          {field.label} {field.required ? '*' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-2">
-              <Button onClick={resetUpload} variant="outline">
-                Start Over
+            <div className="flex gap-3 pt-4">
+              <Button onClick={() => setStep('upload')} variant="outline">
+                Back to Upload
               </Button>
-              <Button onClick={proceedToPreview}>
-                Continue to Preview
+              <Button onClick={proceedToPreview} className="flex-1">
+                Preview Import
               </Button>
             </div>
           </CardContent>
