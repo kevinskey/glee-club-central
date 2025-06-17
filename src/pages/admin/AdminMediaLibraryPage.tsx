@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileImage, Upload, RefreshCw } from 'lucide-react';
-import { ResponsiveMediaLibrary } from '@/components/media/ResponsiveMediaLibrary';
+import { OrganizedMediaLibrary } from '@/components/media/OrganizedMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 import { usePaginatedMediaLibrary } from '@/hooks/usePaginatedMediaLibrary';
 import { toast } from 'sonner';
@@ -39,12 +39,12 @@ const AdminMediaLibraryPage = () => {
                 Media Library Management
               </h1>
               <p className="text-sm sm:text-body text-gray-600 dark:text-gray-300 mb-4">
-                Upload, organize, and manage all media files for the Glee Club
+                Upload, organize, and manage all media files for the Glee Club with advanced folder organization
               </p>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <Badge variant="outline" className="glass-button border-royal-300/30 text-royal-700 dark:text-royal-300">
                   <FileImage className="h-3 w-3 mr-1" />
-                  Optimized Loading
+                  Organized Structure
                 </Badge>
                 <Badge variant="outline" className="glass-button border-powder-300/30 text-powder-700 dark:text-powder-300">
                   Admin Access
@@ -73,10 +73,9 @@ const AdminMediaLibraryPage = () => {
         </div>
       </div>
 
-      {/* Responsive Media Library */}
-      <ResponsiveMediaLibrary
+      {/* Organized Media Library */}
+      <OrganizedMediaLibrary
         isAdminView={true}
-        showUpload={false}
         onUploadComplete={handleUploadComplete}
       />
         
