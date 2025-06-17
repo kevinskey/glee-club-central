@@ -40,7 +40,7 @@ export interface Profile {
   dues_paid?: boolean;
   role_tags?: string[];
   created_at?: string;
-  // New e-commerce fields
+  // E-commerce fields
   ecommerce_enabled?: boolean;
   design_history_ids?: string[];
   current_cart_id?: string;
