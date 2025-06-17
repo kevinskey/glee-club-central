@@ -7,7 +7,7 @@ export const userFormSchema = z.object({
   first_name: z.string().min(1, 'First name is required'),
   last_name: z.string().min(1, 'Last name is required'),
   phone: z.string().optional(),
-  voice_part: z.enum(['soprano_1', 'soprano_2', 'alto_1', 'alto_2', 'tenor', 'bass', 'director']).nullable().optional(),
+  voice_part: z.enum(['soprano_1', 'soprano_2', 'alto_1', 'alto_2', 'tenor', 'bass', 'director']).optional(),
   role: z.enum(['admin', 'member', 'section_leader']).default('member'),
   status: z.enum(['active', 'inactive', 'pending', 'alumni']).default('active'),
   class_year: z.string().optional(),

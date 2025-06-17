@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
     first_name: '',
     last_name: '',
     phone: '',
-    voice_part: null,
+    voice_part: undefined, // Use undefined instead of null
     status: 'active',
     class_year: '',
     notes: '',
@@ -36,14 +35,19 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await onMemberAdd(formData);
+      // Filter out undefined voice_part before submitting
+      const submitData = {
+        ...formData,
+        voice_part: formData.voice_part || undefined
+      };
+      await onMemberAdd(submitData);
       // Reset form on success
       setFormData({
         email: '',
         first_name: '',
         last_name: '',
         phone: '',
-        voice_part: null,
+        voice_part: undefined,
         status: 'active',
         class_year: '',
         notes: '',
@@ -116,7 +120,10 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
             
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
-              <Select value={formData.voice_part || 'none'} onValueChange={(value) => updateFormData('voice_part', value === 'none' ? null : value)}>
+              <Select 
+                value={formData.voice_part || 'none'} 
+                onValueChange={(value) => updateFormData('voice_part', value === 'none' ? undefined : value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
                 </SelectTrigger>
