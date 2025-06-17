@@ -1,46 +1,29 @@
 
-import React, { useState, useEffect } from "react";
-import { WaveSurferPlayer } from "@/components/audio/WaveSurferPlayer";
-import { useAudioFiles } from "@/hooks/useAudioFiles";
-import { AudioFile } from "@/types/audio";
+import React, { useState } from "react";
+import { EnhancedCustomAudioPlayer } from "@/components/audio/EnhancedCustomAudioPlayer";
+import { AudioFileSelector } from "@/components/audio/AudioFileSelector";
+import { useAudioFiles, AudioFileData } from "@/hooks/useAudioFiles";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Music, Settings } from "lucide-react";
 
-interface AudioTrack {
-  id: string;
-  title: string;
-  audioUrl: string;
-  albumArt: string;
-  artist: string;
-  duration: string;
-}
+export function CustomAudioSection() {
+  const { audioFiles, isLoading } = useAudioFiles();
+  const [selectedAudioFile, setSelectedAudioFile] = useState<AudioFileData | null>(null);
+  const [showFileSelector, setShowFileSelector] = useState(false);
 
-interface CustomAudioSectionProps {
-  tracks?: AudioTrack[];
-}
-
-export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
-  const { audioFiles } = useAudioFiles();
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  
-  // Use provided tracks or fallback to audio files
-  const displayTracks = tracks.length > 0 ? tracks : audioFiles.slice(0, 5);
-  const currentTrack = displayTracks[currentTrackIndex];
-
-  // Helper function to get track properties
-  const getTrackUrl = (track: any) => {
-    return 'audioUrl' in track ? track.audioUrl : track.file_url;
+  const handleSelectAudioFile = (file: AudioFileData) => {
+    setSelectedAudioFile(file);
+    setShowFileSelector(false);
   };
 
-  const getTrackArtist = (track: any) => {
-    return 'artist' in track ? track.artist : track.description || 'Spelman College Glee Club';
-  };
+  // Auto-select first audio file if none selected and files are available
+  React.useEffect(() => {
+    if (!selectedAudioFile && audioFiles.length > 0 && !isLoading) {
+      setSelectedAudioFile(audioFiles[0]);
+    }
+  }, [audioFiles, selectedAudioFile, isLoading]);
 
-  const getTrackTitle = (track: any) => {
-    return track.title || 'Untitled Track';
-  };
-
-  if (!currentTrack) {
+  if (isLoading) {
     return (
       <section className="py-16">
         <div className="container mx-auto px-4">
@@ -51,27 +34,13 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
               Experience our latest recordings and performances
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              No audio tracks available at the moment.
-            </p>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading audio files...</p>
           </div>
         </div>
       </section>
     );
   }
-
-  // Convert current track to AudioFile format for WaveSurferPlayer
-  const currentAudioFile: AudioFile = {
-    id: currentTrack.id,
-    title: getTrackTitle(currentTrack),
-    description: getTrackArtist(currentTrack),
-    file_url: getTrackUrl(currentTrack),
-    file_path: getTrackUrl(currentTrack),
-    category: 'recordings',
-    is_backing_track: false,
-    uploaded_by: '',
-    created_at: new Date().toISOString(),
-  };
 
   return (
     <section className="py-16">
@@ -86,50 +55,61 @@ export function CustomAudioSection({ tracks = [] }: CustomAudioSectionProps) {
         </div>
         
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Main Player */}
-          <WaveSurferPlayer
-            audio={currentAudioFile}
-            className="mb-6"
-          />
-
-          {/* Current Track Info */}
-          <div className="text-center py-4">
-            <h3 className="text-xl font-semibold">{getTrackTitle(currentTrack)}</h3>
-            <p className="text-muted-foreground">{getTrackArtist(currentTrack)}</p>
+          {/* Toggle between player and selector */}
+          <div className="flex justify-center mb-6">
+            <div className="flex gap-2">
+              <Button
+                variant={!showFileSelector ? "default" : "outline"}
+                onClick={() => setShowFileSelector(false)}
+                className="flex items-center gap-2"
+              >
+                <Music className="h-4 w-4" />
+                Player
+              </Button>
+              <Button
+                variant={showFileSelector ? "default" : "outline"}
+                onClick={() => setShowFileSelector(true)}
+                className="flex items-center gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                Browse Audio
+              </Button>
+            </div>
           </div>
 
-          {/* Track List */}
-          {displayTracks.length > 1 && (
-            <div className="grid gap-3">
-              <h3 className="text-lg font-semibold text-center mb-4">
-                More Tracks ({displayTracks.length})
-              </h3>
-              {displayTracks.map((track, index) => (
-                <div
-                  key={track.id}
-                  className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                    index === currentTrackIndex
-                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                  onClick={() => setCurrentTrackIndex(index)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{getTrackTitle(track)}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {getTrackArtist(track)}
-                      </p>
+          {/* Main Content */}
+          {showFileSelector ? (
+            <AudioFileSelector
+              onSelectFile={handleSelectAudioFile}
+              selectedFileId={selectedAudioFile?.id}
+              showPlayer={false}
+            />
+          ) : (
+            <>
+              {selectedAudioFile || audioFiles.length > 0 ? (
+                <div className="space-y-6">
+                  <EnhancedCustomAudioPlayer className="w-full" />
+                  
+                  {selectedAudioFile && (
+                    <div className="text-center py-4">
+                      <h3 className="text-xl font-semibold">{selectedAudioFile.title}</h3>
+                      <p className="text-muted-foreground">{selectedAudioFile.description || 'Spelman College Glee Club'}</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {index === currentTrackIndex && (
-                        <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Music className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-semibold mb-2">No Audio Files Available</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    Audio files will appear here once they are uploaded to the media library.
+                  </p>
+                  <Button onClick={() => setShowFileSelector(true)}>
+                    Browse Audio Library
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
