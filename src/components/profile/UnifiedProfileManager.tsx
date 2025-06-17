@@ -11,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Profile } from '@/types/auth';
 import { 
   User, 
   Mail, 
@@ -25,6 +24,37 @@ import {
   X,
   Shield
 } from 'lucide-react';
+
+interface ProfileData {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  role?: string;
+  voice_part?: string;
+  avatar_url?: string;
+  status?: string;
+  class_year?: string;
+  notes?: string;
+  special_roles?: string;
+  is_super_admin?: boolean;
+  title?: string;
+  disabled?: boolean;
+  updated_at?: string;
+  join_date?: string;
+  dues_paid?: boolean;
+  role_tags?: string[];
+  created_at?: string;
+  account_balance?: number;
+  ecommerce_enabled?: boolean;
+  design_history_ids?: string[];
+  current_cart_id?: string;
+  default_shipping_address?: string;
+  music_role?: string;
+  org?: string;
+  is_exec_board?: boolean;
+  exec_board_role?: string;
+}
 
 interface UnifiedProfileManagerProps {
   viewMode?: 'view' | 'edit';
@@ -40,11 +70,11 @@ export function UnifiedProfileManager({
   const { profile: currentProfile, isAdmin, refreshProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(viewMode === 'edit');
   const [isLoading, setIsLoading] = useState(false);
-  const [profileData, setProfileData] = useState<Partial<Profile>>({});
-  const [targetProfile, setTargetProfile] = useState<Profile | null>(null);
+  const [profileData, setProfileData] = useState<Partial<ProfileData>>({});
+  const [targetProfile, setTargetProfile] = useState<ProfileData | null>(null);
 
   // Determine which profile to show
-  const displayProfile = targetUserId && targetProfile ? targetProfile : currentProfile;
+  const displayProfile = targetUserId && targetProfile ? targetProfile : (currentProfile as ProfileData);
   const isOwnProfile = !targetUserId || targetUserId === currentProfile?.id;
   const canEdit = isOwnProfile || isAdmin();
 
@@ -52,7 +82,7 @@ export function UnifiedProfileManager({
     if (targetUserId && targetUserId !== currentProfile?.id) {
       fetchTargetProfile();
     } else if (currentProfile) {
-      setProfileData(currentProfile);
+      setProfileData(currentProfile as ProfileData);
     }
   }, [targetUserId, currentProfile]);
 
@@ -68,8 +98,8 @@ export function UnifiedProfileManager({
       
       if (error) throw error;
       
-      setTargetProfile(data);
-      setProfileData(data);
+      setTargetProfile(data as ProfileData);
+      setProfileData(data as ProfileData);
     } catch (error) {
       console.error('Error fetching target profile:', error);
       toast.error('Failed to load profile');
@@ -114,7 +144,7 @@ export function UnifiedProfileManager({
     setIsEditing(false);
   };
 
-  const updateField = (field: keyof Profile, value: any) => {
+  const updateField = (field: keyof ProfileData, value: any) => {
     setProfileData(prev => ({ ...prev, [field]: value }));
   };
 
