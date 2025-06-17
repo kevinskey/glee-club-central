@@ -23,7 +23,7 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
     first_name: '',
     last_name: '',
     phone: '',
-    voice_part: '',
+    voice_part: null,
     status: 'active',
     class_year: '',
     notes: '',
@@ -43,7 +43,7 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
         first_name: '',
         last_name: '',
         phone: '',
-        voice_part: '',
+        voice_part: null,
         status: 'active',
         class_year: '',
         notes: '',
@@ -116,7 +116,7 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
             
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
-              <Select value={formData.voice_part} onValueChange={(value) => updateFormData('voice_part', value)}>
+              <Select value={formData.voice_part || ''} onValueChange={(value) => updateFormData('voice_part', value || null)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
                 </SelectTrigger>

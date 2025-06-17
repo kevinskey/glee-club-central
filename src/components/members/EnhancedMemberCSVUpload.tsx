@@ -289,8 +289,12 @@ admin@spelman.edu,Sarah,Johnson,555-0125,soprano_2,admin,active,2024,Administrat
             value = 'active';
           } else if (systemField === 'role' && !value) {
             value = 'member';
-          } else if (systemField === 'title' && !value) {
-            value = 'General Member';
+          } else if (systemField === 'title') {
+            // Validate title against allowed enum values
+            const validTitles = ['none', 'President', 'Vice President', 'Secretary', 'Treasurer', 'Chief of Staff', 'Historian', 'Librarian', 'Wardrobe Manager', 'Social Chair', 'Publicity Chair', 'Chaplain', 'Business Manager', 'Assistant Director', 'Director'];
+            if (!validTitles.includes(value)) {
+              value = 'none'; // Default to 'none' if invalid
+            }
           } else if (systemField === 'email') {
             value = value.toLowerCase().trim();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -361,7 +365,7 @@ admin@spelman.edu,Sarah,Johnson,555-0125,soprano_2,admin,active,2024,Administrat
         dues_paid: userData.dues_paid?.toLowerCase() === 'true',
         join_date: userData.join_date || new Date().toISOString().split('T')[0],
         is_admin: validRole === 'admin',
-        title: userData.title || 'General Member',
+        title: userData.title as UserFormValues['title'] || 'none',
         account_balance: userData.account_balance ? parseFloat(userData.account_balance) : 0,
         avatar_url: userData.avatar_url || '',
         role_tags: userData.role_tags ? userData.role_tags.split(',').map(tag => tag.trim()) : []
