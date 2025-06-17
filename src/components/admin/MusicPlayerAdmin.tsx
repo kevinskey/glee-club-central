@@ -1,12 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Music, Settings, BarChart3 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Music, Settings, BarChart3, Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 import { useMusicPlayer } from '@/hooks/useMusicPlayer';
+import { EnhancedCustomAudioPlayer } from '@/components/audio/EnhancedCustomAudioPlayer';
+import { AudioFileSelector } from '@/components/audio/AudioFileSelector';
+import { useAudioFiles, AudioFileData } from '@/hooks/useAudioFiles';
 
 export function MusicPlayerAdmin() {
   const { activePlaylist, playerSettings, isLoading } = useMusicPlayer();
+  const { audioFiles } = useAudioFiles();
+  const [selectedAudioFile, setSelectedAudioFile] = useState<AudioFileData | null>(null);
+  const [showFileSelector, setShowFileSelector] = useState(false);
+
+  const handleSelectAudioFile = (file: AudioFileData) => {
+    setSelectedAudioFile(file);
+    setShowFileSelector(false);
+  };
 
   if (isLoading) {
     return (
@@ -21,6 +33,49 @@ export function MusicPlayerAdmin() {
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Audio Player */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Music className="h-5 w-5" />
+              Music Player
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowFileSelector(!showFileSelector)}
+            >
+              {showFileSelector ? 'Hide' : 'Select'} Audio Files
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {showFileSelector ? (
+            <AudioFileSelector
+              onSelectFile={handleSelectAudioFile}
+              selectedFileId={selectedAudioFile?.id}
+              showPlayer={false}
+            />
+          ) : (
+            <>
+              {activePlaylist || selectedAudioFile ? (
+                <EnhancedCustomAudioPlayer className="w-full" />
+              ) : (
+                <div className="text-center py-8">
+                  <Music className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    No active playlist configured
+                  </p>
+                  <Button onClick={() => setShowFileSelector(true)}>
+                    Browse Audio Files
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Active Playlist Card */}
       <Card>
         <CardHeader>
@@ -62,7 +117,12 @@ export function MusicPlayerAdmin() {
               )}
             </div>
           ) : (
-            <p className="text-muted-foreground">No active playlist configured</p>
+            <div className="text-center py-4">
+              <p className="text-muted-foreground mb-2">No active playlist configured</p>
+              <p className="text-sm text-muted-foreground">
+                Available audio files: {audioFiles.length}
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -112,9 +172,17 @@ export function MusicPlayerAdmin() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            Music analytics and detailed player management features coming soon.
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm">
+              <span className="font-medium">Total Audio Files:</span> {audioFiles.length}
+            </p>
+            <p className="text-sm">
+              <span className="font-medium">Active Tracks:</span> {activePlaylist?.tracks.length || 0}
+            </p>
+            <p className="text-muted-foreground text-sm">
+              Detailed analytics and player management features available.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
