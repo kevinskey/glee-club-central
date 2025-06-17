@@ -116,12 +116,12 @@ export function AddMemberDialog({ isOpen, onOpenChange, onMemberAdd, isSubmittin
             
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
-              <Select value={formData.voice_part || ''} onValueChange={(value) => updateFormData('voice_part', value === '' ? null : value)}>
+              <Select value={formData.voice_part || 'none'} onValueChange={(value) => updateFormData('voice_part', value === 'none' ? null : value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No voice part</SelectItem>
+                  <SelectItem value="none">No voice part</SelectItem>
                   <SelectItem value="soprano_1">Soprano 1</SelectItem>
                   <SelectItem value="soprano_2">Soprano 2</SelectItem>
                   <SelectItem value="alto_1">Alto 1</SelectItem>
