@@ -46,6 +46,12 @@ export interface Profile {
   design_history_ids?: string[];
   current_cart_id?: string;
   default_shipping_address?: string;
+  // Music fields
+  music_role?: string;
+  org?: string;
+  // Executive board fields
+  is_exec_board?: boolean;
+  exec_board_role?: string;
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
