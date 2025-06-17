@@ -9,7 +9,7 @@ export const AdminLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <AdminUnifiedHeader />
       
       <div className="flex">

@@ -3,7 +3,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;  /* Pure white like Apple */
+    --background: 0 0% 100%;  /* Pure white */
     --foreground: 0 0% 8%;   /* Near black for text */
 
     --card: 0 0% 100%;
@@ -31,41 +31,41 @@
     --input: 0 0% 96%;
     --ring: 220 100% 60%;
 
-    --radius: 8px;  /* Apple's rounded corners */
+    --radius: 8px;
     
-    /* Glee Club Brand Colors - Apple inspired */
+    /* Glee Club Brand Colors */
     --glee-purple: 220 100% 60%;
     --glee-spelman: 220 100% 60%;
     --glee-columbia: 220 100% 60%;
   }
 
   .dark {
-    --background: 0 0% 100%;  /* Force white background even in dark mode */
-    --foreground: 0 0% 8%;    /* Keep dark text for readability */
+    --background: 0 0% 98%;   /* Very light gray instead of black */
+    --foreground: 0 0% 15%;   /* Dark gray for text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card: 0 0% 96%;         /* Light gray cards */
+    --card-foreground: 0 0% 15%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover: 0 0% 96%;
+    --popover-foreground: 0 0% 15%;
 
     --primary: 220 100% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 8%;
+    --secondary: 0 0% 92%;    /* Slightly darker light gray */
+    --secondary-foreground: 0 0% 15%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 35%;
 
     --accent: 220 100% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62% 30%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 96%;
+    --border: 0 0% 85%;       /* Light gray borders */
+    --input: 0 0% 92%;
     --ring: 220 100% 60%;
   }
 
@@ -74,21 +74,20 @@
   }
 
   body {
-    @apply bg-white text-foreground;
+    @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.003em;
     line-height: 1.4;
-    background-color: white !important;
   }
   
   html {
-    background-color: white !important;
+    background-color: hsl(var(--background)) !important;
   }
   
   #root {
-    background-color: white !important;
+    background-color: hsl(var(--background)) !important;
   }
   
   h1, h2, h3, h4, h5, h6 {
