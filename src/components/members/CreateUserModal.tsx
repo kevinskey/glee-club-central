@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, AlertTriangle } from 'lucide-react';
 
 interface CreateUserModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ interface UserFormData {
 
 export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitWarning, setRateLimitWarning] = useState(false);
   const [formData, setFormData] = useState<UserFormData>({
     email: '',
     password: '',
@@ -49,50 +51,126 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
     join_date: new Date().toISOString().split('T')[0],
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const createUserWithRetry = async (userData: UserFormData, retryCount = 0): Promise<{ success: boolean; error?: string; rateLimited?: boolean }> => {
+    const maxRetries = 2;
+    const baseDelay = 3000;
 
     try {
-      // Create auth user first
+      console.log(`Creating user (attempt ${retryCount + 1}):`, userData.email);
+      
+      // Create auth user with reduced email activity
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
+        email: userData.email,
+        password: userData.password,
         options: {
+          emailRedirectTo: undefined, // Disable email confirmation to reduce rate limit pressure
           data: {
-            first_name: formData.first_name,
-            last_name: formData.last_name
+            first_name: userData.first_name,
+            last_name: userData.last_name
           }
         }
       });
 
-      if (authError) throw authError;
-      if (!authData.user?.id) throw new Error('User creation failed');
+      if (authError) {
+        // Check for rate limit errors
+        if (authError.message.includes('rate limit') || authError.message.includes('429')) {
+          if (retryCount < maxRetries) {
+            const delay = baseDelay * Math.pow(2, retryCount);
+            console.log(`Rate limit hit, retrying in ${delay}ms...`);
+            setRateLimitWarning(true);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return await createUserWithRetry(userData, retryCount + 1);
+          } else {
+            return { success: false, rateLimited: true, error: 'Email rate limit exceeded. Please try again in a few minutes.' };
+          }
+        }
+        
+        if (authError.message.includes('User already registered')) {
+          return { success: false, error: 'A user with this email already exists' };
+        }
+        
+        return { success: false, error: authError.message };
+      }
+
+      if (!authData.user?.id) {
+        return { success: false, error: 'User creation failed - no user ID returned' };
+      }
+
+      console.log('Auth user created:', authData.user.id);
+
+      // Wait for auth user to be fully created
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Update the profile with additional data
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          phone: formData.phone || null,
-          voice_part: formData.voice_part || null,
-          status: formData.status,
-          class_year: formData.class_year || null,
-          notes: formData.notes || null,
-          dues_paid: formData.dues_paid,
-          join_date: formData.join_date,
-          role: formData.role,
-          is_super_admin: formData.role === 'admin',
+          phone: userData.phone || null,
+          voice_part: userData.voice_part || null,
+          status: userData.status,
+          class_year: userData.class_year || null,
+          notes: userData.notes || null,
+          dues_paid: userData.dues_paid,
+          join_date: userData.join_date,
+          role: userData.role,
+          is_super_admin: userData.role === 'admin',
+          updated_at: new Date().toISOString()
         })
         .eq('id', authData.user.id);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        // Try to clean up the auth user if profile update fails
+        try {
+          await supabase.auth.admin.deleteUser(authData.user.id);
+        } catch (cleanupError) {
+          console.error('Failed to cleanup auth user:', cleanupError);
+        }
+        return { success: false, error: `Profile update failed: ${profileError.message}` };
+      }
 
-      toast.success(`Successfully created user: ${formData.first_name} ${formData.last_name}`);
-      onUserCreated();
-      handleClose();
+      return { success: true };
+
+    } catch (error: any) {
+      console.error('Unexpected error creating user:', error);
+      
+      if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+        if (retryCount < maxRetries) {
+          const delay = baseDelay * Math.pow(2, retryCount);
+          console.log(`Rate limit error, retrying in ${delay}ms...`);
+          setRateLimitWarning(true);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return await createUserWithRetry(userData, retryCount + 1);
+        } else {
+          return { success: false, rateLimited: true, error: 'Email rate limit exceeded. Please try again in a few minutes.' };
+        }
+      }
+      
+      return { success: false, error: error.message || 'An unexpected error occurred' };
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setRateLimitWarning(false);
+
+    try {
+      const result = await createUserWithRetry(formData);
+      
+      if (result.success) {
+        toast.success(`Successfully created user: ${formData.first_name} ${formData.last_name}`);
+        onUserCreated();
+        handleClose();
+      } else if (result.rateLimited) {
+        toast.error(result.error || 'Rate limit exceeded. Please wait a few minutes and try again.');
+        setRateLimitWarning(true);
+      } else {
+        toast.error(result.error || 'Failed to create user');
+      }
     } catch (error: any) {
       console.error('Error creating user:', error);
-      toast.error(error?.message || 'Failed to create user');
+      toast.error('An unexpected error occurred while creating the user');
     } finally {
       setIsLoading(false);
     }
@@ -113,6 +191,7 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
       dues_paid: false,
       join_date: new Date().toISOString().split('T')[0],
     });
+    setRateLimitWarning(false);
     onClose();
   };
 
@@ -129,6 +208,16 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
             Create New Member
           </DialogTitle>
         </DialogHeader>
+        
+        {rateLimitWarning && (
+          <Alert className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Email rate limit encountered. The system is automatically retrying with delays. 
+              If this persists, please wait a few minutes before creating more users.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,6 +364,14 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
             />
           </div>
           
+          {/* Rate Limit Info */}
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Rate Limit Info:</strong> If you're creating multiple users, please wait a few seconds between each creation to avoid email rate limits.
+            </AlertDescription>
+          </Alert>
+          
           {/* Actions */}
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>
@@ -282,7 +379,7 @@ export function CreateUserModal({ isOpen, onClose, onUserCreated }: CreateUserMo
             </Button>
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Member
+              {isLoading ? 'Creating...' : 'Create Member'}
             </Button>
           </div>
         </form>
