@@ -196,7 +196,7 @@ export function MediaListView({
               </TableCell>
             </TableRow>
           ))}
-        </tbody>
+        </TableBody>
       </Table>
     </div>
   );
