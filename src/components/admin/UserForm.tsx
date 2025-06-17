@@ -46,11 +46,13 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   // Get all available executive roles
   const availableRoles = getAllRoles();
 
-  // Create a schema that makes password and email optional for editing
-  const editUserSchema = userFormSchema.extend({
-    password: user ? z.string().optional() : z.string().min(6, "Password must be at least 6 characters"),
-    email: user ? z.string().email("Invalid email address").optional() : z.string().email("Invalid email address")
-  });
+  // Create a schema that makes password optional for editing
+  const editUserSchema = user ? 
+    userFormSchema.extend({
+      password: z.string().optional(),
+      email: z.string().email("Invalid email address").optional()
+    }) : 
+    userFormSchema;
 
   const {
     register,
@@ -61,35 +63,36 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
   } = useForm<UserFormValues>({
     resolver: zodResolver(editUserSchema),
     defaultValues: user ? {
-      title: user.title || '',
+      title: (user as any)?.title || 'none',
       first_name: user.first_name || '',
       last_name: user.last_name || '',
       email: user.email || '',
       phone: user.phone || '',
-      voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
-      role: (user.role === 'admin' ? 'admin' : user.role === 'section_leader' ? 'section_leader' : 'member') as 'admin' | 'member' | 'section_leader',
-      status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
+      voice_part: user.voice_part as any || null,
+      role: (user.role === 'admin' ? 'admin' : user.role === 'section_leader' ? 'section_leader' : 'member') as any,
+      status: (user.status as any) || 'active',
       class_year: user.class_year || '',
       notes: user.notes || '',
       dues_paid: user.dues_paid || false,
       is_admin: user.is_super_admin || user.role === 'admin',
-      join_date: user.join_date || new Date().toISOString().split('T')[0],
+      join_date: (user as any)?.join_date || new Date().toISOString().split('T')[0],
       avatar_url: user.avatar_url || '',
-      ecommerce_enabled: user.ecommerce_enabled || false,
-      account_balance: user.account_balance || 0,
-      default_shipping_address: user.default_shipping_address || '',
-      design_history_ids: user.design_history_ids || [],
-      current_cart_id: user.current_cart_id || '',
-      password: '' // Password not required for editing
+      ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
+      account_balance: (user as any)?.account_balance || 0,
+      default_shipping_address: (user as any)?.default_shipping_address || '',
+      design_history_ids: (user as any)?.design_history_ids || [],
+      current_cart_id: (user as any)?.current_cart_id || '',
+      password: '', // Password not required for editing
+      role_tags: user.role_tags || []
     } : {
-      title: '',
+      title: 'none',
       first_name: '',
       last_name: '',
       email: '',
       phone: '',
       voice_part: null,
-      role: 'member' as 'admin' | 'member' | 'section_leader',
-      status: 'active' as "active" | "pending" | "inactive" | "alumni",
+      role: 'member',
+      status: 'active',
       class_year: '',
       notes: '',
       dues_paid: false,
@@ -101,7 +104,8 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
       default_shipping_address: '',
       design_history_ids: [],
       current_cart_id: '',
-      password: ''
+      password: '',
+      role_tags: []
     }
   });
 
@@ -267,7 +271,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Label htmlFor="voice_part">Voice Part</Label>
               <Select
                 value={watch('voice_part') || ''}
-                onValueChange={(value: "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director") => setValue('voice_part', value)}
+                onValueChange={(value) => setValue('voice_part', value as any)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
@@ -299,7 +303,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Label htmlFor="role">System Role</Label>
               <Select
                 value={watch('role')}
-                onValueChange={(value: 'admin' | 'member' | 'section_leader') => setValue('role', value)}
+                onValueChange={(value) => setValue('role', value as any)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -316,7 +320,7 @@ export function UserForm({ user, onSubmit, onCancel, title }: UserFormProps) {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={watch('status')}
-                onValueChange={(value: "active" | "pending" | "inactive" | "alumni") => setValue('status', value)}
+                onValueChange={(value) => setValue('status', value as any)}
               >
                 <SelectTrigger>
                   <SelectValue />
