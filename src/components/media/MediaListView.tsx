@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +82,6 @@ export function MediaListView({
               <TableHead className="w-12">
                 <Checkbox
                   checked={selectedFiles.length === mediaFiles.length && mediaFiles.length > 0}
-                  indeterminate={selectedFiles.length > 0 && selectedFiles.length < mediaFiles.length}
                   onCheckedChange={(checked) => {
                     if (checked) {
                       mediaFiles.forEach(file => onSelect(file.id, true));
