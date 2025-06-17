@@ -39,7 +39,7 @@ export function Header() {
   };
   
   return (
-    <header className="w-full bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
       <div className="flex h-16 items-center justify-between w-full px-6">
         {/* Logo - Always visible */}
         <div className="flex-shrink-0">
