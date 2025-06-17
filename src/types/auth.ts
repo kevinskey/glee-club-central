@@ -1,4 +1,5 @@
 
+
 export interface AuthUser {
   id: string;
   email?: string;
@@ -40,12 +41,12 @@ export interface Profile {
   dues_paid?: boolean;
   role_tags?: string[];
   created_at?: string;
+  account_balance?: number;
   // E-commerce fields
   ecommerce_enabled?: boolean;
   design_history_ids?: string[];
   current_cart_id?: string;
   default_shipping_address?: string;
-  account_balance?: number;
 }
 
 export type UserType = 'admin' | 'member' | 'fan';
@@ -74,3 +75,4 @@ export interface AuthContextType {
   refreshProfile: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
+
