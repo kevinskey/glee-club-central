@@ -1,3 +1,4 @@
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap");
 @import "./styles/base.css";
@@ -15,12 +16,12 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 0 0% 98%;  /* Light gray instead of pure white */
+    --foreground: 240 10% 15%;  /* Dark gray instead of black */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 10% 15%;
     --primary: 208 100% 40%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
@@ -45,30 +46,30 @@
     --glee-blue: 208 100% 40%;
     --glee-blue-foreground: 0 0% 98%;
     --glee-white: 0 0% 100%;
-    --glee-black: 0 0% 0%;
+    --glee-black: 0 0% 15%;  /* Softer black */
     --glee-gray: 0 0% 53%;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 208 100% 50%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 208 100% 50%;
+    --background: 0 0% 95%;  /* Light gray instead of dark */
+    --foreground: 240 10% 20%;  /* Dark gray instead of white */
+    --card: 0 0% 98%;  /* Very light gray cards */
+    --card-foreground: 240 10% 20%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 240 10% 20%;
+    --primary: 208 100% 45%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 3.7% 88%;  /* Light gray */
+    --secondary-foreground: 240 10% 20%;
+    --muted: 240 3.7% 88%;
+    --muted-foreground: 240 5% 45%;
+    --accent: 208 100% 45%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 208 100% 50%;
+    --border: 240 3.7% 85%;  /* Light gray borders */
+    --input: 240 3.7% 85%;
+    --ring: 208 100% 45%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -82,7 +83,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-white text-foreground;
+    @apply bg-background text-foreground;
     font-family: "Inter", system-ui, sans-serif;
     min-height: 100vh;
   }
@@ -94,16 +95,16 @@
   }
   
   h2 {
-    @apply text-2xl font-bold text-black dark:text-white;
+    @apply text-2xl font-bold text-foreground;
     font-family: "Playfair Display", serif;
   }
   
   h3 {
-    @apply text-xl font-semibold text-black dark:text-white;
+    @apply text-xl font-semibold text-foreground;
   }
   
   p {
-    @apply text-base text-gray-700 dark:text-gray-300;
+    @apply text-base text-muted-foreground;
   }
 }
 
@@ -118,15 +119,15 @@
   }
   
   .glee-card {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm;
+    @apply bg-card border border-border rounded-lg shadow-sm;
   }
   
   .glee-header {
-    @apply bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50;
+    @apply bg-card/95 backdrop-blur-xl border-b border-border;
   }
   
   .glee-footer {
-    @apply bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700;
+    @apply bg-card border-t border-border;
   }
 }
 

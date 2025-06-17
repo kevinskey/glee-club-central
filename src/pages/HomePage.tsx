@@ -49,7 +49,7 @@ export default function HomePage() {
         <DynamicHero />
         
         {/* Rest of homepage content */}
-        <div className="bg-black/95 backdrop-blur-sm">
+        <div className="bg-background">
           <HomePageContent
             heroImages={[]} // No hero images needed anymore
             upcomingEvents={upcomingEvents}
