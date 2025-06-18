@@ -138,13 +138,13 @@ export default function UserManagement() {
             <p className="text-xs text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
           </div>
           <div className="flex gap-1">
-            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading} className="text-xs h-6 md:h-7 px-2">
-              <RefreshCw className={`mr-1 h-2 w-2 md:h-3 md:w-3 ${isLoading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Refresh</span>
+            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading} className="text-xs h-8 md:h-7 px-3 min-w-[70px]">
+              <RefreshCw className={`hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
             </Button>
-            <Button onClick={handleAddUser} size="sm" className="text-xs h-6 md:h-7 px-2">
-              <Plus className="mr-1 h-2 w-2 md:h-3 md:w-3" />
-              <span className="hidden sm:inline">Add</span>
+            <Button onClick={handleAddUser} size="sm" className="text-xs h-8 md:h-7 px-3 min-w-[60px]">
+              <Plus className="hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3" />
+              <span>Add</span>
             </Button>
           </div>
         </div>
@@ -224,14 +224,14 @@ export default function UserManagement() {
                       </TableCell>
                       <TableCell className="p-1">
                         <div className="flex items-center text-xs text-muted-foreground">
-                          <Mail className="mr-1 h-2 w-2" />
+                          <Mail className="hidden md:inline mr-1 h-2 w-2" />
                           <span className="truncate max-w-[80px] md:max-w-none">{user.email}</span>
                         </div>
                       </TableCell>
                       <TableCell className="p-1">
                         {user.phone && (
                           <div className="flex items-center text-xs text-muted-foreground">
-                            <Phone className="mr-1 h-2 w-2" />
+                            <Phone className="hidden md:inline mr-1 h-2 w-2" />
                             <span className="truncate">{user.phone}</span>
                           </div>
                         )}
@@ -239,7 +239,7 @@ export default function UserManagement() {
                       <TableCell className="p-1">
                         {user.voice_part && (
                           <Badge variant="outline" className="text-xs px-1 py-0 h-4">
-                            <Music className="mr-1 h-2 w-2" />
+                            <Music className="hidden md:inline mr-1 h-2 w-2" />
                             <span className="hidden md:inline">{user.voice_part.replace('_', ' ')}</span>
                             <span className="md:hidden">{user.voice_part.replace('_', ' ').substring(0, 2)}</span>
                           </Badge>
@@ -278,11 +278,11 @@ export default function UserManagement() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem className="text-xs">
-                              <Edit className="mr-2 h-2 w-2 md:h-3 md:w-3" />
+                              <Edit className="hidden md:inline mr-2 h-2 w-2 md:h-3 md:w-3" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive text-xs">
-                              <Trash2 className="mr-2 h-2 w-2 md:h-3 md:w-3" />
+                              <Trash2 className="hidden md:inline mr-2 h-2 w-2 md:h-3 md:w-3" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
