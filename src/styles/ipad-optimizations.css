@@ -97,18 +97,18 @@
     margin-bottom: 1.5rem !important;
   }
   
-  /* Card Spacing */
+  /* Card Spacing - Reduced margin between cards */
   .card,
   [class*="card"] {
     border-radius: 12px !important;
     padding: 1.5rem !important;
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.5rem !important; /* Reduced from 1rem to 0.5rem */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   }
   
-  /* Grid Systems */
+  /* Grid Systems - Reduced gap between cards */
   .grid {
-    gap: 1.5rem !important;
+    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
   }
   
   /* Typography Adjustments - Reduced descriptor text by half */
@@ -224,16 +224,16 @@
     padding: 2rem !important;
   }
   
-  /* Media Library Grid */
+  /* Media Library Grid - Reduced gap */
   .media-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
-    gap: 1.5rem !important;
+    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
   }
   
-  /* Event Cards */
+  /* Event Cards - Reduced margin */
   .event-card {
     padding: 1.5rem !important;
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.5rem !important; /* Reduced from 1rem to 0.5rem */
   }
   
   /* Profile Forms */
@@ -251,10 +251,10 @@
     padding: 1rem 1.5rem !important;
   }
   
-  /* Store Product Grid */
+  /* Store Product Grid - Reduced gap */
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
-    gap: 1.5rem !important;
+    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
   }
   
   /* Member Cards */
@@ -342,7 +342,7 @@
   }
   
   .grid {
-    gap: 2rem !important;
+    gap: 1rem !important; /* Slightly larger gap for larger iPad Pro */
   }
   
   .card {
