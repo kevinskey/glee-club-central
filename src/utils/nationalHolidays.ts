@@ -29,6 +29,15 @@ const getFourthThursdayOfMonth = (year: number, month: number): Date => {
   return getNthDayOfMonth(year, month, 4, 4); // 4 for Thursday, 4 for the fourth occurrence
 };
 
+// Helper function to get the last Monday of a month
+const getLastMondayOfMonth = (year: number, month: number): Date => {
+  const date = new Date(year, month + 1, 0); // Last day of the month
+  while (date.getDay() !== 1) {
+    date.setDate(date.getDate() - 1);
+  }
+  return date;
+};
+
 export const getNationalHolidays = (year: number): Holiday[] => {
   const holidays: Holiday[] = [
     {
@@ -55,7 +64,7 @@ export const getNationalHolidays = (year: number): Holiday[] => {
     {
       id: `memorial-day-${year}`,
       title: "Memorial Day",
-      date: new Date(year, 4, 31), // Last Monday of May
+      date: getLastMondayOfMonth(year, 4), // Last Monday of May
       description: "Honors those who have died in military service",
       imageUrl: "/lovable-uploads/memorial-day.jpg"
     },
