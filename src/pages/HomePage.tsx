@@ -20,7 +20,9 @@ export default function HomePage() {
   const { trackFeatureUsage } = useAnalyticsTracking();
 
   useEffect(() => {
+    console.log('HomePage: Component mounted');
     const timer = setTimeout(() => {
+      console.log('HomePage: Initial loading complete');
       setIsLoading(false);
       // Track homepage feature usage
       trackFeatureUsage('homepage_loaded', {
@@ -35,8 +37,11 @@ export default function HomePage() {
 
   // Show loader while initial page is loading, but don't wait for data indefinitely
   if (isLoading) {
+    console.log('HomePage: Showing loader');
     return <HomePageLoader />;
   }
+
+  console.log('HomePage: Rendering main content');
 
   return (
     <div className="min-h-screen bg-background">
