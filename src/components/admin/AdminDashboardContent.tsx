@@ -52,9 +52,6 @@ export function AdminDashboardContent() {
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair mb-2">
           Welcome back, {profile?.first_name || 'Admin'}! 👋
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300">
-          Here's what's happening with your Glee Club today.
-        </p>
       </div>
 
       {/* Admin Modules */}
