@@ -45,17 +45,26 @@ export function PlaylistPlayer({ playlist, className = "" }: PlaylistPlayerProps
       // Replay current track - the MediaPlayer will handle this
       return;
     }
-    
-    let nextIndex = currentTrackIndex + 1;
-    
-    if (nextIndex >= playlist.tracks.length) {
-      if (repeatMode === 'playlist') {
-        nextIndex = 0;
-      } else {
-        return; // End of playlist
+
+    let nextIndex: number;
+    if (isShuffled) {
+      if (playlist.tracks.length <= 1) {
+        return;
+      }
+      do {
+        nextIndex = Math.floor(Math.random() * playlist.tracks.length);
+      } while (nextIndex === currentTrackIndex && playlist.tracks.length > 1);
+    } else {
+      nextIndex = currentTrackIndex + 1;
+      if (nextIndex >= playlist.tracks.length) {
+        if (repeatMode === 'playlist') {
+          nextIndex = 0;
+        } else {
+          return; // End of playlist
+        }
       }
     }
-    
+
     setCurrentTrackIndex(nextIndex);
   };
 
@@ -66,7 +75,6 @@ export function PlaylistPlayer({ playlist, className = "" }: PlaylistPlayerProps
 
   const toggleShuffle = () => {
     setIsShuffled(!isShuffled);
-    // TODO: Implement shuffle logic
   };
 
   const cycleRepeatMode = () => {
