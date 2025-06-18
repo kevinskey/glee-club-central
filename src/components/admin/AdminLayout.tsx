@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { AdminUnifiedHeader } from './AdminUnifiedHeader';
 import { AdminSidebar } from './AdminSidebar';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 
@@ -9,18 +8,14 @@ export const AdminLayout: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminUnifiedHeader />
+    <div className="min-h-screen bg-background flex">
+      <AdminSidebar />
       
-      <div className="flex">
-        {!isMobile && <AdminSidebar />}
-        
-        <main className={`flex-1 min-h-[calc(100vh-5rem)] admin-main ${!isMobile ? 'ml-64' : ''}`}>
-          <div className={isMobile ? 'p-4' : 'p-6'}>
-            <Outlet />
-          </div>
-        </main>
-      </div>
+      <main className={`flex-1 min-h-screen ${!isMobile ? 'ml-64' : 'ml-0'}`}>
+        <div className="p-6">
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 };

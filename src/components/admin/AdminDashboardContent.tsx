@@ -1,37 +1,100 @@
 
 import React from 'react';
-import { UnifiedAdminModules } from '@/components/admin/UnifiedAdminModules';
-import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
-import { EditRoleTagsPanel } from '@/components/admin/EditRoleTagsPanel';
+import { UnifiedAdminModules } from './UnifiedAdminModules';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  Users,
+  Calendar,
+  BarChart3,
+  Settings
+} from 'lucide-react';
 
 export function AdminDashboardContent() {
-  const { user, profile } = useAuth();
-  
-  const isAdminRole = profile?.role === 'admin' || user?.email === 'kevinskey@mac.com';
+  const { profile } = useAuth();
+
+  const quickStats = [
+    {
+      title: 'Total Members',
+      value: '42',
+      icon: Users,
+      change: '+3 this month',
+      color: 'text-blue-600'
+    },
+    {
+      title: 'Upcoming Events',
+      value: '8',
+      icon: Calendar,
+      change: '2 this week',
+      color: 'text-green-600'
+    },
+    {
+      title: 'Analytics Views',
+      value: '1,234',
+      icon: BarChart3,
+      change: '+12% this week',
+      color: 'text-purple-600'
+    },
+    {
+      title: 'System Health',
+      value: '99.9%',
+      icon: Settings,
+      change: 'All systems operational',
+      color: 'text-emerald-600'
+    }
+  ];
 
   return (
-    <div className="w-full max-w-full space-y-8">
-      {/* Admin Modules - Full Width */}
-      <div className="w-full">
-        <UnifiedAdminModules />
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Welcome back, {profile?.first_name || 'Admin'}! 👋
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Here's what's happening with your Glee Club today.
+        </p>
       </div>
 
-      {/* Two Column Layout for Desktop */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
-        {/* Left Column */}
-        <div className="space-y-6">
-          {/* Edit Role Tags Panel - Only for Admin users */}
-          {isAdminRole && (
-            <EditRoleTagsPanel />
-          )}
-        </div>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {quickStats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                <Icon className={`h-4 w-4 ${stat.color}`} />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground">
+                  {stat.change}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Recent Activity */}
-          <AdminRecentActivity />
+      {/* Admin Modules */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Administration</h2>
+            <p className="text-muted-foreground">
+              Manage all aspects of your Glee Club
+            </p>
+          </div>
+          <Badge variant="outline" className="text-sm">
+            Admin Access
+          </Badge>
         </div>
+        
+        <UnifiedAdminModules />
       </div>
     </div>
   );
