@@ -22,9 +22,9 @@ export default function AdministrationPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-center glass-card p-8 rounded-2xl">
+        <div className="text-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0072CE] mx-auto mb-4"></div>
-          <p className="text-body text-muted-foreground">Loading administration panel...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading administration panel...</p>
         </div>
       </div>
     );
@@ -97,28 +97,28 @@ export default function AdministrationPage() {
   ];
 
   return (
-    <div className="px-1 sm:px-2 md:px-3 lg:px-4 py-6 space-y-8">
-      <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
-        <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
+    <div className="p-6 space-y-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair mb-2">
           Administration
         </h1>
-        <p className="text-subhead text-muted-foreground mt-2">
+        <p className="text-lg text-gray-600 dark:text-gray-300">
           Manage all aspects of the Spelman Glee Club
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adminModules.map((module, index) => (
-          <Card key={module.href} className="glass-card glass-hover rounded-2xl border-white/20 animate-glass-scale" style={{ animationDelay: `${index * 50}ms` }}>
+          <Card key={module.href} className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-4">
               <div className={`w-12 h-12 ${module.color} rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg`}>
                 {module.icon}
               </div>
-              <CardTitle className="text-subhead font-playfair text-foreground">{module.title}</CardTitle>
-              <CardDescription className="text-body text-muted-foreground">{module.description}</CardDescription>
+              <CardTitle className="text-xl font-bold text-gray-900 dark:text-white font-playfair">{module.title}</CardTitle>
+              <CardDescription className="text-gray-600 dark:text-gray-300">{module.description}</CardDescription>
             </CardHeader>
             <CardContent className="pt-0">
-              <Button asChild className="w-full glass-button-primary rounded-xl">
+              <Button asChild className="w-full bg-[#0072CE] hover:bg-[#0072CE]/90 text-white">
                 <Link to={module.href}>
                   Access Module
                 </Link>

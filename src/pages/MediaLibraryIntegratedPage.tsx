@@ -38,8 +38,8 @@ const MediaLibraryIntegratedPage = () => {
   };
 
   return (
-    <div className="px-1 sm:px-2 md:px-3 lg:px-4 py-6 space-y-8">
-      <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
+    <div className="p-6 space-y-6">
+      <div className="mb-8">
         <PageHeader
           title="Media Library"
           description="Manage and use media across the site"
@@ -50,10 +50,10 @@ const MediaLibraryIntegratedPage = () => {
       <div className="space-y-6">
         {/* Upload button for mobile/tablet friendly access */}
         {canUpload && (
-          <div className="glass-card p-4 rounded-2xl">
+          <div className="flex justify-end">
             <Button 
               onClick={handleOpenUploadModal}
-              className="glass-button-primary rounded-xl min-h-[44px] w-full sm:w-auto"
+              className="bg-[#0072CE] hover:bg-[#0072CE]/90 text-white min-h-[44px]"
             >
               Upload New Media
             </Button>
@@ -61,13 +61,11 @@ const MediaLibraryIntegratedPage = () => {
         )}
 
         {/* Responsive Media Library */}
-        <div className="glass-card p-4 sm:p-6 rounded-2xl">
-          <ResponsiveMediaLibrary
-            isAdminView={canEdit || canDelete}
-            showUpload={false} // We handle upload separately above
-            onUploadComplete={handleUploadComplete}
-          />
-        </div>
+        <ResponsiveMediaLibrary
+          isAdminView={canEdit || canDelete}
+          showUpload={false} // We handle upload separately above
+          onUploadComplete={handleUploadComplete}
+        />
       </div>
       
       {/* Upload Modal */}

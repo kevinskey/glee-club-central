@@ -46,27 +46,27 @@ export function AdminDashboardContent() {
   ];
 
   return (
-    <div className="px-1 sm:px-2 md:px-3 lg:px-4 py-6 space-y-8">
+    <div className="p-6 space-y-8">
       {/* Welcome Section */}
-      <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
-        <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair mb-2">
           Welcome back, {profile?.first_name || 'Admin'}! 👋
         </h1>
-        <p className="text-subhead text-muted-foreground mt-2">
+        <p className="text-lg text-gray-600 dark:text-gray-300">
           Here's what's happening with your Glee Club today.
         </p>
       </div>
 
       {/* Admin Modules */}
-      <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-headline text-foreground font-playfair">Administration</h2>
-            <p className="text-body text-muted-foreground mt-1">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-playfair">Administration</h2>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Manage all aspects of your Glee Club
             </p>
           </div>
-          <Badge variant="outline" className="glass-button px-3 py-1 text-xs border-[#0072CE]/30">
+          <Badge variant="outline" className="px-3 py-1 text-xs">
             Admin Access
           </Badge>
         </div>
@@ -79,16 +79,16 @@ export function AdminDashboardContent() {
         {quickStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index} className="glass-card glass-hover rounded-2xl border-white/20 animate-glass-scale" style={{ animationDelay: `${index * 100}ms` }}>
+            <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-caption font-medium text-foreground">
+                <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
                   {stat.title}
                 </CardTitle>
                 <Icon className={`h-5 w-5 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-headline font-bold text-foreground">{stat.value}</div>
-                <p className="text-caption text-muted-foreground mt-1">
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                   {stat.change}
                 </p>
               </CardContent>
