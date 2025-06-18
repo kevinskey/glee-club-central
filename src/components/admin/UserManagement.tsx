@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, Search, Plus, RefreshCw, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music, Menu, ChevronDown } from "lucide-react";
+import { Users, Search, Plus, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music, Menu, ChevronDown } from "lucide-react";
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
@@ -106,10 +105,6 @@ export default function UserManagement() {
     refreshUsers();
   };
 
-  const handleRefresh = async () => {
-    await refreshUsers();
-  };
-
   const filteredUsers = transformedUsers.filter(user => 
     user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,10 +132,6 @@ export default function UserManagement() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleRefresh} disabled={isLoading}>
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                  Refresh Users
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleAddUser}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add User
@@ -278,10 +269,6 @@ export default function UserManagement() {
             <p className="text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleRefresh} variant="outline" disabled={isLoading}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
             <Button onClick={handleAddUser}>
               <Plus className="mr-2 h-4 w-4" />
               Add User
