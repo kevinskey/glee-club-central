@@ -77,15 +77,15 @@ export function AdminDashboardContent() {
           const Icon = stat.icon;
           return (
             <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-900 dark:text-white">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+                <CardTitle className="text-xs font-medium text-gray-900 dark:text-white">
                   {stat.title}
                 </CardTitle>
-                <Icon className={`h-5 w-5 ${stat.color}`} />
+                <Icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              <CardContent className="pt-0 pb-2">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                   {stat.change}
                 </p>
               </CardContent>
