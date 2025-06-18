@@ -35,10 +35,10 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for existing connection
-    const savedToken = localStorage.getItem('soundcloud_access_token');
-    const savedUser = localStorage.getItem('soundcloud_user');
-    
+    // Check for existing connection in sessionStorage
+    const savedToken = sessionStorage.getItem('soundcloud_access_token');
+    const savedUser = sessionStorage.getItem('soundcloud_user');
+
     if (savedToken && savedUser) {
       setAccessToken(savedToken);
       setConnectedUser(JSON.parse(savedUser));
@@ -58,6 +58,8 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
       const scope = 'non-expiring';
       
       const authUrl = `https://soundcloud.com/connect?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+
+      // TODO: Exchange the code server-side and store the resulting tokens securely
       
       // For demo purposes, we'll simulate a successful connection
       setTimeout(() => {
@@ -77,9 +79,9 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
         setAccessToken(mockToken);
         setConnectedUser(mockUser);
         
-        // Store in localStorage
-        localStorage.setItem('soundcloud_access_token', mockToken);
-        localStorage.setItem('soundcloud_user', JSON.stringify(mockUser));
+        // Store in sessionStorage for short-lived access
+        sessionStorage.setItem('soundcloud_access_token', mockToken);
+        sessionStorage.setItem('soundcloud_user', JSON.stringify(mockUser));
         
         onAuthSuccess(mockToken, mockUser);
         setIsConnecting(false);
@@ -105,8 +107,8 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
   };
 
   const handleDisconnect = () => {
-    localStorage.removeItem('soundcloud_access_token');
-    localStorage.removeItem('soundcloud_user');
+    sessionStorage.removeItem('soundcloud_access_token');
+    sessionStorage.removeItem('soundcloud_user');
     setAccessToken(null);
     setConnectedUser(null);
     
