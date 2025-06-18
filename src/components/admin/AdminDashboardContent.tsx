@@ -47,7 +47,7 @@ export function AdminDashboardContent() {
 
   return (
     <div className="w-full min-h-screen flex justify-center px-2 py-4 sm:px-4 md:px-6 lg:px-8">
-      <div className="w-[85vw] space-y-6">
+      <div className="w-[95vw] space-y-6">
         {/* Compact Welcome Section */}
         <div className="px-2">
           <h1 className="text-2xl font-bold tracking-tight">
