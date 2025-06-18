@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -156,39 +155,43 @@ export function UnifiedAdminModules() {
   return (
     <div className="w-full">
       <Card className="w-full">
-        <CardHeader className="pb-6">
-          <CardTitle className="flex items-center justify-between text-xl font-bold">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between text-lg font-bold">
             Admin Modules
-            <Badge variant="secondary" className="text-sm font-medium">{sortedModules.length} available</Badge>
+            <Badge variant="secondary" className="text-xs font-medium">{sortedModules.length} available</Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0 px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
+        <CardContent className="pt-0 px-4">
+          <div className="space-y-2">
             {sortedModules.map((module) => (
               <div
                 key={module.id}
-                className="group cursor-pointer flex flex-col items-center justify-center p-6 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] min-h-[160px] aspect-square"
+                className="group cursor-pointer flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-sm active:scale-[0.98]"
                 onClick={() => navigate(module.path)}
               >
-                <div className={`${module.color} text-white rounded-xl p-4 group-hover:scale-110 transition-transform duration-200 mb-4 shadow-sm`}>
+                <div className={`${module.color} text-white rounded-lg p-2 mr-3 group-hover:scale-105 transition-transform duration-200 shadow-sm flex-shrink-0`}>
                   {module.icon}
                 </div>
-                <span className="text-sm font-semibold text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
-                  {module.title}
-                </span>
-                <span className="text-xs text-muted-foreground text-center leading-tight opacity-80">
-                  {module.description}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-foreground group-hover:text-glee-spelman transition-colors duration-200 truncate">
+                      {module.title}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground line-clamp-1">
+                    {module.description}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
           
           {sortedModules.length === 0 && (
-            <div className="p-12 text-center border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-              <div className="text-muted-foreground mb-3 text-base font-medium">
+            <div className="p-8 text-center border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+              <div className="text-muted-foreground mb-2 text-sm font-medium">
                 No modules available for your role
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Contact an administrator if you need access to specific features
               </p>
             </div>
