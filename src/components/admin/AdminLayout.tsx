@@ -1,17 +1,14 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { AdminSidebar } from './AdminSidebar';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { AdminTopNavigation } from './AdminTopNavigation';
 
 export const AdminLayout: React.FC = () => {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-
   return (
-    <div className="min-h-screen bg-background flex">
-      <AdminSidebar />
+    <div className="min-h-screen bg-background">
+      <AdminTopNavigation />
       
-      <main className={`flex-1 min-h-screen ${!isMobile ? 'ml-64' : 'ml-0'}`}>
+      <main className="w-full">
         <div className="p-6">
           <Outlet />
         </div>

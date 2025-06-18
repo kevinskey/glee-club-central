@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,160 +18,299 @@ import {
   Settings,
   BarChart3,
   ShoppingCart,
-  Megaphone,
+  MessageSquare,
   Image,
-  ImageIcon,
   Home,
-  Menu,
-  ChevronDown,
   Music,
+  Video,
+  FileText,
+  Megaphone,
+  DollarSign,
+  UserCog,
+  Shield,
+  Presentation,
+  Package,
+  ChevronDown,
+  LogOut,
+  Bell
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-const navigationGroups = [
-  {
-    label: 'Dashboard',
-    items: [
-      { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
-      { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-    ]
-  },
-  {
-    label: 'Content',
-    items: [
-      { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-      { to: '/admin/hero-manager', icon: ImageIcon, label: 'Hero Manager' },
-      { to: '/admin/media-library', icon: Image, label: 'Media Library' },
-      { to: '/admin/music', icon: Music, label: 'Music Player' },
-      { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
-    ]
-  },
-  {
-    label: 'Management',
-    items: [
-      { to: '/admin/users', icon: Users, label: 'Users' },
-      { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
-      { to: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
-    ]
-  },
-  {
-    label: 'System',
-    items: [
-      { to: '/admin/settings', icon: Settings, label: 'Settings' },
-    ]
-  }
-];
+const navigationSections = {
+  core: [
+    { to: '/', icon: Home, label: 'Back to Site' },
+    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+    { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
+  ],
+  users: [
+    { to: '/admin/users', icon: Users, label: 'Members' },
+    { to: '/admin/user-roles', icon: UserCog, label: 'User Roles' },
+    { to: '/admin/permissions', icon: Shield, label: 'Permissions' },
+  ],
+  content: [
+    { to: '/admin/media-library', icon: Image, label: 'Media Library' },
+    { to: '/admin/music', icon: Music, label: 'Music Player' },
+    { to: '/admin/videos', icon: Video, label: 'Videos' },
+    { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides' },
+    { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
+    { to: '/admin/handbook', icon: FileText, label: 'Handbook' },
+  ],
+  business: [
+    { to: '/admin/financial', icon: DollarSign, label: 'Financial' },
+    { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
+    { to: '/admin/orders', icon: Package, label: 'Orders' },
+    { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
+  ],
+  system: [
+    { to: '/admin/settings', icon: Settings, label: 'Settings' },
+  ]
+};
 
 export const AdminTopNavigation: React.FC = () => {
+  const { user, profile, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActivePath = (path: string, end?: boolean) => {
-    if (end) {
-      return location.pathname === path;
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
-    return location.pathname.startsWith(path);
   };
 
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    setMobileMenuOpen(false);
+  const getInitials = (firstName?: string, lastName?: string) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
+  };
+
+  const isActiveSection = (items: typeof navigationSections.core) => {
+    return items.some(item => location.pathname === item.to || 
+      (item.to !== '/admin' && location.pathname.startsWith(item.to)));
+  };
+
+  const isActiveItem = (to: string) => {
+    if (to === '/admin') {
+      return location.pathname === '/admin';
+    }
+    return location.pathname === to || location.pathname.startsWith(to);
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
-      <div className="flex items-center justify-between">
-        {/* Logo/Brand */}
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between px-6">
+        {/* Logo */}
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-8 w-8 p-0"
-            title="Go to Public Homepage"
-          >
-            <Home className="h-4 w-4" />
-          </Button>
-          <h1 className="text-base font-semibold text-gray-900 dark:text-white">
-            Admin Panel
-          </h1>
+          <div className="w-8 h-8 bg-gradient-to-br from-glee-spelman to-orange-500 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">G</span>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
+          </div>
         </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-1">
-          {navigationGroups.map((group) => (
-            <DropdownMenu key={group.label}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 h-8 px-2 text-sm"
-                >
-                  {group.label}
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = isActivePath(item.to, item.end);
-                  return (
-                    <DropdownMenuItem
-                      key={item.to}
-                      onClick={() => handleNavigate(item.to)}
-                      className={cn(
-                        "flex items-center gap-2 cursor-pointer",
-                        isActive && "bg-glee-spelman text-white"
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ))}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <DropdownMenu open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        {/* Navigation Dropdowns */}
+        <div className="flex items-center gap-2">
+          {/* Core Navigation */}
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <Menu className="h-4 w-4" />
+              <Button 
+                variant={isActiveSection(navigationSections.core) ? "default" : "ghost"} 
+                size="sm"
+                className="gap-2"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Core
+                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              {navigationGroups.map((group, groupIndex) => (
-                <div key={group.label}>
-                  <div className="px-2 py-1.5 text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {group.label}
-                  </div>
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isActivePath(item.to, item.end);
-                    return (
-                      <DropdownMenuItem
-                        key={item.to}
-                        onClick={() => handleNavigate(item.to)}
-                        className={cn(
-                          "flex items-center gap-2 cursor-pointer ml-2",
-                          isActive && "bg-glee-spelman text-white"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {item.label}
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  {groupIndex < navigationGroups.length - 1 && <DropdownMenuSeparator />}
-                </div>
-              ))}
+            <DropdownMenuContent className="w-56" align="start">
+              {navigationSections.core.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem 
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={isActiveItem(item.to) ? "bg-accent" : ""}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Users Management */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={isActiveSection(navigationSections.users) ? "default" : "ghost"} 
+                size="sm"
+                className="gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Users
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              {navigationSections.users.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem 
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={isActiveItem(item.to) ? "bg-accent" : ""}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Content Management */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={isActiveSection(navigationSections.content) ? "default" : "ghost"} 
+                size="sm"
+                className="gap-2"
+              >
+                <Image className="h-4 w-4" />
+                Content
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              {navigationSections.content.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem 
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={isActiveItem(item.to) ? "bg-accent" : ""}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Business Management */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={isActiveSection(navigationSections.business) ? "default" : "ghost"} 
+                size="sm"
+                className="gap-2"
+              >
+                <DollarSign className="h-4 w-4" />
+                Business
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              {navigationSections.business.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem 
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={isActiveItem(item.to) ? "bg-accent" : ""}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* System Settings */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={isActiveSection(navigationSections.system) ? "default" : "ghost"} 
+                size="sm"
+                className="gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                System
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              {navigationSections.system.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <DropdownMenuItem 
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className={isActiveItem(item.to) ? "bg-accent" : ""}
+                  >
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{item.label}</span>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-4">
+          {/* Notifications */}
+          <Button variant="ghost" size="sm" className="relative">
+            <Bell className="h-4 w-4" />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+              3
+            </span>
+          </Button>
+
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
+                  <AvatarFallback className="bg-glee-spelman text-white text-xs">
+                    {getInitials(profile?.first_name, profile?.last_name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:block">
+                  {profile?.first_name} {profile?.last_name}
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium">
+                  {profile?.first_name} {profile?.last_name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Profile Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
-    </nav>
+    </header>
   );
 };
