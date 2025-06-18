@@ -13,6 +13,20 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+function generateCodeVerifier(length = 128): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  return Array.from(array, (x) => chars[x % chars.length]).join('');
+}
+
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const data = new TextEncoder().encode(verifier);
+  const digest = await window.crypto.subtle.digest('SHA-256', data);
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(digest)));
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 interface SoundCloudUser {
   id: string;
   username: string;
@@ -49,51 +63,86 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
     setIsConnecting(true);
     
     try {
-      // In a real implementation, this would redirect to SoundCloud OAuth
-      // For now, we'll simulate the connection process
-      
-      // Simulate OAuth redirect
-      const clientId = 'your_soundcloud_client_id'; // This would be from your SoundCloud app
-      const redirectUri = `${window.location.origin}/soundcloud/callback`;
-      const scope = 'non-expiring';
-      
-      const authUrl = `https://soundcloud.com/connect?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-      // TODO: Exchange the code server-side and store the resulting tokens securely
-      
-      // For demo purposes, we'll simulate a successful connection
-      setTimeout(() => {
-        const mockUser: SoundCloudUser = {
-          id: '12345',
-          username: 'your_username',
-          display_name: 'Your Name',
-          avatar_url: 'https://i1.sndcdn.com/avatars-default-large.png',
-          followers_count: 150,
-          followings_count: 75,
-          track_count: 25,
-          playlist_count: 8
-        };
-        
-        const mockToken = 'mock_access_token_' + Date.now();
-        
-        setAccessToken(mockToken);
-        setConnectedUser(mockUser);
-        
-        // Store in sessionStorage for short-lived access
-        sessionStorage.setItem('soundcloud_access_token', mockToken);
-        sessionStorage.setItem('soundcloud_user', JSON.stringify(mockUser));
-        
-        onAuthSuccess(mockToken, mockUser);
-        setIsConnecting(false);
-        
-        toast({
-          title: "Connected to SoundCloud!",
-          description: `Successfully connected as ${mockUser.display_name}`,
-        });
-      }, 2000);
-      
-      // In a real app, you would do:
-      // window.location.href = authUrl;
+      const authRes = await fetch('/functions/v1/soundcloud-oauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'authorize',
+          codeChallenge,
+          codeChallengeMethod: 'S256'
+        })
+      });
+
+      const authData = await authRes.json();
+      if (!authRes.ok) {
+        throw new Error(authData.error || 'Failed to start SoundCloud OAuth');
+      }
+
+      const popup = window.open(authData.authUrl, '_blank', 'width=600,height=700');
+      if (!popup) {
+        throw new Error('Unable to open authorization window');
+      }
+
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        const { type, code, error } = event.data || {};
+
+        if (type === 'SOUNDCLOUD_OAUTH_SUCCESS') {
+          window.removeEventListener('message', handleMessage);
+          try {
+            const tokenRes = await fetch('/functions/v1/soundcloud-oauth', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'callback',
+                code,
+                state: authData.state,
+                codeVerifier
+              })
+            });
+
+            const tokenData = await tokenRes.json();
+            if (!tokenRes.ok || !tokenData.success) {
+              throw new Error(tokenData.error || 'Authentication failed');
+            }
+
+            setAccessToken(tokenData.accessToken);
+            setConnectedUser(tokenData.user);
+            sessionStorage.setItem('soundcloud_access_token', tokenData.accessToken);
+            sessionStorage.setItem('soundcloud_user', JSON.stringify(tokenData.user));
+            onAuthSuccess(tokenData.accessToken, tokenData.user);
+
+            toast({
+              title: 'Connected to SoundCloud!',
+              description: `Successfully connected as ${tokenData.user.display_name}`,
+            });
+          } catch (err) {
+            console.error('SoundCloud token exchange failed:', err);
+            toast({
+              title: 'Connection failed',
+              description: 'Failed to connect to SoundCloud. Please try again.',
+              variant: 'destructive',
+            });
+          } finally {
+            setIsConnecting(false);
+            popup.close();
+          }
+        } else if (type === 'SOUNDCLOUD_OAUTH_ERROR') {
+          window.removeEventListener('message', handleMessage);
+          setIsConnecting(false);
+          popup.close();
+          toast({
+            title: 'Connection failed',
+            description: error || 'Authorization failed.',
+            variant: 'destructive',
+          });
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
       
     } catch (error) {
       console.error('SoundCloud connection error:', error);
