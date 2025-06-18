@@ -46,18 +46,18 @@ export function AdminDashboardContent() {
   ];
 
   return (
-    <div className="w-full min-h-screen">
-      <div className="w-full space-y-0">
+    <div className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
         {/* Admin Modules - moved to top */}
-        <div>
-          <div className="flex items-center justify-between">
+        <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight">Administration</h2>
-              <p className="text-muted-foreground text-sm">
+              <h2 className="text-headline text-foreground font-playfair">Administration</h2>
+              <p className="text-body text-muted-foreground mt-1">
                 Manage all aspects of your Glee Club
               </p>
             </div>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="glass-button px-3 py-1 text-xs border-[#0072CE]/30">
               Admin Access
             </Badge>
           </div>
@@ -66,30 +66,30 @@ export function AdminDashboardContent() {
         </div>
 
         {/* Welcome Section */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+        <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+          <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
             Welcome back, {profile?.first_name || 'Admin'}! 👋
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-subhead text-muted-foreground mt-2">
             Here's what's happening with your Glee Club today.
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index} className="p-0 m-0 rounded-none border-0">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 m-0">
-                  <CardTitle className="text-sm font-medium">
+              <Card key={index} className="glass-card glass-hover rounded-2xl border-white/20 animate-glass-scale" style={{ animationDelay: `${index * 100}ms` }}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-caption font-medium text-foreground">
                     {stat.title}
                   </CardTitle>
-                  <Icon className={`h-4 w-4 ${stat.color}`} />
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
                 </CardHeader>
-                <CardContent className="p-0 m-0">
-                  <div className="text-xl font-bold">{stat.value}</div>
-                  <p className="text-xs text-muted-foreground">
+                <CardContent>
+                  <div className="text-headline font-bold text-foreground">{stat.value}</div>
+                  <p className="text-caption text-muted-foreground mt-1">
                     {stat.change}
                   </p>
                 </CardContent>

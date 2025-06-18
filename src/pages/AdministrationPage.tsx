@@ -22,9 +22,9 @@ export default function AdministrationPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading administration panel...</p>
+        <div className="text-center glass-card p-8 rounded-2xl">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0072CE] mx-auto mb-4"></div>
+          <p className="text-body text-muted-foreground">Loading administration panel...</p>
         </div>
       </div>
     );
@@ -97,26 +97,28 @@ export default function AdministrationPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Administration</h1>
-        <p className="text-muted-foreground">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+        <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
+          Administration
+        </h1>
+        <p className="text-subhead text-muted-foreground mt-2">
           Manage all aspects of the Spelman Glee Club
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {adminModules.map((module) => (
-          <Card key={module.href} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className={`w-12 h-12 ${module.color} rounded-lg flex items-center justify-center text-white mb-4`}>
+        {adminModules.map((module, index) => (
+          <Card key={module.href} className="glass-card glass-hover rounded-2xl border-white/20 animate-glass-scale" style={{ animationDelay: `${index * 50}ms` }}>
+            <CardHeader className="pb-4">
+              <div className={`w-12 h-12 ${module.color} rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg`}>
                 {module.icon}
               </div>
-              <CardTitle>{module.title}</CardTitle>
-              <CardDescription>{module.description}</CardDescription>
+              <CardTitle className="text-subhead font-playfair text-foreground">{module.title}</CardTitle>
+              <CardDescription className="text-body text-muted-foreground">{module.description}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button asChild className="w-full">
+            <CardContent className="pt-0">
+              <Button asChild className="w-full glass-button-primary rounded-xl">
                 <Link to={module.href}>
                   Access Module
                 </Link>

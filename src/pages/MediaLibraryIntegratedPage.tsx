@@ -38,20 +38,22 @@ const MediaLibraryIntegratedPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <PageHeader
-        title="Media Library"
-        description="Manage and use media across the site"
-        icon={<LibraryIcon className="h-6 w-6" />}
-      />
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+        <PageHeader
+          title="Media Library"
+          description="Manage and use media across the site"
+          icon={<LibraryIcon className="h-6 w-6 text-[#0072CE]" />}
+        />
+      </div>
       
-      <div className="mt-6">
+      <div className="space-y-6">
         {/* Upload button for mobile/tablet friendly access */}
         {canUpload && (
-          <div className="mb-6">
+          <div className="glass-card p-4 rounded-2xl">
             <Button 
               onClick={handleOpenUploadModal}
-              className="bg-glee-purple hover:bg-glee-purple/90 min-h-[44px] w-full sm:w-auto"
+              className="glass-button-primary rounded-xl min-h-[44px] w-full sm:w-auto"
             >
               Upload New Media
             </Button>
@@ -59,11 +61,13 @@ const MediaLibraryIntegratedPage = () => {
         )}
 
         {/* Responsive Media Library */}
-        <ResponsiveMediaLibrary
-          isAdminView={canEdit || canDelete}
-          showUpload={false} // We handle upload separately above
-          onUploadComplete={handleUploadComplete}
-        />
+        <div className="glass-card p-6 rounded-2xl">
+          <ResponsiveMediaLibrary
+            isAdminView={canEdit || canDelete}
+            showUpload={false} // We handle upload separately above
+            onUploadComplete={handleUploadComplete}
+          />
+        </div>
       </div>
       
       {/* Upload Modal */}

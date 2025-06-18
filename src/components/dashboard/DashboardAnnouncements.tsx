@@ -94,10 +94,10 @@ export function DashboardAnnouncements() {
   };
 
   const getPriorityBadge = (type: string, isRead: boolean) => {
-    const baseClasses = "text-xs";
+    const baseClasses = "text-xs glass-button";
     
     if (isRead) {
-      return <Badge variant="outline" className={baseClasses}>Read</Badge>;
+      return <Badge variant="outline" className={`${baseClasses} border-white/30`}>Read</Badge>;
     }
 
     switch(type) {
@@ -106,28 +106,28 @@ export function DashboardAnnouncements() {
       case 'warning':
         return <Badge variant="secondary" className={baseClasses}>Warning</Badge>;
       case 'success':
-        return <Badge className={`${baseClasses} bg-green-500 hover:bg-green-600`}>Success</Badge>;
+        return <Badge className={`${baseClasses} bg-green-500/80 hover:bg-green-600/80`}>Success</Badge>;
       default:
-        return <Badge variant="default" className={baseClasses}>New</Badge>;
+        return <Badge variant="default" className={`${baseClasses} bg-[#0072CE]/80`}>New</Badge>;
     }
   };
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <Card>
+    <Card className="glass-card rounded-2xl border-white/20">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
-          <CardTitle className="flex items-center">
-            <Bell className="mr-2 h-5 w-5 text-amber-600" />
+          <CardTitle className="flex items-center text-subhead font-playfair text-foreground">
+            <Bell className="mr-3 h-5 w-5 text-amber-600" />
             Announcements
             {unreadCount > 0 && (
-              <Badge variant="destructive" className="ml-2 text-xs">
+              <Badge variant="destructive" className="ml-2 text-xs glass-button">
                 {unreadCount} new
               </Badge>
             )}
           </CardTitle>
-          <Button variant="ghost" size="sm" onClick={fetchNotifications}>
+          <Button variant="ghost" size="sm" onClick={fetchNotifications} className="glass-button rounded-xl">
             Refresh
           </Button>
         </div>
@@ -136,19 +136,20 @@ export function DashboardAnnouncements() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-4 text-muted-foreground">
-              Loading notifications...
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0072CE] mx-auto mb-2"></div>
+              <p className="text-body">Loading notifications...</p>
             </div>
           ) : notifications.length > 0 ? (
             notifications.map(notification => (
               <div 
                 key={notification.id} 
-                className={`border rounded-md p-3 ${
-                  !notification.is_read ? 'bg-blue-50/50 border-blue-200' : ''
+                className={`glass-card border border-white/20 rounded-xl p-3 glass-hover ${
+                  !notification.is_read ? 'bg-[#0072CE]/5 border-[#0072CE]/30' : ''
                 }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2 flex-1">
-                    <h4 className={`font-medium ${!notification.is_read ? 'text-blue-900' : ''}`}>
+                    <h4 className={`text-body font-medium ${!notification.is_read ? 'text-[#0072CE]' : 'text-foreground'}`}>
                       {notification.title}
                     </h4>
                     {getPriorityBadge(notification.type, notification.is_read)}
@@ -157,7 +158,7 @@ export function DashboardAnnouncements() {
                     )}
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-caption text-muted-foreground">
                       {format(new Date(notification.created_at), 'MMM d')}
                     </span>
                     <div className="flex gap-1">
@@ -166,7 +167,7 @@ export function DashboardAnnouncements() {
                           variant="ghost"
                           size="sm"
                           onClick={() => markAsRead(notification.id)}
-                          className="h-6 w-6 p-0"
+                          className="h-6 w-6 p-0 glass-button rounded-lg"
                         >
                           <CheckCircle className="h-3 w-3" />
                         </Button>
@@ -175,20 +176,20 @@ export function DashboardAnnouncements() {
                         variant="ghost"
                         size="sm"
                         onClick={() => dismissNotification(notification.id)}
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6 p-0 glass-button rounded-lg"
                       >
                         <X className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
                 </div>
-                <p className="text-sm">{notification.message}</p>
+                <p className="text-body text-muted-foreground">{notification.message}</p>
               </div>
             ))
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Bell className="mx-auto h-10 w-10 mb-2 opacity-30" />
-              <p>No announcements at this time</p>
+              <p className="text-body">No announcements at this time</p>
             </div>
           )}
         </div>
