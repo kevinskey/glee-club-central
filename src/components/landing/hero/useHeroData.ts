@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { HeroSlide, MediaFile } from './types';
@@ -16,7 +17,7 @@ export function useHeroData() {
     if (slides.length > 1) {
       const timer = setInterval(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-      }, 8000); // Changed from 5000 to 8000 (8 seconds)
+      }, 8000);
 
       return () => clearInterval(timer);
     }
@@ -28,6 +29,7 @@ export function useHeroData() {
         console.warn('useHeroData: Supabase not configured, showing default hero');
         setSlides([]);
         setMediaFiles({});
+        setIsLoading(false);
         return;
       }
 
@@ -120,49 +122,6 @@ export function useHeroData() {
             }
           }
 
-          // If still no media found, let's debug what's in each table
-          if (foundMedia.length === 0) {
-            console.warn('useHeroData: No media found in any table. Running debug queries...');
-            
-            // Debug: Check what's actually in media_library
-            const { data: allMediaLibrary } = await supabase
-              .from('media_library')
-              .select('id, title, file_url')
-              .limit(5);
-            console.log('useHeroData: Sample media_library entries:', allMediaLibrary);
-
-            // Debug: Check what's actually in site_images
-            const { data: allSiteImages } = await supabase
-              .from('site_images')
-              .select('id, name, file_url')
-              .limit(5);
-            console.log('useHeroData: Sample site_images entries:', allSiteImages);
-
-            // Debug: Check what's actually in products
-            const { data: allProducts } = await supabase
-              .from('products')
-              .select('id, name, image_url')
-              .not('image_url', 'is', null)
-              .limit(5);
-            console.log('useHeroData: Sample products entries:', allProducts);
-
-            // Final attempt: Try broader search for the specific media IDs
-            for (const mediaId of mediaIds) {
-              console.log(`useHeroData: Searching all tables for media ID: ${mediaId}`);
-              
-              const { data: specificMedia } = await supabase
-                .from('media_library')
-                .select('*')
-                .eq('id', mediaId);
-              
-              if (specificMedia && specificMedia.length > 0) {
-                console.log(`useHeroData: Found in media_library:`, specificMedia[0]);
-              } else {
-                console.log(`useHeroData: Media ID ${mediaId} not found in media_library`);
-              }
-            }
-          }
-
           // Create media map from found media
           if (foundMedia.length > 0) {
             const mediaMap = foundMedia.reduce((acc, media) => {
@@ -189,6 +148,9 @@ export function useHeroData() {
       }
     } catch (error) {
       console.error('useHeroData: Error in fetchHeroSlides:', error);
+      // On error, show default hero
+      setSlides([]);
+      setMediaFiles({});
     } finally {
       setIsLoading(false);
     }

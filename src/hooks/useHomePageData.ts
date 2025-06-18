@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
@@ -74,6 +75,17 @@ export const useHomePageData = () => {
 
   const fetchStoreProducts = async () => {
     try {
+      if (!supabase) {
+        console.warn('useHomePageData: Supabase not configured, using fallback products');
+        setStoreProducts([{
+          id: "product-fallback-1",
+          name: "Glee Club T-Shirt",
+          price: 25.00,
+          imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop"
+        }]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('products')
         .select('id, name, price, image_url')
