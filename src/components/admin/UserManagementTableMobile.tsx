@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UserManagementData } from '@/services/userManagementService';
 import { RotateCcw, User, Mail, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserManagementTableMobileProps {
   users: UserManagementData[];
@@ -54,6 +55,32 @@ export function UserManagementTableMobile({
       toast.success(`User ${!currentDisabled ? 'disabled' : 'enabled'} successfully`);
     } catch (error) {
       toast.error('Failed to update user status');
+    } finally {
+      setUpdatingUsers(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    }
+  };
+
+  const handlePasswordReset = async (userId: string, email: string | undefined) => {
+    if (!email) {
+      toast.error('No email found for this user');
+      return;
+    }
+
+    setUpdatingUsers(prev => new Set(prev).add(userId));
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`
+      });
+
+      if (error) throw error;
+      toast.success('Password reset email sent');
+    } catch (error) {
+      console.error('Error sending password reset email:', error);
+      toast.error('Failed to send password reset email');
     } finally {
       setUpdatingUsers(prev => {
         const next = new Set(prev);
@@ -156,10 +183,7 @@ export function UserManagementTableMobile({
                   variant="outline"
                   size="sm"
                   disabled={isUpdating}
-                  onClick={() => {
-                    // TODO: Implement password reset functionality
-                    toast.info('Password reset functionality coming soon');
-                  }}
+                  onClick={() => handlePasswordReset(user.id, user.email)}
                   className="w-full"
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
