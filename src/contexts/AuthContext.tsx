@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -132,13 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const fetchProfile = async (userId: string) => {
-    if (!checkSupabaseConfig()) return null;
-
     try {
       console.log('📡 fetchProfile: Fetching profile for user:', userId);
       
       // Use maybeSingle and only existing columns
-      const { data, error } = await supabase!
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
