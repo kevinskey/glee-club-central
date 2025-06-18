@@ -4,6 +4,7 @@ import { PageWrapper } from '@/components/ui/page-wrapper';
 import { UserOrdersTable } from '@/components/orders/UserOrdersTable';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingBag } from 'lucide-react';
+import { UserOrderDetailsDialog } from '@/components/orders/UserOrderDetailsDialog';
 
 interface UserOrder {
   id: string;
@@ -32,7 +33,13 @@ export default function MyOrdersPage() {
         </CardContent>
       </Card>
 
-      {/* TODO: Add order details modal/drawer when selectedOrder is set */}
+      {selectedOrder && (
+        <UserOrderDetailsDialog
+          order={selectedOrder}
+          isOpen={!!selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </PageWrapper>
   );
 }
