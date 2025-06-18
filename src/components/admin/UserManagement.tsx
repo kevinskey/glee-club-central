@@ -187,25 +187,38 @@ export default function UserManagement() {
                 <p className="mt-2 text-muted-foreground">Loading members...</p>
               </div>
             ) : (
-              <>
-                {/* Desktop List View */}
-                <div className="hidden lg:block">
-                  <Table>
-                    <TableHeader>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-12"></TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Voice Part</TableHead>
+                      <TableHead>Class</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Dues</TableHead>
+                      <TableHead className="w-12"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.length === 0 ? (
                       <TableRow>
-                        <TableHead className="w-12"></TableHead>
-                        <TableHead>Member</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Voice Part</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Dues</TableHead>
-                        <TableHead className="w-12"></TableHead>
+                        <TableCell colSpan={10} className="text-center py-12">
+                          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <h3 className="font-semibold mb-2">No Members Found</h3>
+                          <p className="text-muted-foreground">
+                            {users.length === 0 
+                              ? 'No members have been added yet.' 
+                              : 'No members match your search criteria.'
+                            }
+                          </p>
+                        </TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
+                    ) : (
+                      filteredUsers.map((user) => (
                         <TableRow key={user.id} className="hover:bg-muted/50">
                           <TableCell>
                             <Avatar className="h-8 w-8">
@@ -216,22 +229,22 @@ export default function UserManagement() {
                             </Avatar>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium text-sm">
-                                {user.first_name} {user.last_name}
-                              </span>
-                              <span className="text-xs text-muted-foreground flex items-center">
-                                <Mail className="mr-1 h-3 w-3" />
-                                {user.email}
-                              </span>
+                            <div className="font-medium">
+                              {user.first_name} {user.last_name}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Mail className="mr-1 h-3 w-3" />
+                              {user.email}
                             </div>
                           </TableCell>
                           <TableCell>
                             {user.phone && (
-                              <span className="text-xs text-muted-foreground flex items-center">
+                              <div className="flex items-center text-sm text-muted-foreground">
                                 <Phone className="mr-1 h-3 w-3" />
                                 {user.phone}
-                              </span>
+                              </div>
                             )}
                           </TableCell>
                           <TableCell>
@@ -286,21 +299,11 @@ export default function UserManagement() {
                             </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-                
-                {/* Mobile Table for medium screens */}
-                <div className="block lg:hidden">
-                  <UserManagementTableMobile
-                    users={filteredUsers}
-                    onRoleUpdate={handleRoleUpdate}
-                    onStatusToggle={handleStatusToggle}
-                    isLoading={isLoading}
-                  />
-                </div>
-              </>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>
