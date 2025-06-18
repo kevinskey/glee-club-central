@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function SimpleLoginPage() {
   const { login, user, isLoading } = useAuth();
@@ -19,6 +20,9 @@ export default function SimpleLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
+  // Check if Supabase is configured
+  const isSupabaseConfigured = !!supabase;
+
   useEffect(() => {
     if (user && !isLoading) {
       navigate(from, { replace: true });
@@ -27,6 +31,11 @@ export default function SimpleLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication service is not configured. Please contact support.');
+      return;
+    }
     
     if (!email || !password) {
       toast.error('Please enter both email and password');
@@ -40,7 +49,13 @@ export default function SimpleLoginPage() {
       
       if (error) {
         console.error('Login error:', error);
-        toast.error(error.message || 'Login failed');
+        if (error.message?.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please try again.');
+        } else if (error.message?.includes('not configured')) {
+          toast.error('Authentication service is not available. Please contact support.');
+        } else {
+          toast.error(error.message || 'Login failed');
+        }
       } else {
         toast.success('Login successful');
         navigate(from, { replace: true });
@@ -69,6 +84,14 @@ export default function SimpleLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center">Sign In</CardTitle>
+          {!isSupabaseConfigured && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <p className="text-sm text-yellow-800">
+                Authentication service is not configured. Please contact support.
+              </p>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -80,7 +103,7 @@ export default function SimpleLoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                disabled={submitting}
+                disabled={submitting || !isSupabaseConfigured}
                 placeholder="Enter your email"
               />
             </div>
@@ -93,7 +116,7 @@ export default function SimpleLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  disabled={submitting}
+                  disabled={submitting || !isSupabaseConfigured}
                   placeholder="Enter your password"
                 />
                 <Button
@@ -102,13 +125,17 @@ export default function SimpleLoginPage() {
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={submitting}
+                  disabled={submitting || !isSupabaseConfigured}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={submitting}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={submitting || !isSupabaseConfigured}
+            >
               {submitting ? 'Signing in...' : (
                 <>
                   <LogIn className="mr-2 h-4 w-4" />
