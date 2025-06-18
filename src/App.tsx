@@ -21,10 +21,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <AppContent>
-            <Outlet />
-          </AppContent>
-          <Toaster />
+          <div className="min-h-screen bg-background">
+            <AppContent>
+              <Outlet />
+            </AppContent>
+            <Toaster />
+          </div>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

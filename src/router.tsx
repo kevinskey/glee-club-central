@@ -30,7 +30,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    ErrorBoundary: NotFoundPage,
+    errorElement: <NotFoundPage />,
     children: [
       {
         index: true,
@@ -122,11 +122,12 @@ const router = createBrowserRouter([
       ...adminRoutes,
       // Add all v2 admin routes
       ...adminRoutesV2,
-      {
-        path: "*",
-        element: <NotFoundPage />,
-      },
     ],
+  },
+  // Catch-all route for 404s
+  {
+    path: "*",
+    element: <NotFoundPage />,
   },
 ]);
 
