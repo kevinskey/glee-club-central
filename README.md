@@ -85,4 +85,4 @@ SUPABASE_URL=<your-supabase-url>
 SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
 
-If these variables are missing, the application will log a warning and fall back to the default credentials bundled with the code.
+Both variables are required. The application will fail to start if either one is missing.
