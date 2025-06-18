@@ -115,20 +115,51 @@ export const AdminTopNavigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Dropdown */}
+        {/* Unified Dropdown Menu */}
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
+                  <AvatarFallback className="bg-glee-spelman text-white text-xs">
+                    {getInitials(profile?.first_name, profile?.last_name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:block">
+                  {profile?.first_name} {profile?.last_name}
+                </span>
                 <Menu className="h-4 w-4" />
-                Navigation
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="center">
+            <DropdownMenuContent className="w-64" align="end">
+              {/* User Info */}
+              <div className="flex flex-col space-y-1 p-2">
+                <p className="text-sm font-medium">
+                  {profile?.first_name} {profile?.last_name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {user?.email}
+                </p>
+              </div>
+              <DropdownMenuSeparator />
+              
+              {/* Notifications */}
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuItem>
+                <Bell className="mr-2 h-4 w-4" />
+                <span>3 New Messages</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              
+              {/* Navigation */}
+              <DropdownMenuLabel>Navigation</DropdownMenuLabel>
               {Object.entries(groupedItems).map(([section, items]) => (
                 <div key={section}>
-                  <DropdownMenuLabel>{getSectionLabel(section)}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">
+                    {getSectionLabel(section)}
+                  </DropdownMenuLabel>
                   {items.map((item) => {
                     const Icon = item.icon;
                     return (
@@ -142,54 +173,16 @@ export const AdminTopNavigation: React.FC = () => {
                       </DropdownMenuItem>
                     );
                   })}
-                  <DropdownMenuSeparator />
                 </div>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Right Side Actions */}
-        <div className="flex items-center gap-4">
-          {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
-          </Button>
-
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
-                  <AvatarFallback className="bg-glee-spelman text-white text-xs">
-                    {getInitials(profile?.first_name, profile?.last_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden md:block">
-                  {profile?.first_name} {profile?.last_name}
-                </span>
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium">
-                  {profile?.first_name} {profile?.last_name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
+              
               <DropdownMenuSeparator />
+              
+              {/* User Actions */}
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Profile Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
