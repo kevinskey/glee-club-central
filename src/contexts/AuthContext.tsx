@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,25 +48,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Check if Supabase is configured
-  const checkSupabaseConfig = () => {
-    if (!supabase) {
-      console.error('Supabase is not configured. Please check your environment variables.');
-      toast.error('Authentication service is not configured. Please contact support.');
-      return false;
-    }
-    return true;
-  };
-
   // Helper: Fetch or create the profile for a given user
   const ensureUserProfile = async (userObj: User) => {
-    if (!checkSupabaseConfig()) return null;
-
     try {
       console.log('🔍 ensureUserProfile: Fetching profile for user:', userObj.id);
       
       // Try to fetch existing profile first
-      const { data: profile, error } = await supabase!
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userObj.id)
@@ -86,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🔧 No profile found, creating new profile...');
       
       // No profile: create one. Only insert real columns!
-      const { data: insertedProfile, error: insertError } = await supabase!
+      const { data: insertedProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([
           {
@@ -202,14 +189,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = async (email: string, password: string) => {
-    if (!checkSupabaseConfig()) {
-      return { error: new Error('Authentication service not configured') };
-    }
-
     try {
       setIsLoading(true);
       
-      const { error } = await supabase!.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -229,14 +212,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string) => {
-    if (!checkSupabaseConfig()) {
-      return { error: new Error('Authentication service not configured') };
-    }
-
     try {
       setIsLoading(true);
       
-      const { error } = await supabase!.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -258,12 +237,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPassword = async (email: string) => {
-    if (!checkSupabaseConfig()) {
-      return { error: new Error('Authentication service not configured') };
-    }
-
     try {
-      const { error } = await supabase!.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       });
       return { error };
@@ -273,12 +248,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updatePassword = async (password: string) => {
-    if (!checkSupabaseConfig()) {
-      return { error: new Error('Authentication service not configured') };
-    }
-
     try {
-      const { error } = await supabase!.auth.updateUser({ password });
+      const { error } = await supabase.auth.updateUser({ password });
       return { error };
     } catch (error) {
       return { error };
@@ -301,10 +272,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       
-      // Sign out from Supabase if configured
-      if (supabase) {
-        await supabase.auth.signOut({ scope: 'global' });
-      }
+      // Sign out from Supabase
+      await supabase.auth.signOut({ scope: 'global' });
       
       // Force page reload for clean state
       window.location.href = '/';
@@ -320,14 +289,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     console.log('🔐 AuthManager: Initializing auth manager');
-    
-    // If Supabase is not configured, set initialized state
-    if (!supabase) {
-      console.warn('🔐 AuthManager: Supabase not configured');
-      setIsInitialized(true);
-      setIsLoading(false);
-      return;
-    }
     
     let mounted = true;
     

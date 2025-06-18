@@ -2,19 +2,14 @@
 // Auth utilities for Supabase
 import { supabase } from '@/integrations/supabase/client';
 
-const checkSupabaseConfig = () => {
-  if (!supabase) {
-    throw new Error('Supabase is not configured. Please check your environment variables.');
-  }
-};
-
 export const signUp = async (email: string, password: string) => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.auth.signUp({ 
+    const { data, error } = await supabase.auth.signUp({ 
       email, 
-      password
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`
+      }
     });
     
     if (error) throw error;
@@ -28,9 +23,7 @@ export const signUp = async (email: string, password: string) => {
 
 export const signIn = async (email: string, password: string) => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.auth.signInWithPassword({ 
+    const { data, error } = await supabase.auth.signInWithPassword({ 
       email, 
       password 
     });
@@ -46,9 +39,7 @@ export const signIn = async (email: string, password: string) => {
 
 export const signOut = async () => {
   try {
-    checkSupabaseConfig();
-    
-    const { error } = await supabase!.auth.signOut();
+    const { error } = await supabase.auth.signOut();
     
     if (error) throw error;
     
@@ -61,9 +52,9 @@ export const signOut = async () => {
 
 export const resetPassword = async (email: string) => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.auth.resetPasswordForEmail(email);
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`
+    });
     
     if (error) throw error;
     
@@ -76,9 +67,7 @@ export const resetPassword = async (email: string) => {
 
 export const updatePassword = async (password: string) => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.auth.updateUser({ password });
+    const { data, error } = await supabase.auth.updateUser({ password });
     
     if (error) throw error;
     
@@ -91,9 +80,7 @@ export const updatePassword = async (password: string) => {
 
 export const getCurrentUser = async () => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
     
     if (error) throw error;
     
@@ -106,9 +93,7 @@ export const getCurrentUser = async () => {
 
 export const isAdmin = async () => {
   try {
-    checkSupabaseConfig();
-    
-    const { data, error } = await supabase!.rpc('is_admin');
+    const { data, error } = await supabase.rpc('is_admin');
     
     if (error) throw error;
     
