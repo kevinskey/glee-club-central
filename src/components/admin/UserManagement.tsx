@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
@@ -116,7 +117,7 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="p-1 space-y-1 md:p-2 md:space-y-2">
+    <div className="p-0 space-y-0 md:p-1 md:space-y-1">
       {/* Mobile View */}
       <div className="block md:hidden">
         <UserManagementMobile
@@ -130,29 +131,31 @@ export default function UserManagement() {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:block space-y-1 md:space-y-2">
+      <div className="hidden md:block space-y-0 md:space-y-1">
         {/* Ultra Compact Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-1">
           <div>
-            <h1 className="text-sm md:text-lg font-bold">User Management</h1>
+            <h1 className="text-xs md:text-sm font-bold">User Management</h1>
             <p className="text-xs text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
           </div>
           <div className="flex gap-1">
-            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading} className="text-xs h-8 md:h-7 px-3 min-w-[70px]">
+            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading} className="text-xs h-6 md:h-7 px-2 min-w-[50px]">
               <RefreshCw className={`hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3 ${isLoading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
             </Button>
-            <Button onClick={handleAddUser} size="sm" className="text-xs h-8 md:h-7 px-3 min-w-[60px]">
+            <Button onClick={handleAddUser} size="sm" className="text-xs h-6 md:h-7 px-2 min-w-[40px]">
               <Plus className="hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3" />
               <span>Add</span>
             </Button>
           </div>
         </div>
         
-        <DatabaseConnectionTest />
+        <div className="px-1">
+          <DatabaseConnectionTest />
+        </div>
         
         {error && (
-          <Alert variant="destructive" className="text-xs p-2">
+          <Alert variant="destructive" className="text-xs p-1 mx-1">
             <AlertCircle className="h-2 w-2 md:h-3 md:w-3" />
             <AlertTitle className="text-xs">Error</AlertTitle>
             <AlertDescription className="text-xs">{error}</AlertDescription>
@@ -160,43 +163,43 @@ export default function UserManagement() {
         )}
         
         {/* Ultra Compact Search */}
-        <div className="relative max-w-xs">
-          <Search className="absolute left-1 top-1 h-2 w-2 md:h-3 md:w-3 text-muted-foreground" />
+        <div className="relative max-w-xs px-1">
+          <Search className="absolute left-2 top-1 h-2 w-2 md:h-3 md:w-3 text-muted-foreground" />
           <input
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-4 md:pl-6 h-5 md:h-6 w-full rounded border border-input bg-background px-1 md:px-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="pl-4 md:pl-6 h-4 md:h-5 w-full rounded border border-input bg-background px-1 md:px-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
         
         {isLoading ? (
-          <div className="text-center py-2 md:py-4">
-            <div className="animate-spin rounded-full h-4 w-4 md:h-6 md:w-6 border-b-2 border-primary mx-auto"></div>
+          <div className="text-center py-1 md:py-2">
+            <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-primary mx-auto"></div>
             <p className="mt-1 text-xs text-muted-foreground">Loading...</p>
           </div>
         ) : (
-          <div className="rounded border">
+          <div className="rounded border mx-1">
             <Table>
               <TableHeader>
-                <TableRow className="h-6">
-                  <TableHead className="w-6 md:w-8 text-xs p-1"></TableHead>
-                  <TableHead className="text-xs p-1">Name</TableHead>
-                  <TableHead className="text-xs p-1">Email</TableHead>
-                  <TableHead className="text-xs p-1">Phone</TableHead>
-                  <TableHead className="text-xs p-1">Voice</TableHead>
-                  <TableHead className="text-xs p-1">Class</TableHead>
-                  <TableHead className="text-xs p-1">Role</TableHead>
-                  <TableHead className="text-xs p-1">Status</TableHead>
-                  <TableHead className="text-xs p-1">Dues</TableHead>
-                  <TableHead className="w-6 md:w-8 text-xs p-1"></TableHead>
+                <TableRow className="h-5">
+                  <TableHead className="w-5 md:w-6 text-xs p-0.5"></TableHead>
+                  <TableHead className="text-xs p-0.5">Name</TableHead>
+                  <TableHead className="text-xs p-0.5">Email</TableHead>
+                  <TableHead className="text-xs p-0.5">Phone</TableHead>
+                  <TableHead className="text-xs p-0.5">Voice</TableHead>
+                  <TableHead className="text-xs p-0.5">Class</TableHead>
+                  <TableHead className="text-xs p-0.5">Role</TableHead>
+                  <TableHead className="text-xs p-0.5">Status</TableHead>
+                  <TableHead className="text-xs p-0.5">Dues</TableHead>
+                  <TableHead className="w-5 md:w-6 text-xs p-0.5"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-2 md:py-4">
-                      <Users className="h-4 w-4 md:h-6 md:w-6 text-muted-foreground mx-auto mb-1" />
+                    <TableCell colSpan={10} className="text-center py-1 md:py-2">
+                      <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground mx-auto mb-1" />
                       <h3 className="font-semibold mb-1 text-xs">No Members Found</h3>
                       <p className="text-muted-foreground text-xs">
                         {users.length === 0 
@@ -208,27 +211,27 @@ export default function UserManagement() {
                   </TableRow>
                 ) : (
                   filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="hover:bg-muted/50 h-8">
-                      <TableCell className="p-1">
-                        <Avatar className="h-4 w-4 md:h-6 md:w-6">
+                    <TableRow key={user.id} className="hover:bg-muted/50 h-6">
+                      <TableCell className="p-0.5">
+                        <Avatar className="h-3 w-3 md:h-4 md:w-4">
                           <AvatarImage src={user.avatar_url} />
                           <AvatarFallback className="text-xs">
                             {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
                           </AvatarFallback>
                         </Avatar>
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         <div className="font-medium text-xs">
                           {user.first_name} {user.last_name}
                         </div>
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Mail className="hidden md:inline mr-1 h-2 w-2" />
-                          <span className="truncate max-w-[80px] md:max-w-none">{user.email}</span>
+                          <span className="truncate max-w-[60px] md:max-w-none">{user.email}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         {user.phone && (
                           <div className="flex items-center text-xs text-muted-foreground">
                             <Phone className="hidden md:inline mr-1 h-2 w-2" />
@@ -236,43 +239,43 @@ export default function UserManagement() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         {user.voice_part && (
-                          <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                          <Badge variant="outline" className="text-xs px-0.5 py-0 h-3">
                             <Music className="hidden md:inline mr-1 h-2 w-2" />
                             <span className="hidden md:inline">{user.voice_part.replace('_', ' ')}</span>
                             <span className="md:hidden">{user.voice_part.replace('_', ' ').substring(0, 2)}</span>
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         {user.class_year && (
-                          <Badge variant="outline" className="text-xs px-1 py-0 h-4">
+                          <Badge variant="outline" className="text-xs px-0.5 py-0 h-3">
                             {user.class_year}
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-1">
-                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs px-1 py-0 h-4">
+                      <TableCell className="p-0.5">
+                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs px-0.5 py-0 h-3">
                           {user.is_super_admin ? 'Super' : user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-1">
-                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs px-1 py-0 h-4">
+                      <TableCell className="p-0.5">
+                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs px-0.5 py-0 h-3">
                           {user.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         {user.dues_paid && (
-                          <Badge variant="default" className="bg-green-600 text-xs px-1 py-0 h-4">
+                          <Badge variant="default" className="bg-green-600 text-xs px-0.5 py-0 h-3">
                             ✓
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-1">
+                      <TableCell className="p-0.5">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                            <Button variant="ghost" size="sm" className="h-3 w-3 p-0">
                               <MoreVertical className="h-2 w-2 md:h-3 md:w-3" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -307,14 +310,14 @@ export default function UserManagement() {
         {/* Import Users Dialog */}
         {showImportDialog && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-2 md:p-4 max-w-xl w-full m-2 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-sm md:text-lg font-semibold">Import Users from CSV</h2>
-                <Button variant="ghost" onClick={() => setShowImportDialog(false)} className="text-sm md:text-lg h-6 w-6 p-0">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-1 md:p-2 max-w-xl w-full m-1 max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-1">
+                <h2 className="text-xs md:text-sm font-semibold">Import Users from CSV</h2>
+                <Button variant="ghost" onClick={() => setShowImportDialog(false)} className="text-xs md:text-sm h-5 w-5 p-0">
                   ×
                 </Button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">
                   Upload CSV to bulk import members.
                 </p>
@@ -328,7 +331,7 @@ export default function UserManagement() {
                       handleImportComplete();
                     }
                   }}
-                  className="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-xs text-gray-500 file:mr-1 file:py-0.5 file:px-1 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
               </div>
             </div>
