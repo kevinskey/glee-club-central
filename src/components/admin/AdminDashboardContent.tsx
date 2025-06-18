@@ -46,10 +46,10 @@ export function AdminDashboardContent() {
   ];
 
   return (
-    <div className="w-full min-h-screen flex justify-center py-4" style={{ paddingLeft: '10pt', paddingRight: '10pt' }}>
-      <div className="w-[95vw] space-y-6">
+    <div className="w-full min-h-screen">
+      <div className="w-full space-y-0">
         {/* Compact Welcome Section */}
-        <div className="px-2">
+        <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Welcome back, {profile?.first_name || 'Admin'}! 👋
           </h1>
@@ -59,18 +59,18 @@ export function AdminDashboardContent() {
         </div>
 
         {/* Compact Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 px-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
           {quickStats.map((stat, index) => {
             const Icon = stat.icon;
             return (
-              <Card key={index} className="p-3">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <Card key={index} className="p-0 m-0 rounded-none border-0">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0 m-0">
                   <CardTitle className="text-sm font-medium">
                     {stat.title}
                   </CardTitle>
                   <Icon className={`h-4 w-4 ${stat.color}`} />
                 </CardHeader>
-                <CardContent className="p-0">
+                <CardContent className="p-0 m-0">
                   <div className="text-xl font-bold">{stat.value}</div>
                   <p className="text-xs text-muted-foreground">
                     {stat.change}
@@ -82,8 +82,8 @@ export function AdminDashboardContent() {
         </div>
 
         {/* Compact Admin Modules */}
-        <div className="px-2">
-          <div className="flex items-center justify-between mb-3">
+        <div>
+          <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold tracking-tight">Administration</h2>
               <p className="text-muted-foreground text-sm">
