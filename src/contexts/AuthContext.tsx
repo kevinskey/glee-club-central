@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { devLog } from "@/utils/devLogger";
 
 interface Profile {
   id: string;
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper: Fetch or create the profile for a given user
   const ensureUserProfile = async (userObj: User) => {
     try {
-      console.log('🔍 ensureUserProfile: Fetching profile for user:', userObj.id);
+      devLog('🔍 ensureUserProfile: Fetching profile for user:', userObj.id);
       
       // Try to fetch existing profile first
       const { data: profile, error } = await supabase
@@ -66,11 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (profile) {
-        console.log('✅ Profile found:', profile);
+        devLog('✅ Profile found:', profile);
         return profile;
       }
 
-      console.log('🔧 No profile found, creating new profile...');
+      devLog('🔧 No profile found, creating new profile...');
       
       // No profile: create one. Only insert real columns!
       const { data: insertedProfile, error: insertError } = await supabase
@@ -105,11 +106,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           updated_at: new Date().toISOString(),
         };
         
-        console.log('🆘 Using fallback profile:', fallbackProfile);
+        devLog('🆘 Using fallback profile:', fallbackProfile);
         return fallbackProfile;
       }
       
-      console.log('✅ Profile created successfully:', insertedProfile);
+      devLog('✅ Profile created successfully:', insertedProfile);
       return insertedProfile;
     } catch (err) {
       console.error('💥 Error in ensureUserProfile:', err);
@@ -126,14 +127,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updated_at: new Date().toISOString(),
       };
       
-      console.log('🆘 Using emergency fallback profile:', emergencyProfile);
+      devLog('🆘 Using emergency fallback profile:', emergencyProfile);
       return emergencyProfile;
     }
   };
 
   const fetchProfile = async (userId: string) => {
     try {
-      console.log('📡 fetchProfile: Fetching profile for user:', userId);
+      devLog('📡 fetchProfile: Fetching profile for user:', userId);
       
       // Use maybeSingle and only existing columns
       const { data, error } = await supabase
@@ -147,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return null;
       }
 
-      console.log('✅ Profile fetched successfully:', data);
+      devLog('✅ Profile fetched successfully:', data);
       return data;
     } catch (error) {
       console.error('💥 Error in fetchProfile:', error);
@@ -157,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      console.log('🔄 Refreshing profile for user:', user.id);
+      devLog('🔄 Refreshing profile for user:', user.id);
       // Always ensure a profile exists (create if missing)
       const profileData = await ensureUserProfile(user);
       setProfile(profileData);
@@ -196,7 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!error) {
         // Profile will be fetched via auth state change
-        console.log('✅ Login successful');
+        devLog('✅ Login successful');
       }
       
       return { error };
@@ -221,7 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (!error) {
-        console.log('✅ Signup successful');
+        devLog('✅ Signup successful');
       }
       
       return { error };
@@ -285,7 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = signOut; // Alias for consistency
 
   useEffect(() => {
-    console.log('🔐 AuthManager: Initializing auth manager');
+    devLog('🔐 AuthManager: Initializing auth manager');
     
     let mounted = true;
     
@@ -297,7 +298,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           async (event: AuthChangeEvent, session: Session | null) => {
             if (!mounted) return;
             
-            console.log('🔐 Auth state change:', event, { 
+            devLog('🔐 Auth state change:', event, {
               hasSession: !!session,
               userEmail: session?.user?.email 
             });
@@ -309,7 +310,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               // Defer profile fetching to avoid deadlocks
               setTimeout(async () => {
                 if (mounted) {
-                  console.log('📡 Fetching profile after auth change...');
+                  devLog('📡 Fetching profile after auth change...');
                   const profileData = await ensureUserProfile(session.user);
                   if (mounted) {
                     setProfile(profileData);
@@ -334,7 +335,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         if (mounted) {
-          console.log('🔐 AuthManager: Session check completed', {
+          devLog('🔐 AuthManager: Session check completed', {
             hasSession: !!initialSession,
             userEmail: initialSession?.user?.email
           });

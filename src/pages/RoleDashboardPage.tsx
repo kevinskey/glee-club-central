@@ -3,11 +3,12 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { PageLoader } from '@/components/ui/page-loader';
+import { devLog } from '@/utils/devLogger';
 
 const RoleDashboardPage = () => {
   const { user, profile, isLoading, isInitialized, isAuthenticated, isAdmin } = useAuth();
 
-  console.log('🏠 RoleDashboardPage: DASHBOARD ASSIGNMENT STATE:', {
+  devLog('🏠 RoleDashboardPage: DASHBOARD ASSIGNMENT STATE:', {
     hasUser: !!user,
     userEmail: user?.email,
     hasProfile: !!profile,
@@ -22,7 +23,7 @@ const RoleDashboardPage = () => {
 
   // Show loading only briefly during initialization
   if (!isInitialized && isLoading) {
-    console.log('⏳ RoleDashboardPage: Waiting for auth initialization...');
+    devLog('⏳ RoleDashboardPage: Waiting for auth initialization...');
     return (
       <PageLoader 
         message="Starting GleeWorld..." 
@@ -33,7 +34,7 @@ const RoleDashboardPage = () => {
 
   // Check authentication
   if (!isAuthenticated || !user) {
-    console.log('🔒 RoleDashboardPage: User not authenticated, redirecting to login');
+    devLog('🔒 RoleDashboardPage: User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
@@ -58,7 +59,7 @@ const RoleDashboardPage = () => {
     assignmentReason = `member role (profile loaded: ${!!profile})`;
   }
   
-  console.log('🎯 RoleDashboardPage: DASHBOARD ASSIGNMENT DECISION:', {
+  devLog('🎯 RoleDashboardPage: DASHBOARD ASSIGNMENT DECISION:', {
     finalPath: redirectPath,
     reason: assignmentReason,
     userEmail: user.email,
