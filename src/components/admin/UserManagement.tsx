@@ -117,81 +117,160 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile View */}
       <div className="block md:hidden">
         {/* Mobile Header with Dropdown */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-xl font-bold">User Management</h1>
-            <p className="text-sm text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
+        <div className="bg-white dark:bg-gray-800 border-b px-3 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">User Management</h1>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Manage Glee Club members ({users.length} total)</p>
+            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 px-2">
+                  <Menu className="h-4 w-4 mr-1" />
+                  Actions
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleRefresh} disabled={isLoading}>
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh Users
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleAddUser}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add User
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleImportUsers}>
+                  <Users className="mr-2 h-4 w-4" />
+                  Import Users
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Menu className="h-4 w-4 mr-2" />
-                Actions
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh Users
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleAddUser}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add User
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleImportUsers}>
-                <Users className="mr-2 h-4 w-4" />
-                Import Users
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
 
-        <DatabaseConnectionTest />
-        
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full h-10 rounded border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          />
+          <DatabaseConnectionTest />
+          
+          {error && (
+            <Alert variant="destructive" className="mb-3">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 w-full h-9 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            />
+          </div>
         </div>
         
+        {/* User List - No Cards */}
         {isLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+            </div>
           </div>
         ) : (
-          <UserManagementMobile
-            users={users}
-            onUserSelect={(user) => {
-              console.log('Selected user:', user);
-            }}
-            onAddUser={handleAddUser}
-            isLoading={isLoading}
-          />
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {filteredUsers.length === 0 ? (
+              <div className="text-center py-12 px-4">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                <h3 className="font-medium text-gray-900 dark:text-white mb-1">No Members Found</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {users.length === 0 
+                    ? 'No members added yet.' 
+                    : 'No members match search.'
+                  }
+                </p>
+              </div>
+            ) : (
+              filteredUsers.map((user) => (
+                <div key={user.id} className="bg-white dark:bg-gray-800 px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <Avatar className="h-10 w-10 flex-shrink-0">
+                        <AvatarImage src={user.avatar_url} />
+                        <AvatarFallback className="text-xs">
+                          {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h3 className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                            {user.first_name} {user.last_name}
+                          </h3>
+                          {user.is_super_admin && (
+                            <Badge variant="destructive" className="text-xs px-1 py-0">
+                              Admin
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
+                          <Mail className="mr-1 h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">{user.email}</span>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          {user.voice_part && (
+                            <Badge variant="outline" className="text-xs px-1 py-0">
+                              <Music className="mr-1 h-2 w-2" />
+                              {user.voice_part.replace('_', ' ')}
+                            </Badge>
+                          )}
+                          <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs px-1 py-0">
+                            {user.status}
+                          </Badge>
+                          {user.dues_paid && (
+                            <Badge variant="default" className="bg-green-600 text-xs px-1 py-0">
+                              ✓
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:block space-y-4">
+      <div className="hidden md:block space-y-4 p-4">
         {/* Desktop Header */}
         <div className="flex items-center justify-between">
           <div>
