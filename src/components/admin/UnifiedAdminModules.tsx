@@ -37,7 +37,7 @@ export function UnifiedAdminModules() {
       id: "analytics",
       title: "Analytics",
       description: "View insights and reports",
-      icon: <BarChart className="h-5 w-5" />,
+      icon: <BarChart className="h-6 w-6" />,
       color: "bg-cyan-500",
       path: "/admin/analytics",
       adminOnly: true,
@@ -47,7 +47,7 @@ export function UnifiedAdminModules() {
       id: "communications",
       title: "Communications",
       description: "Send announcements and news",
-      icon: <Bell className="h-5 w-5" />,
+      icon: <Bell className="h-6 w-6" />,
       color: "bg-red-500",
       path: "/admin/news-items",
       adminOnly: true
@@ -56,7 +56,7 @@ export function UnifiedAdminModules() {
       id: "calendar",
       title: "Events & Calendar",
       description: "Schedule and manage events",
-      icon: <Calendar className="h-5 w-5" />,
+      icon: <Calendar className="h-6 w-6" />,
       color: "bg-green-500",
       path: "/admin/calendar",
       adminOnly: true
@@ -65,7 +65,7 @@ export function UnifiedAdminModules() {
       id: "financial",
       title: "Financial Management",
       description: "Track income, expenses, and budgets",
-      icon: <DollarSign className="h-5 w-5" />,
+      icon: <DollarSign className="h-6 w-6" />,
       color: "bg-emerald-600",
       path: "/admin/financial",
       adminOnly: true,
@@ -75,7 +75,7 @@ export function UnifiedAdminModules() {
       id: "hero-slides",
       title: "Hero Slides",
       description: "Manage homepage hero slides",
-      icon: <Presentation className="h-5 w-5" />,
+      icon: <Presentation className="h-6 w-6" />,
       color: "bg-blue-500",
       path: "/admin/hero-slides",
       adminOnly: true
@@ -84,7 +84,7 @@ export function UnifiedAdminModules() {
       id: "media",
       title: "Media Library",
       description: "Upload and organize files",
-      icon: <Upload className="h-5 w-5" />,
+      icon: <Upload className="h-6 w-6" />,
       color: "bg-orange-500",
       path: "/admin/media-library",
       adminOnly: true,
@@ -94,7 +94,7 @@ export function UnifiedAdminModules() {
       id: "users",
       title: "Members",
       description: "Manage choir members and users",
-      icon: <Users className="h-5 w-5" />,
+      icon: <Users className="h-6 w-6" />,
       color: "bg-blue-500",
       path: "/admin/users",
       adminOnly: true
@@ -103,7 +103,7 @@ export function UnifiedAdminModules() {
       id: "music-player",
       title: "Music Player",
       description: "Manage playlists and player settings",
-      icon: <Music className="h-5 w-5" />,
+      icon: <Music className="h-6 w-6" />,
       color: "bg-orange-500",
       path: "/admin/music",
       adminOnly: true
@@ -112,7 +112,7 @@ export function UnifiedAdminModules() {
       id: "settings",
       title: "Site Settings",
       description: "Configure system settings and preferences",
-      icon: <Settings className="h-5 w-5" />,
+      icon: <Settings className="h-6 w-6" />,
       color: "bg-gray-500",
       path: "/admin/settings",
       adminOnly: true,
@@ -122,7 +122,7 @@ export function UnifiedAdminModules() {
       id: "store",
       title: "Store Management",
       description: "Manage products and orders",
-      icon: <ShoppingBag className="h-5 w-5" />,
+      icon: <ShoppingBag className="h-6 w-6" />,
       color: "bg-emerald-500",
       path: "/admin/store",
       adminOnly: true
@@ -131,7 +131,7 @@ export function UnifiedAdminModules() {
       id: "user-roles",
       title: "User Roles",
       description: "Manage user permissions and roles",
-      icon: <UserCog className="h-5 w-5" />,
+      icon: <UserCog className="h-6 w-6" />,
       color: "bg-purple-500",
       path: "/admin/user-roles",
       adminOnly: true,
@@ -163,17 +163,17 @@ export function UnifiedAdminModules() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0 px-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             {sortedModules.map((module) => (
               <div
                 key={module.id}
-                className="group cursor-pointer flex flex-col items-center justify-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] min-h-[120px] aspect-square"
+                className="group cursor-pointer flex flex-col items-center justify-center p-6 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:border-glee-spelman/40 hover:bg-glee-spelman/5 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] min-h-[160px] aspect-square"
                 onClick={() => navigate(module.path)}
               >
-                <div className={`${module.color} text-white rounded-xl p-3 group-hover:scale-110 transition-transform duration-200 mb-3 shadow-sm`}>
+                <div className={`${module.color} text-white rounded-xl p-4 group-hover:scale-110 transition-transform duration-200 mb-4 shadow-sm`}>
                   {module.icon}
                 </div>
-                <span className="text-xs font-semibold text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-1">
+                <span className="text-sm font-semibold text-center group-hover:text-glee-spelman transition-colors duration-200 leading-tight mb-2">
                   {module.title}
                 </span>
                 <span className="text-xs text-muted-foreground text-center leading-tight opacity-80">
