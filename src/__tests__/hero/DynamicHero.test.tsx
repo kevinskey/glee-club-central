@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react';
+
+import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
-import { vi } from 'vitest';
+import { vi, describe, it, expect } from 'vitest';
 
 import { DynamicHero } from '@/components/landing/DynamicHero';
 import { HeroSlideContent } from '@/components/landing/hero/HeroSlideContent';
@@ -76,7 +77,7 @@ describe('useHeroData', () => {
 
     vi.mock('@/integrations/supabase/client', () => ({ supabase: supabaseMock }));
 
-    const { result, waitFor } = renderHook(() => useHeroData());
+    const { result } = renderHook(() => useHeroData());
 
     await waitFor(() => !result.current.isLoading);
 
