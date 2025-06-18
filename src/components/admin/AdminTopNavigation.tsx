@@ -2,8 +2,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +10,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   Calendar,
@@ -31,7 +30,6 @@ import {
   Shield,
   Presentation,
   Package,
-  ChevronDown,
   LogOut,
   Bell,
   Menu
@@ -59,7 +57,7 @@ const allNavigationItems = [
 ];
 
 export const AdminTopNavigation: React.FC = () => {
-  const { user, profile, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,10 +68,6 @@ export const AdminTopNavigation: React.FC = () => {
     } catch (error) {
       console.error('Error signing out:', error);
     }
-  };
-
-  const getInitials = (firstName?: string, lastName?: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
   };
 
   const isActiveItem = (to: string) => {
@@ -115,36 +109,15 @@ export const AdminTopNavigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Unified Dropdown Menu */}
+        {/* Hamburger Menu */}
         <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
-                  <AvatarFallback className="bg-glee-spelman text-white text-xs">
-                    {getInitials(profile?.first_name, profile?.last_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden md:block">
-                  {profile?.first_name} {profile?.last_name}
-                </span>
+              <Button variant="outline" size="sm" className="gap-2">
                 <Menu className="h-4 w-4" />
-                <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" align="end">
-              {/* User Info */}
-              <div className="flex flex-col space-y-1 p-2">
-                <p className="text-sm font-medium">
-                  {profile?.first_name} {profile?.last_name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {user?.email}
-                </p>
-              </div>
-              <DropdownMenuSeparator />
-              
               {/* Notifications */}
               <DropdownMenuLabel>Notifications</DropdownMenuLabel>
               <DropdownMenuItem>
