@@ -47,9 +47,9 @@ export function AdminDashboardContent() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 py-6 space-y-8">
         {/* Admin Modules - moved to top */}
-        <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+        <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-headline text-foreground font-playfair">Administration</h2>
@@ -66,7 +66,7 @@ export function AdminDashboardContent() {
         </div>
 
         {/* Welcome Section */}
-        <div className="glass-card p-6 rounded-2xl animate-glass-fade-in">
+        <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
           <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
             Welcome back, {profile?.first_name || 'Admin'}! 👋
           </h1>
