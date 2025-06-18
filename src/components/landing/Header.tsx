@@ -40,7 +40,7 @@ export function Header() {
   
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="flex h-16 items-center justify-between w-full px-6">
+      <div className="flex h-8 items-center justify-between w-full px-6">
         {/* Logo - Always visible */}
         <div className="flex-shrink-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
