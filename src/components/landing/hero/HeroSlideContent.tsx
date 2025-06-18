@@ -136,12 +136,18 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
             )}
             {slide.button_text && slide.button_link && (
               <div className={`flex gap-4 sm:gap-6 ${getTextAlignment(slide.text_position) === 'text-left' ? 'justify-start' : getTextAlignment(slide.text_position) === 'text-right' ? 'justify-end' : 'justify-center'}`}>
-                <Button 
+                <Button
+                  asChild
                   size="lg"
                   className="glass-button-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
-                  onClick={() => window.open(slide.button_link, '_blank')}
                 >
-                  {slide.button_text}
+                  <a
+                    href={slide.button_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {slide.button_text}
+                  </a>
                 </Button>
               </div>
             )}
