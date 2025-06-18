@@ -27,14 +27,23 @@ import { PitchPipe } from '@/components/audio/PitchPipe';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/contexts/ProfileContext';
 import { usePracticeLogs } from '@/hooks/usePracticeLogs';
+import { PracticeLog, updatePracticeLog } from '@/utils/supabase/practiceLogs';
 
 export default function PracticePage() {
   const { user, isLoading } = useAuth();
   const { profile, isLoading: profileLoading } = useProfile();
-  const { logs, stats, totalMinutes, logPractice, deletePracticeLog } = usePracticeLogs();
+  const {
+    logs,
+    stats,
+    totalMinutes,
+    logPractice,
+    deletePracticeLog,
+    fetchLogs
+  } = usePracticeLogs();
 
   const [currentTab, setCurrentTab] = useState('practice-log');
   const [isMobile, setIsMobile] = useState(false);
+  const [editingLog, setEditingLog] = useState<PracticeLog | null>(null);
 
   useEffect(() => {
     console.log('PracticePage mounted - checking audio utils');
@@ -65,9 +74,32 @@ export default function PracticePage() {
     }
   };
 
-  const handleUpdateLog = (log: any) => {
-    // TODO: Implement update functionality
-    console.log('Update log:', log);
+  const handleUpdateLog = (log: PracticeLog) => {
+    setEditingLog(log);
+  };
+
+  const handleEditSubmit = async (
+    minutes: number,
+    category: string,
+    description: string | null,
+    date?: string
+  ) => {
+    if (!editingLog) return false;
+
+    try {
+      await updatePracticeLog(editingLog.id, {
+        minutes_practiced: minutes,
+        category,
+        description,
+        date
+      });
+      setEditingLog(null);
+      await fetchLogs();
+      return true;
+    } catch (error) {
+      console.error('Failed to update practice log:', error);
+      return false;
+    }
   };
 
   if (isLoading || profileLoading) {
@@ -107,8 +139,20 @@ export default function PracticePage() {
             <TabsContent value="practice-log">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Log New Practice Session</h3>
-                  <PracticeLogForm onSubmit={handlePracticeSubmit} />
+                  <h3 className="text-xl font-semibold mb-2">
+                    {editingLog ? 'Edit Practice Log' : 'Log New Practice Session'}
+                  </h3>
+                  <PracticeLogForm
+                    onSubmit={editingLog ? handleEditSubmit : handlePracticeSubmit}
+                    defaultValues={editingLog ? {
+                      minutes: editingLog.minutes_practiced,
+                      category: editingLog.category,
+                      description: editingLog.description || '',
+                      date: editingLog.date
+                    } : undefined}
+                    isEditing={Boolean(editingLog)}
+                    onCancel={editingLog ? () => setEditingLog(null) : undefined}
+                  />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Recent Practice Logs</h3>
