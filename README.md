@@ -29,14 +29,10 @@ git clone <YOUR_GIT_URL>
 # Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Run the setup script to install dependencies and create a `.env` file.
+./setup.sh
 
-# Step 4: Create a `.env` file by copying the provided example and fill in
-# your Supabase credentials and API keys.
-cp .env.example .env
-
-# Step 5: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
