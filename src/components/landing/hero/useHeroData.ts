@@ -24,6 +24,13 @@ export function useHeroData() {
 
   const fetchHeroSlides = async () => {
     try {
+      if (!supabase) {
+        console.warn('useHeroData: Supabase not configured, showing default hero');
+        setSlides([]);
+        setMediaFiles({});
+        return;
+      }
+
       console.log('useHeroData: Fetching hero slides...');
       
       // Fetch hero slides
