@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isAdminEmail } from "@/config/authConfig";
 
 interface Profile {
   id: string;
@@ -80,8 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: userObj.id,
             first_name: userObj.user_metadata?.first_name || userObj.email?.split('@')[0] || 'User',
             last_name: userObj.user_metadata?.last_name || '',
-            role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
-            is_super_admin: userObj.email === 'kevinskey@mac.com',
+            role: isAdminEmail(userObj.email) ? 'admin' : 'member',
+            is_super_admin: isAdminEmail(userObj.email),
             status: 'active',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -98,8 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: userObj.id,
           first_name: userObj.user_metadata?.first_name || userObj.email?.split('@')[0] || 'User',
           last_name: userObj.user_metadata?.last_name || '',
-          role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
-          is_super_admin: userObj.email === 'kevinskey@mac.com',
+          role: isAdminEmail(userObj.email) ? 'admin' : 'member',
+          is_super_admin: isAdminEmail(userObj.email),
           status: 'active',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -119,8 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: userObj.id,
         first_name: userObj.email?.split('@')[0] || 'User',
         last_name: '',
-        role: userObj.email === 'kevinskey@mac.com' ? 'admin' : 'member',
-        is_super_admin: userObj.email === 'kevinskey@mac.com',
+        role: isAdminEmail(userObj.email) ? 'admin' : 'member',
+        is_super_admin: isAdminEmail(userObj.email),
         status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -165,13 +166,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const isAdmin = () => {
-    if (!user || !profile) return false;
-    
-    // Known admin email override
-    if (user.email === 'kevinskey@mac.com') {
+    if (!user) return false;
+
+    if (isAdminEmail(user.email)) {
       return true;
     }
-    
+
+    if (!profile) return false;
+
     return profile.is_super_admin === true || profile.role === 'admin';
   };
 
