@@ -85,15 +85,37 @@ export default function HeroSlidesPage() {
   const fetchMediaFiles = async () => {
     try {
       console.log('Fetching media files for thumbnails...');
-      const { data, error } = await supabase
+      const { data: mediaData, error: mediaError } = await supabase
         .from('media_library')
         .select('id, title, file_url, file_type')
         .in('file_type', ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'])
         .order('title');
 
-      if (error) throw error;
-      console.log('Media files fetched:', data);
-      setMediaFiles(data || []);
+      if (mediaError) throw mediaError;
+
+      // Also look for hero images stored in the site_images table
+      const { data: siteImagesData, error: siteImagesError } = await supabase
+        .from('site_images')
+        .select('id, name, file_url');
+
+      if (siteImagesError) {
+        console.error('Error fetching site images:', siteImagesError);
+      }
+
+      const mappedSiteImages = (siteImagesData || []).map((img) => ({
+        id: img.id,
+        title: img.name ?? 'Untitled',
+        file_url: img.file_url,
+        file_type: 'image'
+      }));
+
+      const combinedMedia = [
+        ...(mediaData || []),
+        ...mappedSiteImages
+      ];
+
+      console.log('Media files fetched:', combinedMedia);
+      setMediaFiles(combinedMedia);
     } catch (error) {
       console.error('Error fetching media files:', error);
     }
