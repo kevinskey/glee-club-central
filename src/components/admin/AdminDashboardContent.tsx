@@ -48,26 +48,17 @@ export function AdminDashboardContent() {
   return (
     <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Welcome Section */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair mb-2">
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair">
           Welcome back, {profile?.first_name || 'Admin'}! 👋
         </h1>
+        <Badge variant="outline" className="px-3 py-1 text-xs">
+          Admin Access
+        </Badge>
       </div>
 
       {/* Admin Modules */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white font-playfair">Administration</h2>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Manage all aspects of your Glee Club
-            </p>
-          </div>
-          <Badge variant="outline" className="px-3 py-1 text-xs">
-            Admin Access
-          </Badge>
-        </div>
-        
         <UnifiedAdminModules />
       </div>
 
