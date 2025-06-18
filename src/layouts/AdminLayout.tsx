@@ -13,9 +13,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <AdminTopNavigation />
       
       <main className="w-full">
-        <div className="p-6">
-          {children || <Outlet />}
-        </div>
+        {children || <Outlet />}
       </main>
     </div>
   );

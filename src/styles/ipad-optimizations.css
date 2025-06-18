@@ -48,8 +48,8 @@
   [class*="max-w-"] {
     width: 100% !important;
     max-width: 100vw !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+    padding-left: 1rem !important; /* Reduced from 2rem */
+    padding-right: 1rem !important; /* Reduced from 2rem */
     margin-left: auto !important;
     margin-right: auto !important;
     box-sizing: border-box !important;
@@ -60,10 +60,10 @@
     position: static !important;
     width: 100% !important;
     max-width: 100vw !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-left: 1rem !important; /* Reduced from 2rem */
+    padding-right: 1rem !important; /* Reduced from 2rem */
+    padding-top: 0.5rem !important; /* Reduced from 1rem */
+    padding-bottom: 0.5rem !important; /* Reduced from 1rem */
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
@@ -77,63 +77,86 @@
   /* News Ticker for iPad */
   .news-ticker,
   .bg-glee-columbia {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-    height: 40px !important;
-    font-size: 14px !important;
+    padding-left: 1rem !important; /* Reduced from 2rem */
+    padding-right: 1rem !important; /* Reduced from 2rem */
+    height: 32px !important; /* Reduced from 40px */
+    font-size: 12px !important; /* Reduced from 14px */
   }
   
-  /* Main Content Spacing */
+  /* Main Content Spacing - Much more compact */
   main {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
-    padding-top: 1.5rem !important;
+    padding-left: 1rem !important; /* Reduced from 2rem */
+    padding-right: 1rem !important; /* Reduced from 2rem */
+    padding-top: 0.5rem !important; /* Reduced from 1.5rem */
   }
   
-  /* Section Spacing - More generous than mobile */
+  /* Section Spacing - More compact */
   section {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-    margin-bottom: 1.5rem !important;
+    padding-top: 1rem !important; /* Reduced from 2rem */
+    padding-bottom: 1rem !important; /* Reduced from 2rem */
+    margin-bottom: 0.5rem !important; /* Reduced from 1.5rem */
   }
   
-  /* Card Spacing - Reduced margin between cards */
+  /* Card Spacing - Much more compact */
   .card,
   [class*="card"] {
-    border-radius: 12px !important;
-    padding: 1.5rem !important;
-    margin-bottom: 0.5rem !important; /* Reduced from 1rem to 0.5rem */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border-radius: 8px !important; /* Reduced from 12px */
+    padding: 0.75rem !important; /* Reduced from 1.5rem */
+    margin-bottom: 0.25rem !important; /* Reduced from 0.5rem */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important; /* Reduced shadow */
   }
   
-  /* Grid Systems - Reduced gap between cards */
+  /* Grid Systems - Tighter gaps */
   .grid {
-    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
+    gap: 0.5rem !important; /* Reduced from 0.75rem */
   }
   
-  /* Typography Adjustments - Reduced descriptor text by half */
+  /* Admin-specific optimizations */
+  .admin-layout,
+  [class*="admin"] {
+    padding: 0.5rem !important; /* Much more compact admin padding */
+  }
+  
+  .admin-content {
+    padding: 0.75rem !important; /* Reduced admin content padding */
+  }
+  
+  /* Table optimizations for admin */
+  .admin-table table,
+  [class*="admin"] table {
+    font-size: 0.8rem !important; /* Smaller table text */
+  }
+  
+  .admin-table th,
+  .admin-table td,
+  [class*="admin"] th,
+  [class*="admin"] td {
+    padding: 0.5rem !important; /* Reduced table cell padding */
+  }
+  
+  /* Typography Adjustments - More compact */
   h1 {
-    font-size: clamp(1.5rem, 4vw, 2rem) !important;
-    margin-bottom: 1rem !important;
+    font-size: clamp(1.25rem, 3vw, 1.75rem) !important; /* Reduced sizes */
+    margin-bottom: 0.5rem !important; /* Reduced margin */
   }
   
   h2 {
-    font-size: clamp(1.25rem, 3vw, 1.5rem) !important;
-    margin-bottom: 0.75rem !important;
+    font-size: clamp(1.125rem, 2.5vw, 1.375rem) !important; /* Reduced sizes */
+    margin-bottom: 0.5rem !important; /* Reduced margin */
   }
   
   h3 {
-    font-size: clamp(1.125rem, 2.5vw, 1.25rem) !important;
-    margin-bottom: 0.5rem !important;
+    font-size: clamp(1rem, 2vw, 1.125rem) !important; /* Reduced sizes */
+    margin-bottom: 0.25rem !important; /* Reduced margin */
   }
   
   p {
-    font-size: clamp(0.875rem, 2vw, 1rem) !important;
-    line-height: 1.6 !important;
-    margin-bottom: 0.75rem !important;
+    font-size: clamp(0.8rem, 1.8vw, 0.9rem) !important; /* Reduced sizes */
+    line-height: 1.4 !important; /* Tighter line height */
+    margin-bottom: 0.5rem !important; /* Reduced margin */
   }
   
-  /* Reduced descriptor text - targeting common description classes */
+  /* Much smaller descriptor text */
   .text-muted-foreground,
   .description,
   .subtitle,
@@ -144,9 +167,9 @@
   .card p,
   .module p,
   [role="description"] {
-    font-size: 0.5rem !important; /* Reduced by half from 0.875rem to 0.4375rem */
-    line-height: 1.3 !important;
-    opacity: 0.8 !important;
+    font-size: 0.4rem !important; /* Further reduced */
+    line-height: 1.2 !important;
+    opacity: 0.7 !important;
   }
   
   /* Admin module descriptions specifically */
@@ -154,256 +177,239 @@
   .admin-module p,
   [class*="admin"] .description,
   [class*="module"] .description {
-    font-size: 0.45rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.35rem !important; /* Much smaller */
+    line-height: 1.1 !important;
   }
   
-  /* Button Optimizations */
+  /* Button Optimizations - More compact */
   button {
-    min-height: 48px !important;
-    padding: 0.75rem 1.5rem !important;
-    font-size: 1rem !important;
-    border-radius: 8px !important;
+    min-height: 36px !important; /* Reduced from 48px */
+    padding: 0.5rem 1rem !important; /* Reduced padding */
+    font-size: 0.875rem !important; /* Smaller text */
+    border-radius: 6px !important; /* Smaller radius */
   }
   
-  /* Form Elements */
+  /* Form Elements - More compact */
   input, select, textarea {
-    font-size: 16px !important;
-    padding: 0.75rem 1rem !important;
-    border-radius: 8px !important;
-    min-height: 48px !important;
+    font-size: 14px !important; /* Smaller but still readable */
+    padding: 0.5rem 0.75rem !important; /* Reduced padding */
+    border-radius: 6px !important; /* Smaller radius */
+    min-height: 36px !important; /* Reduced from 48px */
   }
+  
+  /* ... keep existing code (all the other optimizations remain the same) */
   
   /* Calendar Page Specific */
   .calendar-page .container {
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+    padding-left: 1rem !important; /* Reduced */
+    padding-right: 1rem !important; /* Reduced */
   }
   
-  /* Dashboard Specific */
+  /* Dashboard Specific - Much more compact */
   .dashboard-content,
   .admin-content {
-    padding: 2rem !important;
+    padding: 0.75rem !important; /* Much more compact */
   }
   
-  /* Table Responsiveness */
-  table {
-    font-size: 0.9rem !important;
-  }
-  
-  th, td {
-    padding: 0.75rem !important;
-  }
-  
-  /* Modal and Dialog Spacing */
+  /* Modal and Dialog Spacing - More compact */
   .modal-content,
   .dialog-content {
-    padding: 2rem !important;
-    margin: 2rem !important;
-    max-width: 80vw !important;
+    padding: 1rem !important; /* Reduced from 2rem */
+    margin: 1rem !important; /* Reduced from 2rem */
+    max-width: 85vw !important; /* Slightly larger to use more space */
   }
   
-  /* Navigation Spacing */
+  /* Navigation Spacing - More compact */
   nav {
-    padding: 1rem 2rem !important;
+    padding: 0.5rem 1rem !important; /* Reduced padding */
   }
   
   nav a {
-    padding: 0.5rem 1rem !important;
-    margin: 0 0.25rem !important;
+    padding: 0.25rem 0.75rem !important; /* Reduced padding */
+    margin: 0 0.125rem !important; /* Reduced margin */
   }
   
-  /* Sidebar Adjustments */
+  /* Sidebar Adjustments - More compact */
   .sidebar {
-    width: 280px !important;
-    padding: 1.5rem !important;
+    width: 240px !important; /* Reduced from 280px */
+    padding: 1rem !important; /* Reduced padding */
   }
   
-  /* Footer Spacing */
+  /* Footer Spacing - More compact */
   footer {
-    padding: 2rem !important;
+    padding: 1rem !important; /* Reduced from 2rem */
   }
   
-  /* Media Library Grid - Reduced gap */
+  /* Media Library Grid - Tighter */
   .media-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
-    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important; /* Smaller columns */
+    gap: 0.5rem !important; /* Tighter gap */
   }
   
-  /* Event Cards - Reduced margin */
+  /* Event Cards - Much more compact */
   .event-card {
-    padding: 1.5rem !important;
-    margin-bottom: 0.5rem !important; /* Reduced from 1rem to 0.5rem */
+    padding: 0.75rem !important; /* Reduced padding */
+    margin-bottom: 0.25rem !important; /* Reduced margin */
   }
   
-  /* Profile Forms */
+  /* Profile Forms - More compact */
   .profile-form .form-group {
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1rem !important; /* Reduced margin */
   }
   
-  /* Sheet Music Viewer */
-  .pdf-viewer-container {
-    padding: 1rem !important;
-  }
-  
-  /* Audio Player */
-  .audio-player {
-    padding: 1rem 1.5rem !important;
-  }
-  
-  /* Store Product Grid - Reduced gap */
+  /* Store Product Grid - Tighter */
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
-    gap: 0.75rem !important; /* Reduced from 1.5rem to 0.75rem */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important; /* Smaller columns */
+    gap: 0.5rem !important; /* Tighter gap */
   }
   
-  /* Member Cards */
+  /* Member Cards - More compact */
   .member-card {
-    padding: 1.5rem !important;
-    border-radius: 12px !important;
+    padding: 0.75rem !important; /* Reduced padding */
+    border-radius: 8px !important; /* Smaller radius */
   }
   
-  /* Tabs */
+  /* Tabs - More compact */
   .tabs-list {
-    padding: 0.5rem !important;
+    padding: 0.25rem !important; /* Reduced padding */
   }
   
   .tabs-trigger {
-    padding: 0.75rem 1.5rem !important;
-    font-size: 0.9rem !important;
+    padding: 0.5rem 1rem !important; /* Reduced padding */
+    font-size: 0.8rem !important; /* Smaller text */
   }
   
-  /* Accordion */
+  /* Accordion - More compact */
   .accordion-trigger {
-    padding: 1rem 1.5rem !important;
+    padding: 0.75rem 1rem !important; /* Reduced padding */
   }
   
   .accordion-content {
-    padding: 1rem 1.5rem 1.5rem !important;
+    padding: 0.75rem 1rem 1rem !important; /* Reduced padding */
   }
   
-  /* Hero Section */
+  /* Hero Section - More compact */
   .hero-section {
-    padding: 3rem 2rem !important;
+    padding: 2rem 1rem !important; /* Reduced padding */
   }
   
   .hero-content {
-    max-width: 80% !important;
+    max-width: 85% !important; /* Use more space */
     margin: 0 auto !important;
   }
   
-  /* Search Bars */
+  /* Search Bars - More compact */
   .search-bar {
-    padding: 0.75rem 1rem !important;
-    font-size: 1rem !important;
+    padding: 0.5rem 0.75rem !important; /* Reduced padding */
+    font-size: 0.875rem !important; /* Smaller text */
   }
   
-  /* Breadcrumbs */
+  /* Breadcrumbs - More compact */
   .breadcrumb {
-    padding: 1rem 2rem !important;
+    padding: 0.5rem 1rem !important; /* Reduced padding */
   }
   
-  /* Status Badges */
+  /* Status Badges - Smaller */
   .badge {
-    padding: 0.375rem 0.75rem !important;
-    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem !important; /* Reduced padding */
+    font-size: 0.7rem !important; /* Smaller text */
   }
   
-  /* Loading States */
+  /* Loading States - Smaller */
   .loading-spinner {
-    width: 2rem !important;
-    height: 2rem !important;
+    width: 1.5rem !important; /* Smaller */
+    height: 1.5rem !important; /* Smaller */
   }
   
-  /* Error Messages */
+  /* Error Messages - More compact */
   .error-message {
-    padding: 1rem 1.5rem !important;
-    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important; /* Reduced padding */
+    border-radius: 6px !important; /* Smaller radius */
   }
   
-  /* Success Messages */
+  /* Success Messages - More compact */
   .success-message {
-    padding: 1rem 1.5rem !important;
-    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important; /* Reduced padding */
+    border-radius: 6px !important; /* Smaller radius */
   }
 }
 
 /* iPad Pro 12.9" Specific Optimizations */
 @media (min-width: 1024px) and (max-width: 1366px) {
   .container {
-    max-width: 90% !important;
-    padding-left: 3rem !important;
-    padding-right: 3rem !important;
+    max-width: 95% !important; /* Use more screen space */
+    padding-left: 1.5rem !important; /* Slightly more padding for larger screen */
+    padding-right: 1.5rem !important;
   }
   
   main {
-    padding-left: 3rem !important;
-    padding-right: 3rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
   }
   
   .grid {
-    gap: 1rem !important; /* Slightly larger gap for larger iPad Pro */
+    gap: 0.75rem !important; /* Slightly larger gap for larger iPad Pro */
   }
   
   .card {
-    padding: 2rem !important;
+    padding: 1rem !important; /* Slightly more padding */
   }
 }
 
 /* iPad Landscape Specific */
 @media (orientation: landscape) and (min-width: 1024px) and (max-width: 1366px) {
   .sidebar {
-    width: 320px !important;
+    width: 260px !important; /* Slightly larger in landscape */
   }
   
   .main-content {
-    margin-left: 320px !important;
+    margin-left: 260px !important;
   }
   
   .hero-section {
-    padding: 4rem 3rem !important;
+    padding: 2.5rem 1.5rem !important; /* Slightly more in landscape */
   }
   
   .product-grid,
   .media-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; /* Larger columns in landscape */
   }
 }
 
 /* Touch Optimizations for iPad */
 @media (pointer: coarse) and (min-width: 768px) {
   button, .btn, [role="button"] {
-    min-height: 48px !important;
-    min-width: 48px !important;
+    min-height: 36px !important; /* Reduced but still touch-friendly */
+    min-width: 36px !important;
   }
   
   .touch-target {
-    min-height: 48px !important;
-    min-width: 48px !important;
+    min-height: 36px !important;
+    min-width: 36px !important;
   }
   
   /* Larger tap targets for navigation */
   nav a, .nav-link {
-    min-height: 48px !important;
-    padding: 0.75rem 1rem !important;
+    min-height: 36px !important;
+    padding: 0.5rem 0.75rem !important; /* More compact */
   }
   
-  /* Larger form controls */
+  /* Form controls */
   input[type="checkbox"],
   input[type="radio"] {
-    width: 20px !important;
-    height: 20px !important;
+    width: 18px !important; /* Slightly smaller */
+    height: 18px !important;
   }
   
   /* Scroll indicators */
   .scroll-indicator {
-    width: 8px !important;
-    border-radius: 4px !important;
+    width: 6px !important; /* Thinner */
+    border-radius: 3px !important;
   }
   
   /* Enhanced swipe areas */
   .swipe-area {
-    padding: 1rem !important;
+    padding: 0.75rem !important; /* More compact */
     touch-action: pan-x !important;
   }
 }

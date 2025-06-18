@@ -9,9 +9,7 @@ export const AdminLayout: React.FC = () => {
       <AdminTopNavigation />
       
       <main className="w-full">
-        <div className="p-6">
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
     </div>
   );

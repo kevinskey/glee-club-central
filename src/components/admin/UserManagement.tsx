@@ -1,13 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from "@/components/ui/page-header";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -124,7 +116,7 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="p-4 space-y-4">
       {/* Mobile View */}
       <div className="block md:hidden">
         <UserManagementMobile
@@ -138,175 +130,170 @@ export default function UserManagement() {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden md:block">
-        <PageHeader
-          title="User Management"
-          description="Manage Glee Club members and their roles"
-          icon={<Users className="h-6 w-6" />}
-        />
+      <div className="hidden md:block space-y-4">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">User Management</h1>
+            <p className="text-sm text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button onClick={handleAddUser} size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Member
+            </Button>
+          </div>
+        </div>
         
         <DatabaseConnectionTest />
         
         {error && (
-          <Alert variant="destructive" className="mt-4">
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
-        <Card className="mt-8">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Members Directory ({users.length})</CardTitle>
-            <Button onClick={handleAddUser}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Member
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* Search and Filter */}
-            <div className="flex mb-4 gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search members..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
-              <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-            
-            {isLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-2 text-muted-foreground">Loading members...</p>
-              </div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Voice Part</TableHead>
-                      <TableHead>Class</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Dues</TableHead>
-                      <TableHead className="w-12"></TableHead>
+        {/* Search - More Compact */}
+        <div className="relative max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input
+            placeholder="Search members..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-8 h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Loading members...</p>
+          </div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12"></TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Voice Part</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Dues</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center py-8">
+                      <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <h3 className="font-semibold mb-1">No Members Found</h3>
+                      <p className="text-muted-foreground text-sm">
+                        {users.length === 0 
+                          ? 'No members have been added yet.' 
+                          : 'No members match your search criteria.'
+                        }
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar_url} />
+                          <AvatarFallback className="text-xs">
+                            {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">
+                          {user.first_name} {user.last_name}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Mail className="mr-1 h-3 w-3" />
+                          {user.email}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {user.phone && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Phone className="mr-1 h-3 w-3" />
+                            {user.phone}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.voice_part && (
+                          <Badge variant="outline" className="text-xs">
+                            <Music className="mr-1 h-3 w-3" />
+                            {user.voice_part.replace('_', ' ')}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {user.class_year && (
+                          <Badge variant="outline" className="text-xs">
+                            {user.class_year}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs">
+                          {user.is_super_admin ? 'Super Admin' : user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                          {user.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.dues_paid && (
+                          <Badge variant="default" className="bg-green-600 text-xs">
+                            Paid
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Member
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Member
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={10} className="text-center py-12">
-                          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <h3 className="font-semibold mb-2">No Members Found</h3>
-                          <p className="text-muted-foreground">
-                            {users.length === 0 
-                              ? 'No members have been added yet.' 
-                              : 'No members match your search criteria.'
-                            }
-                          </p>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredUsers.map((user) => (
-                        <TableRow key={user.id} className="hover:bg-muted/50">
-                          <TableCell>
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={user.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
-                              </AvatarFallback>
-                            </Avatar>
-                          </TableCell>
-                          <TableCell>
-                            <div className="font-medium">
-                              {user.first_name} {user.last_name}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Mail className="mr-1 h-3 w-3" />
-                              {user.email}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {user.phone && (
-                              <div className="flex items-center text-sm text-muted-foreground">
-                                <Phone className="mr-1 h-3 w-3" />
-                                {user.phone}
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {user.voice_part && (
-                              <Badge variant="outline" className="text-xs">
-                                <Music className="mr-1 h-3 w-3" />
-                                {user.voice_part.replace('_', ' ')}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {user.class_year && (
-                              <Badge variant="outline" className="text-xs">
-                                {user.class_year}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs">
-                              {user.is_super_admin ? 'Super Admin' : user.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                              {user.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {user.dues_paid && (
-                              <Badge variant="default" className="bg-green-600 text-xs">
-                                Paid
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Edit Member
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-destructive">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete Member
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
         
         {/* Add User Dialog */}
         <AddUserDialog 

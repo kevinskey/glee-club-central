@@ -46,31 +46,31 @@ export function AdminDashboardContent() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
+    <div className="p-4 space-y-4">
+      {/* Compact Welcome Section */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight">
           Welcome back, {profile?.first_name || 'Admin'}! 👋
         </h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground text-sm">
           Here's what's happening with your Glee Club today.
         </p>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Compact Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {quickStats.map((stat, index) => {
           const Icon = stat.icon;
           return (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card key={index} className="p-3">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
                 </CardTitle>
                 <Icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+              <CardContent className="p-0">
+                <div className="text-xl font-bold">{stat.value}</div>
                 <p className="text-xs text-muted-foreground">
                   {stat.change}
                 </p>
@@ -80,16 +80,16 @@ export function AdminDashboardContent() {
         })}
       </div>
 
-      {/* Admin Modules */}
+      {/* Compact Admin Modules */}
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Administration</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-xl font-bold tracking-tight">Administration</h2>
+            <p className="text-muted-foreground text-sm">
               Manage all aspects of your Glee Club
             </p>
           </div>
-          <Badge variant="outline" className="text-sm">
+          <Badge variant="outline" className="text-xs">
             Admin Access
           </Badge>
         </div>
