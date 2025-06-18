@@ -37,7 +37,7 @@ import {
 
 const allNavigationItems = [
   { to: '/', icon: Home, label: 'Back to Site', section: 'core' },
-  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', section: 'core' },
+  { to: '/admin', icon: LayoutDashboard, label: 'Overview', section: 'core' },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar', section: 'core' },
   { to: '/admin/users', icon: Users, label: 'Members', section: 'users' },
   { to: '/admin/user-roles', icon: UserCog, label: 'User Roles', section: 'users' },
