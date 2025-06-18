@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import {
   LayoutDashboard,
@@ -32,39 +33,30 @@ import {
   Package,
   ChevronDown,
   LogOut,
-  Bell
+  Bell,
+  Menu
 } from 'lucide-react';
 
-const navigationSections = {
-  core: [
-    { to: '/', icon: Home, label: 'Back to Site' },
-    { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-    { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-  ],
-  users: [
-    { to: '/admin/users', icon: Users, label: 'Members' },
-    { to: '/admin/user-roles', icon: UserCog, label: 'User Roles' },
-    { to: '/admin/permissions', icon: Shield, label: 'Permissions' },
-  ],
-  content: [
-    { to: '/admin/media-library', icon: Image, label: 'Media Library' },
-    { to: '/admin/music', icon: Music, label: 'Music Player' },
-    { to: '/admin/videos', icon: Video, label: 'Videos' },
-    { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides' },
-    { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
-    { to: '/admin/handbook', icon: FileText, label: 'Handbook' },
-  ],
-  business: [
-    { to: '/admin/financial', icon: DollarSign, label: 'Financial' },
-    { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
-    { to: '/admin/orders', icon: Package, label: 'Orders' },
-    { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
-  ],
-  system: [
-    { to: '/admin/settings', icon: Settings, label: 'Settings' },
-  ]
-};
+const allNavigationItems = [
+  { to: '/', icon: Home, label: 'Back to Site', section: 'core' },
+  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', section: 'core' },
+  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics', section: 'core' },
+  { to: '/admin/calendar', icon: Calendar, label: 'Calendar', section: 'core' },
+  { to: '/admin/users', icon: Users, label: 'Members', section: 'users' },
+  { to: '/admin/user-roles', icon: UserCog, label: 'User Roles', section: 'users' },
+  { to: '/admin/permissions', icon: Shield, label: 'Permissions', section: 'users' },
+  { to: '/admin/media-library', icon: Image, label: 'Media Library', section: 'content' },
+  { to: '/admin/music', icon: Music, label: 'Music Player', section: 'content' },
+  { to: '/admin/videos', icon: Video, label: 'Videos', section: 'content' },
+  { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides', section: 'content' },
+  { to: '/admin/news-items', icon: Megaphone, label: 'News Items', section: 'content' },
+  { to: '/admin/handbook', icon: FileText, label: 'Handbook', section: 'content' },
+  { to: '/admin/financial', icon: DollarSign, label: 'Financial', section: 'business' },
+  { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin', section: 'business' },
+  { to: '/admin/orders', icon: Package, label: 'Orders', section: 'business' },
+  { to: '/admin/communications', icon: MessageSquare, label: 'Communications', section: 'business' },
+  { to: '/admin/settings', icon: Settings, label: 'Settings', section: 'system' },
+];
 
 export const AdminTopNavigation: React.FC = () => {
   const { user, profile, logout } = useAuth();
@@ -84,17 +76,31 @@ export const AdminTopNavigation: React.FC = () => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
   };
 
-  const isActiveSection = (items: typeof navigationSections.core) => {
-    return items.some(item => location.pathname === item.to || 
-      (item.to !== '/admin' && location.pathname.startsWith(item.to)));
-  };
-
   const isActiveItem = (to: string) => {
     if (to === '/admin') {
       return location.pathname === '/admin';
     }
     return location.pathname === to || location.pathname.startsWith(to);
   };
+
+  const getSectionLabel = (section: string) => {
+    switch (section) {
+      case 'core': return 'Core';
+      case 'users': return 'User Management';
+      case 'content': return 'Content Management';
+      case 'business': return 'Business';
+      case 'system': return 'System';
+      default: return section;
+    }
+  };
+
+  const groupedItems = allNavigationItems.reduce((acc, item) => {
+    if (!acc[item.section]) {
+      acc[item.section] = [];
+    }
+    acc[item.section].push(item);
+    return acc;
+  }, {} as Record<string, typeof allNavigationItems>);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -109,155 +115,36 @@ export const AdminTopNavigation: React.FC = () => {
           </div>
         </div>
 
-        {/* Navigation Dropdowns */}
-        <div className="flex items-center gap-2">
-          {/* Core Navigation */}
+        {/* Navigation Dropdown */}
+        <div className="flex items-center gap-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant={isActiveSection(navigationSections.core) ? "default" : "ghost"} 
-                size="sm"
-                className="gap-2"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Core
+              <Button variant="outline" className="gap-2">
+                <Menu className="h-4 w-4" />
+                Navigation
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {navigationSections.core.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={isActiveItem(item.to) ? "bg-accent" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Users Management */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant={isActiveSection(navigationSections.users) ? "default" : "ghost"} 
-                size="sm"
-                className="gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Users
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {navigationSections.users.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={isActiveItem(item.to) ? "bg-accent" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Content Management */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant={isActiveSection(navigationSections.content) ? "default" : "ghost"} 
-                size="sm"
-                className="gap-2"
-              >
-                <Image className="h-4 w-4" />
-                Content
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {navigationSections.content.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={isActiveItem(item.to) ? "bg-accent" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Business Management */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant={isActiveSection(navigationSections.business) ? "default" : "ghost"} 
-                size="sm"
-                className="gap-2"
-              >
-                <DollarSign className="h-4 w-4" />
-                Business
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {navigationSections.business.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={isActiveItem(item.to) ? "bg-accent" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* System Settings */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant={isActiveSection(navigationSections.system) ? "default" : "ghost"} 
-                size="sm"
-                className="gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                System
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="start">
-              {navigationSections.system.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <DropdownMenuItem 
-                    key={item.to}
-                    onClick={() => navigate(item.to)}
-                    className={isActiveItem(item.to) ? "bg-accent" : ""}
-                  >
-                    <Icon className="mr-2 h-4 w-4" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                );
-              })}
+            <DropdownMenuContent className="w-64" align="center">
+              {Object.entries(groupedItems).map(([section, items]) => (
+                <div key={section}>
+                  <DropdownMenuLabel>{getSectionLabel(section)}</DropdownMenuLabel>
+                  {items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <DropdownMenuItem 
+                        key={item.to}
+                        onClick={() => navigate(item.to)}
+                        className={isActiveItem(item.to) ? "bg-accent" : ""}
+                      >
+                        <Icon className="mr-2 h-4 w-4" />
+                        <span>{item.label}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                </div>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
