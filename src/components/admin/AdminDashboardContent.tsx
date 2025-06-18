@@ -48,7 +48,24 @@ export function AdminDashboardContent() {
   return (
     <div className="w-full min-h-screen">
       <div className="w-full space-y-0">
-        {/* Compact Welcome Section */}
+        {/* Admin Modules - moved to top */}
+        <div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold tracking-tight">Administration</h2>
+              <p className="text-muted-foreground text-sm">
+                Manage all aspects of your Glee Club
+              </p>
+            </div>
+            <Badge variant="outline" className="text-xs">
+              Admin Access
+            </Badge>
+          </div>
+          
+          <UnifiedAdminModules />
+        </div>
+
+        {/* Welcome Section */}
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
             Welcome back, {profile?.first_name || 'Admin'}! 👋
@@ -58,7 +75,7 @@ export function AdminDashboardContent() {
           </p>
         </div>
 
-        {/* Compact Quick Stats */}
+        {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
           {quickStats.map((stat, index) => {
             const Icon = stat.icon;
@@ -79,23 +96,6 @@ export function AdminDashboardContent() {
               </Card>
             );
           })}
-        </div>
-
-        {/* Compact Admin Modules */}
-        <div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold tracking-tight">Administration</h2>
-              <p className="text-muted-foreground text-sm">
-                Manage all aspects of your Glee Club
-              </p>
-            </div>
-            <Badge variant="outline" className="text-xs">
-              Admin Access
-            </Badge>
-          </div>
-          
-          <UnifiedAdminModules />
         </div>
       </div>
     </div>
