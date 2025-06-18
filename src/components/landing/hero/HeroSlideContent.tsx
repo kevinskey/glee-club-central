@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { HeroSlide, MediaFile } from './types';
 import { useIsPad } from '@/hooks/useIsPad';
@@ -11,6 +11,7 @@ interface HeroSlideContentProps {
 
 export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
   const isPad = useIsPad();
+  const [imageError, setImageError] = useState(false);
   
   // Debug logging
   console.log('HeroSlideContent: Current slide:', slide);
@@ -68,32 +69,21 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     <section className="relative w-full h-[30vh] sm:h-[45vh] md:h-[52vh] lg:h-[60vh] flex overflow-hidden">
       {/* Background Image or Video */}
       <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-        {hasValidImage ? (
+        {hasValidImage && !imageError ? (
           <>
             <img
               src={backgroundImage}
               alt={slide.title}
               className="w-full h-full object-contain transition-all duration-1000"
-              style={{ 
+              style={{
                 objectPosition: 'center center'
               }}
               onLoad={() => {
                 console.log('HeroSlideContent: Image loaded successfully:', backgroundImage);
               }}
-              onError={(e) => {
+              onError={() => {
                 console.error('HeroSlideContent: Failed to load image:', backgroundImage);
-                // Hide the broken image and show fallback
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                // Show gradient background instead
-                const parent = target.parentElement;
-                if (parent) {
-                  parent.innerHTML = `
-                    <div class="w-full h-full bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
-                      ${hasTextContent ? '<div class="absolute inset-0 bg-black/50"></div>' : ''}
-                    </div>
-                  `;
-                }
+                setImageError(true);
               }}
             />
             {hasTextContent && <div className="absolute inset-0 bg-black/50"></div>}
