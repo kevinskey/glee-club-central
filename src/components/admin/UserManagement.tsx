@@ -19,7 +19,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, Search, Plus, RefreshCw, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music } from "lucide-react";
+import { Users, Search, Plus, RefreshCw, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music, Menu, ChevronDown } from "lucide-react";
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
 import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
@@ -117,91 +117,149 @@ export default function UserManagement() {
   );
 
   return (
-    <div className="p-0 space-y-0 md:p-1 md:space-y-1">
+    <div className="space-y-4 p-4">
       {/* Mobile View */}
       <div className="block md:hidden">
-        <UserManagementMobile
-          users={users}
-          onUserSelect={(user) => {
-            console.log('Selected user:', user);
-          }}
-          onAddUser={handleAddUser}
-          isLoading={isLoading}
-        />
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden md:block space-y-0 md:space-y-1">
-        {/* Ultra Compact Header */}
-        <div className="flex items-center justify-between px-1">
+        {/* Mobile Header with Dropdown */}
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xs md:text-sm font-bold">User Management</h1>
-            <p className="text-xs text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
+            <h1 className="text-xl font-bold">User Management</h1>
+            <p className="text-sm text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
           </div>
-          <div className="flex gap-1">
-            <Button onClick={handleRefresh} variant="outline" size="sm" disabled={isLoading} className="text-xs h-6 md:h-7 px-2 min-w-[50px]">
-              <RefreshCw className={`hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3 ${isLoading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </Button>
-            <Button onClick={handleAddUser} size="sm" className="text-xs h-6 md:h-7 px-2 min-w-[40px]">
-              <Plus className="hidden md:inline mr-1 h-2 w-2 md:h-3 md:w-3" />
-              <span>Add</span>
-            </Button>
-          </div>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Menu className="h-4 w-4 mr-2" />
+                Actions
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={handleRefresh} disabled={isLoading}>
+                <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh Users
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleAddUser}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add User
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleImportUsers}>
+                <Users className="mr-2 h-4 w-4" />
+                Import Users
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        
-        <div className="px-1">
-          <DatabaseConnectionTest />
-        </div>
+
+        <DatabaseConnectionTest />
         
         {error && (
-          <Alert variant="destructive" className="text-xs p-1 mx-1">
-            <AlertCircle className="h-2 w-2 md:h-3 md:w-3" />
-            <AlertTitle className="text-xs">Error</AlertTitle>
-            <AlertDescription className="text-xs">{error}</AlertDescription>
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         
-        {/* Ultra Compact Search */}
-        <div className="relative max-w-xs px-1">
-          <Search className="absolute left-2 top-1 h-2 w-2 md:h-3 md:w-3 text-muted-foreground" />
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
-            placeholder="Search..."
+            placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-4 md:pl-6 h-4 md:h-5 w-full rounded border border-input bg-background px-1 md:px-2 text-xs ring-offset-background file:border-0 file:bg-transparent file:text-xs file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
+            className="pl-10 w-full h-10 rounded border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
         
         {isLoading ? (
-          <div className="text-center py-1 md:py-2">
-            <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-1 text-xs text-muted-foreground">Loading...</p>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
           </div>
         ) : (
-          <div className="rounded border mx-1">
+          <UserManagementMobile
+            users={users}
+            onUserSelect={(user) => {
+              console.log('Selected user:', user);
+            }}
+            onAddUser={handleAddUser}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden md:block space-y-4">
+        {/* Desktop Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">User Management</h1>
+            <p className="text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleRefresh} variant="outline" disabled={isLoading}>
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button onClick={handleAddUser}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          </div>
+        </div>
+        
+        <DatabaseConnectionTest />
+        
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 h-10 w-full rounded border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          />
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Loading...</p>
+          </div>
+        ) : (
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
-                <TableRow className="h-5">
-                  <TableHead className="w-5 md:w-6 text-xs p-0.5"></TableHead>
-                  <TableHead className="text-xs p-0.5">Name</TableHead>
-                  <TableHead className="text-xs p-0.5">Email</TableHead>
-                  <TableHead className="text-xs p-0.5">Phone</TableHead>
-                  <TableHead className="text-xs p-0.5">Voice</TableHead>
-                  <TableHead className="text-xs p-0.5">Class</TableHead>
-                  <TableHead className="text-xs p-0.5">Role</TableHead>
-                  <TableHead className="text-xs p-0.5">Status</TableHead>
-                  <TableHead className="text-xs p-0.5">Dues</TableHead>
-                  <TableHead className="w-5 md:w-6 text-xs p-0.5"></TableHead>
+                <TableRow>
+                  <TableHead className="w-12"></TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Voice</TableHead>
+                  <TableHead>Class</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Dues</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-1 md:py-2">
-                      <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground mx-auto mb-1" />
-                      <h3 className="font-semibold mb-1 text-xs">No Members Found</h3>
-                      <p className="text-muted-foreground text-xs">
+                    <TableCell colSpan={10} className="text-center py-8">
+                      <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                      <h3 className="font-semibold mb-1">No Members Found</h3>
+                      <p className="text-muted-foreground">
                         {users.length === 0 
                           ? 'No members added yet.' 
                           : 'No members match search.'
@@ -211,81 +269,80 @@ export default function UserManagement() {
                   </TableRow>
                 ) : (
                   filteredUsers.map((user) => (
-                    <TableRow key={user.id} className="hover:bg-muted/50 h-6">
-                      <TableCell className="p-0.5">
-                        <Avatar className="h-3 w-3 md:h-4 md:w-4">
+                    <TableRow key={user.id} className="hover:bg-muted/50">
+                      <TableCell>
+                        <Avatar className="h-8 w-8">
                           <AvatarImage src={user.avatar_url} />
-                          <AvatarFallback className="text-xs">
+                          <AvatarFallback>
                             {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
                           </AvatarFallback>
                         </Avatar>
                       </TableCell>
-                      <TableCell className="p-0.5">
-                        <div className="font-medium text-xs">
+                      <TableCell>
+                        <div className="font-medium">
                           {user.first_name} {user.last_name}
                         </div>
                       </TableCell>
-                      <TableCell className="p-0.5">
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Mail className="hidden md:inline mr-1 h-2 w-2" />
-                          <span className="truncate max-w-[60px] md:max-w-none">{user.email}</span>
+                      <TableCell>
+                        <div className="flex items-center text-muted-foreground">
+                          <Mail className="mr-2 h-4 w-4" />
+                          <span className="truncate">{user.email}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="p-0.5">
+                      <TableCell>
                         {user.phone && (
-                          <div className="flex items-center text-xs text-muted-foreground">
-                            <Phone className="hidden md:inline mr-1 h-2 w-2" />
-                            <span className="truncate">{user.phone}</span>
+                          <div className="flex items-center text-muted-foreground">
+                            <Phone className="mr-2 h-4 w-4" />
+                            <span>{user.phone}</span>
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="p-0.5">
+                      <TableCell>
                         {user.voice_part && (
-                          <Badge variant="outline" className="text-xs px-0.5 py-0 h-3">
-                            <Music className="hidden md:inline mr-1 h-2 w-2" />
-                            <span className="hidden md:inline">{user.voice_part.replace('_', ' ')}</span>
-                            <span className="md:hidden">{user.voice_part.replace('_', ' ').substring(0, 2)}</span>
+                          <Badge variant="outline">
+                            <Music className="mr-2 h-4 w-4" />
+                            {user.voice_part.replace('_', ' ')}
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-0.5">
+                      <TableCell>
                         {user.class_year && (
-                          <Badge variant="outline" className="text-xs px-0.5 py-0 h-3">
+                          <Badge variant="outline">
                             {user.class_year}
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-0.5">
-                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs px-0.5 py-0 h-3">
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'}>
                           {user.is_super_admin ? 'Super' : user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-0.5">
-                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs px-0.5 py-0 h-3">
+                      <TableCell>
+                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
                           {user.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="p-0.5">
+                      <TableCell>
                         {user.dues_paid && (
-                          <Badge variant="default" className="bg-green-600 text-xs px-0.5 py-0 h-3">
+                          <Badge variant="default" className="bg-green-600">
                             ✓
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="p-0.5">
+                      <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-3 w-3 p-0">
-                              <MoreVertical className="h-2 w-2 md:h-3 md:w-3" />
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="text-xs">
-                              <Edit className="hidden md:inline mr-2 h-2 w-2 md:h-3 md:w-3" />
+                            <DropdownMenuItem>
+                              <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive text-xs">
-                              <Trash2 className="hidden md:inline mr-2 h-2 w-2 md:h-3 md:w-3" />
+                            <DropdownMenuItem className="text-destructive">
+                              <Trash2 className="mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -298,46 +355,46 @@ export default function UserManagement() {
             </Table>
           </div>
         )}
+      </div>
         
-        {/* Add User Dialog */}
-        <AddUserDialog 
-          isOpen={showAddDialog} 
-          onClose={() => setShowAddDialog(false)}
-          onCreateUser={handleUserAdded}
-          onImportUsers={handleImportUsers}
-        />
+      {/* Add User Dialog */}
+      <AddUserDialog 
+        isOpen={showAddDialog} 
+        onClose={() => setShowAddDialog(false)}
+        onCreateUser={handleUserAdded}
+        onImportUsers={handleImportUsers}
+      />
 
-        {/* Import Users Dialog */}
-        {showImportDialog && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-1 md:p-2 max-w-xl w-full m-1 max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-1">
-                <h2 className="text-xs md:text-sm font-semibold">Import Users from CSV</h2>
-                <Button variant="ghost" onClick={() => setShowImportDialog(false)} className="text-xs md:text-sm h-5 w-5 p-0">
-                  ×
-                </Button>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  Upload CSV to bulk import members.
-                </p>
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      toast.info('CSV import functionality coming soon');
-                      handleImportComplete();
-                    }
-                  }}
-                  className="block w-full text-xs text-gray-500 file:mr-1 file:py-0.5 file:px-1 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </div>
+      {/* Import Users Dialog */}
+      {showImportDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Import Users from CSV</h2>
+              <Button variant="ghost" onClick={() => setShowImportDialog(false)}>
+                ×
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Upload CSV to bulk import members.
+              </p>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    toast.info('CSV import functionality coming soon');
+                    handleImportComplete();
+                  }
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
