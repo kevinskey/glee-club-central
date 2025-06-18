@@ -38,7 +38,6 @@ import {
 const allNavigationItems = [
   { to: '/', icon: Home, label: 'Back to Site', section: 'core' },
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', section: 'core' },
-  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics', section: 'core' },
   { to: '/admin/calendar', icon: Calendar, label: 'Calendar', section: 'core' },
   { to: '/admin/users', icon: Users, label: 'Members', section: 'users' },
   { to: '/admin/user-roles', icon: UserCog, label: 'User Roles', section: 'users' },
@@ -54,6 +53,7 @@ const allNavigationItems = [
   { to: '/admin/orders', icon: Package, label: 'Orders', section: 'business' },
   { to: '/admin/communications', icon: MessageSquare, label: 'Communications', section: 'business' },
   { to: '/admin/settings', icon: Settings, label: 'Settings', section: 'system' },
+  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics', section: 'system' },
 ];
 
 export const AdminTopNavigation: React.FC = () => {
@@ -126,14 +126,14 @@ export const AdminTopNavigation: React.FC = () => {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               
-              {/* Navigation */}
+              {/* Navigation - ordered sections: core, users, content, business, system */}
               <DropdownMenuLabel>Navigation</DropdownMenuLabel>
-              {Object.entries(groupedItems).map(([section, items]) => (
+              {['core', 'users', 'content', 'business', 'system'].map((section) => (
                 <div key={section}>
                   <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">
                     {getSectionLabel(section)}
                   </DropdownMenuLabel>
-                  {items.map((item) => {
+                  {groupedItems[section]?.map((item) => {
                     const Icon = item.icon;
                     return (
                       <DropdownMenuItem 
