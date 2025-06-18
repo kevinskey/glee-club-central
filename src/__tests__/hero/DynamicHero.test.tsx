@@ -1,7 +1,7 @@
-
 import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect } from 'vitest';
+import '@testing-library/jest-dom';
 
 import { DynamicHero } from '@/components/landing/DynamicHero';
 import { HeroSlideContent } from '@/components/landing/hero/HeroSlideContent';
