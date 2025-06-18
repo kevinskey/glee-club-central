@@ -73,49 +73,62 @@ export function MobileAdminDashboard() {
     }
   ];
 
-  const stats = [
-    {
-      label: 'Total Files',
-      value: isLoading ? '...' : mediaStats?.totalFiles?.toString() || '0',
-      icon: FileImage
-    },
-    {
-      label: 'Images',
-      value: isLoading ? '...' : (mediaStats?.filesByType?.['image'] || 0).toString(),
-      icon: FileImage
-    }
-  ];
-
   return (
-    <div className="w-full max-w-full p-3 space-y-4 overflow-x-hidden">
+    <div className="w-full max-w-full p-2 space-y-3 overflow-x-hidden">
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+        <h1 className="text-xl font-bold text-foreground mb-1">
           Admin Dashboard
         </h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Manage your Glee Club
         </p>
       </div>
 
-      {/* Stats */}
-      <div className="w-full">
-        <div className="grid grid-cols-2 gap-2 w-full">
-          {stats.map((stat, index) => (
-            <Card key={index} className="w-full">
-              <CardContent className="p-3 text-center">
-                <stat.icon className="h-5 w-5 mx-auto mb-2 text-primary" />
-                <div className="text-lg font-bold text-primary">{stat.value}</div>
-                <div className="text-xs text-muted-foreground">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+      {/* Combined Stats Card */}
+      <Card className="w-full">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Quick Stats</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-1">
+                <Users className="h-3 w-3 text-blue-500 mr-1" />
+                <span className="text-xs text-muted-foreground">Members</span>
+              </div>
+              <div className="text-lg font-bold text-blue-500">42</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-1">
+                <Calendar className="h-3 w-3 text-green-500 mr-1" />
+                <span className="text-xs text-muted-foreground">Events</span>
+              </div>
+              <div className="text-lg font-bold text-green-500">8</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-1">
+                <FileImage className="h-3 w-3 text-orange-500 mr-1" />
+                <span className="text-xs text-muted-foreground">Media</span>
+              </div>
+              <div className="text-lg font-bold text-orange-500">
+                {isLoading ? '...' : mediaStats?.totalFiles?.toString() || '0'}
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center mb-1">
+                <ShoppingBag className="h-3 w-3 text-purple-500 mr-1" />
+                <span className="text-xs text-muted-foreground">Orders</span>
+              </div>
+              <div className="text-lg font-bold text-purple-500">3</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <div className="w-full">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
+        <h2 className="text-sm font-semibold text-foreground mb-2">
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 gap-2 w-full">
@@ -125,11 +138,11 @@ export function MobileAdminDashboard() {
               className="w-full cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => navigate(action.path)}
             >
-              <CardContent className="p-3 text-center">
-                <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-2`}>
-                  <action.icon className="h-5 w-5" />
+              <CardContent className="p-2 text-center">
+                <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-1`}>
+                  <action.icon className="h-4 w-4" />
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">
+                <p className="text-xs font-medium text-foreground mb-0.5">
                   {action.title}
                 </p>
                 <p className="text-xs text-muted-foreground">
