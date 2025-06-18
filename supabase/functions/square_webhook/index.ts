@@ -25,10 +25,27 @@ serve(async (req) => {
     }
 
     const body = await req.text();
-    
-    // TODO: Implement signature verification
-    // For now, we'll process the webhook without verification (not recommended for production)
-    console.log("⚠️ Webhook signature verification not implemented");
+
+    // Verify the webhook signature using the Square signing key
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(webhookSignatureKey),
+      { name: "HMAC", hash: "SHA-1" },
+      false,
+      ["sign"],
+    );
+    const data = encoder.encode(req.url + body);
+    const signatureBuf = await crypto.subtle.sign("HMAC", key, data);
+    const computedSignature = btoa(
+      String.fromCharCode(...new Uint8Array(signatureBuf)),
+    );
+
+    if (signature !== computedSignature) {
+      console.error("❌ Webhook signature verification failed");
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    }
+
 
     const event = JSON.parse(body);
     console.log("📨 Webhook event:", JSON.stringify(event, null, 2));
