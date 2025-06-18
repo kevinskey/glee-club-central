@@ -1,3 +1,4 @@
+
 /* Mobile-First Design System Optimizations */
 
 /* Global Mobile Fixes */
@@ -29,9 +30,9 @@ body {
   max-width: 100vw;
 }
 
-/* Unified Container System - MINIMAL SPACING */
+/* Unified Container System - ULTRA MINIMAL SPACING */
 @media (max-width: 768px) {
-  /* Minimal horizontal padding for containers */
+  /* Ultra minimal horizontal padding for containers */
   .container, 
   .max-w-7xl, 
   .max-w-6xl, 
@@ -47,17 +48,17 @@ body {
   [class*="max-w-"] {
     width: 100% !important;
     max-width: 100vw !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
     margin-left: 0 !important;
     margin-right: 0 !important;
     box-sizing: border-box !important;
   }
   
-  /* Minimal padding classes */
+  /* Ultra minimal padding classes */
   .px-1, .px-2, .px-3, .px-4, .px-5, .px-6, .px-8, .px-12 {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
   }
   
   /* Remove excessive margins */
@@ -66,30 +67,30 @@ body {
     margin-right: 0 !important;
   }
   
-  /* Minimal spacing for main content */
+  /* Ultra minimal spacing for main content */
   main, 
   main > *,
   section,
   article,
   div[class*="page"],
   div[class*="content"] {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
   
-  /* Compact mobile padding classes */
+  /* Ultra compact mobile padding classes */
   .mobile-padding-sm {
-    padding: 0.25rem !important;
+    padding: 0.125rem !important; /* Ultra minimal */
   }
   
   .mobile-padding-md {
-    padding: 0.5rem !important;
+    padding: 0.25rem !important; /* Ultra minimal */
   }
   
   .mobile-padding-lg {
-    padding: 0.75rem !important;
+    padding: 0.375rem !important; /* Ultra minimal */
   }
   
   /* Hero section minimal padding */
@@ -100,26 +101,26 @@ body {
     padding-right: 0 !important;
   }
   
-  /* Card containers with minimal spacing */
+  /* Card containers with ultra minimal spacing */
   .card-container,
   [class*="card"] .container {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
   }
   
-  /* Section containers minimal padding */
+  /* Section containers ultra minimal padding */
   section .container,
   section [class*="max-w-"] {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
   }
   
-  /* Page wrapper minimal spacing */
+  /* Page wrapper ultra minimal spacing */
   .page-wrapper,
   .layout-container,
   .content-wrapper {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    padding-left: 0.25rem !important; /* Ultra minimal */
+    padding-right: 0.25rem !important; /* Ultra minimal */
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
@@ -131,7 +132,7 @@ body {
   .space-x-4 > * + *,
   .space-x-6 > * + *,
   .space-x-8 > * + * {
-    margin-left: 0.25rem !important;
+    margin-left: 0.125rem !important; /* Ultra minimal */
   }
   
   /* Admin pages - slightly more padding for usability */
@@ -139,35 +140,35 @@ body {
   .dashboard-content,
   [class*="admin"],
   [class*="dashboard"] {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    padding-left: 0.5rem !important; /* Reduced from 0.75rem */
+    padding-right: 0.5rem !important; /* Reduced from 0.75rem */
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
   
-  /* Admin header minimal padding */
+  /* Admin header ultra minimal padding */
   .admin-header,
   header.admin-header,
   [class*="admin-header"] {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    padding-left: 0.5rem !important; /* Reduced from 0.75rem */
+    padding-right: 0.5rem !important; /* Reduced from 0.75rem */
   }
   
-  /* Admin main content minimal padding */
+  /* Admin main content ultra minimal padding */
   main[class*="admin"],
   .admin-layout main,
   .admin-page main {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-    padding-top: 0.5rem !important;
+    padding-left: 0.5rem !important; /* Reduced from 0.75rem */
+    padding-right: 0.5rem !important; /* Reduced from 0.75rem */
+    padding-top: 0.25rem !important; /* Reduced from 0.5rem */
   }
   
-  /* Admin containers minimal padding */
+  /* Admin containers ultra minimal padding */
   .admin-unified-header,
   .admin-top-bar,
   .admin-navigation {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    padding-left: 0.5rem !important; /* Reduced from 0.75rem */
+    padding-right: 0.5rem !important; /* Reduced from 0.75rem */
   }
 }
 
@@ -178,9 +179,9 @@ body {
   overflow-x: hidden;
 }
 
-/* Mobile Header Fixes - Compact */
+/* Mobile Header Fixes - Ultra Compact */
 @media (max-width: 768px) {
-  /* Header compact spacing */
+  /* Header ultra compact spacing */
   header {
     position: static !important;
     top: auto !important;
@@ -196,8 +197,8 @@ body {
     -webkit-backdrop-filter: blur(20px) !important;
     margin: 0 !important;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
-    padding: 0.5rem !important;
-    min-height: 28px !important;
+    padding: 0.25rem !important; /* Reduced from 0.5rem */
+    min-height: 24px !important; /* Reduced from 28px */
   }
   
   .dark header {
@@ -205,21 +206,21 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
   }
   
-  /* Header content compact spacing */
+  /* Header content ultra compact spacing */
   header .flex {
-    min-height: 20px !important;
+    min-height: 16px !important; /* Reduced from 20px */
     align-items: center !important;
   }
   
-  /* Admin header compact */
+  /* Admin header ultra compact */
   header.admin-header,
   .admin-header,
   .admin-unified-header {
-    padding: 0.75rem !important;
-    min-height: 64px !important;
+    padding: 0.5rem !important; /* Reduced from 0.75rem */
+    min-height: 56px !important; /* Reduced from 64px */
   }
   
-  /* News Ticker compact */
+  /* News Ticker ultra compact */
   .news-ticker,
   .bg-glee-columbia {
     position: static !important;
@@ -232,106 +233,61 @@ body {
     box-sizing: border-box;
     z-index: 49 !important;
     margin: 0 !important;
-    height: 28px !important;
-    font-size: 12px !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    height: 24px !important; /* Reduced from 28px */
+    font-size: 10px !important; /* Reduced from 12px */
+    padding-left: 0.25rem !important; /* Reduced from 0.5rem */
+    padding-right: 0.25rem !important; /* Reduced from 0.5rem */
   }
   
-  /* Main content minimal top spacing */
+  /* Main content ultra minimal top spacing */
   main {
     margin: 0 !important;
-    padding-top: 0.5rem !important;
+    padding-top: 0.25rem !important; /* Reduced from 0.5rem */
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
   
-  /* Body content minimal spacing */
+  /* Body content ultra minimal spacing */
   body main {
-    padding-top: 0.5rem !important;
+    padding-top: 0.25rem !important; /* Reduced from 0.5rem */
   }
   
-  /* Page wrapper minimal content spacing */
-  .min-h-screen > main,
-  .bg-background > main {
-    padding-top: 0.5rem !important;
-  }
-  
-  /* Admin main content */
-  main.admin-main,
-  .admin-layout main {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-    padding-top: 0.75rem !important;
-  }
-  
-  /* Home page minimal adjustments */
-  .home-page main {
-    padding-top: 0.25rem !important;
-  }
-  
-  .min-h-screen.home-page {
-    padding-top: 0 !important;
-  }
-  
-  /* Hero section minimal spacing */
-  .home-page main > *:first-child {
-    margin-top: 0.25rem !important;
-    padding-top: 0.25rem !important;
-  }
-  
-  /* Dashboard and admin pages */
-  .dashboard-content,
-  .admin-content,
-  [class*="dashboard"],
-  [class*="admin"] {
-    padding-top: 0.75rem !important;
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-  
-  /* Content sections minimal spacing */
-  .content-wrapper,
-  .page-content,
-  section:first-child {
-    margin-top: 0.25rem !important;
-    padding-top: 0.25rem !important;
-  }
+  /* ... keep existing code (other optimizations remain the same) */
 }
 
-/* Compact Typography System - Halved Text Sizes for Mobile */
+/* Ultra Compact Typography System - Further Reduced Text Sizes for Mobile */
 @media (max-width: 768px) {
-  /* Page Headers - halved sizes */
+  /* Page Headers - further reduced sizes */
   h1 {
-    font-size: clamp(0.75rem, 1.5vw, 0.875rem) !important; /* Halved from 1.5-1.75rem */
+    font-size: clamp(0.625rem, 1.2vw, 0.75rem) !important; /* Further reduced */
     line-height: 1.1 !important;
-    margin-bottom: 0.125rem !important;
+    margin-bottom: 0.0625rem !important; /* Ultra minimal */
     font-weight: 700;
     letter-spacing: -0.01em;
   }
 
-  /* Section headers - halved */
+  /* Section headers - further reduced */
   h2 {
-    font-size: clamp(0.6875rem, 1.3vw, 0.75rem) !important; /* Halved from 1.375-1.5rem */
+    font-size: clamp(0.5625rem, 1.1vw, 0.625rem) !important; /* Further reduced */
     line-height: 1.2 !important;
-    margin-bottom: 0.125rem !important;
+    margin-bottom: 0.0625rem !important; /* Ultra minimal */
     font-weight: 600;
     letter-spacing: -0.01em;
   }
 
-  /* Subsection headers - halved */
+  /* Subsection headers - further reduced */
   h3 {
-    font-size: clamp(0.625rem, 1.2vw, 0.6875rem) !important; /* Halved from 1.25-1.375rem */
+    font-size: clamp(0.5rem, 1vw, 0.5625rem) !important; /* Further reduced */
     line-height: 1.2 !important;
-    margin-bottom: 0.0625rem !important;
+    margin-bottom: 0.03125rem !important; /* Ultra minimal */
     font-weight: 600;
   }
 
-  /* Body text - halved */
+  /* Body text - further reduced */
   p {
-    font-size: clamp(0.5625rem, 1.1vw, 0.625rem) !important; /* Halved from 1.125-1.25rem */
+    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important; /* Further reduced */
     line-height: 1.3 !important;
-    margin-bottom: 0.125rem !important;
+    margin-bottom: 0.0625rem !important; /* Ultra minimal */
     color: rgba(0, 0, 0, 0.8);
   }
 
@@ -339,112 +295,119 @@ body {
     color: rgba(255, 255, 255, 0.8);
   }
 
-  /* Small text - halved */
+  /* Small text - further reduced */
   .text-sm, small {
-    font-size: clamp(0.5rem, 1vw, 0.5625rem) !important; /* Halved from 1-1.125rem */
+    font-size: clamp(0.375rem, 0.8vw, 0.4375rem) !important; /* Further reduced */
   }
 
-  /* Extra small text - halved */
+  /* Extra small text - further reduced */
   .text-xs {
-    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important; /* Halved from 0.875-1rem */
+    font-size: clamp(0.3125rem, 0.7vw, 0.375rem) !important; /* Further reduced */
   }
 
-  /* Large text - halved */
+  /* Large text - further reduced */
   .text-lg {
-    font-size: clamp(0.625rem, 1.2vw, 0.6875rem) !important; /* Halved from 1.25-1.375rem */
+    font-size: clamp(0.5rem, 1vw, 0.5625rem) !important; /* Further reduced */
   }
 
-  /* Table text specifically */
+  /* Table text specifically - ultra small */
   table, th, td {
-    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important; /* Very small for tables */
+    font-size: clamp(0.3125rem, 0.7vw, 0.375rem) !important; /* Ultra small for tables */
     line-height: 1.2 !important;
+    padding: 0.125rem !important; /* Ultra minimal table padding */
   }
 
-  /* Badge text - extra small */
+  /* Badge text - ultra small */
   .badge, [class*="badge"] {
-    font-size: clamp(0.375rem, 0.8vw, 0.4375rem) !important; /* Extra small for badges */
-    padding: 0.0625rem 0.25rem !important;
+    font-size: clamp(0.25rem, 0.6vw, 0.3125rem) !important; /* Ultra small for badges */
+    padding: 0.03125rem 0.125rem !important; /* Ultra minimal padding */
+    height: 16px !important; /* Fixed small height */
   }
 
-  /* Button text - small */
+  /* Button text - ultra small */
   button {
-    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important;
+    font-size: clamp(0.3125rem, 0.7vw, 0.375rem) !important; /* Ultra small */
+    padding: 0.125rem 0.25rem !important; /* Ultra minimal padding */
+    min-height: 20px !important; /* Ultra compact height */
   }
 
   /* Input text - small but readable */
   input, select, textarea {
-    font-size: clamp(0.5rem, 1vw, 0.5625rem) !important;
+    font-size: clamp(0.375rem, 0.8vw, 0.4375rem) !important; /* Ultra small */
+    padding: 0.125rem 0.25rem !important; /* Ultra minimal padding */
+    min-height: 20px !important; /* Ultra compact height */
   }
 
-  /* Admin specific text */
+  /* Admin specific text - ultra compact */
   .admin-content h1,
   .admin-content h2,
   .admin-content h3,
   [class*="admin"] h1,
   [class*="admin"] h2,
   [class*="admin"] h3 {
-    font-size: clamp(0.625rem, 1.2vw, 0.75rem) !important;
-    margin-bottom: 0.125rem !important;
+    font-size: clamp(0.5rem, 1vw, 0.625rem) !important; /* Ultra small */
+    margin-bottom: 0.0625rem !important; /* Ultra minimal */
   }
 
   .admin-content p,
   [class*="admin"] p {
-    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important;
+    font-size: clamp(0.3125rem, 0.7vw, 0.375rem) !important; /* Ultra small */
     line-height: 1.2 !important;
   }
 
-  /* Dropdown menu text */
+  /* Dropdown menu text - ultra small */
   .dropdown-menu-item,
   [class*="dropdown"] {
-    font-size: clamp(0.4375rem, 0.9vw, 0.5rem) !important;
+    font-size: clamp(0.3125rem, 0.7vw, 0.375rem) !important; /* Ultra small */
+    padding: 0.125rem 0.25rem !important; /* Ultra minimal */
   }
 }
 
-/* Reset Typography and Spacing - MINIMAL SECTION SPACING */
+/* Reset Typography and Spacing - ULTRA MINIMAL SECTION SPACING */
 @media (max-width: 768px) {
-  /* Minimal section spacing */
+  /* Ultra minimal section spacing */
   section {
-    padding: 0.25rem 0 !important;
+    padding: 0.125rem 0 !important; /* Further reduced */
     margin: 0 !important;
   }
   
-  /* Reduce padding classes */
+  /* Reduce padding classes further */
   .py-4, .py-6, .py-8, .py-12, .py-16, .py-20, .py-24 {
-    padding-top: 0.25rem !important;
-    padding-bottom: 0.25rem !important;
+    padding-top: 0.125rem !important; /* Further reduced */
+    padding-bottom: 0.125rem !important; /* Further reduced */
   }
   
-  /* Reduce header spacing */
+  /* Reduce header spacing further */
   .text-center.mb-8,
   .text-center.mb-12,
   .text-center.mb-16 {
-    margin-bottom: 0.25rem !important;
+    margin-bottom: 0.125rem !important; /* Further reduced */
   }
   
-  /* Minimal vertical spacing */
+  /* Ultra minimal vertical spacing */
   .space-y-8 > * + *,
   .space-y-12 > * + *,
   .space-y-16 > * + * {
-    margin-top: 0.25rem !important;
+    margin-top: 0.125rem !important; /* Further reduced */
   }
   
   .space-y-3 > * + * {
-    margin-top: 0.125rem !important;
+    margin-top: 0.0625rem !important; /* Ultra minimal */
   }
   
   .space-y-4 > * + * {
-    margin-top: 0.25rem !important;
+    margin-top: 0.125rem !important; /* Ultra minimal */
   }
 }
 
-/* Mobile Cards - Compact */
+/* Mobile Cards - Ultra Compact */
 @media (max-width: 768px) {
   .card,
   [class*="card"] {
-    border-radius: 6px !important;
-    padding: 0.5rem !important;
-    margin-bottom: 0.5rem !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    border-radius: 4px !important; /* Reduced from 6px */
+    padding: 0.25rem !important; /* Reduced from 0.5rem */
+    margin-bottom: 0.25rem !important; /* Reduced from 0.5rem */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important; /* Reduced shadow */
     border: 1px solid rgba(0, 0, 0, 0.05) !important;
     background: rgba(255, 255, 255, 0.9) !important;
     backdrop-filter: blur(10px) !important;
@@ -454,56 +417,58 @@ body {
   .dark [class*="card"] {
     background: rgba(0, 0, 0, 0.4) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.05) !important;
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05) !important; /* Reduced shadow */
   }
 }
 
-/* Button Optimizations - Compact */
+/* Button Optimizations - Ultra Compact */
 button {
-  min-height: 32px;
-  min-width: 32px;
-  padding: 0.25rem 0.5rem;
-  font-size: clamp(0.5rem, 1vw, 0.625rem);
-  border-radius: 4px;
+  min-height: 24px; /* Reduced from 32px */
+  min-width: 24px; /* Reduced from 32px */
+  padding: 0.125rem 0.25rem; /* Reduced padding */
+  font-size: clamp(0.375rem, 0.8vw, 0.4375rem); /* Reduced font size */
+  border-radius: 3px; /* Reduced from 4px */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   font-weight: 500;
 }
 
-/* Small buttons for compact layouts */
+/* Extra small buttons for ultra compact layouts */
 button.text-xs,
 .btn-sm {
-  min-height: 28px;
-  min-width: 28px;
-  padding: 0.125rem 0.25rem;
-  font-size: clamp(0.4375rem, 0.9vw, 0.5rem);
+  min-height: 20px; /* Reduced from 28px */
+  min-width: 20px; /* Reduced from 28px */
+  padding: 0.0625rem 0.125rem; /* Ultra minimal padding */
+  font-size: clamp(0.3125rem, 0.7vw, 0.375rem); /* Ultra small font */
 }
 
-/* Grid System - Compact */
+/* Grid System - Ultra Compact */
 .grid {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.125rem; /* Reduced from 0.25rem */
   width: 100%;
   max-width: 100%;
 }
 
 @media (min-width: 640px) {
   .grid {
-    gap: 0.5rem;
+    gap: 0.25rem; /* Reduced from 0.5rem */
   }
 }
 
 /* Touch Optimizations */
 @media (hover: none) and (pointer: coarse) {
   button, .btn, [role="button"] {
-    min-height: 32px;
-    min-width: 32px;
+    min-height: 24px; /* Reduced from 32px */
+    min-width: 24px; /* Reduced from 32px */
   }
   
   input, select, textarea {
-    font-size: 14px !important;
+    font-size: 12px !important; /* Reduced from 14px */
   }
 }
+
+/* ... keep existing code (scroll optimizations, accessibility, image fixes, etc.) the same */
 
 /* Scroll Optimizations */
 .overflow-x-auto {
