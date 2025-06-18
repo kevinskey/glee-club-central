@@ -97,7 +97,7 @@ export default function AdministrationPage() {
   ];
 
   return (
-    <div className="w-full px-1 sm:px-2 md:px-3 lg:px-4 py-6 space-y-8">
+    <div className="px-1 sm:px-2 md:px-3 lg:px-4 py-6 space-y-8">
       <div className="glass-card p-4 sm:p-6 rounded-2xl animate-glass-fade-in">
         <h1 className="text-display bg-gradient-to-r from-[#0072CE] to-[#0072CE]/80 bg-clip-text text-transparent font-playfair">
           Administration
