@@ -9,10 +9,25 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Users, Search, Plus, RefreshCw, AlertCircle } from "lucide-react";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Users, Search, Plus, RefreshCw, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music } from "lucide-react";
 import { useUserManagement, User } from '@/hooks/user/useUserManagement';
-import { UserManagementTable } from './UserManagementTable';
 import { UserManagementTableMobile } from './UserManagementTableMobile';
 import { AddUserDialog } from './AddUserDialog';
 import { DatabaseConnectionTest } from './DatabaseConnectionTest';
@@ -115,7 +130,6 @@ export default function UserManagement() {
         <UserManagementMobile
           users={users}
           onUserSelect={(user) => {
-            // Handle user selection - could open a modal or navigate
             console.log('Selected user:', user);
           }}
           onAddUser={handleAddUser}
@@ -131,7 +145,6 @@ export default function UserManagement() {
           icon={<Users className="h-6 w-6" />}
         />
         
-        {/* Database Connection Test */}
         <DatabaseConnectionTest />
         
         {error && (
@@ -175,14 +188,107 @@ export default function UserManagement() {
               </div>
             ) : (
               <>
-                {/* Desktop Table */}
+                {/* Desktop List View */}
                 <div className="hidden lg:block">
-                  <UserManagementTable
-                    users={filteredUsers}
-                    onRoleUpdate={handleRoleUpdate}
-                    onStatusToggle={handleStatusToggle}
-                    isLoading={isLoading}
-                  />
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12"></TableHead>
+                        <TableHead>Member</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Voice Part</TableHead>
+                        <TableHead>Class</TableHead>
+                        <TableHead>Role</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Dues</TableHead>
+                        <TableHead className="w-12"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredUsers.map((user) => (
+                        <TableRow key={user.id} className="hover:bg-muted/50">
+                          <TableCell>
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm">
+                                {user.first_name} {user.last_name}
+                              </span>
+                              <span className="text-xs text-muted-foreground flex items-center">
+                                <Mail className="mr-1 h-3 w-3" />
+                                {user.email}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {user.phone && (
+                              <span className="text-xs text-muted-foreground flex items-center">
+                                <Phone className="mr-1 h-3 w-3" />
+                                {user.phone}
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {user.voice_part && (
+                              <Badge variant="outline" className="text-xs">
+                                <Music className="mr-1 h-3 w-3" />
+                                {user.voice_part.replace('_', ' ')}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {user.class_year && (
+                              <Badge variant="outline" className="text-xs">
+                                {user.class_year}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'} className="text-xs">
+                              {user.is_super_admin ? 'Super Admin' : user.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                              {user.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {user.dues_paid && (
+                              <Badge variant="default" className="bg-green-600 text-xs">
+                                Paid
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Member
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Member
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
                 
                 {/* Mobile Table for medium screens */}
@@ -227,7 +333,6 @@ export default function UserManagement() {
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      // Handle CSV file upload
                       toast.info('CSV import functionality coming soon');
                       handleImportComplete();
                     }
