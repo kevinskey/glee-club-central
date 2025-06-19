@@ -17,7 +17,7 @@ interface EventsSectionProps {
 
 export function EventsSection({ events }: EventsSectionProps) {
   return (
-    <section className="py-8 md:py-12 lg:py-16">
+    <section className="bg-gradient-to-br from-blue-50 to-orange-50 dark:from-gray-800 dark:to-gray-900 py-8 md:py-12 lg:py-16">
       <div className="mx-auto w-full max-w-full px-4 md:px-6 lg:px-8">
         <EventScroller 
           events={events}
