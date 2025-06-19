@@ -42,7 +42,7 @@ export function MobileNavDropdown() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
+        className="w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
       >
         {/* Authentication section at the top */}
         {!isAuthenticated ? (
@@ -91,7 +91,7 @@ export function MobileNavDropdown() {
           </>
         )}
 
-        {/* Navigation Links */}
+        {/* Main Navigation Links - Reduced */}
         <DropdownMenuItem asChild>
           <Link to="/" onClick={() => setIsOpen(false)}>
             <Home className="mr-3 h-4 w-4" />
@@ -116,29 +116,15 @@ export function MobileNavDropdown() {
         <DropdownMenuItem asChild>
           <a href="https://reader.gleeworld.org" onClick={() => setIsOpen(false)}>
             <Music className="mr-3 h-4 w-4" />
-            Reader
-          </a>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <a href="https://studio.gleeworld.org" onClick={() => setIsOpen(false)}>
-            <Music className="mr-3 h-4 w-4" />
-            Studio
+            Music
           </a>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <a href="https://merch.gleeworld.org" onClick={() => setIsOpen(false)}>
             <Store className="mr-3 h-4 w-4" />
-            Merch
+            Shop
           </a>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem asChild>
-          <Link to="/store" onClick={() => setIsOpen(false)}>
-            <Store className="mr-3 h-4 w-4" />
-            Store
-          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
