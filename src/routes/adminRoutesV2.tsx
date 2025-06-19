@@ -11,6 +11,7 @@ import SheetMusicV2Page from '@/pages/admin/SheetMusicV2Page';
 import MusicStudioPage from '@/pages/admin/MusicStudioPage';
 import StoreV2Page from '@/pages/admin/StoreV2Page';
 import PermissionsPage from '@/pages/admin/PermissionsPage';
+import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
 
 export const adminRoutesV2: RouteObject[] = [
   {
@@ -66,6 +67,14 @@ export const adminRoutesV2: RouteObject[] = [
     element: (
       <AdminRoute>
         <PermissionsPage />
+      </AdminRoute>
+    ),
+  },
+  {
+    path: '/admin/soundcloud',
+    element: (
+      <AdminRoute>
+        <SoundCloudAdminPage />
       </AdminRoute>
     ),
   },
