@@ -43,6 +43,7 @@ const allNavigationItems = [
   { to: '/admin/permissions', icon: Shield, label: 'Permissions', section: 'users' },
   { to: '/admin/media-library', icon: Image, label: 'Media Library', section: 'content' },
   { to: '/admin/music', icon: Music, label: 'Music Player', section: 'content' },
+  { to: '/admin/soundcloud', icon: Music, label: 'SoundCloud', section: 'content' },
   { to: '/admin/videos', icon: Video, label: 'Videos', section: 'content' },
   { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides', section: 'content' },
   { to: '/admin/news-items', icon: Megaphone, label: 'News Items', section: 'content' },
