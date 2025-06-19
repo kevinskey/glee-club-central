@@ -8,11 +8,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Music, BookOpen, Users, Clock, CheckCircle, Upload } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
+import { MemberReaderView } from './MemberReaderView';
 import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
 import { PDFFile } from '@/hooks/usePDFLibrary';
 
 export function ReaderInterface() {
-  const { isAuthenticated, profile } = useAuth();
+  const { isAuthenticated, profile, isAdmin } = useAuth();
   const [currentView, setCurrentView] = useState<'library' | 'viewer'>('library');
   const [selectedPDF, setSelectedPDF] = useState<PDFFile | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -26,6 +27,25 @@ export function ReaderInterface() {
     setCurrentView('library');
     setSelectedPDF(null);
   };
+
+  // If user is authenticated but not admin, show member reader view
+  if (isAuthenticated && !isAdmin()) {
+    return <MemberReaderView />;
+  }
+
+  // Admin view continues below with full library management
+  if (currentView === 'viewer' && selectedPDF) {
+    return (
+      <div className="h-screen">
+        <AdvancedPDFViewer 
+          url={selectedPDF.file_url} 
+          title={selectedPDF.title}
+          sheetMusicId={selectedPDF.id}
+          onBack={handleBackToLibrary}
+        />
+      </div>
+    );
+  }
 
   const features = [
     {
@@ -50,29 +70,16 @@ export function ReaderInterface() {
     }
   ];
 
-  if (currentView === 'viewer' && selectedPDF) {
-    return (
-      <div className="h-screen">
-        <AdvancedPDFViewer 
-          url={selectedPDF.file_url} 
-          title={selectedPDF.title}
-          sheetMusicId={selectedPDF.id}
-          onBack={handleBackToLibrary}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Music className="h-8 w-8 text-orange-500" />
-          <h1 className="text-3xl font-bold text-[#003366] dark:text-white">Music Reader</h1>
+          <h1 className="text-3xl font-bold text-[#003366] dark:text-white">Music Reader Admin</h1>
         </div>
         <p className="text-lg text-gray-600 dark:text-gray-300">
-          Access your digital sheet music library and practice materials
+          Manage the digital sheet music library and member access
         </p>
       </div>
 
@@ -81,7 +88,7 @@ export function ReaderInterface() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-500" />
-            Reader Status
+            Admin Dashboard Status
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -93,14 +100,14 @@ export function ReaderInterface() {
                 </Badge>
                 {isAuthenticated && (
                   <Badge variant="outline" className="text-green-600 border-green-600">
-                    Authenticated
+                    Admin Access
                   </Badge>
                 )}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 {isAuthenticated 
-                  ? `Ready for ${profile?.first_name || 'member'} access`
-                  : 'Sign in for full access'
+                  ? `Admin panel ready for ${profile?.first_name || 'administrator'}`
+                  : 'Sign in for admin access'
                 }
               </p>
             </div>
@@ -141,7 +148,7 @@ export function ReaderInterface() {
         ))}
       </div>
 
-      {/* PDF Library */}
+      {/* PDF Library Management */}
       <Card>
         <CardContent className="p-6">
           <PDFLibraryView 
@@ -155,7 +162,7 @@ export function ReaderInterface() {
       {!isAuthenticated && (
         <Alert>
           <AlertDescription>
-            Sign in to your Glee Club account for seamless access to the Music Reader with your personalized sheet music library.
+            Sign in with admin credentials to access the Music Reader management dashboard.
           </AlertDescription>
         </Alert>
       )}
@@ -163,23 +170,22 @@ export function ReaderInterface() {
       {/* Help Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Getting Started</CardTitle>
+          <CardTitle>Admin Guide</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
-            <h4 className="font-medium">For Members:</h4>
+            <h4 className="font-medium">Library Management:</h4>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-              <li>• Browse the PDF library to find sheet music</li>
-              <li>• Click on any PDF to open it in the advanced viewer</li>
-              <li>• Use annotation tools to mark up your music</li>
-              <li>• Create bookmarks for quick navigation</li>
-              <li>• Upload new PDFs to share with the group</li>
+              <li>• Upload new PDFs with metadata and voice part assignments</li>
+              <li>• Organize sheet music by categories and tags</li>
+              <li>• Monitor member access and usage</li>
+              <li>• Manage PDF permissions and availability</li>
             </ul>
           </div>
           <div className="space-y-2">
-            <h4 className="font-medium">Need Help?</h4>
+            <h4 className="font-medium">Member Experience:</h4>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Contact the music librarian or check the help section in the Reader for detailed instructions.
+              Regular members see a simplified reader interface focused on browsing and reading sheet music.
             </p>
           </div>
         </CardContent>
