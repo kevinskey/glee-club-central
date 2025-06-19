@@ -18,12 +18,14 @@ interface EventsSectionProps {
 export function EventsSection({ events }: EventsSectionProps) {
   return (
     <section className="py-12 md:py-16">
-      <EventScroller 
-        events={events}
-        title="Upcoming Events"
-        showViewAllButton={true}
-        onViewAll={() => window.location.href = "/events"}
-      />
+      <div className="mx-auto w-full max-w-full px-4 sm:px-6 lg:px-8">
+        <EventScroller 
+          events={events}
+          title="Upcoming Events"
+          showViewAllButton={true}
+          onViewAll={() => window.location.href = "/events"}
+        />
+      </div>
     </section>
   );
 }
