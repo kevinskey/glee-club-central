@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export function HeroDefault() {
   return (
-    <section className="hero-section relative w-full min-h-[60vh] sm:min-h-[50vh] md:min-h-[55vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden">
+    <section className="hero-section relative w-full min-h-[80vh] sm:min-h-[50vh] md:min-h-[55vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-royal-600 via-royal-500 to-powder-500">
         <div className="absolute inset-0 bg-black/30"></div>
