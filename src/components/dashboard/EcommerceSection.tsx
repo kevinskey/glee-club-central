@@ -27,7 +27,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="glee-text-body mb-4">
             Contact an administrator to enable access to the store features.
           </p>
           <Badge variant="secondary">Access Disabled</Badge>
@@ -37,15 +37,15 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="glee-spacing-md">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">E-commerce Hub</h2>
+        <h2 className="glee-text-headline">E-commerce Hub</h2>
         <Badge variant="default" className="bg-green-100 text-green-800">
           Access Enabled
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="glee-grid-3">
         {/* Store */}
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/store')}>
           <CardHeader>
@@ -58,7 +58,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="glee-text-body mb-4">
               Shop for official Glee Club merchandise and more.
             </p>
             <Button className="w-full">
@@ -82,7 +82,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
             <div className="text-2xl font-bold text-green-600 mb-2">
               ${(profile.account_balance || 0).toFixed(2)}
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="glee-text-body mb-4">
               Use your credits for purchases.
             </p>
             <Button variant="outline" className="w-full">
@@ -106,7 +106,7 @@ export function EcommerceSection({ profile }: EcommerceSectionProps) {
             <div className="text-2xl font-bold mb-2">
               0
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="glee-text-body mb-4">
               View your past orders and track shipments.
             </p>
             <Button 

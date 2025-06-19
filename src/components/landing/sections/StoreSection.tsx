@@ -23,31 +23,31 @@ export function StoreSection({ products }: StoreSectionProps) {
   const featuredProducts = products.slice(0, 4);
 
   return (
-    <section className="py-8 bg-gradient-to-b from-white via-gray-50/50 to-white dark:from-background dark:via-muted/20 dark:to-background relative overflow-hidden">
+    <section className="glee-section bg-gradient-to-b from-white via-gray-50/50 to-white dark:from-background dark:via-muted/20 dark:to-background relative overflow-hidden">
       {/* Decorative Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 right-10 w-40 h-40 bg-purple-400/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-32 h-32 bg-blue-400/5 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8 relative z-10">
+      <div className="glee-container relative z-10">
         {/* Section Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-purple-200/50 dark:border-purple-800/50 mb-4">
+          <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm px-6 py-3 glee-corners-full shadow-lg border border-purple-200/50 dark:border-purple-800/50 mb-4">
             <ShoppingBag className="h-4 w-4 text-purple-500" />
             <span className="text-sm font-medium text-purple-600 dark:text-purple-400">Official Merchandise</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-playfair font-bold mb-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h2 className="glee-text-display bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Show Your Glee Spirit
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="glee-text-body max-w-2xl mx-auto">
             Support the Spelman College Glee Club with our exclusive merchandise collection
           </p>
         </div>
 
         {/* Products Grid */}
           {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
+          <div className="glee-grid-4 xl:grid-cols-5 mb-8">
             {featuredProducts.map((product, index) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 dark:bg-card/90 backdrop-blur-sm overflow-hidden">
                 <CardContent className="p-0">
@@ -56,7 +56,7 @@ export function StoreSection({ products }: StoreSectionProps) {
                       <img
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="glee-image-cover group-hover:scale-110 transition-transform duration-700"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 flex items-center justify-center">
@@ -67,12 +67,12 @@ export function StoreSection({ products }: StoreSectionProps) {
                     {/* Product Badges */}
                     <div className="absolute top-3 left-3 flex gap-2">
                       {product.isNew && (
-                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        <span className="bg-green-500 text-white text-xs px-2 py-1 glee-corners-full font-medium">
                           New
                         </span>
                       )}
                       {product.isSale && (
-                        <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        <span className="bg-red-500 text-white text-xs px-2 py-1 glee-corners-full font-medium">
                           Sale
                         </span>
                       )}
@@ -107,11 +107,11 @@ export function StoreSection({ products }: StoreSectionProps) {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 glee-corners-full flex items-center justify-center">
               <ShoppingBag className="h-10 w-10 text-purple-400" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Store Coming Soon</h3>
-            <p className="text-muted-foreground">Stay tuned for our official merchandise!</p>
+            <h3 className="glee-text-subhead mb-2">Store Coming Soon</h3>
+            <p className="glee-text-body">Stay tuned for our official merchandise!</p>
           </div>
         )}
 

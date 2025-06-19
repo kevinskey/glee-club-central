@@ -32,12 +32,12 @@ export default function AdminStorePage() {
 
   if (!canManageShop()) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="glee-container glee-section">
         <Card>
           <CardContent className="p-8 text-center">
             <Lock className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">Access Restricted</h3>
-            <p className="text-muted-foreground">
+            <h3 className="glee-text-subhead mb-2">Access Restricted</h3>
+            <p className="glee-text-body">
               You need Treasurer, Merchandise Manager, or Admin permissions to access store management.
             </p>
           </CardContent>
@@ -47,20 +47,20 @@ export default function AdminStorePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
+    <div className="glee-container glee-section">
+      <div className="glee-spacing-md">
         {/* Header */}
-        <div className="border-b pb-6">
-          <h1 className="text-3xl font-bold text-navy-900 dark:text-white">
+        <div className="glee-border-bottom pb-6">
+          <h1 className="glee-text-display">
             Store Management
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <p className="glee-text-body mt-2">
             Manage products, inventory, orders, and store settings
           </p>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="products" className="space-y-6">
+        <Tabs defaultValue="products" className="glee-spacing-md">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />

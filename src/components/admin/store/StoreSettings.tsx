@@ -10,8 +10,8 @@ import { Settings, Store, CreditCard, Truck } from 'lucide-react';
 
 export function StoreSettings() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="glee-spacing-md">
+      <div className="glee-grid-2 gap-6">
         {/* General Settings */}
         <Card>
           <CardHeader>
@@ -20,12 +20,12 @@ export function StoreSettings() {
               General Settings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent className="glee-spacing-sm">
+            <div className="glee-spacing-xs">
               <Label htmlFor="store-name">Store Name</Label>
               <Input id="store-name" placeholder="Spelman Glee Club Store" />
             </div>
-            <div className="space-y-2">
+            <div className="glee-spacing-xs">
               <Label htmlFor="store-description">Store Description</Label>
               <Textarea 
                 id="store-description" 
@@ -51,12 +51,12 @@ export function StoreSettings() {
               Payment Settings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent className="glee-spacing-sm">
+            <div className="glee-spacing-xs">
               <Label htmlFor="currency">Default Currency</Label>
               <Input id="currency" value="USD" disabled />
             </div>
-            <div className="space-y-2">
+            <div className="glee-spacing-xs">
               <Label htmlFor="tax-rate">Tax Rate (%)</Label>
               <Input id="tax-rate" type="number" placeholder="8.25" />
             </div>
@@ -64,7 +64,7 @@ export function StoreSettings() {
               <Label htmlFor="stripe-enabled">Stripe Payments</Label>
               <Switch id="stripe-enabled" defaultChecked />
             </div>
-            <div className="space-y-2">
+            <div className="glee-spacing-xs">
               <Label htmlFor="stripe-key">Stripe Public Key</Label>
               <Input id="stripe-key" placeholder="pk_..." type="password" />
             </div>
@@ -79,12 +79,12 @@ export function StoreSettings() {
               Shipping Settings
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
+          <CardContent className="glee-spacing-sm">
+            <div className="glee-spacing-xs">
               <Label htmlFor="shipping-cost">Default Shipping Cost</Label>
               <Input id="shipping-cost" type="number" placeholder="5.99" />
             </div>
-            <div className="space-y-2">
+            <div className="glee-spacing-xs">
               <Label htmlFor="free-shipping">Free Shipping Threshold</Label>
               <Input id="free-shipping" type="number" placeholder="50.00" />
             </div>
@@ -103,7 +103,7 @@ export function StoreSettings() {
               Notifications
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="glee-spacing-sm">
             <div className="flex items-center justify-between">
               <Label htmlFor="order-notifications">Order Notifications</Label>
               <Switch id="order-notifications" defaultChecked />
@@ -112,7 +112,7 @@ export function StoreSettings() {
               <Label htmlFor="low-stock-alerts">Low Stock Alerts</Label>
               <Switch id="low-stock-alerts" defaultChecked />
             </div>
-            <div className="space-y-2">
+            <div className="glee-spacing-xs">
               <Label htmlFor="notification-email">Notification Email</Label>
               <Input id="notification-email" type="email" placeholder="admin@spelman.edu" />
             </div>

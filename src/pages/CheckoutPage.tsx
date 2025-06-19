@@ -14,41 +14,45 @@ function CheckoutContent() {
 
   if (orderComplete) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Order Confirmation"
-          description="Thank you for your purchase!"
-        />
-        
-        <Card className="max-w-2xl mx-auto">
-          <CardContent className="p-8 text-center">
-            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-semibold mb-2">Order Placed Successfully!</h3>
-            <p className="text-muted-foreground mb-6">
-              You will receive an email confirmation shortly with your order details and tracking information.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Button onClick={() => navigate('/store')}>
-                Continue Shopping
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/my-orders')}>
-                View My Orders
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="glee-container glee-section">
+        <div className="glee-spacing-md">
+          <PageHeader
+            title="Order Confirmation"
+            description="Thank you for your purchase!"
+          />
+          
+          <Card className="max-w-2xl mx-auto">
+            <CardContent className="p-8 text-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <h3 className="glee-text-subhead mb-2">Order Placed Successfully!</h3>
+              <p className="glee-text-body mb-6">
+                You will receive an email confirmation shortly with your order details and tracking information.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={() => navigate('/store')}>
+                  Continue Shopping
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/my-orders')}>
+                  View My Orders
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Checkout"
-        description="Complete your purchase"
-      />
-      
-      <CheckoutForm onSuccess={() => setOrderComplete(true)} />
+    <div className="glee-container glee-section">
+      <div className="glee-spacing-md">
+        <PageHeader
+          title="Checkout"
+          description="Complete your purchase"
+        />
+        
+        <CheckoutForm onSuccess={() => setOrderComplete(true)} />
+      </div>
     </div>
   );
 }

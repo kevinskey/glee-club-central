@@ -66,20 +66,20 @@ export function StorePreview({
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4">
+      <div className="glee-container">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2">{title}</h2>
-          <p className="text-muted-foreground">{subtitle}</p>
+          <h2 className="glee-text-headline">{title}</h2>
+          <p className="glee-text-body">{subtitle}</p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="glee-grid-4">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse bg-black border-gray-700">
               <CardHeader>
-                <div className="w-full h-48 bg-gray-200 rounded"></div>
+                <div className="w-full h-48 bg-gray-200 glee-corners"></div>
               </CardHeader>
               <CardContent>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-4 bg-gray-200 glee-corners mb-2"></div>
+                <div className="h-4 bg-gray-200 glee-corners w-2/3"></div>
               </CardContent>
             </Card>
           ))}
@@ -90,31 +90,31 @@ export function StorePreview({
 
   if (featuredItems.length === 0) {
     return (
-      <div className="container mx-auto px-4 text-center py-12">
-        <h2 className="text-3xl font-bold mb-2">{title}</h2>
-        <p className="text-muted-foreground mb-8">{subtitle}</p>
-        <p className="text-muted-foreground">No items available at the moment.</p>
+      <div className="glee-container text-center glee-section">
+        <h2 className="glee-text-headline">{title}</h2>
+        <p className="glee-text-body mb-8">{subtitle}</p>
+        <p className="glee-text-body">No items available at the moment.</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="glee-container">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-2">{title}</h2>
-        <p className="text-muted-foreground">{subtitle}</p>
+        <h2 className="glee-text-headline">{title}</h2>
+        <p className="glee-text-body">{subtitle}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="glee-grid-4 mb-8">
         {featuredItems.map((item) => (
           <Card key={item.id} className="group hover:shadow-lg transition-shadow bg-black border-gray-700">
             <CardHeader className="p-0">
-              <div className="relative overflow-hidden rounded-t-lg">
+              <div className="relative overflow-hidden glee-corners-lg">
                 {item.image_url ? (
                   <img
                     src={item.image_url}
                     alt={item.name}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                    className="w-full h-48 glee-image-cover group-hover:scale-105 transition-transform"
                   />
                 ) : (
                   <div className="w-full h-48 bg-gradient-to-br from-glee-purple/20 to-glee-orange/20 flex items-center justify-center">
@@ -135,9 +135,9 @@ export function StorePreview({
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-lg mb-2 line-clamp-1 text-white">{item.name}</h3>
+              <h3 className="glee-text-subhead line-clamp-1 text-white">{item.name}</h3>
               {item.description && (
-                <p className="text-sm text-gray-300 mb-2 line-clamp-2">
+                <p className="glee-text-caption line-clamp-2">
                   {item.description}
                 </p>
               )}
@@ -145,7 +145,7 @@ export function StorePreview({
                 <span className="text-lg font-bold text-glee-purple">
                   {formatPrice(item.price)}
                 </span>
-                <span className="text-sm text-gray-300">
+                <span className="glee-text-caption">
                   {item.quantity_in_stock} in stock
                 </span>
               </div>

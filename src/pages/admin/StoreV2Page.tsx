@@ -15,13 +15,13 @@ export default function StoreV2Page() {
 
   return (
     <AdminV2Layout>
-      <div className="space-y-6">
+      <div className="glee-spacing-md">
         {/* Header */}
-        <div className="border-b pb-6">
-          <h1 className="text-3xl font-bold text-navy-900 dark:text-white">
+        <div className="glee-border-bottom pb-6">
+          <h1 className="glee-text-display">
             Store & Merch Manager
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 mt-2">
+          <p className="glee-text-body mt-2">
             Manage products, inventory, and orders
           </p>
           <div className="flex items-center gap-4 mt-4">
@@ -39,7 +39,7 @@ export default function StoreV2Page() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="glee-spacing-md">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />

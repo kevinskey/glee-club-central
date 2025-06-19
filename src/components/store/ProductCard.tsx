@@ -33,18 +33,18 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow bg-black border-gray-700">
+    <Card className="glee-card-base overflow-hidden hover:shadow-lg transition-shadow bg-black border-gray-700">
       <CardContent className="p-0">
         <div className="relative">
           {product.image_url ? (
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-full h-48 object-cover"
+              className="w-full h-48 glee-image-cover"
             />
           ) : (
             <div className="w-full h-48 bg-muted flex items-center justify-center">
-              <span className="text-muted-foreground">No Image</span>
+              <span className="glee-text-caption">No Image</span>
             </div>
           )}
           {product.featured && (
@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         
         <div className="p-4">
-          <h3 className="font-semibold text-lg mb-2 text-white">{product.name}</h3>
+          <h3 className="glee-text-subhead text-white">{product.name}</h3>
           <p className="text-2xl font-bold text-glee-purple">
             ${product.price.toFixed(2)}
           </p>

@@ -7,7 +7,7 @@ export default function StorePage() {
   return (
     <CartProvider>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
+        <div className="glee-container glee-section">
           <EnhancedStorefront />
         </div>
       </div>
