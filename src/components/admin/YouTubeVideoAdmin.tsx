@@ -300,7 +300,7 @@ export function YouTubeVideoAdmin() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">YouTube Content</h2>
+        <h2 className="text-2xl font-bold text-navy-900">YouTube Content</h2>
         <Button onClick={() => setShowAddForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Content

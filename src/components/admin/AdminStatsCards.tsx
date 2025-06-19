@@ -169,7 +169,7 @@ export function AdminStatsCards({ isMobile = false }: AdminStatsCardsProps) {
               </div>
               
               <div>
-                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                <p className="text-lg font-bold text-navy-900 dark:text-gray-100">
                   {stat.value}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">

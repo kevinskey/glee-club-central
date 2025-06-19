@@ -187,7 +187,7 @@ export function PermissionManagement() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Shield className="w-6 h-6 text-blue-500" />
-        <h2 className="text-2xl font-bold">Permission Management</h2>
+        <h2 className="text-2xl font-bold text-navy-900">Permission Management</h2>
       </div>
 
       <Tabs defaultValue="features" className="space-y-4">
