@@ -82,10 +82,10 @@ export function UnifiedPublicHeader() {
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
             <Icons.logo className="h-7 w-7 flex-shrink-0" />
             <div className="ml-2 min-w-0">
-              <div className="text-xs sm:text-sm lg:text-base text-[#003366] dark:text-white font-bold font-playfair truncate">
+              <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-[#003366] dark:text-white font-bold font-playfair truncate">
                 GleeWorld
               </div>
-              <div className="text-xs text-[#003366]/70 dark:text-white/70 font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
+              <div className="text-xs sm:text-sm lg:text-base text-[#003366]/70 dark:text-white/70 font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
                 Spelman College
               </div>
             </div>
@@ -100,14 +100,14 @@ export function UnifiedPublicHeader() {
         </div>
         
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 xl:space-x-4 flex-1 justify-center">
-          <Link to="/" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center mx-4">
+          <Link to="/" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Home
           </Link>
-          <Link to="/about" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/about" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             About
           </Link>
-          <Link to="/calendar" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
+          <Link to="/calendar" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -116,20 +116,20 @@ export function UnifiedPublicHeader() {
           <a 
             href="#" 
             onClick={handleReaderClick}
-            className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1"
+            className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <a href="https://studio.gleeworld.org" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Studio
           </a>
-          <Link to="/calculator" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/calculator" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Calculator
           </Link>
-          <Link to="/store" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/store" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Store
           </Link>
-          <Link to="/contact" className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/contact" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Contact
           </Link>
         </nav>
@@ -139,24 +139,24 @@ export function UnifiedPublicHeader() {
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Buttons - Now circular */}
+          {/* Desktop Auth Buttons - Made smaller with visible icons */}
           <div className="hidden md:flex items-center gap-1">
             {isAuthenticated ? (
               <div className="flex items-center gap-1">
                 <Button 
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={handleDashboardClick}
-                  className="h-8 w-8 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  className="h-7 w-7 p-0 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Dashboard"
                 >
                   <User className="w-4 h-4" />
                 </Button>
                 <Button 
                   variant="ghost"
-                  size="icon"
+                  size="sm"
                   onClick={handleLogout}
-                  className="h-8 w-8 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  className="h-7 w-7 p-0 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Sign Out"
                 >
                   <LogOut className="w-4 h-4" />
@@ -166,18 +166,18 @@ export function UnifiedPublicHeader() {
               <div className="flex items-center gap-1">
                 <Button 
                   variant="outline"
-                  size="icon"
+                  size="sm"
                   onClick={() => navigate("/signup")}
-                  className="h-8 w-8 rounded-full bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white"
+                  className="h-7 w-7 p-0 rounded-full bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white"
                   title="Sign Up"
                 >
                   <UserPlus className="w-4 h-4" />
                 </Button>
                 <Button 
                   variant="default"
-                  size="icon"
+                  size="sm"
                   onClick={() => navigate("/login")}
-                  className="h-8 w-8 rounded-full bg-[#003366] hover:bg-[#003366]/90 text-white"
+                  className="h-7 w-7 p-0 rounded-full bg-[#003366] hover:bg-[#003366]/90 text-white"
                   title="Login"
                 >
                   <LogIn className="w-4 h-4" />
