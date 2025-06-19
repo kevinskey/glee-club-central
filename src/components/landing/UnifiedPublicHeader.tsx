@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -99,8 +98,8 @@ export function UnifiedPublicHeader() {
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-1 justify-center">
+        {/* Desktop Navigation - Changed from hidden lg:flex to hidden md:flex */}
+        <nav className="hidden md:flex items-center space-x-3 lg:space-x-4 xl:space-x-6 flex-1 justify-center">
           <Link to="/" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Home
           </Link>
@@ -139,25 +138,25 @@ export function UnifiedPublicHeader() {
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Buttons */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop Auth Buttons - Changed from hidden lg:flex to hidden md:flex */}
+          <div className="hidden md:flex items-center gap-2">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost"
                   onClick={handleDashboardClick}
-                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
+                  className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 lg:px-3"
                 >
-                  <User className="w-4 h-4 xl:mr-2" />
-                  <span className="hidden xl:inline">Dashboard</span>
+                  <User className="w-4 h-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Dashboard</span>
                 </Button>
                 <Button 
                   variant="ghost"
                   onClick={handleLogout}
-                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
+                  className="text-xs lg:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 lg:px-3"
                 >
-                  <LogOut className="w-4 h-4 xl:mr-2" />
-                  <span className="hidden xl:inline">Sign Out</span>
+                  <LogOut className="w-4 h-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Sign Out</span>
                 </Button>
               </div>
             ) : (
@@ -165,25 +164,25 @@ export function UnifiedPublicHeader() {
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/signup")}
-                  className="text-xs xl:text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium px-2 xl:px-3"
+                  className="text-xs lg:text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium px-2 lg:px-3"
                 >
-                  <UserPlus className="w-4 h-4 xl:mr-2" />
-                  <span className="hidden xl:inline">Sign Up</span>
+                  <UserPlus className="w-4 h-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Sign Up</span>
                 </Button>
                 <Button 
                   variant="default"
                   onClick={() => navigate("/login")}
-                  className="text-xs xl:text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium px-2 xl:px-3"
+                  className="text-xs lg:text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium px-2 lg:px-3"
                 >
-                  <LogIn className="w-4 h-4 xl:mr-2" />
-                  <span className="hidden xl:inline">Login</span>
+                  <LogIn className="w-4 h-4 lg:mr-2" />
+                  <span className="hidden lg:inline">Login</span>
                 </Button>
               </div>
             )}
           </div>
           
-          {/* Mobile Hamburger Menu */}
-          <div className="lg:hidden flex-shrink-0">
+          {/* Mobile Hamburger Menu - Changed from lg:hidden to md:hidden */}
+          <div className="md:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white relative">
