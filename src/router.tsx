@@ -105,6 +105,10 @@ const router = createBrowserRouter([
         element: <StorePage />,
       },
       {
+        path: "merchandise",
+        element: <StorePage />,
+      },
+      {
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
       },

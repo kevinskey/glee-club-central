@@ -420,7 +420,7 @@ export function HomePageContent({
               Glee Store
             </h2>
             <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto font-light leading-relaxed">
-              Show your support with official Spelman Glee Club merchandise
+              Shop our brand-new Square-powered store for official Spelman Glee Club gear
             </p>
           </div>
           <StoreSection products={storeProducts} />
