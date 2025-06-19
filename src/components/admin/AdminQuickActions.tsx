@@ -1,11 +1,12 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, Calendar, Image, Music } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Plus, Users, Calendar, Image, Music, Download } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export function AdminQuickActions() {
+  const navigate = useNavigate();
+
   const quickActions = [
     {
       title: 'Add Member',
@@ -34,6 +35,14 @@ export function AdminQuickActions() {
       icon: Music,
       href: '/admin/music',
       color: 'bg-orange-500'
+    },
+    {
+      title: 'Import from Reader',
+      description: 'Import PDFs and MP3s from reader.gleeworld.org',
+      icon: Download,
+      path: '/admin/reader-import',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30',
     }
   ];
 

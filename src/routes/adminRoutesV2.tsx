@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import AdminRoute from '@/components/auth/AdminRoute';
@@ -12,6 +11,9 @@ import MusicStudioPage from '@/pages/admin/MusicStudioPage';
 import StoreV2Page from '@/pages/admin/StoreV2Page';
 import PermissionsPage from '@/pages/admin/PermissionsPage';
 import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
+
+// Add the import for the new page
+import ReaderImportPage from "../pages/admin/ReaderImportPage";
 
 export const adminRoutesV2: RouteObject[] = [
   {
@@ -77,5 +79,9 @@ export const adminRoutesV2: RouteObject[] = [
         <SoundCloudAdminPage />
       </AdminRoute>
     ),
+  },
+  {
+    path: "admin/reader-import",
+    element: <ReaderImportPage />,
   },
 ];
