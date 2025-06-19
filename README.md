@@ -100,3 +100,13 @@ SOUNDCLOUD_CLIENT_SECRET=<your-soundcloud-client-secret>
 This project uses open source audio libraries including **Tone.js**, **WaveSurfer.js**, and **soundfont-player** to power the metronome, pitch pipe, and karaoke studio. Saved recordings are uploaded to the Supabase `audio` bucket so your mixes remain accessible from any device.
 
 See [docs/RECORDING_PROCESS.md](docs/RECORDING_PROCESS.md) for a step-by-step guide on creating and managing recordings.
+
+## Updating Store Product Images
+
+If your store items are missing proper product photos, you can generate new mockups with the helper script:
+
+```bash
+node scripts/updateStoreImages.js
+```
+
+The script connects to your Supabase project using `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from your `.env` file. It looks for T‑shirt, hoodie, and sweatshirt products, generates new images with the `generate-product-mockup` function, and updates each product's `image_url` field.
