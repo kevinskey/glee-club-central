@@ -65,10 +65,12 @@ export function CustomSlideRenderer() {
   }, []);
 
   const goToPrevious = () => {
+    if (currentSlides.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex - 1 + currentSlides.length) % currentSlides.length);
   };
 
   const goToNext = () => {
+    if (currentSlides.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
   };
 
@@ -96,7 +98,7 @@ export function CustomSlideRenderer() {
   };
 
   useEffect(() => {
-    if (!isPad) {
+    if (!isPad && currentSlides.length > 0) {
       const timer = setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % currentSlides.length);
       }, 5000);
