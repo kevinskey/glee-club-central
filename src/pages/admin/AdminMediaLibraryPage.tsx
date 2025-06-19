@@ -35,7 +35,7 @@ const AdminMediaLibraryPage = () => {
               <FileImage className="h-8 w-8 sm:h-10 sm:w-10 text-royal-600" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-headline font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-headline font-bold text-navy-900 dark:text-white mb-2">
                 Media Library Management
               </h1>
               <p className="text-sm sm:text-body text-gray-600 dark:text-gray-300 mb-4">

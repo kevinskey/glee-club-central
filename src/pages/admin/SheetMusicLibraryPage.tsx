@@ -243,7 +243,7 @@ export default function SheetMusicLibraryPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Sheet Music Library</h1>
+          <h1 className="text-3xl font-bold text-navy-900 dark:text-white">Sheet Music Library</h1>
           <p className="text-muted-foreground">Manage and organize choir sheet music</p>
         </div>
         <Button onClick={() => setUploadDialogOpen(true)}>

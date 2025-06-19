@@ -340,7 +340,7 @@ export default function CalendarV2Page() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">Calendar & Events</h1>
+            <h1 className="text-3xl font-bold text-navy-900 dark:text-white">Calendar & Events</h1>
             <p className="text-muted-foreground">Manage rehearsals, performances, and activities</p>
           </div>
           <div className="flex gap-2">
