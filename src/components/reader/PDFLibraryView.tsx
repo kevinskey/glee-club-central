@@ -53,6 +53,23 @@ export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) 
     return matchesSearch && matchesVoicePart && matchesCategory;
   });
 
+  const handleViewPDF = (pdf: PDFFile) => {
+    console.log('📚 PDFLibraryView: View PDF clicked for:', pdf);
+    console.log('📚 PDF data being passed:', {
+      id: pdf.id,
+      title: pdf.title,
+      file_url: pdf.file_url,
+      file_path: pdf.file_path
+    });
+    
+    if (!pdf.file_url) {
+      console.error('❌ PDFLibraryView: PDF missing file_url');
+      return;
+    }
+    
+    onViewPDF(pdf);
+  };
+
   const handleDelete = async (pdf: PDFFile) => {
     if (confirm(`Are you sure you want to delete "${pdf.title}"?`)) {
       await deletePDF(pdf.id, pdf.file_path);
@@ -66,6 +83,8 @@ export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) 
       </div>
     );
   }
+
+  console.log('📚 PDFLibraryView: Rendered with', filteredPDFs.length, 'PDFs');
 
   return (
     <div className="space-y-6">
@@ -168,7 +187,7 @@ export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) 
                     size="sm"
                     variant="secondary"
                     className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onViewPDF(pdf)}
+                    onClick={() => handleViewPDF(pdf)}
                   >
                     <Eye className="h-4 w-4" />
                   </Button>

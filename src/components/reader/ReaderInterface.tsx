@@ -23,11 +23,23 @@ export function ReaderInterface() {
   const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   const handleViewPDF = (pdf: PDFFile) => {
+    console.log('📖 ReaderInterface: Opening PDF:', pdf);
+    console.log('📖 PDF URL:', pdf.file_url);
+    console.log('📖 PDF Title:', pdf.title);
+    console.log('📖 PDF ID:', pdf.id);
+    
+    if (!pdf.file_url) {
+      console.error('❌ ReaderInterface: PDF file_url is missing');
+      return;
+    }
+    
     setSelectedPDF(pdf);
     setCurrentView('viewer');
+    console.log('📖 ReaderInterface: View changed to viewer');
   };
 
   const handleBackToLibrary = () => {
+    console.log('📖 ReaderInterface: Returning to library');
     setCurrentView('library');
     setSelectedPDF(null);
   };
@@ -65,6 +77,7 @@ export function ReaderInterface() {
 
   // Admin view continues below with full library management
   if (currentView === 'viewer' && selectedPDF) {
+    console.log('📖 ReaderInterface: Rendering PDF viewer with:', selectedPDF);
     return (
       <div className="h-screen">
         <AdvancedPDFViewer 
