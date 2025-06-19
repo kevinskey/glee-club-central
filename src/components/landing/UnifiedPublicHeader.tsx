@@ -23,7 +23,7 @@ export function UnifiedPublicHeader() {
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
-    const hasAdminRole = isAdmin();
+    const hasAdminRole = isAdmin ? isAdmin() : false;
     
     if (isKnownAdmin || hasAdminRole) {
       navigate("/admin");
@@ -214,7 +214,7 @@ export function UnifiedPublicHeader() {
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
                           <div className="text-sm text-[#003366]/70 dark:text-white/70">
-                            {isAdmin() ? 'Administrator' : 'Member'}
+                            {isAdmin && isAdmin() ? 'Administrator' : 'Member'}
                           </div>
                         </div>
                       </div>
@@ -223,9 +223,6 @@ export function UnifiedPublicHeader() {
                   
                   {/* Navigation */}
                   <div className="flex-1 py-4">
-                    <div className="px-6 mb-4">
-                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Navigation</h3>
-                    </div>
                     <nav className="space-y-1 px-3">
                       {navigationLinks.map((link) => (
                         <Button
@@ -250,27 +247,22 @@ export function UnifiedPublicHeader() {
                           )}
                         </Button>
                       ))}
-                    </nav>
 
-                    {/* Admin Dashboard Link */}
-                    {isAuthenticated && isAdmin() && (
-                      <div className="px-6 mt-6 mb-4">
-                        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Administration</h3>
-                        <div className="mt-2">
-                          <Button
-                            variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
-                            onClick={() => {
-                              navigate("/admin");
-                              setIsMobileMenuOpen(false);
-                            }}
-                          >
-                            <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
-                            <span>Admin Dashboard</span>
-                          </Button>
-                        </div>
-                      </div>
-                    )}
+                      {/* Admin Dashboard Link - moved into main navigation */}
+                      {isAuthenticated && isAdmin && isAdmin() && (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                          onClick={() => {
+                            navigate("/admin");
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
+                          <span>Admin Panel</span>
+                        </Button>
+                      )}
+                    </nav>
                   </div>
                   
                   {/* Auth Section */}
@@ -279,7 +271,7 @@ export function UnifiedPublicHeader() {
                       <div className="space-y-3">
                         <Button 
                           variant="outline" 
-                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200"
+                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200 justify-start"
                           onClick={handleDashboardClick}
                         >
                           <User className="w-4 h-4 mr-2" />
@@ -287,7 +279,7 @@ export function UnifiedPublicHeader() {
                         </Button>
                         <Button 
                           variant="ghost" 
-                          className="w-full h-12 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
+                          className="w-full h-12 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 justify-start"
                           onClick={handleLogout}
                         >
                           <LogOut className="w-4 h-4 mr-2" />
@@ -298,7 +290,7 @@ export function UnifiedPublicHeader() {
                       <div className="space-y-3">
                         <Button 
                           variant="outline" 
-                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200"
+                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200 justify-start"
                           onClick={() => handleNavClick("/signup")}
                         >
                           <UserPlus className="w-4 h-4 mr-2" />
@@ -306,7 +298,7 @@ export function UnifiedPublicHeader() {
                         </Button>
                         <Button 
                           variant="default" 
-                          className="w-full h-12 bg-[#003366] hover:bg-[#003366]/90 text-white transition-all duration-200"
+                          className="w-full h-12 bg-[#003366] hover:bg-[#003366]/90 text-white transition-all duration-200 justify-start"
                           onClick={() => handleNavClick("/login")}
                         >
                           <LogIn className="w-4 h-4 mr-2" />
