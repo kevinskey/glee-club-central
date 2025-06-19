@@ -43,7 +43,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
 
   return (
       <section
-        className="hero-section relative w-full min-h-[50vh] flex items-center justify-center overflow-hidden"
+        className="hero-section relative w-full min-h-[80vh] sm:min-h-[50vh] md:min-h-[55vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden"
         style={backgroundStyle}
       >
       {/* Background overlay */}
