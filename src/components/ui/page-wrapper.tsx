@@ -29,14 +29,14 @@ export function PageWrapper({
     sm: "max-w-2xl",
     md: "max-w-4xl",
     lg: "max-w-5xl",
-    xl: "max-w-6xl",
-    "2xl": "max-w-7xl",
+    xl: "max-w-[1800px]",
+    "2xl": "max-w-[1800px]",
     full: "max-w-full",
   };
 
   return (
     <div className={cn("min-h-screen bg-background", className)} {...props}>
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 lg:py-12">
+      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8 py-4 sm:py-6 md:py-8 lg:py-12">
         <div className={cn("mx-auto space-y-4 sm:space-y-6 md:space-y-8", maxWidthClasses[maxWidth])}>
           {/* Page Header */}
           {(title || icon) && (

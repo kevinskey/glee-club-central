@@ -52,7 +52,7 @@ export function Footer() {
   
   return (
     <footer className="glee-footer py-8 md:py-12 mt-8 md:mt-16">
-      <div className="container px-4 sm:px-6 max-w-7xl mx-auto">
+      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8">
         {/* Main Footer Content */}
         <div className="grid gap-6 sm:gap-8 md:grid-cols-3 mb-6 sm:mb-8">
           {/* Logo & Tagline */}

@@ -37,9 +37,9 @@ export function ResponsiveSection({
   // Horizontal padding styles
   const horizontalPaddingClasses = {
     none: "",
-    small: "px-3 sm:px-4",
-    medium: "px-4 sm:px-6 md:px-8",
-    large: "px-6 sm:px-8 md:px-12",
+    small: "px-4 sm:px-6",
+    medium: "px-6 sm:px-8 md:px-8",
+    large: "px-8 sm:px-12 md:px-16",
   };
 
   // Max width styles
@@ -48,8 +48,8 @@ export function ResponsiveSection({
     sm: "max-w-screen-sm",
     md: "max-w-screen-md",
     lg: "max-w-screen-lg",
-    xl: "max-w-screen-xl",
-    "2xl": "max-w-screen-2xl",
+    xl: "max-w-[1800px]",
+    "2xl": "max-w-[1800px]",
     full: "max-w-full",
   };
 
