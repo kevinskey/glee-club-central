@@ -46,8 +46,8 @@ export function StoreSection({ products }: StoreSectionProps) {
         </div>
 
         {/* Products Grid */}
-        {featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {featuredProducts.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
             {featuredProducts.map((product, index) => (
               <Card key={product.id} className="group hover:shadow-xl transition-all duration-500 border-0 shadow-lg bg-white/90 dark:bg-card/90 backdrop-blur-sm overflow-hidden">
                 <CardContent className="p-0">
