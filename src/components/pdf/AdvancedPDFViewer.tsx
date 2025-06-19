@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -121,97 +122,164 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
     }
   }, [pageNumber, scale, rotation, numPages, preloadAdjacentPages]);
 
+  // Safe keyboard event handler with proper cleanup
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) return;
+      // Prevent handling if user is typing in an input
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
       
-      switch (event.key) {
-        case 'ArrowLeft':
-          goToPrevPage();
-          break;
-        case 'ArrowRight':
-          goToNextPage();
-          break;
-        case 'Escape':
-          if (isFullscreen) {
-            exitFullscreen();
-          }
-          setCurrentTool('none');
-          break;
-        case 'f':
-        case 'F':
-          if (event.ctrlKey || event.metaKey) {
+      try {
+        switch (event.key) {
+          case 'ArrowLeft':
             event.preventDefault();
-            const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
-            searchInput?.focus();
-          } else if (!event.ctrlKey && !event.metaKey) {
+            goToPrevPage();
+            break;
+          case 'ArrowRight':
             event.preventDefault();
-            toggleFullscreen();
-          }
-          break;
-        case 'r':
-        case 'R':
-          if (!event.ctrlKey && !event.metaKey) {
+            goToNextPage();
+            break;
+          case 'Escape':
             event.preventDefault();
-            rotate();
-          }
-          break;
+            if (isFullscreen) {
+              exitFullscreen();
+            }
+            setCurrentTool('none');
+            break;
+          case 'f':
+          case 'F':
+            if (event.ctrlKey || event.metaKey) {
+              event.preventDefault();
+              const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement;
+              searchInput?.focus();
+            } else if (!event.ctrlKey && !event.metaKey) {
+              event.preventDefault();
+              toggleFullscreen();
+            }
+            break;
+          case 'r':
+          case 'R':
+            if (!event.ctrlKey && !event.metaKey) {
+              event.preventDefault();
+              rotate();
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('Error handling keyboard event:', error);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [pageNumber, numPages, isFullscreen, goToPrevPage, goToNextPage, exitFullscreen, setCurrentTool, toggleFullscreen, rotate]);
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${title}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+  // Safe fullscreen change handler
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      try {
+        const isCurrentlyFullscreen = Boolean(document.fullscreenElement);
+        if (!isCurrentlyFullscreen && isFullscreen) {
+          // Fullscreen was exited externally (e.g., ESC key)
+          exitFullscreen();
+        }
+      } catch (error) {
+        console.error('Error handling fullscreen change:', error);
+      }
+    };
 
-  const handlePrint = () => {
-    window.print();
-  };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isFullscreen, exitFullscreen]);
 
-  const jumpToBookmark = (bookmark: any) => {
-    setPageNumber(bookmark.page_number);
-  };
-
-  const handleAnnotationAdd = (annotation: any) => {
-    addAnnotation(annotation, pageNumber);
-  };
-
-  const handleAnnotationRemove = (annotationId: string) => {
-    removeAnnotationById(annotationId, pageNumber);
-  };
-
-  const handleSaveAnnotations = () => {
-    toast({ title: "Annotations saved" });
-  };
-
-  const handleClearAnnotations = () => {
-    clearPageAnnotations(pageNumber);
-    toast({ title: "Annotations cleared" });
-  };
-
-  const handleBackNavigation = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      window.history.back();
+  const handleDownload = useCallback(() => {
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({ title: "Download failed", description: "Unable to download the PDF file.", variant: "destructive" });
     }
-  };
+  }, [url, title, toast]);
 
-  const handlePrevSearchResult = () => {
+  const handlePrint = useCallback(() => {
+    try {
+      window.print();
+    } catch (error) {
+      console.error('Error printing PDF:', error);
+      toast({ title: "Print failed", description: "Unable to print the PDF.", variant: "destructive" });
+    }
+  }, [toast]);
+
+  const jumpToBookmark = useCallback((bookmark: any) => {
+    try {
+      setPageNumber(bookmark.page_number);
+    } catch (error) {
+      console.error('Error jumping to bookmark:', error);
+    }
+  }, [setPageNumber]);
+
+  const handleAnnotationAdd = useCallback((annotation: any) => {
+    try {
+      addAnnotation(annotation, pageNumber);
+    } catch (error) {
+      console.error('Error adding annotation:', error);
+    }
+  }, [addAnnotation, pageNumber]);
+
+  const handleAnnotationRemove = useCallback((annotationId: string) => {
+    try {
+      removeAnnotationById(annotationId, pageNumber);
+    } catch (error) {
+      console.error('Error removing annotation:', error);
+    }
+  }, [removeAnnotationById, pageNumber]);
+
+  const handleSaveAnnotations = useCallback(() => {
+    try {
+      toast({ title: "Annotations saved" });
+    } catch (error) {
+      console.error('Error saving annotations:', error);
+    }
+  }, [toast]);
+
+  const handleClearAnnotations = useCallback(() => {
+    try {
+      clearPageAnnotations(pageNumber);
+      toast({ title: "Annotations cleared" });
+    } catch (error) {
+      console.error('Error clearing annotations:', error);
+    }
+  }, [clearPageAnnotations, pageNumber, toast]);
+
+  const handleBackNavigation = useCallback(() => {
+    try {
+      if (onBack) {
+        onBack();
+      } else {
+        window.history.back();
+      }
+    } catch (error) {
+      console.error('Error navigating back:', error);
+    }
+  }, [onBack]);
+
+  const handlePrevSearchResult = useCallback(() => {
     setCurrentSearchIndex(Math.max(0, currentSearchIndex - 1));
-  };
+  }, [currentSearchIndex, setCurrentSearchIndex]);
 
-  const handleNextSearchResult = () => {
+  const handleNextSearchResult = useCallback(() => {
     setCurrentSearchIndex(Math.min(searchResults.length - 1, currentSearchIndex + 1));
-  };
+  }, [searchResults.length, currentSearchIndex, setCurrentSearchIndex]);
 
   return (
     <div 
@@ -221,7 +289,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         isFullscreen ? "fixed inset-0 z-50 h-screen" : "h-screen"
       )}
     >
-      {/* Headers with smooth transitions */}
+      {/* Headers with safe fullscreen handling */}
       {isFullscreen && (
         <PDFFullscreenHeader
           title={title}
@@ -328,7 +396,7 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
         />
       )}
 
-      {/* Main PDF Viewer with optimized rendering */}
+      {/* Main PDF Viewer with crash protection */}
       <div className="flex-1 overflow-auto bg-gray-100 relative flex">
         <div 
           ref={containerRef}
@@ -346,6 +414,10 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                 <Document
                   file={url}
                   onLoadSuccess={onDocumentLoadSuccess}
+                  onLoadError={(error) => {
+                    console.error('PDF load error:', error);
+                    toast({ title: "PDF load failed", description: "Unable to load the PDF file.", variant: "destructive" });
+                  }}
                   loading={
                     <div className={cn(
                       "flex items-center justify-center",
@@ -380,10 +452,13 @@ const AdvancedPDFViewer: React.FC<AdvancedPDFViewerProps> = ({
                     renderAnnotationLayer={false}
                     className="transition-opacity duration-200 max-w-full"
                     width={isMobile ? Math.min(window.innerWidth - 16, 600) : undefined}
+                    onRenderError={(error) => {
+                      console.error('Page render error:', error);
+                    }}
                   />
                 </Document>
                 
-                {/* Annotation Canvas Overlay with optimized rendering */}
+                {/* Annotation Canvas Overlay with crash protection */}
                 {pageSize.width > 0 && pageSize.height > 0 && (
                   <AnnotationCanvas
                     width={pageSize.width}
