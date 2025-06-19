@@ -40,7 +40,7 @@ export function EventScroller({
   if (events.length === 0) {
     return (
       <section className={`py-8 md:py-12 ${className}`}>
-        <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-playfair font-bold mb-4">{title}</h2>
             <p className="text-muted-foreground">No upcoming events at this time.</p>
@@ -52,7 +52,7 @@ export function EventScroller({
 
   return (
     <section className={`py-8 md:py-12 ${className}`}>
-      <div className="max-w-full md:max-w-3xl lg:max-w-6xl mx-auto px-4 md:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-3xl font-playfair font-bold">{title}</h2>
           {showViewAllButton && (

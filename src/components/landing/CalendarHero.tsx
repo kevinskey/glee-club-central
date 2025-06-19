@@ -48,7 +48,7 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
   if (upcomingEvents.length === 0) {
     return (
       <section className="py-12 pt-16 md:pt-20 bg-gradient-to-br from-glee-spelman/5 to-glee-purple/5 mt-2.5 md:mt-0">
-        <div className="container mx-auto px-4">
+        <div className="mx-auto w-full max-w-[1800px] px-4">
           <div className="text-center">
             <h2 className="text-3xl font-bold font-playfair text-gray-900 mb-4">Upcoming Events</h2>
             <p className="text-gray-600">Stay tuned for our next performances!</p>
@@ -60,7 +60,7 @@ export const CalendarHero: React.FC<CalendarHeroProps> = ({
 
   return (
     <section className="py-12 pt-16 md:pt-20 bg-gradient-to-br from-glee-spelman/5 to-glee-purple/5 mt-2.5 md:mt-0">
-      <div className="container mx-auto px-4">
+      <div className="mx-auto w-full max-w-[1800px] px-4">
         <h2 className="text-3xl font-bold font-playfair text-gray-900 mb-8">Upcoming Events</h2>
         
         {/* Mobile: Scrollable cards */}
