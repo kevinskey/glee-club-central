@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Bell, Menu, Search } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface ConsolidatedHeaderProps {
   onMenuClick?: () => void;
@@ -13,6 +14,7 @@ interface ConsolidatedHeaderProps {
 
 export function ConsolidatedHeader({ onMenuClick, isMobile = false }: ConsolidatedHeaderProps) {
   const { user, logout, profile } = useAuth();
+  const { theme } = useTheme();
 
   const handleSignOut = async () => {
     try {
@@ -27,8 +29,9 @@ export function ConsolidatedHeader({ onMenuClick, isMobile = false }: Consolidat
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 h-16 flex items-center justify-between px-6 transition-colors duration-200">
-      {/* Menu Button (Mobile Only) */}
+    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
+      <div className={`container mx-auto flex items-center justify-between px-4 ${theme === 'light' && !isMobile ? 'py-4' : 'py-2'}`}>
+        {/* Menu Button (Mobile Only) */}
       {isMobile && onMenuClick && (
         <Button
           variant="ghost"
@@ -88,6 +91,7 @@ export function ConsolidatedHeader({ onMenuClick, isMobile = false }: Consolidat
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+      </div>
       </div>
     </header>
   );

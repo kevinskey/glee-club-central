@@ -31,9 +31,9 @@ export function FloatingThemeToggle({
       aria-label={theme === "light" ? "Enable dark mode" : "Enable light mode"}
     >
       {theme === "light" ? (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <Moon className="h-[1.2rem] w-[1.2rem] text-gray-800 dark:text-white" />
       ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <Sun className="h-[1.2rem] w-[1.2rem] text-gray-800 dark:text-white" />
       )}
       <span className="sr-only">{theme === "light" ? "Dark" : "Light"} mode</span>
     </Button>
