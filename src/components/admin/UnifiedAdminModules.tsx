@@ -98,28 +98,37 @@ export function UnifiedAdminModules() {
       path: "/admin/users",
       adminOnly: true
     },
-    {
-      id: "music-player",
-      title: "Music Player",
-      description: "Manage playlists and player settings",
-      icon: <Music className="h-6 w-6" />,
-      color: "bg-orange-500",
-      path: "/admin/music",
-      adminOnly: true
-    },
-    {
-      id: "settings",
-      title: "Site Settings",
-      description: "Configure system settings and preferences",
-      icon: <Settings className="h-6 w-6" />,
-      color: "bg-gray-500",
-      path: "/admin/settings",
-      adminOnly: true,
-      isPriority: true
-    },
-    {
-      id: "store",
-      title: "Store Management",
+  {
+    id: "music-player",
+    title: "Music Player",
+    description: "Manage playlists and player settings",
+    icon: <Music className="h-6 w-6" />,
+    color: "bg-orange-500",
+    path: "/admin/music",
+    adminOnly: true
+  },
+  {
+    id: "settings",
+    title: "Site Settings",
+    description: "Configure system settings and preferences",
+    icon: <Settings className="h-6 w-6" />,
+    color: "bg-gray-500",
+    path: "/admin/settings",
+    adminOnly: true,
+    isPriority: true
+  },
+  {
+    id: 'soundcloud-admin',
+    title: 'SoundCloud Admin',
+    description: 'Manage SoundCloud tracks and embeds',
+    icon: <Music className="h-6 w-6" />,
+    color: 'bg-orange-600',
+    path: '/admin/soundcloud',
+    adminOnly: true
+  },
+  {
+    id: "store",
+    title: "Store Management",
       description: "Manage products and orders",
       icon: <ShoppingBag className="h-6 w-6" />,
       color: "bg-emerald-500",
