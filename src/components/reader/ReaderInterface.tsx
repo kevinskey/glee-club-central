@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic, Eye, ArrowLeft } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
 import { MemberReaderView } from './MemberReaderView';
@@ -20,6 +20,7 @@ export function ReaderInterface() {
   const [selectedPDF, setSelectedPDF] = useState<PDFFile | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('library');
+  const [showMemberPreview, setShowMemberPreview] = useState(false);
 
   const handleViewPDF = (pdf: PDFFile) => {
     setSelectedPDF(pdf);
@@ -30,6 +31,32 @@ export function ReaderInterface() {
     setCurrentView('library');
     setSelectedPDF(null);
   };
+
+  // If admin is previewing member view, show member interface
+  if (isAdmin() && showMemberPreview) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Eye className="h-5 w-5 text-blue-600" />
+            <span className="font-medium text-blue-900 dark:text-blue-100">
+              Previewing Member View
+            </span>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowMemberPreview(false)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Admin View
+          </Button>
+        </div>
+        <MemberReaderView />
+      </div>
+    );
+  }
 
   // If user is authenticated but not admin, show member reader view
   if (isAuthenticated && !isAdmin()) {
@@ -119,16 +146,28 @@ export function ReaderInterface() {
                 }
               </p>
             </div>
-            {isAuthenticated && (
-              <Button 
-                onClick={() => setUploadDialogOpen(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Upload PDF
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {isAuthenticated && (
+                <>
+                  <Button 
+                    onClick={() => setShowMemberPreview(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Preview Member View
+                  </Button>
+                  <Button 
+                    onClick={() => setUploadDialogOpen(true)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload PDF
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
