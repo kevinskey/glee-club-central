@@ -23,7 +23,6 @@ import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ReaderPage from "./pages/ReaderPage";
-import MerchandiseCalculatorPage from "./pages/MerchandiseCalculatorPage";
 import { AdminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";

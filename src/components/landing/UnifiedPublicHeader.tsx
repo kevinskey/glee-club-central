@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield, Calculator } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
@@ -69,7 +69,6 @@ export function UnifiedPublicHeader() {
     },
     { label: "Reader", path: "#", icon: Music, onClick: handleReaderClick },
     { label: "Studio", external: "https://studio.gleeworld.org", icon: Music },
-    { label: "Calculator", path: "/calculator", icon: Calculator },
     { label: "Store", path: "/store", icon: Store },
     { label: "Contact", path: "/contact", icon: Contact },
   ];
@@ -123,9 +122,6 @@ export function UnifiedPublicHeader() {
           <a href="https://studio.gleeworld.org" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Studio
           </a>
-          <Link to="/calculator" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
-            Calculator
-          </Link>
           <Link to="/store" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Store
           </Link>
