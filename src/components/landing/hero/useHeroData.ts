@@ -26,14 +26,11 @@ export function useHeroData() {
   const fetchHeroSlides = async () => {
     try {
       if (!supabase) {
-        console.warn('useHeroData: Supabase not configured, showing default hero');
         setSlides([]);
         setMediaFiles({});
         setIsLoading(false);
         return;
       }
-
-      console.log('useHeroData: Fetching hero slides...');
       
       // Fetch hero slides
       const { data: slidesData, error: slidesError } = await supabase
@@ -44,11 +41,8 @@ export function useHeroData() {
         .order('slide_order', { ascending: true });
 
       if (slidesError) {
-        console.error('useHeroData: Error fetching slides:', slidesError);
         throw slidesError;
       }
-
-      console.log('useHeroData: Fetched slides:', slidesData);
 
       if (slidesData && slidesData.length > 0) {
         setSlides(slidesData);
@@ -58,36 +52,27 @@ export function useHeroData() {
           .filter(slide => slide.media_id)
           .map(slide => slide.media_id);
 
-        console.log('useHeroData: Media IDs to fetch:', mediaIds);
-
         if (mediaIds.length > 0) {
           let foundMedia: MediaFile[] = [];
 
           // Try media_library table first
-          console.log('useHeroData: Searching media_library table...');
-          const { data: mediaLibraryData, error: mediaLibraryError } = await supabase
+          const { data: mediaLibraryData } = await supabase
             .from('media_library')
             .select('id, file_url, title')
             .in('id', mediaIds);
 
-          if (mediaLibraryError) {
-            console.error('useHeroData: Error fetching media_library:', mediaLibraryError);
-          } else if (mediaLibraryData && mediaLibraryData.length > 0) {
+          if (mediaLibraryData && mediaLibraryData.length > 0) {
             foundMedia = mediaLibraryData.filter(item => item.file_url);
-            console.log('useHeroData: Found media in media_library:', foundMedia);
           }
 
           // If no media found in media_library, try site_images
           if (foundMedia.length === 0) {
-            console.log('useHeroData: Searching site_images table...');
-            const { data: siteImagesData, error: siteImagesError } = await supabase
+            const { data: siteImagesData } = await supabase
               .from('site_images')
               .select('id, file_url, name')
               .in('id', mediaIds);
 
-            if (siteImagesError) {
-              console.error('useHeroData: Error fetching site_images:', siteImagesError);
-            } else if (siteImagesData && siteImagesData.length > 0) {
+            if (siteImagesData && siteImagesData.length > 0) {
               foundMedia = siteImagesData
                 .filter(item => item.file_url)
                 .map(item => ({
@@ -95,22 +80,18 @@ export function useHeroData() {
                   file_url: item.file_url,
                   title: item.name || 'Untitled'
                 }));
-              console.log('useHeroData: Found media in site_images:', foundMedia);
             }
           }
 
           // If still no media found, try products table
           if (foundMedia.length === 0) {
-            console.log('useHeroData: Searching products table...');
-            const { data: productData, error: productError } = await supabase
+            const { data: productData } = await supabase
               .from('products')
               .select('id, image_url, name')
               .in('id', mediaIds)
               .not('image_url', 'is', null);
 
-            if (productError) {
-              console.error('useHeroData: Error fetching products:', productError);
-            } else if (productData && productData.length > 0) {
+            if (productData && productData.length > 0) {
               foundMedia = productData
                 .filter(item => item.image_url)
                 .map(item => ({
@@ -118,7 +99,6 @@ export function useHeroData() {
                   file_url: item.image_url,
                   title: item.name || 'Untitled'
                 }));
-              console.log('useHeroData: Found media in products:', foundMedia);
             }
           }
 
@@ -130,24 +110,18 @@ export function useHeroData() {
               }
               return acc;
             }, {} as Record<string, MediaFile>);
-            
-            console.log('useHeroData: Final media map created:', mediaMap);
             setMediaFiles(mediaMap);
           } else {
-            console.warn('useHeroData: No media files found for any media IDs');
             setMediaFiles({});
           }
         } else {
-          console.warn('useHeroData: No media IDs found in slides');
           setMediaFiles({});
         }
       } else {
-        console.log('useHeroData: No visible hero slides found, will show default hero');
         setSlides([]);
         setMediaFiles({});
       }
     } catch (error) {
-      console.error('useHeroData: Error in fetchHeroSlides:', error);
       // On error, show default hero
       setSlides([]);
       setMediaFiles({});

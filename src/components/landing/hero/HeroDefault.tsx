@@ -3,8 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 
 export function HeroDefault() {
-  console.log('HeroDefault: Rendering default hero');
-  
   return (
     <section className="hero-section relative w-full min-h-[60vh] sm:min-h-[50vh] md:min-h-[55vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden">
       {/* Background gradient */}
@@ -13,7 +11,7 @@ export function HeroDefault() {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 text-center text-white py-4 px-2 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center text-white container px-4 py-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
           Spelman College Glee Club
         </h1>

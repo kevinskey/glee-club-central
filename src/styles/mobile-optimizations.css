@@ -93,13 +93,6 @@ body {
     padding: 0.75rem !important;
   }
   
-  /* Hero section minimal padding */
-  .hero-section .container,
-  .hero-section [class*="max-w-"],
-  .hero-container {
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-  }
   
   /* Card containers with minimal spacing */
   .card-container,
@@ -551,47 +544,3 @@ img, picture, video, canvas, svg {
   overflow-x: hidden;
 }
 
-/* Hero Section Mobile Fixes - PROPER SIZE */
-@media (max-width: 768px) {
-  /* Make hero properly sized on mobile */
-  .hero-section,
-  section[class*="hero"],
-  div[class*="hero"] {
-    min-height: 60vh !important;
-    height: auto !important;
-    padding: 1rem 0.5rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  /* Hero content */
-  .hero-section .container,
-  .hero-section [class*="max-w-"],
-  .hero-container {
-    padding: 0.5rem !important;
-    text-align: center !important;
-  }
-  
-  /* Hero text sizing */
-  .hero-section h1,
-  section[class*="hero"] h1 {
-    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
-    line-height: 1.2 !important;
-    margin-bottom: 0.5rem !important;
-  }
-  
-  .hero-section p,
-  section[class*="hero"] p {
-    font-size: clamp(1rem, 3vw, 1.25rem) !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  /* Hero buttons */
-  .hero-section button,
-  section[class*="hero"] button {
-    margin: 0.25rem !important;
-    padding: 0.75rem 1rem !important;
-    min-height: 44px !important;
-  }
-}
