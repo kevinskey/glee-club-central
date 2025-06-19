@@ -146,9 +146,9 @@ export function YouTubeVideoSection() {
     <div className="space-y-6">
       {/* Single Video Display */}
       {videos.length === 1 ? (
-        <div className="w-full max-w-4xl mx-auto">
-          <Card className="overflow-hidden">
-            <div className="p-6">
+        <div className="w-full max-w-4xl -mx-4 sm:mx-auto">
+          <Card className="overflow-hidden rounded-none sm:rounded-lg border-0 sm:border">
+            <div className="p-0 sm:p-6">
               {/* Video Header */}
               <div className="flex items-center gap-3 mb-4">
                 <Badge variant={videos[0].content_type === 'playlist' ? 'default' : 'secondary'}>
@@ -198,7 +198,7 @@ export function YouTubeVideoSection() {
         </div>
       ) : (
         /* Multiple Videos Carousel - Navigation arrows removed */
-        <div className="w-full max-w-6xl mx-auto">
+        <div className="w-full max-w-6xl -mx-4 sm:mx-auto">
           <Carousel 
             className="w-full"
             opts={{
@@ -212,8 +212,8 @@ export function YouTubeVideoSection() {
                 
                 return (
                   <CarouselItem key={video.id} className="pl-2 md:pl-4 basis-full">
-                    <Card className="overflow-hidden h-full">
-                      <div className="p-4 md:p-6">
+                    <Card className="overflow-hidden h-full rounded-none sm:rounded-lg border-0 sm:border">
+                      <div className="p-0 sm:p-4 md:p-6">
                         {/* Video Header */}
                         <div className="flex items-center gap-3 mb-4">
                           <Badge variant={video.content_type === 'playlist' ? 'default' : 'secondary'} className="flex-shrink-0">
