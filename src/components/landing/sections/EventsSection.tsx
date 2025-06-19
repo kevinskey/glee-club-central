@@ -17,8 +17,8 @@ interface EventsSectionProps {
 
 export function EventsSection({ events }: EventsSectionProps) {
   return (
-    <section className="py-12 md:py-16">
-      <div className="mx-auto w-full max-w-full px-4 sm:px-6 lg:px-8">
+    <section>
+      <div className="mx-auto w-full max-w-full">
         <EventScroller 
           events={events}
           title="Upcoming Events"
