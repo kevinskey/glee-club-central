@@ -56,6 +56,8 @@ export function UnifiedPublicHeader() {
 
   const navigationLinks = [
     { label: "Home", path: "/", icon: Home },
+    // Admin Panel as second item if user is admin
+    ...(isAuthenticated && isAdmin && isAdmin() ? [{ label: "Admin Panel", path: "/admin", icon: Shield }] : []),
     { label: "About", path: "/about", icon: Info },
     { 
       label: "Events", 
@@ -247,21 +249,6 @@ export function UnifiedPublicHeader() {
                           )}
                         </Button>
                       ))}
-
-                      {/* Admin Dashboard Link - moved into main navigation */}
-                      {isAuthenticated && isAdmin && isAdmin() && (
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
-                          onClick={() => {
-                            navigate("/admin");
-                            setIsMobileMenuOpen(false);
-                          }}
-                        >
-                          <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
-                          <span>Admin Panel</span>
-                        </Button>
-                      )}
                     </nav>
                   </div>
                   
