@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,24 @@ interface PDFUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+// Helper function to create a clean title from filename
+const createTitleFromFilename = (filename: string): string => {
+  // Remove file extension
+  const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+  
+  // Replace common separators with spaces
+  let title = nameWithoutExt
+    .replace(/[-_]+/g, ' ')
+    .replace(/\./g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  // Capitalize first letter of each word
+  title = title.replace(/\b\w/g, char => char.toUpperCase());
+  
+  return title;
+};
 
 export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
   const { uploadPDF } = usePDFLibrary();
@@ -54,9 +71,10 @@ export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
         return;
       }
       setFile(selectedFile);
-      if (!title) {
-        setTitle(selectedFile.name.replace('.pdf', ''));
-      }
+      
+      // Automatically create title from filename
+      const autoTitle = createTitleFromFilename(selectedFile.name);
+      setTitle(autoTitle);
     }
   };
 
@@ -137,16 +155,19 @@ export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
             </div>
           </div>
 
-          {/* Title */}
+          {/* Title - Auto-populated from filename */}
           <div>
             <Label htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter PDF title"
+              placeholder="Title will be auto-generated from filename"
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Title is automatically created from filename. You can edit it if needed.
+            </p>
           </div>
 
           {/* Description */}

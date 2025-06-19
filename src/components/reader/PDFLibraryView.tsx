@@ -10,6 +10,7 @@ import { usePDFLibrary, PDFFile } from '@/hooks/usePDFLibrary';
 import { FileText, Search, Upload, Eye, Download, Trash2, Filter } from 'lucide-react';
 import { PDFThumbnail } from '@/components/pdf/PDFThumbnail';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PDFLibraryViewProps {
   onViewPDF: (pdf: PDFFile) => void;
@@ -18,6 +19,7 @@ interface PDFLibraryViewProps {
 
 export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) {
   const { pdfFiles, loading, deletePDF } = usePDFLibrary();
+  const { isAuthenticated, isAdmin } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVoicePart, setSelectedVoicePart] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -75,7 +77,8 @@ export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) 
             {filteredPDFs.length} {filteredPDFs.length === 1 ? 'document' : 'documents'}
           </p>
         </div>
-        {onUploadPDF && (
+        {/* Enable upload for all authenticated users */}
+        {isAuthenticated && onUploadPDF && (
           <Button onClick={onUploadPDF} className="bg-orange-500 hover:bg-orange-600">
             <Upload className="h-4 w-4 mr-2" />
             Upload PDF
@@ -177,14 +180,17 @@ export function PDFLibraryView({ onViewPDF, onUploadPDF }: PDFLibraryViewProps) 
                   >
                     <Download className="h-4 w-4" />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDelete(pdf)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {/* Only show delete button for admins */}
+                  {isAdmin() && (
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleDelete(pdf)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
               
