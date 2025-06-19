@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Music, BookOpen, Users, Clock, CheckCircle, Upload, Library } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
 import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
@@ -104,25 +104,16 @@ export function ReaderInterface() {
                 }
               </p>
             </div>
-            <div className="space-x-2">
-              {isAuthenticated && (
-                <Button 
-                  onClick={() => setUploadDialogOpen(true)}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="h-4 w-4" />
-                  Upload PDF
-                </Button>
-              )}
+            {isAuthenticated && (
               <Button 
-                onClick={() => setCurrentView('library')}
-                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600"
+                onClick={() => setUploadDialogOpen(true)}
+                variant="outline"
+                className="flex items-center gap-2"
               >
-                <Library className="h-4 w-4" />
-                Browse Library
+                <Upload className="h-4 w-4" />
+                Upload PDF
               </Button>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
