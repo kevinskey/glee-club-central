@@ -17,8 +17,8 @@ interface EnhancedEventsSectionProps {
 
 export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   return (
-    <section className="bg-gradient-to-br from-navy-50 to-navy-100 dark:from-navy-900 dark:to-navy-800 py-8 md:py-12 lg:py-16">
-      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8">
+    <section className="bg-gradient-to-br from-navy-50 to-navy-100 dark:from-navy-900 dark:to-navy-800 glee-section">
+      <div className="glee-container">
         <EventScroller 
           events={events}
           title="Upcoming Events"

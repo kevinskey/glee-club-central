@@ -19,23 +19,22 @@ export function ResponsiveContainer({
   const isPad = useIsPad();
 
   const variantClasses = {
-    default: 'max-w-[1800px]',
-    narrow: 'max-w-4xl',
-    wide: 'max-w-[1800px]',
-    full: 'max-w-full'
+    default: 'glee-container',
+    narrow: 'glee-container-narrow',
+    wide: 'glee-container-wide',
+    full: 'glee-container-full'
   };
 
   const paddingClasses = {
     none: '',
-    sm: isPad ? 'px-6 py-2' : 'px-4 py-1',
-    md: isPad ? 'px-8 py-4' : 'px-6 py-2',
-    lg: isPad ? 'px-12 py-6' : 'px-8 py-3',
-    xl: isPad ? 'px-16 py-8' : 'px-10 py-4'
+    sm: isPad ? 'py-2' : 'py-1',
+    md: isPad ? 'py-4' : 'py-2',
+    lg: isPad ? 'py-6' : 'py-3',
+    xl: isPad ? 'py-8' : 'py-4'
   };
 
   return (
     <div className={cn(
-      'container mx-auto w-full',
       variantClasses[variant],
       paddingClasses[padding],
       isPad && 'ipad-optimized',

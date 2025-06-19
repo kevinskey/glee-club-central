@@ -40,8 +40,8 @@ export function EventScroller({
   if (events.length === 0) {
     return (
       <div className={`text-center ${className}`}>
-        <h2 className="text-3xl font-playfair font-bold mb-4 dark:text-white">{title}</h2>
-        <p className="text-muted-foreground dark:text-gray-300">No upcoming events at this time.</p>
+        <h2 className="glee-text-headline mb-4 dark:text-white">{title}</h2>
+        <p className="glee-text-body dark:text-gray-300">No upcoming events at this time.</p>
       </div>
     );
   }
@@ -49,7 +49,7 @@ export function EventScroller({
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-playfair font-bold dark:text-white">{title}</h2>
+        <h2 className="glee-text-headline dark:text-white">{title}</h2>
         {showViewAllButton && (
           <button
             onClick={onViewAll}
@@ -70,25 +70,25 @@ export function EventScroller({
         <CarouselContent className="-ml-2 md:-ml-4">
           {events.map((event) => (
             <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/3">
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <Card className="glee-card-base h-full hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-0">
-                  <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
+                  <div className="aspect-[4/3] overflow-hidden glee-corners-lg">
                     <img
                       src={event.imageUrl || "/placeholder.svg"}
                       alt={event.title}
-                      className="w-full h-full object-cover"
+                      className="glee-image-cover"
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-playfair font-semibold text-lg mb-2 line-clamp-2 dark:text-white">
+                    <h3 className="glee-text-subhead mb-2 line-clamp-2 dark:text-white">
                       {event.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300 mb-2">
+                    <div className="flex items-center gap-2 glee-text-caption mb-2">
                       <Calendar className="h-4 w-4 dark:text-gray-300" />
                       <span>{formatEventDate(event.date)}</span>
                     </div>
                     {event.location && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300">
+                      <div className="flex items-center gap-2 glee-text-caption">
                         <MapPin className="h-4 w-4 dark:text-gray-300" />
                         <span className="line-clamp-1">{event.location}</span>
                       </div>

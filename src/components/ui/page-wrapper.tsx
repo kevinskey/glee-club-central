@@ -36,11 +36,11 @@ export function PageWrapper({
 
   return (
     <div className={cn("min-h-screen bg-background", className)} {...props}>
-      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8 py-4 sm:py-6 md:py-8 lg:py-12">
-        <div className={cn("mx-auto space-y-4 sm:space-y-6 md:space-y-8", maxWidthClasses[maxWidth])}>
+      <div className="glee-container glee-section">
+        <div className={cn("mx-auto glee-spacing-lg", maxWidthClasses[maxWidth])}>
           {/* Page Header */}
           {(title || icon) && (
-            <div className={cn("space-y-3 sm:space-y-4 md:space-y-6", headerClassName)}>
+            <div className={cn("glee-spacing-md", headerClassName)}>
               {(title || icon) && (
                 <div className="flex items-center gap-2 sm:gap-3">
                   {icon && (
@@ -52,7 +52,7 @@ export function PageWrapper({
                     <ResponsiveText 
                       as="h1" 
                       size="4xl" 
-                      className="font-playfair font-bold text-foreground"
+                      className="glee-text-display"
                     >
                       {title}
                     </ResponsiveText>
@@ -63,7 +63,7 @@ export function PageWrapper({
               {description && (
                 <ResponsiveText 
                   size="lg" 
-                  className="text-muted-foreground leading-relaxed max-w-3xl"
+                  className="glee-text-body max-w-3xl"
                 >
                   {description}
                 </ResponsiveText>
@@ -72,7 +72,7 @@ export function PageWrapper({
           )}
 
           {/* Page Content */}
-          <div className={cn("space-y-4 sm:space-y-6 md:space-y-8", contentClassName)}>
+          <div className={cn("glee-spacing-lg", contentClassName)}>
             {children}
           </div>
         </div>

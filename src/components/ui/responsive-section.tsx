@@ -19,38 +19,30 @@ export function ResponsiveSection({
   className, 
   as: Component = "section",
   verticalPadding = "medium",
-  horizontalPadding = "medium",
+  horizontalPadding = "none",
   fullWidth = false,
   maxWidth = "xl",
   centered = false,
   sectionSpacing = "normal",
   ...props 
 }: ResponsiveSectionProps) {
-  // Vertical padding styles
+  // Vertical padding styles using glee system
   const verticalPaddingClasses = {
     none: "",
-    small: "py-4 sm:py-6",
-    medium: "py-6 sm:py-8 md:py-12",
-    large: "py-8 sm:py-12 md:py-16 lg:py-20",
+    small: "glee-section-compact",
+    medium: "glee-section",
+    large: "glee-section-spacious",
   };
 
-  // Horizontal padding styles
-  const horizontalPaddingClasses = {
-    none: "",
-    small: "px-4 sm:px-6",
-    medium: "px-6 sm:px-8 md:px-8",
-    large: "px-8 sm:px-12 md:px-16",
-  };
-
-  // Max width styles
+  // Max width styles using glee system
   const maxWidthClasses = {
     none: "",
-    sm: "max-w-screen-sm",
-    md: "max-w-screen-md",
-    lg: "max-w-screen-lg",
-    xl: "max-w-[1800px]",
-    "2xl": "max-w-[1800px]",
-    full: "max-w-full",
+    sm: "glee-container-narrow",
+    md: "glee-container-narrow",
+    lg: "glee-container",
+    xl: "glee-container",
+    "2xl": "glee-container-wide",
+    full: "glee-container-full",
   };
 
   // Section spacing styles
@@ -65,7 +57,6 @@ export function ResponsiveSection({
     <Component
       className={cn(
         verticalPadding !== "none" && verticalPaddingClasses[verticalPadding],
-        horizontalPadding !== "none" && horizontalPaddingClasses[horizontalPadding],
         fullWidth ? "w-full" : "",
         maxWidth !== "none" && maxWidthClasses[maxWidth],
         centered && "mx-auto",
