@@ -7,11 +7,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus, Bell } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
+import { useSSOAuth } from '@/hooks/useSSOAuth';
 
 export function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
   const { upcomingEvents } = useHomePageData();
+  const { openReaderWithAuth } = useSSOAuth();
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
@@ -31,6 +33,11 @@ export function Header() {
     } catch (error) {
       console.error("Logout error:", error);
     }
+  };
+  
+  const handleReaderClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    openReaderWithAuth();
   };
   
   return (
@@ -72,7 +79,11 @@ export function Header() {
               <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
             )}
           </Link>
-          <a href="https://reader.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <a 
+            href="#" 
+            onClick={handleReaderClick}
+            className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+          >
             Reader
           </a>
           <a href="https://studio.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">

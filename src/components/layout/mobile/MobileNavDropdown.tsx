@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -6,12 +5,14 @@ import { Menu, Home, Calendar, Music, Store, Contact, Info, LogIn, UserPlus, Use
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useHomePageData } from '@/hooks/useHomePageData';
+import { useSSOAuth } from '@/hooks/useSSOAuth';
 
 export function MobileNavDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated, user, profile, logout, isAdmin } = useAuth();
   const { upcomingEvents } = useHomePageData();
+  const { openReaderWithAuth } = useSSOAuth();
 
   const handleLogout = async () => {
     try {
@@ -32,6 +33,11 @@ export function MobileNavDropdown() {
     } else {
       navigate("/dashboard");
     }
+    setIsOpen(false);
+  };
+
+  const handleReaderClick = () => {
+    openReaderWithAuth();
     setIsOpen(false);
   };
 
@@ -157,15 +163,12 @@ export function MobileNavDropdown() {
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild>
-          <a 
-            href="https://reader.gleeworld.org" 
-            onClick={() => setIsOpen(false)}
-            className="px-3 py-2 text-sm font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20"
-          >
-            <Music className="mr-3 h-4 w-4 flex-shrink-0" />
-            <span className="truncate">Reader</span>
-          </a>
+        <DropdownMenuItem 
+          onClick={handleReaderClick}
+          className="px-3 py-2 text-sm font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20"
+        >
+          <Music className="mr-3 h-4 w-4 flex-shrink-0" />
+          <span className="truncate">Reader</span>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
