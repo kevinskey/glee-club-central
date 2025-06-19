@@ -61,9 +61,9 @@ export function NewAudioSection() {
   };
 
   return (
-    <section className="py-16">
+    <section className="py-8">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Listen to the Sound of GleeWorld
           </h2>
@@ -92,7 +92,7 @@ export function NewAudioSection() {
                 <MediaPlayer track={currentTrack} />
               ) : (
                 <Card>
-                  <CardContent className="text-center py-12">
+                  <CardContent className="text-center py-8">
                     <Music className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="text-lg font-semibold mb-2">No Audio Selected</h3>
                     <p className="text-muted-foreground mb-4">
@@ -107,7 +107,7 @@ export function NewAudioSection() {
 
               {/* Saved Playlists */}
               {playlists.length > 0 && (
-                <div className="mt-8">
+                <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     <List className="h-5 w-5" />
                     Your Playlists
