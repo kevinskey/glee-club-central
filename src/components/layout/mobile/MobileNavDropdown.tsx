@@ -31,6 +31,9 @@ export function MobileNavDropdown() {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Calendar", href: "/calendar" },
+    { label: "Reader", href: "https://reader.gleeworld.org" },
+    { label: "Studio", href: "https://studio.gleeworld.org" },
+    { label: "Merch", href: "https://merch.gleeworld.org" },
     { label: "Store", href: "/store" },
     { label: "Contact", href: "/contact" },
   ];

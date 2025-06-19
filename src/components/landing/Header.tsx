@@ -60,6 +60,15 @@ export function Header() {
           <Link to="/calendar" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Events
           </Link>
+          <a href="https://reader.gleeworld.org" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            Reader
+          </a>
+          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            Studio
+          </a>
+          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+            Merch
+          </a>
           <Link to="/store" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Store
           </Link>

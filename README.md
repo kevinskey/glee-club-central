@@ -60,6 +60,16 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Sister Sites
+
+This project links out to several subdomains that offer specialized features:
+
+- [reader.gleeworld.org](https://reader.gleeworld.org) – digital sheet music library
+- [studio.gleeworld.org](https://studio.gleeworld.org) – rehearsal and recording hub
+- [merch.gleeworld.org](https://merch.gleeworld.org) – dedicated merchandise store
+
+Navigation to these sister sites appears in the header and mobile menu.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/2cf8ddd9-7edc-45f1-a4ba-011c3aa74730) and click on Share -> Publish.
