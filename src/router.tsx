@@ -23,6 +23,7 @@ import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ReaderPage from "./pages/ReaderPage";
+import MediaPage from "./pages/MediaPage";
 import { AdminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "calendar",
         element: <EnhancedCalendarPage />,
+      },
+      {
+        path: "media",
+        element: <MediaPage />,
       },
       {
         path: "reader",
