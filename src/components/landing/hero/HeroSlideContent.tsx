@@ -1,19 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import type { MediaFile } from './types';
-
-interface HeroSlide {
-  id: string;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  cta_text?: string;
-  cta_url?: string;
-  media_id?: string;
-  is_active: boolean;
-  order_index: number;
-}
+import type { HeroSlide, MediaFile } from './types';
 
 interface HeroSlideContentProps {
   slide: HeroSlide;
@@ -54,25 +42,21 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
           {slide?.title || 'Spelman College Glee Club'}
         </h1>
         
-        {slide?.subtitle && (
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold mb-2 sm:mb-3 md:mb-4 opacity-90">
-            {slide.subtitle}
-          </h2>
+        {slide?.description && (
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 opacity-90 leading-relaxed">
+            {slide.description}
+          </p>
         )}
         
-        <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 opacity-90 leading-relaxed">
-          {slide?.description || 'To Amaze and Inspire'}
-        </p>
-        
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 justify-center">
-          {slide?.cta_text && slide?.cta_url && (
+          {slide?.button_text && slide?.button_link && (
             <Button
               asChild
               size="lg"
               className="bg-white text-royal-600 hover:bg-white/90 text-sm sm:text-base px-4 sm:px-6 md:px-8 py-3 sm:py-4"
             >
-              <a href={slide.cta_url}>
-                {slide.cta_text}
+              <a href={slide.button_link}>
+                {slide.button_text}
               </a>
             </Button>
           )}
