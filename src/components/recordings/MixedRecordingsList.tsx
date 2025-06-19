@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
   Table,
   TableBody,
@@ -148,6 +148,9 @@ export function MixedRecordingsList() {
       <Card>
         <CardHeader>
           <CardTitle>My Karaoke Recordings</CardTitle>
+          <CardDescription>
+            Recordings are stored securely in the Supabase "audio" bucket.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">

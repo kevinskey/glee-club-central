@@ -84,3 +84,9 @@ SOUNDCLOUD_CLIENT_SECRET=<your-soundcloud-client-secret>
 ```
 
 `SUPABASE_URL` and `SUPABASE_ANON_KEY` are required. If you want to enable the optional SoundCloud integration you must also provide `SOUNDCLOUD_CLIENT_ID` and `SOUNDCLOUD_CLIENT_SECRET`. Without these, SoundCloud authentication will fail.
+
+## Recording Library and Karaoke Studio
+
+This project uses open source audio libraries including **Tone.js**, **WaveSurfer.js**, and **soundfont-player** to power the metronome, pitch pipe, and karaoke studio. Saved recordings are uploaded to the Supabase `audio` bucket so your mixes remain accessible from any device.
+
+See [docs/RECORDING_PROCESS.md](docs/RECORDING_PROCESS.md) for a step-by-step guide on creating and managing recordings.
