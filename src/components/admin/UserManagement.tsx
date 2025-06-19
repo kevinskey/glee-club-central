@@ -266,7 +266,7 @@ export default function UserManagement() {
         {/* Desktop Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">User Management</h1>
+            <h1 className="text-2xl font-bold text-navy-900">User Management</h1>
             <p className="text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
           </div>
           <div className="flex gap-2">
@@ -437,7 +437,7 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold">Import Users from CSV</h2>
+              <h2 className="text-lg font-semibold text-navy-900">Import Users from CSV</h2>
               <Button variant="ghost" onClick={() => setShowImportDialog(false)}>
                 ×
               </Button>
