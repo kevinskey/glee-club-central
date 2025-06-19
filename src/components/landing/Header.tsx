@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
@@ -43,11 +44,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md w-full">
       <div className="w-full max-w-full mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-        {/* Logo Section - Optimized for mobile */}
-        <div className="flex-shrink-0 min-w-0 flex-1 max-w-[60%] sm:max-w-none sm:flex-1">
+        {/* Logo Section */}
+        <div className="flex-shrink-0 min-w-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
             <Icons.logo className="h-7 w-7 flex-shrink-0" />
-            <div className="ml-2 min-w-0 flex-1">
+            <div className="ml-2 min-w-0">
               <div className="text-sm sm:text-base text-[#003366] dark:text-white font-bold font-playfair truncate">
                 GleeWorld
               </div>
@@ -55,9 +56,9 @@ export function Header() {
                 Spelman College
               </div>
             </div>
-            {/* Event Indicator - Mobile only, positioned absolutely to avoid overflow */}
+            {/* Event Indicator - Mobile only */}
             {upcomingEvents.length > 0 && (
-              <div className="ml-1 sm:hidden relative">
+              <div className="ml-1 sm:hidden">
                 <Bell className="h-3 w-3 text-[#003366] dark:text-white" />
                 <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
               </div>
@@ -65,15 +66,15 @@ export function Header() {
           </Link>
         </div>
         
-        {/* Desktop Navigation - keep existing */}
-        <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center">
-          <Link to="/" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+        {/* Desktop Navigation - Improved spacing */}
+        <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-1 justify-center">
+          <Link to="/" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Home
           </Link>
-          <Link to="/about" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <Link to="/about" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             About
           </Link>
-          <Link to="/calendar" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
+          <Link to="/calendar" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -82,76 +83,74 @@ export function Header() {
           <a 
             href="#" 
             onClick={handleReaderClick}
-            className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
+            className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Studio
           </a>
-          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Merch
           </a>
-          <Link to="/store" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <Link to="/store" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Store
           </Link>
-          <Link to="/contact" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
+          <Link to="/contact" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Contact
           </Link>
         </nav>
         
-        {/* Right Side Actions - Optimized for mobile */}
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
-          {/* Theme Toggle - smaller on mobile */}
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          {/* Theme Toggle */}
+          <ThemeToggle />
           
-          {/* Desktop Auth Buttons - keep existing */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Auth Buttons - Improved spacing and responsiveness */}
+          <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost"
                   onClick={handleDashboardClick}
-                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
                 >
-                  <User className="w-4 h-4 mr-2" />
-                  Dashboard
+                  <User className="w-4 h-4 xl:mr-2" />
+                  <span className="hidden xl:inline">Dashboard</span>
                 </Button>
                 <Button 
                   variant="ghost"
                   onClick={handleLogout}
-                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                  <LogOut className="w-4 h-4 xl:mr-2" />
+                  <span className="hidden xl:inline">Sign Out</span>
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/signup")}
-                  className="text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium"
+                  className="text-xs xl:text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium px-2 xl:px-3"
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Sign Up
+                  <UserPlus className="w-4 h-4 xl:mr-2" />
+                  <span className="hidden xl:inline">Sign Up</span>
                 </Button>
                 <Button 
                   variant="default"
                   onClick={() => navigate("/login")}
-                  className="text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium"
+                  className="text-xs xl:text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium px-2 xl:px-3"
                 >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
+                  <LogIn className="w-4 h-4 xl:mr-2" />
+                  <span className="hidden xl:inline">Login</span>
                 </Button>
               </div>
             )}
           </div>
           
-          {/* Mobile Hamburger Menu - ensure it doesn't overflow */}
-          <div className="md:hidden flex-shrink-0">
+          {/* Mobile Hamburger Menu */}
+          <div className="lg:hidden flex-shrink-0">
             <MobileNavDropdown />
           </div>
         </div>
