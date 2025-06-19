@@ -22,7 +22,7 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import { adminRoutes } from "./routes/adminRoutes";
+import { AdminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
 
@@ -118,8 +118,11 @@ const router = createBrowserRouter([
       },
       // Add all dashboard routes
       ...dashboardRoutes,
-      // Add all admin routes (original)
-      ...adminRoutes,
+      // Add admin routes as nested component
+      {
+        path: "admin/*",
+        element: <AdminRoutes />,
+      },
       // Add all v2 admin routes
       ...adminRoutesV2,
     ],
