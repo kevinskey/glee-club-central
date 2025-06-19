@@ -23,15 +23,15 @@ export function EnhancedEventsSection({
   const displayEvents = events.slice(0, 6);
 
   return (
-    <section className={`py-16 pt-20 md:pt-24 bg-background ${className}`}>
+    <section className={`py-12 pt-16 md:pt-20 bg-background ${className}`}>
       <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">{title}</h2>
         </div>
         
-        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 mb-8">
+        <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-3 mb-6">
           {displayEvents.map((event) => (
-            <Card key={event.id} className="flex-shrink-0 w-96 overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={event.id} className="flex-shrink-0 w-full sm:w-[28rem] overflow-hidden hover:shadow-lg transition-shadow">
               {event.imageUrl && (
                 <div className="aspect-video bg-cover bg-center" 
                      style={{ backgroundImage: `url(${event.imageUrl})` }} />
