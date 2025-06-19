@@ -55,7 +55,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       )}
       
       {/* Content */}
-      <div className="relative z-10 text-center text-white container px-4 py-8">
+      <div className="relative z-10 text-center text-white w-full max-w-[1800px] mx-auto px-6 md:px-8 py-6 md:py-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
           {slide?.title || 'Spelman College Glee Club'}
         </h1>

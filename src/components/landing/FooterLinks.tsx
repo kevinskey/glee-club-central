@@ -63,7 +63,7 @@ export function FooterLinks({
 
   return (
     <footer className={`border-t bg-muted/50 ${className}`}>
-      <div className="container mx-auto px-4 py-12">
+      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8 py-12">
         {/* Main Footer Content */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Logo & Tagline */}
