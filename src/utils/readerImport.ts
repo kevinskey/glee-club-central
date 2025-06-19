@@ -1,4 +1,3 @@
-
 interface ReaderPDFFile {
   id: string;
   title: string;
@@ -25,7 +24,6 @@ export class ReaderImporter {
     try {
       console.log('🔍 Fetching PDFs from reader.gleeworld.org...');
       
-      // Try to fetch from the reader API endpoints
       const response = await fetch(`${this.baseUrl}/api/pdfs`, {
         method: 'GET',
         headers: {
@@ -33,15 +31,60 @@ export class ReaderImporter {
         },
       });
 
+      console.log('📡 PDF API Response status:', response.status);
+      console.log('📡 PDF API Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch PDFs: ${response.statusText}`);
+        const errorText = await response.text();
+        console.log('📡 PDF API Error response body:', errorText);
+        throw new Error(`Failed to fetch PDFs: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('📄 Found PDFs:', data.length);
-      return data;
+      const responseText = await response.text();
+      console.log('📡 PDF API Raw response:', responseText.substring(0, 500) + '...');
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse PDF response as JSON:', parseError);
+        console.log('📡 Full response text:', responseText);
+        throw new Error(`Invalid JSON response from PDF API: ${parseError.message}`);
+      }
+
+      console.log('📄 Found PDFs:', Array.isArray(data) ? data.length : 'Not an array');
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('❌ Error fetching PDFs from reader:', error);
+      
+      // Try alternative endpoints
+      console.log('🔄 Trying alternative endpoints...');
+      
+      try {
+        const altResponse = await fetch(`${this.baseUrl}/pdfs`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('📡 Alternative PDF endpoint status:', altResponse.status);
+        
+        if (altResponse.ok) {
+          const altResponseText = await altResponse.text();
+          console.log('📡 Alternative PDF response:', altResponseText.substring(0, 200) + '...');
+          
+          try {
+            const altData = JSON.parse(altResponseText);
+            return Array.isArray(altData) ? altData : [];
+          } catch (altParseError) {
+            console.error('❌ Alternative endpoint also returned invalid JSON');
+          }
+        }
+      } catch (altError) {
+        console.error('❌ Alternative endpoint also failed:', altError);
+      }
+      
       throw error;
     }
   }
@@ -57,16 +100,98 @@ export class ReaderImporter {
         },
       });
 
+      console.log('📡 Audio API Response status:', response.status);
+      console.log('📡 Audio API Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Failed to fetch audio files: ${response.statusText}`);
+        const errorText = await response.text();
+        console.log('📡 Audio API Error response body:', errorText);
+        throw new Error(`Failed to fetch audio files: ${response.status} ${response.statusText} - ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('🎵 Found audio files:', data.length);
-      return data;
+      const responseText = await response.text();
+      console.log('📡 Audio API Raw response:', responseText.substring(0, 500) + '...');
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse audio response as JSON:', parseError);
+        console.log('📡 Full response text:', responseText);
+        throw new Error(`Invalid JSON response from audio API: ${parseError.message}`);
+      }
+
+      console.log('🎵 Found audio files:', Array.isArray(data) ? data.length : 'Not an array');
+      return Array.isArray(data) ? data : [];
     } catch (error) {
       console.error('❌ Error fetching audio files from reader:', error);
+      
+      // Try alternative endpoints
+      console.log('🔄 Trying alternative audio endpoints...');
+      
+      try {
+        const altResponse = await fetch(`${this.baseUrl}/audio`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('📡 Alternative audio endpoint status:', altResponse.status);
+        
+        if (altResponse.ok) {
+          const altResponseText = await altResponse.text();
+          console.log('📡 Alternative audio response:', altResponseText.substring(0, 200) + '...');
+          
+          try {
+            const altData = JSON.parse(altResponseText);
+            return Array.isArray(altData) ? altData : [];
+          } catch (altParseError) {
+            console.error('❌ Alternative audio endpoint also returned invalid JSON');
+          }
+        }
+      } catch (altError) {
+        console.error('❌ Alternative audio endpoint also failed:', altError);
+      }
+      
       throw error;
+    }
+  }
+
+  async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
+    try {
+      console.log('🔍 Testing connection to reader.gleeworld.org...');
+      
+      const response = await fetch(this.baseUrl, { 
+        method: 'HEAD',
+        mode: 'cors' 
+      });
+      
+      console.log('📡 Connection test response:', response.status, response.statusText);
+      
+      if (response.ok) {
+        return {
+          success: true,
+          message: 'Connection successful',
+          details: {
+            status: response.status,
+            headers: Object.fromEntries(response.headers.entries())
+          }
+        };
+      } else {
+        return {
+          success: false,
+          message: `Server responded with status: ${response.status} ${response.statusText}`,
+          details: { status: response.status }
+        };
+      }
+    } catch (error) {
+      console.error('❌ Connection test failed:', error);
+      return {
+        success: false,
+        message: `Connection failed: ${error.message}`,
+        details: { error: error.name }
+      };
     }
   }
 
@@ -150,10 +275,22 @@ export class ReaderImporter {
     try {
       console.log('🚀 Starting bulk import from reader.gleeworld.org...');
       
+      // Test connection first
+      const connectionTest = await this.testConnection();
+      if (!connectionTest.success) {
+        throw new Error(`Connection failed: ${connectionTest.message}`);
+      }
+      
       // Fetch all data
       const [pdfs, audioFiles] = await Promise.all([
-        this.fetchPDFs(),
-        this.fetchAudioFiles(),
+        this.fetchPDFs().catch(error => {
+          console.error('❌ PDF fetch failed, continuing with empty array:', error);
+          return [];
+        }),
+        this.fetchAudioFiles().catch(error => {
+          console.error('❌ Audio fetch failed, continuing with empty array:', error);
+          return [];
+        }),
       ]);
 
       console.log(`📊 Import summary: ${pdfs.length} PDFs, ${audioFiles.length} audio files`);

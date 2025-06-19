@@ -14,7 +14,8 @@ import {
   CheckCircle, 
   AlertCircle, 
   Loader2,
-  ExternalLink 
+  ExternalLink,
+  Info
 } from 'lucide-react';
 
 interface ImportProgress {
@@ -27,34 +28,49 @@ interface ImportProgress {
 export function ReaderImportManager() {
   const { toast } = useToast();
   const [isImporting, setIsImporting] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
   const [importResults, setImportResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<any>(null);
 
   const handleTestConnection = async () => {
     try {
+      setIsTesting(true);
       setError(null);
+      setConnectionStatus(null);
+      
       toast({ title: "Testing connection...", description: "Checking reader.gleeworld.org availability" });
       
-      const response = await fetch('https://reader.gleeworld.org', { method: 'HEAD' });
+      const result = await readerImporter.testConnection();
       
-      if (response.ok) {
+      setConnectionStatus(result);
+      
+      if (result.success) {
         toast({ 
           title: "Connection successful", 
           description: "reader.gleeworld.org is accessible",
           variant: "default"
         });
       } else {
-        throw new Error(`Server responded with status: ${response.status}`);
+        setError(result.message);
+        toast({ 
+          title: "Connection failed", 
+          description: result.message,
+          variant: "destructive"
+        });
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Connection failed';
       setError(errorMessage);
+      setConnectionStatus({ success: false, message: errorMessage });
       toast({ 
         title: "Connection failed", 
         description: errorMessage,
         variant: "destructive"
       });
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -65,13 +81,20 @@ export function ReaderImportManager() {
       setImportResults(null);
       
       setImportProgress({
-        stage: 'Fetching data from reader.gleeworld.org...',
-        current: 0,
+        stage: 'Testing connection...',
+        current: 10,
         total: 100,
         completed: false
       });
 
-      toast({ title: "Import started", description: "Fetching content from reader.gleeworld.org" });
+      toast({ title: "Import started", description: "Testing connection and fetching content from reader.gleeworld.org" });
+
+      setImportProgress({
+        stage: 'Fetching data from reader.gleeworld.org...',
+        current: 30,
+        total: 100,
+        completed: false
+      });
 
       const results = await readerImporter.importAll();
       
@@ -120,17 +143,53 @@ export function ReaderImportManager() {
           </div>
 
           {/* Connection Test */}
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              onClick={handleTestConnection}
-              disabled={isImporting}
-            >
-              Test Connection
-            </Button>
-            <span className="text-sm text-gray-500">
-              Verify connection to reader.gleeworld.org
-            </span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={handleTestConnection}
+                disabled={isImporting || isTesting}
+              >
+                {isTesting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Testing...
+                  </>
+                ) : (
+                  'Test Connection'
+                )}
+              </Button>
+              <span className="text-sm text-gray-500">
+                Verify connection to reader.gleeworld.org
+              </span>
+            </div>
+
+            {/* Connection Status */}
+            {connectionStatus && (
+              <Alert variant={connectionStatus.success ? "default" : "destructive"}>
+                {connectionStatus.success ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
+                <AlertDescription>
+                  <div className="space-y-1">
+                    <div className="font-medium">
+                      {connectionStatus.success ? 'Connection successful' : 'Connection failed'}
+                    </div>
+                    <div className="text-sm">{connectionStatus.message}</div>
+                    {connectionStatus.details && (
+                      <details className="text-xs mt-2">
+                        <summary>Technical details</summary>
+                        <pre className="mt-1 p-2 bg-gray-100 dark:bg-gray-800 rounded">
+                          {JSON.stringify(connectionStatus.details, null, 2)}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
 
           {/* Import Progress */}
@@ -150,7 +209,15 @@ export function ReaderImportManager() {
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div className="font-medium">Import Error:</div>
+                  <div className="text-sm">{error}</div>
+                  <div className="text-xs text-gray-500">
+                    Check the browser console for detailed error logs.
+                  </div>
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 
@@ -180,7 +247,7 @@ export function ReaderImportManager() {
           <div className="flex items-center gap-3">
             <Button 
               onClick={handleImport}
-              disabled={isImporting}
+              disabled={isImporting || isTesting}
               className="bg-orange-500 hover:bg-orange-600"
             >
               {isImporting ? (
@@ -196,12 +263,29 @@ export function ReaderImportManager() {
               )}
             </Button>
             
-            {!isImporting && (
+            {!isImporting && !isTesting && (
               <div className="text-sm text-gray-500">
                 This will fetch and import all PDFs and audio files from reader.gleeworld.org
               </div>
             )}
           </div>
+
+          {/* Info Alert */}
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <div className="font-medium">Import Process:</div>
+                <ul className="text-sm space-y-1 ml-4">
+                  <li>• Tests connection to reader.gleeworld.org</li>
+                  <li>• Fetches PDFs from /api/pdfs endpoint</li>
+                  <li>• Fetches audio files from /api/audio endpoint</li>
+                  <li>• Imports metadata to Supabase tables</li>
+                  <li>• Handles errors gracefully and continues with available data</li>
+                </ul>
+              </div>
+            </AlertDescription>
+          </Alert>
 
           {/* Status Badges */}
           <div className="flex flex-wrap gap-2">
