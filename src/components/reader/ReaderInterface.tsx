@@ -1,42 +1,30 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSSOAuth } from '@/hooks/useSSOAuth';
 import { useAuth } from '@/contexts/AuthContext';
-import { ExternalLink, Music, BookOpen, Users, Clock, CheckCircle } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload, Library } from 'lucide-react';
+import { PDFLibraryView } from './PDFLibraryView';
+import { PDFUploadDialog } from './PDFUploadDialog';
+import { AdvancedPDFViewer } from '@/components/pdf/AdvancedPDFViewer';
+import { PDFFile } from '@/hooks/usePDFLibrary';
 
 export function ReaderInterface() {
-  const { getAuthenticatedReaderURL, openReaderWithAuth, isGeneratingURL } = useSSOAuth();
   const { isAuthenticated, profile } = useAuth();
-  const [readerStatus, setReaderStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+  const [currentView, setCurrentView] = useState<'library' | 'viewer'>('library');
+  const [selectedPDF, setSelectedPDF] = useState<PDFFile | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
-  useEffect(() => {
-    // Check if Reader is available
-    const checkReaderStatus = async () => {
-      try {
-        const response = await fetch('https://reader.gleeworld.org/health', { 
-          method: 'HEAD',
-          mode: 'no-cors'
-        });
-        setReaderStatus('available');
-      } catch (error) {
-        setReaderStatus('available'); // Assume available since no-cors doesn't give us real status
-      }
-    };
-
-    checkReaderStatus();
-  }, []);
-
-  const handleOpenReader = () => {
-    openReaderWithAuth(false); // Open in new tab
+  const handleViewPDF = (pdf: PDFFile) => {
+    setSelectedPDF(pdf);
+    setCurrentView('viewer');
   };
 
-  const handleNavigateToReader = async () => {
-    const url = await getAuthenticatedReaderURL();
-    window.location.href = url; // Navigate in same tab
+  const handleBackToLibrary = () => {
+    setCurrentView('library');
+    setSelectedPDF(null);
   };
 
   const features = [
@@ -62,8 +50,21 @@ export function ReaderInterface() {
     }
   ];
 
+  if (currentView === 'viewer' && selectedPDF) {
+    return (
+      <div className="h-screen">
+        <AdvancedPDFViewer 
+          url={selectedPDF.file_url} 
+          title={selectedPDF.title}
+          sheetMusicId={selectedPDF.id}
+          onBack={handleBackToLibrary}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
@@ -87,9 +88,8 @@ export function ReaderInterface() {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Badge variant={readerStatus === 'available' ? 'default' : 'secondary'}>
-                  {readerStatus === 'checking' ? 'Checking...' : 
-                   readerStatus === 'available' ? 'Online' : 'Offline'}
+                <Badge variant="default" className="bg-green-500">
+                  Online
                 </Badge>
                 {isAuthenticated && (
                   <Badge variant="outline" className="text-green-600 border-green-600">
@@ -105,20 +105,22 @@ export function ReaderInterface() {
               </p>
             </div>
             <div className="space-x-2">
+              {isAuthenticated && (
+                <Button 
+                  onClick={() => setUploadDialogOpen(true)}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload PDF
+                </Button>
+              )}
               <Button 
-                onClick={handleOpenReader}
-                disabled={isGeneratingURL}
-                variant="outline"
+                onClick={() => setCurrentView('library')}
+                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in New Tab
-              </Button>
-              <Button 
-                onClick={handleNavigateToReader}
-                disabled={isGeneratingURL}
-              >
-                <Music className="h-4 w-4 mr-2" />
-                {isGeneratingURL ? 'Loading...' : 'Go to Reader'}
+                <Library className="h-4 w-4" />
+                Browse Library
               </Button>
             </div>
           </div>
@@ -148,6 +150,16 @@ export function ReaderInterface() {
         ))}
       </div>
 
+      {/* PDF Library */}
+      <Card>
+        <CardContent className="p-6">
+          <PDFLibraryView 
+            onViewPDF={handleViewPDF}
+            onUploadPDF={isAuthenticated ? () => setUploadDialogOpen(true) : undefined}
+          />
+        </CardContent>
+      </Card>
+
       {/* Authentication Notice */}
       {!isAuthenticated && (
         <Alert>
@@ -166,10 +178,11 @@ export function ReaderInterface() {
           <div className="space-y-2">
             <h4 className="font-medium">For Members:</h4>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-              <li>• Click "Go to Reader" to access your sheet music library</li>
-              <li>• Your voice part assignments will be automatically loaded</li>
-              <li>• Use the search function to find specific pieces</li>
-              <li>• Download PDFs for offline practice</li>
+              <li>• Browse the PDF library to find sheet music</li>
+              <li>• Click on any PDF to open it in the advanced viewer</li>
+              <li>• Use annotation tools to mark up your music</li>
+              <li>• Create bookmarks for quick navigation</li>
+              <li>• Upload new PDFs to share with the group</li>
             </ul>
           </div>
           <div className="space-y-2">
@@ -180,6 +193,12 @@ export function ReaderInterface() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Upload Dialog */}
+      <PDFUploadDialog 
+        open={uploadDialogOpen} 
+        onOpenChange={setUploadDialogOpen}
+      />
     </div>
   );
 }

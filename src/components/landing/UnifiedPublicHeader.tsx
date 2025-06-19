@@ -23,7 +23,7 @@ export function UnifiedPublicHeader() {
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
-    const hasAdminRole = isAdmin && typeof isAdmin === 'function' ? isAdmin() : false;
+    const hasAdminRole = profile?.is_super_admin || profile?.role === 'admin';
     
     if (isKnownAdmin || hasAdminRole) {
       navigate("/admin");
@@ -45,7 +45,7 @@ export function UnifiedPublicHeader() {
   
   const handleReaderClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigateToReader();
+    navigate("/reader");
     setIsMobileMenuOpen(false);
   };
 
@@ -54,10 +54,12 @@ export function UnifiedPublicHeader() {
     setIsMobileMenuOpen(false);
   };
 
+  const isUserAdmin = profile?.is_super_admin || profile?.role === 'admin';
+
   const navigationLinks = [
     { label: "Home", path: "/", icon: Home },
     // Admin Panel as second item if user is admin
-    ...(isAuthenticated && isAdmin && typeof isAdmin === 'function' && isAdmin() ? [{ label: "Admin Panel", path: "/admin", icon: Shield }] : []),
+    ...(isAuthenticated && isUserAdmin ? [{ label: "Admin Panel", path: "/admin", icon: Shield }] : []),
     { label: "About", path: "/about", icon: Info },
     { 
       label: "Events", 
@@ -216,7 +218,7 @@ export function UnifiedPublicHeader() {
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
                           <div className="text-sm text-[#003366]/70 dark:text-white/70">
-                            {isAdmin && typeof isAdmin === 'function' && isAdmin() ? 'Administrator' : 'Member'}
+                            {isUserAdmin ? 'Administrator' : 'Member'}
                           </div>
                         </div>
                       </div>
