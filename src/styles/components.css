@@ -42,3 +42,38 @@
 .animate-marquee-fast {
   animation: marquee 20s linear infinite;
 }
+
+/* Override default components to use glee system */
+@layer components {
+  .card {
+    @apply glee-card-base;
+  }
+  
+  .btn {
+    @apply glee-button-base;
+  }
+  
+  .btn-primary {
+    @apply glee-button-primary;
+  }
+  
+  .btn-secondary {
+    @apply glee-button-secondary;
+  }
+  
+  .container {
+    @apply glee-container;
+  }
+  
+  .section {
+    @apply glee-section;
+  }
+  
+  .header {
+    @apply glee-header;
+  }
+  
+  .footer {
+    @apply glee-footer;
+  }
+}

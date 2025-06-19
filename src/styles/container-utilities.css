@@ -1,0 +1,232 @@
+
+@tailwind utilities;
+
+@layer utilities {
+  /* Unified Container System */
+  .glee-container {
+    @apply mx-auto w-full max-w-[1800px] px-6 md:px-8;
+  }
+  
+  .glee-container-narrow {
+    @apply mx-auto w-full max-w-4xl px-6 md:px-8;
+  }
+  
+  .glee-container-wide {
+    @apply mx-auto w-full max-w-[1800px] px-6 md:px-8;
+  }
+  
+  .glee-container-full {
+    @apply mx-auto w-full max-w-full px-6 md:px-8;
+  }
+
+  /* Unified Corner Radius System */
+  .glee-corners {
+    @apply rounded-lg;
+  }
+  
+  .glee-corners-sm {
+    @apply rounded-md;
+  }
+  
+  .glee-corners-lg {
+    @apply rounded-xl;
+  }
+  
+  .glee-corners-full {
+    @apply rounded-full;
+  }
+
+  /* Unified Card System */
+  .glee-card-base {
+    @apply bg-card border border-border rounded-lg shadow-sm;
+  }
+  
+  .glee-card {
+    @apply glee-card-base p-6;
+  }
+  
+  .glee-card-compact {
+    @apply glee-card-base p-4;
+  }
+  
+  .glee-card-spacious {
+    @apply glee-card-base p-8;
+  }
+
+  /* Unified Section System */
+  .glee-section {
+    @apply py-8 md:py-12 lg:py-16;
+  }
+  
+  .glee-section-compact {
+    @apply py-4 sm:py-6;
+  }
+  
+  .glee-section-spacious {
+    @apply py-12 md:py-16 lg:py-20;
+  }
+
+  /* Unified Button System */
+  .glee-button-base {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+  }
+  
+  .glee-button-primary {
+    @apply glee-button-base bg-[#0072CE] text-white hover:bg-[#0072CE]/90 h-10 px-6 py-2;
+  }
+  
+  .glee-button-secondary {
+    @apply glee-button-base bg-white text-[#0072CE] border border-[#0072CE] hover:bg-[#0072CE]/10 h-10 px-6 py-2;
+  }
+  
+  .glee-button-ghost {
+    @apply glee-button-base hover:bg-gray-100 hover:text-gray-900 h-10 px-6 py-2;
+  }
+
+  /* Unified Input System */
+  .glee-input {
+    @apply flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Unified Modal/Dialog System */
+  .glee-dialog {
+    @apply fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 rounded-lg;
+  }
+  
+  .glee-dialog-content {
+    @apply space-y-4;
+  }
+
+  /* Unified Header System */
+  .glee-header {
+    @apply bg-card/95 backdrop-blur-xl border-b border-border;
+  }
+  
+  .glee-header-content {
+    @apply glee-container flex items-center justify-between py-4;
+  }
+
+  /* Unified Footer System */
+  .glee-footer {
+    @apply bg-card border-t border-border py-8 md:py-12 mt-8 md:mt-16;
+  }
+  
+  .glee-footer-content {
+    @apply glee-container;
+  }
+
+  /* Unified Spacing System */
+  .glee-spacing-xs {
+    @apply space-y-2;
+  }
+  
+  .glee-spacing-sm {
+    @apply space-y-4;
+  }
+  
+  .glee-spacing-md {
+    @apply space-y-6;
+  }
+  
+  .glee-spacing-lg {
+    @apply space-y-8;
+  }
+  
+  .glee-spacing-xl {
+    @apply space-y-12;
+  }
+
+  /* Unified Grid System */
+  .glee-grid-1 {
+    @apply grid grid-cols-1 gap-4 sm:gap-6;
+  }
+  
+  .glee-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6;
+  }
+  
+  .glee-grid-3 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+  }
+  
+  .glee-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+
+  /* Unified Text System */
+  .glee-text-display {
+    @apply text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-[#0072CE];
+  }
+  
+  .glee-text-headline {
+    @apply text-2xl md:text-3xl font-playfair font-bold text-foreground;
+  }
+  
+  .glee-text-subhead {
+    @apply text-xl md:text-2xl font-semibold text-foreground;
+  }
+  
+  .glee-text-body {
+    @apply text-base text-muted-foreground leading-relaxed;
+  }
+  
+  .glee-text-caption {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Unified Image System */
+  .glee-image-rounded {
+    @apply rounded-lg overflow-hidden;
+  }
+  
+  .glee-image-avatar {
+    @apply rounded-full overflow-hidden;
+  }
+  
+  .glee-image-cover {
+    @apply w-full h-full object-cover;
+  }
+
+  /* Unified Shadow System */
+  .glee-shadow-sm {
+    @apply shadow-sm;
+  }
+  
+  .glee-shadow {
+    @apply shadow-md;
+  }
+  
+  .glee-shadow-lg {
+    @apply shadow-lg;
+  }
+  
+  .glee-shadow-xl {
+    @apply shadow-xl;
+  }
+
+  /* Unified Border System */
+  .glee-border {
+    @apply border border-border;
+  }
+  
+  .glee-border-top {
+    @apply border-t border-border;
+  }
+  
+  .glee-border-bottom {
+    @apply border-b border-border;
+  }
+
+  /* Responsive Utilities */
+  .glee-mobile-only {
+    @apply block md:hidden;
+  }
+  
+  .glee-desktop-only {
+    @apply hidden md:block;
+  }
+  
+  .glee-tablet-up {
+    @apply hidden sm:block;
+  }
+}
