@@ -67,7 +67,7 @@ export function UnifiedPublicHeader() {
     },
     { label: "Reader", path: "#", icon: Music, onClick: handleReaderClick },
     { label: "Studio", external: "https://studio.gleeworld.org", icon: Music },
-    { label: "Merch", external: "https://merch.gleeworld.org", icon: Store },
+    { label: "Calculator", path: "/calculator", icon: Calculator },
     { label: "Store", path: "/store", icon: Store },
     { label: "Contact", path: "/contact", icon: Contact },
   ];
@@ -121,9 +121,9 @@ export function UnifiedPublicHeader() {
           <a href="https://studio.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Studio
           </a>
-          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
-            Merch
-          </a>
+          <Link to="/calculator" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+            Calculator
+          </Link>
           <Link to="/store" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Store
           </Link>
