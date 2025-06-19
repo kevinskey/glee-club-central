@@ -81,9 +81,9 @@ export function PerformanceSection() {
         <div className="mb-12">
           <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory touch-pan-x">
             {upcomingPerformances.map((performance) => (
-              <Card 
-                key={performance.id} 
-                className="flex-shrink-0 w-80 md:w-96 overflow-hidden hover:shadow-lg transition-shadow snap-start"
+              <Card
+                key={performance.id}
+                className="flex-shrink-0 w-96 overflow-hidden hover:shadow-lg transition-shadow snap-start"
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">

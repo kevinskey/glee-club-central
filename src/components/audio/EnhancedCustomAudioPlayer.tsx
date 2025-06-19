@@ -165,7 +165,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
 
   if (isLoading) {
     return (
-      <Card className={className}>
+      <Card className={`${className} min-h-[50vh] flex items-center justify-center`}>
         <CardContent className="p-6 text-center">
           <p className="text-muted-foreground">Loading music player...</p>
         </CardContent>
@@ -175,7 +175,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
 
   if (!currentTrack || !activePlaylist) {
     return (
-      <Card className={className}>
+      <Card className={`${className} min-h-[50vh] flex items-center justify-center`}>
         <CardContent className="p-6 text-center">
           <p className="text-muted-foreground">No playlist available</p>
         </CardContent>
@@ -184,7 +184,7 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
   }
 
   return (
-    <Card className={`${className} bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-xl`}>
+    <Card className={`${className} bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-xl min-h-[50vh] flex flex-col justify-center`}>
       <CardContent className="p-6">
         <audio
           ref={audioRef}

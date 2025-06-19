@@ -42,10 +42,10 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
     : {};
 
   return (
-    <section 
-      className="hero-section relative w-full min-h-[60vh] sm:min-h-[50vh] md:min-h-[55vh] lg:min-h-[60vh] flex items-center justify-center overflow-hidden"
-      style={backgroundStyle}
-    >
+      <section
+        className="hero-section relative w-full min-h-[50vh] flex items-center justify-center overflow-hidden"
+        style={backgroundStyle}
+      >
       {/* Background overlay */}
       <div className="absolute inset-0 bg-black/40"></div>
       
