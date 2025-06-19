@@ -17,7 +17,7 @@ interface EventsSectionProps {
 
 export function EventsSection({ events }: EventsSectionProps) {
   return (
-    <section>
+    <section className="bg-gray-100 dark:bg-gray-900">
       <div className="mx-auto w-full max-w-full">
         <EventScroller 
           events={events}
