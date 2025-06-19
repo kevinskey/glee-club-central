@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell, Menu, X } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
@@ -53,6 +53,22 @@ export function UnifiedPublicHeader() {
     navigate(path);
     setIsMobileMenuOpen(false);
   };
+
+  const navigationLinks = [
+    { label: "Home", path: "/", icon: Home },
+    { label: "About", path: "/about", icon: Info },
+    { 
+      label: "Events", 
+      path: "/calendar", 
+      icon: Calendar,
+      hasNotification: upcomingEvents.length > 0 
+    },
+    { label: "Reader", path: "#", icon: Music, onClick: handleReaderClick },
+    { label: "Studio", external: "https://studio.gleeworld.org", icon: Music },
+    { label: "Merch", external: "https://merch.gleeworld.org", icon: Store },
+    { label: "Store", path: "/store", icon: Store },
+    { label: "Contact", path: "/contact", icon: Contact },
+  ];
   
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md w-full">
@@ -166,132 +182,137 @@ export function UnifiedPublicHeader() {
           <div className="lg:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white">
+                <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white relative">
                   <Menu className="h-6 w-6" />
+                  {upcomingEvents.length > 0 && (
+                    <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                  )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80">
+              <SheetContent side="right" className="w-80 p-0 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
                 <div className="flex flex-col h-full">
                   {/* Header */}
-                  <div className="flex items-center justify-between pb-4 border-b">
-                    <div className="flex items-center gap-2">
-                      <Icons.logo className="h-8 w-8" />
-                      <span className="font-bold text-lg text-[#003366] dark:text-white">GleeWorld</span>
+                  <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <Icons.logo className="h-10 w-10" />
+                      <div>
+                        <div className="font-bold text-lg text-[#003366] dark:text-white font-playfair">GleeWorld</div>
+                        <div className="text-sm text-[#003366]/70 dark:text-white/70 font-medium">Spelman College</div>
+                      </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
                   </div>
+
+                  {/* User Profile Section (if authenticated) */}
+                  {isAuthenticated && (
+                    <div className="px-6 py-4 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-800">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-[#003366] flex items-center justify-center text-white font-medium">
+                          {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-[#003366] dark:text-white">
+                            {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
+                          </div>
+                          <div className="text-sm text-[#003366]/70 dark:text-white/70">
+                            {isAdmin() ? 'Administrator' : 'Member'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Navigation */}
-                  <nav className="flex-1 py-6 space-y-2">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => handleNavClick("/")}
-                    >
-                      Home
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => handleNavClick("/about")}
-                    >
-                      About
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => handleNavClick("/calendar")}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span>Events</span>
-                        {upcomingEvents.length > 0 && (
-                          <div className="h-2 w-2 bg-orange-500 rounded-full"></div>
-                        )}
+                  <div className="flex-1 py-4">
+                    <div className="px-6 mb-4">
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Navigation</h3>
+                    </div>
+                    <nav className="space-y-1 px-3">
+                      {navigationLinks.map((link) => (
+                        <Button
+                          key={link.label}
+                          variant="ghost"
+                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                          onClick={() => {
+                            if (link.onClick) {
+                              link.onClick();
+                            } else if (link.external) {
+                              window.open(link.external, "_blank");
+                              setIsMobileMenuOpen(false);
+                            } else if (link.path) {
+                              handleNavClick(link.path);
+                            }
+                          }}
+                        >
+                          <link.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                          <span className="flex-1">{link.label}</span>
+                          {link.hasNotification && (
+                            <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                          )}
+                        </Button>
+                      ))}
+                    </nav>
+
+                    {/* Admin Dashboard Link */}
+                    {isAuthenticated && isAdmin() && (
+                      <div className="px-6 mt-6 mb-4">
+                        <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Administration</h3>
+                        <div className="mt-2">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            onClick={() => {
+                              navigate("/admin");
+                              setIsMobileMenuOpen(false);
+                            }}
+                          >
+                            <Shield className="w-5 h-5 mr-3 flex-shrink-0" />
+                            <span>Admin Dashboard</span>
+                          </Button>
+                        </div>
                       </div>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={handleReaderClick}
-                    >
-                      Reader
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => window.open("https://studio.gleeworld.org", "_blank")}
-                    >
-                      Studio
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => window.open("https://merch.gleeworld.org", "_blank")}
-                    >
-                      Merch
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => handleNavClick("/store")}
-                    >
-                      Store
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-left h-12"
-                      onClick={() => handleNavClick("/contact")}
-                    >
-                      Contact
-                    </Button>
-                  </nav>
+                    )}
+                  </div>
                   
                   {/* Auth Section */}
-                  <div className="border-t pt-4 space-y-2">
+                  <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
                     {isAuthenticated ? (
-                      <>
+                      <div className="space-y-3">
                         <Button 
                           variant="outline" 
-                          className="w-full h-12"
+                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200"
                           onClick={handleDashboardClick}
                         >
                           <User className="w-4 h-4 mr-2" />
-                          Dashboard
+                          My Dashboard
                         </Button>
                         <Button 
                           variant="ghost" 
-                          className="w-full h-12 text-red-600 hover:text-red-700"
+                          className="w-full h-12 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200"
                           onClick={handleLogout}
                         >
                           <LogOut className="w-4 h-4 mr-2" />
                           Sign Out
                         </Button>
-                      </>
+                      </div>
                     ) : (
-                      <>
+                      <div className="space-y-3">
                         <Button 
                           variant="outline" 
-                          className="w-full h-12"
+                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200"
                           onClick={() => handleNavClick("/signup")}
                         >
                           <UserPlus className="w-4 h-4 mr-2" />
-                          Sign Up
+                          Create Account
                         </Button>
                         <Button 
                           variant="default" 
-                          className="w-full h-12 bg-[#003366] hover:bg-[#003366]/90"
+                          className="w-full h-12 bg-[#003366] hover:bg-[#003366]/90 text-white transition-all duration-200"
                           onClick={() => handleNavClick("/login")}
                         >
                           <LogIn className="w-4 h-4 mr-2" />
-                          Login
+                          Sign In
                         </Button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
