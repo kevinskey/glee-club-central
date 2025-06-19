@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ import {
   RefreshCw, 
   Unlink,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -46,7 +48,16 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedUser, setConnectedUser] = useState<SoundCloudUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+  const [showDebug, setShowDebug] = useState(false);
   const { toast } = useToast();
+
+  const addDebugInfo = (message: string) => {
+    const timestamp = new Date().toISOString();
+    const debugMessage = `${timestamp}: ${message}`;
+    console.log(debugMessage);
+    setDebugInfo(prev => [...prev.slice(-10), debugMessage]);
+  };
 
   useEffect(() => {
     // Check for existing connection in sessionStorage
@@ -54,21 +65,78 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
     const savedUser = sessionStorage.getItem('soundcloud_user');
 
     if (savedToken && savedUser) {
-      setAccessToken(savedToken);
-      setConnectedUser(JSON.parse(savedUser));
+      try {
+        setAccessToken(savedToken);
+        setConnectedUser(JSON.parse(savedUser));
+        addDebugInfo('Restored connection from session storage');
+      } catch (error) {
+        addDebugInfo('Failed to restore connection from session storage');
+        sessionStorage.removeItem('soundcloud_access_token');
+        sessionStorage.removeItem('soundcloud_user');
+      }
     }
   }, []);
 
+  const testFunctionAvailability = async () => {
+    try {
+      addDebugInfo('Testing SoundCloud OAuth function availability...');
+      
+      const response = await fetch('https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
+        },
+        body: JSON.stringify({ action: 'test' })
+      });
+
+      const data = await response.json();
+      addDebugInfo(`Function test response: ${response.status} - ${JSON.stringify(data)}`);
+      
+      if (data.needsSetup) {
+        toast({
+          title: "SoundCloud Setup Required",
+          description: "SoundCloud API credentials need to be configured in Supabase.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      addDebugInfo(`Function test failed: ${error.message}`);
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to SoundCloud service. Please try again later.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   const handleConnect = async () => {
     setIsConnecting(true);
+    addDebugInfo('Starting SoundCloud connection process');
     
     try {
+      // Test function availability first
+      const isAvailable = await testFunctionAvailability();
+      if (!isAvailable) {
+        setIsConnecting(false);
+        return;
+      }
+
       const codeVerifier = generateCodeVerifier();
       const codeChallenge = await generateCodeChallenge(codeVerifier);
+      
+      addDebugInfo('Generated PKCE parameters');
 
-      const authRes = await fetch('/functions/v1/soundcloud-oauth', {
+      const authRes = await fetch('https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
+        },
         body: JSON.stringify({
           action: 'authorize',
           codeChallenge,
@@ -77,25 +145,40 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
       });
 
       const authData = await authRes.json();
+      addDebugInfo(`Auth request response: ${authRes.status} - ${JSON.stringify(authData)}`);
+      
       if (!authRes.ok) {
         throw new Error(authData.error || 'Failed to start SoundCloud OAuth');
       }
 
-      const popup = window.open(authData.authUrl, '_blank', 'width=600,height=700');
+      addDebugInfo(`Opening auth URL: ${authData.authUrl}`);
+      const popup = window.open(authData.authUrl, '_blank', 'width=600,height=700,scrollbars=yes,resizable=yes');
+      
       if (!popup) {
-        throw new Error('Unable to open authorization window');
+        throw new Error('Unable to open authorization window. Please allow popups and try again.');
       }
 
       const handleMessage = async (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
+        addDebugInfo(`Received message: ${JSON.stringify(event.data)}`);
+        
+        if (event.origin !== window.location.origin) {
+          addDebugInfo(`Ignoring message from wrong origin: ${event.origin}`);
+          return;
+        }
+        
         const { type, code, error } = event.data || {};
 
         if (type === 'SOUNDCLOUD_OAUTH_SUCCESS') {
           window.removeEventListener('message', handleMessage);
+          addDebugInfo('OAuth success message received, exchanging code for token');
+          
           try {
-            const tokenRes = await fetch('/functions/v1/soundcloud-oauth', {
+            const tokenRes = await fetch('https://dzzptovqfqausipsgabw.supabase.co/functions/v1/soundcloud-oauth', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6enB0b3ZxZnFhdXNpcHNnYWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MDM1MjksImV4cCI6MjA2MTk3OTUyOX0.7jSsV-y-32C7f23rw6smPPzuQs6HsQeKpySP4ae_C5s'
+              },
               body: JSON.stringify({
                 action: 'callback',
                 code,
@@ -105,6 +188,8 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
             });
 
             const tokenData = await tokenRes.json();
+            addDebugInfo(`Token exchange response: ${tokenRes.status} - ${JSON.stringify(tokenData)}`);
+            
             if (!tokenRes.ok || !tokenData.success) {
               throw new Error(tokenData.error || 'Authentication failed');
             }
@@ -119,7 +204,10 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
               title: 'Connected to SoundCloud!',
               description: `Successfully connected as ${tokenData.user.display_name}`,
             });
+            
+            addDebugInfo('Connection successful!');
           } catch (err) {
+            addDebugInfo(`Token exchange failed: ${err.message}`);
             console.error('SoundCloud token exchange failed:', err);
             toast({
               title: 'Connection failed',
@@ -134,6 +222,7 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
           window.removeEventListener('message', handleMessage);
           setIsConnecting(false);
           popup.close();
+          addDebugInfo(`OAuth error: ${error}`);
           toast({
             title: 'Connection failed',
             description: error || 'Authorization failed.',
@@ -144,12 +233,30 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
 
       window.addEventListener('message', handleMessage);
       
+      // Add popup close detection
+      const checkClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkClosed);
+          window.removeEventListener('message', handleMessage);
+          if (isConnecting) {
+            setIsConnecting(false);
+            addDebugInfo('Popup was closed by user');
+            toast({
+              title: "Connection cancelled",
+              description: "Authorization window was closed",
+              variant: "destructive",
+            });
+          }
+        }
+      }, 1000);
+      
     } catch (error) {
+      addDebugInfo(`Connection error: ${error.message}`);
       console.error('SoundCloud connection error:', error);
       setIsConnecting(false);
       toast({
         title: "Connection failed",
-        description: "Failed to connect to SoundCloud. Please try again.",
+        description: error.message || "Failed to connect to SoundCloud. Please try again.",
         variant: "destructive",
       });
     }
@@ -160,6 +267,7 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
     sessionStorage.removeItem('soundcloud_user');
     setAccessToken(null);
     setConnectedUser(null);
+    addDebugInfo('Disconnected from SoundCloud');
     
     toast({
       title: "Disconnected",
@@ -171,10 +279,12 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
     if (!accessToken) return;
     
     setIsConnecting(true);
+    addDebugInfo('Refreshing SoundCloud data');
     
     // Simulate refreshing user data
     setTimeout(() => {
       setIsConnecting(false);
+      addDebugInfo('Data refresh completed');
       toast({
         title: "Refreshed",
         description: "SoundCloud data has been refreshed",
@@ -189,6 +299,14 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
             Connected to SoundCloud
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDebug(!showDebug)}
+              className="ml-auto"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -234,6 +352,17 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
               Disconnect
             </Button>
           </div>
+
+          {showDebug && (
+            <div className="mt-4 p-4 bg-muted rounded-lg">
+              <h4 className="font-medium mb-2">Debug Information</h4>
+              <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto">
+                {debugInfo.map((info, index) => (
+                  <div key={index} className="font-mono">{info}</div>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -245,6 +374,14 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
         <CardTitle className="flex items-center gap-2">
           <AlertCircle className="w-5 h-5 text-blue-500" />
           Connect Your SoundCloud Account
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowDebug(!showDebug)}
+            className="ml-auto"
+          >
+            <Settings className="w-4 h-4" />
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -279,6 +416,29 @@ export function SoundCloudAuth({ onAuthSuccess }: SoundCloudAuthProps) {
             </>
           )}
         </Button>
+        
+        {showDebug && (
+          <div className="mt-4 p-4 bg-muted rounded-lg">
+            <h4 className="font-medium mb-2">Debug Information</h4>
+            <div className="text-xs text-muted-foreground max-h-32 overflow-y-auto">
+              {debugInfo.length > 0 ? (
+                debugInfo.map((info, index) => (
+                  <div key={index} className="font-mono">{info}</div>
+                ))
+              ) : (
+                <div>No debug information yet. Try connecting to see logs.</div>
+              )}
+            </div>
+            <Button
+              onClick={testFunctionAvailability}
+              variant="outline"
+              size="sm"
+              className="mt-2"
+            >
+              Test Connection
+            </Button>
+          </div>
+        )}
         
         <p className="text-xs text-muted-foreground">
           By connecting, you agree to SoundCloud's terms of service and privacy policy.
