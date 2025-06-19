@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -234,7 +235,7 @@ export function UnifiedPublicHeader() {
                           className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
                           onClick={() => {
                             if (link.onClick) {
-                              link.onClick();
+                              link.onClick(new Event('click') as any);
                             } else if (link.external) {
                               window.open(link.external, "_blank");
                               setIsMobileMenuOpen(false);
