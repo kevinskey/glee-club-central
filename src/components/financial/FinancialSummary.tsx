@@ -84,19 +84,19 @@ export const FinancialSummary: React.FC = () => {
               <div className="text-2xl font-bold text-green-600">
                 {formatCurrency(monthlyIncome)}
               </div>
-              <p className="text-sm text-muted-foreground">Monthly Income</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Monthly Income</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">
                 {formatCurrency(monthlyExpenses)}
               </div>
-              <p className="text-sm text-muted-foreground">Monthly Expenses</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Monthly Expenses</p>
             </div>
             <div className="text-center">
               <div className={`text-2xl font-bold ${(monthlyIncome - monthlyExpenses) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(monthlyIncome - monthlyExpenses)}
               </div>
-              <p className="text-sm text-muted-foreground">Monthly Net</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Monthly Net</p>
             </div>
           </div>
         </CardContent>
@@ -115,19 +115,19 @@ export const FinancialSummary: React.FC = () => {
               <div className="text-2xl font-bold text-green-600">
                 {formatCurrency(yearlyIncome)}
               </div>
-              <p className="text-sm text-muted-foreground">Yearly Income</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Yearly Income</p>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">
                 {formatCurrency(yearlyExpenses)}
               </div>
-              <p className="text-sm text-muted-foreground">Yearly Expenses</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Yearly Expenses</p>
             </div>
             <div className="text-center">
               <div className={`text-2xl font-bold ${(yearlyIncome - yearlyExpenses) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {formatCurrency(yearlyIncome - yearlyExpenses)}
               </div>
-              <p className="text-sm text-muted-foreground">Yearly Net</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300">Yearly Net</p>
             </div>
           </div>
         </CardContent>
@@ -148,7 +148,7 @@ export const FinancialSummary: React.FC = () => {
                   <Badge variant="outline">
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </Badge>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-gray-700 dark:text-gray-300">
                     Income: {formatCurrency(data.income)} | 
                     Expenses: {formatCurrency(data.expense)}
                   </div>
@@ -160,7 +160,7 @@ export const FinancialSummary: React.FC = () => {
             ))}
             
             {Object.keys(categoryBreakdown).length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-gray-700 dark:text-gray-300">
                 No financial data available for category breakdown.
               </div>
             )}

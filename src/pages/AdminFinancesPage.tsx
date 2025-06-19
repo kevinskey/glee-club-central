@@ -79,9 +79,9 @@ export default function AdminFinancesPage() {
     return (
       <Card>
         <CardContent className="text-center py-8">
-          <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <DollarSign className="h-12 w-12 text-gray-700 dark:text-gray-300 mx-auto mb-4" />
           <h3 className="font-semibold mb-2">Access Restricted</h3>
-          <p className="text-muted-foreground">
+          <p className="text-gray-700 dark:text-gray-300">
             You don't have permission to view financial information.
           </p>
         </CardContent>
@@ -94,7 +94,7 @@ export default function AdminFinancesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Financial Management</h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-700 dark:text-gray-300">
             Track dues, expenses, and revenue for the Glee Club
           </p>
         </div>
@@ -129,11 +129,11 @@ export default function AdminFinancesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${financialData.totalRevenue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-700 dark:text-gray-300">
                   +12% from last semester
                 </p>
               </CardContent>
@@ -142,11 +142,11 @@ export default function AdminFinancesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Net Income</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <TrendingUp className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${financialData.netIncome.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-700 dark:text-gray-300">
                   Revenue minus expenses
                 </p>
               </CardContent>
@@ -155,11 +155,11 @@ export default function AdminFinancesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Dues Collected</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${financialData.duesCollected.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-700 dark:text-gray-300">
                   {financialData.membersPaid} of {financialData.totalMembers} members
                 </p>
               </CardContent>
@@ -168,11 +168,11 @@ export default function AdminFinancesPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Outstanding Dues</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-gray-700 dark:text-gray-300" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">${financialData.outstandingDues.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-700 dark:text-gray-300">
                   {financialData.totalMembers - financialData.membersPaid} members pending
                 </p>
               </CardContent>
@@ -192,21 +192,21 @@ export default function AdminFinancesPage() {
                 <div className="flex items-center justify-between border-b pb-2">
                   <div>
                     <p className="font-medium">Dues Payment - Jane Smith</p>
-                    <p className="text-sm text-muted-foreground">Dec 1, 2023</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">Dec 1, 2023</p>
                   </div>
                   <Badge variant="default">+$300</Badge>
                 </div>
                 <div className="flex items-center justify-between border-b pb-2">
                   <div>
                     <p className="font-medium">Concert Hall Rental</p>
-                    <p className="text-sm text-muted-foreground">Nov 28, 2023</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">Nov 28, 2023</p>
                   </div>
                   <Badge variant="destructive">-$1,200</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">Uniform Purchase</p>
-                    <p className="text-sm text-muted-foreground">Nov 25, 2023</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">Nov 25, 2023</p>
                   </div>
                   <Badge variant="destructive">-$450</Badge>
                 </div>
@@ -217,9 +217,9 @@ export default function AdminFinancesPage() {
       ) : (
         <Card>
           <CardContent className="text-center py-8">
-            <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <DollarSign className="h-12 w-12 text-gray-700 dark:text-gray-300 mx-auto mb-4" />
             <h3 className="font-semibold mb-2">No Financial Data</h3>
-            <p className="text-muted-foreground">
+            <p className="text-gray-700 dark:text-gray-300">
               Financial data could not be loaded at this time.
             </p>
           </CardContent>

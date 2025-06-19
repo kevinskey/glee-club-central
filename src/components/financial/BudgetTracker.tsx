@@ -54,7 +54,7 @@ export const BudgetTracker: React.FC = () => {
         <CardContent className="p-6">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading budget data...</p>
+            <p className="text-gray-700 dark:text-gray-300">Loading budget data...</p>
           </div>
         </CardContent>
       </Card>
@@ -76,7 +76,7 @@ export const BudgetTracker: React.FC = () => {
         <CardContent>
           {currentYearBudgets.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">
+              <p className="text-gray-700 dark:text-gray-300 mb-4">
                 No budgets have been created for the current academic year.
               </p>
               <Button onClick={() => setShowAddDialog(true)}>
@@ -98,7 +98,7 @@ export const BudgetTracker: React.FC = () => {
                         <h3 className="font-semibold">{budget.category}</h3>
                         {getStatusBadge(spentPercentage)}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-sm text-gray-700 dark:text-gray-300">
                         {formatCurrency(spent)} of {formatCurrency(budget.budgeted_amount)}
                       </div>
                     </div>
@@ -109,7 +109,7 @@ export const BudgetTracker: React.FC = () => {
                     />
                     
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">
+                      <span className="text-gray-700 dark:text-gray-300">
                         {spentPercentage.toFixed(1)}% used
                       </span>
                       <span className={remaining >= 0 ? 'text-green-600' : 'text-red-600'}>
@@ -119,7 +119,7 @@ export const BudgetTracker: React.FC = () => {
                     </div>
                     
                     {budget.notes && (
-                      <p className="text-sm text-muted-foreground italic">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 italic">
                         {budget.notes}
                       </p>
                     )}
