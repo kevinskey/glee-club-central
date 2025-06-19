@@ -69,7 +69,7 @@ export function EventScroller({
       >
         <CarouselContent className="-ml-2 md:-ml-4">
           {events.map((event) => (
-            <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+            <CarouselItem key={event.id} className="pl-2 md:pl-4 basis-full sm:basis-1/2 md:basis-1/2 lg:basis-1/2 xl:basis-1/3">
               <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
                 <CardContent className="p-0">
                   <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
