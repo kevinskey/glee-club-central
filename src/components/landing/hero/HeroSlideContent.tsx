@@ -27,7 +27,6 @@ interface HeroSlideContentProps {
 }
 
 export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
-  console.log('HeroSlideContent: Rendering slide:', slide?.title);
   
   const backgroundMedia = slide?.media_id 
     ? mediaFiles.find(m => m.id === slide.media_id)
@@ -56,7 +55,7 @@ export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
       )}
       
       {/* Content */}
-      <div className="relative z-10 text-center text-white py-4 px-2 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center text-white container px-4 py-8">
         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 leading-tight">
           {slide?.title || 'Spelman College Glee Club'}
         </h1>
