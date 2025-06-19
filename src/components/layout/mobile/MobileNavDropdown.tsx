@@ -198,7 +198,7 @@ export function MobileNavDropdown() {
           >
             <Store className="mr-3 h-4 w-4 flex-shrink-0" />
             <span className="truncate">Store</span>
-          </a>
+          </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
