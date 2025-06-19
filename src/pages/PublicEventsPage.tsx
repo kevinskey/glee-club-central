@@ -133,14 +133,14 @@ export default function PublicEventsPage() {
                 className="h-auto p-4 justify-start text-left hover:bg-glee-spelman/5 hover:border-glee-spelman/50 dark:hover:bg-blue-400/10 dark:hover:border-blue-400/50 dark:border-border"
                 asChild
               >
-                <Link to="/merchandise" className="block">
+                <Link to="/store" className="block">
                   <div>
                     <div className="flex items-center mb-1">
                       <ShoppingBag className="h-4 w-4 mr-2 text-glee-spelman dark:text-blue-400" />
-                      <span className="font-medium dark:text-foreground">Merchandise Store</span>
+                      <span className="font-medium dark:text-foreground">Glee Store</span>
                     </div>
                     <p className="text-xs text-muted-foreground dark:text-gray-400">
-                      Shop official Glee Club merchandise
+                      Discover our new Square-powered store
                     </p>
                   </div>
                 </Link>

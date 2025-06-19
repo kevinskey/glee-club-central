@@ -41,7 +41,7 @@ export function StoreSection({ products }: StoreSectionProps) {
             Show Your Glee Spirit
           </h2>
           <p className="glee-text-body max-w-2xl mx-auto">
-            Support the Spelman College Glee Club with our exclusive merchandise collection
+            Explore our new Square-powered shop and show your Glee spirit with exclusive merchandise
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export function StoreSection({ products }: StoreSectionProps) {
             className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white px-8 py-4 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
             asChild
           >
-            <Link to="/merchandise">
+            <Link to="/store">
               Shop All Products
               <ArrowRight className="h-5 w-5 ml-2" />
             </Link>
