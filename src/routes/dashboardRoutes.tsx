@@ -6,6 +6,7 @@ import AuthRoute from '@/components/auth/AuthRoute';
 // Dashboard Pages
 import MemberDashboardPage from '@/pages/dashboard/MemberDashboardPage';
 import FanDashboardPage from '@/pages/dashboard/FanDashboardPage';
+import SoundCloudLibraryPage from '@/pages/dashboard/SoundCloudLibraryPage';
 
 export const dashboardRoutes: RouteObject[] = [
   {
@@ -21,6 +22,14 @@ export const dashboardRoutes: RouteObject[] = [
     element: (
       <AuthRoute>
         <FanDashboardPage />
+      </AuthRoute>
+    ),
+  },
+  {
+    path: '/dashboard/soundcloud',
+    element: (
+      <AuthRoute>
+        <SoundCloudLibraryPage />
       </AuthRoute>
     ),
   },

@@ -12,6 +12,7 @@ import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
 import MembersPage from '@/pages/admin/MembersPage';
 import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
 import MusicAdminPage from '@/pages/admin/MusicAdminPage';
+import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
 import AdminStorePage from '@/pages/admin/AdminStorePage';
 import CommunicationsPage from '@/pages/admin/CommunicationsPage';
 import EmailServiceManagementPage from '@/pages/admin/EmailServiceManagementPage';
@@ -63,6 +64,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'music',
         element: <MusicAdminPage />,
+      },
+      {
+        path: 'soundcloud',
+        element: <SoundCloudAdminPage />,
       },
       {
         path: 'videos',

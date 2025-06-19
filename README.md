@@ -79,6 +79,8 @@ Certain features require Supabase credentials. Define these variables in a `.env
 ```bash
 SUPABASE_URL=<your-supabase-url>
 SUPABASE_ANON_KEY=<your-supabase-anon-key>
+SOUNDCLOUD_CLIENT_ID=<your-soundcloud-client-id>
+SOUNDCLOUD_CLIENT_SECRET=<your-soundcloud-client-secret>
 ```
 
-Both variables are required. The application will fail to start if either one is missing.
+`SUPABASE_URL` and `SUPABASE_ANON_KEY` are required. If you want to enable the optional SoundCloud integration you must also provide `SOUNDCLOUD_CLIENT_ID` and `SOUNDCLOUD_CLIENT_SECRET`. Without these, SoundCloud authentication will fail.
