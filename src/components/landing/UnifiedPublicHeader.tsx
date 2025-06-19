@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield, Calculator } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
