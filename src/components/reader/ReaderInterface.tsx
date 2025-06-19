@@ -4,11 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { Music, BookOpen, Users, Clock, CheckCircle, Upload } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
 import { MemberReaderView } from './MemberReaderView';
+import { SetlistManager } from './SetlistManager';
 import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
 import { PDFFile } from '@/hooks/usePDFLibrary';
 
@@ -17,6 +19,7 @@ export function ReaderInterface() {
   const [currentView, setCurrentView] = useState<'library' | 'viewer'>('library');
   const [selectedPDF, setSelectedPDF] = useState<PDFFile | null>(null);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('library');
 
   const handleViewPDF = (pdf: PDFFile) => {
     setSelectedPDF(pdf);
@@ -57,6 +60,11 @@ export function ReaderInterface() {
       icon: BookOpen,
       title: "Digital Scores",
       description: "High-quality PDF viewing with zoom and annotation tools"
+    },
+    {
+      icon: ListMusic,
+      title: "Setlist Management",
+      description: "Create and organize setlists for performances and rehearsals"
     },
     {
       icon: Users,
@@ -126,7 +134,7 @@ export function ReaderInterface() {
       </Card>
 
       {/* Features Grid */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {features.map((feature, index) => (
           <Card key={index} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
@@ -148,13 +156,26 @@ export function ReaderInterface() {
         ))}
       </div>
 
-      {/* PDF Library Management */}
+      {/* Main Content Tabs */}
       <Card>
         <CardContent className="p-6">
-          <PDFLibraryView 
-            onViewPDF={handleViewPDF}
-            onUploadPDF={isAuthenticated ? () => setUploadDialogOpen(true) : undefined}
-          />
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="library">PDF Library</TabsTrigger>
+              <TabsTrigger value="setlists">Setlist Manager</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="library" className="mt-6">
+              <PDFLibraryView 
+                onViewPDF={handleViewPDF}
+                onUploadPDF={isAuthenticated ? () => setUploadDialogOpen(true) : undefined}
+              />
+            </TabsContent>
+            
+            <TabsContent value="setlists" className="mt-6">
+              <SetlistManager onViewPDF={handleViewPDF} />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -183,9 +204,18 @@ export function ReaderInterface() {
             </ul>
           </div>
           <div className="space-y-2">
+            <h4 className="font-medium">Setlist Management:</h4>
+            <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
+              <li>• Create setlists for performances and rehearsals</li>
+              <li>• Add and remove PDFs from setlists</li>
+              <li>• Share setlists with members</li>
+              <li>• Manage setlist permissions and access</li>
+            </ul>
+          </div>
+          <div className="space-y-2">
             <h4 className="font-medium">Member Experience:</h4>
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Regular members see a simplified reader interface focused on browsing and reading sheet music.
+              Regular members see a simplified reader interface focused on browsing and reading sheet music and creating their own setlists.
             </p>
           </div>
         </CardContent>

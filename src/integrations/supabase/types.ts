@@ -1701,6 +1701,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_library: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_url: string
+          id: string
+          is_public: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          voice_part: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          voice_part?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          is_public?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          voice_part?: string | null
+        }
+        Relationships: []
+      }
       permissions: {
         Row: {
           created_at: string

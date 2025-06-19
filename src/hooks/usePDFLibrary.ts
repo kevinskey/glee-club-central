@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -40,6 +39,15 @@ export interface PDFAnnotation {
   source_table: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Setlist {
+  id: string;
+  name: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  sheet_music_ids: string[];
 }
 
 export function usePDFLibrary() {
@@ -159,6 +167,154 @@ export function usePDFLibrary() {
     fetchPDFs,
     uploadPDF,
     deletePDF
+  };
+}
+
+export function useSetlists() {
+  const [setlists, setSetlists] = useState<Setlist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchSetlists = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('setlists')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setSetlists(data || []);
+    } catch (err: any) {
+      console.error('Error fetching setlists:', err);
+      toast.error('Failed to load setlists');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createSetlist = async (name: string, sheetMusicIds: string[] = []) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase
+        .from('setlists')
+        .insert({
+          name,
+          user_id: user.id,
+          sheet_music_ids: sheetMusicIds
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Setlist created successfully');
+      await fetchSetlists();
+      return data;
+    } catch (err: any) {
+      console.error('Error creating setlist:', err);
+      toast.error('Failed to create setlist');
+      throw err;
+    }
+  };
+
+  const updateSetlist = async (setlistId: string, updates: Partial<Setlist>) => {
+    try {
+      const { error } = await supabase
+        .from('setlists')
+        .update(updates)
+        .eq('id', setlistId);
+
+      if (error) throw error;
+
+      toast.success('Setlist updated successfully');
+      await fetchSetlists();
+    } catch (err: any) {
+      console.error('Error updating setlist:', err);
+      toast.error('Failed to update setlist');
+      throw err;
+    }
+  };
+
+  const deleteSetlist = async (setlistId: string) => {
+    try {
+      const { error } = await supabase
+        .from('setlists')
+        .delete()
+        .eq('id', setlistId);
+
+      if (error) throw error;
+
+      toast.success('Setlist deleted successfully');
+      await fetchSetlists();
+    } catch (err: any) {
+      console.error('Error deleting setlist:', err);
+      toast.error('Failed to delete setlist');
+      throw err;
+    }
+  };
+
+  const addPDFToSetlist = async (setlistId: string, pdfId: string) => {
+    try {
+      // Get current setlist
+      const { data: setlist, error: fetchError } = await supabase
+        .from('setlists')
+        .select('sheet_music_ids')
+        .eq('id', setlistId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const currentIds = setlist.sheet_music_ids || [];
+      if (currentIds.includes(pdfId)) {
+        toast.info('PDF already in setlist');
+        return;
+      }
+
+      const updatedIds = [...currentIds, pdfId];
+      await updateSetlist(setlistId, { sheet_music_ids: updatedIds });
+    } catch (err: any) {
+      console.error('Error adding PDF to setlist:', err);
+      toast.error('Failed to add PDF to setlist');
+      throw err;
+    }
+  };
+
+  const removePDFFromSetlist = async (setlistId: string, pdfId: string) => {
+    try {
+      // Get current setlist
+      const { data: setlist, error: fetchError } = await supabase
+        .from('setlists')
+        .select('sheet_music_ids')
+        .eq('id', setlistId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const currentIds = setlist.sheet_music_ids || [];
+      const updatedIds = currentIds.filter(id => id !== pdfId);
+      await updateSetlist(setlistId, { sheet_music_ids: updatedIds });
+    } catch (err: any) {
+      console.error('Error removing PDF from setlist:', err);
+      toast.error('Failed to remove PDF from setlist');
+      throw err;
+    }
+  };
+
+  useEffect(() => {
+    fetchSetlists();
+  }, []);
+
+  return {
+    setlists,
+    loading,
+    fetchSetlists,
+    createSetlist,
+    updateSetlist,
+    deleteSetlist,
+    addPDFToSetlist,
+    removePDFFromSetlist
   };
 }
 
