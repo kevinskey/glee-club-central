@@ -39,8 +39,8 @@ export function Header() {
   };
   
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+    <header className="sticky top-0 z-50 backdrop-blur-md">
+      <div className="container mx-auto flex h-14 items-center justify-between px-4 bg-white/90 dark:bg-gray-800/90 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
         {/* Logo - Always visible */}
         <div className="flex-shrink-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors">
