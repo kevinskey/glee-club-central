@@ -23,7 +23,7 @@ export function UnifiedPublicHeader() {
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
-    const hasAdminRole = isAdmin ? isAdmin() : false;
+    const hasAdminRole = isAdmin && typeof isAdmin === 'function' ? isAdmin() : false;
     
     if (isKnownAdmin || hasAdminRole) {
       navigate("/admin");
@@ -57,7 +57,7 @@ export function UnifiedPublicHeader() {
   const navigationLinks = [
     { label: "Home", path: "/", icon: Home },
     // Admin Panel as second item if user is admin
-    ...(isAuthenticated && isAdmin && isAdmin() ? [{ label: "Admin Panel", path: "/admin", icon: Shield }] : []),
+    ...(isAuthenticated && isAdmin && typeof isAdmin === 'function' && isAdmin() ? [{ label: "Admin Panel", path: "/admin", icon: Shield }] : []),
     { label: "About", path: "/about", icon: Info },
     { 
       label: "Events", 
@@ -216,7 +216,7 @@ export function UnifiedPublicHeader() {
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
                           <div className="text-sm text-[#003366]/70 dark:text-white/70">
-                            {isAdmin && isAdmin() ? 'Administrator' : 'Member'}
+                            {isAdmin && typeof isAdmin === 'function' && isAdmin() ? 'Administrator' : 'Member'}
                           </div>
                         </div>
                       </div>

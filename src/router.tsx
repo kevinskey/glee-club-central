@@ -22,6 +22,7 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import ReaderPage from "./pages/ReaderPage";
 import { AdminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
 import { dashboardRoutes } from "./routes/dashboardRoutes";
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "calendar",
         element: <EnhancedCalendarPage />,
+      },
+      {
+        path: "reader",
+        element: <ReaderPage />,
       },
       {
         path: "login",
