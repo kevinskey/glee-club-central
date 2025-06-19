@@ -1,7 +1,81 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Users, UserPlus, GraduationCap, Music } from 'lucide-react';
 import MembersPageSimple from '@/components/admin/MembersPageSimple';
 
 export default function MembersPage() {
-  return <MembersPageSimple />;
+  const memberStats = [
+    {
+      title: 'Active Members',
+      value: '42',
+      icon: Users,
+      change: '+3 this month',
+      color: 'text-blue-600'
+    },
+    {
+      title: 'New Recruits',
+      value: '8',
+      icon: UserPlus,
+      change: 'This semester',
+      color: 'text-green-600'
+    },
+    {
+      title: 'Seniors',
+      value: '12',
+      icon: GraduationCap,
+      change: 'Class of 2025',
+      color: 'text-purple-600'
+    },
+    {
+      title: 'Voice Sections',
+      value: '4',
+      icon: Music,
+      change: 'S1, S2, A1, A2',
+      color: 'text-orange-600'
+    }
+  ];
+
+  return (
+    <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      {/* Welcome Section */}
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair">
+          Members Directory
+        </h1>
+        <Badge variant="outline" className="px-3 py-1 text-xs">
+          Glee Club Members
+        </Badge>
+      </div>
+
+      {/* Member Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        {memberStats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={index} className="hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-2 pt-2">
+                <CardTitle className="text-xs font-medium text-gray-900 dark:text-white">
+                  {stat.title}
+                </CardTitle>
+                <Icon className={`h-4 w-4 ${stat.color}`} />
+              </CardHeader>
+              <CardContent className="pt-0 pb-2 px-2">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
+                  {stat.change}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Members Component */}
+      <div className="mb-8">
+        <MembersPageSimple />
+      </div>
+    </div>
+  );
 }
