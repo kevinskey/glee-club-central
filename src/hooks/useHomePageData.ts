@@ -138,7 +138,6 @@ export const useHomePageData = () => {
   const overallLoading = isLoading || eventsLoading || musicLoading;
 
   return {
-    heroImages: [], // No longer used - hero handled by UniversalHero
     upcomingEvents,
     storeProducts,
     audioTracks,

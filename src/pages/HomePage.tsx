@@ -4,7 +4,6 @@ import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 import { Footer } from "@/components/landing/Footer";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
-import { DynamicHero } from "@/components/landing/DynamicHero";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
 
@@ -50,9 +49,6 @@ export default function HomePage() {
       
       {/* Main content */}
       <main className="relative">
-        {/* Dynamic Hero Section - Full Screen */}
-        <DynamicHero />
-        
         {/* Rest of homepage content */}
         <div className="bg-background">
           <HomePageContent
