@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
@@ -35,34 +34,32 @@ export function Header() {
   };
   
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 md:h-14 items-center justify-between px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md">
-        {/* Enhanced Logo Section */}
-        <div className="flex-shrink-0">
-          <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group">
-            <Icons.logo className="h-8 md:h-7 w-auto" />
-            <div className="ml-2 md:ml-2">
-              <div className="text-lg md:text-base text-[#003366] dark:text-white font-bold font-playfair">
+    <header className="sticky top-0 z-50 backdrop-blur-md w-full">
+      <div className="w-full max-w-full mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+        {/* Logo Section - Optimized for mobile */}
+        <div className="flex-shrink-0 min-w-0 flex-1 max-w-[60%] sm:max-w-none sm:flex-1">
+          <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
+            <Icons.logo className="h-7 w-7 flex-shrink-0" />
+            <div className="ml-2 min-w-0 flex-1">
+              <div className="text-sm sm:text-base text-[#003366] dark:text-white font-bold font-playfair truncate">
                 GleeWorld
               </div>
-              <div className="text-xs text-[#003366]/70 dark:text-white/70 font-medium -mt-1 hidden sm:block">
+              <div className="text-xs text-[#003366]/70 dark:text-white/70 font-medium -mt-1 hidden sm:block truncate">
                 Spelman College
               </div>
             </div>
-            {/* Event Indicator - Mobile */}
+            {/* Event Indicator - Mobile only, positioned absolutely to avoid overflow */}
             {upcomingEvents.length > 0 && (
-              <div className="ml-2 md:hidden">
-                <div className="relative">
-                  <Bell className="h-4 w-4 text-[#003366] dark:text-white" />
-                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
-                </div>
+              <div className="ml-1 sm:hidden relative">
+                <Bell className="h-3 w-3 text-[#003366] dark:text-white" />
+                <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
               </div>
             )}
           </Link>
         </div>
         
-        {/* Desktop Navigation - Enhanced */}
-        <nav className="hidden md:flex items-center space-x-8 flex-1 justify-center">
+        {/* Desktop Navigation - keep existing */}
+        <nav className="hidden md:flex items-center space-x-6 flex-1 justify-center">
           <Link to="/" className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Home
           </Link>
@@ -92,14 +89,14 @@ export function Header() {
           </Link>
         </nav>
         
-        {/* Right Side Actions - Enhanced */}
-        <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
-          {/* Theme Toggle */}
+        {/* Right Side Actions - Optimized for mobile */}
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
+          {/* Theme Toggle - smaller on mobile */}
           <div className="flex items-center">
             <ThemeToggle />
           </div>
           
-          {/* Desktop Auth Buttons - Enhanced */}
+          {/* Desktop Auth Buttons - keep existing */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -142,8 +139,8 @@ export function Header() {
             )}
           </div>
           
-          {/* Mobile Hamburger Menu */}
-          <div className="md:hidden">
+          {/* Mobile Hamburger Menu - ensure it doesn't overflow */}
+          <div className="md:hidden flex-shrink-0">
             <MobileNavDropdown />
           </div>
         </div>
