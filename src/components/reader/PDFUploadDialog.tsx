@@ -50,7 +50,6 @@ export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
   const [uploading, setUploading] = useState(false);
 
   const voiceParts = [
-    { value: '', label: 'Select voice part' },
     { value: 'all', label: 'All Voice Parts' },
     { value: 'soprano_1', label: 'Soprano 1' },
     { value: 'soprano_2', label: 'Soprano 2' },
@@ -82,7 +81,7 @@ export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
           id: Math.random().toString(36).substring(2),
           title: createTitleFromFilename(file.name),
           description: '',
-          voicePart: '',
+          voicePart: 'all', // Default to 'all' instead of empty string
           category: 'general',
           tags: []
         };
@@ -141,7 +140,7 @@ export function PDFUploadDialog({ open, onOpenChange }: PDFUploadDialogProps) {
         await uploadPDF(fileData.file, {
           title: fileData.title.trim(),
           description: fileData.description.trim() || undefined,
-          voice_part: fileData.voicePart || undefined,
+          voice_part: fileData.voicePart === 'all' ? undefined : fileData.voicePart,
           category: fileData.category,
           tags: fileData.tags
         });
