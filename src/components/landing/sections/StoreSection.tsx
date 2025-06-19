@@ -30,7 +30,7 @@ export function StoreSection({ products }: StoreSectionProps) {
         <div className="absolute bottom-20 left-10 w-32 h-32 bg-blue-400/5 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="mx-auto w-full max-w-[1800px] px-6 md:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-white/80 dark:bg-card/80 backdrop-blur-sm px-6 py-3 rounded-full shadow-lg border border-purple-200/50 dark:border-purple-800/50 mb-4">

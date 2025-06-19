@@ -212,12 +212,12 @@ export function HomePageContent({
           <EnhancedEventsSection events={upcomingEvents} />
           
           {/* SoundCloud Music Section */}
-          <div className="mt-16 max-w-7xl mx-auto bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-8 md:p-12">
+          <div className="mt-16 mx-auto w-full max-w-[1800px] bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 rounded-2xl p-8 md:p-12">
             <div className="text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-light text-white mb-4 tracking-tight">
                 Listen to the Glee
               </h3>
-              <p className="text-lg text-blue-100 max-w-2xl mx-auto font-light">
+              <p className="text-lg text-blue-100 max-w-4xl mx-auto font-light">
                 Experience our music collection
               </p>
             </div>
@@ -231,7 +231,7 @@ export function HomePageContent({
             ) : soundCloudEmbeds.length > 0 ? (
               <div className="space-y-8">
                 {/* Swipeable Carousel for Embeds */}
-                <Carousel className="w-full max-w-6xl mx-auto" opts={{ dragFree: true, align: "center" }}>
+                <Carousel className="w-full max-w-[1600px] mx-auto" opts={{ dragFree: true, align: "center" }}>
                   <CarouselContent>
                     {soundCloudEmbeds.map((embed, index) => {
                       const currentPlaylist = soundCloudPlaylists[embed.id];
@@ -397,12 +397,12 @@ export function HomePageContent({
           </div>
 
           {/* YouTube Video Section */}
-          <div className="mt-16 max-w-7xl mx-auto">
+          <div className="mt-16 mx-auto w-full max-w-[1800px]">
             <div className="text-center mb-12">
               <h3 className="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-4 tracking-tight">
                 Watch the Glee
               </h3>
-              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light">
+              <p className="text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto font-light">
                 Performance videos and behind-the-scenes content
               </p>
             </div>
@@ -419,7 +419,7 @@ export function HomePageContent({
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-light text-gray-900 dark:text-white mb-8 md:mb-10 tracking-tight">
               Glee Store
             </h2>
-            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+            <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 max-w-4xl mx-auto font-light leading-relaxed">
               Show your support with official Spelman Glee Club merchandise
             </p>
           </div>
