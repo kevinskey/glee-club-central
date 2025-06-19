@@ -40,8 +40,8 @@ export function EventScroller({
   if (events.length === 0) {
     return (
       <div className={`text-center ${className}`}>
-        <h2 className="text-3xl font-playfair font-bold mb-4">{title}</h2>
-        <p className="text-muted-foreground">No upcoming events at this time.</p>
+        <h2 className="text-3xl font-playfair font-bold mb-4 dark:text-white">{title}</h2>
+        <p className="text-muted-foreground dark:text-gray-300">No upcoming events at this time.</p>
       </div>
     );
   }
@@ -49,11 +49,11 @@ export function EventScroller({
   return (
     <div className={className}>
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-playfair font-bold">{title}</h2>
+        <h2 className="text-3xl font-playfair font-bold dark:text-white">{title}</h2>
         {showViewAllButton && (
           <button
             onClick={onViewAll}
-            className="text-glee-spelman hover:text-glee-spelman/80 font-medium transition-colors"
+            className="text-glee-spelman hover:text-glee-spelman/80 dark:text-white dark:hover:text-gray-300 font-medium transition-colors"
           >
             View All →
           </button>

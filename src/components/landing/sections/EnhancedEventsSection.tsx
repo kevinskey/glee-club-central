@@ -19,14 +19,12 @@ export function EnhancedEventsSection({ events }: EnhancedEventsSectionProps) {
   return (
     <section className="bg-gradient-to-br from-navy-50 to-navy-100 dark:from-navy-900 dark:to-navy-800 py-8 md:py-12 lg:py-16">
       <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 lg:px-8">
-        <div className="dark:text-white">
-          <EventScroller 
-            events={events}
-            title="Upcoming Events"
-            showViewAllButton={true}
-            onViewAll={() => window.location.href = "/events"}
-          />
-        </div>
+        <EventScroller 
+          events={events}
+          title="Upcoming Events"
+          showViewAllButton={true}
+          onViewAll={() => window.location.href = "/events"}
+        />
       </div>
     </section>
   );
