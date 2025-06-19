@@ -48,6 +48,7 @@ const navItems = [
   { to: '/admin/financial', icon: DollarSign, label: 'Financial' },
   { to: '/admin/media-library', icon: Image, label: 'Media Library' },
   { to: '/admin/music', icon: Music, label: 'Music Player' },
+  { to: '/admin/soundcloud', icon: Music, label: 'SoundCloud' },
   { to: '/admin/videos', icon: Video, label: 'Videos' },
   { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides' },
   { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
