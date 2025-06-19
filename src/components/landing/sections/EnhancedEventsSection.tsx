@@ -29,11 +29,11 @@ export function EnhancedEventsSection({
           <h2 className="text-3xl font-bold mb-4">{title}</h2>
         </div>
         
-        <div className="flex gap-5 overflow-x-auto scrollbar-hide pb-3 mb-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {displayEvents.map((event) => (
-            <Card key={event.id} className="flex-shrink-0 w-full sm:w-[28rem] overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               {event.imageUrl && (
-                <div className="aspect-video bg-cover bg-center" 
+                <div className="aspect-video bg-cover bg-center"
                      style={{ backgroundImage: `url(${event.imageUrl})` }} />
               )}
               <CardContent className="p-6">
