@@ -247,7 +247,7 @@ export default function MembersV2Page() {
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold">Member Management</h1>
+            <h1 className="text-3xl font-bold text-navy-900 dark:text-white">Member Management</h1>
             <p className="text-muted-foreground">Manage member profiles, roles, and assignments</p>
           </div>
           <Button onClick={openCreateDialog}>

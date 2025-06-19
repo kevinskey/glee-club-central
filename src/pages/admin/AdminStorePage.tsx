@@ -51,7 +51,7 @@ export default function AdminStorePage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="border-b pb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-navy-900 dark:text-white">
             Store Management
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-2">

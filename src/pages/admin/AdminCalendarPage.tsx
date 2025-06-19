@@ -112,7 +112,7 @@ export default function AdminCalendarPage() {
             <CalendarDays className="h-8 w-8 text-glee-spelman" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-navy-900 dark:text-white mb-2">
               Event Calendar Management
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-3">

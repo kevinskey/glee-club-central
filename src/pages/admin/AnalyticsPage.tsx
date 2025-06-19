@@ -40,7 +40,7 @@ const AnalyticsPage = () => {
     <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Welcome Section */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair">
+        <h1 className="text-4xl font-bold text-navy-900 dark:text-white font-playfair">
           Analytics Dashboard
         </h1>
         <Badge variant="outline" className="px-3 py-1 text-xs">

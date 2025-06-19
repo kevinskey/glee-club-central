@@ -148,7 +148,7 @@ export default function SiteImagesPage() {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Site Images Management</h1>
+        <h1 className="text-2xl font-bold text-navy-900 dark:text-white">Site Images Management</h1>
         <Button onClick={() => setIsUploadDialogOpen(true)}>
           <Upload className="mr-2 h-4 w-4" />
           Upload Image

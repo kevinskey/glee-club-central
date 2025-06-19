@@ -356,7 +356,7 @@ export default function HeroSlidesPage() {
       <AdminTopNavigation />
       <div className="p-6 space-y-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Hero Slides Management</h1>
+          <h1 className="text-2xl font-bold text-navy-900 dark:text-white">Hero Slides Management</h1>
           <Button onClick={handleCreateNew} variant="spelman">
             <Plus className="h-4 w-4 mr-2" />
             Add New Slide
