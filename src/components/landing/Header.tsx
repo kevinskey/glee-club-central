@@ -1,22 +1,16 @@
 
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { HeaderLogo } from "@/components/layout/header/HeaderLogo";
-import { HeaderActions } from "@/components/layout/header/HeaderActions";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Icons } from "@/components/Icons";
 
 export function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
-  const isMobile = useIsMobile();
-  
-  console.log("Header render - isMobile:", isMobile, "window width:", window.innerWidth);
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
@@ -50,7 +44,7 @@ export function Header() {
         </div>
         
         {/* Desktop Navigation - Hidden on mobile */}
-        <nav className={`items-center space-x-8 flex-1 justify-center ${isMobile ? 'hidden' : 'flex'}`}>
+        <nav className="hidden md:flex items-center space-x-8 flex-1 justify-center">
           <Link to="/" className="text-sm font-medium text-black dark:text-white hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
             Home
           </Link>
@@ -79,13 +73,13 @@ export function Header() {
         
         {/* Right Side Actions */}
         <div className="flex items-center gap-4 flex-shrink-0">
-          {/* Theme Toggle - Now wider */}
+          {/* Theme Toggle */}
           <div className="flex items-center">
             <ThemeToggle />
           </div>
           
           {/* Desktop Auth Buttons - Hidden on mobile */}
-          <div className={`items-center gap-3 ${isMobile ? 'hidden' : 'flex'}`}>
+          <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <Button 
@@ -127,8 +121,8 @@ export function Header() {
             )}
           </div>
           
-          {/* Mobile Actions - Only the dropdown menu now */}
-          <div className={`items-center ${isMobile ? 'flex' : 'hidden'}`}>
+          {/* Mobile Hamburger Menu - Always visible on mobile */}
+          <div className="md:hidden">
             <MobileNavDropdown />
           </div>
         </div>
