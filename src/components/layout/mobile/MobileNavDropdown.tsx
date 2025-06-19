@@ -1,22 +1,16 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, User, LogIn, LogOut, UserPlus } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Menu, Home, Calendar, Music, Store, Contact, Info, LogIn, UserPlus, User, LogOut, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function MobileNavDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, profile, logout } = useAuth();
   const navigate = useNavigate();
+  const { isAuthenticated, user, profile, logout, isAdmin } = useAuth();
 
-  const handleDashboardClick = () => {
-    navigate("/role-dashboard");
-    setIsOpen(false);
-  };
-  
   const handleLogout = async () => {
     try {
       await logout();
@@ -27,99 +21,133 @@ export function MobileNavDropdown() {
     }
   };
 
-  const navigationLinks = [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Calendar", href: "/calendar" },
-    { label: "Reader", href: "https://reader.gleeworld.org" },
-    { label: "Studio", href: "https://studio.gleeworld.org" },
-    { label: "Merch", href: "https://merch.gleeworld.org" },
-    { label: "Store", href: "/store" },
-    { label: "Contact", href: "/contact" },
-  ];
+  const handleDashboardClick = () => {
+    const isKnownAdmin = user?.email === 'kevinskey@mac.com';
+    const hasAdminRole = isAdmin();
+    
+    if (isKnownAdmin || hasAdminRole) {
+      navigate("/admin");
+    } else {
+      navigate("/dashboard");
+    }
+    setIsOpen(false);
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-10 w-10" />
-          <span className="sr-only">Toggle menu</span>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Menu className="h-5 w-5" />
         </Button>
-      </SheetTrigger>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <nav className="flex flex-col gap-4">
-          {/* Navigation Links */}
-          <div className="flex flex-col gap-2 pt-4">
-            {navigationLinks.map((link) => (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="block px-2 py-2 text-lg font-medium text-foreground hover:text-primary transition-colors"
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="end" 
+        className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
+      >
+        {/* Authentication section at the top */}
+        {!isAuthenticated ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link 
+                to="/login" 
+                className="flex items-center w-full px-3 py-2 text-sm font-medium text-[#0072CE] hover:bg-gray-100 dark:hover:bg-gray-700"
                 onClick={() => setIsOpen(false)}
               >
-                {link.label}
+                <LogIn className="mr-3 h-4 w-4" />
+                Login
               </Link>
-            ))}
-          </div>
-
-          {/* Auth Section */}
-          <div className="flex flex-col gap-2 pt-4 border-t">
-            {isAuthenticated ? (
-              <>
-                <Button 
-                  variant="default"
-                  onClick={handleDashboardClick}
-                  className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  {profile?.first_name ? `${profile.first_name}'s Dashboard` : 'My Dashboard'}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={handleLogout}
-                  className="w-full justify-start border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    navigate("/signup");
-                    setIsOpen(false);
-                  }}
-                  className="w-full justify-start border-glee-spelman text-glee-spelman hover:bg-glee-spelman/10"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Sign Up
-                </Button>
-                <Button 
-                  variant="default"
-                  onClick={() => {
-                    navigate("/login");
-                    setIsOpen(false);
-                  }}
-                  className="w-full justify-start bg-glee-spelman hover:bg-glee-spelman/90"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-              </>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link 
+                to="/signup" 
+                className="flex items-center w-full px-3 py-2 text-sm font-medium text-[#0072CE] hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => setIsOpen(false)}
+              >
+                <UserPlus className="mr-3 h-4 w-4" />
+                Sign Up
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem onClick={handleDashboardClick}>
+              <User className="mr-3 h-4 w-4" />
+              Dashboard
+            </DropdownMenuItem>
+            {isAdmin() && (
+              <DropdownMenuItem asChild>
+                <Link to="/admin" onClick={() => setIsOpen(false)}>
+                  <Shield className="mr-3 h-4 w-4" />
+                  Admin
+                </Link>
+              </DropdownMenuItem>
             )}
-          </div>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="mr-3 h-4 w-4" />
+              Sign Out
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
 
-          {/* Theme Toggle */}
-          <div className="pt-4 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Theme</span>
-              <ThemeToggle />
-            </div>
-          </div>
-        </nav>
-      </SheetContent>
-    </Sheet>
+        {/* Navigation Links */}
+        <DropdownMenuItem asChild>
+          <Link to="/" onClick={() => setIsOpen(false)}>
+            <Home className="mr-3 h-4 w-4" />
+            Home
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link to="/about" onClick={() => setIsOpen(false)}>
+            <Info className="mr-3 h-4 w-4" />
+            About
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link to="/calendar" onClick={() => setIsOpen(false)}>
+            <Calendar className="mr-3 h-4 w-4" />
+            Events
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <a href="https://reader.gleeworld.org" onClick={() => setIsOpen(false)}>
+            <Music className="mr-3 h-4 w-4" />
+            Reader
+          </a>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <a href="https://studio.gleeworld.org" onClick={() => setIsOpen(false)}>
+            <Music className="mr-3 h-4 w-4" />
+            Studio
+          </a>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <a href="https://merch.gleeworld.org" onClick={() => setIsOpen(false)}>
+            <Store className="mr-3 h-4 w-4" />
+            Merch
+          </a>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link to="/store" onClick={() => setIsOpen(false)}>
+            <Store className="mr-3 h-4 w-4" />
+            Store
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link to="/contact" onClick={() => setIsOpen(false)}>
+            <Contact className="mr-3 h-4 w-4" />
+            Contact
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

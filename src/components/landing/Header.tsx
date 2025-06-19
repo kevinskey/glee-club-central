@@ -127,28 +127,8 @@ export function Header() {
             )}
           </div>
           
-          {/* Mobile Actions - Shown only on mobile */}
-          <div className={`items-center gap-1 ${isMobile ? 'flex' : 'hidden'}`}>
-            {isAuthenticated ? (
-              <Button 
-                variant="default"
-                onClick={handleDashboardClick}
-                size="sm"
-                className="h-8 w-8 p-0 bg-[#0072CE] hover:bg-[#0072CE]/90 text-white"
-              >
-                <User className="w-3.5 h-3.5" />
-              </Button>
-            ) : (
-              <Button 
-                variant="default"
-                onClick={() => navigate("/login")}
-                size="sm"
-                className="h-8 px-2 text-xs bg-[#0072CE] hover:bg-[#0072CE]/90 text-white font-medium"
-              >
-                <LogIn className="w-3.5 h-3.5 mr-1" />
-                Login
-              </Button>
-            )}
+          {/* Mobile Actions - Only the dropdown menu now */}
+          <div className={`items-center ${isMobile ? 'flex' : 'hidden'}`}>
             <MobileNavDropdown />
           </div>
         </div>
