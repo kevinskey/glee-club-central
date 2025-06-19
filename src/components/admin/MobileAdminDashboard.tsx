@@ -77,7 +77,7 @@ export function MobileAdminDashboard() {
     <div className="w-full max-w-full p-2 space-y-3 overflow-x-hidden">
       {/* Header */}
       <div className="w-full">
-        <h1 className="text-xl font-bold text-foreground mb-1">
+        <h1 className="text-xl font-bold text-navy-900 mb-1">
           Admin Dashboard
         </h1>
         <p className="text-xs text-muted-foreground">
@@ -128,7 +128,7 @@ export function MobileAdminDashboard() {
 
       {/* Quick Actions */}
       <div className="w-full">
-        <h2 className="text-sm font-semibold text-foreground mb-2">
+        <h2 className="text-sm font-semibold text-navy-900 mb-2">
           Quick Actions
         </h2>
         <div className="grid grid-cols-2 gap-2 w-full">
@@ -142,7 +142,7 @@ export function MobileAdminDashboard() {
                 <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center text-white mx-auto mb-1`}>
                   <action.icon className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-medium text-foreground mb-0.5">
+                <p className="text-xs font-medium text-navy-900 mb-0.5">
                   {action.title}
                 </p>
                 <p className="text-xs text-muted-foreground">

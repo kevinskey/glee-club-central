@@ -167,7 +167,7 @@ export function EnhancedMemberManagement() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-3xl font-bold text-navy-900 dark:text-white">
             Member Management & Communications
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400">

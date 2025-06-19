@@ -49,7 +49,7 @@ export function AdminDashboardContent() {
     <div className="w-full max-w-none px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {/* Welcome Section */}
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white font-playfair">
+        <h1 className="text-4xl font-bold text-navy-900 dark:text-white font-playfair">
           Welcome back, {profile?.first_name || 'Admin'}! 👋
         </h1>
         <Badge variant="outline" className="px-3 py-1 text-xs">
@@ -69,13 +69,13 @@ export function AdminDashboardContent() {
           return (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 px-2 pt-2">
-                <CardTitle className="text-xs font-medium text-gray-900 dark:text-white">
+                <CardTitle className="text-xs font-medium text-navy-900 dark:text-white">
                   {stat.title}
                 </CardTitle>
                 <Icon className={`h-4 w-4 ${stat.color}`} />
               </CardHeader>
               <CardContent className="pt-0 pb-2 px-2">
-                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-lg font-bold text-navy-900 dark:text-white">{stat.value}</div>
                 <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                   {stat.change}
                 </p>

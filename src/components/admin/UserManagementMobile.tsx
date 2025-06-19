@@ -75,7 +75,7 @@ export function UserManagementMobile({
       {/* Header */}
       <div className="p-4 border-b bg-white dark:bg-gray-800 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold">User Management</h1>
+          <h1 className="text-xl font-bold text-navy-900">User Management</h1>
           <Button onClick={onAddUser} size="sm">
             <UserPlus className="h-4 w-4 mr-2" />
             Add User

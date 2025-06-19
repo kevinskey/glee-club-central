@@ -35,7 +35,7 @@ export default function MembersPageSimple() {
             ← Back to Members
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Bulk Upload Members</h1>
+            <h1 className="text-2xl font-bold text-navy-900">Bulk Upload Members</h1>
             <p className="text-muted-foreground">Import multiple members from a CSV file</p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export default function MembersPageSimple() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Members</h1>
+          <h1 className="text-2xl font-bold text-navy-900">Members</h1>
           <p className="text-muted-foreground">Manage Glee Club members</p>
         </div>
         

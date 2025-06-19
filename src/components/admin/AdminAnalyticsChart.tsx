@@ -32,7 +32,7 @@ export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartPro
   return (
     <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+        <CardTitle className="flex items-center gap-2 text-navy-900 dark:text-gray-100">
           <BarChart3 className="h-5 w-5 text-orange-500" />
           Analytics Overview
         </CardTitle>

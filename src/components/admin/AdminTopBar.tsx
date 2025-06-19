@@ -162,7 +162,7 @@ export function AdminTopBar({ onMenuClick, isMobile = false }: AdminTopBarProps)
       {isMobile && (
         <div className="px-6 sm:px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-semibold text-navy-900 dark:text-white">
               Admin Panel
             </h1>
             

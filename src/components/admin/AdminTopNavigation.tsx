@@ -111,7 +111,7 @@ export const AdminTopNavigation: React.FC = () => {
             <span className="text-white font-bold text-sm">G</span>
           </div>
           <div>
-            <h2 className="text-lg font-bold text-foreground">Admin Panel</h2>
+            <h2 className="text-lg font-bold text-navy-900">Admin Panel</h2>
           </div>
         </div>
 
