@@ -1,118 +1,34 @@
-import React from 'react';
-import { RouteObject } from 'react-router-dom';
-import AdminRoute from '@/components/auth/AdminRoute';
-import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Navigate } from 'react-router-dom';
 
-// Import admin pages
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminMediaLibraryPage from '@/pages/admin/AdminMediaLibraryPage';
-import SiteImagesPage from '@/pages/admin/SiteImagesPage';
-import AdminCalendarPage from '@/pages/admin/AdminCalendarPage';
-import MembersPage from '@/pages/admin/MembersPage';
-import HeroSlidesPage from '@/pages/admin/HeroSlidesPage';
-import MusicAdminPage from '@/pages/admin/MusicAdminPage';
-import SoundCloudAdminPage from '@/pages/admin/SoundCloudAdminPage';
-import AdminStorePage from '@/pages/admin/AdminStorePage';
-import CommunicationsPage from '@/pages/admin/CommunicationsPage';
-import EmailServiceManagementPage from '@/pages/admin/EmailServiceManagementPage';
-import AdminAnalyticsPage from '@/pages/AdminAnalyticsPage';
-import AdminVideosPage from '@/pages/admin/AdminVideosPage';
-import SiteSettingsPage from '@/pages/admin/SiteSettingsPage';
-import UserRolesPage from '@/pages/admin/UserRolesPage';
-import FinancialPage from '@/pages/admin/FinancialPage';
-import UserManagementPage from '@/pages/admin/UserManagementPage';
-import MyProfilePage from '@/pages/admin/MyProfilePage';
+import { Routes, Route } from "react-router-dom";
+import { AdminLayout } from "@/components/admin/AdminLayout";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminMembersPage from "@/pages/admin/MembersPage";
+import AdminCalendarPage from "@/pages/admin/AdminCalendarPage";
+import AdminMediaLibraryPage from "@/pages/admin/AdminMediaLibraryPage";
+import AdminStorePage from "@/pages/admin/AdminStorePage";
+import AdminSettingsPage from "@/pages/admin/SettingsPage";
+import CommunicationsPage from "@/pages/admin/CommunicationsPage";
+import FinancialPage from "@/pages/admin/FinancialPage";
+import AnalyticsPage from "@/pages/admin/AnalyticsPage";
+import SheetMusicLibraryPage from "@/pages/admin/SheetMusicLibraryPage";
+import ReaderImportPage from "@/pages/admin/ReaderImportPage";
 
-export const adminRoutes: RouteObject[] = [
-  {
-    path: '/admin',
-    element: (
-      <AdminRoute>
-        <AdminLayout />
-      </AdminRoute>
-    ),
-    children: [
-      {
-        index: true,
-        element: <AdminDashboard />,
-      },
-      {
-        path: 'profile',
-        element: <MyProfilePage />,
-      },
-      {
-        path: 'members',
-        element: <MembersPage />,
-      },
-      {
-        path: 'users',
-        element: <UserManagementPage />,
-      },
-      {
-        path: 'user-roles',
-        element: <UserRolesPage />,
-      },
-      {
-        path: 'calendar',
-        element: <AdminCalendarPage />,
-      },
-      {
-        path: 'hero-slides',
-        element: <HeroSlidesPage />,
-      },
-      {
-        path: 'music',
-        element: <MusicAdminPage />,
-      },
-      {
-        path: 'soundcloud',
-        element: <SoundCloudAdminPage />,
-      },
-      {
-        path: 'videos',
-        element: <AdminVideosPage />,
-      },
-      {
-        path: 'store',
-        element: <AdminStorePage />,
-      },
-      {
-        path: 'communications',
-        element: <CommunicationsPage />,
-      },
-      {
-        path: 'email-services',
-        element: <EmailServiceManagementPage />,
-      },
-      {
-        path: 'news-items',
-        element: <CommunicationsPage />,
-      },
-      {
-        path: 'media',
-        element: <AdminMediaLibraryPage />,
-      },
-      {
-        path: 'media-library',
-        element: <AdminMediaLibraryPage />,
-      },
-      {
-        path: 'site-images',
-        element: <SiteImagesPage />,
-      },
-      {
-        path: 'analytics',
-        element: <AdminAnalyticsPage />,
-      },
-      {
-        path: 'settings',
-        element: <SiteSettingsPage />,
-      },
-      {
-        path: 'financial',
-        element: <FinancialPage />,
-      },
-    ],
-  },
-];
+export const AdminRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<AdminLayout />}>
+        <Route index element={<AdminDashboard />} />
+        <Route path="members" element={<AdminMembersPage />} />
+        <Route path="calendar" element={<AdminCalendarPage />} />
+        <Route path="media" element={<AdminMediaLibraryPage />} />
+        <Route path="store" element={<AdminStorePage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
+        <Route path="communications" element={<CommunicationsPage />} />
+        <Route path="finances" element={<FinancialPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="sheet-music" element={<SheetMusicLibraryPage />} />
+        <Route path="reader-import" element={<ReaderImportPage />} />
+      </Route>
+    </Routes>
+  );
+};
