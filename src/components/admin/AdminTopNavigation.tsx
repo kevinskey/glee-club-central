@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,9 +70,15 @@ export const AdminTopNavigation: React.FC = () => {
   };
 
   const isActiveItem = (to: string) => {
+    // Special case for root path - only highlight when exactly on root
+    if (to === '/') {
+      return location.pathname === '/';
+    }
+    // Special case for admin root - only highlight when exactly on /admin
     if (to === '/admin') {
       return location.pathname === '/admin';
     }
+    // For other admin routes, check if current path starts with the route
     return location.pathname === to || location.pathname.startsWith(to);
   };
 
