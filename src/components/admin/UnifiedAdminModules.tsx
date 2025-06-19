@@ -165,7 +165,7 @@ export function UnifiedAdminModules() {
     <div className="w-full">
       <Card className="w-full">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center justify-between text-lg font-bold">
+          <CardTitle className="flex items-center justify-between text-lg font-bold text-navy-900 dark:text-white">
             Admin Modules
             <Badge variant="secondary" className="text-xs font-medium">{sortedModules.length} available</Badge>
           </CardTitle>
@@ -183,7 +183,7 @@ export function UnifiedAdminModules() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground group-hover:text-glee-spelman transition-colors duration-200 truncate">
+                    <span className="text-sm font-semibold text-navy-900 group-hover:text-glee-spelman transition-colors duration-200 truncate">
                       {module.title}
                     </span>
                   </div>

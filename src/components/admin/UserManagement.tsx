@@ -120,7 +120,7 @@ export default function UserManagement() {
         <div className="bg-white dark:bg-gray-800 border-b px-2 py-2">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">User Management</h1>
+              <h1 className="text-lg font-semibold text-navy-900 dark:text-white">User Management</h1>
               <p className="text-xs text-gray-600 dark:text-gray-400">Manage Glee Club members ({users.length} total)</p>
             </div>
             
@@ -162,7 +162,7 @@ export default function UserManagement() {
               placeholder="Search users..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full h-8 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="pl-10 w-full h-8 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-navy-900 dark:text-gray-100 placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             />
           </div>
         </div>
@@ -180,7 +180,7 @@ export default function UserManagement() {
             {filteredUsers.length === 0 ? (
               <div className="text-center py-8 px-4">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="font-medium text-gray-900 dark:text-white mb-1">No Members Found</h3>
+                <h3 className="font-medium text-navy-900 dark:text-white mb-1">No Members Found</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {users.length === 0 
                     ? 'No members added yet.' 
@@ -202,7 +202,7 @@ export default function UserManagement() {
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-1 mb-1">
-                          <h3 className="font-medium text-sm text-gray-900 dark:text-white truncate">
+                          <h3 className="font-medium text-sm text-navy-900 dark:text-white truncate">
                             {user.first_name} {user.last_name}
                           </h3>
                           {user.is_super_admin && (

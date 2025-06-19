@@ -33,7 +33,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
     return (
       <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <CardTitle className="flex items-center gap-2 text-navy-900 dark:text-gray-100">
             <Activity className="h-5 w-5 text-orange-500" />
             Recent Activity
           </CardTitle>
@@ -62,7 +62,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
     return (
       <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <CardTitle className="flex items-center gap-2 text-navy-900 dark:text-gray-100">
             <Activity className="h-5 w-5 text-orange-500" />
             Recent Activity
           </CardTitle>
@@ -78,7 +78,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
     return (
       <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+          <CardTitle className="flex items-center gap-2 text-navy-900 dark:text-gray-100">
             <Activity className="h-5 w-5 text-orange-500" />
             Recent Activity
           </CardTitle>
@@ -93,7 +93,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
   return (
     <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+        <CardTitle className="flex items-center gap-2 text-navy-900 dark:text-gray-100">
           <Activity className="h-5 w-5 text-orange-500" />
           Recent Activity
         </CardTitle>
@@ -113,7 +113,7 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">
+                    <h4 className="font-medium text-navy-900 dark:text-gray-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">
                       {activity.title}
                     </h4>
                     <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
