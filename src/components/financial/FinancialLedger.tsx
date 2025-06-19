@@ -96,7 +96,7 @@ export const FinancialLedger: React.FC = () => {
         <CardContent className="p-6">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-glee-spelman mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading transactions...</p>
+            <p className="text-gray-700 dark:text-gray-300">Loading transactions...</p>
           </div>
         </CardContent>
       </Card>
@@ -111,7 +111,7 @@ export const FinancialLedger: React.FC = () => {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mt-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-700 dark:text-gray-300" />
             <Input
               placeholder="Search transactions..."
               value={searchTerm}
@@ -172,7 +172,7 @@ export const FinancialLedger: React.FC = () => {
                   <TableCell className="font-medium">
                     {transaction.description}
                     {transaction.notes && (
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                         {transaction.notes}
                       </p>
                     )}
@@ -237,7 +237,7 @@ export const FinancialLedger: React.FC = () => {
           </Table>
           
           {filteredTransactions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-gray-700 dark:text-gray-300">
               No transactions found matching your filters.
             </div>
           )}
