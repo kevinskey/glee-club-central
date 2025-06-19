@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ import {
 
 export function UnifiedPublicHeader() {
   const navigate = useNavigate();
-  const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
+  const { isAuthenticated, profile, user, logout } = useAuth();
   const { upcomingEvents } = useHomePageData();
   const { navigateToReader } = useSSOAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

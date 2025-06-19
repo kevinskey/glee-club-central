@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Music, BookOpen, Users, Clock, CheckCircle, Upload, Library } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
-import { AdvancedPDFViewer } from '@/components/pdf/AdvancedPDFViewer';
+import AdvancedPDFViewer from '@/components/pdf/AdvancedPDFViewer';
 import { PDFFile } from '@/hooks/usePDFLibrary';
 
 export function ReaderInterface() {
