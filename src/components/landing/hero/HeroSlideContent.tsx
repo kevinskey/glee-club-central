@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import type { MediaFile } from './types';
 
 interface HeroSlide {
   id: string;
@@ -14,22 +15,15 @@ interface HeroSlide {
   order_index: number;
 }
 
-interface MediaFile {
-  id: string;
-  file_url: string;
-  file_type: string;
-  file_name: string;
-}
-
 interface HeroSlideContentProps {
   slide: HeroSlide;
-  mediaFiles: MediaFile[];
+  mediaFiles: Record<string, MediaFile>;
 }
 
 export function HeroSlideContent({ slide, mediaFiles }: HeroSlideContentProps) {
-  
-  const backgroundMedia = slide?.media_id 
-    ? mediaFiles.find(m => m.id === slide.media_id)
+
+  const backgroundMedia = slide?.media_id
+    ? mediaFiles[slide.media_id]
     : null;
 
   const backgroundStyle = backgroundMedia 

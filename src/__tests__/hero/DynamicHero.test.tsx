@@ -16,7 +16,7 @@ describe('DynamicHero', () => {
   it('renders HeroDefault when no slides exist', () => {
     mockedUseHeroData.mockReturnValue({
       slides: [],
-      mediaFiles: {},
+      mediaFiles: {} as Record<string, MediaFile>,
       currentIndex: 0,
       isLoading: false,
       refetch: vi.fn(),
