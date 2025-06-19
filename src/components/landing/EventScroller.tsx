@@ -80,15 +80,15 @@ export function EventScroller({
                     />
                   </div>
                   <div className="p-4">
-                    <h3 className="font-playfair font-semibold text-lg mb-2 line-clamp-2">
+                    <h3 className="font-playfair font-semibold text-lg mb-2 line-clamp-2 dark:text-white">
                       {event.title}
                     </h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300 mb-2">
                       <Calendar className="h-4 w-4" />
                       <span>{formatEventDate(event.date)}</span>
                     </div>
                     {event.location && (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-300">
                         <MapPin className="h-4 w-4" />
                         <span className="line-clamp-1">{event.location}</span>
                       </div>
