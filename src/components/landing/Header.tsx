@@ -110,7 +110,7 @@ export function Header() {
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/signup")}
-                  className="text-sm border-black dark:border-white text-black dark:text-white hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
+                  className="text-sm bg-white dark:bg-gray-800 border-2 border-[#0072CE] text-[#0072CE] dark:text-[#0072CE] hover:bg-[#0072CE] hover:text-white dark:hover:bg-[#0072CE] dark:hover:text-white font-medium"
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   Sign Up
@@ -118,7 +118,7 @@ export function Header() {
                 <Button 
                   variant="default"
                   onClick={() => navigate("/login")}
-                  className="text-sm bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
+                  className="text-sm bg-[#0072CE] hover:bg-[#0072CE]/90 text-white font-medium"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
                   Login
@@ -134,7 +134,7 @@ export function Header() {
                 variant="default"
                 onClick={handleDashboardClick}
                 size="sm"
-                className="h-8 w-8 p-0 bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
+                className="h-8 w-8 p-0 bg-[#0072CE] hover:bg-[#0072CE]/90 text-white"
               >
                 <User className="w-3.5 h-3.5" />
               </Button>
@@ -143,7 +143,7 @@ export function Header() {
                 variant="default"
                 onClick={() => navigate("/login")}
                 size="sm"
-                className="h-8 px-2 text-xs bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-black"
+                className="h-8 px-2 text-xs bg-[#0072CE] hover:bg-[#0072CE]/90 text-white font-medium"
               >
                 <LogIn className="w-3.5 h-3.5 mr-1" />
                 Login
