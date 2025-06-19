@@ -101,6 +101,17 @@ This project uses open source audio libraries including **Tone.js**, **WaveSurfe
 
 See [docs/RECORDING_PROCESS.md](docs/RECORDING_PROCESS.md) for a step-by-step guide on creating and managing recordings.
 
+## SoundCloud Integration Tools
+
+The admin panel now includes a dedicated **SoundCloud** section under content management. After connecting your SoundCloud account via OAuth, you can:
+
+- Browse your personal library directly in the dashboard.
+- Import public tracks or playlists by URL.
+- Manage homepage embeds with the **SoundCloud Embed Manager**.
+- Tweak playback options in **Player Settings**.
+
+These tools rely on the SoundCloud API so be sure to configure `SOUNDCLOUD_CLIENT_ID` and `SOUNDCLOUD_CLIENT_SECRET` in your `.env` file.
+
 ## Updating Store Product Images
 
 If your store items are missing proper product photos, you can generate new mockups with the helper script:

@@ -5,6 +5,8 @@ import { SoundCloudAuth } from '@/components/soundcloud/SoundCloudAuth';
 import { SoundCloudLibrary } from '@/components/soundcloud/SoundCloudLibrary';
 import { SoundCloudUrlImport } from '@/components/admin/SoundCloudUrlImport';
 import { Music } from 'lucide-react';
+import { SoundCloudEmbedManager } from '@/components/admin/soundcloud/SoundCloudEmbedManager';
+import { SoundCloudPlayerSettings } from '@/components/admin/soundcloud/SoundCloudPlayerSettings';
 
 export default function SoundCloudAdminPage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -28,14 +30,34 @@ export default function SoundCloudAdminPage() {
         </Card>
 
         {accessToken && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Import from URL</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SoundCloudUrlImport />
-            </CardContent>
-          </Card>
+          <>
+            <Card>
+              <CardHeader>
+                <CardTitle>Import from URL</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SoundCloudUrlImport />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Homepage Embeds</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SoundCloudEmbedManager />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Player Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SoundCloudPlayerSettings />
+              </CardContent>
+            </Card>
+          </>
         )}
       </div>
     </AdminV2Layout>
