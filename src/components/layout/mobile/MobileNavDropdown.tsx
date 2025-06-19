@@ -12,7 +12,7 @@ export function MobileNavDropdown() {
   const navigate = useNavigate();
   const { isAuthenticated, user, profile, logout, isAdmin } = useAuth();
   const { upcomingEvents } = useHomePageData();
-  const { openReaderWithAuth } = useSSOAuth();
+  const { navigateToReader } = useSSOAuth();
 
   const handleLogout = async () => {
     try {
@@ -37,7 +37,7 @@ export function MobileNavDropdown() {
   };
 
   const handleReaderClick = () => {
-    openReaderWithAuth();
+    navigateToReader();
     setIsOpen(false);
   };
 

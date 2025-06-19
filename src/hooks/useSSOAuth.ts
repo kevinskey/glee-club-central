@@ -24,14 +24,25 @@ export const useSSOAuth = () => {
     }
   }, [isAuthenticated]);
 
-  const openReaderWithAuth = useCallback(async () => {
+  const openReaderWithAuth = useCallback(async (openInSameTab = false) => {
     const url = await getAuthenticatedReaderURL();
-    window.open(url, '_blank');
+    
+    if (openInSameTab) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank');
+    }
+  }, [getAuthenticatedReaderURL]);
+
+  const navigateToReader = useCallback(async () => {
+    const url = await getAuthenticatedReaderURL();
+    window.location.href = url;
   }, [getAuthenticatedReaderURL]);
 
   return {
     getAuthenticatedReaderURL,
     openReaderWithAuth,
+    navigateToReader,
     isGeneratingURL
   };
 };

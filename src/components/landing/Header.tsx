@@ -13,7 +13,7 @@ export function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, profile, user, logout, isAdmin } = useAuth();
   const { upcomingEvents } = useHomePageData();
-  const { openReaderWithAuth } = useSSOAuth();
+  const { navigateToReader } = useSSOAuth();
   
   const handleDashboardClick = () => {
     const isKnownAdmin = user?.email === 'kevinskey@mac.com';
@@ -37,7 +37,7 @@ export function Header() {
   
   const handleReaderClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    openReaderWithAuth();
+    navigateToReader();
   };
   
   return (
