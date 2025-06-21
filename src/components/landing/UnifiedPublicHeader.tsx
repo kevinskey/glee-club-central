@@ -88,10 +88,10 @@ export function UnifiedPublicHeader() {
                 Spelman College
               </div>
             </div>
-            {/* Event Indicator - Mobile only */}
+            {/* Event Indicator - Mobile only - Fixed positioning */}
             {upcomingEvents.length > 0 && (
-              <div className="ml-1 sm:hidden">
-                <Bell className="h-3 w-3 text-[#003366] dark:text-white" />
+              <div className="ml-2 sm:hidden relative">
+                <Bell className="h-4 w-4 text-[#003366] dark:text-white" />
                 <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
               </div>
             )}
@@ -109,7 +109,7 @@ export function UnifiedPublicHeader() {
           <Link to="/calendar" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
             Events
             {upcomingEvents.length > 0 && (
-              <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
             )}
           </Link>
           <a 
@@ -181,7 +181,7 @@ export function UnifiedPublicHeader() {
                 <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white relative">
                   <Menu className="h-6 w-6" />
                   {upcomingEvents.length > 0 && (
-                    <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                    <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
                   )}
                 </Button>
               </SheetTrigger>
@@ -224,7 +224,7 @@ export function UnifiedPublicHeader() {
                         <Button
                           key={link.label}
                           variant="ghost"
-                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 relative"
                           onClick={() => {
                             if (link.onClick) {
                               link.onClick(new Event('click') as any);
@@ -239,7 +239,7 @@ export function UnifiedPublicHeader() {
                           <link.icon className="w-5 h-5 mr-3 flex-shrink-0" />
                           <span className="flex-1">{link.label}</span>
                           {link.hasNotification && (
-                            <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                            <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse ml-2"></div>
                           )}
                         </Button>
                       ))}
