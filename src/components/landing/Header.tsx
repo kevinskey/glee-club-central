@@ -47,7 +47,7 @@ export function Header() {
         {/* Logo Section */}
         <div className="flex-shrink-0 min-w-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
-            <Icons.logo className="h-7 w-7 flex-shrink-0" />
+            <Icons.logo className="h-8 w-8 flex-shrink-0" />
             <div className="ml-2 min-w-0">
               <div className="text-sm sm:text-base text-[#003366] dark:text-white font-bold font-playfair truncate">
                 GleeWorld
@@ -59,7 +59,7 @@ export function Header() {
             {/* Event Indicator - Mobile only */}
             {upcomingEvents.length > 0 && (
               <div className="ml-1 sm:hidden">
-                <Bell className="h-3 w-3 text-[#003366] dark:text-white" />
+                <Bell className="h-4 w-4 text-[#003366] dark:text-white" />
                 <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
               </div>
             )}
@@ -115,7 +115,7 @@ export function Header() {
                   onClick={handleDashboardClick}
                   className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
                 >
-                  <User className="w-4 h-4 xl:mr-2" />
+                  <User className="w-5 h-5 xl:mr-2" />
                   <span className="hidden xl:inline">Dashboard</span>
                 </Button>
                 <Button 
@@ -123,7 +123,7 @@ export function Header() {
                   onClick={handleLogout}
                   className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
                 >
-                  <LogOut className="w-4 h-4 xl:mr-2" />
+                  <LogOut className="w-5 h-5 xl:mr-2" />
                   <span className="hidden xl:inline">Sign Out</span>
                 </Button>
               </div>
@@ -134,7 +134,7 @@ export function Header() {
                   onClick={() => navigate("/signup")}
                   className="text-xs xl:text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium px-2 xl:px-3"
                 >
-                  <UserPlus className="w-4 h-4 xl:mr-2" />
+                  <UserPlus className="w-5 h-5 xl:mr-2" />
                   <span className="hidden xl:inline">Sign Up</span>
                 </Button>
                 <Button 
@@ -142,7 +142,7 @@ export function Header() {
                   onClick={() => navigate("/login")}
                   className="text-xs xl:text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium px-2 xl:px-3"
                 >
-                  <LogIn className="w-4 h-4 xl:mr-2" />
+                  <LogIn className="w-5 h-5 xl:mr-2" />
                   <span className="hidden xl:inline">Login</span>
                 </Button>
               </div>
