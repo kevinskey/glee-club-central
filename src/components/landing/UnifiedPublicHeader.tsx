@@ -135,49 +135,33 @@ export function UnifiedPublicHeader() {
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Buttons - Made smaller with visible icons */}
+          {/* Desktop Auth Icons - Just icons */}
           <div className="hidden md:flex items-center gap-1">
             {isAuthenticated ? (
               <div className="flex items-center gap-1">
-                <Button 
-                  variant="ghost"
-                  size="sm"
+                <User 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleDashboardClick}
-                  className="h-7 w-7 p-0 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Dashboard"
-                >
-                  <User className="w-4 h-4" />
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
+                />
+                <LogOut 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleLogout}
-                  className="h-7 w-7 p-0 rounded-full text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Sign Out"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                />
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <Button 
-                  variant="outline"
-                  size="sm"
+                <UserPlus 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/signup")}
-                  className="h-7 w-7 p-0 rounded-full bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white"
                   title="Sign Up"
-                >
-                  <UserPlus className="w-4 h-4" />
-                </Button>
-                <Button 
-                  variant="default"
-                  size="sm"
+                />
+                <LogIn 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/login")}
-                  className="h-7 w-7 p-0 rounded-full bg-[#003366] hover:bg-[#003366]/90 text-white"
                   title="Login"
-                >
-                  <LogIn className="w-4 h-4" />
-                </Button>
+                />
               </div>
             )}
           </div>
