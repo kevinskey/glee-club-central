@@ -42,7 +42,7 @@ export function Header() {
   
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md w-full">
-      <div className="w-full max-w-full mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+      <div className="w-full max-w-none mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border-b border-gray-200 dark:border-gray-700">
         {/* Logo Section */}
         <div className="flex-shrink-0 min-w-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
