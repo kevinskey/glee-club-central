@@ -23,7 +23,7 @@ import {
 
 export function UnifiedPublicHeader() {
   const navigate = useNavigate();
-  const { isAuthenticated, profile, user, logout } = useAuth();
+  const { isAuthenticated, profile, user, signOut } = useAuth();
   const { upcomingEvents } = useHomePageData();
   const { navigateToReader } = useSSOAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -42,7 +42,7 @@ export function UnifiedPublicHeader() {
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       navigate("/");
       setIsMobileMenuOpen(false);
     } catch (error) {
@@ -58,6 +58,16 @@ export function UnifiedPublicHeader() {
 
   const handleNavClick = (path: string) => {
     navigate(path);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleSignUpClick = () => {
+    navigate("/signup");
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    navigate("/login");
     setIsMobileMenuOpen(false);
   };
 
@@ -222,14 +232,14 @@ export function UnifiedPublicHeader() {
               <div className="flex items-center gap-3">
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
-                  onClick={() => navigate("/signup")}
+                  onClick={handleSignUpClick}
                   title="Sign Up"
                 >
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
-                  onClick={() => navigate("/login")}
+                  onClick={handleLoginClick}
                   title="Login"
                 >
                   <LogIn className="w-5 h-5" />
@@ -264,11 +274,11 @@ export function UnifiedPublicHeader() {
                   </>
                 ) : (
                   <>
-                    <DropdownMenuItem onClick={() => navigate("/signup")}>
+                    <DropdownMenuItem onClick={handleSignUpClick}>
                       <UserPlus className="mr-2 h-4 w-4" />
                       Sign Up
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                    <DropdownMenuItem onClick={handleLoginClick}>
                       <LogIn className="mr-2 h-4 w-4" />
                       Sign In
                     </DropdownMenuItem>
@@ -348,49 +358,49 @@ export function UnifiedPublicHeader() {
                         </Button>
                       ))}
                     </nav>
-                  </div>
-                  
-                  {/* Auth Section */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
-                    {isAuthenticated ? (
-                      <div className="space-y-3">
-                        <Button 
-                          variant="outline" 
-                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200 justify-start"
-                          onClick={handleDashboardClick}
-                        >
-                          <User className="w-4 h-4 mr-2" />
-                          My Dashboard
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          className="w-full h-12 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 justify-start"
-                          onClick={handleLogout}
-                        >
-                          <LogOut className="w-4 h-4 mr-2" />
-                          Sign Out
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <Button 
-                          variant="outline" 
-                          className="w-full h-12 border-2 border-[#003366] text-[#003366] hover:bg-[#003366] hover:text-white transition-all duration-200 justify-start"
-                          onClick={() => handleNavClick("/signup")}
-                        >
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          Create Account
-                        </Button>
-                        <Button 
-                          variant="default" 
-                          className="w-full h-12 bg-[#003366] hover:bg-[#003366]/90 text-white transition-all duration-200 justify-start"
-                          onClick={() => handleNavClick("/login")}
-                        >
-                          <LogIn className="w-4 h-4 mr-2" />
-                          Sign In
-                        </Button>
-                      </div>
-                    )}
+
+                    {/* Auth Section for Mobile */}
+                    <div className="px-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      {isAuthenticated ? (
+                        <div className="space-y-1">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            onClick={handleDashboardClick}
+                          >
+                            <User className="w-5 h-5 mr-3 flex-shrink-0" />
+                            Dashboard
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+                            onClick={handleLogout}
+                          >
+                            <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
+                            Sign Out
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            onClick={handleSignUpClick}
+                          >
+                            <UserPlus className="w-5 h-5 mr-3 flex-shrink-0" />
+                            Sign Up
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            onClick={handleLoginClick}
+                          >
+                            <LogIn className="w-5 h-5 mr-3 flex-shrink-0" />
+                            Sign In
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </SheetContent>
