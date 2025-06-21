@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
@@ -90,7 +89,7 @@ export function HeroSlider() {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden">
-      <Carousel className="w-full h-full" opts={{ loop: true }} showArrows>
+      <Carousel className="w-full h-full" opts={{ loop: true }}>
         <CarouselContent className="h-full">
           {displaySlides.map((slide, idx) => (
             <CarouselItem key={slide.id} className="relative w-full h-full">
@@ -146,8 +145,6 @@ export function HeroSlider() {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white" />
-        <CarouselNext className="right-4 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white" />
       </Carousel>
     </div>
   );
