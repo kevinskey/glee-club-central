@@ -12,6 +12,7 @@ import FinancialPage from "@/pages/admin/FinancialPage";
 import AnalyticsPage from "@/pages/admin/AnalyticsPage";
 import SheetMusicLibraryPage from "@/pages/admin/SheetMusicLibraryPage";
 import ReaderImportPage from "@/pages/admin/ReaderImportPage";
+import HeroSlidesPage from "@/pages/admin/HeroSlidesPage";
 
 export const AdminRoutes = () => {
   return (
@@ -28,6 +29,7 @@ export const AdminRoutes = () => {
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="sheet-music" element={<SheetMusicLibraryPage />} />
         <Route path="reader-import" element={<ReaderImportPage />} />
+        <Route path="hero-slides" element={<HeroSlidesPage />} />
       </Route>
     </Routes>
   );

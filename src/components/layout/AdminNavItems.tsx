@@ -1,55 +1,90 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { 
   Users, 
   Calendar, 
-  Image, 
-  Store, 
-  Settings, 
+  FileText, 
+  Music, 
+  ShoppingBag, 
+  BarChart3, 
   MessageSquare, 
   DollarSign, 
-  BarChart,
-  Music,
-  Download
+  Settings,
+  Upload,
+  Presentation
 } from 'lucide-react';
 
-const AdminNavItems: React.FC = () => {
-  const navItems = [
-    { to: '/admin', icon: BarChart, label: 'Dashboard', end: true },
-    { to: '/admin/members', icon: Users, label: 'Members' },
-    { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-    { to: '/admin/media', icon: Image, label: 'Media' },
-    { to: '/admin/sheet-music', icon: Music, label: 'Sheet Music' },
-    { to: '/admin/reader-import', icon: Download, label: 'Reader Import' },
-    { to: '/admin/store', icon: Store, label: 'Store' },
-    { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
-    { to: '/admin/finances', icon: DollarSign, label: 'Finances' },
-    { to: '/admin/analytics', icon: BarChart, label: 'Analytics' },
-    { to: '/admin/settings', icon: Settings, label: 'Settings' },
-  ];
-
-  return (
-    <nav className="space-y-2">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400'
-                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-            }`
-          }
-        >
-          <item.icon className="h-4 w-4" />
-          {item.label}
-        </NavLink>
-      ))}
-    </nav>
-  );
-};
-
-export default AdminNavItems;
+export const adminNavItems = [
+  {
+    title: 'Dashboard',
+    href: '/admin',
+    icon: BarChart3,
+    description: 'Overview and analytics'
+  },
+  {
+    title: 'Members',
+    href: '/admin/members',
+    icon: Users,
+    description: 'Manage club members'
+  },
+  {
+    title: 'Calendar',
+    href: '/admin/calendar',
+    icon: Calendar,
+    description: 'Events and scheduling'
+  },
+  {
+    title: 'Hero Slides',
+    href: '/admin/hero-slides',
+    icon: Presentation,
+    description: 'Manage landing page slider'
+  },
+  {
+    title: 'Media Library',
+    href: '/admin/media',
+    icon: FileText,
+    description: 'Photos, videos, and files'
+  },
+  {
+    title: 'Sheet Music',
+    href: '/admin/sheet-music',
+    icon: Music,
+    description: 'Music library management'
+  },
+  {
+    title: 'Store',
+    href: '/admin/store',
+    icon: ShoppingBag,
+    description: 'Products and orders'
+  },
+  {
+    title: 'Communications',
+    href: '/admin/communications',
+    icon: MessageSquare,
+    description: 'Messages and announcements'
+  },
+  {
+    title: 'Finances',
+    href: '/admin/finances',
+    icon: DollarSign,
+    description: 'Budget and transactions'
+  },
+  {
+    title: 'Analytics',
+    href: '/admin/analytics',
+    icon: BarChart3,
+    description: 'Reports and insights'
+  },
+  {
+    title: 'Reader Import',
+    href: '/admin/reader-import',
+    icon: Upload,
+    description: 'Import user data'
+  },
+  {
+    title: 'Settings',
+    href: '/admin/settings',
+    icon: Settings,
+    description: 'System configuration'
+  }
+];
