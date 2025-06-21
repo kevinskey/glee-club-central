@@ -80,28 +80,23 @@ export function HeroSlider() {
     }
   }));
 
+  console.log('HeroSlider: Displaying slides:', displaySlides.map(slide => ({
+    id: slide.id,
+    title: slide.title,
+    media_url: slide.media?.file_url,
+    youtube_url: slide.youtube_url
+  })));
+
   if (loading) {
     return (
-      <div className="fixed inset-0 w-screen h-screen bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-screen h-screen bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading slides...</div>
       </div>
     );
   }
 
-  // Apply spacing settings to container style
-  const containerStyle = {
-    paddingTop: `${spacingSettings.topPadding}px`,
-    paddingBottom: `${spacingSettings.bottomPadding}px`,
-    paddingLeft: `${spacingSettings.leftPadding}px`,
-    paddingRight: `${spacingSettings.rightPadding}px`,
-    marginTop: `${spacingSettings.topMargin}px`,
-    marginBottom: `${spacingSettings.bottomMargin}px`,
-    minHeight: `${spacingSettings.minHeight}vh`,
-    maxHeight: `${spacingSettings.maxHeight}vh`,
-  };
-
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={containerStyle}>
+    <div className="w-screen h-screen overflow-hidden">
       <Carousel className="w-full h-full" opts={{ loop: true }}>
         <CarouselContent className="h-full">
           {displaySlides.map((slide, idx) => (
@@ -119,6 +114,10 @@ export function HeroSlider() {
                   src={slide.media?.file_url || fallbackImages[0]} 
                   alt={slide.title || `Slide ${idx + 1}`} 
                   className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    console.error('Image failed to load:', slide.media?.file_url);
+                    e.currentTarget.src = fallbackImages[0];
+                  }}
                 />
               )}
               
