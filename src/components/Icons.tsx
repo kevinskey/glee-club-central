@@ -22,7 +22,8 @@ export const Icons = {
       <img 
         src={logoSrc}
         alt="Spelman College Glee Club Logo" 
-        className={cn("h-7 w-auto", props.className)} 
+        className={cn("h-7 w-auto", props.className)}
+        style={{ filter: 'hue-rotate(220deg) saturate(1.2) brightness(0.4)' }}
         {...props} 
       />
     );
