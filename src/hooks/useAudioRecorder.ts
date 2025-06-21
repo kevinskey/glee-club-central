@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { audioLogger, requestMicrophoneAccess, releaseMicrophone } from '@/utils/audioUtils';
+import { audioLogger, requestMicrophoneAccess, releaseMicrophone, initializeAudioSystem, cleanupAudioSystem } from '@/utils/audioUtils';
 
 export function useAudioRecorder() {
   // State
@@ -14,41 +14,24 @@ export function useAudioRecorder() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   
-  // Initialize audio system on mount
+  // Initialize audio system on mount with proper user interaction handling
   useEffect(() => {
     let mounted = true;
     
-    const initAudioContext = async () => {
+    const initAudio = async () => {
       try {
-        // Check if the AudioContext already exists
-        if (!audioContextRef.current) {
-          const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-          
-          if (!AudioContextClass) {
-            throw new Error("AudioContext not supported in this browser");
-          }
-          
-          audioContextRef.current = new AudioContextClass();
-          
-          // Resume context if it's in suspended state
-          if (audioContextRef.current.state === 'suspended') {
-            await audioContextRef.current.resume();
-          }
-        }
-        
-        if (mounted) {
-          setIsInitialized(true);
-          audioLogger.log('Audio recorder: Audio context created and initialized');
-        }
+        // Don't auto-initialize - wait for user interaction
+        setIsInitialized(true);
+        audioLogger.log('Audio recorder: Ready for user interaction');
       } catch (err) {
-        audioLogger.error('Audio recorder: Failed to create audio context', err);
+        audioLogger.error('Audio recorder: Failed to initialize', err);
         if (mounted) {
           setError(err instanceof Error ? err : new Error(String(err)));
         }
       }
     };
     
-    initAudioContext();
+    initAudio();
     
     // Clean up on unmount
     return () => {
@@ -63,17 +46,22 @@ export function useAudioRecorder() {
       }
       
       if (audioContextRef.current) {
-        audioContextRef.current.close().catch(console.error);
         audioContextRef.current = null;
       }
+      
+      // Don't cleanup global context here as other components might be using it
     };
   }, []);
   
-  // Start recording - Fix return type to ensure proper type checking
+  // Start recording with proper AudioContext initialization
   const startRecording = useCallback(async (): Promise<MediaStream> => {
     try {
       // Reset any previous errors
       setError(null);
+      
+      // Initialize audio system with user interaction
+      const audioContext = await initializeAudioSystem();
+      audioContextRef.current = audioContext;
       
       // Request microphone access
       const stream = await requestMicrophoneAccess();
@@ -84,7 +72,9 @@ export function useAudioRecorder() {
       mediaStreamRef.current = stream;
       
       // Create and configure the MediaRecorder
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = []; // Reset audio chunks array
       
@@ -95,10 +85,15 @@ export function useAudioRecorder() {
         }
       };
       
+      mediaRecorder.onerror = (event) => {
+        audioLogger.error('MediaRecorder error:', event);
+        setError(new Error('Recording failed'));
+      };
+      
       // Start recording
-      mediaRecorder.start();
+      mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
-      audioLogger.log('Recording started');
+      audioLogger.log('Recording started with proper AudioContext');
       
       return stream;
     } catch (error) {
@@ -121,7 +116,7 @@ export function useAudioRecorder() {
       
       // When stopped, create a blob from the audio chunks
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm;codecs=opus' });
         
         // Clean up
         if (mediaStreamRef.current) {
@@ -157,7 +152,7 @@ export function useAudioRecorder() {
   
   // Check if the browser supports recording
   const isBrowserSupported = useCallback(() => {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
   }, []);
   
   return {

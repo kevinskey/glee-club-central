@@ -11,6 +11,52 @@ export const audioLogger = {
   }
 };
 
+// Global AudioContext instance to prevent multiple contexts
+let globalAudioContext: AudioContext | null = null;
+
+// Get or create AudioContext singleton
+export function getAudioContext(): AudioContext {
+  if (!globalAudioContext) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) {
+      throw new Error('AudioContext not supported in this browser');
+    }
+    globalAudioContext = new AudioContextClass();
+    audioLogger.log('Global AudioContext created');
+  }
+  
+  return globalAudioContext;
+}
+
+// Resume audio context with user interaction handling
+export async function resumeAudioContext(audioContext?: AudioContext): Promise<AudioContext> {
+  const ctx = audioContext || getAudioContext();
+  
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume();
+      audioLogger.log('AudioContext resumed successfully');
+    } catch (error) {
+      audioLogger.error('Failed to resume AudioContext:', error);
+      throw error;
+    }
+  }
+  
+  return ctx;
+}
+
+// Initialize audio system with user interaction
+export async function initializeAudioSystem(): Promise<AudioContext> {
+  try {
+    const audioContext = getAudioContext();
+    await resumeAudioContext(audioContext);
+    return audioContext;
+  } catch (error) {
+    audioLogger.error('Failed to initialize audio system:', error);
+    throw error;
+  }
+}
+
 // Note frequency calculation for pitch pipe
 export function getNoteFrequency(note: string, octave: number = 4): number {
   console.log('getNoteFrequency called with:', { note, octave });
@@ -37,12 +83,13 @@ export function getNoteFrequency(note: string, octave: number = 4): number {
   return frequency;
 }
 
-// Play note function for pitch pipe functionality
-export function playNote(frequency: number, duration: number = 1000): Promise<void> {
+// Play note function for pitch pipe functionality - now uses global context
+export async function playNote(frequency: number, duration: number = 1000): Promise<void> {
   console.log('playNote called with:', { frequency, duration });
   
-  return new Promise((resolve) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  try {
+    const audioContext = await initializeAudioSystem();
+    
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     
@@ -58,58 +105,45 @@ export function playNote(frequency: number, duration: number = 1000): Promise<vo
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + duration / 1000);
     
-    setTimeout(() => {
-      resolve();
-    }, duration);
-  });
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, duration);
+    });
+  } catch (error) {
+    audioLogger.error('Error playing note:', error);
+    throw error;
+  }
 }
 
 // Click sound for metronome - now accepts optional AudioContext
-export function playClick(audioContext?: AudioContext): Promise<void> {
-  if (audioContext) {
+export async function playClick(audioContext?: AudioContext): Promise<void> {
+  try {
+    const ctx = audioContext || await initializeAudioSystem();
+    
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.1);
+    
     return new Promise((resolve) => {
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1);
-      
       setTimeout(() => {
         resolve();
       }, 100);
     });
-  } else {
-    // Fallback using basic Audio API
-    return new Promise((resolve) => {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.type = 'sine';
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1);
-      
-      setTimeout(() => {
-        resolve();
-      }, 100);
-    });
+  } catch (error) {
+    audioLogger.error('Error playing click:', error);
+    throw error;
   }
 }
 
@@ -141,13 +175,6 @@ export function createAccentClickBuffer(audioContext: AudioContext): AudioBuffer
   return buffer;
 }
 
-// Resume audio context
-export async function resumeAudioContext(audioContext: AudioContext): Promise<void> {
-  if (audioContext.state === 'suspended') {
-    await audioContext.resume();
-  }
-}
-
 // Request microphone access
 export async function requestMicrophoneAccess(): Promise<MediaStream> {
   try {
@@ -164,6 +191,15 @@ export async function requestMicrophoneAccess(): Promise<MediaStream> {
 export function releaseMicrophone(stream: MediaStream): void {
   stream.getTracks().forEach(track => track.stop());
   audioLogger.log('Microphone released');
+}
+
+// Cleanup global audio context
+export function cleanupAudioSystem(): void {
+  if (globalAudioContext) {
+    globalAudioContext.close().catch(console.error);
+    globalAudioContext = null;
+    audioLogger.log('Global AudioContext cleaned up');
+  }
 }
 
 console.log('audioUtils.ts loaded successfully - all exports available');
