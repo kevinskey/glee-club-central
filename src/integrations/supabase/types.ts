@@ -1001,6 +1001,7 @@ export type Database = {
           loop: boolean | null
           pause_on_hover: boolean | null
           scroll_interval: number | null
+          spacing_settings: Json | null
           updated_at: string | null
         }
         Insert: {
@@ -1010,6 +1011,7 @@ export type Database = {
           loop?: boolean | null
           pause_on_hover?: boolean | null
           scroll_interval?: number | null
+          spacing_settings?: Json | null
           updated_at?: string | null
         }
         Update: {
@@ -1019,6 +1021,7 @@ export type Database = {
           loop?: boolean | null
           pause_on_hover?: boolean | null
           scroll_interval?: number | null
+          spacing_settings?: Json | null
           updated_at?: string | null
         }
         Relationships: []
