@@ -35,8 +35,7 @@ interface AudioTrack {
 
 export const useHomePageData = () => {
   const [storeProducts, setStoreProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Changed from true to false
   const { events, loading: eventsLoading } = useCalendarEvents();
   const { activePlaylist, isLoading: musicLoading } = useMusicPlayer();
 
@@ -75,6 +74,8 @@ export const useHomePageData = () => {
 
   const fetchStoreProducts = async () => {
     try {
+      setIsLoading(true);
+      
       if (!supabase) {
         console.warn('useHomePageData: Supabase not configured, using fallback products');
         setStoreProducts([{
@@ -93,7 +94,10 @@ export const useHomePageData = () => {
         .eq('featured', true)
         .limit(4);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
 
       const formattedProducts: Product[] = data?.map(product => ({
         id: product.id,
@@ -112,30 +116,18 @@ export const useHomePageData = () => {
         price: 25.00,
         imageUrl: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop"
       }]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Load data on component mount
   useEffect(() => {
-    if (hasLoadedOnce) return;
-    
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        await fetchStoreProducts();
-      } catch (error) {
-        console.error('Error loading homepage data:', error);
-      } finally {
-        setIsLoading(false);
-        setHasLoadedOnce(true);
-      }
-    };
+    fetchStoreProducts();
+  }, []); // Removed hasLoadedOnce dependency
 
-    loadData();
-  }, [hasLoadedOnce]);
-
-  // Overall loading state includes events and music loading
-  const overallLoading = isLoading || eventsLoading || musicLoading;
+  // Overall loading state - now only shows loading during actual data fetches
+  const overallLoading = isLoading;
 
   return {
     upcomingEvents,

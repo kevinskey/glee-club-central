@@ -9,7 +9,7 @@ import { useHomePageData } from "@/hooks/useHomePageData";
 import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { 
     upcomingEvents, 
     storeProducts, 
@@ -21,22 +21,25 @@ export default function HomePage() {
 
   useEffect(() => {
     console.log('HomePage: Component mounted');
+    
+    // Reduce initial loading time and don't wait for all data
     const timer = setTimeout(() => {
       console.log('HomePage: Initial loading complete');
-      setIsLoading(false);
-      // Track homepage feature usage
+      setIsInitialLoading(false);
+      
+      // Track homepage feature usage after initial load
       trackFeatureUsage('homepage_loaded', {
         eventsCount: upcomingEvents.length,
         productsCount: storeProducts.length,
         tracksCount: audioTracks.length
       });
-    }, 1000);
+    }, 500); // Reduced from 1000ms to 500ms
 
     return () => clearTimeout(timer);
   }, [upcomingEvents.length, storeProducts.length, audioTracks.length, trackFeatureUsage]);
 
-  // Show loader while initial page is loading, but don't wait for data indefinitely
-  if (isLoading) {
+  // Show loader only during very initial page load
+  if (isInitialLoading) {
     console.log('HomePage: Showing loader');
     return <HomePageLoader />;
   }
