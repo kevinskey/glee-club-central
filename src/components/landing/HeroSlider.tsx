@@ -66,14 +66,14 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full py-20 bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero...</div>
       </div>
     );
   }
 
   return (
-    <section className="relative w-full overflow-hidden">
+    <section className="relative w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
       {/* Background Image or Video */}
       {heroSlide.media_type === 'video' && heroSlide.youtube_url ? (
         <div className="absolute inset-0 w-full h-full">
@@ -111,11 +111,11 @@ export function HeroSlider() {
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/30" />
       
-      {/* Content with Dynamic Height */}
+      {/* Content */}
       {(heroSlide.title || heroSlide.description || heroSlide.button_text) && (
-        <div className={`relative flex items-center py-16 sm:py-20 md:py-24 lg:py-28 ${
-          heroSlide.text_position === 'top' ? 'justify-start' :
-          heroSlide.text_position === 'bottom' ? 'justify-end' :
+        <div className={`absolute inset-0 flex items-center ${
+          heroSlide.text_position === 'top' ? 'justify-start pt-8 sm:pt-12 md:pt-16' :
+          heroSlide.text_position === 'bottom' ? 'justify-end pb-8 sm:pb-12 md:pb-16' :
           'justify-center'
         }`}>
           <div className={`text-white px-4 sm:px-6 md:px-8 max-w-4xl w-full ${
