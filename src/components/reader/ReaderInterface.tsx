@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic, Eye, ArrowLeft, Search, Settings, Edit, Link, Grid3X3, Share, Store, Cloud, Scan, FileText, Piano, Mic, Gauge, BarChart, CloudSync } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic, Eye, ArrowLeft, Search, Settings, Edit, Link, Grid3X3, Share, Store, Cloud, Scan, FileText, Piano, Mic, Gauge, BarChart } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
 import { MemberReaderView } from './MemberReaderView';
@@ -198,7 +197,7 @@ export function ReaderInterface() {
                       Dashboard
                     </Button>
                     <Button variant="ghost" className="w-full justify-start text-blue-600">
-                      <CloudSync className="h-4 w-4 mr-3" />
+                      <Cloud className="h-4 w-4 mr-3" />
                       Sync
                     </Button>
                   </div>
