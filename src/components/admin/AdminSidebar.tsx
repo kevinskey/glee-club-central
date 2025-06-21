@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -26,11 +25,9 @@ import {
   Video,
   FileText,
   Megaphone,
-  Upload,
   DollarSign,
   UserCog,
   Shield,
-  Presentation,
   Package,
   ChevronDown,
   LogOut,
@@ -50,7 +47,6 @@ const navItems = [
   { to: '/admin/music', icon: Music, label: 'Music Player' },
   { to: '/admin/soundcloud', icon: Music, label: 'SoundCloud' },
   { to: '/admin/videos', icon: Video, label: 'Videos' },
-  { to: '/admin/hero-slides', icon: Presentation, label: 'Hero Slides' },
   { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
   { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
   { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
