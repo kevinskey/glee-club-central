@@ -1,4 +1,3 @@
-
 @tailwind base;
 
 @layer base {
@@ -21,15 +20,15 @@
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 220 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 173 80% 70%;  /* Light blue instead of apple blue */
+    --accent-foreground: 210 100% 20%;  /* Navy blue text */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 90%;
     --input: 0 0% 96%;
-    --ring: 220 100% 60%;
+    --ring: 173 80% 70%;  /* Light blue ring */
 
     --radius: 8px;
     
@@ -58,15 +57,15 @@
     --muted: 0 0% 92%;
     --muted-foreground: 0 0% 35%;
 
-    --accent: 220 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 173 80% 70%;  /* Light blue for dark mode */
+    --accent-foreground: 210 100% 20%;  /* Navy blue text */
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 0 0% 85%;       /* Light gray borders */
     --input: 0 0% 92%;
-    --ring: 220 100% 60%;
+    --ring: 173 80% 70%;  /* Light blue ring */
   }
 
   * {
