@@ -29,7 +29,7 @@ export function ReaderInterface() {
     console.log('📖 PDF ID:', pdf.id);
     
     if (!pdf.file_url) {
-      console.error('❌ ReaderInterface: PDF file_url is missing');
+      console.error('❌ ReaderInterface: PDF missing file_url');
       return;
     }
     
@@ -96,10 +96,10 @@ export function ReaderInterface() {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Music className="h-8 w-8 text-orange-500" />
-          <h1 className="text-3xl font-bold text-[#003366] dark:text-white">Music Reader Admin</h1>
+          <h1 className="text-3xl font-bold text-[#003366] dark:text-white">Music Reader</h1>
         </div>
         <p className="text-lg text-gray-600 dark:text-gray-300">
-          Manage the digital sheet music library and member access
+          Digital sheet music library and PDF viewer
         </p>
       </div>
 
@@ -108,7 +108,7 @@ export function ReaderInterface() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-500" />
-            Admin Dashboard Status
+            Reader Status
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -120,19 +120,19 @@ export function ReaderInterface() {
                 </Badge>
                 {isAuthenticated && (
                   <Badge variant="outline" className="text-green-600 border-green-600">
-                    Admin Access
+                    {isAdmin() ? 'Admin Access' : 'Member Access'}
                   </Badge>
                 )}
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 {isAuthenticated 
-                  ? `Admin panel ready for ${profile?.first_name || 'administrator'}`
-                  : 'Sign in for admin access'
+                  ? `Ready for ${profile?.first_name || 'user'}`
+                  : 'Sign in to access the music library'
                 }
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {isAuthenticated && (
+              {isAuthenticated && isAdmin() && (
                 <>
                   <Button 
                     onClick={() => setShowMemberPreview(true)}
@@ -184,7 +184,7 @@ export function ReaderInterface() {
       {!isAuthenticated && (
         <Alert>
           <AlertDescription>
-            Sign in with admin credentials to access the Music Reader management dashboard.
+            Sign in to access the Music Reader and digital sheet music library.
           </AlertDescription>
         </Alert>
       )}
@@ -192,33 +192,38 @@ export function ReaderInterface() {
       {/* Help Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Admin Guide</CardTitle>
+          <CardTitle>Music Reader Guide</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-2">
-            <h4 className="font-medium">Library Management:</h4>
+            <h4 className="font-medium">PDF Library:</h4>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-              <li>• Upload new PDFs with metadata and voice part assignments</li>
-              <li>• Organize sheet music by categories and tags</li>
-              <li>• Monitor member access and usage</li>
-              <li>• Manage PDF permissions and availability</li>
+              <li>• Browse and search through digital sheet music</li>
+              <li>• Filter by voice part, category, and tags</li>
+              <li>• View PDFs with advanced reader features</li>
+              <li>• Create annotations and bookmarks</li>
             </ul>
           </div>
           <div className="space-y-2">
             <h4 className="font-medium">Setlist Management:</h4>
             <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-              <li>• Create setlists for performances and rehearsals</li>
-              <li>• Add and remove PDFs from setlists</li>
-              <li>• Share setlists with members</li>
-              <li>• Manage setlist permissions and access</li>
+              <li>• Create personal setlists for performances</li>
+              <li>• Organize sheet music by event or rehearsal</li>
+              <li>• Quick access to frequently used pieces</li>
+              <li>• Share setlists with other members</li>
             </ul>
           </div>
-          <div className="space-y-2">
-            <h4 className="font-medium">Member Experience:</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Regular members see a simplified reader interface focused on browsing and reading sheet music and creating their own setlists.
-            </p>
-          </div>
+          {isAdmin() && (
+            <div className="space-y-2">
+              <h4 className="font-medium">Admin Features:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
+                <li>• Upload and manage PDF files</li>
+                <li>• Assign metadata and voice parts</li>
+                <li>• Monitor member access and usage</li>
+                <li>• Preview member experience</li>
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
 
