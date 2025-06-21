@@ -1,16 +1,15 @@
-
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Search, X, Filter } from 'lucide-react';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, X, Filter } from "lucide-react";
 
 interface MembersFiltersProps {
   search: string;
@@ -39,7 +38,7 @@ export function MembersFilters({
   duesPaidFilter,
   onDuesPaidFilterChange,
   onClearFilters,
-  activeFilterCount
+  activeFilterCount,
 }: MembersFiltersProps) {
   return (
     <div className="space-y-4">
@@ -119,9 +118,9 @@ export function MembersFilters({
 
         {/* Clear Filters */}
         {activeFilterCount > 0 && (
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onClearFilters}
             className="h-9"
           >
@@ -137,45 +136,45 @@ export function MembersFilters({
           {search && (
             <Badge variant="secondary" className="gap-1">
               Search: "{search}"
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => onSearchChange('')}
+              <X
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onSearchChange("")}
               />
             </Badge>
           )}
-          {roleFilter !== 'all' && (
+          {roleFilter !== "all" && (
             <Badge variant="secondary" className="gap-1">
               Role: {roleFilter}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => onRoleFilterChange('all')}
+              <X
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onRoleFilterChange("all")}
               />
             </Badge>
           )}
-          {statusFilter !== 'all' && (
+          {statusFilter !== "all" && (
             <Badge variant="secondary" className="gap-1">
               Status: {statusFilter}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => onStatusFilterChange('all')}
+              <X
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onStatusFilterChange("all")}
               />
             </Badge>
           )}
-          {voicePartFilter !== 'all' && (
+          {voicePartFilter !== "all" && (
             <Badge variant="secondary" className="gap-1">
-              Voice: {voicePartFilter.replace('_', ' ')}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => onVoicePartFilterChange('all')}
+              Voice: {voicePartFilter.replace("_", " ")}
+              <X
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onVoicePartFilterChange("all")}
               />
             </Badge>
           )}
-          {duesPaidFilter !== 'all' && (
+          {duesPaidFilter !== "all" && (
             <Badge variant="secondary" className="gap-1">
               Dues: {duesPaidFilter}
-              <X 
-                className="h-3 w-3 cursor-pointer" 
-                onClick={() => onDuesPaidFilterChange('all')}
+              <X
+                className="h-3 w-3 cursor-pointer"
+                onClick={() => onDuesPaidFilterChange("all")}
               />
             </Badge>
           )}

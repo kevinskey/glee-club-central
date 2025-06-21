@@ -1,13 +1,12 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Edit, Trash2, Package } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Plus, Search, Edit, Trash2, Package } from "lucide-react";
+import { toast } from "sonner";
 
 interface StoreItem {
   id: string;
@@ -22,16 +21,16 @@ interface StoreItem {
 }
 
 export function ProductManagement() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['store-items'],
+    queryKey: ["store-items"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('store_items')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("store_items")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data as StoreItem[];
@@ -41,45 +40,53 @@ export function ProductManagement() {
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: string) => {
       const { error } = await supabase
-        .from('store_items')
+        .from("store_items")
         .delete()
-        .eq('id', productId);
+        .eq("id", productId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store-items'] });
-      toast.success('Product deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ["store-items"] });
+      toast.success("Product deleted successfully");
     },
     onError: (error) => {
-      toast.error('Failed to delete product');
+      toast.error("Failed to delete product");
       console.error(error);
     },
   });
 
   const toggleProductStatusMutation = useMutation({
-    mutationFn: async ({ productId, isActive }: { productId: string; isActive: boolean }) => {
+    mutationFn: async ({
+      productId,
+      isActive,
+    }: {
+      productId: string;
+      isActive: boolean;
+    }) => {
       const { error } = await supabase
-        .from('store_items')
+        .from("store_items")
         .update({ is_active: isActive })
-        .eq('id', productId);
+        .eq("id", productId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store-items'] });
-      toast.success('Product status updated');
+      queryClient.invalidateQueries({ queryKey: ["store-items"] });
+      toast.success("Product status updated");
     },
     onError: (error) => {
-      toast.error('Failed to update product status');
+      toast.error("Failed to update product status");
       console.error(error);
     },
   });
 
-  const filteredProducts = products?.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  const filteredProducts =
+    products?.filter(
+      (product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+    ) || [];
 
   if (isLoading) {
     return (
@@ -129,8 +136,8 @@ export function ProductManagement() {
                 </div>
               )}
               <div className="absolute top-2 right-2">
-                <Badge variant={product.is_active ? 'default' : 'secondary'}>
-                  {product.is_active ? 'Active' : 'Inactive'}
+                <Badge variant={product.is_active ? "default" : "secondary"}>
+                  {product.is_active ? "Active" : "Inactive"}
                 </Badge>
               </div>
             </div>
@@ -173,12 +180,14 @@ export function ProductManagement() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => toggleProductStatusMutation.mutate({
-                      productId: product.id,
-                      isActive: !product.is_active
-                    })}
+                    onClick={() =>
+                      toggleProductStatusMutation.mutate({
+                        productId: product.id,
+                        isActive: !product.is_active,
+                      })
+                    }
                   >
-                    {product.is_active ? 'Deactivate' : 'Activate'}
+                    {product.is_active ? "Deactivate" : "Activate"}
                   </Button>
                 </div>
                 <Button
@@ -201,7 +210,9 @@ export function ProductManagement() {
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">No Products Found</h3>
             <p className="text-muted-foreground mb-4">
-              {searchQuery ? 'No products match your search.' : 'No products have been added yet.'}
+              {searchQuery
+                ? "No products match your search."
+                : "No products have been added yet."}
             </p>
             <Button>
               <Plus className="h-4 w-4 mr-2" />

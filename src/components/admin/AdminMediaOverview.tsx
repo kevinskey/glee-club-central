@@ -1,20 +1,19 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { useMediaLibrary } from '@/hooks/useMediaLibrary';
-import { 
-  FileImage, 
-  Upload, 
-  Image, 
-  FileText, 
-  Music, 
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
+import {
+  FileImage,
+  Upload,
+  Image,
+  FileText,
+  Music,
   Video,
-  ArrowRight 
-} from 'lucide-react';
-import { formatFileSize } from '@/utils/file-utils';
-import { getMediaType } from '@/utils/mediaUtils';
+  ArrowRight,
+} from "lucide-react";
+import { formatFileSize } from "@/utils/file-utils";
+import { getMediaType } from "@/utils/mediaUtils";
 
 export function AdminMediaOverview() {
   const navigate = useNavigate();
@@ -29,11 +28,16 @@ export function AdminMediaOverview() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'image': return <Image className="h-4 w-4" />;
-      case 'pdf': return <FileText className="h-4 w-4" />;
-      case 'audio': return <Music className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "image":
+        return <Image className="h-4 w-4" />;
+      case "pdf":
+        return <FileText className="h-4 w-4" />;
+      case "audio":
+        return <Music className="h-4 w-4" />;
+      case "video":
+        return <Video className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -62,10 +66,10 @@ export function AdminMediaOverview() {
           <FileImage className="h-5 w-5" />
           Media Library
         </CardTitle>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
-          onClick={() => navigate('/admin/media')}
+          onClick={() => navigate("/admin/media")}
         >
           View All <ArrowRight className="ml-1 h-3 w-3" />
         </Button>
@@ -74,7 +78,9 @@ export function AdminMediaOverview() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{mediaStats.totalFiles}</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {mediaStats.totalFiles}
+            </div>
             <div className="text-xs text-muted-foreground">Total Files</div>
           </div>
           <div className="text-center">
@@ -85,13 +91,13 @@ export function AdminMediaOverview() {
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-purple-600">
-              {getFileCount('image')}
+              {getFileCount("image")}
             </div>
             <div className="text-xs text-muted-foreground">Images</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-orange-600">
-              {getFileCount('application') + getFileCount('audio')}
+              {getFileCount("application") + getFileCount("audio")}
             </div>
             <div className="text-xs text-muted-foreground">Documents</div>
           </div>
@@ -105,14 +111,20 @@ export function AdminMediaOverview() {
               {recentFiles.map((file) => {
                 const mediaType = getMediaType(file.file_type);
                 return (
-                  <div key={file.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
+                  <div
+                    key={file.id}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50"
+                  >
                     <div className="flex-shrink-0">
                       {getTypeIcon(mediaType)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate">{file.title}</div>
+                      <div className="font-medium text-sm truncate">
+                        {file.title}
+                      </div>
                       <div className="text-xs text-muted-foreground">
-                        {formatFileSize(file.size || 0)} • {new Date(file.created_at).toLocaleDateString()}
+                        {formatFileSize(file.size || 0)} •{" "}
+                        {new Date(file.created_at).toLocaleDateString()}
                       </div>
                     </div>
                   </div>
@@ -128,18 +140,18 @@ export function AdminMediaOverview() {
 
         {/* Quick Actions */}
         <div className="flex gap-2 pt-2">
-          <Button 
-            size="sm" 
-            onClick={() => navigate('/admin/media')}
+          <Button
+            size="sm"
+            onClick={() => navigate("/admin/media")}
             className="flex-1"
           >
             <Upload className="mr-2 h-4 w-4" />
             Upload Media
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
-            onClick={() => navigate('/admin/media')}
+            onClick={() => navigate("/admin/media")}
             className="flex-1"
           >
             Manage Library

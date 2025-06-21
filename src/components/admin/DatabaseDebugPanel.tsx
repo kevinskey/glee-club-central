@@ -1,12 +1,18 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useUsersDebug } from '@/hooks/user/useUsersDebug';
-import { AlertCircle, Database, User, Shield } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useUsersDebug } from "@/hooks/user/useUsersDebug";
+import { AlertCircle, Database, User, Shield } from "lucide-react";
 
 export const DatabaseDebugPanel: React.FC = () => {
-  const { testConnection, testAuth, testBasicQuery, testAdminQuery, isLoading, results } = useUsersDebug();
+  const {
+    testConnection,
+    testAuth,
+    testBasicQuery,
+    testAdminQuery,
+    isLoading,
+    results,
+  } = useUsersDebug();
 
   return (
     <Card className="mb-6">
@@ -18,8 +24,8 @@ export const DatabaseDebugPanel: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap gap-2">
-          <Button 
-            onClick={testConnection} 
+          <Button
+            onClick={testConnection}
             disabled={isLoading}
             variant="outline"
             size="sm"
@@ -27,9 +33,9 @@ export const DatabaseDebugPanel: React.FC = () => {
             <Database className="mr-2 h-4 w-4" />
             Test Connection
           </Button>
-          
-          <Button 
-            onClick={testAuth} 
+
+          <Button
+            onClick={testAuth}
             disabled={isLoading}
             variant="outline"
             size="sm"
@@ -37,18 +43,18 @@ export const DatabaseDebugPanel: React.FC = () => {
             <User className="mr-2 h-4 w-4" />
             Test Auth
           </Button>
-          
-          <Button 
-            onClick={testBasicQuery} 
+
+          <Button
+            onClick={testBasicQuery}
             disabled={isLoading}
             variant="outline"
             size="sm"
           >
             Test Own Profile
           </Button>
-          
-          <Button 
-            onClick={testAdminQuery} 
+
+          <Button
+            onClick={testAdminQuery}
             disabled={isLoading}
             variant="outline"
             size="sm"
@@ -63,12 +69,18 @@ export const DatabaseDebugPanel: React.FC = () => {
             <h4 className="font-semibold mb-2">Debug Results:</h4>
             <div className="space-y-1 font-mono text-sm">
               {results.map((result, index) => (
-                <div key={index} className={
-                  result.includes('❌') ? 'text-red-600' :
-                  result.includes('✅') ? 'text-green-600' :
-                  result.includes('⚠️') ? 'text-orange-600' :
-                  'text-gray-700'
-                }>
+                <div
+                  key={index}
+                  className={
+                    result.includes("❌")
+                      ? "text-red-600"
+                      : result.includes("✅")
+                        ? "text-green-600"
+                        : result.includes("⚠️")
+                          ? "text-orange-600"
+                          : "text-gray-700"
+                  }
+                >
                   {result}
                 </div>
               ))}

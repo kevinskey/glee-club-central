@@ -1,12 +1,11 @@
-
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Users, Search, Music } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Users, Search, Music } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -26,11 +25,11 @@ interface PerformerSelectorProps {
 export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
   selectedPerformers,
   onPerformersChange,
-  isPerformanceEvent
+  isPerformanceEvent,
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -40,16 +39,16 @@ export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, voice_part, role, avatar_url')
-        .eq('status', 'active')
-        .order('last_name', { ascending: true });
+        .from("profiles")
+        .select("id, first_name, last_name, voice_part, role, avatar_url")
+        .eq("status", "active")
+        .order("last_name", { ascending: true });
 
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Failed to load users');
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
     } finally {
       setIsLoading(false);
     }
@@ -59,29 +58,31 @@ export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
     if (isSelected) {
       onPerformersChange([...selectedPerformers, userId]);
     } else {
-      onPerformersChange(selectedPerformers.filter(id => id !== userId));
+      onPerformersChange(selectedPerformers.filter((id) => id !== userId));
     }
   };
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
     const query = searchQuery.toLowerCase();
-    return fullName.includes(query) || user.voice_part?.toLowerCase().includes(query);
+    return (
+      fullName.includes(query) || user.voice_part?.toLowerCase().includes(query)
+    );
   });
 
   const getVoicePartDisplay = (voicePart: string | null) => {
-    if (!voicePart) return 'No voice part';
-    
+    if (!voicePart) return "No voice part";
+
     const voicePartMap: Record<string, string> = {
-      'soprano_1': 'Soprano 1',
-      'soprano_2': 'Soprano 2',
-      'alto_1': 'Alto 1',
-      'alto_2': 'Alto 2',
-      'tenor': 'Tenor',
-      'bass': 'Bass',
-      'director': 'Director'
+      soprano_1: "Soprano 1",
+      soprano_2: "Soprano 2",
+      alto_1: "Alto 1",
+      alto_2: "Alto 2",
+      tenor: "Tenor",
+      bass: "Bass",
+      director: "Director",
     };
-    
+
     return voicePartMap[voicePart] || voicePart;
   };
 
@@ -112,7 +113,8 @@ export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Select which members will perform at this event. They will be notified and the event will appear on their dashboard.
+          Select which members will perform at this event. They will be notified
+          and the event will appear on their dashboard.
         </div>
 
         <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -124,21 +126,21 @@ export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
               <p>No performers found</p>
             </div>
           ) : (
-            filteredUsers.map(user => {
+            filteredUsers.map((user) => {
               const isSelected = selectedPerformers.includes(user.id);
-              
+
               return (
-                <div 
-                  key={user.id} 
+                <div
+                  key={user.id}
                   className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50"
                 >
                   <Checkbox
                     checked={isSelected}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       handlePerformerToggle(user.id, checked as boolean)
                     }
                   />
-                  
+
                   <div className="flex-1">
                     <div className="font-medium">
                       {user.first_name} {user.last_name}
@@ -168,12 +170,16 @@ export const PerformerSelector: React.FC<PerformerSelectorProps> = ({
               Selected Performers ({selectedPerformers.length}):
             </div>
             <div className="flex flex-wrap gap-1">
-              {selectedPerformers.map(performerId => {
-                const user = users.find(u => u.id === performerId);
+              {selectedPerformers.map((performerId) => {
+                const user = users.find((u) => u.id === performerId);
                 if (!user) return null;
-                
+
                 return (
-                  <Badge key={performerId} variant="secondary" className="text-xs">
+                  <Badge
+                    key={performerId}
+                    variant="secondary"
+                    className="text-xs"
+                  >
                     {user.first_name} {user.last_name}
                   </Badge>
                 );

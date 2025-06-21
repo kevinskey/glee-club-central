@@ -1,14 +1,13 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
+import {
   Activity,
   Calendar,
   Upload,
   UserPlus,
   Settings,
-  Clock
+  Clock,
 } from "lucide-react";
 import { useRecentActivity } from "@/hooks/useRecentActivity";
 
@@ -16,16 +15,23 @@ interface AdminRecentActivityProps {
   isMobile?: boolean;
 }
 
-export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityProps) {
+export function AdminRecentActivity({
+  isMobile = false,
+}: AdminRecentActivityProps) {
   const { data: activities = [], isLoading, error } = useRecentActivity();
 
   const getIcon = (iconName: string) => {
     switch (iconName) {
-      case 'Calendar': return Calendar;
-      case 'Upload': return Upload;
-      case 'UserPlus': return UserPlus;
-      case 'Settings': return Settings;
-      default: return Activity;
+      case "Calendar":
+        return Calendar;
+      case "Upload":
+        return Upload;
+      case "UserPlus":
+        return UserPlus;
+      case "Settings":
+        return Settings;
+      default:
+        return Activity;
     }
   };
 
@@ -41,7 +47,10 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-lg animate-pulse">
+              <div
+                key={i}
+                className="flex items-start gap-4 p-4 rounded-lg animate-pulse"
+              >
                 <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600">
                   <div className="h-4 w-4 bg-gray-300 dark:bg-gray-500 rounded"></div>
                 </div>
@@ -68,7 +77,9 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Failed to load recent activity</p>
+          <p className="text-muted-foreground">
+            Failed to load recent activity
+          </p>
         </CardContent>
       </Card>
     );
@@ -103,14 +114,16 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
           {activities.map((activity) => {
             const Icon = getIcon(activity.icon);
             return (
-              <div 
-                key={activity.id} 
+              <div
+                key={activity.id}
                 className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 group"
               >
-                <div className={`p-2 rounded-lg ${activity.bgColor} group-hover:scale-105 transition-transform duration-200`}>
+                <div
+                  className={`p-2 rounded-lg ${activity.bgColor} group-hover:scale-105 transition-transform duration-200`}
+                >
                   <Icon className={`h-4 w-4 ${activity.color}`} />
                 </div>
-                
+
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-medium text-navy-900 dark:text-gray-100 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">
@@ -128,7 +141,10 @@ export function AdminRecentActivity({ isMobile = false }: AdminRecentActivityPro
                     <Avatar className="h-6 w-6">
                       <AvatarImage src={activity.avatar} />
                       <AvatarFallback className="bg-gray-200 dark:bg-gray-600 text-xs">
-                        {activity.user.split(' ').map(n => n[0]).join('')}
+                        {activity.user
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-xs text-gray-500 dark:text-gray-400">

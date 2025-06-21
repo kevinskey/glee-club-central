@@ -1,13 +1,12 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Music, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Music, Users } from "lucide-react";
 
 interface Event {
   id: string;
   date: string;
   title: string;
-  type: 'performance' | 'rehearsal' | 'other';
+  type: "performance" | "rehearsal" | "other";
   description?: string;
 }
 
@@ -17,10 +16,10 @@ interface EventTimelineProps {
 
 export function EventTimeline({ events }: EventTimelineProps) {
   const getEventIcon = (type: string) => {
-    switch(type) {
-      case 'performance':
+    switch (type) {
+      case "performance":
         return <Music className="h-5 w-5 text-purple-500" />;
-      case 'rehearsal':
+      case "rehearsal":
         return <Calendar className="h-5 w-5 text-blue-500" />;
       default:
         return <Users className="h-5 w-5 text-amber-500" />;
@@ -36,7 +35,7 @@ export function EventTimeline({ events }: EventTimelineProps) {
         <div className="relative ml-3 space-y-4">
           {/* Timeline line */}
           <div className="absolute inset-y-0 left-0 ml-[7px] w-[1px] bg-border" />
-          
+
           {events.map((event, i) => (
             <div key={event.id} className="relative pl-8">
               {/* Timeline dot */}

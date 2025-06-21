@@ -1,48 +1,47 @@
-
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { toast } from 'sonner';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { toast } from "sonner";
 
 export const SiteGeneralSettings: React.FC = () => {
   const { settings, updateSetting, loading } = useSiteSettings();
   const { register, handleSubmit, setValue, watch } = useForm({
     defaultValues: {
-      siteName: settings.site_name || 'Spelman College Glee Club',
-      siteDescription: settings.site_description || '',
-      contactEmail: settings.contact_email || '',
+      siteName: settings.site_name || "Spelman College Glee Club",
+      siteDescription: settings.site_description || "",
+      contactEmail: settings.contact_email || "",
       maintenanceMode: settings.maintenance_mode || false,
       allowRegistration: settings.allow_registration || true,
-    }
+    },
   });
 
   const onSubmit = async (data: any) => {
     try {
       await Promise.all([
-        updateSetting('site_name', data.siteName),
-        updateSetting('site_description', data.siteDescription),
-        updateSetting('contact_email', data.contactEmail),
-        updateSetting('maintenance_mode', data.maintenanceMode),
-        updateSetting('allow_registration', data.allowRegistration),
+        updateSetting("site_name", data.siteName),
+        updateSetting("site_description", data.siteDescription),
+        updateSetting("contact_email", data.contactEmail),
+        updateSetting("maintenance_mode", data.maintenanceMode),
+        updateSetting("allow_registration", data.allowRegistration),
       ]);
-      toast.success('Settings updated successfully');
+      toast.success("Settings updated successfully");
     } catch (error) {
-      toast.error('Failed to update settings');
+      toast.error("Failed to update settings");
     }
   };
 
   React.useEffect(() => {
     if (settings) {
-      setValue('siteName', settings.site_name || 'Spelman College Glee Club');
-      setValue('siteDescription', settings.site_description || '');
-      setValue('contactEmail', settings.contact_email || '');
-      setValue('maintenanceMode', settings.maintenance_mode || false);
-      setValue('allowRegistration', settings.allow_registration || true);
+      setValue("siteName", settings.site_name || "Spelman College Glee Club");
+      setValue("siteDescription", settings.site_description || "");
+      setValue("contactEmail", settings.contact_email || "");
+      setValue("maintenanceMode", settings.maintenance_mode || false);
+      setValue("allowRegistration", settings.allow_registration || true);
     }
   }, [settings, setValue]);
 
@@ -57,7 +56,7 @@ export const SiteGeneralSettings: React.FC = () => {
           <Label htmlFor="siteName">Site Name</Label>
           <Input
             id="siteName"
-            {...register('siteName')}
+            {...register("siteName")}
             placeholder="Enter site name"
           />
         </div>
@@ -67,7 +66,7 @@ export const SiteGeneralSettings: React.FC = () => {
           <Input
             id="contactEmail"
             type="email"
-            {...register('contactEmail')}
+            {...register("contactEmail")}
             placeholder="admin@spelmangleeclub.com"
           />
         </div>
@@ -77,7 +76,7 @@ export const SiteGeneralSettings: React.FC = () => {
         <Label htmlFor="siteDescription">Site Description</Label>
         <Textarea
           id="siteDescription"
-          {...register('siteDescription')}
+          {...register("siteDescription")}
           placeholder="Enter site description"
           rows={3}
         />
@@ -93,8 +92,8 @@ export const SiteGeneralSettings: React.FC = () => {
           </div>
           <Switch
             id="maintenanceMode"
-            checked={watch('maintenanceMode')}
-            onCheckedChange={(checked) => setValue('maintenanceMode', checked)}
+            checked={watch("maintenanceMode")}
+            onCheckedChange={(checked) => setValue("maintenanceMode", checked)}
           />
         </div>
 
@@ -107,8 +106,10 @@ export const SiteGeneralSettings: React.FC = () => {
           </div>
           <Switch
             id="allowRegistration"
-            checked={watch('allowRegistration')}
-            onCheckedChange={(checked) => setValue('allowRegistration', checked)}
+            checked={watch("allowRegistration")}
+            onCheckedChange={(checked) =>
+              setValue("allowRegistration", checked)
+            }
           />
         </div>
       </div>

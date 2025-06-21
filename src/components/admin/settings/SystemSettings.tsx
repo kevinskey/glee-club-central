@@ -1,14 +1,19 @@
-
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
-import { toast } from 'sonner';
-import { AlertTriangle, Database, Download } from 'lucide-react';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { toast } from "sonner";
+import { AlertTriangle, Database, Download } from "lucide-react";
 
 export const SystemSettings: React.FC = () => {
   const { settings, updateSetting, loading } = useSiteSettings();
@@ -17,36 +22,43 @@ export const SystemSettings: React.FC = () => {
       enableDebugMode: settings.enable_debug_mode || false,
       enableCaching: settings.enable_caching || true,
       cacheExpiry: settings.cache_expiry || 3600,
-      backupFrequency: settings.backup_frequency || 'daily',
-      enablePerformanceMonitoring: settings.enable_performance_monitoring || true,
+      backupFrequency: settings.backup_frequency || "daily",
+      enablePerformanceMonitoring:
+        settings.enable_performance_monitoring || true,
       maxFileUploadSize: settings.max_file_upload_size || 10,
-    }
+    },
   });
 
   const onSubmit = async (data: any) => {
     try {
       await Promise.all([
-        updateSetting('enable_debug_mode', data.enableDebugMode),
-        updateSetting('enable_caching', data.enableCaching),
-        updateSetting('cache_expiry', data.cacheExpiry),
-        updateSetting('backup_frequency', data.backupFrequency),
-        updateSetting('enable_performance_monitoring', data.enablePerformanceMonitoring),
-        updateSetting('max_file_upload_size', data.maxFileUploadSize),
+        updateSetting("enable_debug_mode", data.enableDebugMode),
+        updateSetting("enable_caching", data.enableCaching),
+        updateSetting("cache_expiry", data.cacheExpiry),
+        updateSetting("backup_frequency", data.backupFrequency),
+        updateSetting(
+          "enable_performance_monitoring",
+          data.enablePerformanceMonitoring,
+        ),
+        updateSetting("max_file_upload_size", data.maxFileUploadSize),
       ]);
-      toast.success('System settings updated');
+      toast.success("System settings updated");
     } catch (error) {
-      toast.error('Failed to update settings');
+      toast.error("Failed to update settings");
     }
   };
 
   React.useEffect(() => {
     if (settings) {
-      setValue('enableDebugMode', settings.enable_debug_mode || false);
-      setValue('enableCaching', settings.enable_caching || true);
-      setValue('cacheExpiry', settings.cache_expiry || 3600);
-      setValue('backupFrequency', settings.backup_frequency || 'daily');
-      setValue('enablePerformanceMonitoring', settings.enable_performance_monitoring || true);
-      setValue('maxFileUploadSize', settings.max_file_upload_size || 10);
+      setValue("enableDebugMode", settings.enable_debug_mode || false);
+      setValue("enableCaching", settings.enable_caching || true);
+      setValue("cacheExpiry", settings.cache_expiry || 3600);
+      setValue("backupFrequency", settings.backup_frequency || "daily");
+      setValue(
+        "enablePerformanceMonitoring",
+        settings.enable_performance_monitoring || true,
+      );
+      setValue("maxFileUploadSize", settings.max_file_upload_size || 10);
     }
   }, [settings, setValue]);
 
@@ -67,8 +79,10 @@ export const SystemSettings: React.FC = () => {
             </div>
             <Switch
               id="enableDebugMode"
-              checked={watch('enableDebugMode')}
-              onCheckedChange={(checked) => setValue('enableDebugMode', checked)}
+              checked={watch("enableDebugMode")}
+              onCheckedChange={(checked) =>
+                setValue("enableDebugMode", checked)
+              }
             />
           </div>
 
@@ -81,22 +95,26 @@ export const SystemSettings: React.FC = () => {
             </div>
             <Switch
               id="enableCaching"
-              checked={watch('enableCaching')}
-              onCheckedChange={(checked) => setValue('enableCaching', checked)}
+              checked={watch("enableCaching")}
+              onCheckedChange={(checked) => setValue("enableCaching", checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="enablePerformanceMonitoring">Performance Monitoring</Label>
+              <Label htmlFor="enablePerformanceMonitoring">
+                Performance Monitoring
+              </Label>
               <p className="text-sm text-muted-foreground">
                 Monitor system performance and response times
               </p>
             </div>
             <Switch
               id="enablePerformanceMonitoring"
-              checked={watch('enablePerformanceMonitoring')}
-              onCheckedChange={(checked) => setValue('enablePerformanceMonitoring', checked)}
+              checked={watch("enablePerformanceMonitoring")}
+              onCheckedChange={(checked) =>
+                setValue("enablePerformanceMonitoring", checked)
+              }
             />
           </div>
         </div>
@@ -107,7 +125,7 @@ export const SystemSettings: React.FC = () => {
             <Input
               id="cacheExpiry"
               type="number"
-              {...register('cacheExpiry', { valueAsNumber: true })}
+              {...register("cacheExpiry", { valueAsNumber: true })}
               min="300"
               max="86400"
             />
@@ -118,7 +136,7 @@ export const SystemSettings: React.FC = () => {
             <Input
               id="maxFileUploadSize"
               type="number"
-              {...register('maxFileUploadSize', { valueAsNumber: true })}
+              {...register("maxFileUploadSize", { valueAsNumber: true })}
               min="1"
               max="100"
             />
@@ -127,8 +145,8 @@ export const SystemSettings: React.FC = () => {
           <div className="space-y-2">
             <Label htmlFor="backupFrequency">Backup Frequency</Label>
             <Select
-              value={watch('backupFrequency')}
-              onValueChange={(value) => setValue('backupFrequency', value)}
+              value={watch("backupFrequency")}
+              onValueChange={(value) => setValue("backupFrequency", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select frequency" />
@@ -156,12 +174,12 @@ export const SystemSettings: React.FC = () => {
             <Database className="h-4 w-4" />
             Clear Cache
           </Button>
-          
+
           <Button variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export Data
           </Button>
-          
+
           <Button variant="destructive" className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             Reset System

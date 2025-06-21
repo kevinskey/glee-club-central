@@ -1,13 +1,12 @@
-
-import React, { useState, useEffect } from 'react';
-import { CalendarEvent } from '@/types/calendar';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Users, Music, UserPlus, UserMinus } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { CalendarEvent } from "@/types/calendar";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Users, Music, UserPlus, UserMinus } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -30,7 +29,7 @@ interface EventAssignmentManagerProps {
 
 export const EventAssignmentManager: React.FC<EventAssignmentManagerProps> = ({
   event,
-  onAssignmentsChange
+  onAssignmentsChange,
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -38,9 +37,12 @@ export const EventAssignmentManager: React.FC<EventAssignmentManagerProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Check if this is a performance event
-  const isPerformanceEvent = event.event_types?.some(type => 
-    ['performance', 'concert', 'tour_concert'].includes(type)
-  ) || event.event_type === 'performance' || event.event_type === 'concert';
+  const isPerformanceEvent =
+    event.event_types?.some((type) =>
+      ["performance", "concert", "tour_concert"].includes(type),
+    ) ||
+    event.event_type === "performance" ||
+    event.event_type === "concert";
 
   useEffect(() => {
     if (isPerformanceEvent) {
@@ -51,71 +53,72 @@ export const EventAssignmentManager: React.FC<EventAssignmentManagerProps> = ({
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Fetch all users
       const { data: usersData, error: usersError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, voice_part, role')
-        .order('last_name', { ascending: true });
+        .from("profiles")
+        .select("id, first_name, last_name, voice_part, role")
+        .order("last_name", { ascending: true });
 
       if (usersError) throw usersError;
 
       // Fetch current assignments
       const { data: assignmentsData, error: assignmentsError } = await supabase
-        .from('event_assignments')
-        .select('id, user_id, notes')
-        .eq('event_id', event.id);
+        .from("event_assignments")
+        .select("id, user_id, notes")
+        .eq("event_id", event.id);
 
       if (assignmentsError) throw assignmentsError;
 
       setUsers(usersData || []);
       setAssignments(assignmentsData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Failed to load assignment data');
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load assignment data");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAssignmentToggle = async (userId: string, isAssigned: boolean) => {
+  const handleAssignmentToggle = async (
+    userId: string,
+    isAssigned: boolean,
+  ) => {
     setIsUpdating(true);
     try {
       if (isAssigned) {
         // Add assignment
-        const { error } = await supabase
-          .from('event_assignments')
-          .insert({
-            event_id: event.id,
-            user_id: userId
-          });
+        const { error } = await supabase.from("event_assignments").insert({
+          event_id: event.id,
+          user_id: userId,
+        });
 
         if (error) throw error;
-        toast.success('User assigned to event');
+        toast.success("User assigned to event");
       } else {
         // Remove assignment
         const { error } = await supabase
-          .from('event_assignments')
+          .from("event_assignments")
           .delete()
-          .eq('event_id', event.id)
-          .eq('user_id', userId);
+          .eq("event_id", event.id)
+          .eq("user_id", userId);
 
         if (error) throw error;
-        toast.success('User removed from event');
+        toast.success("User removed from event");
       }
 
       await fetchData();
       onAssignmentsChange?.();
     } catch (error) {
-      console.error('Error updating assignment:', error);
-      toast.error('Failed to update assignment');
+      console.error("Error updating assignment:", error);
+      toast.error("Failed to update assignment");
     } finally {
       setIsUpdating(false);
     }
   };
 
   const isUserAssigned = (userId: string) => {
-    return assignments.some(assignment => assignment.user_id === userId);
+    return assignments.some((assignment) => assignment.user_id === userId);
   };
 
   const assignedCount = assignments.length;
@@ -154,23 +157,27 @@ export const EventAssignmentManager: React.FC<EventAssignmentManagerProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-sm text-muted-foreground">
-          Select which members will perform at this event. Assigned members will be notified automatically.
+          Select which members will perform at this event. Assigned members will
+          be notified automatically.
         </div>
 
         <div className="space-y-3 max-h-96 overflow-y-auto">
-          {users.map(user => {
+          {users.map((user) => {
             const assigned = isUserAssigned(user.id);
-            
+
             return (
-              <div key={user.id} className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50">
+              <div
+                key={user.id}
+                className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50"
+              >
                 <Checkbox
                   checked={assigned}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     handleAssignmentToggle(user.id, checked as boolean)
                   }
                   disabled={isUpdating}
                 />
-                
+
                 <div className="flex-1">
                   <div className="font-medium">
                     {user.first_name} {user.last_name}
@@ -178,7 +185,7 @@ export const EventAssignmentManager: React.FC<EventAssignmentManagerProps> = ({
                   <div className="text-sm text-muted-foreground flex gap-2">
                     {user.voice_part && (
                       <Badge variant="outline" className="text-xs">
-                        {user.voice_part.replace('_', ' ')}
+                        {user.voice_part.replace("_", " ")}
                       </Badge>
                     )}
                     {user.role && (

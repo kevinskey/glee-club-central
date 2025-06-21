@@ -1,15 +1,14 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Save, Plus, ExternalLink } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Edit, Save, Plus, ExternalLink } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SoundCloudEmbed {
   id: string;
@@ -28,12 +27,12 @@ export function SoundCloudEmbedManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    artist: 'Spelman College Glee Club',
-    url: '',
-    description: '',
+    title: "",
+    artist: "Spelman College Glee Club",
+    url: "",
+    description: "",
     is_active: true,
-    display_order: 0
+    display_order: 0,
   });
 
   useEffect(() => {
@@ -43,15 +42,15 @@ export function SoundCloudEmbedManager() {
   const loadEmbeds = async () => {
     try {
       const { data, error } = await supabase
-        .from('soundcloud_embeds')
-        .select('*')
-        .order('display_order', { ascending: true });
+        .from("soundcloud_embeds")
+        .select("*")
+        .order("display_order", { ascending: true });
 
       if (error) throw error;
       setEmbeds(data || []);
     } catch (error) {
-      console.error('Error loading embeds:', error);
-      toast.error('Failed to load embeds');
+      console.error("Error loading embeds:", error);
+      toast.error("Failed to load embeds");
     } finally {
       setIsLoading(false);
     }
@@ -59,60 +58,60 @@ export function SoundCloudEmbedManager() {
 
   const handleSave = async () => {
     if (!formData.title || !formData.url) {
-      toast.error('Title and URL are required');
+      toast.error("Title and URL are required");
       return;
     }
 
     try {
       if (editingId) {
         const { error } = await supabase
-          .from('soundcloud_embeds')
+          .from("soundcloud_embeds")
           .update(formData)
-          .eq('id', editingId);
+          .eq("id", editingId);
 
         if (error) throw error;
-        toast.success('Embed updated successfully');
+        toast.success("Embed updated successfully");
       } else {
         const { error } = await supabase
-          .from('soundcloud_embeds')
+          .from("soundcloud_embeds")
           .insert([formData]);
 
         if (error) throw error;
-        toast.success('Embed added successfully');
+        toast.success("Embed added successfully");
       }
 
       setEditingId(null);
       setShowAddForm(false);
       setFormData({
-        title: '',
-        artist: 'Spelman College Glee Club',
-        url: '',
-        description: '',
+        title: "",
+        artist: "Spelman College Glee Club",
+        url: "",
+        description: "",
         is_active: true,
-        display_order: 0
+        display_order: 0,
       });
       loadEmbeds();
     } catch (error) {
-      console.error('Error saving embed:', error);
-      toast.error('Failed to save embed');
+      console.error("Error saving embed:", error);
+      toast.error("Failed to save embed");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this embed?')) return;
+    if (!confirm("Are you sure you want to delete this embed?")) return;
 
     try {
       const { error } = await supabase
-        .from('soundcloud_embeds')
+        .from("soundcloud_embeds")
         .delete()
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
-      toast.success('Embed deleted successfully');
+      toast.success("Embed deleted successfully");
       loadEmbeds();
     } catch (error) {
-      console.error('Error deleting embed:', error);
-      toast.error('Failed to delete embed');
+      console.error("Error deleting embed:", error);
+      toast.error("Failed to delete embed");
     }
   };
 
@@ -123,7 +122,7 @@ export function SoundCloudEmbedManager() {
       url: embed.url,
       description: embed.description,
       is_active: embed.is_active,
-      display_order: embed.display_order
+      display_order: embed.display_order,
     });
     setEditingId(embed.id);
     setShowAddForm(true);
@@ -132,18 +131,18 @@ export function SoundCloudEmbedManager() {
   const generateEmbedCode = (url: string) => {
     const embedParams = new URLSearchParams({
       url: url,
-      color: '#ff5500',
-      auto_play: 'false',
-      hide_related: 'true', // Hides related tracks
-      show_comments: 'false', // Hides comments section  
-      show_user: 'false', // Hides user info
-      show_reposts: 'false',
-      show_teaser: 'false', // Removes teaser for next track
-      visual: 'false', // Uses minimal waveform instead of artwork
-      show_artwork: 'false', // Hides large artwork
-      buying: 'false', // Removes buy buttons
-      sharing: 'false', // Removes share buttons
-      download: 'false' // Removes download button
+      color: "#ff5500",
+      auto_play: "false",
+      hide_related: "true", // Hides related tracks
+      show_comments: "false", // Hides comments section
+      show_user: "false", // Hides user info
+      show_reposts: "false",
+      show_teaser: "false", // Removes teaser for next track
+      visual: "false", // Uses minimal waveform instead of artwork
+      show_artwork: "false", // Hides large artwork
+      buying: "false", // Removes buy buttons
+      sharing: "false", // Removes share buttons
+      download: "false", // Removes download button
     });
 
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
@@ -174,7 +173,10 @@ export function SoundCloudEmbedManager() {
         <CardContent>
           {embeds.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No embeds configured yet. Add your first SoundCloud embed to get started.</p>
+              <p>
+                No embeds configured yet. Add your first SoundCloud embed to get
+                started.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -183,30 +185,50 @@ export function SoundCloudEmbedManager() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="font-semibold">{embed.title}</h3>
-                      <p className="text-sm text-muted-foreground">by {embed.artist}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{embed.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        by {embed.artist}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {embed.description}
+                      </p>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant={embed.is_active ? "default" : "secondary"}>
+                        <Badge
+                          variant={embed.is_active ? "default" : "secondary"}
+                        >
                           {embed.is_active ? "Active" : "Inactive"}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">Order: {embed.display_order}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Order: {embed.display_order}
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" asChild>
-                        <a href={embed.url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={embed.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(embed)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(embed)}
+                      >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(embed.id)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(embed.id)}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-                  
+
                   {embed.is_active && (
                     <div className="rounded-lg overflow-hidden">
                       <iframe
@@ -231,7 +253,7 @@ export function SoundCloudEmbedManager() {
       {showAddForm && (
         <Card>
           <CardHeader>
-            <CardTitle>{editingId ? 'Edit Embed' : 'Add New Embed'}</CardTitle>
+            <CardTitle>{editingId ? "Edit Embed" : "Add New Embed"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -240,7 +262,9 @@ export function SoundCloudEmbedManager() {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   placeholder="Playlist or track title"
                 />
               </div>
@@ -249,7 +273,9 @@ export function SoundCloudEmbedManager() {
                 <Input
                   id="artist"
                   value={formData.artist}
-                  onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, artist: e.target.value })
+                  }
                   placeholder="Artist name"
                 />
               </div>
@@ -260,7 +286,9 @@ export function SoundCloudEmbedManager() {
               <Input
                 id="url"
                 value={formData.url}
-                onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, url: e.target.value })
+                }
                 placeholder="https://soundcloud.com/artist/track-or-playlist"
               />
             </div>
@@ -270,7 +298,9 @@ export function SoundCloudEmbedManager() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Brief description of the content"
                 rows={3}
               />
@@ -281,7 +311,9 @@ export function SoundCloudEmbedManager() {
                 <Switch
                   id="is_active"
                   checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, is_active: checked })
+                  }
                 />
                 <Label htmlFor="is_active">Active on homepage</Label>
               </div>
@@ -291,7 +323,12 @@ export function SoundCloudEmbedManager() {
                   id="display_order"
                   type="number"
                   value={formData.display_order}
-                  onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      display_order: parseInt(e.target.value) || 0,
+                    })
+                  }
                   min="0"
                 />
               </div>
@@ -300,20 +337,23 @@ export function SoundCloudEmbedManager() {
             <div className="flex items-center gap-2">
               <Button onClick={handleSave} className="gap-2">
                 <Save className="w-4 h-4" />
-                {editingId ? 'Update' : 'Add'} Embed
+                {editingId ? "Update" : "Add"} Embed
               </Button>
-              <Button variant="outline" onClick={() => {
-                setShowAddForm(false);
-                setEditingId(null);
-                setFormData({
-                  title: '',
-                  artist: 'Spelman College Glee Club',
-                  url: '',
-                  description: '',
-                  is_active: true,
-                  display_order: 0
-                });
-              }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAddForm(false);
+                  setEditingId(null);
+                  setFormData({
+                    title: "",
+                    artist: "Spelman College Glee Club",
+                    url: "",
+                    description: "",
+                    is_active: true,
+                    display_order: 0,
+                  });
+                }}
+              >
                 Cancel
               </Button>
             </div>

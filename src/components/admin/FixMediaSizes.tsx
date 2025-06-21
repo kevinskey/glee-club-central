@@ -1,10 +1,15 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export function FixMediaSizes() {
   const [loading, setLoading] = useState(false);
@@ -16,29 +21,29 @@ export function FixMediaSizes() {
   const handleFixSizes = async () => {
     setLoading(true);
     setResult(null);
-    
+
     try {
-      const response = await fetch('/functions/v1/fix-media-sizes', {
-        method: 'POST',
+      const response = await fetch("/functions/v1/fix-media-sizes", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setResult({
           updatedCount: data.updatedCount,
-          errorCount: data.errorCount
+          errorCount: data.errorCount,
         });
         toast.success(`Updated ${data.updatedCount} files`);
       } else {
-        throw new Error(data.error || 'Failed to fix media sizes');
+        throw new Error(data.error || "Failed to fix media sizes");
       }
     } catch (error: any) {
-      console.error('Error fixing media sizes:', error);
-      toast.error('Failed to fix media sizes: ' + error.message);
+      console.error("Error fixing media sizes:", error);
+      toast.error("Failed to fix media sizes: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -56,21 +61,17 @@ export function FixMediaSizes() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button 
-          onClick={handleFixSizes} 
-          disabled={loading}
-          className="w-full"
-        >
+        <Button onClick={handleFixSizes} disabled={loading} className="w-full">
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Fixing sizes...
             </>
           ) : (
-            'Fix Media Sizes'
+            "Fix Media Sizes"
           )}
         </Button>
-        
+
         {result && (
           <Alert>
             <AlertDescription>

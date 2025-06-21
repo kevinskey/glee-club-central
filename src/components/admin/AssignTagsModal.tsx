@@ -1,26 +1,25 @@
-
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { FanTag, useFanTags } from '@/hooks/useFanTags';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { FanTag, useFanTags } from "@/hooks/useFanTags";
+import { toast } from "sonner";
 
 interface Fan {
   id: string;
@@ -34,7 +33,11 @@ interface AssignTagsModalProps {
   tags: FanTag[];
 }
 
-export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalProps) {
+export function AssignTagsModal({
+  open,
+  onOpenChange,
+  tags,
+}: AssignTagsModalProps) {
   const [fans, setFans] = useState<Fan[]>([]);
   const [selectedFans, setSelectedFans] = useState<Fan[]>([]);
   const [selectedTags, setSelectedTags] = useState<FanTag[]>([]);
@@ -50,38 +53,38 @@ export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalPro
   const fetchFans = async () => {
     try {
       const { data, error } = await supabase
-        .from('fans')
-        .select('id, full_name, email')
-        .order('full_name');
+        .from("fans")
+        .select("id, full_name, email")
+        .order("full_name");
 
       if (error) throw error;
       setFans(data || []);
     } catch (error) {
-      console.error('Error fetching fans:', error);
-      toast.error('Failed to load fans');
+      console.error("Error fetching fans:", error);
+      toast.error("Failed to load fans");
     }
   };
 
   const handleAddFan = (fanId: string) => {
-    const fan = fans.find(f => f.id === fanId);
-    if (fan && !selectedFans.find(f => f.id === fanId)) {
+    const fan = fans.find((f) => f.id === fanId);
+    if (fan && !selectedFans.find((f) => f.id === fanId)) {
       setSelectedFans([...selectedFans, fan]);
     }
   };
 
   const handleRemoveFan = (fanId: string) => {
-    setSelectedFans(selectedFans.filter(f => f.id !== fanId));
+    setSelectedFans(selectedFans.filter((f) => f.id !== fanId));
   };
 
   const handleAddTag = (tagId: string) => {
-    const tag = tags.find(t => t.id === tagId);
-    if (tag && !selectedTags.find(t => t.id === tagId)) {
+    const tag = tags.find((t) => t.id === tagId);
+    if (tag && !selectedTags.find((t) => t.id === tagId)) {
       setSelectedTags([...selectedTags, tag]);
     }
   };
 
   const handleRemoveTag = (tagId: string) => {
-    setSelectedTags(selectedTags.filter(t => t.id !== tagId));
+    setSelectedTags(selectedTags.filter((t) => t.id !== tagId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,9 +93,9 @@ export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalPro
 
     setIsSubmitting(true);
     try {
-      const fanIds = selectedFans.map(f => f.id);
-      const tagLabels = selectedTags.map(t => t.label);
-      
+      const fanIds = selectedFans.map((f) => f.id);
+      const tagLabels = selectedTags.map((t) => t.label);
+
       const success = await assignTagsToFans(fanIds, tagLabels);
       if (success) {
         setSelectedFans([]);
@@ -110,12 +113,12 @@ export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalPro
     onOpenChange(false);
   };
 
-  const availableFans = fans.filter(fan => 
-    !selectedFans.find(selected => selected.id === fan.id)
+  const availableFans = fans.filter(
+    (fan) => !selectedFans.find((selected) => selected.id === fan.id),
   );
 
-  const availableTags = tags.filter(tag => 
-    !selectedTags.find(selected => selected.id === tag.id)
+  const availableTags = tags.filter(
+    (tag) => !selectedTags.find((selected) => selected.id === tag.id),
   );
 
   return (
@@ -124,7 +127,8 @@ export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalPro
         <DialogHeader>
           <DialogTitle>Assign Tags to Fans</DialogTitle>
           <DialogDescription>
-            Select fans and tags to assign. Tags will be added to the selected fans.
+            Select fans and tags to assign. Tags will be added to the selected
+            fans.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -200,19 +204,23 @@ export function AssignTagsModal({ open, onOpenChange, tags }: AssignTagsModalPro
           </div>
 
           <div className="flex justify-end gap-2 mt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={selectedFans.length === 0 || selectedTags.length === 0 || isSubmitting}
+            <Button
+              type="submit"
+              disabled={
+                selectedFans.length === 0 ||
+                selectedTags.length === 0 ||
+                isSubmitting
+              }
             >
-              {isSubmitting ? 'Assigning...' : 'Assign Tags'}
+              {isSubmitting ? "Assigning..." : "Assign Tags"}
             </Button>
           </div>
         </form>

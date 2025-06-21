@@ -1,13 +1,12 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { Package, AlertTriangle, Plus, Minus } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Package, AlertTriangle, Plus, Minus } from "lucide-react";
+import { toast } from "sonner";
 
 interface StoreItem {
   id: string;
@@ -19,16 +18,16 @@ interface StoreItem {
 }
 
 export function InventoryManager() {
-  const [adjustments, setAdjustments] = useState<{[key: string]: number}>({});
+  const [adjustments, setAdjustments] = useState<{ [key: string]: number }>({});
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery({
-    queryKey: ['store-inventory'],
+    queryKey: ["store-inventory"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('store_items')
-        .select('id, name, price, quantity_in_stock, is_active, tags')
-        .order('name');
+        .from("store_items")
+        .select("id, name, price, quantity_in_stock, is_active, tags")
+        .order("name");
 
       if (error) throw error;
       return data as StoreItem[];
@@ -36,25 +35,35 @@ export function InventoryManager() {
   });
 
   const updateStockMutation = useMutation({
-    mutationFn: async ({ productId, newQuantity }: { productId: string; newQuantity: number }) => {
+    mutationFn: async ({
+      productId,
+      newQuantity,
+    }: {
+      productId: string;
+      newQuantity: number;
+    }) => {
       const { error } = await supabase
-        .from('store_items')
+        .from("store_items")
         .update({ quantity_in_stock: Math.max(0, newQuantity) })
-        .eq('id', productId);
+        .eq("id", productId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['store-inventory'] });
-      toast.success('Stock updated successfully');
+      queryClient.invalidateQueries({ queryKey: ["store-inventory"] });
+      toast.success("Stock updated successfully");
     },
     onError: (error) => {
-      toast.error('Failed to update stock');
+      toast.error("Failed to update stock");
       console.error(error);
     },
   });
 
-  const handleStockAdjustment = (productId: string, currentStock: number, adjustment: number) => {
+  const handleStockAdjustment = (
+    productId: string,
+    currentStock: number,
+    adjustment: number,
+  ) => {
     const newQuantity = currentStock + adjustment;
     updateStockMutation.mutate({ productId, newQuantity });
   };
@@ -63,8 +72,10 @@ export function InventoryManager() {
     updateStockMutation.mutate({ productId, newQuantity });
   };
 
-  const lowStockItems = products?.filter(product => product.quantity_in_stock < 10) || [];
-  const outOfStockItems = products?.filter(product => product.quantity_in_stock === 0) || [];
+  const lowStockItems =
+    products?.filter((product) => product.quantity_in_stock < 10) || [];
+  const outOfStockItems =
+    products?.filter((product) => product.quantity_in_stock === 0) || [];
 
   if (isLoading) {
     return (
@@ -82,7 +93,9 @@ export function InventoryManager() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Products
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{products?.length || 0}</div>
@@ -90,18 +103,26 @@ export function InventoryManager() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Low Stock</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Low Stock
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{lowStockItems.length}</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {lowStockItems.length}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Out of Stock</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Out of Stock
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{outOfStockItems.length}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {outOfStockItems.length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -127,7 +148,7 @@ export function InventoryManager() {
                 {products?.map((product) => {
                   const isLowStock = product.quantity_in_stock < 10;
                   const isOutOfStock = product.quantity_in_stock === 0;
-                  
+
                   return (
                     <tr key={product.id} className="border-b hover:bg-muted/50">
                       <td className="p-2">
@@ -137,7 +158,11 @@ export function InventoryManager() {
                             {product.tags && product.tags.length > 0 && (
                               <div className="flex gap-1 mt-1">
                                 {product.tags.slice(0, 2).map((tag, index) => (
-                                  <Badge key={index} variant="outline" className="text-xs">
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
                                     {tag}
                                   </Badge>
                                 ))}
@@ -154,7 +179,12 @@ export function InventoryManager() {
                           <Input
                             type="number"
                             value={product.quantity_in_stock}
-                            onChange={(e) => handleDirectStockUpdate(product.id, parseInt(e.target.value) || 0)}
+                            onChange={(e) =>
+                              handleDirectStockUpdate(
+                                product.id,
+                                parseInt(e.target.value) || 0,
+                              )
+                            }
                             className="w-20"
                             min="0"
                           />
@@ -167,10 +197,20 @@ export function InventoryManager() {
                         </div>
                       </td>
                       <td className="p-2">
-                        <Badge 
-                          variant={isOutOfStock ? 'destructive' : isLowStock ? 'secondary' : 'default'}
+                        <Badge
+                          variant={
+                            isOutOfStock
+                              ? "destructive"
+                              : isLowStock
+                                ? "secondary"
+                                : "default"
+                          }
                         >
-                          {isOutOfStock ? 'Out of Stock' : isLowStock ? 'Low Stock' : 'In Stock'}
+                          {isOutOfStock
+                            ? "Out of Stock"
+                            : isLowStock
+                              ? "Low Stock"
+                              : "In Stock"}
                         </Badge>
                       </td>
                       <td className="p-2">
@@ -178,7 +218,13 @@ export function InventoryManager() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, -1)}
+                            onClick={() =>
+                              handleStockAdjustment(
+                                product.id,
+                                product.quantity_in_stock,
+                                -1,
+                              )
+                            }
                             disabled={product.quantity_in_stock === 0}
                           >
                             <Minus className="h-3 w-3" />
@@ -186,14 +232,26 @@ export function InventoryManager() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, 1)}
+                            onClick={() =>
+                              handleStockAdjustment(
+                                product.id,
+                                product.quantity_in_stock,
+                                1,
+                              )
+                            }
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleStockAdjustment(product.id, product.quantity_in_stock, 10)}
+                            onClick={() =>
+                              handleStockAdjustment(
+                                product.id,
+                                product.quantity_in_stock,
+                                10,
+                              )
+                            }
                           >
                             +10
                           </Button>

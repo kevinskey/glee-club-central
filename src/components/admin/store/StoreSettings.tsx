@@ -1,12 +1,11 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Settings, Store, CreditCard, Truck } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Settings, Store, CreditCard, Truck } from "lucide-react";
 
 export function StoreSettings() {
   return (
@@ -27,8 +26,8 @@ export function StoreSettings() {
             </div>
             <div className="glee-spacing-xs">
               <Label htmlFor="store-description">Store Description</Label>
-              <Textarea 
-                id="store-description" 
+              <Textarea
+                id="store-description"
                 placeholder="Official merchandise for the Spelman College Glee Club"
               />
             </div>
@@ -114,7 +113,11 @@ export function StoreSettings() {
             </div>
             <div className="glee-spacing-xs">
               <Label htmlFor="notification-email">Notification Email</Label>
-              <Input id="notification-email" type="email" placeholder="admin@spelman.edu" />
+              <Input
+                id="notification-email"
+                type="email"
+                placeholder="admin@spelman.edu"
+              />
             </div>
           </CardContent>
         </Card>
@@ -122,9 +125,7 @@ export function StoreSettings() {
 
       {/* Save Button */}
       <div className="flex justify-end">
-        <Button size="lg">
-          Save Settings
-        </Button>
+        <Button size="lg">Save Settings</Button>
       </div>
     </div>
   );

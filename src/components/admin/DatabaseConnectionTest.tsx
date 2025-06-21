@@ -1,12 +1,27 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, Database, Play, RefreshCw } from 'lucide-react';
-import { runDatabaseConnectionTests, formatTestResults, DatabaseTestResult } from '@/utils/admin/databaseConnectionTest';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  AlertCircle,
+  CheckCircle,
+  Database,
+  Play,
+  RefreshCw,
+} from "lucide-react";
+import {
+  runDatabaseConnectionTests,
+  formatTestResults,
+  DatabaseTestResult,
+} from "@/utils/admin/databaseConnectionTest";
+import { toast } from "sonner";
 
 export function DatabaseConnectionTest() {
   const [isRunning, setIsRunning] = useState(false);
@@ -16,37 +31,40 @@ export function DatabaseConnectionTest() {
   const runTests = async () => {
     setIsRunning(true);
     setTestResults([]);
-    
+
     try {
-      console.log('🔧 Starting database connection tests...');
+      console.log("🔧 Starting database connection tests...");
       const results = await runDatabaseConnectionTests();
-      console.log('🔧 Test results:', results);
-      
+      console.log("🔧 Test results:", results);
+
       setTestResults(results);
-      
+
       const report = formatTestResults(results);
-      console.log('📋 Test Report:\n', report);
-      
-      const errorCount = results.filter(r => r.status === 'error').length;
-      const warningCount = results.filter(r => r.status === 'warning').length;
-      
+      console.log("📋 Test Report:\n", report);
+
+      const errorCount = results.filter((r) => r.status === "error").length;
+      const warningCount = results.filter((r) => r.status === "warning").length;
+
       if (errorCount > 0) {
-        toast.error(`Database tests completed with ${errorCount} errors and ${warningCount} warnings`);
+        toast.error(
+          `Database tests completed with ${errorCount} errors and ${warningCount} warnings`,
+        );
       } else if (warningCount > 0) {
         toast.warning(`Database tests completed with ${warningCount} warnings`);
       } else {
-        toast.success('All database tests passed successfully!');
+        toast.success("All database tests passed successfully!");
       }
-      
     } catch (error) {
-      console.error('💥 Database test error:', error);
-      toast.error('Failed to run database tests');
-      setTestResults([{
-        test: 'Test Suite',
-        status: 'error',
-        message: `Test suite failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        details: error
-      }]);
+      console.error("💥 Database test error:", error);
+      toast.error("Failed to run database tests");
+      setTestResults([
+        {
+          test: "Test Suite",
+          status: "error",
+          message: `Test suite failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+          details: error,
+        },
+      ]);
     } finally {
       setIsRunning(false);
     }
@@ -54,11 +72,11 @@ export function DatabaseConnectionTest() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success':
+      case "success":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
+      case "warning":
         return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      case 'error':
+      case "error":
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return null;
@@ -67,11 +85,15 @@ export function DatabaseConnectionTest() {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      success: 'default' as const,
-      warning: 'secondary' as const,
-      error: 'destructive' as const
+      success: "default" as const,
+      warning: "secondary" as const,
+      error: "destructive" as const,
     };
-    return <Badge variant={variants[status as keyof typeof variants] || 'outline'}>{status}</Badge>;
+    return (
+      <Badge variant={variants[status as keyof typeof variants] || "outline"}>
+        {status}
+      </Badge>
+    );
   };
 
   return (
@@ -82,13 +104,14 @@ export function DatabaseConnectionTest() {
           Database Connection Test
         </CardTitle>
         <CardDescription>
-          Run comprehensive tests to verify database connectivity and configuration
+          Run comprehensive tests to verify database connectivity and
+          configuration
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
-          <Button 
-            onClick={runTests} 
+          <Button
+            onClick={runTests}
             disabled={isRunning}
             className="flex items-center gap-2"
           >
@@ -97,15 +120,15 @@ export function DatabaseConnectionTest() {
             ) : (
               <Play className="h-4 w-4" />
             )}
-            {isRunning ? 'Running Tests...' : 'Run Database Tests'}
+            {isRunning ? "Running Tests..." : "Run Database Tests"}
           </Button>
-          
+
           {testResults.length > 0 && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowDetails(!showDetails)}
             >
-              {showDetails ? 'Hide Details' : 'Show Details'}
+              {showDetails ? "Hide Details" : "Show Details"}
             </Button>
           )}
         </div>
@@ -114,12 +137,17 @@ export function DatabaseConnectionTest() {
           <div className="space-y-4">
             <div className="grid gap-4">
               {testResults.map((result, index) => (
-                <div key={index} className="flex items-start justify-between p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-start justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-start gap-3">
                     {getStatusIcon(result.status)}
                     <div>
                       <p className="font-medium">{result.test}</p>
-                      <p className="text-sm text-muted-foreground">{result.message}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {result.message}
+                      </p>
                     </div>
                   </div>
                   {getStatusBadge(result.status)}
@@ -142,15 +170,22 @@ export function DatabaseConnectionTest() {
               <div className="flex gap-4 text-sm">
                 <span className="flex items-center gap-1">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  {testResults.filter(r => r.status === 'success').length} Passed
+                  {
+                    testResults.filter((r) => r.status === "success").length
+                  }{" "}
+                  Passed
                 </span>
                 <span className="flex items-center gap-1">
                   <AlertCircle className="h-4 w-4 text-yellow-500" />
-                  {testResults.filter(r => r.status === 'warning').length} Warnings
+                  {
+                    testResults.filter((r) => r.status === "warning").length
+                  }{" "}
+                  Warnings
                 </span>
                 <span className="flex items-center gap-1">
                   <AlertCircle className="h-4 w-4 text-red-500" />
-                  {testResults.filter(r => r.status === 'error').length} Errors
+                  {testResults.filter((r) => r.status === "error").length}{" "}
+                  Errors
                 </span>
               </div>
             </div>

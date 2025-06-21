@@ -1,16 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { UserPlus, Edit, Trash2, Users, AlertCircle, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  UserPlus,
+  Edit,
+  Trash2,
+  Users,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface UserProfile {
   id: string;
@@ -42,24 +68,22 @@ export default function UserManagementSimplified() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*');
+      const { data, error } = await supabase.from("profiles").select("*");
 
       if (error) {
-        console.error('Error fetching users:', error);
-        toast.error('Failed to fetch users');
+        console.error("Error fetching users:", error);
+        toast.error("Failed to fetch users");
         return;
       }
 
       if (data) {
-        const userProfiles: UserProfile[] = data.map(profile => ({
+        const userProfiles: UserProfile[] = data.map((profile) => ({
           id: profile.id,
           email: profile.email,
-          first_name: profile.first_name || 'N/A',
-          last_name: profile.last_name || 'N/A',
-          role: profile.role || 'member',
-          status: profile.status || 'active',
+          first_name: profile.first_name || "N/A",
+          last_name: profile.last_name || "N/A",
+          role: profile.role || "member",
+          status: profile.status || "active",
           created_at: profile.created_at,
           is_super_admin: profile.is_super_admin || false,
           disabled: profile.disabled || false,
@@ -77,26 +101,26 @@ export default function UserManagementSimplified() {
   const handleEditUser = async (updatedUser: UserProfile) => {
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({
           first_name: updatedUser.first_name,
           last_name: updatedUser.last_name,
           role: updatedUser.role,
         })
-        .eq('id', updatedUser.id);
+        .eq("id", updatedUser.id);
 
       if (error) {
-        console.error('Error updating user:', error);
-        toast.error('Failed to update user');
+        console.error("Error updating user:", error);
+        toast.error("Failed to update user");
         return;
       }
 
-      toast.success('User updated successfully');
+      toast.success("User updated successfully");
       setIsEditDialogOpen(false);
       fetchUsers();
     } catch (error) {
-      console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
     }
   };
 
@@ -113,7 +137,12 @@ export default function UserManagementSimplified() {
               <Input
                 id="first_name"
                 value={selectedUser.first_name}
-                onChange={(e) => setSelectedUser({...selectedUser, first_name: e.target.value})}
+                onChange={(e) =>
+                  setSelectedUser({
+                    ...selectedUser,
+                    first_name: e.target.value,
+                  })
+                }
               />
             </div>
             <div>
@@ -121,12 +150,22 @@ export default function UserManagementSimplified() {
               <Input
                 id="last_name"
                 value={selectedUser.last_name}
-                onChange={(e) => setSelectedUser({...selectedUser, last_name: e.target.value})}
+                onChange={(e) =>
+                  setSelectedUser({
+                    ...selectedUser,
+                    last_name: e.target.value,
+                  })
+                }
               />
             </div>
             <div>
               <Label htmlFor="role">Role</Label>
-              <Select value={selectedUser.role} onValueChange={(value) => setSelectedUser({...selectedUser, role: value})}>
+              <Select
+                value={selectedUser.role}
+                onValueChange={(value) =>
+                  setSelectedUser({ ...selectedUser, role: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -137,7 +176,9 @@ export default function UserManagementSimplified() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={() => handleEditUser(selectedUser)}>Save Changes</Button>
+            <Button onClick={() => handleEditUser(selectedUser)}>
+              Save Changes
+            </Button>
           </div>
         )}
       </DialogContent>
@@ -178,15 +219,25 @@ export default function UserManagementSimplified() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell>{user.first_name} {user.last_name}</TableCell>
+                    <TableCell>
+                      {user.first_name} {user.last_name}
+                    </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          user.role === "admin" ? "default" : "secondary"
+                        }
+                      >
                         {user.role}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={
+                          user.status === "active" ? "default" : "secondary"
+                        }
+                      >
                         {user.status}
                       </Badge>
                     </TableCell>

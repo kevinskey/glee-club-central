@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,11 +11,18 @@ interface AdminMembersListProps {
   isLoading?: boolean;
 }
 
-export function AdminMembersList({ members, isLoading = false }: AdminMembersListProps) {
+export function AdminMembersList({
+  members,
+  isLoading = false,
+}: AdminMembersListProps) {
   const navigate = useNavigate();
-  
-  console.log("AdminMembersList rendering with", members?.length || 0, "members");
-  
+
+  console.log(
+    "AdminMembersList rendering with",
+    members?.length || 0,
+    "members",
+  );
+
   if (isLoading) {
     return (
       <Card>
@@ -26,7 +32,10 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
         <CardContent>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between animate-pulse">
+              <div
+                key={i}
+                className="flex items-center justify-between animate-pulse"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full bg-muted"></div>
                   <div>
@@ -42,7 +51,7 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
       </Card>
     );
   }
-  
+
   if (!members || members.length === 0) {
     return (
       <Card>
@@ -55,12 +64,12 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
       </Card>
     );
   }
-  
+
   // Only show active members in the dashboard preview
-  const activeMembers = members.filter(member => member.status === 'active');
+  const activeMembers = members.filter((member) => member.status === "active");
   console.log("AdminMembersList active members:", activeMembers.length);
   const recentMembers = activeMembers.slice(0, 5);
-  
+
   return (
     <Card>
       <CardHeader>
@@ -69,20 +78,26 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
       <CardContent>
         <div className="space-y-4">
           {recentMembers.map((member) => (
-            <div 
-              key={member.id} 
+            <div
+              key={member.id}
               className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-2 rounded-md transition-colors"
               onClick={() => navigate(`/dashboard/admin/members/${member.id}`)}
             >
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={member.avatar_url || undefined} alt={`${member.first_name} ${member.last_name}`} />
+                  <AvatarImage
+                    src={member.avatar_url || undefined}
+                    alt={`${member.first_name} ${member.last_name}`}
+                  />
                   <AvatarFallback>
-                    {member.first_name?.[0]}{member.last_name?.[0]}
+                    {member.first_name?.[0]}
+                    {member.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{member.first_name} {member.last_name}</p>
+                  <p className="font-medium">
+                    {member.first_name} {member.last_name}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {formatVoicePart(member.voice_part) || member.role}
                   </p>
@@ -95,12 +110,12 @@ export function AdminMembersList({ members, isLoading = false }: AdminMembersLis
               </div>
             </div>
           ))}
-          
+
           {activeMembers.length > 5 && (
             <div className="pt-2 text-center">
-              <button 
+              <button
                 className="text-sm text-primary hover:text-primary/80 underline"
-                onClick={() => navigate('/dashboard/admin/members')}
+                onClick={() => navigate("/dashboard/admin/members")}
               >
                 View all {activeMembers.length} active members
               </button>

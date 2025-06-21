@@ -1,49 +1,50 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Users, Calendar, Image, Music, Download } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Users, Calendar, Image, Music, Download } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export function AdminQuickActions() {
   const navigate = useNavigate();
 
   const quickActions = [
     {
-      title: 'Add Member',
-      description: 'Add a new member to the club',
+      title: "Add Member",
+      description: "Add a new member to the club",
       icon: Users,
-      href: '/admin/members',
-      color: 'bg-blue-500'
+      href: "/admin/members",
+      color: "bg-blue-500",
     },
     {
-      title: 'Create Event',
-      description: 'Schedule a new rehearsal or performance',
+      title: "Create Event",
+      description: "Schedule a new rehearsal or performance",
       icon: Calendar,
-      href: '/admin/calendar',
-      color: 'bg-green-500'
+      href: "/admin/calendar",
+      color: "bg-green-500",
     },
     {
-      title: 'Manage Hero Slides',
-      description: 'Update homepage slideshow content',
+      title: "Manage Hero Slides",
+      description: "Update homepage slideshow content",
       icon: Image,
-      href: '/admin/hero-slides',
-      color: 'bg-purple-500'
+      href: "/admin/hero-slides",
+      color: "bg-purple-500",
     },
     {
-      title: 'Music Player',
-      description: 'Manage playlists and player settings',
+      title: "Music Player",
+      description: "Manage playlists and player settings",
       icon: Music,
-      href: '/admin/music',
-      color: 'bg-orange-500'
+      href: "/admin/music",
+      color: "bg-orange-500",
     },
     {
-      title: 'Import from Reader',
-      description: 'Import PDFs and MP3s from reader.gleeworld.org',
+      title: "Import from Reader",
+      description: "Import PDFs and MP3s from reader.gleeworld.org",
       icon: Download,
-      path: '/admin/reader-import',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30',
-    }
+      path: "/admin/reader-import",
+      color: "text-purple-600",
+      bgColor:
+        "bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/20 dark:hover:bg-purple-900/30",
+    },
   ];
 
   return (

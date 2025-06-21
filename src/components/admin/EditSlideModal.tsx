@@ -1,16 +1,26 @@
-
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useMediaLibrary } from '@/hooks/useMediaLibrary';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { HeroSlide } from '@/hooks/useHeroSlides';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useMediaLibrary } from "@/hooks/useMediaLibrary";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { HeroSlide } from "@/hooks/useHeroSlides";
 
 interface EditSlideModalProps {
   open: boolean;
@@ -19,37 +29,42 @@ interface EditSlideModalProps {
   slide: HeroSlide | null;
 }
 
-export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: EditSlideModalProps) {
+export function EditSlideModal({
+  open,
+  onOpenChange,
+  onSlideUpdated,
+  slide,
+}: EditSlideModalProps) {
   const { mediaFiles } = useMediaLibrary();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    media_id: '',
-    button_text: '',
-    button_link: '',
-    text_position: 'center',
-    text_alignment: 'center',
+    title: "",
+    description: "",
+    media_id: "",
+    button_text: "",
+    button_link: "",
+    text_position: "center",
+    text_alignment: "center",
     show_title: true,
     visible: false,
-    media_type: 'image',
-    youtube_url: ''
+    media_type: "image",
+    youtube_url: "",
   });
 
   useEffect(() => {
     if (slide) {
       setFormData({
-        title: slide.title || '',
-        description: slide.description || '',
-        media_id: slide.media_id || '',
-        button_text: slide.button_text || '',
-        button_link: slide.button_link || '',
-        text_position: slide.text_position || 'center',
-        text_alignment: slide.text_alignment || 'center',
+        title: slide.title || "",
+        description: slide.description || "",
+        media_id: slide.media_id || "",
+        button_text: slide.button_text || "",
+        button_link: slide.button_link || "",
+        text_position: slide.text_position || "center",
+        text_alignment: slide.text_alignment || "center",
         show_title: slide.show_title ?? true,
         visible: slide.visible ?? false,
-        media_type: slide.media_type || 'image',
-        youtube_url: slide.youtube_url || ''
+        media_type: slide.media_type || "image",
+        youtube_url: slide.youtube_url || "",
       });
     }
   }, [slide]);
@@ -57,36 +72,37 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!slide) return;
-    
+
     setIsSubmitting(true);
 
     try {
       const slideData = {
         ...formData,
         media_id: formData.media_id || null,
-        youtube_url: formData.media_type === 'video' ? formData.youtube_url || null : null
+        youtube_url:
+          formData.media_type === "video" ? formData.youtube_url || null : null,
       };
 
       const { error } = await supabase
-        .from('hero_slides')
+        .from("hero_slides")
         .update(slideData)
-        .eq('id', slide.id);
+        .eq("id", slide.id);
 
       if (error) throw error;
 
-      toast.success('Hero slide updated successfully');
+      toast.success("Hero slide updated successfully");
       onSlideUpdated();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating slide:', error);
-      toast.error('Failed to update hero slide');
+      console.error("Error updating slide:", error);
+      toast.error("Failed to update hero slide");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const imageFiles = mediaFiles.filter(file => 
-    file.file_type.startsWith('image/')
+  const imageFiles = mediaFiles.filter((file) =>
+    file.file_type.startsWith("image/"),
   );
 
   if (!slide) return null;
@@ -105,7 +121,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="Enter slide title"
               required
             />
@@ -117,7 +135,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="Enter slide description"
               rows={3}
             />
@@ -126,9 +146,11 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
           {/* Media Type */}
           <div className="space-y-2">
             <Label>Media Type</Label>
-            <Select 
-              value={formData.media_type} 
-              onValueChange={(value) => setFormData({ ...formData, media_type: value })}
+            <Select
+              value={formData.media_type}
+              onValueChange={(value) =>
+                setFormData({ ...formData, media_type: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -141,12 +163,14 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
           </div>
 
           {/* Media Selection */}
-          {formData.media_type === 'image' ? (
+          {formData.media_type === "image" ? (
             <div className="space-y-2">
               <Label>Background Image</Label>
-              <Select 
-                value={formData.media_id} 
-                onValueChange={(value) => setFormData({ ...formData, media_id: value })}
+              <Select
+                value={formData.media_id}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, media_id: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select an image" />
@@ -166,7 +190,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
               <Input
                 id="youtube_url"
                 value={formData.youtube_url}
-                onChange={(e) => setFormData({ ...formData, youtube_url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, youtube_url: e.target.value })
+                }
                 placeholder="https://www.youtube.com/embed/..."
               />
             </div>
@@ -175,9 +201,11 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
           {/* Text Position */}
           <div className="space-y-2">
             <Label>Text Position</Label>
-            <Select 
-              value={formData.text_position} 
-              onValueChange={(value) => setFormData({ ...formData, text_position: value })}
+            <Select
+              value={formData.text_position}
+              onValueChange={(value) =>
+                setFormData({ ...formData, text_position: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -193,9 +221,11 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
           {/* Text Alignment */}
           <div className="space-y-2">
             <Label>Text Alignment</Label>
-            <Select 
-              value={formData.text_alignment} 
-              onValueChange={(value) => setFormData({ ...formData, text_alignment: value })}
+            <Select
+              value={formData.text_alignment}
+              onValueChange={(value) =>
+                setFormData({ ...formData, text_alignment: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue />
@@ -215,7 +245,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
               <Input
                 id="button_text"
                 value={formData.button_text}
-                onChange={(e) => setFormData({ ...formData, button_text: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, button_text: e.target.value })
+                }
                 placeholder="Learn More"
               />
             </div>
@@ -224,7 +256,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
               <Input
                 id="button_link"
                 value={formData.button_link}
-                onChange={(e) => setFormData({ ...formData, button_link: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, button_link: e.target.value })
+                }
                 placeholder="/about"
               />
             </div>
@@ -236,7 +270,9 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
             <Switch
               id="show_title"
               checked={formData.show_title}
-              onCheckedChange={(checked) => setFormData({ ...formData, show_title: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, show_title: checked })
+              }
             />
           </div>
 
@@ -245,25 +281,27 @@ export function EditSlideModal({ open, onOpenChange, onSlideUpdated, slide }: Ed
             <Switch
               id="visible"
               checked={formData.visible}
-              onCheckedChange={(checked) => setFormData({ ...formData, visible: checked })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, visible: checked })
+              }
             />
           </div>
 
           {/* Submit Buttons */}
           <div className="flex justify-end gap-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="bg-orange-500 hover:bg-orange-600"
             >
-              {isSubmitting ? 'Updating...' : 'Update Slide'}
+              {isSubmitting ? "Updating..." : "Update Slide"}
             </Button>
           </div>
         </form>
