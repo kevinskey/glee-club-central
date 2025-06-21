@@ -8,6 +8,9 @@ export const audioLogger = {
   },
   error: (message: string, error?: any) => {
     console.error(`[Audio Error] ${message}`, error);
+  },
+  warn: (message: string, data?: any) => {
+    console.warn(`[Audio Warning] ${message}`, data);
   }
 };
 
@@ -180,22 +183,96 @@ export function createAccentClickBuffer(audioContext: AudioContext): AudioBuffer
   return buffer;
 }
 
-// Request microphone access
+// Enhanced microphone access with detailed error handling
 export async function requestMicrophoneAccess(): Promise<MediaStream> {
+  audioLogger.log('🎤 Requesting microphone access...');
+  
+  // Check if getUserMedia is supported
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const error = new Error('getUserMedia is not supported in this browser');
+    audioLogger.error('🎤 Browser compatibility issue:', error);
+    throw error;
+  }
+  
+  // Check if we're on HTTPS (required for microphone access)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    const error = new Error('Microphone access requires HTTPS connection');
+    audioLogger.error('🎤 Security requirement not met:', error);
+    throw error;
+  }
+  
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    audioLogger.log('Microphone access granted');
+    // Check current permissions
+    if ('permissions' in navigator) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'microphone' as any });
+        audioLogger.log('🎤 Current microphone permission status:', permissionStatus.state);
+        
+        if (permissionStatus.state === 'denied') {
+          throw new Error('Microphone permission has been denied. Please enable it in your browser settings.');
+        }
+      } catch (permError) {
+        audioLogger.warn('🎤 Could not check permissions:', permError);
+      }
+    }
+    
+    // Request microphone access with specific constraints
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 44100
+      }
+    });
+    
+    // Verify we got audio tracks
+    const audioTracks = stream.getAudioTracks();
+    if (audioTracks.length === 0) {
+      throw new Error('No audio tracks found in the media stream');
+    }
+    
+    audioLogger.log('🎤 Microphone access granted successfully');
+    audioLogger.log('🎤 Audio tracks:', audioTracks.map(track => ({
+      label: track.label,
+      enabled: track.enabled,
+      readyState: track.readyState,
+      settings: track.getSettings()
+    })));
+    
     return stream;
   } catch (error) {
-    audioLogger.error('Microphone access denied', error);
+    audioLogger.error('🎤 Microphone access failed:', error);
+    
+    // Provide more specific error messages
+    if (error.name === 'NotAllowedError') {
+      throw new Error('Microphone access was denied. Please allow microphone permissions and try again.');
+    } else if (error.name === 'NotFoundError') {
+      throw new Error('No microphone device found. Please connect a microphone and try again.');
+    } else if (error.name === 'NotReadableError') {
+      throw new Error('Microphone is already in use by another application.');
+    } else if (error.name === 'OverconstrainedError') {
+      throw new Error('Microphone constraints could not be satisfied.');
+    } else if (error.name === 'SecurityError') {
+      throw new Error('Microphone access blocked due to security restrictions.');
+    }
+    
     throw error;
   }
 }
 
 // Release microphone
 export function releaseMicrophone(stream: MediaStream): void {
-  stream.getTracks().forEach(track => track.stop());
-  audioLogger.log('Microphone released');
+  try {
+    const tracks = stream.getTracks();
+    tracks.forEach(track => {
+      track.stop();
+      audioLogger.log(`🎤 Stopped track: ${track.label || track.kind}`);
+    });
+    audioLogger.log('🎤 Microphone released successfully');
+  } catch (error) {
+    audioLogger.error('🎤 Error releasing microphone:', error);
+  }
 }
 
 // Cleanup global audio context
@@ -207,26 +284,60 @@ export function cleanupAudioSystem(): void {
   }
 }
 
-// Debug function to check audio capabilities
+// Enhanced debug function to check audio capabilities
 export function debugAudioCapabilities(): void {
-  audioLogger.log('=== Audio Debug Info ===');
-  audioLogger.log('AudioContext supported:', !!(window.AudioContext || (window as any).webkitAudioContext));
-  audioLogger.log('MediaDevices supported:', !!navigator.mediaDevices);
-  audioLogger.log('getUserMedia supported:', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
-  audioLogger.log('MediaRecorder supported:', !!window.MediaRecorder);
+  audioLogger.log('=== 🔍 AUDIO DEBUG INFO ===');
   
-  if (globalAudioContext) {
-    audioLogger.log('Global AudioContext state:', globalAudioContext.state);
-    audioLogger.log('Global AudioContext sample rate:', globalAudioContext.sampleRate);
-  } else {
-    audioLogger.log('Global AudioContext: Not created yet');
+  // Browser support checks
+  audioLogger.log('🌐 Browser Support:');
+  audioLogger.log('  - AudioContext:', !!(window.AudioContext || (window as any).webkitAudioContext));
+  audioLogger.log('  - MediaDevices:', !!navigator.mediaDevices);
+  audioLogger.log('  - getUserMedia:', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+  audioLogger.log('  - MediaRecorder:', !!window.MediaRecorder);
+  
+  // Security context
+  audioLogger.log('🔒 Security Context:');
+  audioLogger.log('  - Protocol:', location.protocol);
+  audioLogger.log('  - Hostname:', location.hostname);
+  audioLogger.log('  - Secure context:', window.isSecureContext);
+  
+  // MediaRecorder support
+  if (window.MediaRecorder) {
+    audioLogger.log('🎥 MediaRecorder Support:');
+    const mimeTypes = [
+      'audio/webm',
+      'audio/webm;codecs=opus',
+      'audio/mp4',
+      'audio/wav'
+    ];
+    mimeTypes.forEach(type => {
+      audioLogger.log(`  - ${type}:`, MediaRecorder.isTypeSupported(type));
+    });
   }
   
-  // Test a simple tone
-  audioLogger.log('Testing simple tone...');
-  playNote(440, 500).catch(error => {
-    audioLogger.error('Test tone failed:', error);
-  });
+  // AudioContext state
+  if (globalAudioContext) {
+    audioLogger.log('🎵 Global AudioContext:');
+    audioLogger.log('  - State:', globalAudioContext.state);
+    audioLogger.log('  - Sample rate:', globalAudioContext.sampleRate);
+    audioLogger.log('  - Base latency:', globalAudioContext.baseLatency);
+  } else {
+    audioLogger.log('🎵 Global AudioContext: Not created yet');
+  }
+  
+  // Test microphone access (without actually requesting)
+  audioLogger.log('🎤 Testing microphone requirements...');
+  if (!navigator.mediaDevices) {
+    audioLogger.error('❌ navigator.mediaDevices not available');
+  } else if (!navigator.mediaDevices.getUserMedia) {
+    audioLogger.error('❌ getUserMedia not available');
+  } else if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    audioLogger.error('❌ HTTPS required for microphone access');
+  } else {
+    audioLogger.log('✅ Microphone requirements met');
+  }
+  
+  audioLogger.log('=== 🔍 END DEBUG INFO ===');
 }
 
 console.log('audioUtils.ts loaded successfully - all exports available');
