@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -87,8 +88,20 @@ export function HeroSlider() {
     );
   }
 
+  // Apply spacing settings to container style
+  const containerStyle = {
+    paddingTop: `${spacingSettings.topPadding}px`,
+    paddingBottom: `${spacingSettings.bottomPadding}px`,
+    paddingLeft: `${spacingSettings.leftPadding}px`,
+    paddingRight: `${spacingSettings.rightPadding}px`,
+    marginTop: `${spacingSettings.topMargin}px`,
+    marginBottom: `${spacingSettings.bottomMargin}px`,
+    minHeight: `${spacingSettings.minHeight}vh`,
+    maxHeight: `${spacingSettings.maxHeight}vh`,
+  };
+
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden">
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden" style={containerStyle}>
       <Carousel className="w-full h-full" opts={{ loop: true }}>
         <CarouselContent className="h-full">
           {displaySlides.map((slide, idx) => (
