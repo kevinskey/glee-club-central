@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -9,12 +8,14 @@ import { Eye, EyeOff, Plus, Upload, MoveUp, MoveDown, Edit, Trash2 } from 'lucid
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
+import { AddSlideModal } from '@/components/admin/AddSlideModal';
 import { toast } from 'sonner';
 
 export default function HeroSlidesPage() {
   const { slides, loading, updateSlideVisibility, updateSlideOrder, fetchHeroSlides } = useHeroSlides();
   const { mediaFiles, isLoading: mediaLoading } = useMediaLibrary();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showAddSlideModal, setShowAddSlideModal] = useState(false);
 
   const handleVisibilityToggle = async (slideId: string, visible: boolean) => {
     await updateSlideVisibility(slideId, visible);
@@ -37,6 +38,10 @@ export default function HeroSlidesPage() {
     setShowUploadModal(false);
     fetchHeroSlides();
     toast.success('Media uploaded successfully');
+  };
+
+  const handleSlideAdded = () => {
+    fetchHeroSlides();
   };
 
   if (loading) {
@@ -68,7 +73,10 @@ export default function HeroSlidesPage() {
               <Upload className="h-4 w-4 mr-2" />
               Upload Media
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => setShowAddSlideModal(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add New Slide
             </Button>
@@ -124,7 +132,7 @@ export default function HeroSlidesPage() {
           <Card>
             <CardContent className="text-center py-12">
               <div className="text-gray-500 mb-4">No slides found</div>
-              <Button onClick={() => setShowUploadModal(true)}>
+              <Button onClick={() => setShowAddSlideModal(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Your First Slide
               </Button>
@@ -231,6 +239,13 @@ export default function HeroSlidesPage() {
         onOpenChange={setShowUploadModal}
         onUploadComplete={handleUploadComplete}
         defaultCategory="hero-slides"
+      />
+
+      {/* Add Slide Modal */}
+      <AddSlideModal
+        open={showAddSlideModal}
+        onOpenChange={setShowAddSlideModal}
+        onSlideAdded={handleSlideAdded}
       />
     </div>
   );
