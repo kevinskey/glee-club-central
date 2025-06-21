@@ -66,14 +66,14 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero...</div>
       </div>
     );
   }
 
   return (
-    <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
+    <section className="relative w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
       {/* Background Image or Video */}
       {heroSlide.media_type === 'video' && heroSlide.youtube_url ? (
         <iframe
@@ -101,22 +101,22 @@ export function HeroSlider() {
       {/* Content */}
       {(heroSlide.title || heroSlide.description || heroSlide.button_text) && (
         <div className={`absolute inset-0 flex items-center ${
-          heroSlide.text_position === 'top' ? 'justify-start pt-16' :
-          heroSlide.text_position === 'bottom' ? 'justify-end pb-16' :
+          heroSlide.text_position === 'top' ? 'justify-start pt-8 sm:pt-12 md:pt-16' :
+          heroSlide.text_position === 'bottom' ? 'justify-end pb-8 sm:pb-12 md:pb-16' :
           'justify-center'
         }`}>
-          <div className={`text-white px-4 max-w-4xl ${
+          <div className={`text-white px-4 sm:px-6 md:px-8 max-w-4xl w-full ${
             heroSlide.text_alignment === 'left' ? 'text-left' :
             heroSlide.text_alignment === 'right' ? 'text-right' :
             'text-center'
           }`}>
             {heroSlide.show_title !== false && heroSlide.title && (
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 drop-shadow-lg">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 drop-shadow-lg">
                 {heroSlide.title}
               </h1>
             )}
             {heroSlide.description && (
-              <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 drop-shadow-lg max-w-3xl">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 drop-shadow-lg max-w-3xl mx-auto">
                 {heroSlide.description}
               </p>
             )}
@@ -124,7 +124,7 @@ export function HeroSlider() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg"
               >
                 <a href={heroSlide.button_link}>
                   {heroSlide.button_text}
