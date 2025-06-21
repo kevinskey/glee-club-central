@@ -2,7 +2,6 @@
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogIn, User, LogOut, UserPlus, Bell } from "lucide-react";
@@ -110,45 +109,29 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost"
-                  size="icon"
+                <User 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleDashboardClick}
-                  className="h-9 w-9 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Dashboard"
-                >
-                  <User className="w-5 h-5" />
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="icon"
+                />
+                <LogOut 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleLogout}
-                  className="h-9 w-9 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
                   title="Sign Out"
-                >
-                  <LogOut className="w-5 h-5" />
-                </Button>
+                />
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline"
-                  size="icon"
+                <UserPlus 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/signup")}
-                  className="h-9 w-9 bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white"
                   title="Sign Up"
-                >
-                  <UserPlus className="w-5 h-5" />
-                </Button>
-                <Button 
-                  variant="default"
-                  size="icon"
+                />
+                <LogIn 
+                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/login")}
-                  className="h-9 w-9 bg-[#003366] hover:bg-[#003366]/90 text-white"
                   title="Login"
-                >
-                  <LogIn className="w-5 h-5" />
-                </Button>
+                />
               </div>
             )}
           </div>
