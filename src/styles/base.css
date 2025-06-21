@@ -1,71 +1,72 @@
+
 @tailwind base;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;  /* Pure white */
-    --foreground: 210 100% 20%;   /* Navy blue instead of near black */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 210 100% 20%;  /* Navy blue */
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 210 100% 20%;  /* Navy blue */
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 220 100% 60%;  /* Apple blue */
-    --primary-foreground: 0 0% 100%;
+    --primary: 208 100% 40%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 0% 96%;   /* Light gray */
-    --secondary-foreground: 210 100% 20%;  /* Navy blue */
+    --secondary: 210 40% 98%;
+    --secondary-foreground: 222.2 84% 4.9%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 173 80% 70%;  /* Light blue instead of apple blue */
-    --accent-foreground: 210 100% 20%;  /* Navy blue text */
+    --accent: 210 40% 98%;
+    --accent-foreground: 222.2 84% 4.9%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 96%;
-    --ring: 173 80% 70%;  /* Light blue ring */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 208 100% 40%;
 
-    --radius: 8px;
+    --radius: 0.75rem;
     
     /* Glee Club Brand Colors */
-    --glee-purple: 220 100% 60%;
-    --glee-spelman: 220 100% 60%;
-    --glee-columbia: 220 100% 60%;
+    --glee-blue: 208 100% 40%;
+    --glee-spelman: 208 100% 40%;
+    --glee-columbia: 208 100% 40%;
   }
 
   .dark {
-    --background: 0 0% 98%;   /* Very light gray instead of black */
-    --foreground: 0 0% 100%;   /* White text for dark mode */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 96%;         /* Light gray cards */
-    --card-foreground: 0 0% 100%;  /* White text */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 96%;
-    --popover-foreground: 0 0% 100%;  /* White text */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 220 100% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 208 100% 50%;
+    --primary-foreground: 222.2 84% 4.9%;
 
-    --secondary: 0 0% 92%;    /* Slightly darker light gray */
-    --secondary-foreground: 0 0% 100%;  /* White text */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 173 80% 70%;  /* Light blue for dark mode */
-    --accent-foreground: 210 100% 20%;  /* Navy blue text */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 85%;       /* Light gray borders */
-    --input: 0 0% 92%;
-    --ring: 173 80% 70%;  /* Light blue ring */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 208 100% 50%;
   }
 
   * {
@@ -74,101 +75,73 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.003em;
-    line-height: 1.4;
+    line-height: 1.5;
   }
   
   html {
-    background-color: hsl(var(--background)) !important;
+    background-color: hsl(var(--background));
   }
   
   #root {
-    background-color: hsl(var(--background)) !important;
+    background-color: hsl(var(--background));
+    min-height: 100vh;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    font-weight: 300;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
   }
   
-  /* Apple-style button and form elements */
+  /* Form elements */
   input, select, textarea {
-    @apply text-base;
-    font-size: 16px !important;
+    font-size: 16px;
     -webkit-appearance: none;
-    border-radius: 8px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    border-radius: 0.5rem;
+    font-family: "Inter", sans-serif;
   }
   
   button, .btn, [role="button"] {
-    @apply min-h-9;
     min-height: 44px;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-weight: 400;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
     letter-spacing: -0.003em;
   }
   
-  /* Apple-style smooth scrolling */
+  /* Smooth scrolling */
   * {
     scroll-behavior: smooth;
   }
   
-  /* Apple-style focus states */
+  /* Focus states */
   button:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    outline: 2px solid hsl(var(--primary));
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
   
-  /* Apple-style link hover effects */
+  /* Link hover effects */
   a {
     transition: all 0.2s ease;
   }
   
-  /* Apple-style backdrop blur support */
-  .backdrop-blur-xl {
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  
-  /* Mobile optimizations with Apple design */
+  /* Mobile optimizations */
   @media (max-width: 768px) {
     input[type="email"],
     input[type="password"],
     input[type="text"] {
-      font-size: 16px !important;
+      font-size: 16px;
       transform: scale(1);
       -webkit-text-size-adjust: 100%;
-    }
-    
-    .auth-input {
-      min-height: 48px;
-      padding: 12px 16px;
-      border-radius: 12px;
-    }
-    
-    .auth-button {
-      min-height: 48px;
-      font-size: 16px;
-      padding: 12px 24px;
-      border-radius: 24px;
-    }
-  }
-  
-  /* Apple-style text rendering */
-  @media screen and (max-width: 768px) {
-    html {
-      -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
     }
     
     body {

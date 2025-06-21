@@ -27,13 +27,13 @@ export function FloatingThemeToggle({
       variant="outline" 
       size="icon" 
       onClick={toggleTheme}
-      className={`${positionClasses[position]} shadow-lg ${className}`}
-      aria-label={theme === "light" ? "Enable dark mode" : "Enable light mode"}
+      className={`${positionClasses[position]} shadow-lg bg-background border-border hover:bg-accent hover:text-accent-foreground ${className}`}
+      aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
     >
       {theme === "light" ? (
-        <Moon className="h-[1.2rem] w-[1.2rem] text-gray-800 dark:text-white" />
+        <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
       ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem] text-gray-800 dark:text-white" />
+        <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
       )}
       <span className="sr-only">{theme === "light" ? "Dark" : "Light"} mode</span>
     </Button>

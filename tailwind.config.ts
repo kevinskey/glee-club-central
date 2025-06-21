@@ -17,7 +17,7 @@ module.exports = {
         lg: "2rem",
       },
       screens: {
-        "2xl": "1800px",
+        "2xl": "1400px",
       },
     },
     extend: {
@@ -70,30 +70,6 @@ module.exports = {
         'glee-spelman': '#0072CE',
         'glee-columbia': '#0072CE',
         'columbia-blue': '#0072CE',
-        // Navy color palette
-        'navy': {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-        },
-        'blue': {
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0072CE",
-          600: "#0369a1",
-          700: "#0c4a6e",
-          800: "#075985",
-          900: "#0c4a6e",
-        }
       },
       borderRadius: {
         lg: "var(--radius)",
