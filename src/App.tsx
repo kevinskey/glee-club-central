@@ -1,11 +1,10 @@
 
 import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/admin/AdminLayout";
 import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 
 const queryClient = new QueryClient({
@@ -18,24 +17,15 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
           <div className="min-h-screen bg-background">
-            {isAdminRoute ? (
-              <AdminLayout />
-            ) : (
-              <div className="min-h-screen bg-background">
-                <UnifiedPublicHeader />
-                <main>
-                  <Outlet />
-                </main>
-              </div>
-            )}
+            <UnifiedPublicHeader />
+            <main>
+              <Outlet />
+            </main>
             <Toaster />
           </div>
         </AuthProvider>
