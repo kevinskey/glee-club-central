@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { Button } from "@/components/ui/button";
@@ -110,7 +111,7 @@ export function HeroSlider() {
           <img 
             src={currentSlide.media?.file_url || fallbackImages[0]} 
             alt={currentSlide.title || 'Hero Image'} 
-            className="w-full h-full object-contain sm:object-cover object-center" 
+            className="w-full h-full object-cover object-center" 
             style={{
               width: '100%',
               height: '100%'
