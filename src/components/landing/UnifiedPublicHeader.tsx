@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -139,29 +138,37 @@ export function UnifiedPublicHeader() {
           <div className="hidden md:flex items-center gap-1">
             {isAuthenticated ? (
               <div className="flex items-center gap-1">
-                <User 
+                <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleDashboardClick}
                   title="Dashboard"
-                />
-                <LogOut 
+                >
+                  <User className="w-5 h-5" />
+                </div>
+                <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleLogout}
                   title="Sign Out"
-                />
+                >
+                  <LogOut className="w-5 h-5" />
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <UserPlus 
+                <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/signup")}
                   title="Sign Up"
-                />
-                <LogIn 
+                >
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/login")}
                   title="Login"
-                />
+                >
+                  <LogIn className="w-5 h-5" />
+                </div>
               </div>
             )}
           </div>
