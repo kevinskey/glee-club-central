@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { Button } from "@/components/ui/button";
@@ -82,14 +81,14 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[250px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero...</div>
       </div>
     );
   }
 
   return (
-    <section className="relative w-full min-h-[250px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
+    <section className="relative w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
       {/* Background Image or Video */}
       {currentSlide.media_type === 'video' && currentSlide.youtube_url ? (
         <div className="absolute inset-0 w-full h-full">
