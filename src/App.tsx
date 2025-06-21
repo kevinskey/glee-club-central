@@ -6,6 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,11 +27,12 @@ function App() {
         <AuthProvider>
           <div className="min-h-screen bg-background">
             {isAdminRoute ? (
-              <AdminLayout>
-                <Outlet />
-              </AdminLayout>
+              <AdminLayout />
             ) : (
-              <Outlet />
+              <>
+                <UnifiedPublicHeader />
+                <Outlet />
+              </>
             )}
             <Toaster />
           </div>
