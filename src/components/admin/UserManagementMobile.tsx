@@ -1,18 +1,17 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, UserPlus, Filter, MoreVertical } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Search, UserPlus, Filter, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { User } from '@/hooks/user/useUserManagement';
+} from "@/components/ui/dropdown-menu";
+import { User } from "@/hooks/user/useUserManagement";
 
 interface UserManagementMobileProps {
   users: User[];
@@ -21,32 +20,37 @@ interface UserManagementMobileProps {
   isLoading?: boolean;
 }
 
-export function UserManagementMobile({ 
-  users, 
-  onUserSelect, 
-  onAddUser, 
-  isLoading = false 
+export function UserManagementMobile({
+  users,
+  onUserSelect,
+  onAddUser,
+  isLoading = false,
 }: UserManagementMobileProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      (user.first_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.last_name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.email?.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesFilter = filterStatus === 'all' || user.status === filterStatus;
-    
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFilter =
+      filterStatus === "all" || user.status === filterStatus;
+
     return matchesSearch && matchesFilter;
   });
 
   const getStatusColor = (status?: string) => {
     switch (status) {
-      case 'active': return 'default';
-      case 'inactive': return 'secondary';
-      case 'pending': return 'outline';
-      default: return 'secondary';
+      case "active":
+        return "default";
+      case "inactive":
+        return "secondary";
+      case "pending":
+        return "outline";
+      default:
+        return "secondary";
     }
   };
 
@@ -81,7 +85,7 @@ export function UserManagementMobile({
             Add User
           </Button>
         </div>
-        
+
         {/* Search and Filter */}
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -101,16 +105,16 @@ export function UserManagementMobile({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => setFilterStatus('all')}>
+              <DropdownMenuItem onClick={() => setFilterStatus("all")}>
                 All Users
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStatus('active')}>
+              <DropdownMenuItem onClick={() => setFilterStatus("active")}>
                 Active
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStatus('inactive')}>
+              <DropdownMenuItem onClick={() => setFilterStatus("inactive")}>
                 Inactive
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setFilterStatus('pending')}>
+              <DropdownMenuItem onClick={() => setFilterStatus("pending")}>
                 Pending
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -128,17 +132,21 @@ export function UserManagementMobile({
           </Card>
         ) : (
           filteredUsers.map((user) => (
-            <Card key={user.id} className="cursor-pointer hover:shadow-md transition-shadow">
+            <Card
+              key={user.id}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div 
+                  <div
                     className="flex items-center space-x-3 flex-1"
                     onClick={() => onUserSelect(user)}
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user.avatar_url || undefined} />
                       <AvatarFallback>
-                        {user.first_name?.[0]}{user.last_name?.[0]}
+                        {user.first_name?.[0]}
+                        {user.last_name?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
@@ -149,8 +157,11 @@ export function UserManagementMobile({
                         {user.email}
                       </p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <Badge variant={getStatusColor(user.status)} className="text-xs">
-                          {user.status || 'active'}
+                        <Badge
+                          variant={getStatusColor(user.status)}
+                          className="text-xs"
+                        >
+                          {user.status || "active"}
                         </Badge>
                         {user.voice_part && (
                           <span className="text-xs text-gray-400">
@@ -170,9 +181,7 @@ export function UserManagementMobile({
                       <DropdownMenuItem onClick={() => onUserSelect(user)}>
                         View Details
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        Edit User
-                      </DropdownMenuItem>
+                      <DropdownMenuItem>Edit User</DropdownMenuItem>
                       <DropdownMenuItem className="text-red-600">
                         Deactivate
                       </DropdownMenuItem>

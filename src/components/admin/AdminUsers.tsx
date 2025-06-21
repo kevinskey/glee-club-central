@@ -1,47 +1,44 @@
-
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  Users, 
-  Search, 
-  Plus, 
-  MoreVertical, 
-  Upload, 
-  RefreshCw, 
-  Edit, 
-  Trash2, 
+import {
+  Users,
+  Search,
+  Plus,
+  MoreVertical,
+  Upload,
+  RefreshCw,
+  Edit,
+  Trash2,
   AlertCircle,
   Mail,
   Phone,
-  Music
+  Music,
 } from "lucide-react";
-import { useUserList } from '@/hooks/user/useUserList';
-import { useUserUpdate } from '@/hooks/user/useUserUpdate';
-import { useUserCreate } from '@/hooks/user/useUserCreate';
-import { MemberFiltersAdvanced, MemberFilters } from '../members/MemberFiltersAdvanced';
-import { MembersPagination } from '../members/MembersPagination';
-import { EditUserDialog } from '../members/EditUserDialog';
-import { AddMemberDialog } from '../members/AddMemberDialog';
-import { UserFormValues } from '../members/form/userFormSchema';
-import { toast } from 'sonner';
+import { useUserList } from "@/hooks/user/useUserList";
+import { useUserUpdate } from "@/hooks/user/useUserUpdate";
+import { useUserCreate } from "@/hooks/user/useUserCreate";
+import {
+  MemberFiltersAdvanced,
+  MemberFilters,
+} from "../members/MemberFiltersAdvanced";
+import { MembersPagination } from "../members/MembersPagination";
+import { EditUserDialog } from "../members/EditUserDialog";
+import { AddMemberDialog } from "../members/AddMemberDialog";
+import { UserFormValues } from "../members/form/userFormSchema";
+import { toast } from "sonner";
 
 const USERS_PER_PAGE = 6;
 
@@ -49,17 +46,17 @@ const AdminUsers: React.FC = () => {
   const { users, isLoading: usersLoading, error, refetch } = useUserList();
   const { addUser } = useUserCreate();
   const { updateUser } = useUserUpdate(refetch);
-  
+
   const [filters, setFilters] = useState<MemberFilters>({
-    search: '',
-    role: 'all',
-    status: 'all',
-    voicePart: 'all',
-    classYear: 'all',
-    duesPaid: 'all',
-    isAdmin: 'all'
+    search: "",
+    role: "all",
+    status: "all",
+    voicePart: "all",
+    classYear: "all",
+    duesPaid: "all",
+    isAdmin: "all",
   });
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -67,52 +64,54 @@ const AdminUsers: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Apply filters to users
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     // Search filter
     if (filters.search) {
       const searchTermLower = filters.search.toLowerCase();
-      const fullName = `${user.first_name || ''} ${user.last_name || ''}`.toLowerCase();
-      const email = (user.email || '').toLowerCase();
-      const notes = (user.notes || '').toLowerCase();
-      
-      const matchesSearch = fullName.includes(searchTermLower) || 
-                           email.includes(searchTermLower) || 
-                           notes.includes(searchTermLower);
-      
+      const fullName =
+        `${user.first_name || ""} ${user.last_name || ""}`.toLowerCase();
+      const email = (user.email || "").toLowerCase();
+      const notes = (user.notes || "").toLowerCase();
+
+      const matchesSearch =
+        fullName.includes(searchTermLower) ||
+        email.includes(searchTermLower) ||
+        notes.includes(searchTermLower);
+
       if (!matchesSearch) return false;
     }
 
     // Role filter
-    if (filters.role !== 'all' && user.role !== filters.role) {
+    if (filters.role !== "all" && user.role !== filters.role) {
       return false;
     }
 
     // Status filter
-    if (filters.status !== 'all' && user.status !== filters.status) {
+    if (filters.status !== "all" && user.status !== filters.status) {
       return false;
     }
 
     // Voice part filter
-    if (filters.voicePart !== 'all' && user.voice_part !== filters.voicePart) {
+    if (filters.voicePart !== "all" && user.voice_part !== filters.voicePart) {
       return false;
     }
 
     // Class year filter
-    if (filters.classYear !== 'all' && user.class_year !== filters.classYear) {
+    if (filters.classYear !== "all" && user.class_year !== filters.classYear) {
       return false;
     }
 
     // Dues paid filter
-    if (filters.duesPaid !== 'all') {
+    if (filters.duesPaid !== "all") {
       const isDuesPaid = user.dues_paid === true;
-      const filterValue = filters.duesPaid === 'true';
+      const filterValue = filters.duesPaid === "true";
       if (isDuesPaid !== filterValue) return false;
     }
 
     // Admin status filter
-    if (filters.isAdmin !== 'all') {
-      const isUserAdmin = user.is_super_admin === true || user.role === 'admin';
-      const filterValue = filters.isAdmin === 'true';
+    if (filters.isAdmin !== "all") {
+      const isUserAdmin = user.is_super_admin === true || user.role === "admin";
+      const filterValue = filters.isAdmin === "true";
       if (isUserAdmin !== filterValue) return false;
     }
 
@@ -132,8 +131,8 @@ const AdminUsers: React.FC = () => {
 
   // Count active filters
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'search') return value !== '';
-    return value !== 'all';
+    if (key === "search") return value !== "";
+    return value !== "all";
   }).length;
 
   const handleAddMember = async (data: UserFormValues) => {
@@ -143,11 +142,11 @@ const AdminUsers: React.FC = () => {
       if (success) {
         setShowAddMemberDialog(false);
         refetch();
-        toast.success('Member added successfully');
+        toast.success("Member added successfully");
       }
     } catch (error) {
-      console.error('Error adding member:', error);
-      toast.error('Failed to add member');
+      console.error("Error adding member:", error);
+      toast.error("Failed to add member");
     } finally {
       setIsSubmitting(false);
     }
@@ -160,7 +159,7 @@ const AdminUsers: React.FC = () => {
 
   const handleSaveUser = async (data: UserFormValues) => {
     if (!selectedUser) return;
-    
+
     setIsSubmitting(true);
     try {
       const updateData: any = {
@@ -173,25 +172,25 @@ const AdminUsers: React.FC = () => {
         notes: data.notes,
         dues_paid: data.dues_paid,
         is_super_admin: data.is_admin,
-        role: data.is_admin ? 'admin' : 'member'
+        role: data.is_admin ? "admin" : "member",
       };
 
       const success = await updateUser(selectedUser.id, updateData);
       if (success) {
         setShowEditDialog(false);
         setSelectedUser(null);
-        toast.success('User updated successfully');
+        toast.success("User updated successfully");
       }
     } catch (error) {
-      console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleRefresh = async () => {
-    console.log('🔄 Manual refresh triggered');
+    console.log("🔄 Manual refresh triggered");
     await refetch();
   };
 
@@ -211,21 +210,28 @@ const AdminUsers: React.FC = () => {
       {error && (
         <Alert variant="destructive" className="mt-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Error loading members: {error}
-          </AlertDescription>
+          <AlertDescription>Error loading members: {error}</AlertDescription>
         </Alert>
       )}
-      
+
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Members Directory</CardTitle>
           <div className="flex gap-2">
-            <Button onClick={handleRefresh} variant="outline" disabled={usersLoading}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${usersLoading ? 'animate-spin' : ''}`} />
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              disabled={usersLoading}
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${usersLoading ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
-            <Button onClick={() => setShowAddMemberDialog(true)} variant="default">
+            <Button
+              onClick={() => setShowAddMemberDialog(true)}
+              variant="default"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Member
             </Button>
@@ -259,10 +265,15 @@ const AdminUsers: React.FC = () => {
               {/* Results Summary */}
               <div className="flex items-center justify-between text-sm text-muted-foreground mt-4 mb-4">
                 <p>
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} members
-                  {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+                  Showing {startIndex + 1}-
+                  {Math.min(endIndex, filteredUsers.length)} of{" "}
+                  {filteredUsers.length} members
+                  {activeFilterCount > 0 &&
+                    ` (${activeFilterCount} filter${activeFilterCount !== 1 ? "s" : ""} applied)`}
                 </p>
-                <p>Page {currentPage} of {totalPages}</p>
+                <p>
+                  Page {currentPage} of {totalPages}
+                </p>
               </div>
 
               {/* Member List */}
@@ -271,12 +282,11 @@ const AdminUsers: React.FC = () => {
                   <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">No Members Found</h3>
                   <p className="text-muted-foreground mb-4">
-                    {users.length === 0 
-                      ? 'No members have been added yet.' 
+                    {users.length === 0
+                      ? "No members have been added yet."
                       : activeFilterCount > 0
-                        ? 'No members match your current filters.'
-                        : 'No members found.'
-                    }
+                        ? "No members match your current filters."
+                        : "No members found."}
                   </p>
                   {users.length === 0 && (
                     <Button onClick={() => setShowAddMemberDialog(true)}>
@@ -289,8 +299,8 @@ const AdminUsers: React.FC = () => {
                 <>
                   <div className="grid gap-4">
                     {paginatedUsers.map((member) => (
-                      <Card 
-                        key={member.id} 
+                      <Card
+                        key={member.id}
                         className="transition-all duration-200 cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-primary/50"
                         onClick={() => handleEditUser(member)}
                       >
@@ -300,7 +310,7 @@ const AdminUsers: React.FC = () => {
                               <Avatar>
                                 <AvatarImage src={member.avatar_url} />
                                 <AvatarFallback>
-                                  {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
+                                  {`${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
@@ -309,7 +319,7 @@ const AdminUsers: React.FC = () => {
                                 </h3>
                                 <p className="text-sm text-muted-foreground flex items-center">
                                   <Mail className="mr-1 h-3 w-3" />
-                                  {member.email || 'No email'}
+                                  {member.email || "No email"}
                                 </p>
                                 {member.phone && (
                                   <p className="text-sm text-muted-foreground flex items-center">
@@ -321,21 +331,36 @@ const AdminUsers: React.FC = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                               {member.role && (
-                                <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                                <Badge
+                                  variant={
+                                    member.role === "admin"
+                                      ? "destructive"
+                                      : "outline"
+                                  }
+                                >
                                   {member.role}
                                 </Badge>
                               )}
                               {member.voice_part && (
                                 <Badge variant="outline">
                                   <Music className="mr-1 h-3 w-3" />
-                                  {member.voice_part.replace('_', ' ')}
+                                  {member.voice_part.replace("_", " ")}
                                 </Badge>
                               )}
-                              <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                                {member.status || 'active'}
+                              <Badge
+                                variant={
+                                  member.status === "active"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {member.status || "active"}
                               </Badge>
                               {member.dues_paid && (
-                                <Badge variant="default" className="bg-green-600">
+                                <Badge
+                                  variant="default"
+                                  className="bg-green-600"
+                                >
                                   Dues Paid
                                 </Badge>
                               )}
@@ -345,24 +370,31 @@ const AdminUsers: React.FC = () => {
                                 </Badge>
                               )}
                               <DropdownMenu>
-                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <DropdownMenuTrigger
+                                  asChild
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <Button variant="ghost" size="sm">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditUser(member);
-                                  }}>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditUser(member);
+                                    }}
+                                  >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit Member
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem 
+                                  <DropdownMenuItem
                                     className="text-destructive"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      toast.info('Delete functionality will be implemented soon');
+                                      toast.info(
+                                        "Delete functionality will be implemented soon",
+                                      );
                                     }}
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />

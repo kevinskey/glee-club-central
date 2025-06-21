@@ -1,29 +1,34 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  Send, 
-  FileText, 
-  Users, 
-  Eye, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Send,
+  FileText,
+  Users,
+  Eye,
   RefreshCw,
   Mail,
   AlertCircle,
   CheckCircle,
   Info,
-  XCircle
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
-import { toast } from 'sonner';
+  XCircle,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUnifiedUserManagement } from "@/hooks/user/useUnifiedUserManagement";
+import { toast } from "sonner";
 
 interface ElasticTemplate {
   templateid: string;
@@ -44,16 +49,19 @@ interface Recipient {
 
 export function ElasticEmailComposer() {
   const [templates, setTemplates] = useState<ElasticTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<ElasticTemplate | null>(null);
-  const [subject, setSubject] = useState('');
-  const [content, setContent] = useState('');
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ElasticTemplate | null>(null);
+  const [subject, setSubject] = useState("");
+  const [content, setContent] = useState("");
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'checking' | 'connected' | 'error' | 'unknown'>('unknown');
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "checking" | "connected" | "error" | "unknown"
+  >("unknown");
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   const { filteredUsers } = useUnifiedUserManagement();
 
@@ -65,60 +73,65 @@ export function ElasticEmailComposer() {
   const loadTemplates = async () => {
     setIsLoading(true);
     setError(null);
-    setConnectionStatus('checking');
-    
-    try {
-      console.log('🔄 Fetching templates from Elastic Email...');
-      
-      const { data, error } = await supabase.functions.invoke('elastic-email-sync', {
-        body: { action: 'sync_templates' }
-      });
+    setConnectionStatus("checking");
 
-      console.log('📧 Elastic Email Response:', { data, error });
+    try {
+      console.log("🔄 Fetching templates from Elastic Email...");
+
+      const { data, error } = await supabase.functions.invoke(
+        "elastic-email-sync",
+        {
+          body: { action: "sync_templates" },
+        },
+      );
+
+      console.log("📧 Elastic Email Response:", { data, error });
 
       if (error) {
-        console.error('❌ Supabase Function Error:', error);
+        console.error("❌ Supabase Function Error:", error);
         throw new Error(`Function error: ${error.message}`);
       }
-      
+
       // Check if the response indicates success or failure
       if (data?.success === false) {
-        console.error('❌ Elastic Email API Error:', data.error);
-        setConnectionStatus('error');
+        console.error("❌ Elastic Email API Error:", data.error);
+        setConnectionStatus("error");
         setDebugInfo(`❌ API Error: ${data.error}`);
         setError(`Elastic Email API Error: ${data.error}`);
         toast.error(`Connection failed: ${data.error}`);
         return;
       }
-      
+
       // Ensure templates is always an array
       const templatesData = data?.templates || [];
-      console.log('📝 Templates received:', templatesData);
-      
+      console.log("📝 Templates received:", templatesData);
+
       if (Array.isArray(templatesData)) {
         setTemplates(templatesData);
-        setConnectionStatus('connected');
-        setDebugInfo(`✅ Successfully connected! Found ${templatesData.length} templates`);
-        
+        setConnectionStatus("connected");
+        setDebugInfo(
+          `✅ Successfully connected! Found ${templatesData.length} templates`,
+        );
+
         if (templatesData.length === 0) {
-          toast.info('Connected to Elastic Email, but no templates found');
+          toast.info("Connected to Elastic Email, but no templates found");
         } else {
           toast.success(`Connected! Loaded ${templatesData.length} templates`);
         }
       } else {
-        console.warn('⚠️ Templates data is not an array:', templatesData);
+        console.warn("⚠️ Templates data is not an array:", templatesData);
         setTemplates([]);
-        setConnectionStatus('connected'); // Still connected, just no templates
-        setDebugInfo('✅ Connected to Elastic Email (no templates found)');
-        toast.info('Connected to Elastic Email, but no templates available');
+        setConnectionStatus("connected"); // Still connected, just no templates
+        setDebugInfo("✅ Connected to Elastic Email (no templates found)");
+        toast.info("Connected to Elastic Email, but no templates available");
       }
     } catch (error: any) {
-      console.error('💥 Error loading templates:', error);
-      setError('Failed to connect to Elastic Email');
+      console.error("💥 Error loading templates:", error);
+      setError("Failed to connect to Elastic Email");
       setTemplates([]);
-      setConnectionStatus('error');
-      setDebugInfo(`❌ Connection failed: ${error.message || 'Unknown error'}`);
-      toast.error('Failed to connect to Elastic Email - check your API key');
+      setConnectionStatus("error");
+      setDebugInfo(`❌ Connection failed: ${error.message || "Unknown error"}`);
+      toast.error("Failed to connect to Elastic Email - check your API key");
     } finally {
       setIsLoading(false);
     }
@@ -127,24 +140,24 @@ export function ElasticEmailComposer() {
   const loadRecipients = () => {
     try {
       const memberRecipients: Recipient[] = filteredUsers
-        .filter(user => user.email)
-        .map(user => ({
+        .filter((user) => user.email)
+        .map((user) => ({
           id: user.id,
-          first_name: user.first_name || 'Unknown',
-          last_name: user.last_name || 'User',
+          first_name: user.first_name || "Unknown",
+          last_name: user.last_name || "User",
           email: user.email!,
-          selected: false
+          selected: false,
         }));
-      
+
       setRecipients(memberRecipients);
     } catch (error) {
-      console.error('Error loading recipients:', error);
+      console.error("Error loading recipients:", error);
       setRecipients([]);
     }
   };
 
   const handleTemplateSelect = (templateId: string) => {
-    const template = templates.find(t => t.templateid === templateId);
+    const template = templates.find((t) => t.templateid === templateId);
     if (template) {
       setSelectedTemplate(template);
       setSubject(template.subject);
@@ -153,10 +166,10 @@ export function ElasticEmailComposer() {
   };
 
   const handleRecipientToggle = (recipientId: string) => {
-    setSelectedRecipients(prev => 
-      prev.includes(recipientId) 
-        ? prev.filter(id => id !== recipientId)
-        : [...prev, recipientId]
+    setSelectedRecipients((prev) =>
+      prev.includes(recipientId)
+        ? prev.filter((id) => id !== recipientId)
+        : [...prev, recipientId],
     );
   };
 
@@ -164,25 +177,27 @@ export function ElasticEmailComposer() {
     if (selectedRecipients.length === recipients.length) {
       setSelectedRecipients([]);
     } else {
-      setSelectedRecipients(recipients.map(r => r.id));
+      setSelectedRecipients(recipients.map((r) => r.id));
     }
   };
 
   const previewEmail = () => {
-    const selectedRecipientsData = recipients.filter(r => 
-      selectedRecipients.includes(r.id)
+    const selectedRecipientsData = recipients.filter((r) =>
+      selectedRecipients.includes(r.id),
     );
 
     if (selectedRecipientsData.length === 0) {
-      toast.error('Please select at least one recipient');
+      toast.error("Please select at least one recipient");
       return;
     }
 
     // Open preview in new window/modal
-    const previewWindow = window.open('', '_blank');
+    const previewWindow = window.open("", "_blank");
     if (previewWindow) {
-      const recipientsList = selectedRecipientsData.map(r => `${r.first_name} ${r.last_name} (${r.email})`).join(', ');
-      
+      const recipientsList = selectedRecipientsData
+        .map((r) => `${r.first_name} ${r.last_name} (${r.email})`)
+        .join(", ");
+
       previewWindow.document.write(`
         <html>
           <head><title>Email Preview</title></head>
@@ -203,19 +218,19 @@ export function ElasticEmailComposer() {
 
   const sendEmail = async () => {
     if (!subject.trim() || !content.trim()) {
-      toast.error('Please fill in subject and content');
+      toast.error("Please fill in subject and content");
       return;
     }
 
     if (selectedRecipients.length === 0) {
-      toast.error('Please select at least one recipient');
+      toast.error("Please select at least one recipient");
       return;
     }
 
     setIsSending(true);
     try {
-      const selectedRecipientsData = recipients.filter(r => 
-        selectedRecipients.includes(r.id)
+      const selectedRecipientsData = recipients.filter((r) =>
+        selectedRecipients.includes(r.id),
       );
 
       for (const recipient of selectedRecipientsData) {
@@ -224,29 +239,30 @@ export function ElasticEmailComposer() {
           .replace(/{{last_name}}/g, recipient.last_name)
           .replace(/{{email}}/g, recipient.email);
 
-        const { error } = await supabase.functions.invoke('send-email', {
+        const { error } = await supabase.functions.invoke("send-email", {
           body: {
             to: recipient.email,
             subject: subject,
             content: personalizedContent,
-            userId: recipient.id
-          }
+            userId: recipient.id,
+          },
         });
 
         if (error) throw error;
       }
 
-      toast.success(`Email sent to ${selectedRecipientsData.length} recipients`);
-      
+      toast.success(
+        `Email sent to ${selectedRecipientsData.length} recipients`,
+      );
+
       // Reset form
-      setSubject('');
-      setContent('');
+      setSubject("");
+      setContent("");
       setSelectedRecipients([]);
       setSelectedTemplate(null);
-      
     } catch (error) {
-      console.error('Error sending emails:', error);
-      toast.error('Failed to send emails');
+      console.error("Error sending emails:", error);
+      toast.error("Failed to send emails");
     } finally {
       setIsSending(false);
     }
@@ -254,11 +270,11 @@ export function ElasticEmailComposer() {
 
   const getConnectionStatusIcon = () => {
     switch (connectionStatus) {
-      case 'checking':
+      case "checking":
         return <RefreshCw className="h-4 w-4 animate-spin text-blue-500" />;
-      case 'connected':
+      case "connected":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'error':
+      case "error":
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Info className="h-4 w-4 text-gray-500" />;
@@ -267,18 +283,18 @@ export function ElasticEmailComposer() {
 
   const getConnectionStatusColor = () => {
     switch (connectionStatus) {
-      case 'connected':
-        return 'text-green-600';
-      case 'error':
-        return 'text-red-600';
-      case 'checking':
-        return 'text-blue-600';
+      case "connected":
+        return "text-green-600";
+      case "error":
+        return "text-red-600";
+      case "checking":
+        return "text-blue-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
-  if (error && connectionStatus === 'error') {
+  if (error && connectionStatus === "error") {
     return (
       <Card>
         <CardContent className="p-6">
@@ -298,7 +314,8 @@ export function ElasticEmailComposer() {
               Try Again
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Make sure your Elastic Email API key is valid and has the correct permissions
+              Make sure your Elastic Email API key is valid and has the correct
+              permissions
             </p>
           </div>
         </CardContent>
@@ -315,22 +332,26 @@ export function ElasticEmailComposer() {
             Elastic Email Composer
             <div className="flex items-center gap-2 ml-auto">
               {getConnectionStatusIcon()}
-              <span className={`text-sm font-medium ${getConnectionStatusColor()}`}>
-                {connectionStatus === 'connected' && 'Connected'}
-                {connectionStatus === 'checking' && 'Connecting...'}
-                {connectionStatus === 'error' && 'Connection Error'}
-                {connectionStatus === 'unknown' && 'Not Connected'}
+              <span
+                className={`text-sm font-medium ${getConnectionStatusColor()}`}
+              >
+                {connectionStatus === "connected" && "Connected"}
+                {connectionStatus === "checking" && "Connecting..."}
+                {connectionStatus === "error" && "Connection Error"}
+                {connectionStatus === "unknown" && "Not Connected"}
               </span>
             </div>
           </CardTitle>
           {debugInfo && (
-            <div className={`mt-2 p-3 rounded text-sm border ${
-              connectionStatus === 'connected' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : connectionStatus === 'error'
-                ? 'bg-red-50 border-red-200 text-red-800'
-                : 'bg-blue-50 border-blue-200 text-blue-800'
-            }`}>
+            <div
+              className={`mt-2 p-3 rounded text-sm border ${
+                connectionStatus === "connected"
+                  ? "bg-green-50 border-green-200 text-green-800"
+                  : connectionStatus === "error"
+                    ? "bg-red-50 border-red-200 text-red-800"
+                    : "bg-blue-50 border-blue-200 text-blue-800"
+              }`}
+            >
               <strong>Status:</strong> {debugInfo}
             </div>
           )}
@@ -339,11 +360,15 @@ export function ElasticEmailComposer() {
           <Tabs defaultValue="compose" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="compose">Compose</TabsTrigger>
-              <TabsTrigger value="recipients">Recipients ({selectedRecipients.length})</TabsTrigger>
+              <TabsTrigger value="recipients">
+                Recipients ({selectedRecipients.length})
+              </TabsTrigger>
               <TabsTrigger value="templates">
                 Templates ({templates.length})
-                {connectionStatus === 'connected' && templates.length === 0 && (
-                  <Badge variant="outline" className="ml-2">Empty</Badge>
+                {connectionStatus === "connected" && templates.length === 0 && (
+                  <Badge variant="outline" className="ml-2">
+                    Empty
+                  </Badge>
                 )}
               </TabsTrigger>
             </TabsList>
@@ -358,7 +383,10 @@ export function ElasticEmailComposer() {
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map((template) => (
-                      <SelectItem key={template.templateid} value={template.templateid}>
+                      <SelectItem
+                        key={template.templateid}
+                        value={template.templateid}
+                      >
                         {template.name} - {template.subject}
                       </SelectItem>
                     ))}
@@ -393,28 +421,38 @@ export function ElasticEmailComposer() {
                     placeholder="Enter your email content here... You can use {{first_name}}, {{last_name}}, {{email}} for personalization."
                   />
                   <p className="text-sm text-muted-foreground">
-                    Use personalization tags: {`{{first_name}}, {{last_name}}, {{email}}`}
+                    Use personalization tags:{" "}
+                    {`{{first_name}}, {{last_name}}, {{email}}`}
                   </p>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex gap-3">
-                <Button 
+                <Button
                   onClick={previewEmail}
                   variant="outline"
-                  disabled={!subject || !content || selectedRecipients.length === 0}
+                  disabled={
+                    !subject || !content || selectedRecipients.length === 0
+                  }
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Preview
                 </Button>
-                <Button 
+                <Button
                   onClick={sendEmail}
-                  disabled={isSending || !subject || !content || selectedRecipients.length === 0}
+                  disabled={
+                    isSending ||
+                    !subject ||
+                    !content ||
+                    selectedRecipients.length === 0
+                  }
                   className="flex-1"
                 >
                   <Send className="h-4 w-4 mr-2" />
-                  {isSending ? 'Sending...' : `Send to ${selectedRecipients.length} Recipients`}
+                  {isSending
+                    ? "Sending..."
+                    : `Send to ${selectedRecipients.length} Recipients`}
                 </Button>
               </div>
             </TabsContent>
@@ -428,7 +466,9 @@ export function ElasticEmailComposer() {
                   onClick={handleSelectAllRecipients}
                 >
                   <Users className="h-4 w-4 mr-2" />
-                  {selectedRecipients.length === recipients.length ? 'Deselect All' : 'Select All'}
+                  {selectedRecipients.length === recipients.length
+                    ? "Deselect All"
+                    : "Select All"}
                 </Button>
               </div>
 
@@ -440,7 +480,9 @@ export function ElasticEmailComposer() {
                   >
                     <Checkbox
                       checked={selectedRecipients.includes(recipient.id)}
-                      onCheckedChange={() => handleRecipientToggle(recipient.id)}
+                      onCheckedChange={() =>
+                        handleRecipientToggle(recipient.id)
+                      }
                     />
                     <div className="flex-1">
                       <p className="font-medium">
@@ -464,21 +506,28 @@ export function ElasticEmailComposer() {
                   onClick={loadTemplates}
                   disabled={isLoading}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                  />
                   Refresh
                 </Button>
               </div>
 
-              {templates.length === 0 && connectionStatus === 'connected' ? (
+              {templates.length === 0 && connectionStatus === "connected" ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>No templates found in your Elastic Email account</p>
-                  <p className="text-sm">Create templates in Elastic Email to use them here</p>
+                  <p className="text-sm">
+                    Create templates in Elastic Email to use them here
+                  </p>
                 </div>
               ) : (
                 <div className="grid gap-4">
                   {templates.map((template) => (
-                    <Card key={template.templateid} className="cursor-pointer hover:shadow-md">
+                    <Card
+                      key={template.templateid}
+                      className="cursor-pointer hover:shadow-md"
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -487,16 +536,23 @@ export function ElasticEmailComposer() {
                               {template.subject}
                             </p>
                             <div className="flex items-center gap-2 mt-2">
-                              <Badge variant="outline">{template.templatetype}</Badge>
+                              <Badge variant="outline">
+                                {template.templatetype}
+                              </Badge>
                               <span className="text-xs text-muted-foreground">
-                                Created {new Date(template.datecreated).toLocaleDateString()}
+                                Created{" "}
+                                {new Date(
+                                  template.datecreated,
+                                ).toLocaleDateString()}
                               </span>
                             </div>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleTemplateSelect(template.templateid)}
+                            onClick={() =>
+                              handleTemplateSelect(template.templateid)
+                            }
                           >
                             <FileText className="h-4 w-4 mr-2" />
                             Use Template

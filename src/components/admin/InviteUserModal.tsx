@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,37 +6,46 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface InviteUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInvite: (email: string, role: string, firstName?: string, lastName?: string) => Promise<void>;
+  onInvite: (
+    email: string,
+    role: string,
+    firstName?: string,
+    lastName?: string,
+  ) => Promise<void>;
 }
 
-export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalProps) {
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [role, setRole] = useState('member');
+export function InviteUserModal({
+  isOpen,
+  onClose,
+  onInvite,
+}: InviteUserModalProps) {
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [role, setRole] = useState("member");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
-      toast.error('Email is required');
+      toast.error("Email is required");
       return;
     }
 
@@ -47,18 +55,18 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
         email.trim(),
         role,
         firstName.trim() || undefined,
-        lastName.trim() || undefined
+        lastName.trim() || undefined,
       );
-      
+
       // Reset form
-      setEmail('');
-      setFirstName('');
-      setLastName('');
-      setRole('member');
+      setEmail("");
+      setFirstName("");
+      setLastName("");
+      setRole("member");
       onClose();
-      toast.success('User invitation sent successfully');
+      toast.success("User invitation sent successfully");
     } catch (error) {
-      toast.error('Failed to send invitation');
+      toast.error("Failed to send invitation");
     } finally {
       setIsSubmitting(false);
     }
@@ -66,10 +74,10 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
 
   const handleClose = () => {
     if (!isSubmitting) {
-      setEmail('');
-      setFirstName('');
-      setLastName('');
-      setRole('member');
+      setEmail("");
+      setFirstName("");
+      setLastName("");
+      setRole("member");
       onClose();
     }
   };
@@ -83,7 +91,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
             Send an invitation to a new user to join the system.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address *</Label>
@@ -97,7 +105,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
               disabled={isSubmitting}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -109,7 +117,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
                 disabled={isSubmitting}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
               <Input
@@ -121,10 +129,14 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={setRole} disabled={isSubmitting}>
+            <Select
+              value={role}
+              onValueChange={setRole}
+              disabled={isSubmitting}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
@@ -135,7 +147,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
               </SelectContent>
             </Select>
           </div>
-          
+
           <DialogFooter>
             <Button
               type="button"
@@ -146,7 +158,7 @@ export function InviteUserModal({ isOpen, onClose, onInvite }: InviteUserModalPr
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Sending...' : 'Send Invitation'}
+              {isSubmitting ? "Sending..." : "Send Invitation"}
             </Button>
           </DialogFooter>
         </form>

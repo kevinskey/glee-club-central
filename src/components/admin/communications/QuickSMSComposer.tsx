@@ -1,24 +1,23 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Phone, Send, Plus, X } from 'lucide-react';
-import { useMessaging } from '@/hooks/useMessaging';
-import { toast } from 'sonner';
-import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Phone, Send, Plus, X } from "lucide-react";
+import { useMessaging } from "@/hooks/useMessaging";
+import { toast } from "sonner";
+import { parsePhoneNumber, isValidPhoneNumber } from "libphonenumber-js";
 
 export function QuickSMSComposer() {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [content, setContent] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [content, setContent] = useState("");
   const [customNumbers, setCustomNumbers] = useState<string[]>([]);
   const { sendSMS, isSending } = useMessaging();
 
   const validatePhoneNumber = (number: string): boolean => {
     try {
-      return isValidPhoneNumber(number, 'US'); // Default to US, could be made configurable
+      return isValidPhoneNumber(number, "US"); // Default to US, could be made configurable
     } catch {
       return false;
     }
@@ -26,7 +25,7 @@ export function QuickSMSComposer() {
 
   const formatPhoneNumber = (number: string): string => {
     try {
-      const parsed = parsePhoneNumber(number, 'US');
+      const parsed = parsePhoneNumber(number, "US");
       return parsed.formatInternational();
     } catch {
       return number;
@@ -35,64 +34,64 @@ export function QuickSMSComposer() {
 
   const addCustomNumber = () => {
     if (!phoneNumber.trim()) {
-      toast.error('Please enter a phone number');
+      toast.error("Please enter a phone number");
       return;
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error('Please enter a valid phone number');
+      toast.error("Please enter a valid phone number");
       return;
     }
 
     const formatted = formatPhoneNumber(phoneNumber);
-    
+
     if (customNumbers.includes(formatted)) {
-      toast.error('This number is already in the list');
+      toast.error("This number is already in the list");
       return;
     }
 
-    setCustomNumbers(prev => [...prev, formatted]);
-    setPhoneNumber('');
-    toast.success('Phone number added');
+    setCustomNumbers((prev) => [...prev, formatted]);
+    setPhoneNumber("");
+    toast.success("Phone number added");
   };
 
   const removeCustomNumber = (numberToRemove: string) => {
-    setCustomNumbers(prev => prev.filter(num => num !== numberToRemove));
+    setCustomNumbers((prev) => prev.filter((num) => num !== numberToRemove));
   };
 
   const handleSendSingle = async () => {
     if (!phoneNumber.trim()) {
-      toast.error('Please enter a phone number');
+      toast.error("Please enter a phone number");
       return;
     }
 
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error('Please enter a valid phone number');
+      toast.error("Please enter a valid phone number");
       return;
     }
 
     if (!content.trim()) {
-      toast.error('Please enter a message');
+      toast.error("Please enter a message");
       return;
     }
 
     const formatted = formatPhoneNumber(phoneNumber);
     const result = await sendSMS(formatted, content);
-    
+
     if (result.success) {
-      setPhoneNumber('');
-      setContent('');
+      setPhoneNumber("");
+      setContent("");
     }
   };
 
   const handleSendBulk = async () => {
     if (customNumbers.length === 0) {
-      toast.error('Please add at least one phone number');
+      toast.error("Please add at least one phone number");
       return;
     }
 
     if (!content.trim()) {
-      toast.error('Please enter a message');
+      toast.error("Please enter a message");
       return;
     }
 
@@ -111,13 +110,13 @@ export function QuickSMSComposer() {
     if (successCount > 0) {
       toast.success(`Successfully sent ${successCount} message(s)`);
     }
-    
+
     if (failCount > 0) {
       toast.error(`Failed to send ${failCount} message(s)`);
     }
 
     if (successCount === customNumbers.length) {
-      setContent('');
+      setContent("");
       setCustomNumbers([]);
     }
   };
@@ -157,7 +156,7 @@ export function QuickSMSComposer() {
                 Include country code (e.g., +1 for US)
               </p>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="content">Message</Label>
               <Textarea
@@ -174,7 +173,7 @@ export function QuickSMSComposer() {
           </div>
 
           <div className="flex justify-end">
-            <Button 
+            <Button
               onClick={handleSendSingle}
               disabled={isSending || !phoneNumber.trim() || !content.trim()}
               className="gap-2"
@@ -227,13 +226,17 @@ export function QuickSMSComposer() {
               >
                 Clear All
               </Button>
-              <Button 
+              <Button
                 onClick={handleSendBulk}
-                disabled={isSending || customNumbers.length === 0 || !content.trim()}
+                disabled={
+                  isSending || customNumbers.length === 0 || !content.trim()
+                }
                 className="gap-2"
               >
                 <Send className="w-4 h-4" />
-                {isSending ? 'Sending...' : `Send to ${customNumbers.length} Numbers`}
+                {isSending
+                  ? "Sending..."
+                  : `Send to ${customNumbers.length} Numbers`}
               </Button>
             </div>
           </CardContent>

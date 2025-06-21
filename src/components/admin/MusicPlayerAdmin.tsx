@@ -1,23 +1,31 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Music, Settings, BarChart3, Plus, Trash2, Upload, List } from 'lucide-react';
-import { useMusicPlayer } from '@/hooks/useMusicPlayer';
-import { EnhancedCustomAudioPlayer } from '@/components/audio/EnhancedCustomAudioPlayer';
-import { AudioFileSelector } from '@/components/audio/AudioFileSelector';
-import { useAudioFiles, AudioFileData } from '@/hooks/useAudioFiles';
-import { UploadAudioModal } from '@/components/UploadAudioModal';
-import { DeleteAudioDialog } from '@/components/audio/DeleteAudioDialog';
-import { PlaylistManager } from './PlaylistManager';
-import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Music,
+  Settings,
+  BarChart3,
+  Plus,
+  Trash2,
+  Upload,
+  List,
+} from "lucide-react";
+import { useMusicPlayer } from "@/hooks/useMusicPlayer";
+import { EnhancedCustomAudioPlayer } from "@/components/audio/EnhancedCustomAudioPlayer";
+import { AudioFileSelector } from "@/components/audio/AudioFileSelector";
+import { useAudioFiles, AudioFileData } from "@/hooks/useAudioFiles";
+import { UploadAudioModal } from "@/components/UploadAudioModal";
+import { DeleteAudioDialog } from "@/components/audio/DeleteAudioDialog";
+import { PlaylistManager } from "./PlaylistManager";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function MusicPlayerAdmin() {
   const { activePlaylist, playerSettings, isLoading } = useMusicPlayer();
   const { audioFiles, deleteAudioFile, refetch } = useAudioFiles();
-  const [selectedAudioFile, setSelectedAudioFile] = useState<AudioFileData | null>(null);
+  const [selectedAudioFile, setSelectedAudioFile] =
+    useState<AudioFileData | null>(null);
   const [showFileSelector, setShowFileSelector] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -35,24 +43,24 @@ export function MusicPlayerAdmin() {
 
   const confirmDelete = async () => {
     if (!fileToDelete) return;
-    
+
     try {
       await deleteAudioFile(fileToDelete.id);
-      toast.success('Audio file deleted successfully');
+      toast.success("Audio file deleted successfully");
       setDeleteDialogOpen(false);
       setFileToDelete(null);
       if (selectedAudioFile?.id === fileToDelete.id) {
         setSelectedAudioFile(null);
       }
     } catch (error) {
-      toast.error('Failed to delete audio file');
+      toast.error("Failed to delete audio file");
     }
   };
 
   const handleUploadComplete = () => {
     refetch();
     setShowUploadModal(false);
-    toast.success('Audio file uploaded successfully');
+    toast.success("Audio file uploaded successfully");
   };
 
   if (isLoading) {
@@ -85,18 +93,18 @@ export function MusicPlayerAdmin() {
                   Music Player
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setShowUploadModal(true)}
                   >
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Audio
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => setShowFileSelector(!showFileSelector)}
                   >
-                    {showFileSelector ? 'Hide' : 'Select'} Audio Files
+                    {showFileSelector ? "Hide" : "Select"} Audio Files
                   </Button>
                 </div>
               </CardTitle>
@@ -109,16 +117,21 @@ export function MusicPlayerAdmin() {
                     selectedFileId={selectedAudioFile?.id}
                     showPlayer={false}
                   />
-                  
+
                   {/* Audio Files Management */}
                   <div className="space-y-2">
                     <h4 className="font-medium">Manage Audio Files</h4>
                     <div className="max-h-64 overflow-y-auto space-y-2">
                       {audioFiles.map((file) => (
-                        <div key={file.id} className="flex items-center justify-between p-2 border rounded">
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between p-2 border rounded"
+                        >
                           <div className="flex-1">
                             <p className="font-medium">{file.title}</p>
-                            <p className="text-sm text-muted-foreground">{file.description || file.category}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {file.description || file.category}
+                            </p>
                           </div>
                           <div className="flex gap-2">
                             <Button
@@ -148,7 +161,9 @@ export function MusicPlayerAdmin() {
                       <EnhancedCustomAudioPlayer className="w-full" />
                       <div className="text-center">
                         <p className="font-medium">{selectedAudioFile.title}</p>
-                        <p className="text-sm text-muted-foreground">{selectedAudioFile.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedAudioFile.description}
+                        </p>
                       </div>
                     </div>
                   ) : activePlaylist && activePlaylist.tracks.length > 0 ? (
@@ -163,7 +178,10 @@ export function MusicPlayerAdmin() {
                         <Button onClick={() => setShowFileSelector(true)}>
                           Browse Audio Files
                         </Button>
-                        <Button variant="outline" onClick={() => setShowUploadModal(true)}>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowUploadModal(true)}
+                        >
                           Upload New Audio
                         </Button>
                       </div>
@@ -186,20 +204,27 @@ export function MusicPlayerAdmin() {
               {activePlaylist ? (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-semibold">{activePlaylist.playlist_name}</h3>
+                    <h3 className="font-semibold">
+                      {activePlaylist.playlist_name}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       {activePlaylist.tracks.length} tracks
                     </p>
                   </div>
-                  
+
                   {activePlaylist.tracks.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium">Recent Tracks:</h4>
                       {activePlaylist.tracks.slice(0, 3).map((track, index) => (
-                        <div key={track.id} className="flex items-center justify-between p-2 bg-muted rounded">
+                        <div
+                          key={track.id}
+                          className="flex items-center justify-between p-2 bg-muted rounded"
+                        >
                           <div>
                             <p className="font-medium">{track.title}</p>
-                            <p className="text-sm text-muted-foreground">{track.artist}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {track.artist}
+                            </p>
                           </div>
                           {track.featured && (
                             <Badge variant="secondary">Featured</Badge>
@@ -216,7 +241,9 @@ export function MusicPlayerAdmin() {
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-muted-foreground mb-2">No active playlist configured</p>
+                  <p className="text-muted-foreground mb-2">
+                    No active playlist configured
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     Available audio files: {audioFiles.length}
                   </p>
@@ -249,7 +276,9 @@ export function MusicPlayerAdmin() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Autoplay</p>
-                  <Badge variant={playerSettings.autoplay ? "default" : "secondary"}>
+                  <Badge
+                    variant={playerSettings.autoplay ? "default" : "secondary"}
+                  >
                     {playerSettings.autoplay ? "Enabled" : "Disabled"}
                   </Badge>
                 </div>
@@ -259,7 +288,11 @@ export function MusicPlayerAdmin() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Analytics</p>
-                  <Badge variant={playerSettings.analytics_enabled ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      playerSettings.analytics_enabled ? "default" : "secondary"
+                    }
+                  >
                     {playerSettings.analytics_enabled ? "Enabled" : "Disabled"}
                   </Badge>
                 </div>
@@ -278,10 +311,12 @@ export function MusicPlayerAdmin() {
             <CardContent>
               <div className="space-y-2">
                 <p className="text-sm">
-                  <span className="font-medium">Total Audio Files:</span> {audioFiles.length}
+                  <span className="font-medium">Total Audio Files:</span>{" "}
+                  {audioFiles.length}
                 </p>
                 <p className="text-sm">
-                  <span className="font-medium">Active Tracks:</span> {activePlaylist?.tracks.length || 0}
+                  <span className="font-medium">Active Tracks:</span>{" "}
+                  {activePlaylist?.tracks.length || 0}
                 </p>
                 <p className="text-muted-foreground text-sm">
                   Detailed analytics and player management features available.

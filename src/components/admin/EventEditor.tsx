@@ -1,79 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { CalendarEvent } from '@/types/calendar';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { EventAssignmentManager } from './EventAssignmentManager';
-import { EventImageUpload } from './EventImageUpload';
-import { PerformerSelector } from './PerformerSelector';
-import { EventTypeSelector } from './EventTypeSelector';
-import { Calendar, Clock, MapPin, Users, Music } from 'lucide-react';
-import { format } from 'date-fns';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { CalendarEvent } from "@/types/calendar";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { EventAssignmentManager } from "./EventAssignmentManager";
+import { EventImageUpload } from "./EventImageUpload";
+import { PerformerSelector } from "./PerformerSelector";
+import { EventTypeSelector } from "./EventTypeSelector";
+import { Calendar, Clock, MapPin, Users, Music } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface EventEditorProps {
   event?: CalendarEvent | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (event: Omit<CalendarEvent, 'id' | 'created_at'>) => Promise<void>;
+  onSave: (event: Omit<CalendarEvent, "id" | "created_at">) => Promise<void>;
 }
 
-const STORAGE_KEY = 'glee-event-editor-data';
+const STORAGE_KEY = "glee-event-editor-data";
 
 export const EventEditor: React.FC<EventEditorProps> = ({
   event,
   isOpen,
   onClose,
-  onSave
+  onSave,
 }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    start_time: '',
-    end_time: '',
-    location_name: '',
-    location_map_url: '',
-    feature_image_url: '',
-    short_description: '',
-    full_description: '',
-    event_host_name: '',
-    event_host_contact: '',
+    title: "",
+    start_time: "",
+    end_time: "",
+    location_name: "",
+    location_map_url: "",
+    feature_image_url: "",
+    short_description: "",
+    full_description: "",
+    event_host_name: "",
+    event_host_contact: "",
     event_types: [] as string[],
     is_private: false,
     is_public: true,
     allow_rsvp: true,
     allow_reminders: true,
     allow_ics_download: true,
-    allow_google_map_link: true
+    allow_google_map_link: true,
   });
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [assignmentsChanged, setAssignmentsChanged] = useState(false);
 
   useEffect(() => {
     if (event) {
       setFormData({
-        title: event.title || '',
-        start_time: event.start_time ? format(new Date(event.start_time), "yyyy-MM-dd'T'HH:mm") : '',
-        end_time: event.end_time ? format(new Date(event.end_time), "yyyy-MM-dd'T'HH:mm") : '',
-        location_name: event.location_name || '',
-        location_map_url: event.location_map_url || '',
-        feature_image_url: event.feature_image_url || '',
-        short_description: event.short_description || '',
-        full_description: event.full_description || '',
-        event_host_name: event.event_host_name || '',
-        event_host_contact: event.event_host_contact || '',
-        event_types: event.event_types || (event.event_type ? [event.event_type] : []),
+        title: event.title || "",
+        start_time: event.start_time
+          ? format(new Date(event.start_time), "yyyy-MM-dd'T'HH:mm")
+          : "",
+        end_time: event.end_time
+          ? format(new Date(event.end_time), "yyyy-MM-dd'T'HH:mm")
+          : "",
+        location_name: event.location_name || "",
+        location_map_url: event.location_map_url || "",
+        feature_image_url: event.feature_image_url || "",
+        short_description: event.short_description || "",
+        full_description: event.full_description || "",
+        event_host_name: event.event_host_name || "",
+        event_host_contact: event.event_host_contact || "",
+        event_types:
+          event.event_types || (event.event_type ? [event.event_type] : []),
         is_private: event.is_private || false,
         is_public: event.is_public !== undefined ? event.is_public : true,
         allow_rsvp: event.allow_rsvp !== undefined ? event.allow_rsvp : true,
-        allow_reminders: event.allow_reminders !== undefined ? event.allow_reminders : true,
-        allow_ics_download: event.allow_ics_download !== undefined ? event.allow_ics_download : true,
-        allow_google_map_link: event.allow_google_map_link !== undefined ? event.allow_google_map_link : true
+        allow_reminders:
+          event.allow_reminders !== undefined ? event.allow_reminders : true,
+        allow_ics_download:
+          event.allow_ics_download !== undefined
+            ? event.allow_ics_download
+            : true,
+        allow_google_map_link:
+          event.allow_google_map_link !== undefined
+            ? event.allow_google_map_link
+            : true,
       });
     } else {
       // Load from localStorage or reset
@@ -85,7 +102,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             setFormData(parsed.formData);
           }
         } catch (error) {
-          console.error('Error loading saved data:', error);
+          console.error("Error loading saved data:", error);
         }
       } else {
         resetForm();
@@ -96,72 +113,75 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   // Save to localStorage whenever form data changes (but only when creating)
   useEffect(() => {
     if (!event && isOpen) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        isCreating: true,
-        formData
-      }));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          isCreating: true,
+          formData,
+        }),
+      );
     }
   }, [formData, event, isOpen]);
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      start_time: '',
-      end_time: '',
-      location_name: '',
-      location_map_url: '',
-      feature_image_url: '',
-      short_description: '',
-      full_description: '',
-      event_host_name: '',
-      event_host_contact: '',
+      title: "",
+      start_time: "",
+      end_time: "",
+      location_name: "",
+      location_map_url: "",
+      feature_image_url: "",
+      short_description: "",
+      full_description: "",
+      event_host_name: "",
+      event_host_contact: "",
       event_types: [],
       is_private: false,
       is_public: true,
       allow_rsvp: true,
       allow_reminders: true,
       allow_ics_download: true,
-      allow_google_map_link: true
+      allow_google_map_link: true,
     });
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleEventTypesChange = (newTypes: string[]) => {
-    setFormData(prev => ({ ...prev, event_types: newTypes }));
+    setFormData((prev) => ({ ...prev, event_types: newTypes }));
   };
 
   const handleImageChange = (imageUrl: string) => {
-    setFormData(prev => ({ ...prev, feature_image_url: imageUrl }));
+    setFormData((prev) => ({ ...prev, feature_image_url: imageUrl }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.start_time || !formData.end_time) {
-      toast.error('Please fill in required fields');
+      toast.error("Please fill in required fields");
       return;
     }
 
     if (formData.event_types.length === 0) {
-      toast.error('Please select at least one event type');
+      toast.error("Please select at least one event type");
       return;
     }
 
     setIsSaving(true);
     try {
       await onSave(formData);
-      
+
       // Clear localStorage after successful save
       localStorage.removeItem(STORAGE_KEY);
-      
+
       onClose();
       resetForm();
     } catch (error) {
-      console.error('Error saving event:', error);
-      toast.error('Failed to save event');
+      console.error("Error saving event:", error);
+      toast.error("Failed to save event");
     } finally {
       setIsSaving(false);
     }
@@ -170,10 +190,13 @@ export const EventEditor: React.FC<EventEditorProps> = ({
   const handleClose = () => {
     if (!event) {
       // Save current state when closing during creation
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        isCreating: true,
-        formData
-      }));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          isCreating: true,
+          formData,
+        }),
+      );
     }
     onClose();
   };
@@ -182,8 +205,8 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     setAssignmentsChanged(true);
   };
 
-  const isPerformanceEvent = formData.event_types.some(type => 
-    ['performance', 'concert', 'tour_concert'].includes(type)
+  const isPerformanceEvent = formData.event_types.some((type) =>
+    ["performance", "concert", "tour_concert"].includes(type),
   );
 
   return (
@@ -192,7 +215,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            {event ? 'Edit Event' : 'Create New Event'}
+            {event ? "Edit Event" : "Create New Event"}
           </DialogTitle>
         </DialogHeader>
 
@@ -208,7 +231,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="Enter event title"
                   required
                 />
@@ -221,7 +244,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                     id="start_time"
                     type="datetime-local"
                     value={formData.start_time}
-                    onChange={(e) => handleInputChange('start_time', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("start_time", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -231,7 +256,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                     id="end_time"
                     type="datetime-local"
                     value={formData.end_time}
-                    onChange={(e) => handleInputChange('end_time', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("end_time", e.target.value)
+                    }
                     required
                   />
                 </div>
@@ -249,7 +276,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 <Textarea
                   id="short_description"
                   value={formData.short_description}
-                  onChange={(e) => handleInputChange('short_description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("short_description", e.target.value)
+                  }
                   placeholder="Brief description for calendar view"
                   rows={2}
                 />
@@ -278,7 +307,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   <Input
                     id="location_name"
                     value={formData.location_name}
-                    onChange={(e) => handleInputChange('location_name', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location_name", e.target.value)
+                    }
                     placeholder="Event venue or location"
                   />
                 </div>
@@ -287,7 +318,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   <Input
                     id="location_map_url"
                     value={formData.location_map_url}
-                    onChange={(e) => handleInputChange('location_map_url', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("location_map_url", e.target.value)
+                    }
                     placeholder="Google Maps or other map link"
                   />
                 </div>
@@ -299,7 +332,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   <Input
                     id="event_host_name"
                     value={formData.event_host_name}
-                    onChange={(e) => handleInputChange('event_host_name', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("event_host_name", e.target.value)
+                    }
                     placeholder="Host organization or person"
                   />
                 </div>
@@ -308,7 +343,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   <Input
                     id="event_host_contact"
                     value={formData.event_host_contact}
-                    onChange={(e) => handleInputChange('event_host_contact', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("event_host_contact", e.target.value)
+                    }
                     placeholder="Contact information"
                   />
                 </div>
@@ -319,7 +356,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 <Textarea
                   id="full_description"
                   value={formData.full_description}
-                  onChange={(e) => handleInputChange('full_description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("full_description", e.target.value)
+                  }
                   placeholder="Detailed event description"
                   rows={4}
                 />
@@ -339,54 +378,68 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                     <Checkbox
                       id="is_private"
                       checked={formData.is_private}
-                      onCheckedChange={(checked) => handleInputChange('is_private', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("is_private", checked)
+                      }
                     />
                     <Label htmlFor="is_private">Private Event</Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="is_public"
                       checked={formData.is_public}
-                      onCheckedChange={(checked) => handleInputChange('is_public', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("is_public", checked)
+                      }
                     />
                     <Label htmlFor="is_public">Public Event</Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="allow_rsvp"
                       checked={formData.allow_rsvp}
-                      onCheckedChange={(checked) => handleInputChange('allow_rsvp', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("allow_rsvp", checked)
+                      }
                     />
                     <Label htmlFor="allow_rsvp">Allow RSVP</Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="allow_reminders"
                       checked={formData.allow_reminders}
-                      onCheckedChange={(checked) => handleInputChange('allow_reminders', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("allow_reminders", checked)
+                      }
                     />
                     <Label htmlFor="allow_reminders">Allow Reminders</Label>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="allow_ics_download"
                       checked={formData.allow_ics_download}
-                      onCheckedChange={(checked) => handleInputChange('allow_ics_download', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("allow_ics_download", checked)
+                      }
                     />
-                    <Label htmlFor="allow_ics_download">Allow Calendar Download</Label>
+                    <Label htmlFor="allow_ics_download">
+                      Allow Calendar Download
+                    </Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="allow_google_map_link"
                       checked={formData.allow_google_map_link}
-                      onCheckedChange={(checked) => handleInputChange('allow_google_map_link', checked)}
+                      onCheckedChange={(checked) =>
+                        handleInputChange("allow_google_map_link", checked)
+                      }
                     />
                     <Label htmlFor="allow_google_map_link">Show Map Link</Label>
                   </div>
@@ -397,8 +450,8 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
           {/* Performance Assignments - Only show for existing performance events */}
           {event && isPerformanceEvent && (
-            <EventAssignmentManager 
-              event={event} 
+            <EventAssignmentManager
+              event={event}
               onAssignmentsChange={handleAssignmentsChange}
             />
           )}
@@ -409,7 +462,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               Cancel
             </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? 'Saving...' : (event ? 'Update Event' : 'Create Event')}
+              {isSaving ? "Saving..." : event ? "Update Event" : "Create Event"}
             </Button>
           </div>
 
@@ -420,7 +473,10 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                 <Music className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium">Performance Event</p>
-                  <p>After creating this event, you'll be able to assign members to perform and they'll be automatically notified.</p>
+                  <p>
+                    After creating this event, you'll be able to assign members
+                    to perform and they'll be automatically notified.
+                  </p>
                 </div>
               </div>
             </div>

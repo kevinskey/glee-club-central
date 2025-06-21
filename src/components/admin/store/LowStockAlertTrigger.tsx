@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { AlertTriangle } from 'lucide-react';
+import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle } from "lucide-react";
 
 interface StoreItem {
   id: string;

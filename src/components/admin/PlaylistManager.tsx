@@ -1,38 +1,37 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Music, 
-  Play, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Music,
+  Play,
   X,
   Save,
-  GripVertical 
-} from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAudioFiles, AudioFileData } from '@/hooks/useAudioFiles';
-import { toast } from 'sonner';
+  GripVertical,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAudioFiles, AudioFileData } from "@/hooks/useAudioFiles";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 interface Playlist {
   id: string;
@@ -55,13 +54,15 @@ interface PlaylistTrack {
 
 export function PlaylistManager() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
+    null,
+  );
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddTrackDialog, setShowAddTrackDialog] = useState(false);
   const [editingPlaylist, setEditingPlaylist] = useState<Partial<Playlist>>({});
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const { audioFiles } = useAudioFiles();
 
   useEffect(() => {
@@ -72,8 +73,9 @@ export function PlaylistManager() {
     try {
       setIsLoading(true);
       const { data: playlistsData, error } = await supabase
-        .from('playlists')
-        .select(`
+        .from("playlists")
+        .select(
+          `
           *,
           playlist_tracks (
             id,
@@ -87,26 +89,29 @@ export function PlaylistManager() {
               file_url
             )
           )
-        `)
-        .order('display_order');
+        `,
+        )
+        .order("display_order");
 
       if (error) throw error;
 
-      const formattedPlaylists = playlistsData?.map(playlist => ({
-        ...playlist,
-        tracks: playlist.playlist_tracks?.map((track: any) => ({
-          id: track.id,
-          audio_file_id: track.audio_file_id,
-          track_order: track.track_order,
-          is_featured: track.is_featured,
-          audio_file: track.audio_files
-        })) || []
-      })) || [];
+      const formattedPlaylists =
+        playlistsData?.map((playlist) => ({
+          ...playlist,
+          tracks:
+            playlist.playlist_tracks?.map((track: any) => ({
+              id: track.id,
+              audio_file_id: track.audio_file_id,
+              track_order: track.track_order,
+              is_featured: track.is_featured,
+              audio_file: track.audio_files,
+            })) || [],
+        })) || [];
 
       setPlaylists(formattedPlaylists);
     } catch (error) {
-      console.error('Error loading playlists:', error);
-      toast.error('Failed to load playlists');
+      console.error("Error loading playlists:", error);
+      toast.error("Failed to load playlists");
     } finally {
       setIsLoading(false);
     }
@@ -114,83 +119,83 @@ export function PlaylistManager() {
 
   const createPlaylist = async () => {
     if (!editingPlaylist.name?.trim()) {
-      toast.error('Playlist name is required');
+      toast.error("Playlist name is required");
       return;
     }
 
     try {
       const { data, error } = await supabase
-        .from('playlists')
+        .from("playlists")
         .insert({
           name: editingPlaylist.name,
           description: editingPlaylist.description || null,
           is_active: editingPlaylist.is_active || false,
           is_homepage_default: editingPlaylist.is_homepage_default || false,
-          display_order: playlists.length
+          display_order: playlists.length,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      toast.success('Playlist created successfully');
+      toast.success("Playlist created successfully");
       setShowCreateDialog(false);
       setEditingPlaylist({});
       loadPlaylists();
     } catch (error) {
-      console.error('Error creating playlist:', error);
-      toast.error('Failed to create playlist');
+      console.error("Error creating playlist:", error);
+      toast.error("Failed to create playlist");
     }
   };
 
   const updatePlaylist = async () => {
     if (!selectedPlaylist || !editingPlaylist.name?.trim()) {
-      toast.error('Playlist name is required');
+      toast.error("Playlist name is required");
       return;
     }
 
     try {
       const { error } = await supabase
-        .from('playlists')
+        .from("playlists")
         .update({
           name: editingPlaylist.name,
           description: editingPlaylist.description || null,
           is_active: editingPlaylist.is_active,
-          is_homepage_default: editingPlaylist.is_homepage_default
+          is_homepage_default: editingPlaylist.is_homepage_default,
         })
-        .eq('id', selectedPlaylist.id);
+        .eq("id", selectedPlaylist.id);
 
       if (error) throw error;
 
-      toast.success('Playlist updated successfully');
+      toast.success("Playlist updated successfully");
       setShowEditDialog(false);
       setEditingPlaylist({});
       loadPlaylists();
     } catch (error) {
-      console.error('Error updating playlist:', error);
-      toast.error('Failed to update playlist');
+      console.error("Error updating playlist:", error);
+      toast.error("Failed to update playlist");
     }
   };
 
   const deletePlaylist = async (playlistId: string) => {
-    if (!confirm('Are you sure you want to delete this playlist?')) return;
+    if (!confirm("Are you sure you want to delete this playlist?")) return;
 
     try {
       const { error } = await supabase
-        .from('playlists')
+        .from("playlists")
         .delete()
-        .eq('id', playlistId);
+        .eq("id", playlistId);
 
       if (error) throw error;
 
-      toast.success('Playlist deleted successfully');
+      toast.success("Playlist deleted successfully");
       loadPlaylists();
       if (selectedPlaylist?.id === playlistId) {
         setSelectedPlaylist(null);
       }
     } catch (error) {
-      console.error('Error deleting playlist:', error);
-      toast.error('Failed to delete playlist');
+      console.error("Error deleting playlist:", error);
+      toast.error("Failed to delete playlist");
     }
   };
 
@@ -198,59 +203,59 @@ export function PlaylistManager() {
     if (!selectedPlaylist) return;
 
     try {
-      const nextOrder = (selectedPlaylist.tracks?.length || 0);
-      
-      const { error } = await supabase
-        .from('playlist_tracks')
-        .insert({
-          playlist_id: selectedPlaylist.id,
-          audio_file_id: audioFileId,
-          track_order: nextOrder,
-          is_featured: false
-        });
+      const nextOrder = selectedPlaylist.tracks?.length || 0;
+
+      const { error } = await supabase.from("playlist_tracks").insert({
+        playlist_id: selectedPlaylist.id,
+        audio_file_id: audioFileId,
+        track_order: nextOrder,
+        is_featured: false,
+      });
 
       if (error) throw error;
 
-      toast.success('Track added to playlist');
+      toast.success("Track added to playlist");
       setShowAddTrackDialog(false);
       loadPlaylists();
     } catch (error) {
-      console.error('Error adding track:', error);
-      toast.error('Failed to add track to playlist');
+      console.error("Error adding track:", error);
+      toast.error("Failed to add track to playlist");
     }
   };
 
   const removeTrackFromPlaylist = async (trackId: string) => {
     try {
       const { error } = await supabase
-        .from('playlist_tracks')
+        .from("playlist_tracks")
         .delete()
-        .eq('id', trackId);
+        .eq("id", trackId);
 
       if (error) throw error;
 
-      toast.success('Track removed from playlist');
+      toast.success("Track removed from playlist");
       loadPlaylists();
     } catch (error) {
-      console.error('Error removing track:', error);
-      toast.error('Failed to remove track');
+      console.error("Error removing track:", error);
+      toast.error("Failed to remove track");
     }
   };
 
   const toggleTrackFeatured = async (trackId: string, isFeatured: boolean) => {
     try {
       const { error } = await supabase
-        .from('playlist_tracks')
+        .from("playlist_tracks")
         .update({ is_featured: isFeatured })
-        .eq('id', trackId);
+        .eq("id", trackId);
 
       if (error) throw error;
 
-      toast.success(isFeatured ? 'Track marked as featured' : 'Track unmarked as featured');
+      toast.success(
+        isFeatured ? "Track marked as featured" : "Track unmarked as featured",
+      );
       loadPlaylists();
     } catch (error) {
-      console.error('Error updating track:', error);
-      toast.error('Failed to update track');
+      console.error("Error updating track:", error);
+      toast.error("Failed to update track");
     }
   };
 
@@ -275,10 +280,12 @@ export function PlaylistManager() {
               <Music className="h-5 w-5" />
               Playlists
             </div>
-            <Button onClick={() => {
-              setEditingPlaylist({});
-              setShowCreateDialog(true);
-            }}>
+            <Button
+              onClick={() => {
+                setEditingPlaylist({});
+                setShowCreateDialog(true);
+              }}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Playlist
             </Button>
@@ -291,10 +298,12 @@ export function PlaylistManager() {
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 No playlists created yet
               </p>
-              <Button onClick={() => {
-                setEditingPlaylist({});
-                setShowCreateDialog(true);
-              }}>
+              <Button
+                onClick={() => {
+                  setEditingPlaylist({});
+                  setShowCreateDialog(true);
+                }}
+              >
                 Create Your First Playlist
               </Button>
             </div>
@@ -363,14 +372,9 @@ export function PlaylistManager() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <div>
-                Managing: {selectedPlaylist.name}
-              </div>
+              <div>Managing: {selectedPlaylist.name}</div>
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => setShowAddTrackDialog(true)}
-                >
+                <Button size="sm" onClick={() => setShowAddTrackDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Track
                 </Button>
@@ -398,13 +402,16 @@ export function PlaylistManager() {
             ) : (
               <div className="space-y-2">
                 {selectedPlaylist.tracks?.map((track, index) => (
-                  <div key={track.id} className="flex items-center justify-between p-3 border rounded">
+                  <div
+                    key={track.id}
+                    className="flex items-center justify-between p-3 border rounded"
+                  >
                     <div className="flex items-center gap-3">
                       <GripVertical className="h-4 w-4 text-gray-400" />
                       <div>
                         <p className="font-medium">{track.audio_file?.title}</p>
                         <p className="text-sm text-muted-foreground">
-                          {track.audio_file?.description || 'No description'}
+                          {track.audio_file?.description || "No description"}
                         </p>
                       </div>
                       {track.is_featured && (
@@ -414,7 +421,9 @@ export function PlaylistManager() {
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={track.is_featured}
-                        onCheckedChange={(checked) => toggleTrackFeatured(track.id, checked)}
+                        onCheckedChange={(checked) =>
+                          toggleTrackFeatured(track.id, checked)
+                        }
                       />
                       <Label className="text-sm">Featured</Label>
                       <Button
@@ -447,8 +456,13 @@ export function PlaylistManager() {
               <Label htmlFor="name">Playlist Name</Label>
               <Input
                 id="name"
-                value={editingPlaylist.name || ''}
-                onChange={(e) => setEditingPlaylist(prev => ({ ...prev, name: e.target.value }))}
+                value={editingPlaylist.name || ""}
+                onChange={(e) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
                 placeholder="Enter playlist name"
               />
             </div>
@@ -456,8 +470,13 @@ export function PlaylistManager() {
               <Label htmlFor="description">Description</Label>
               <Input
                 id="description"
-                value={editingPlaylist.description || ''}
-                onChange={(e) => setEditingPlaylist(prev => ({ ...prev, description: e.target.value }))}
+                value={editingPlaylist.description || ""}
+                onChange={(e) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 placeholder="Enter description (optional)"
               />
             </div>
@@ -465,7 +484,12 @@ export function PlaylistManager() {
               <Switch
                 id="is_active"
                 checked={editingPlaylist.is_active || false}
-                onCheckedChange={(checked) => setEditingPlaylist(prev => ({ ...prev, is_active: checked }))}
+                onCheckedChange={(checked) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    is_active: checked,
+                  }))
+                }
               />
               <Label htmlFor="is_active">Active</Label>
             </div>
@@ -473,12 +497,20 @@ export function PlaylistManager() {
               <Switch
                 id="is_homepage_default"
                 checked={editingPlaylist.is_homepage_default || false}
-                onCheckedChange={(checked) => setEditingPlaylist(prev => ({ ...prev, is_homepage_default: checked }))}
+                onCheckedChange={(checked) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    is_homepage_default: checked,
+                  }))
+                }
               />
               <Label htmlFor="is_homepage_default">Homepage Default</Label>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateDialog(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={createPlaylist}>
@@ -504,8 +536,13 @@ export function PlaylistManager() {
               <Label htmlFor="edit-name">Playlist Name</Label>
               <Input
                 id="edit-name"
-                value={editingPlaylist.name || ''}
-                onChange={(e) => setEditingPlaylist(prev => ({ ...prev, name: e.target.value }))}
+                value={editingPlaylist.name || ""}
+                onChange={(e) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    name: e.target.value,
+                  }))
+                }
                 placeholder="Enter playlist name"
               />
             </div>
@@ -513,8 +550,13 @@ export function PlaylistManager() {
               <Label htmlFor="edit-description">Description</Label>
               <Input
                 id="edit-description"
-                value={editingPlaylist.description || ''}
-                onChange={(e) => setEditingPlaylist(prev => ({ ...prev, description: e.target.value }))}
+                value={editingPlaylist.description || ""}
+                onChange={(e) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
                 placeholder="Enter description (optional)"
               />
             </div>
@@ -522,7 +564,12 @@ export function PlaylistManager() {
               <Switch
                 id="edit-is_active"
                 checked={editingPlaylist.is_active || false}
-                onCheckedChange={(checked) => setEditingPlaylist(prev => ({ ...prev, is_active: checked }))}
+                onCheckedChange={(checked) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    is_active: checked,
+                  }))
+                }
               />
               <Label htmlFor="edit-is_active">Active</Label>
             </div>
@@ -530,12 +577,20 @@ export function PlaylistManager() {
               <Switch
                 id="edit-is_homepage_default"
                 checked={editingPlaylist.is_homepage_default || false}
-                onCheckedChange={(checked) => setEditingPlaylist(prev => ({ ...prev, is_homepage_default: checked }))}
+                onCheckedChange={(checked) =>
+                  setEditingPlaylist((prev) => ({
+                    ...prev,
+                    is_homepage_default: checked,
+                  }))
+                }
               />
               <Label htmlFor="edit-is_homepage_default">Homepage Default</Label>
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowEditDialog(false)}
+              >
                 Cancel
               </Button>
               <Button onClick={updatePlaylist}>
@@ -563,9 +618,17 @@ export function PlaylistManager() {
               </p>
             ) : (
               audioFiles
-                .filter(file => !selectedPlaylist?.tracks?.some(track => track.audio_file_id === file.id))
+                .filter(
+                  (file) =>
+                    !selectedPlaylist?.tracks?.some(
+                      (track) => track.audio_file_id === file.id,
+                    ),
+                )
                 .map((file) => (
-                  <div key={file.id} className="flex items-center justify-between p-3 border rounded">
+                  <div
+                    key={file.id}
+                    className="flex items-center justify-between p-3 border rounded"
+                  >
                     <div>
                       <p className="font-medium">{file.title}</p>
                       <p className="text-sm text-muted-foreground">

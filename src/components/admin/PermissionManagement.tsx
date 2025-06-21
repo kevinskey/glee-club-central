@@ -1,42 +1,65 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { supabase } from '@/integrations/supabase/client';
-import { useUserManagement } from '@/hooks/user/useUserManagement';
-import { AVAILABLE_FEATURES, AVAILABLE_PAGES, FeaturePermission, PagePermission } from '@/hooks/useFeaturePermissions';
-import { Shield, User, Users, Settings, Plus, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserManagement } from "@/hooks/user/useUserManagement";
+import {
+  AVAILABLE_FEATURES,
+  AVAILABLE_PAGES,
+  FeaturePermission,
+  PagePermission,
+} from "@/hooks/useFeaturePermissions";
+import { Shield, User, Users, Settings, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function PermissionManagement() {
   const { users } = useUserManagement();
-  const [featurePermissions, setFeaturePermissions] = useState<FeaturePermission[]>([]);
+  const [featurePermissions, setFeaturePermissions] = useState<
+    FeaturePermission[]
+  >([]);
   const [pagePermissions, setPagePermissions] = useState<PagePermission[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states
-  const [selectedUser, setSelectedUser] = useState<string>('');
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [selectedFeature, setSelectedFeature] = useState<string>('');
-  const [selectedPage, setSelectedPage] = useState<string>('');
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedFeature, setSelectedFeature] = useState<string>("");
+  const [selectedPage, setSelectedPage] = useState<string>("");
 
   const availableRoles = [
-    'President', 'Secretary', 'Treasurer', 'Historian', 
-    'Social Chair', 'Librarian', 'Chaplain'
+    "President",
+    "Secretary",
+    "Treasurer",
+    "Historian",
+    "Social Chair",
+    "Librarian",
+    "Chaplain",
   ];
 
   const fetchPermissions = async () => {
     try {
       const [featuresResponse, pagesResponse] = await Promise.all([
-        supabase.from('feature_permissions').select('*').order('created_at', { ascending: false }),
-        supabase.from('page_permissions').select('*').order('created_at', { ascending: false })
+        supabase
+          .from("feature_permissions")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("page_permissions")
+          .select("*")
+          .order("created_at", { ascending: false }),
       ]);
 
       if (featuresResponse.error) throw featuresResponse.error;
@@ -45,8 +68,8 @@ export function PermissionManagement() {
       setFeaturePermissions(featuresResponse.data || []);
       setPagePermissions(pagesResponse.data || []);
     } catch (error) {
-      console.error('Error fetching permissions:', error);
-      toast.error('Failed to load permissions');
+      console.error("Error fetching permissions:", error);
+      toast.error("Failed to load permissions");
     } finally {
       setLoading(false);
     }
@@ -56,123 +79,137 @@ export function PermissionManagement() {
     fetchPermissions();
   }, []);
 
-  const addFeaturePermission = async (featureKey: string, userId?: string, roleTag?: string, enabled: boolean = true) => {
+  const addFeaturePermission = async (
+    featureKey: string,
+    userId?: string,
+    roleTag?: string,
+    enabled: boolean = true,
+  ) => {
     try {
-      const { error } = await supabase
-        .from('feature_permissions')
-        .insert({
-          feature_key: featureKey,
-          user_id: userId || null,
-          role_tag: roleTag || null,
-          enabled
-        });
+      const { error } = await supabase.from("feature_permissions").insert({
+        feature_key: featureKey,
+        user_id: userId || null,
+        role_tag: roleTag || null,
+        enabled,
+      });
 
       if (error) throw error;
-      
-      toast.success('Feature permission added');
+
+      toast.success("Feature permission added");
       fetchPermissions();
     } catch (error) {
-      console.error('Error adding feature permission:', error);
-      toast.error('Failed to add feature permission');
+      console.error("Error adding feature permission:", error);
+      toast.error("Failed to add feature permission");
     }
   };
 
-  const addPagePermission = async (pagePath: string, userId?: string, roleTag?: string, enabled: boolean = true) => {
+  const addPagePermission = async (
+    pagePath: string,
+    userId?: string,
+    roleTag?: string,
+    enabled: boolean = true,
+  ) => {
     try {
-      const { error } = await supabase
-        .from('page_permissions')
-        .insert({
-          page_path: pagePath,
-          user_id: userId || null,
-          role_tag: roleTag || null,
-          enabled
-        });
+      const { error } = await supabase.from("page_permissions").insert({
+        page_path: pagePath,
+        user_id: userId || null,
+        role_tag: roleTag || null,
+        enabled,
+      });
 
       if (error) throw error;
-      
-      toast.success('Page permission added');
+
+      toast.success("Page permission added");
       fetchPermissions();
     } catch (error) {
-      console.error('Error adding page permission:', error);
-      toast.error('Failed to add page permission');
+      console.error("Error adding page permission:", error);
+      toast.error("Failed to add page permission");
     }
   };
 
-  const toggleFeaturePermission = async (permissionId: string, enabled: boolean) => {
+  const toggleFeaturePermission = async (
+    permissionId: string,
+    enabled: boolean,
+  ) => {
     try {
       const { error } = await supabase
-        .from('feature_permissions')
+        .from("feature_permissions")
         .update({ enabled })
-        .eq('id', permissionId);
+        .eq("id", permissionId);
 
       if (error) throw error;
-      
-      setFeaturePermissions(prev => 
-        prev.map(p => p.id === permissionId ? { ...p, enabled } : p)
+
+      setFeaturePermissions((prev) =>
+        prev.map((p) => (p.id === permissionId ? { ...p, enabled } : p)),
       );
-      toast.success('Feature permission updated');
+      toast.success("Feature permission updated");
     } catch (error) {
-      console.error('Error updating feature permission:', error);
-      toast.error('Failed to update feature permission');
+      console.error("Error updating feature permission:", error);
+      toast.error("Failed to update feature permission");
     }
   };
 
-  const togglePagePermission = async (permissionId: string, enabled: boolean) => {
+  const togglePagePermission = async (
+    permissionId: string,
+    enabled: boolean,
+  ) => {
     try {
       const { error } = await supabase
-        .from('page_permissions')
+        .from("page_permissions")
         .update({ enabled })
-        .eq('id', permissionId);
+        .eq("id", permissionId);
 
       if (error) throw error;
-      
-      setPagePermissions(prev => 
-        prev.map(p => p.id === permissionId ? { ...p, enabled } : p)
+
+      setPagePermissions((prev) =>
+        prev.map((p) => (p.id === permissionId ? { ...p, enabled } : p)),
       );
-      toast.success('Page permission updated');
+      toast.success("Page permission updated");
     } catch (error) {
-      console.error('Error updating page permission:', error);
-      toast.error('Failed to update page permission');
+      console.error("Error updating page permission:", error);
+      toast.error("Failed to update page permission");
     }
   };
 
   const deleteFeaturePermission = async (permissionId: string) => {
     try {
       const { error } = await supabase
-        .from('feature_permissions')
+        .from("feature_permissions")
         .delete()
-        .eq('id', permissionId);
+        .eq("id", permissionId);
 
       if (error) throw error;
-      
-      setFeaturePermissions(prev => prev.filter(p => p.id !== permissionId));
-      toast.success('Feature permission deleted');
+
+      setFeaturePermissions((prev) =>
+        prev.filter((p) => p.id !== permissionId),
+      );
+      toast.success("Feature permission deleted");
     } catch (error) {
-      console.error('Error deleting feature permission:', error);
-      toast.error('Failed to delete feature permission');
+      console.error("Error deleting feature permission:", error);
+      toast.error("Failed to delete feature permission");
     }
   };
 
   const deletePagePermission = async (permissionId: string) => {
     try {
       const { error } = await supabase
-        .from('page_permissions')
+        .from("page_permissions")
         .delete()
-        .eq('id', permissionId);
+        .eq("id", permissionId);
 
       if (error) throw error;
-      
-      setPagePermissions(prev => prev.filter(p => p.id !== permissionId));
-      toast.success('Page permission deleted');
+
+      setPagePermissions((prev) => prev.filter((p) => p.id !== permissionId));
+      toast.success("Page permission deleted");
     } catch (error) {
-      console.error('Error deleting page permission:', error);
-      toast.error('Failed to delete page permission');
+      console.error("Error deleting page permission:", error);
+      toast.error("Failed to delete page permission");
     }
   };
 
   const getUserName = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    return user ? `${user.first_name} ${user.last_name}` : 'Unknown User';
+    const user = users.find((u) => u.id === userId);
+    return user ? `${user.first_name} ${user.last_name}` : "Unknown User";
   };
 
   if (loading) {
@@ -187,7 +224,9 @@ export function PermissionManagement() {
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Shield className="w-6 h-6 text-blue-500" />
-        <h2 className="text-2xl font-bold text-navy-900">Permission Management</h2>
+        <h2 className="text-2xl font-bold text-navy-900">
+          Permission Management
+        </h2>
       </div>
 
       <Tabs defaultValue="features" className="space-y-4">
@@ -209,12 +248,15 @@ export function PermissionManagement() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                   <Label>Feature</Label>
-                  <Select value={selectedFeature} onValueChange={setSelectedFeature}>
+                  <Select
+                    value={selectedFeature}
+                    onValueChange={setSelectedFeature}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select feature" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AVAILABLE_FEATURES.map(feature => (
+                      {AVAILABLE_FEATURES.map((feature) => (
                         <SelectItem key={feature.key} value={feature.key}>
                           {feature.label}
                         </SelectItem>
@@ -231,7 +273,7 @@ export function PermissionManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No specific user</SelectItem>
-                      {users.map(user => (
+                      {users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.first_name} {user.last_name}
                         </SelectItem>
@@ -248,7 +290,7 @@ export function PermissionManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No specific role</SelectItem>
-                      {availableRoles.map(role => (
+                      {availableRoles.map((role) => (
                         <SelectItem key={role} value={role}>
                           {role}
                         </SelectItem>
@@ -258,17 +300,17 @@ export function PermissionManagement() {
                 </div>
 
                 <div className="flex items-end">
-                  <Button 
+                  <Button
                     onClick={() => {
                       if (selectedFeature) {
                         addFeaturePermission(
-                          selectedFeature, 
-                          selectedUser || undefined, 
-                          selectedRole || undefined
+                          selectedFeature,
+                          selectedUser || undefined,
+                          selectedRole || undefined,
                         );
-                        setSelectedFeature('');
-                        setSelectedUser('');
-                        setSelectedRole('');
+                        setSelectedFeature("");
+                        setSelectedUser("");
+                        setSelectedRole("");
                       }
                     }}
                     disabled={!selectedFeature}
@@ -287,12 +329,17 @@ export function PermissionManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {featurePermissions.map(permission => (
-                  <div key={permission.id} className="flex items-center justify-between p-4 border rounded-lg">
+                {featurePermissions.map((permission) => (
+                  <div
+                    key={permission.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">
-                          {AVAILABLE_FEATURES.find(f => f.key === permission.feature_key)?.label || permission.feature_key}
+                          {AVAILABLE_FEATURES.find(
+                            (f) => f.key === permission.feature_key,
+                          )?.label || permission.feature_key}
                         </Badge>
                         {permission.user_id && (
                           <Badge variant="secondary">
@@ -308,13 +355,19 @@ export function PermissionManagement() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {AVAILABLE_FEATURES.find(f => f.key === permission.feature_key)?.description}
+                        {
+                          AVAILABLE_FEATURES.find(
+                            (f) => f.key === permission.feature_key,
+                          )?.description
+                        }
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={permission.enabled}
-                        onCheckedChange={(enabled) => toggleFeaturePermission(permission.id, enabled)}
+                        onCheckedChange={(enabled) =>
+                          toggleFeaturePermission(permission.id, enabled)
+                        }
                       />
                       <Button
                         variant="outline"
@@ -349,7 +402,7 @@ export function PermissionManagement() {
                       <SelectValue placeholder="Select page" />
                     </SelectTrigger>
                     <SelectContent>
-                      {AVAILABLE_PAGES.map(page => (
+                      {AVAILABLE_PAGES.map((page) => (
                         <SelectItem key={page.path} value={page.path}>
                           {page.label}
                         </SelectItem>
@@ -366,7 +419,7 @@ export function PermissionManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No specific user</SelectItem>
-                      {users.map(user => (
+                      {users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.first_name} {user.last_name}
                         </SelectItem>
@@ -383,7 +436,7 @@ export function PermissionManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">No specific role</SelectItem>
-                      {availableRoles.map(role => (
+                      {availableRoles.map((role) => (
                         <SelectItem key={role} value={role}>
                           {role}
                         </SelectItem>
@@ -393,17 +446,17 @@ export function PermissionManagement() {
                 </div>
 
                 <div className="flex items-end">
-                  <Button 
+                  <Button
                     onClick={() => {
                       if (selectedPage) {
                         addPagePermission(
-                          selectedPage, 
-                          selectedUser || undefined, 
-                          selectedRole || undefined
+                          selectedPage,
+                          selectedUser || undefined,
+                          selectedRole || undefined,
                         );
-                        setSelectedPage('');
-                        setSelectedUser('');
-                        setSelectedRole('');
+                        setSelectedPage("");
+                        setSelectedUser("");
+                        setSelectedRole("");
                       }
                     }}
                     disabled={!selectedPage}
@@ -422,12 +475,17 @@ export function PermissionManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {pagePermissions.map(permission => (
-                  <div key={permission.id} className="flex items-center justify-between p-4 border rounded-lg">
+                {pagePermissions.map((permission) => (
+                  <div
+                    key={permission.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">
-                          {AVAILABLE_PAGES.find(p => p.path === permission.page_path)?.label || permission.page_path}
+                          {AVAILABLE_PAGES.find(
+                            (p) => p.path === permission.page_path,
+                          )?.label || permission.page_path}
                         </Badge>
                         {permission.user_id && (
                           <Badge variant="secondary">
@@ -443,13 +501,19 @@ export function PermissionManagement() {
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {AVAILABLE_PAGES.find(p => p.path === permission.page_path)?.description}
+                        {
+                          AVAILABLE_PAGES.find(
+                            (p) => p.path === permission.page_path,
+                          )?.description
+                        }
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={permission.enabled}
-                        onCheckedChange={(enabled) => togglePagePermission(permission.id, enabled)}
+                        onCheckedChange={(enabled) =>
+                          togglePagePermission(permission.id, enabled)
+                        }
                       />
                       <Button
                         variant="outline"

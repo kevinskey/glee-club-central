@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { X, MessageSquare } from 'lucide-react';
-import { MemberCommunicationActions } from './MemberCommunicationActions';
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, MessageSquare } from "lucide-react";
+import { MemberCommunicationActions } from "./MemberCommunicationActions";
 
 interface Member {
   id: string;
@@ -21,11 +20,11 @@ interface BulkCommunicationBarProps {
   totalMembers: number;
 }
 
-export function BulkCommunicationBar({ 
-  selectedMembers, 
-  onClearSelection, 
-  onSelectAll, 
-  totalMembers 
+export function BulkCommunicationBar({
+  selectedMembers,
+  onClearSelection,
+  onSelectAll,
+  totalMembers,
 }: BulkCommunicationBarProps) {
   const [isSelectAllChecked, setIsSelectAllChecked] = useState(false);
 
@@ -59,11 +58,11 @@ export function BulkCommunicationBar({
               Clear
             </Button>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <MemberCommunicationActions 
-              members={selectedMembers} 
-              variant="bulk" 
+            <MemberCommunicationActions
+              members={selectedMembers}
+              variant="bulk"
             />
           </div>
         </div>

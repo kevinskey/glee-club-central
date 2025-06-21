@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MessageSquare } from "lucide-react";
 
 export function InternalMessaging() {
   return (
@@ -16,7 +15,9 @@ export function InternalMessaging() {
         <div className="text-center py-8 text-muted-foreground">
           <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>Internal messaging system will be displayed here</p>
-          <p className="text-sm">Member-to-member communication and announcements</p>
+          <p className="text-sm">
+            Member-to-member communication and announcements
+          </p>
         </div>
       </CardContent>
     </Card>

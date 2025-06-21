@@ -1,11 +1,10 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -13,33 +12,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, Search, Plus, AlertCircle, MoreVertical, Edit, Trash2, Mail, Phone, Music, Menu, ChevronDown } from "lucide-react";
-import { useUserManagement, User } from '@/hooks/user/useUserManagement';
-import { UserManagementTableMobile } from './UserManagementTableMobile';
-import { AddUserDialog } from './AddUserDialog';
-import { DatabaseConnectionTest } from './DatabaseConnectionTest';
-import { UserManagementMobile } from './UserManagementMobile';
-import { toast } from 'sonner';
-import { UserManagementData } from '@/services/userManagementService';
+import {
+  Users,
+  Search,
+  Plus,
+  AlertCircle,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Mail,
+  Phone,
+  Music,
+  Menu,
+  ChevronDown,
+} from "lucide-react";
+import { useUserManagement, User } from "@/hooks/user/useUserManagement";
+import { UserManagementTableMobile } from "./UserManagementTableMobile";
+import { AddUserDialog } from "./AddUserDialog";
+import { DatabaseConnectionTest } from "./DatabaseConnectionTest";
+import { UserManagementMobile } from "./UserManagementMobile";
+import { toast } from "sonner";
+import { UserManagementData } from "@/services/userManagementService";
 
 export default function UserManagement() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
-  const { 
-    users, 
-    isLoading, 
-    error, 
-    refreshUsers, 
+  const {
+    users,
+    isLoading,
+    error,
+    refreshUsers,
     updateUser: handleUpdateUser,
     addUser: handleAddUserAction,
-    deleteUser: handleDeleteUser
+    deleteUser: handleDeleteUser,
   } = useUserManagement();
 
   useEffect(() => {
@@ -48,15 +60,18 @@ export default function UserManagement() {
 
   // Transform User[] to UserManagementData[] format
   const transformedUsers: UserManagementData[] = users
-    .filter(user => user.email) // Filter out users without email
-    .map(user => ({
+    .filter((user) => user.email) // Filter out users without email
+    .map((user) => ({
       id: user.id,
       email: user.email!, // Assert non-null since we filtered
       first_name: user.first_name,
       last_name: user.last_name,
-      full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email || 'Unknown User',
-      role: user.role || 'member', // Ensure role is always present
-      status: user.status || 'active',
+      full_name:
+        `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+        user.email ||
+        "Unknown User",
+      role: user.role || "member", // Ensure role is always present
+      status: user.status || "active",
       disabled: user.disabled || false,
       is_super_admin: user.is_super_admin || false,
       created_at: user.created_at || new Date().toISOString(),
@@ -67,24 +82,24 @@ export default function UserManagement() {
       join_date: user.join_date,
       class_year: user.class_year,
       dues_paid: user.dues_paid,
-      notes: user.notes
+      notes: user.notes,
     }));
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     const success = await handleUpdateUser(userId, { role: newRole });
     if (success) {
-      toast.success('User role updated successfully');
+      toast.success("User role updated successfully");
     } else {
-      toast.error('Failed to update user role');
+      toast.error("Failed to update user role");
     }
   };
 
   const handleStatusToggle = async (userId: string, isDisabled: boolean) => {
     const success = await handleUpdateUser(userId, { disabled: isDisabled });
     if (success) {
-      toast.success(`User ${isDisabled ? 'disabled' : 'enabled'} successfully`);
+      toast.success(`User ${isDisabled ? "disabled" : "enabled"} successfully`);
     } else {
-      toast.error('Failed to update user status');
+      toast.error("Failed to update user status");
     }
   };
 
@@ -106,10 +121,11 @@ export default function UserManagement() {
     refreshUsers();
   };
 
-  const filteredUsers = transformedUsers.filter(user => 
-    user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = transformedUsers.filter(
+    (user) =>
+      user.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -120,10 +136,14 @@ export default function UserManagement() {
         <div className="bg-white dark:bg-gray-800 border-b px-2 py-2">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h1 className="text-lg font-semibold text-navy-900 dark:text-white">User Management</h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Manage Glee Club members ({users.length} total)</p>
+              <h1 className="text-lg font-semibold text-navy-900 dark:text-white">
+                User Management
+              </h1>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Manage Glee Club members ({users.length} total)
+              </p>
             </div>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-7 px-2">
@@ -146,7 +166,7 @@ export default function UserManagement() {
           </div>
 
           <DatabaseConnectionTest />
-          
+
           {error && (
             <Alert variant="destructive" className="mb-2">
               <AlertCircle className="h-4 w-4" />
@@ -154,7 +174,7 @@ export default function UserManagement() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
+
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -166,13 +186,15 @@ export default function UserManagement() {
             />
           </div>
         </div>
-        
+
         {/* User List - No Cards */}
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Loading...</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Loading...
+              </p>
             </div>
           </div>
         ) : (
@@ -180,55 +202,73 @@ export default function UserManagement() {
             {filteredUsers.length === 0 ? (
               <div className="text-center py-8 px-4">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                <h3 className="font-medium text-navy-900 dark:text-white mb-1">No Members Found</h3>
+                <h3 className="font-medium text-navy-900 dark:text-white mb-1">
+                  No Members Found
+                </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {users.length === 0 
-                    ? 'No members added yet.' 
-                    : 'No members match search.'
-                  }
+                  {users.length === 0
+                    ? "No members added yet."
+                    : "No members match search."}
                 </p>
               </div>
             ) : (
               filteredUsers.map((user) => (
-                <div key={user.id} className="bg-white dark:bg-gray-800 px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                <div
+                  key={user.id}
+                  className="bg-white dark:bg-gray-800 px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
                       <Avatar className="h-8 w-8 flex-shrink-0">
                         <AvatarImage src={user.avatar_url} />
                         <AvatarFallback className="text-xs">
-                          {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
+                          {`${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`}
                         </AvatarFallback>
                       </Avatar>
-                      
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-1 mb-1">
                           <h3 className="font-medium text-sm text-navy-900 dark:text-white truncate">
                             {user.first_name} {user.last_name}
                           </h3>
                           {user.is_super_admin && (
-                            <Badge variant="destructive" className="text-xs px-1 py-0">
+                            <Badge
+                              variant="destructive"
+                              className="text-xs px-1 py-0"
+                            >
                               Admin
                             </Badge>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center text-xs text-gray-600 dark:text-gray-400 mb-1">
                           <Mail className="mr-1 h-3 w-3 flex-shrink-0" />
                           <span className="truncate">{user.email}</span>
                         </div>
-                        
+
                         <div className="flex items-center space-x-1">
                           {user.voice_part && (
-                            <Badge variant="outline" className="text-xs px-1 py-0">
+                            <Badge
+                              variant="outline"
+                              className="text-xs px-1 py-0"
+                            >
                               <Music className="mr-1 h-2 w-2" />
-                              {user.voice_part.replace('_', ' ')}
+                              {user.voice_part.replace("_", " ")}
                             </Badge>
                           )}
-                          <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className="text-xs px-1 py-0">
+                          <Badge
+                            variant={
+                              user.status === "active" ? "default" : "secondary"
+                            }
+                            className="text-xs px-1 py-0"
+                          >
                             {user.status}
                           </Badge>
                           {user.dues_paid && (
-                            <Badge variant="default" className="bg-green-600 text-xs px-1 py-0">
+                            <Badge
+                              variant="default"
+                              className="bg-green-600 text-xs px-1 py-0"
+                            >
                               ✓
                             </Badge>
                           )}
@@ -238,7 +278,11 @@ export default function UserManagement() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 flex-shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 flex-shrink-0"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -266,8 +310,12 @@ export default function UserManagement() {
         {/* Desktop Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-navy-900">User Management</h1>
-            <p className="text-muted-foreground">Manage Glee Club members ({users.length} total)</p>
+            <h1 className="text-2xl font-bold text-navy-900">
+              User Management
+            </h1>
+            <p className="text-muted-foreground">
+              Manage Glee Club members ({users.length} total)
+            </p>
           </div>
           <div className="flex gap-2">
             <Button onClick={handleAddUser}>
@@ -276,9 +324,9 @@ export default function UserManagement() {
             </Button>
           </div>
         </div>
-        
+
         <DatabaseConnectionTest />
-        
+
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -286,7 +334,7 @@ export default function UserManagement() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-        
+
         {/* Search */}
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -297,7 +345,7 @@ export default function UserManagement() {
             className="pl-10 h-9 w-full rounded border border-input bg-background px-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           />
         </div>
-        
+
         {isLoading ? (
           <div className="text-center py-6">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -327,10 +375,9 @@ export default function UserManagement() {
                       <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                       <h3 className="font-semibold mb-1">No Members Found</h3>
                       <p className="text-muted-foreground">
-                        {users.length === 0 
-                          ? 'No members added yet.' 
-                          : 'No members match search.'
-                        }
+                        {users.length === 0
+                          ? "No members added yet."
+                          : "No members match search."}
                       </p>
                     </TableCell>
                   </TableRow>
@@ -341,7 +388,7 @@ export default function UserManagement() {
                         <Avatar className="h-7 w-7">
                           <AvatarImage src={user.avatar_url} />
                           <AvatarFallback>
-                            {`${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`}
+                            {`${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`}
                           </AvatarFallback>
                         </Avatar>
                       </TableCell>
@@ -368,24 +415,30 @@ export default function UserManagement() {
                         {user.voice_part && (
                           <Badge variant="outline">
                             <Music className="mr-2 h-4 w-4" />
-                            {user.voice_part.replace('_', ' ')}
+                            {user.voice_part.replace("_", " ")}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell className="py-2">
                         {user.class_year && (
-                          <Badge variant="outline">
-                            {user.class_year}
-                          </Badge>
+                          <Badge variant="outline">{user.class_year}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="py-2">
-                        <Badge variant={user.role === 'admin' ? 'destructive' : 'outline'}>
-                          {user.is_super_admin ? 'Super' : user.role}
+                        <Badge
+                          variant={
+                            user.role === "admin" ? "destructive" : "outline"
+                          }
+                        >
+                          {user.is_super_admin ? "Super" : user.role}
                         </Badge>
                       </TableCell>
                       <TableCell className="py-2">
-                        <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={
+                            user.status === "active" ? "default" : "secondary"
+                          }
+                        >
                           {user.status}
                         </Badge>
                       </TableCell>
@@ -423,10 +476,10 @@ export default function UserManagement() {
           </div>
         )}
       </div>
-        
+
       {/* Add User Dialog */}
-      <AddUserDialog 
-        isOpen={showAddDialog} 
+      <AddUserDialog
+        isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
         onCreateUser={handleUserAdded}
         onImportUsers={handleImportUsers}
@@ -437,8 +490,13 @@ export default function UserManagement() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-4 max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold text-navy-900">Import Users from CSV</h2>
-              <Button variant="ghost" onClick={() => setShowImportDialog(false)}>
+              <h2 className="text-lg font-semibold text-navy-900">
+                Import Users from CSV
+              </h2>
+              <Button
+                variant="ghost"
+                onClick={() => setShowImportDialog(false)}
+              >
                 ×
               </Button>
             </div>
@@ -452,7 +510,7 @@ export default function UserManagement() {
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
-                    toast.info('CSV import functionality coming soon');
+                    toast.info("CSV import functionality coming soon");
                     handleImportComplete();
                   }
                 }}

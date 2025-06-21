@@ -1,22 +1,21 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { readerImporter } from '@/utils/readerImport';
-import { 
-  Download, 
-  FileText, 
-  Music, 
-  CheckCircle, 
-  AlertCircle, 
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { readerImporter } from "@/utils/readerImport";
+import {
+  Download,
+  FileText,
+  Music,
+  CheckCircle,
+  AlertCircle,
   Loader2,
   ExternalLink,
-  Info
-} from 'lucide-react';
+  Info,
+} from "lucide-react";
 
 interface ImportProgress {
   stage: string;
@@ -29,7 +28,9 @@ export function ReaderImportManager() {
   const { toast } = useToast();
   const [isImporting, setIsImporting] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
-  const [importProgress, setImportProgress] = useState<ImportProgress | null>(null);
+  const [importProgress, setImportProgress] = useState<ImportProgress | null>(
+    null,
+  );
   const [importResults, setImportResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<any>(null);
@@ -39,35 +40,39 @@ export function ReaderImportManager() {
       setIsTesting(true);
       setError(null);
       setConnectionStatus(null);
-      
-      toast({ title: "Testing connection...", description: "Checking reader.gleeworld.org availability" });
-      
+
+      toast({
+        title: "Testing connection...",
+        description: "Checking reader.gleeworld.org availability",
+      });
+
       const result = await readerImporter.testConnection();
-      
+
       setConnectionStatus(result);
-      
+
       if (result.success) {
-        toast({ 
-          title: "Connection successful", 
+        toast({
+          title: "Connection successful",
           description: "reader.gleeworld.org is accessible",
-          variant: "default"
+          variant: "default",
         });
       } else {
         setError(result.message);
-        toast({ 
-          title: "Connection failed", 
+        toast({
+          title: "Connection failed",
           description: result.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Connection failed';
+      const errorMessage =
+        err instanceof Error ? err.message : "Connection failed";
       setError(errorMessage);
       setConnectionStatus({ success: false, message: errorMessage });
-      toast({ 
-        title: "Connection failed", 
+      toast({
+        title: "Connection failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsTesting(false);
@@ -79,49 +84,52 @@ export function ReaderImportManager() {
       setIsImporting(true);
       setError(null);
       setImportResults(null);
-      
+
       setImportProgress({
-        stage: 'Testing connection...',
+        stage: "Testing connection...",
         current: 10,
         total: 100,
-        completed: false
+        completed: false,
       });
 
-      toast({ title: "Import started", description: "Testing connection and fetching content from reader.gleeworld.org" });
+      toast({
+        title: "Import started",
+        description:
+          "Testing connection and fetching content from reader.gleeworld.org",
+      });
 
       setImportProgress({
-        stage: 'Fetching data from reader.gleeworld.org...',
+        stage: "Fetching data from reader.gleeworld.org...",
         current: 30,
         total: 100,
-        completed: false
+        completed: false,
       });
 
       const results = await readerImporter.importAll();
-      
+
       setImportProgress({
-        stage: 'Import completed',
+        stage: "Import completed",
         current: 100,
         total: 100,
-        completed: true
+        completed: true,
       });
 
       setImportResults(results);
-      
-      toast({ 
-        title: "Import successful", 
+
+      toast({
+        title: "Import successful",
         description: `Imported ${results.summary.importedPDFs} PDFs and ${results.summary.importedAudio} audio files`,
-        variant: "default"
+        variant: "default",
       });
-      
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Import failed';
+      const errorMessage = err instanceof Error ? err.message : "Import failed";
       setError(errorMessage);
       setImportProgress(null);
-      
-      toast({ 
-        title: "Import failed", 
+
+      toast({
+        title: "Import failed",
         description: errorMessage,
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsImporting(false);
@@ -139,14 +147,15 @@ export function ReaderImportManager() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-gray-600 dark:text-gray-300">
-            Import PDFs and MP3s from reader.gleeworld.org into the main Glee World application.
+            Import PDFs and MP3s from reader.gleeworld.org into the main Glee
+            World application.
           </div>
 
           {/* Connection Test */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleTestConnection}
                 disabled={isImporting || isTesting}
               >
@@ -156,7 +165,7 @@ export function ReaderImportManager() {
                     Testing...
                   </>
                 ) : (
-                  'Test Connection'
+                  "Test Connection"
                 )}
               </Button>
               <span className="text-sm text-gray-500">
@@ -166,7 +175,9 @@ export function ReaderImportManager() {
 
             {/* Connection Status */}
             {connectionStatus && (
-              <Alert variant={connectionStatus.success ? "default" : "destructive"}>
+              <Alert
+                variant={connectionStatus.success ? "default" : "destructive"}
+              >
                 {connectionStatus.success ? (
                   <CheckCircle className="h-4 w-4" />
                 ) : (
@@ -175,7 +186,9 @@ export function ReaderImportManager() {
                 <AlertDescription>
                   <div className="space-y-1">
                     <div className="font-medium">
-                      {connectionStatus.success ? 'Connection successful' : 'Connection failed'}
+                      {connectionStatus.success
+                        ? "Connection successful"
+                        : "Connection failed"}
                     </div>
                     <div className="text-sm">{connectionStatus.message}</div>
                     {connectionStatus.details && (
@@ -196,7 +209,9 @@ export function ReaderImportManager() {
           {importProgress && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">{importProgress.stage}</span>
+                <span className="text-sm font-medium">
+                  {importProgress.stage}
+                </span>
                 <span className="text-sm text-gray-500">
                   {importProgress.current}%
                 </span>
@@ -231,11 +246,17 @@ export function ReaderImportManager() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
-                      <span>PDFs: {importResults.summary.importedPDFs}/{importResults.summary.totalPDFs}</span>
+                      <span>
+                        PDFs: {importResults.summary.importedPDFs}/
+                        {importResults.summary.totalPDFs}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Music className="h-4 w-4" />
-                      <span>Audio: {importResults.summary.importedAudio}/{importResults.summary.totalAudio}</span>
+                      <span>
+                        Audio: {importResults.summary.importedAudio}/
+                        {importResults.summary.totalAudio}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -245,7 +266,7 @@ export function ReaderImportManager() {
 
           {/* Import Button */}
           <div className="flex items-center gap-3">
-            <Button 
+            <Button
               onClick={handleImport}
               disabled={isImporting || isTesting}
               className="bg-orange-500 hover:bg-orange-600"
@@ -262,10 +283,11 @@ export function ReaderImportManager() {
                 </>
               )}
             </Button>
-            
+
             {!isImporting && !isTesting && (
               <div className="text-sm text-gray-500">
-                This will fetch and import all PDFs and audio files from reader.gleeworld.org
+                This will fetch and import all PDFs and audio files from
+                reader.gleeworld.org
               </div>
             )}
           </div>
@@ -281,7 +303,10 @@ export function ReaderImportManager() {
                   <li>• Fetches PDFs from /api/pdfs endpoint</li>
                   <li>• Fetches audio files from /api/audio endpoint</li>
                   <li>• Imports metadata to Supabase tables</li>
-                  <li>• Handles errors gracefully and continues with available data</li>
+                  <li>
+                    • Handles errors gracefully and continues with available
+                    data
+                  </li>
                 </ul>
               </div>
             </AlertDescription>

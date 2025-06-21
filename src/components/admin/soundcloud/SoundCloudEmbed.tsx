@@ -1,15 +1,14 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ExternalLink, Music, Play } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ExternalLink, Music, Play } from "lucide-react";
+import { toast } from "sonner";
 
 export function SoundCloudEmbed() {
-  const [embedUrl, setEmbedUrl] = useState('');
+  const [embedUrl, setEmbedUrl] = useState("");
   const [embedHeight, setEmbedHeight] = useState(166);
   const [autoPlay, setAutoPlay] = useState(false);
   const [showComments, setShowComments] = useState(true);
@@ -17,29 +16,29 @@ export function SoundCloudEmbed() {
   // Pre-configured tracks for demo
   const demoTracks = [
     {
-      id: 'demo-1',
-      title: 'Sample Track 1',
-      url: 'https://soundcloud.com/doctorkj/sample-track-1',
-      description: 'A beautiful choral arrangement'
+      id: "demo-1",
+      title: "Sample Track 1",
+      url: "https://soundcloud.com/doctorkj/sample-track-1",
+      description: "A beautiful choral arrangement",
     },
     {
-      id: 'demo-2', 
-      title: 'Sample Track 2',
-      url: 'https://soundcloud.com/doctorkj/sample-track-2',
-      description: 'Live performance recording'
-    }
+      id: "demo-2",
+      title: "Sample Track 2",
+      url: "https://soundcloud.com/doctorkj/sample-track-2",
+      description: "Live performance recording",
+    },
   ];
 
   const generateEmbedCode = (url: string) => {
     const embedParams = new URLSearchParams({
       url: url,
-      color: '#3b82f6', // Changed from orange to blue
+      color: "#3b82f6", // Changed from orange to blue
       auto_play: autoPlay.toString(),
-      hide_related: 'false',
+      hide_related: "false",
       show_comments: showComments.toString(),
-      show_user: 'true',
-      show_reposts: 'false',
-      show_teaser: 'true'
+      show_user: "true",
+      show_reposts: "false",
+      show_teaser: "true",
     });
 
     return `https://w.soundcloud.com/player/?${embedParams.toString()}`;
@@ -47,17 +46,17 @@ export function SoundCloudEmbed() {
 
   const handleAddEmbed = () => {
     if (!embedUrl) {
-      toast.error('Please enter a SoundCloud URL');
+      toast.error("Please enter a SoundCloud URL");
       return;
     }
 
-    if (!embedUrl.includes('soundcloud.com')) {
-      toast.error('Please enter a valid SoundCloud URL');
+    if (!embedUrl.includes("soundcloud.com")) {
+      toast.error("Please enter a valid SoundCloud URL");
       return;
     }
 
-    console.log('Adding embed for:', embedUrl);
-    toast.success('Embed added successfully!');
+    console.log("Adding embed for:", embedUrl);
+    toast.success("Embed added successfully!");
   };
 
   return (
@@ -79,7 +78,9 @@ export function SoundCloudEmbed() {
             <TabsContent value="add" className="space-y-4">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="embed-url">SoundCloud Track/Playlist URL</Label>
+                  <Label htmlFor="embed-url">
+                    SoundCloud Track/Playlist URL
+                  </Label>
                   <Input
                     id="embed-url"
                     type="url"
@@ -147,21 +148,28 @@ export function SoundCloudEmbed() {
 
             <TabsContent value="demo" className="space-y-4">
               <div className="text-sm text-muted-foreground mb-4">
-                These are example embeds showing how SoundCloud content will appear:
+                These are example embeds showing how SoundCloud content will
+                appear:
               </div>
-              
+
               {demoTracks.map((track) => (
                 <Card key={track.id}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold">{track.title}</h4>
                       <Button variant="outline" size="sm" asChild>
-                        <a href={track.url} target="_blank" rel="noopener noreferrer">
+                        <a
+                          href={track.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground">{track.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {track.description}
+                    </p>
                   </CardHeader>
                   <CardContent>
                     <iframe
@@ -189,19 +197,22 @@ export function SoundCloudEmbed() {
           <div className="flex items-start gap-2">
             <Play className="w-4 h-4 mt-0.5 text-orange-500" />
             <div>
-              <strong>Track URLs:</strong> Copy any SoundCloud track URL (like https://soundcloud.com/artist/track-name)
+              <strong>Track URLs:</strong> Copy any SoundCloud track URL (like
+              https://soundcloud.com/artist/track-name)
             </div>
           </div>
           <div className="flex items-start gap-2">
             <Play className="w-4 h-4 mt-0.5 text-orange-500" />
             <div>
-              <strong>Playlist URLs:</strong> Works with playlist URLs too for multi-track embeds
+              <strong>Playlist URLs:</strong> Works with playlist URLs too for
+              multi-track embeds
             </div>
           </div>
           <div className="flex items-start gap-2">
             <Play className="w-4 h-4 mt-0.5 text-orange-500" />
             <div>
-              <strong>No Login Required:</strong> Embeds work without OAuth - perfect for public content
+              <strong>No Login Required:</strong> Embeds work without OAuth -
+              perfect for public content
             </div>
           </div>
         </CardContent>

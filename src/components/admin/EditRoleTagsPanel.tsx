@@ -1,15 +1,20 @@
-
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Search, Save, X, User, Tags } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { getAllRoles } from '@/utils/permissionsMap';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Search, Save, X, User, Tags } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { getAllRoles } from "@/utils/permissionsMap";
 
 interface UserSearchResult {
   id: string;
@@ -32,9 +37,11 @@ interface AuthUser {
 }
 
 export function EditRoleTagsPanel() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
-  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(
+    null,
+  );
   const [availableRoles] = useState(getAllRoles());
   const [selectedRoleTags, setSelectedRoleTags] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -49,59 +56,70 @@ export function EditRoleTagsPanel() {
     setIsSearching(true);
     try {
       const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, role_tags')
+        .from("profiles")
+        .select("id, first_name, last_name, role_tags")
         .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
-        .order('last_name', { ascending: true });
+        .order("last_name", { ascending: true });
 
       if (profileError) throw profileError;
 
       // Get emails from auth.users for matching profiles
-      const userIds = profiles?.map(p => p.id) || [];
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      
+      const userIds = profiles?.map((p) => p.id) || [];
+      const { data: authData, error: authError } =
+        await supabase.auth.admin.listUsers();
+
       if (authError) {
-        console.error('Could not fetch user emails:', authError);
+        console.error("Could not fetch user emails:", authError);
       }
 
-      const usersWithEmails: UserSearchResult[] = (profiles as ProfileData[] || []).map(profile => {
-        const authUser = authData?.users?.find((u: AuthUser) => u.id === profile.id);
+      const usersWithEmails: UserSearchResult[] = (
+        (profiles as ProfileData[]) || []
+      ).map((profile) => {
+        const authUser = authData?.users?.find(
+          (u: AuthUser) => u.id === profile.id,
+        );
         return {
           id: profile.id,
-          first_name: profile.first_name || '',
-          last_name: profile.last_name || '',
-          email: authUser?.email || 'No email',
-          role_tags: profile.role_tags || []
+          first_name: profile.first_name || "",
+          last_name: profile.last_name || "",
+          email: authUser?.email || "No email",
+          role_tags: profile.role_tags || [],
         };
       });
 
       // Also search by email if we have auth access
-      const emailMatches: UserSearchResult[] = authData?.users
-        ?.filter((user: AuthUser) => user.email?.toLowerCase().includes(query.toLowerCase()))
-        .map((user: AuthUser) => {
-          const profile = (profiles as ProfileData[] || []).find(p => p.id === user.id);
-          if (profile) {
-            return {
-              id: profile.id,
-              first_name: profile.first_name || '',
-              last_name: profile.last_name || '',
-              email: user.email || 'No email',
-              role_tags: profile.role_tags || []
-            };
-          }
-          return null;
-        })
-        .filter((user): user is UserSearchResult => user !== null) || [];
+      const emailMatches: UserSearchResult[] =
+        authData?.users
+          ?.filter((user: AuthUser) =>
+            user.email?.toLowerCase().includes(query.toLowerCase()),
+          )
+          .map((user: AuthUser) => {
+            const profile = ((profiles as ProfileData[]) || []).find(
+              (p) => p.id === user.id,
+            );
+            if (profile) {
+              return {
+                id: profile.id,
+                first_name: profile.first_name || "",
+                last_name: profile.last_name || "",
+                email: user.email || "No email",
+                role_tags: profile.role_tags || [],
+              };
+            }
+            return null;
+          })
+          .filter((user): user is UserSearchResult => user !== null) || [];
 
       // Combine and deduplicate results
-      const allResults = [...usersWithEmails, ...emailMatches].filter((user, index, self) => 
-        index === self.findIndex(u => u.id === user.id)
+      const allResults = [...usersWithEmails, ...emailMatches].filter(
+        (user, index, self) =>
+          index === self.findIndex((u) => u.id === user.id),
       );
 
       setSearchResults(allResults);
     } catch (error) {
-      console.error('Error searching users:', error);
-      toast.error('Failed to search users');
+      console.error("Error searching users:", error);
+      toast.error("Failed to search users");
     } finally {
       setIsSearching(false);
     }
@@ -111,14 +129,14 @@ export function EditRoleTagsPanel() {
     setSelectedUser(user);
     setSelectedRoleTags(user.role_tags || []);
     setSearchResults([]);
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const toggleRoleTag = (roleTag: string, checked: boolean) => {
     if (checked) {
-      setSelectedRoleTags(prev => [...prev, roleTag]);
+      setSelectedRoleTags((prev) => [...prev, roleTag]);
     } else {
-      setSelectedRoleTags(prev => prev.filter(tag => tag !== roleTag));
+      setSelectedRoleTags((prev) => prev.filter((tag) => tag !== roleTag));
     }
   };
 
@@ -128,22 +146,26 @@ export function EditRoleTagsPanel() {
     setIsSaving(true);
     try {
       const { error } = await supabase
-        .from('profiles')
-        .update({ 
+        .from("profiles")
+        .update({
           role_tags: selectedRoleTags,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', selectedUser.id);
+        .eq("id", selectedUser.id);
 
       if (error) throw error;
 
       // Update the selected user's role tags locally
-      setSelectedUser(prev => prev ? { ...prev, role_tags: selectedRoleTags } : null);
-      
-      toast.success(`Role tags updated for ${selectedUser.first_name} ${selectedUser.last_name}`);
+      setSelectedUser((prev) =>
+        prev ? { ...prev, role_tags: selectedRoleTags } : null,
+      );
+
+      toast.success(
+        `Role tags updated for ${selectedUser.first_name} ${selectedUser.last_name}`,
+      );
     } catch (error) {
-      console.error('Error updating role tags:', error);
-      toast.error('Failed to update role tags');
+      console.error("Error updating role tags:", error);
+      toast.error("Failed to update role tags");
     } finally {
       setIsSaving(false);
     }
@@ -179,7 +201,7 @@ export function EditRoleTagsPanel() {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-6">
         {/* Search Section */}
         <div className="space-y-4">
@@ -207,11 +229,17 @@ export function EditRoleTagsPanel() {
                       <p className="font-medium">
                         {user.first_name} {user.last_name}
                       </p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {user.role_tags?.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {tag}
                         </Badge>
                       ))}
@@ -239,7 +267,9 @@ export function EditRoleTagsPanel() {
                   <h3 className="font-semibold">
                     {selectedUser.first_name} {selectedUser.last_name}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedUser.email}
+                  </p>
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={clearSelection}>
@@ -256,9 +286,11 @@ export function EditRoleTagsPanel() {
                     <Checkbox
                       id={`role-${role}`}
                       checked={selectedRoleTags.includes(role)}
-                      onCheckedChange={(checked) => toggleRoleTag(role, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        toggleRoleTag(role, checked as boolean)
+                      }
                     />
-                    <Label 
+                    <Label
                       htmlFor={`role-${role}`}
                       className="text-sm font-normal cursor-pointer"
                     >
@@ -284,13 +316,13 @@ export function EditRoleTagsPanel() {
 
               {/* Save Button */}
               <div className="flex justify-end pt-4">
-                <Button 
-                  onClick={saveChanges} 
+                <Button
+                  onClick={saveChanges}
                   disabled={isSaving}
                   className="bg-glee-purple hover:bg-glee-purple/90"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </div>

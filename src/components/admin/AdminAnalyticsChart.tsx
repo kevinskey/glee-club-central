@@ -1,17 +1,16 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
 } from "recharts";
 import { BarChart3 } from "lucide-react";
 
@@ -25,10 +24,12 @@ const chartData = [
   { name: "Mar", members: 85, events: 8, engagement: 92 },
   { name: "Apr", members: 83, events: 5, engagement: 87 },
   { name: "May", members: 85, events: 7, engagement: 94 },
-  { name: "Jun", members: 87, events: 9, engagement: 96 }
+  { name: "Jun", members: 87, events: 9, engagement: 96 },
 ];
 
-export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartProps) {
+export function AdminAnalyticsChart({
+  isMobile = false,
+}: AdminAnalyticsChartProps) {
   return (
     <Card className="border-0 shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <CardHeader className="pb-4">
@@ -41,7 +42,7 @@ export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartPro
         </p>
       </CardHeader>
       <CardContent>
-        <div className={`${isMobile ? 'h-64' : 'h-80'} w-full`}>
+        <div className={`${isMobile ? "h-64" : "h-80"} w-full`}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
@@ -49,36 +50,46 @@ export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartPro
             >
               <defs>
                 <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorEvents" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
-                <linearGradient id="colorEngagement" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                <linearGradient
+                  id="colorEngagement"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-gray-600" />
-              <XAxis 
-                dataKey="name" 
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#e5e7eb"
+                className="dark:stroke-gray-600"
+              />
+              <XAxis
+                dataKey="name"
                 stroke="#6b7280"
                 className="dark:stroke-gray-400"
                 fontSize={12}
               />
-              <YAxis 
+              <YAxis
                 stroke="#6b7280"
                 className="dark:stroke-gray-400"
                 fontSize={12}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "white",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
               />
               <Legend />
@@ -105,8 +116,8 @@ export function AdminAnalyticsChart({ isMobile = false }: AdminAnalyticsChartPro
                 dataKey="engagement"
                 stroke="#10b981"
                 strokeWidth={3}
-                dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#10b981', strokeWidth: 2 }}
+                dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "#10b981", strokeWidth: 2 }}
                 name="Engagement %"
               />
             </AreaChart>

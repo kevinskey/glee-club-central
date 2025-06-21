@@ -1,17 +1,16 @@
-
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { useFanTags } from '@/hooks/useFanTags';
+} from "@/components/ui/dialog";
+import { useFanTags } from "@/hooks/useFanTags";
 
 interface CreateTagModalProps {
   open: boolean;
@@ -19,9 +18,13 @@ interface CreateTagModalProps {
   onSuccess: () => void;
 }
 
-export function CreateTagModal({ open, onOpenChange, onSuccess }: CreateTagModalProps) {
-  const [label, setLabel] = useState('');
-  const [description, setDescription] = useState('');
+export function CreateTagModal({
+  open,
+  onOpenChange,
+  onSuccess,
+}: CreateTagModalProps) {
+  const [label, setLabel] = useState("");
+  const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createTag } = useFanTags();
 
@@ -31,10 +34,13 @@ export function CreateTagModal({ open, onOpenChange, onSuccess }: CreateTagModal
 
     setIsSubmitting(true);
     try {
-      const success = await createTag(label.trim(), description.trim() || undefined);
+      const success = await createTag(
+        label.trim(),
+        description.trim() || undefined,
+      );
       if (success) {
-        setLabel('');
-        setDescription('');
+        setLabel("");
+        setDescription("");
         onOpenChange(false);
         onSuccess();
       }
@@ -44,8 +50,8 @@ export function CreateTagModal({ open, onOpenChange, onSuccess }: CreateTagModal
   };
 
   const handleCancel = () => {
-    setLabel('');
-    setDescription('');
+    setLabel("");
+    setDescription("");
     onOpenChange(false);
   };
 
@@ -80,19 +86,16 @@ export function CreateTagModal({ open, onOpenChange, onSuccess }: CreateTagModal
             />
           </div>
           <div className="flex justify-end gap-2 mt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={!label.trim() || isSubmitting}
-            >
-              {isSubmitting ? 'Creating...' : 'Create Tag'}
+            <Button type="submit" disabled={!label.trim() || isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Tag"}
             </Button>
           </div>
         </form>

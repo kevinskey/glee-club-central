@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, RefreshCw, Database, Image, FileText } from 'lucide-react';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, RefreshCw, Database, Image, FileText } from "lucide-react";
+import { toast } from "sonner";
 
 export function CacheManager() {
   const [isClearing, setIsClearing] = useState(false);
@@ -12,7 +11,7 @@ export function CacheManager() {
 
   const getCacheStats = async () => {
     try {
-      if ('caches' in window) {
+      if ("caches" in window) {
         const cacheNames = await caches.keys();
         const stats = await Promise.all(
           cacheNames.map(async (cacheName) => {
@@ -21,48 +20,51 @@ export function CacheManager() {
             return {
               name: cacheName,
               items: keys.length,
-              urls: keys.map(request => request.url)
+              urls: keys.map((request) => request.url),
             };
-          })
+          }),
         );
         setCacheStats(stats);
       }
     } catch (error) {
-      console.error('Error getting cache stats:', error);
+      console.error("Error getting cache stats:", error);
     }
   };
 
   const clearAllCaches = async () => {
     setIsClearing(true);
     try {
-      if ('caches' in window) {
+      if ("caches" in window) {
         const cacheNames = await caches.keys();
         await Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
+          cacheNames.map((cacheName) => caches.delete(cacheName)),
         );
-        
+
         // Also clear browser storage
         localStorage.clear();
         sessionStorage.clear();
-        
+
         // Notify service worker to update
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        if (
+          "serviceWorker" in navigator &&
+          navigator.serviceWorker.controller
+        ) {
           navigator.serviceWorker.controller.postMessage({
-            type: 'CACHE_CLEARED'
+            type: "CACHE_CLEARED",
           });
         }
-        
-        toast.success('All caches cleared successfully');
+
+        toast.success("All caches cleared successfully");
         setCacheStats(null);
-        
+
         // Reload the page to get fresh content
         setTimeout(() => {
           window.location.reload();
         }, 1000);
       }
     } catch (error) {
-      console.error('Error clearing caches:', error);
-      toast.error('Failed to clear caches');
+      console.error("Error clearing caches:", error);
+      toast.error("Failed to clear caches");
     } finally {
       setIsClearing(false);
     }
@@ -74,7 +76,7 @@ export function CacheManager() {
       toast.success(`Cache "${cacheName}" cleared`);
       getCacheStats(); // Refresh stats
     } catch (error) {
-      console.error('Error clearing specific cache:', error);
+      console.error("Error clearing specific cache:", error);
       toast.error(`Failed to clear cache "${cacheName}"`);
     }
   };
@@ -109,7 +111,7 @@ export function CacheManager() {
             )}
             Clear All Caches
           </Button>
-          
+
           <Button
             onClick={getCacheStats}
             variant="outline"
@@ -124,15 +126,16 @@ export function CacheManager() {
           <div className="space-y-3">
             <h4 className="font-medium">Current Caches</h4>
             {cacheStats.map((cache: any) => (
-              <div key={cache.name} className="flex items-center justify-between p-3 border rounded-lg">
+              <div
+                key={cache.name}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <FileText className="h-4 w-4" />
                     <span className="font-medium">{cache.name}</span>
                   </div>
-                  <Badge variant="secondary">
-                    {cache.items} items
-                  </Badge>
+                  <Badge variant="secondary">{cache.items} items</Badge>
                 </div>
                 <Button
                   size="sm"

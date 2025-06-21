@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Sparkles, Loader2 } from 'lucide-react';
-import { useAIDescriptions } from '@/hooks/useAIDescriptions';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Loader2 } from "lucide-react";
+import { useAIDescriptions } from "@/hooks/useAIDescriptions";
 
 interface AIDescriptionButtonsProps {
   title: string;
@@ -10,7 +9,7 @@ interface AIDescriptionButtonsProps {
   location: string;
   startTime: string;
   callTime: string;
-  onDescriptionGenerated: (description: string, type: 'short' | 'full') => void;
+  onDescriptionGenerated: (description: string, type: "short" | "full") => void;
   disabled?: boolean;
 }
 
@@ -21,18 +20,18 @@ export const AIDescriptionButtons: React.FC<AIDescriptionButtonsProps> = ({
   startTime,
   callTime,
   onDescriptionGenerated,
-  disabled = false
+  disabled = false,
 }) => {
   const { generateDescription, isGenerating } = useAIDescriptions();
 
-  const handleGenerateDescription = async (type: 'short' | 'full') => {
+  const handleGenerateDescription = async (type: "short" | "full") => {
     const description = await generateDescription({
       title,
       eventTypes,
       location,
       startTime,
       callTime,
-      type
+      type,
     });
 
     if (description) {
@@ -46,7 +45,7 @@ export const AIDescriptionButtons: React.FC<AIDescriptionButtonsProps> = ({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => handleGenerateDescription('short')}
+        onClick={() => handleGenerateDescription("short")}
         disabled={disabled || isGenerating || !title.trim()}
         className="text-xs"
       >
@@ -61,7 +60,7 @@ export const AIDescriptionButtons: React.FC<AIDescriptionButtonsProps> = ({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => handleGenerateDescription('full')}
+        onClick={() => handleGenerateDescription("full")}
         disabled={disabled || isGenerating || !title.trim()}
         className="text-xs"
       >

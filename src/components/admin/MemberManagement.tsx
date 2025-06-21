@@ -1,32 +1,31 @@
-
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { 
-  Users, 
-  Plus, 
-  MoreVertical, 
-  RefreshCw, 
-  Edit, 
+} from "@/components/ui/dropdown-menu";
+import {
+  Users,
+  Plus,
+  MoreVertical,
+  RefreshCw,
+  Edit,
   Mail,
   Phone,
-  Music
-} from 'lucide-react';
-import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
-import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
-import { MembersPagination } from '@/components/members/MembersPagination';
-import { AddMemberDialog } from '@/components/members/AddMemberDialog';
-import { EditUserDialog } from '@/components/members/EditUserDialog';
-import { UserFormValues } from '@/components/members/form/userFormSchema';
-import { toast } from 'sonner';
+  Music,
+} from "lucide-react";
+import { useUnifiedUserManagement } from "@/hooks/user/useUnifiedUserManagement";
+import { StreamlinedFilters } from "@/components/members/StreamlinedFilters";
+import { MembersPagination } from "@/components/members/MembersPagination";
+import { AddMemberDialog } from "@/components/members/AddMemberDialog";
+import { EditUserDialog } from "@/components/members/EditUserDialog";
+import { UserFormValues } from "@/components/members/form/userFormSchema";
+import { toast } from "sonner";
 
 export function MemberManagement() {
   const {
@@ -41,7 +40,7 @@ export function MemberManagement() {
     setCurrentPage,
     refetch,
     addUser,
-    updateUser
+    updateUser,
   } = useUnifiedUserManagement();
 
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -50,8 +49,8 @@ export function MemberManagement() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'search') return value !== '';
-    return value !== 'all';
+    if (key === "search") return value !== "";
+    return value !== "all";
   }).length;
 
   const handleAddMember = async (data: UserFormValues) => {
@@ -60,11 +59,11 @@ export function MemberManagement() {
       const success = await addUser(data);
       if (success) {
         setShowAddDialog(false);
-        toast.success('Member added successfully');
+        toast.success("Member added successfully");
       }
     } catch (error) {
-      console.error('Error adding member:', error);
-      toast.error('Failed to add member');
+      console.error("Error adding member:", error);
+      toast.error("Failed to add member");
     } finally {
       setIsSubmitting(false);
     }
@@ -77,52 +76,56 @@ export function MemberManagement() {
 
   const handleSaveUser = async (data: UserFormValues) => {
     if (!selectedUser) return;
-    
+
     setIsSubmitting(true);
     try {
-      console.log('Submitting user update for user:', selectedUser.id);
-      console.log('Form data received:', data);
-      
+      console.log("Submitting user update for user:", selectedUser.id);
+      console.log("Form data received:", data);
+
       // Create clean update object with only changed fields
       const updateData: any = {};
-      
+
       // Only include fields that have values
-      if (data.first_name?.trim()) updateData.first_name = data.first_name.trim();
+      if (data.first_name?.trim())
+        updateData.first_name = data.first_name.trim();
       if (data.last_name?.trim()) updateData.last_name = data.last_name.trim();
       if (data.phone?.trim()) updateData.phone = data.phone.trim();
       if (data.voice_part) updateData.voice_part = data.voice_part;
       if (data.status) updateData.status = data.status;
-      if (data.class_year?.trim()) updateData.class_year = data.class_year.trim();
+      if (data.class_year?.trim())
+        updateData.class_year = data.class_year.trim();
       if (data.notes?.trim()) updateData.notes = data.notes.trim();
       if (data.join_date) updateData.join_date = data.join_date;
-      
+
       // Handle boolean fields properly
-      if (typeof data.dues_paid === 'boolean') {
+      if (typeof data.dues_paid === "boolean") {
         updateData.dues_paid = data.dues_paid;
       }
-      
+
       // Handle role and admin status
       if (data.role) {
         updateData.role = data.role;
       }
-      
-      if (typeof data.is_admin === 'boolean') {
+
+      if (typeof data.is_admin === "boolean") {
         updateData.is_admin = data.is_admin;
       }
 
-      console.log('Prepared update data:', updateData);
+      console.log("Prepared update data:", updateData);
 
       const success = await updateUser(selectedUser.id, updateData);
       if (success) {
         setShowEditDialog(false);
         setSelectedUser(null);
-        toast.success('User updated successfully');
+        toast.success("User updated successfully");
       } else {
-        toast.error('Failed to update user - please check the console for details');
+        toast.error(
+          "Failed to update user - please check the console for details",
+        );
       }
     } catch (error) {
-      console.error('Error updating user:', error);
-      toast.error('Failed to update user');
+      console.error("Error updating user:", error);
+      toast.error("Failed to update user");
     } finally {
       setIsSubmitting(false);
     }
@@ -163,13 +166,18 @@ export function MemberManagement() {
             Manage Glee Club members ({filteredUsers.length} total)
           </p>
         </div>
-        
+
         <div className="flex gap-3">
           <Button onClick={refetch} variant="outline" disabled={isLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
-          <Button onClick={() => setShowAddDialog(true)} className="bg-glee-spelman hover:bg-glee-spelman/90">
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className="bg-glee-spelman hover:bg-glee-spelman/90"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Add Member
           </Button>
@@ -186,10 +194,15 @@ export function MemberManagement() {
       {/* Results Summary */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <p>
-          Showing {((currentPage - 1) * 6) + 1}-{Math.min(currentPage * 6, filteredUsers.length)} of {filteredUsers.length} members
-          {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+          Showing {(currentPage - 1) * 6 + 1}-
+          {Math.min(currentPage * 6, filteredUsers.length)} of{" "}
+          {filteredUsers.length} members
+          {activeFilterCount > 0 &&
+            ` (${activeFilterCount} filter${activeFilterCount !== 1 ? "s" : ""} applied)`}
         </p>
-        <p>Page {currentPage} of {totalPages}</p>
+        <p>
+          Page {currentPage} of {totalPages}
+        </p>
       </div>
 
       {/* Member List */}
@@ -199,7 +212,9 @@ export function MemberManagement() {
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-semibold mb-2">No Members Found</h3>
             <p className="text-muted-foreground mb-4">
-              {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
+              {activeFilterCount > 0
+                ? "No members match your current filters."
+                : "No members have been added yet."}
             </p>
             {activeFilterCount === 0 && (
               <Button onClick={() => setShowAddDialog(true)}>
@@ -213,8 +228,8 @@ export function MemberManagement() {
         <>
           <div className="grid gap-4">
             {paginatedUsers.map((member) => (
-              <Card 
-                key={member.id} 
+              <Card
+                key={member.id}
                 className="transition-all duration-200 cursor-pointer hover:shadow-md hover:scale-[1.01] hover:border-glee-spelman/50"
                 onClick={() => handleEditUser(member)}
               >
@@ -224,7 +239,7 @@ export function MemberManagement() {
                       <Avatar className="h-12 w-12">
                         <AvatarImage src={member.avatar_url} />
                         <AvatarFallback className="bg-glee-spelman/10 text-glee-spelman font-semibold">
-                          {`${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`}
+                          {`${member.first_name?.[0] || ""}${member.last_name?.[0] || ""}`}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -247,21 +262,29 @@ export function MemberManagement() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {member.role && (
-                        <Badge variant={member.role === 'admin' ? 'destructive' : 'outline'}>
+                        <Badge
+                          variant={
+                            member.role === "admin" ? "destructive" : "outline"
+                          }
+                        >
                           {member.role}
                         </Badge>
                       )}
                       {member.voice_part && (
                         <Badge variant="outline">
                           <Music className="mr-1 h-3 w-3" />
-                          {member.voice_part.replace('_', ' ')}
+                          {member.voice_part.replace("_", " ")}
                         </Badge>
                       )}
-                      <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                        {member.status || 'active'}
+                      <Badge
+                        variant={
+                          member.status === "active" ? "default" : "secondary"
+                        }
+                      >
+                        {member.status || "active"}
                       </Badge>
                       {member.dues_paid && (
                         <Badge variant="default" className="bg-green-600">
@@ -273,18 +296,23 @@ export function MemberManagement() {
                           Class {member.class_year}
                         </Badge>
                       )}
-                      
+
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Button variant="ghost" size="sm">
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditUser(member);
-                          }}>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditUser(member);
+                            }}
+                          >
                             <Edit className="mr-2 h-4 w-4" />
                             Edit Member
                           </DropdownMenuItem>

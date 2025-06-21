@@ -1,16 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Send, Users, Mail, Phone, Search } from 'lucide-react';
-import { useMessaging } from '@/hooks/useMessaging';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Send, Users, Mail, Phone, Search } from "lucide-react";
+import { useMessaging } from "@/hooks/useMessaging";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Member {
   id: string;
@@ -28,7 +34,9 @@ interface AuthUser {
 }
 
 export function BulkMessageComposer() {
-  const [messageType, setMessageType] = useState<"email" | "sms" | "both">("email");
+  const [messageType, setMessageType] = useState<"email" | "sms" | "both">(
+    "email",
+  );
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -48,40 +56,43 @@ export function BulkMessageComposer() {
   const loadMembers = async () => {
     try {
       setIsLoading(true);
-      console.log('Loading members for bulk messaging...');
-      
+      console.log("Loading members for bulk messaging...");
+
       // Get current user first to check permissions
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('You must be logged in to access this feature');
+        toast.error("You must be logged in to access this feature");
         return;
       }
 
       // Get profiles data
       const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, phone, role, voice_part')
-        .eq('status', 'active')
-        .order('last_name');
+        .from("profiles")
+        .select("id, first_name, last_name, phone, role, voice_part")
+        .eq("status", "active")
+        .order("last_name");
 
       if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
+        console.error("Error fetching profiles:", profilesError);
         throw profilesError;
       }
 
       if (!profilesData || profilesData.length === 0) {
-        console.log('No profiles found');
+        console.log("No profiles found");
         setMembers([]);
         return;
       }
 
-      console.log('Profiles loaded:', profilesData.length);
+      console.log("Profiles loaded:", profilesData.length);
 
       // Try to get user emails from auth admin (will work for admin users)
       let emailMap = new Map<string, string>();
       try {
-        const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-        
+        const { data: authUsers, error: authError } =
+          await supabase.auth.admin.listUsers();
+
         if (authUsers?.users && !authError) {
           (authUsers.users as AuthUser[]).forEach((authUser: AuthUser) => {
             if (authUser.email && authUser.id) {
@@ -89,76 +100,86 @@ export function BulkMessageComposer() {
             }
           });
         } else {
-          console.warn('Could not fetch auth users, using current user email only');
+          console.warn(
+            "Could not fetch auth users, using current user email only",
+          );
           // Fall back to current user's email for their own profile
           if (user.email) {
             emailMap.set(user.id, user.email);
           }
         }
       } catch (authError) {
-        console.warn('Auth admin access failed, using fallback:', authError);
+        console.warn("Auth admin access failed, using fallback:", authError);
         if (user.email) {
           emailMap.set(user.id, user.email);
         }
       }
 
       // Combine profile data with emails
-      const transformedData: Member[] = profilesData.map(profile => ({
+      const transformedData: Member[] = profilesData.map((profile) => ({
         id: profile.id,
-        first_name: profile.first_name || '',
-        last_name: profile.last_name || '',
-        email: emailMap.get(profile.id) || '',
-        phone: profile.phone || '',
-        role: profile.role || 'member',
-        voice_part: profile.voice_part
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: emailMap.get(profile.id) || "",
+        phone: profile.phone || "",
+        role: profile.role || "member",
+        voice_part: profile.voice_part,
       }));
 
-      console.log('Members processed:', transformedData.length);
-      console.log('Members with phone numbers:', transformedData.filter(m => m.phone).length);
-      console.log('Members with emails:', transformedData.filter(m => m.email).length);
-      
+      console.log("Members processed:", transformedData.length);
+      console.log(
+        "Members with phone numbers:",
+        transformedData.filter((m) => m.phone).length,
+      );
+      console.log(
+        "Members with emails:",
+        transformedData.filter((m) => m.email).length,
+      );
+
       setMembers(transformedData);
     } catch (error) {
-      console.error('Error loading members:', error);
-      toast.error('Failed to load members');
+      console.error("Error loading members:", error);
+      toast.error("Failed to load members");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredMembers = members.filter(member => {
+  const filteredMembers = members.filter((member) => {
     // Apply role filter
     if (filterRole !== "all" && member.role !== filterRole) return false;
-    
-    // Apply voice part filter  
-    if (filterVoicePart !== "all" && member.voice_part !== filterVoicePart) return false;
-    
+
+    // Apply voice part filter
+    if (filterVoicePart !== "all" && member.voice_part !== filterVoicePart)
+      return false;
+
     // Apply message type filter - this was the main issue!
     if (messageType === "email" && !member.email) return false;
     if (messageType === "sms" && !member.phone) return false;
-    if (messageType === "both" && (!member.email || !member.phone)) return false;
-    
+    if (messageType === "both" && (!member.email || !member.phone))
+      return false;
+
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const fullName = `${member.first_name} ${member.last_name}`.toLowerCase();
-      const email = member.email?.toLowerCase() || '';
+      const email = member.email?.toLowerCase() || "";
       return fullName.includes(query) || email.includes(query);
     }
-    
+
     return true;
   });
 
   const handleMemberToggle = (memberId: string) => {
-    setSelectedMembers(prev => 
-      prev.includes(memberId) 
-        ? prev.filter(id => id !== memberId)
-        : [...prev, memberId]
+    setSelectedMembers((prev) =>
+      prev.includes(memberId)
+        ? prev.filter((id) => id !== memberId)
+        : [...prev, memberId],
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedMembers(filteredMembers.map(m => m.id));
+    setSelectedMembers(filteredMembers.map((m) => m.id));
   };
 
   const handleDeselectAll = () => {
@@ -177,8 +198,12 @@ export function BulkMessageComposer() {
         .replace(/{{first_name}}/g, recipient.first_name)
         .replace(/{{last_name}}/g, recipient.last_name);
 
-      const result = await sendEmail(recipient.email, subject, personalizedContent);
-      
+      const result = await sendEmail(
+        recipient.email,
+        subject,
+        personalizedContent,
+      );
+
       if (result.success) {
         successCount++;
       } else {
@@ -186,7 +211,7 @@ export function BulkMessageComposer() {
       }
 
       // Small delay to avoid overwhelming the email service
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     return { successCount, failCount };
@@ -205,7 +230,7 @@ export function BulkMessageComposer() {
         .replace(/{{last_name}}/g, recipient.last_name);
 
       const result = await sendSMS(recipient.phone, personalizedContent);
-      
+
       if (result.success) {
         successCount++;
       } else {
@@ -213,7 +238,7 @@ export function BulkMessageComposer() {
       }
 
       // Small delay to avoid overwhelming the SMS service
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
     return { successCount, failCount };
@@ -230,19 +255,22 @@ export function BulkMessageComposer() {
       return;
     }
 
-    if ((messageType === "email" || messageType === "both") && !subject.trim()) {
+    if (
+      (messageType === "email" || messageType === "both") &&
+      !subject.trim()
+    ) {
       toast.error("Please enter an email subject");
       return;
     }
 
-    const recipients = members.filter(m => selectedMembers.includes(m.id));
+    const recipients = members.filter((m) => selectedMembers.includes(m.id));
     setIsSending(true);
 
     try {
       if (messageType === "both") {
         // Send both email and SMS
-        const emailRecipients = recipients.filter(r => r.email);
-        const smsRecipients = recipients.filter(r => r.phone);
+        const emailRecipients = recipients.filter((r) => r.email);
+        const smsRecipients = recipients.filter((r) => r.phone);
 
         let totalSuccess = 0;
         let totalFail = 0;
@@ -266,9 +294,9 @@ export function BulkMessageComposer() {
           toast.error(`Failed to send ${totalFail} message(s)`);
         }
       } else if (messageType === "email") {
-        const emailRecipients = recipients.filter(r => r.email);
+        const emailRecipients = recipients.filter((r) => r.email);
         const results = await sendBulkEmails(emailRecipients);
-        
+
         if (results.successCount > 0) {
           toast.success(`Successfully sent ${results.successCount} email(s)`);
         }
@@ -276,11 +304,13 @@ export function BulkMessageComposer() {
           toast.error(`Failed to send ${results.failCount} email(s)`);
         }
       } else if (messageType === "sms") {
-        const smsRecipients = recipients.filter(r => r.phone);
+        const smsRecipients = recipients.filter((r) => r.phone);
         const results = await sendBulkSMS(smsRecipients);
-        
+
         if (results.successCount > 0) {
-          toast.success(`Successfully sent ${results.successCount} SMS message(s)`);
+          toast.success(
+            `Successfully sent ${results.successCount} SMS message(s)`,
+          );
         }
         if (results.failCount > 0) {
           toast.error(`Failed to send ${results.failCount} SMS message(s)`);
@@ -292,8 +322,8 @@ export function BulkMessageComposer() {
       setSubject("");
       setSelectedMembers([]);
     } catch (error) {
-      console.error('Error sending messages:', error);
-      toast.error('Failed to send messages');
+      console.error("Error sending messages:", error);
+      toast.error("Failed to send messages");
     } finally {
       setIsSending(false);
     }
@@ -323,7 +353,10 @@ export function BulkMessageComposer() {
           {/* Message Type Selection */}
           <div className="space-y-2">
             <Label>Message Type</Label>
-            <Select value={messageType} onValueChange={(value: any) => setMessageType(value)}>
+            <Select
+              value={messageType}
+              onValueChange={(value: any) => setMessageType(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -433,7 +466,10 @@ export function BulkMessageComposer() {
             </div>
             <div className="space-y-2">
               <Label>Filter by Voice Part</Label>
-              <Select value={filterVoicePart} onValueChange={setFilterVoicePart}>
+              <Select
+                value={filterVoicePart}
+                onValueChange={setFilterVoicePart}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -451,9 +487,12 @@ export function BulkMessageComposer() {
           {/* Filter Summary */}
           <div className="text-sm text-muted-foreground">
             Showing {filteredMembers.length} of {members.length} members
-            {messageType === "sms" && ` (${filteredMembers.filter(m => m.phone).length} with phone numbers)`}
-            {messageType === "email" && ` (${filteredMembers.filter(m => m.email).length} with email addresses)`}
-            {messageType === "both" && ` (${filteredMembers.filter(m => m.email && m.phone).length} with both email and phone)`}
+            {messageType === "sms" &&
+              ` (${filteredMembers.filter((m) => m.phone).length} with phone numbers)`}
+            {messageType === "email" &&
+              ` (${filteredMembers.filter((m) => m.email).length} with email addresses)`}
+            {messageType === "both" &&
+              ` (${filteredMembers.filter((m) => m.email && m.phone).length} with both email and phone)`}
           </div>
 
           {/* Member List */}
@@ -485,10 +524,20 @@ export function BulkMessageComposer() {
                       </Badge>
                     )}
                     <span>{member.role}</span>
-                    {member.voice_part && <span>• {member.voice_part.replace('_', ' ')}</span>}
+                    {member.voice_part && (
+                      <span>• {member.voice_part.replace("_", " ")}</span>
+                    )}
                   </div>
-                  {member.email && <p className="text-xs text-muted-foreground">{member.email}</p>}
-                  {member.phone && <p className="text-xs text-muted-foreground">{member.phone}</p>}
+                  {member.email && (
+                    <p className="text-xs text-muted-foreground">
+                      {member.email}
+                    </p>
+                  )}
+                  {member.phone && (
+                    <p className="text-xs text-muted-foreground">
+                      {member.phone}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
@@ -500,7 +549,8 @@ export function BulkMessageComposer() {
               <p>No members match the current filters</p>
               {messageType === "sms" && (
                 <p className="text-sm mt-2">
-                  Make sure members have phone numbers in their profiles for SMS messaging
+                  Make sure members have phone numbers in their profiles for SMS
+                  messaging
                 </p>
               )}
             </div>
@@ -510,14 +560,18 @@ export function BulkMessageComposer() {
 
       {/* Send Button */}
       <div className="flex justify-end">
-        <Button 
-          onClick={handleSend} 
-          disabled={isSending || selectedMembers.length === 0 || !content.trim()}
+        <Button
+          onClick={handleSend}
+          disabled={
+            isSending || selectedMembers.length === 0 || !content.trim()
+          }
           size="lg"
           className="gap-2"
         >
           <Send className="w-4 w-4" />
-          {isSending ? "Sending..." : `Send to ${selectedMembers.length} Recipients`}
+          {isSending
+            ? "Sending..."
+            : `Send to ${selectedMembers.length} Recipients`}
         </Button>
       </div>
     </div>

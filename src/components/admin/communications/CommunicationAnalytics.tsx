@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart } from "lucide-react";
 
 export function CommunicationAnalytics() {
   return (
@@ -16,7 +15,9 @@ export function CommunicationAnalytics() {
         <div className="text-center py-8 text-muted-foreground">
           <BarChart className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>Analytics and reporting will be displayed here</p>
-          <p className="text-sm">Track message delivery rates, engagement, and more</p>
+          <p className="text-sm">
+            Track message delivery rates, engagement, and more
+          </p>
         </div>
       </CardContent>
     </Card>

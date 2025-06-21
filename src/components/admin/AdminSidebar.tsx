@@ -1,16 +1,16 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   LayoutDashboard,
   Calendar,
@@ -31,28 +31,28 @@ import {
   Package,
   ChevronDown,
   LogOut,
-  Bell
-} from 'lucide-react';
+  Bell,
+} from "lucide-react";
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Back to Site' },
-  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-  { to: '/admin/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/admin/users', icon: Users, label: 'Members' },
-  { to: '/admin/user-roles', icon: UserCog, label: 'User Roles' },
-  { to: '/admin/permissions', icon: Shield, label: 'Permissions' },
-  { to: '/admin/financial', icon: DollarSign, label: 'Financial' },
-  { to: '/admin/media-library', icon: Image, label: 'Media Library' },
-  { to: '/admin/music', icon: Music, label: 'Music Player' },
-  { to: '/admin/soundcloud', icon: Music, label: 'SoundCloud' },
-  { to: '/admin/videos', icon: Video, label: 'Videos' },
-  { to: '/admin/news-items', icon: Megaphone, label: 'News Items' },
-  { to: '/admin/communications', icon: MessageSquare, label: 'Communications' },
-  { to: '/admin/store', icon: ShoppingCart, label: 'Store Admin' },
-  { to: '/admin/orders', icon: Package, label: 'Orders' },
-  { to: '/admin/handbook', icon: FileText, label: 'Handbook' },
-  { to: '/admin/settings', icon: Settings, label: 'Settings' },
+  { to: "/", icon: Home, label: "Back to Site" },
+  { to: "/admin", icon: LayoutDashboard, label: "Dashboard", end: true },
+  { to: "/admin/analytics", icon: BarChart3, label: "Analytics" },
+  { to: "/admin/calendar", icon: Calendar, label: "Calendar" },
+  { to: "/admin/users", icon: Users, label: "Members" },
+  { to: "/admin/user-roles", icon: UserCog, label: "User Roles" },
+  { to: "/admin/permissions", icon: Shield, label: "Permissions" },
+  { to: "/admin/financial", icon: DollarSign, label: "Financial" },
+  { to: "/admin/media-library", icon: Image, label: "Media Library" },
+  { to: "/admin/music", icon: Music, label: "Music Player" },
+  { to: "/admin/soundcloud", icon: Music, label: "SoundCloud" },
+  { to: "/admin/videos", icon: Video, label: "Videos" },
+  { to: "/admin/news-items", icon: Megaphone, label: "News Items" },
+  { to: "/admin/communications", icon: MessageSquare, label: "Communications" },
+  { to: "/admin/store", icon: ShoppingCart, label: "Store Admin" },
+  { to: "/admin/orders", icon: Package, label: "Orders" },
+  { to: "/admin/handbook", icon: FileText, label: "Handbook" },
+  { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 
 export const AdminSidebar: React.FC = () => {
@@ -62,14 +62,17 @@ export const AdminSidebar: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await logout();
-      navigate('/');
+      navigate("/");
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Error signing out:", error);
     }
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
+    return (
+      `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase() ||
+      "U"
+    );
   };
 
   return (
@@ -90,7 +93,10 @@ export const AdminSidebar: React.FC = () => {
         {profile && (
           <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={profile?.avatar_url || ''} alt={profile?.first_name || 'User'} />
+              <AvatarImage
+                src={profile?.avatar_url || ""}
+                alt={profile?.first_name || "User"}
+              />
               <AvatarFallback className="bg-glee-spelman text-white text-xs">
                 {getInitials(profile?.first_name, profile?.last_name)}
               </AvatarFallback>
@@ -119,10 +125,10 @@ export const AdminSidebar: React.FC = () => {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors",
                     isActive
-                      ? 'bg-glee-spelman text-white'
-                      : 'text-foreground hover:bg-muted hover:text-glee-spelman'
+                      ? "bg-glee-spelman text-white"
+                      : "text-foreground hover:bg-muted hover:text-glee-spelman",
                   )
                 }
               >
@@ -167,12 +173,10 @@ export const AdminSidebar: React.FC = () => {
               <p className="text-sm font-medium">
                 {profile?.first_name} {profile?.last_name}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {user?.email}
-              </p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/profile')}>
+            <DropdownMenuItem onClick={() => navigate("/profile")}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Profile Settings</span>
             </DropdownMenuItem>

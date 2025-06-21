@@ -1,66 +1,68 @@
-
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { PageHeader } from "@/components/ui/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Users, 
-  Plus, 
-  Upload, 
-  RefreshCw, 
+import {
+  Users,
+  Plus,
+  Upload,
+  RefreshCw,
   AlertCircle,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
-import { useUnifiedUserManagement } from '@/hooks/user/useUnifiedUserManagement';
-import { UserListCore } from '@/components/members/UserListCore';
-import { StreamlinedFilters } from '@/components/members/StreamlinedFilters';
-import { MembersPagination } from '@/components/members/MembersPagination';
-import { EditUserDialog } from '@/components/members/EditUserDialog';
-import { AddMemberDialog } from '@/components/members/AddMemberDialog';
-import { UserFormValues } from '@/components/members/form/userFormSchema';
-import { MemberBulkUpload } from './MemberBulkUpload';
-import { UserProfileView } from './UserProfileView';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { useAnalyticsTracking } from '@/hooks/useAnalyticsTracking';
+import { useUnifiedUserManagement } from "@/hooks/user/useUnifiedUserManagement";
+import { UserListCore } from "@/components/members/UserListCore";
+import { StreamlinedFilters } from "@/components/members/StreamlinedFilters";
+import { MembersPagination } from "@/components/members/MembersPagination";
+import { EditUserDialog } from "@/components/members/EditUserDialog";
+import { AddMemberDialog } from "@/components/members/AddMemberDialog";
+import { UserFormValues } from "@/components/members/form/userFormSchema";
+import { MemberBulkUpload } from "./MemberBulkUpload";
+import { UserProfileView } from "./UserProfileView";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
 
 const CleanAdminUsers: React.FC = () => {
-  console.log('🔧 CleanAdminUsers: Component rendering started');
-  
+  console.log("🔧 CleanAdminUsers: Component rendering started");
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const { trackFeatureUsage } = useAnalyticsTracking();
-  
+
   // Check admin status
   React.useEffect(() => {
     const checkAdminStatus = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           // Check if user is admin
           const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_super_admin, role')
-            .eq('id', user.id)
+            .from("profiles")
+            .select("is_super_admin, role")
+            .eq("id", user.id)
             .maybeSingle();
-          
-          const adminStatus = user.email === 'kevinskey@mac.com' || 
-                             profile?.is_super_admin || 
-                             profile?.role === 'admin';
+
+          const adminStatus =
+            user.email === "kevinskey@mac.com" ||
+            profile?.is_super_admin ||
+            profile?.role === "admin";
           setIsAdmin(adminStatus);
-          
+
           if (adminStatus) {
-            trackFeatureUsage('admin_user_management_viewed');
+            trackFeatureUsage("admin_user_management_viewed");
           }
         }
       } catch (error) {
-        console.error('Error checking admin status:', error);
+        console.error("Error checking admin status:", error);
       }
     };
-    
+
     checkAdminStatus();
   }, [trackFeatureUsage]);
 
@@ -76,16 +78,16 @@ const CleanAdminUsers: React.FC = () => {
     setCurrentPage,
     refetch,
     addUser,
-    updateUser
+    updateUser,
   } = useUnifiedUserManagement();
 
-  console.log('🔧 CleanAdminUsers: Data state:', {
+  console.log("🔧 CleanAdminUsers: Data state:", {
     filteredUsersCount: filteredUsers.length,
     paginatedUsersCount: paginatedUsers.length,
     isLoading,
     error,
     currentPage,
-    totalPages
+    totalPages,
   });
 
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
@@ -94,8 +96,8 @@ const CleanAdminUsers: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeFilterCount = Object.entries(filters).filter(([key, value]) => {
-    if (key === 'search') return value !== '';
-    return value !== 'all';
+    if (key === "search") return value !== "";
+    return value !== "all";
   }).length;
 
   const handleAddMember = async (data: UserFormValues) => {
@@ -104,8 +106,10 @@ const CleanAdminUsers: React.FC = () => {
       const success = await addUser(data);
       if (success) {
         setShowAddMemberDialog(false);
-        toast.success('Member added successfully');
-        trackFeatureUsage('admin_member_added', { memberRole: data.is_admin ? 'admin' : 'member' });
+        toast.success("Member added successfully");
+        trackFeatureUsage("admin_member_added", {
+          memberRole: data.is_admin ? "admin" : "member",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -115,12 +119,12 @@ const CleanAdminUsers: React.FC = () => {
   const handleEditUser = (user: any) => {
     setSelectedUser(user);
     setShowEditDialog(true);
-    trackFeatureUsage('admin_member_edit_opened', { userId: user.id });
+    trackFeatureUsage("admin_member_edit_opened", { userId: user.id });
   };
 
   const handleViewUserProfile = (user: any) => {
     setSelectedUserId(user.id);
-    trackFeatureUsage('admin_member_profile_viewed', { userId: user.id });
+    trackFeatureUsage("admin_member_profile_viewed", { userId: user.id });
   };
 
   const handleBackFromProfile = () => {
@@ -129,7 +133,7 @@ const CleanAdminUsers: React.FC = () => {
 
   const handleSaveUser = async (data: UserFormValues) => {
     if (!selectedUser) return;
-    
+
     setIsSubmitting(true);
     try {
       const updateData: any = {
@@ -142,17 +146,17 @@ const CleanAdminUsers: React.FC = () => {
         notes: data.notes,
         dues_paid: data.dues_paid,
         is_super_admin: data.is_admin,
-        role: data.is_admin ? 'admin' : 'member'
+        role: data.is_admin ? "admin" : "member",
       };
 
       const success = await updateUser(selectedUser.id, updateData);
       if (success) {
         setShowEditDialog(false);
         setSelectedUser(null);
-        toast.success('User updated successfully');
-        trackFeatureUsage('admin_member_updated', { 
+        toast.success("User updated successfully");
+        trackFeatureUsage("admin_member_updated", {
           userId: selectedUser.id,
-          updatedRole: data.is_admin ? 'admin' : 'member'
+          updatedRole: data.is_admin ? "admin" : "member",
         });
       }
     } finally {
@@ -161,19 +165,19 @@ const CleanAdminUsers: React.FC = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    console.log('Delete user:', userId);
-    toast.info('Delete functionality will be implemented soon');
-    trackFeatureUsage('admin_member_delete_attempted', { userId });
+    console.log("Delete user:", userId);
+    toast.info("Delete functionality will be implemented soon");
+    trackFeatureUsage("admin_member_delete_attempted", { userId });
   };
 
   const handleBulkUploadComplete = () => {
     setShowBulkUpload(false);
     refetch();
-    toast.success('Bulk upload completed successfully');
+    toast.success("Bulk upload completed successfully");
   };
 
   if (isLoading) {
-    console.log('🔄 CleanAdminUsers: Showing loading state');
+    console.log("🔄 CleanAdminUsers: Showing loading state");
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-8">
@@ -184,7 +188,11 @@ const CleanAdminUsers: React.FC = () => {
     );
   }
 
-  console.log('🔧 CleanAdminUsers: Rendering main UI with', filteredUsers.length, 'filtered users');
+  console.log(
+    "🔧 CleanAdminUsers: Rendering main UI with",
+    filteredUsers.length,
+    "filtered users",
+  );
 
   // Show bulk upload view
   if (showBulkUpload) {
@@ -195,10 +203,10 @@ const CleanAdminUsers: React.FC = () => {
           description="Import multiple members from a CSV file"
           icon={<Upload className="h-6 w-6" />}
         />
-        
+
         <div className="mt-8 max-w-4xl">
           <MemberBulkUpload onMembersUploaded={handleBulkUploadComplete} />
-          
+
           <div className="mt-6">
             <Button onClick={() => setShowBulkUpload(false)} variant="outline">
               ← Back to Members
@@ -211,7 +219,9 @@ const CleanAdminUsers: React.FC = () => {
 
   // Show user profile view
   if (selectedUserId) {
-    const selectedUserForProfile = filteredUsers.find(u => u.id === selectedUserId);
+    const selectedUserForProfile = filteredUsers.find(
+      (u) => u.id === selectedUserId,
+    );
     if (selectedUserForProfile) {
       return (
         <div className="container mx-auto px-4 py-8">
@@ -239,16 +249,21 @@ const CleanAdminUsers: React.FC = () => {
           <AlertDescription>Error loading members: {error}</AlertDescription>
         </Alert>
       )}
-      
+
       <Card className="mt-8">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Members Directory</CardTitle>
           <div className="flex gap-2">
             <Button onClick={refetch} variant="outline" disabled={isLoading}>
-              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
-            <Button onClick={() => setShowAddMemberDialog(true)} variant="default">
+            <Button
+              onClick={() => setShowAddMemberDialog(true)}
+              variant="default"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Member
             </Button>
@@ -267,10 +282,15 @@ const CleanAdminUsers: React.FC = () => {
 
           <div className="flex items-center justify-between text-sm text-muted-foreground mt-4 mb-4">
             <p>
-              Showing {((currentPage - 1) * 6) + 1}-{Math.min(currentPage * 6, filteredUsers.length)} of {filteredUsers.length} members
-              {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} applied)`}
+              Showing {(currentPage - 1) * 6 + 1}-
+              {Math.min(currentPage * 6, filteredUsers.length)} of{" "}
+              {filteredUsers.length} members
+              {activeFilterCount > 0 &&
+                ` (${activeFilterCount} filter${activeFilterCount !== 1 ? "s" : ""} applied)`}
             </p>
-            <p>Page {currentPage} of {totalPages}</p>
+            <p>
+              Page {currentPage} of {totalPages}
+            </p>
           </div>
 
           {filteredUsers.length === 0 ? (
@@ -278,7 +298,9 @@ const CleanAdminUsers: React.FC = () => {
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-semibold mb-2">No Members Found</h3>
               <p className="text-muted-foreground mb-4">
-                {activeFilterCount > 0 ? 'No members match your current filters.' : 'No members have been added yet.'}
+                {activeFilterCount > 0
+                  ? "No members match your current filters."
+                  : "No members have been added yet."}
               </p>
               {activeFilterCount === 0 && (
                 <div className="flex gap-2 justify-center">
@@ -286,7 +308,10 @@ const CleanAdminUsers: React.FC = () => {
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add Your First Member
                   </Button>
-                  <Button onClick={() => setShowBulkUpload(true)} variant="outline">
+                  <Button
+                    onClick={() => setShowBulkUpload(true)}
+                    variant="outline"
+                  >
                     <Upload className="mr-2 h-4 w-4" />
                     Bulk Upload
                   </Button>
