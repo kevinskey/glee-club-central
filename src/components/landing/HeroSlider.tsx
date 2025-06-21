@@ -66,14 +66,14 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-screen h-screen bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero...</div>
       </div>
     );
   }
 
   return (
-    <section className="relative w-screen h-screen overflow-hidden">
+    <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
       {/* Background Image or Video */}
       {heroSlide.media_type === 'video' && heroSlide.youtube_url ? (
         <iframe
@@ -111,12 +111,12 @@ export function HeroSlider() {
             'text-center'
           }`}>
             {heroSlide.show_title !== false && heroSlide.title && (
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 drop-shadow-lg">
                 {heroSlide.title}
               </h1>
             )}
             {heroSlide.description && (
-              <p className="text-xl md:text-2xl lg:text-3xl mb-8 drop-shadow-lg max-w-3xl">
+              <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 drop-shadow-lg max-w-3xl">
                 {heroSlide.description}
               </p>
             )}
@@ -124,7 +124,7 @@ export function HeroSlider() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-4 text-lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-6 md:px-8 py-3 md:py-4 text-base md:text-lg"
               >
                 <a href={heroSlide.button_link}>
                   {heroSlide.button_text}
