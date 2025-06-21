@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface SpacingSettings {
   topPadding: number;
@@ -72,18 +71,6 @@ export function HeroSlider() {
       return () => clearInterval(timer);
     }
   }, [slides.length]);
-
-  const goToSlide = (index: number) => {
-    setCurrentSlideIndex(index);
-  };
-
-  const goToPrevious = () => {
-    setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  const goToNext = () => {
-    setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
-  };
 
   console.log('Hero: Displaying slides:', {
     totalSlides: slides.length,
@@ -175,44 +162,6 @@ export function HeroSlider() {
             )}
           </div>
         </div>
-      )}
-
-      {/* Navigation Controls - Only show if multiple slides */}
-      {slides.length > 1 && (
-        <>
-          {/* Previous/Next Buttons */}
-          <button
-            onClick={goToPrevious}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </button>
-          
-          <button
-            onClick={goToNext}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-200"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="w-6 h-6" />
-          </button>
-
-          {/* Slide Indicators */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  index === currentSlideIndex
-                    ? 'bg-white'
-                    : 'bg-white/50 hover:bg-white/75'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        </>
       )}
     </section>
   );
