@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { audioLogger, requestMicrophoneAccess, releaseMicrophone, initializeAudioSystem, cleanupAudioSystem } from '@/utils/audioUtils';
+import { audioLogger, requestMicrophoneAccess, releaseMicrophone, initializeAudioSystem, cleanupAudioSystem, debugAudioCapabilities } from '@/utils/audioUtils';
 
 export function useAudioRecorder() {
   // State
@@ -23,6 +23,9 @@ export function useAudioRecorder() {
         // Don't auto-initialize - wait for user interaction
         setIsInitialized(true);
         audioLogger.log('Audio recorder: Ready for user interaction');
+        
+        // Debug audio capabilities
+        debugAudioCapabilities();
       } catch (err) {
         audioLogger.error('Audio recorder: Failed to initialize', err);
         if (mounted) {
@@ -48,8 +51,6 @@ export function useAudioRecorder() {
       if (audioContextRef.current) {
         audioContextRef.current = null;
       }
-      
-      // Don't cleanup global context here as other components might be using it
     };
   }, []);
   
@@ -58,10 +59,12 @@ export function useAudioRecorder() {
     try {
       // Reset any previous errors
       setError(null);
+      audioLogger.log('Starting recording process...');
       
       // Initialize audio system with user interaction
       const audioContext = await initializeAudioSystem();
       audioContextRef.current = audioContext;
+      audioLogger.log('AudioContext initialized for recording');
       
       // Request microphone access
       const stream = await requestMicrophoneAccess();
@@ -70,6 +73,7 @@ export function useAudioRecorder() {
       }
       
       mediaStreamRef.current = stream;
+      audioLogger.log('Microphone stream obtained');
       
       // Create and configure the MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
@@ -82,6 +86,7 @@ export function useAudioRecorder() {
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
+          audioLogger.log('Audio data chunk received:', event.data.size);
         }
       };
       
@@ -93,7 +98,7 @@ export function useAudioRecorder() {
       // Start recording
       mediaRecorder.start(1000); // Collect data every second
       setIsRecording(true);
-      audioLogger.log('Recording started with proper AudioContext');
+      audioLogger.log('Recording started successfully');
       
       return stream;
     } catch (error) {
@@ -109,6 +114,7 @@ export function useAudioRecorder() {
       const mediaRecorder = mediaRecorderRef.current;
       
       if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        audioLogger.log('No active recording to stop');
         setIsRecording(false);
         resolve(null);
         return;
@@ -130,6 +136,7 @@ export function useAudioRecorder() {
       };
       
       // Stop recording
+      audioLogger.log('Stopping recording...');
       mediaRecorder.stop();
     });
   }, []);
@@ -152,7 +159,9 @@ export function useAudioRecorder() {
   
   // Check if the browser supports recording
   const isBrowserSupported = useCallback(() => {
-    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    const isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    audioLogger.log('Browser audio support check:', isSupported);
+    return isSupported;
   }, []);
   
   return {

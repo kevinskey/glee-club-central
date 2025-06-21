@@ -50,6 +50,7 @@ export async function initializeAudioSystem(): Promise<AudioContext> {
   try {
     const audioContext = getAudioContext();
     await resumeAudioContext(audioContext);
+    audioLogger.log('Audio system initialized successfully');
     return audioContext;
   } catch (error) {
     audioLogger.error('Failed to initialize audio system:', error);
@@ -59,7 +60,7 @@ export async function initializeAudioSystem(): Promise<AudioContext> {
 
 // Note frequency calculation for pitch pipe
 export function getNoteFrequency(note: string, octave: number = 4): number {
-  console.log('getNoteFrequency called with:', { note, octave });
+  audioLogger.log('getNoteFrequency called with:', { note, octave });
   
   const noteMap: { [key: string]: number } = {
     'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5,
@@ -79,13 +80,13 @@ export function getNoteFrequency(note: string, octave: number = 4): number {
   const semitonesFromA4 = (octave - A4_OCTAVE) * 12 + (semitone - A4_SEMITONE);
   const frequency = A4 * Math.pow(2, semitonesFromA4 / 12);
   
-  console.log('Calculated frequency:', frequency);
+  audioLogger.log('Calculated frequency:', frequency);
   return frequency;
 }
 
 // Play note function for pitch pipe functionality - now uses global context
 export async function playNote(frequency: number, duration: number = 1000): Promise<void> {
-  console.log('playNote called with:', { frequency, duration });
+  audioLogger.log('playNote called with:', { frequency, duration });
   
   try {
     const audioContext = await initializeAudioSystem();
@@ -104,6 +105,8 @@ export async function playNote(frequency: number, duration: number = 1000): Prom
     
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + duration / 1000);
+    
+    audioLogger.log('Note played successfully');
     
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -135,6 +138,8 @@ export async function playClick(audioContext?: AudioContext): Promise<void> {
     
     oscillator.start(ctx.currentTime);
     oscillator.stop(ctx.currentTime + 0.1);
+    
+    audioLogger.log('Click played successfully');
     
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -200,6 +205,28 @@ export function cleanupAudioSystem(): void {
     globalAudioContext = null;
     audioLogger.log('Global AudioContext cleaned up');
   }
+}
+
+// Debug function to check audio capabilities
+export function debugAudioCapabilities(): void {
+  audioLogger.log('=== Audio Debug Info ===');
+  audioLogger.log('AudioContext supported:', !!(window.AudioContext || (window as any).webkitAudioContext));
+  audioLogger.log('MediaDevices supported:', !!navigator.mediaDevices);
+  audioLogger.log('getUserMedia supported:', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia));
+  audioLogger.log('MediaRecorder supported:', !!window.MediaRecorder);
+  
+  if (globalAudioContext) {
+    audioLogger.log('Global AudioContext state:', globalAudioContext.state);
+    audioLogger.log('Global AudioContext sample rate:', globalAudioContext.sampleRate);
+  } else {
+    audioLogger.log('Global AudioContext: Not created yet');
+  }
+  
+  // Test a simple tone
+  audioLogger.log('Testing simple tone...');
+  playNote(440, 500).catch(error => {
+    audioLogger.error('Test tone failed:', error);
+  });
 }
 
 console.log('audioUtils.ts loaded successfully - all exports available');
