@@ -1,10 +1,59 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
+import { supabase } from "@/integrations/supabase/client";
+
+interface SpacingSettings {
+  topPadding: number;
+  bottomPadding: number;
+  leftPadding: number;
+  rightPadding: number;
+  topMargin: number;
+  bottomMargin: number;
+  minHeight: number;
+  maxHeight: number;
+}
+
+const defaultSpacingSettings: SpacingSettings = {
+  topPadding: 0,
+  bottomPadding: 0,
+  leftPadding: 0,
+  rightPadding: 0,
+  topMargin: 0,
+  bottomMargin: 0,
+  minHeight: 60,
+  maxHeight: 100
+};
 
 export function HeroSlider() {
   const { visibleSlides, loading } = useHeroSlides('homepage-main');
+  const [spacingSettings, setSpacingSettings] = useState<SpacingSettings>(defaultSpacingSettings);
+
+  // Load spacing settings
+  useEffect(() => {
+    const loadSpacingSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('hero_settings')
+          .select('spacing_settings')
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading spacing settings:', error);
+          return;
+        }
+
+        if (data?.spacing_settings) {
+          setSpacingSettings({ ...defaultSpacingSettings, ...data.spacing_settings });
+        }
+      } catch (error) {
+        console.error('Error loading spacing settings:', error);
+      }
+    };
+
+    loadSpacingSettings();
+  }, []);
 
   // Fallback images if no slides are configured
   const fallbackImages = [
@@ -41,8 +90,20 @@ export function HeroSlider() {
     );
   }
 
+  // Calculate dynamic styles based on spacing settings
+  const containerStyle = {
+    minHeight: `${spacingSettings.minHeight}vh`,
+    maxHeight: `${spacingSettings.maxHeight}vh`,
+    marginTop: `${spacingSettings.topMargin}px`,
+    marginBottom: `${spacingSettings.bottomMargin}px`,
+    paddingTop: `${spacingSettings.topPadding}px`,
+    paddingBottom: `${spacingSettings.bottomPadding}px`,
+    paddingLeft: `${spacingSettings.leftPadding}px`,
+    paddingRight: `${spacingSettings.rightPadding}px`,
+  };
+
   return (
-    <div className="relative w-full h-[60vh] md:h-[80vh] lg:h-screen overflow-hidden">
+    <div className="relative w-full overflow-hidden" style={containerStyle}>
       <Carousel className="h-full" opts={{ loop: true }} showArrows>
         <CarouselContent className="h-full">
           {displaySlides.map((slide, idx) => (

@@ -33,6 +33,7 @@ const defaultSettings: SpacingSettings = {
 export function SliderSpacingControls() {
   const [settings, setSettings] = useState<SpacingSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     loadSpacingSettings();
@@ -42,15 +43,18 @@ export function SliderSpacingControls() {
     try {
       const { data, error } = await supabase
         .from('hero_settings')
-        .select('*')
+        .select('spacing_settings')
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        throw error;
+        console.error('Error loading spacing settings:', error);
+        return;
       }
 
       if (data?.spacing_settings) {
-        setSettings({ ...defaultSettings, ...data.spacing_settings });
+        const loadedSettings = { ...defaultSettings, ...data.spacing_settings };
+        setSettings(loadedSettings);
+        console.log('Loaded spacing settings:', loadedSettings);
       }
     } catch (error) {
       console.error('Error loading spacing settings:', error);
@@ -68,19 +72,28 @@ export function SliderSpacingControls() {
       if (existing) {
         const { error } = await supabase
           .from('hero_settings')
-          .update({ spacing_settings: settings })
+          .update({ 
+            spacing_settings: settings,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', existing.id);
 
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('hero_settings')
-          .insert([{ spacing_settings: settings }]);
+          .insert([{ 
+            spacing_settings: settings,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }]);
 
         if (error) throw error;
       }
 
-      toast.success('Spacing settings saved successfully');
+      setHasChanges(false);
+      toast.success('Spacing settings saved successfully! Refresh the page to see changes on the slider.');
+      console.log('Saved spacing settings:', settings);
     } catch (error) {
       console.error('Error saving spacing settings:', error);
       toast.error('Failed to save spacing settings');
@@ -91,16 +104,22 @@ export function SliderSpacingControls() {
 
   const resetToDefaults = () => {
     setSettings(defaultSettings);
+    setHasChanges(true);
+    toast.info('Settings reset to defaults. Click "Save Changes" to apply.');
   };
 
   const updateSetting = (key: keyof SpacingSettings, value: number) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
   };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Slider Spacing Controls</CardTitle>
+        <p className="text-sm text-gray-600">
+          Adjust the spacing and dimensions of the hero slider. Changes will apply after saving and refreshing the page.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Padding Controls */}
@@ -222,7 +241,7 @@ export function SliderSpacingControls() {
         <div className="flex gap-2 pt-4">
           <Button 
             onClick={saveSpacingSettings}
-            disabled={isLoading}
+            disabled={isLoading || !hasChanges}
             className="bg-orange-500 hover:bg-orange-600"
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
@@ -234,7 +253,20 @@ export function SliderSpacingControls() {
           >
             Reset to Defaults
           </Button>
+          
+          <Button 
+            variant="outline"
+            onClick={loadSpacingSettings}
+          >
+            Reload Settings
+          </Button>
         </div>
+
+        {hasChanges && (
+          <div className="text-sm text-orange-600 bg-orange-50 p-2 rounded">
+            You have unsaved changes. Click "Save Changes" to apply them.
+          </div>
+        )}
       </CardContent>
     </Card>
   );
