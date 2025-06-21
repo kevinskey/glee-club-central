@@ -130,14 +130,14 @@ export function UnifiedPublicHeader() {
         </nav>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 pr-2">
           {/* Theme Toggle */}
           <ThemeToggle />
           
           {/* Desktop Auth Icons - Just icons */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-2">
             {isAuthenticated ? (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleDashboardClick}
@@ -154,7 +154,7 @@ export function UnifiedPublicHeader() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/signup")}
