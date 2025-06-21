@@ -206,7 +206,7 @@ function generateErrorPage(title: string, message: string): string {
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            max-width: 500px;
+            max-width: min(500px, 90vw);
             width: 100%;
             text-align: center;
         }
@@ -273,7 +273,7 @@ function generateSuccessPage(tokenData: any, userData: any, origin: string): str
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            max-width: 500px;
+            max-width: min(500px, 90vw);
             width: 100%;
             text-align: center;
         }
