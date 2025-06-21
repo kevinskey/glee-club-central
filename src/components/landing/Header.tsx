@@ -106,7 +106,7 @@ export function Header() {
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Buttons - Made more readable */}
+          {/* Desktop Auth Buttons - Made more readable with larger icons */}
           <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
@@ -115,7 +115,7 @@ export function Header() {
                   onClick={handleDashboardClick}
                   className="h-9 px-4 text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
                 >
-                  <User className="w-4 h-4" />
+                  <User className="w-5 h-5" />
                   Dashboard
                 </Button>
                 <Button 
@@ -123,7 +123,7 @@ export function Header() {
                   onClick={handleLogout}
                   className="h-9 px-4 text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-5 h-5" />
                   Sign Out
                 </Button>
               </div>
@@ -134,7 +134,7 @@ export function Header() {
                   onClick={() => navigate("/signup")}
                   className="h-9 px-4 text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium flex items-center gap-2"
                 >
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus className="w-5 h-5" />
                   Sign Up
                 </Button>
                 <Button 
@@ -142,7 +142,7 @@ export function Header() {
                   onClick={() => navigate("/login")}
                   className="h-9 px-4 text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium flex items-center gap-2"
                 >
-                  <LogIn className="w-4 h-4" />
+                  <LogIn className="w-5 h-5" />
                   Login
                 </Button>
               </div>
