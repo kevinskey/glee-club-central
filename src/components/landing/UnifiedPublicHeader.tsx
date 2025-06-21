@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -92,38 +91,31 @@ export function UnifiedPublicHeader() {
   
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md w-full">
-      <div className="w-full max-w-none mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 lg:px-8 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700">
         {/* Logo Section */}
-        <div className="flex-shrink-0 min-w-0">
-          <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
-            <Icons.logo className="h-7 w-7 flex-shrink-0" />
-            <div className="ml-2 min-w-0">
-              <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-800 dark:text-white font-bold font-playfair truncate">
+        <div className="flex-shrink-0">
+          <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group">
+            <Icons.logo className="h-8 w-8 flex-shrink-0" />
+            <div className="ml-3">
+              <div className="text-lg text-gray-800 dark:text-white font-bold font-playfair">
                 GleeWorld
               </div>
-              <div className="text-xs sm:text-sm lg:text-base text-gray-700 dark:text-gray-200 font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
+              <div className="text-sm text-gray-700 dark:text-gray-200 font-medium -mt-1 hidden sm:block">
                 Spelman College
               </div>
             </div>
-            {/* Event Indicator - Mobile only - Fixed positioning */}
-            {upcomingEvents.length > 0 && (
-              <div className="ml-2 sm:hidden relative">
-                <Bell className="h-4 w-4 text-gray-800 dark:text-white" />
-                <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
-              </div>
-            )}
           </Link>
         </div>
         
-        {/* Desktop Navigation - Hidden on iPad */}
-        <nav className="hidden xl:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center mx-4">
-          <Link to="/" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+        {/* Desktop Navigation - Fixed spacing and layout */}
+        <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center mx-8">
+          <Link to="/" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Home
           </Link>
-          <Link to="/about" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/about" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             About
           </Link>
-          <Link to="/calendar" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
+          <Link to="/calendar" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -132,23 +124,23 @@ export function UnifiedPublicHeader() {
           <a 
             href="#" 
             onClick={handleReaderClick}
-            className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1"
+            className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <a href="https://studio.gleeworld.org" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Studio
           </a>
-          <Link to="/store" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/store" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Store
           </Link>
-          <Link to="/contact" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/contact" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Contact
           </Link>
         </nav>
 
-        {/* iPad Dropdown Navigation - Visible only on iPad */}
-        <div className="hidden md:flex xl:hidden items-center flex-1 justify-center mx-4">
+        {/* iPad Dropdown Navigation - Visible only on tablet */}
+        <div className="hidden md:flex lg:hidden items-center flex-1 justify-center mx-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
@@ -205,51 +197,51 @@ export function UnifiedPublicHeader() {
         </div>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-3 flex-shrink-0 pr-4">
+        <div className="flex items-center gap-4 flex-shrink-0">
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Icons - Just icons - Hidden on iPad */}
-          <div className="hidden xl:flex items-center gap-3">
+          {/* Desktop Auth - Text Links */}
+          <div className="hidden lg:flex items-center gap-4">
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
                   onClick={handleDashboardClick}
-                  title="Dashboard"
+                  className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400"
                 >
-                  <User className="w-5 h-5" />
-                </div>
-                <div 
-                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={handleLogout}
-                  title="Sign Out"
+                  className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400"
                 >
-                  <LogOut className="w-5 h-5" />
-                </div>
+                  Sign Out
+                </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
                   onClick={handleSignUpClick}
-                  title="Sign Up"
+                  className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400"
                 >
-                  <UserPlus className="w-5 h-5" />
-                </div>
-                <div 
-                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  Sign Up
+                </Button>
+                <Button
+                  variant="ghost"
                   onClick={handleLoginClick}
-                  title="Login"
+                  className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400"
                 >
-                  <LogIn className="w-5 h-5" />
-                </div>
+                  Login
+                </Button>
               </div>
             )}
           </div>
 
-          {/* iPad Auth Dropdown - Visible only on iPad */}
-          <div className="hidden md:flex xl:hidden items-center">
+          {/* iPad Auth Dropdown - Visible only on tablet */}
+          <div className="hidden md:flex lg:hidden items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-gray-800 dark:text-white">
