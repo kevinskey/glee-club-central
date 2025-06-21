@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic, Eye, ArrowLeft } from 'lucide-react';
+import { Music, BookOpen, Users, Clock, CheckCircle, Upload, ListMusic, Eye, ArrowLeft, Search, Settings, Edit, Link, Grid3X3, Share, Store, Cloud, Scan, FileText, Piano, Mic, Gauge, BarChart, CloudSync } from 'lucide-react';
 import { PDFLibraryView } from './PDFLibraryView';
 import { PDFUploadDialog } from './PDFUploadDialog';
 import { MemberReaderView } from './MemberReaderView';
@@ -20,12 +20,10 @@ export function ReaderInterface() {
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('library');
   const [showMemberPreview, setShowMemberPreview] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleViewPDF = (pdf: PDFFile) => {
     console.log('📖 ReaderInterface: Opening PDF:', pdf);
-    console.log('📖 PDF URL:', pdf.file_url);
-    console.log('📖 PDF Title:', pdf.title);
-    console.log('📖 PDF ID:', pdf.id);
     
     if (!pdf.file_url) {
       console.error('❌ ReaderInterface: PDF missing file_url');
@@ -34,13 +32,13 @@ export function ReaderInterface() {
     
     setSelectedPDF(pdf);
     setCurrentView('viewer');
-    console.log('📖 ReaderInterface: View changed to viewer');
+    setSidebarOpen(true);
   };
 
   const handleBackToLibrary = () => {
-    console.log('📖 ReaderInterface: Returning to library');
     setCurrentView('library');
     setSelectedPDF(null);
+    setSidebarOpen(false);
   };
 
   // If admin is previewing member view, show member interface
@@ -74,25 +72,149 @@ export function ReaderInterface() {
     return <MemberReaderView />;
   }
 
-  // Admin view continues below with full library management
+  // PDF Viewer Mode with forScore-like layout
   if (currentView === 'viewer' && selectedPDF) {
-    console.log('📖 ReaderInterface: Rendering PDF viewer with:', selectedPDF);
     return (
-      <div className="h-screen">
-        <AdvancedPDFViewer 
-          url={selectedPDF.file_url} 
-          title={selectedPDF.title}
-          sheetMusicId={selectedPDF.id}
-          onBack={handleBackToLibrary}
-        />
+      <div className="h-screen flex flex-col bg-gray-100">
+        {/* Top Header Bar */}
+        <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleBackToLibrary}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Library
+            </Button>
+            <div className="text-sm font-medium text-gray-700">
+              {selectedPDF.title}
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm">
+              <Search className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          {/* PDF Viewer */}
+          <div className="flex-1">
+            <AdvancedPDFViewer 
+              url={selectedPDF.file_url} 
+              title={selectedPDF.title}
+              sheetMusicId={selectedPDF.id}
+              onBack={handleBackToLibrary}
+            />
+          </div>
+
+          {/* Right Sidebar - forScore style */}
+          {sidebarOpen && (
+            <div className="w-80 bg-white border-l border-gray-200 p-4 overflow-y-auto">
+              <div className="space-y-6">
+                {/* Edit This Score Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-800">Edit This Score</h3>
+                  <div className="space-y-2">
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Edit className="h-4 w-4 mr-3" />
+                      Annotate
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Link className="h-4 w-4 mr-3" />
+                      Links
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Grid3X3 className="h-4 w-4 mr-3" />
+                      Buttons
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Grid3X3 className="h-4 w-4 mr-3" />
+                      Rearrange
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Scan className="h-4 w-4 mr-3" />
+                      Crop
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Share className="h-4 w-4 mr-3" />
+                      Share
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Add Scores Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-600">Add Scores</h3>
+                  <div className="space-y-2">
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Store className="h-4 w-4 mr-3" />
+                      Store
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Cloud className="h-4 w-4 mr-3" />
+                      Services
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Scan className="h-4 w-4 mr-3" />
+                      Scan
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <FileText className="h-4 w-4 mr-3" />
+                      Templates
+                    </Button>
+                  </div>
+                </div>
+
+                {/* More Section */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3 text-gray-600">More</h3>
+                  <div className="space-y-2">
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Piano className="h-4 w-4 mr-3" />
+                      Piano
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Mic className="h-4 w-4 mr-3" />
+                      Record
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <Gauge className="h-4 w-4 mr-3" />
+                      Cue
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <BarChart className="h-4 w-4 mr-3" />
+                      Dashboard
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start text-blue-600">
+                      <CloudSync className="h-4 w-4 mr-3" />
+                      Sync
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header */}
-      <div className="border-b bg-white dark:bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* Top Header */}
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -130,8 +252,8 @@ export function ReaderInterface() {
         </div>
       </div>
 
-      {/* Top Navigation */}
-      <div className="border-b bg-white dark:bg-gray-900">
+      {/* Top Navigation Tabs */}
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6">
           <nav className="flex space-x-8">
             <button
@@ -161,39 +283,6 @@ export function ReaderInterface() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto p-6">
-          {/* Status Card */}
-          <Card className="border-2 border-orange-100 dark:border-orange-900 mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Reader Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="default" className="bg-green-500">
-                      Online
-                    </Badge>
-                    {isAuthenticated && (
-                      <Badge variant="outline" className="text-green-600 border-green-600">
-                        {isAdmin() ? 'Admin Access' : 'Member Access'}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {isAuthenticated 
-                      ? `Ready for ${profile?.first_name || 'user'}`
-                      : 'Sign in to access the music library'
-                    }
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Tab Content */}
           {activeTab === 'library' && (
             <PDFLibraryView 
               onViewPDF={handleViewPDF}
@@ -213,44 +302,6 @@ export function ReaderInterface() {
               </AlertDescription>
             </Alert>
           )}
-
-          {/* Help Section */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Music Reader Guide</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                <h4 className="font-medium">PDF Library:</h4>
-                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-                  <li>• Browse and search through digital sheet music</li>
-                  <li>• Filter by voice part, category, and tags</li>
-                  <li>• View PDFs with advanced reader features</li>
-                  <li>• Create annotations and bookmarks</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium">Setlist Management:</h4>
-                <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-                  <li>• Create personal setlists for performances</li>
-                  <li>• Organize sheet music by event or rehearsal</li>
-                  <li>• Quick access to frequently used pieces</li>
-                  <li>• Share setlists with other members</li>
-                </ul>
-              </div>
-              {isAdmin() && (
-                <div className="space-y-2">
-                  <h4 className="font-medium">Admin Features:</h4>
-                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 ml-4">
-                    <li>• Upload and manage PDF files</li>
-                    <li>• Assign metadata and voice parts</li>
-                    <li>• Monitor member access and usage</li>
-                    <li>• Preview member experience</li>
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
