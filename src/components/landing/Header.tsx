@@ -37,7 +37,7 @@ export function Header() {
   
   const handleReaderClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigateToReader();
+    window.open('https://reader.gleeworld.org', '_blank');
   };
   
   return (
@@ -80,7 +80,9 @@ export function Header() {
             )}
           </Link>
           <a 
-            href="#" 
+            href="https://reader.gleeworld.org" 
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleReaderClick}
             className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap"
           >

@@ -21,7 +21,7 @@ const navigationItems = [
   { name: 'About', href: '/about', icon: Users },
   { name: 'Calendar', href: '/calendar', icon: Calendar },
   { name: 'Media', href: '/media', icon: Image },
-  { name: 'Reader', href: '/reader', icon: BookOpen },
+  { name: 'Reader', href: 'https://reader.gleeworld.org', icon: BookOpen, external: true },
   { name: 'Contact', href: '/contact', icon: Mail },
   { name: 'Store', href: '/store', icon: ShoppingBag },
 ];
@@ -40,6 +40,23 @@ export function NavigationMenu() {
       {navigationItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.href;
+        
+        if (item.external) {
+          return (
+            <Button
+              key={item.name}
+              asChild
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <a href={item.href} target="_blank" rel="noopener noreferrer">
+                <Icon className="h-4 w-4" />
+                {item.name}
+              </a>
+            </Button>
+          );
+        }
         
         return (
           <Button

@@ -45,7 +45,7 @@ export function UnifiedPublicHeader() {
   
   const handleReaderClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate("/reader");
+    window.open('https://reader.gleeworld.org', '_blank');
     setIsMobileMenuOpen(false);
   };
 
@@ -77,7 +77,7 @@ export function UnifiedPublicHeader() {
       icon: Calendar,
       hasNotification: upcomingEvents.length > 0 
     },
-    { label: "Reader", path: "#", icon: Music, onClick: handleReaderClick },
+    { label: "Reader", external: "https://reader.gleeworld.org", icon: Music, onClick: handleReaderClick },
     { label: "Studio", external: "https://studio.gleeworld.org", icon: Music },
     { label: "Store", path: "/store", icon: Store },
     { label: "Contact", path: "/contact", icon: Contact },
@@ -116,7 +116,9 @@ export function UnifiedPublicHeader() {
             )}
           </Link>
           <a 
-            href="#" 
+            href="https://reader.gleeworld.org" 
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleReaderClick}
             className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors"
           >
