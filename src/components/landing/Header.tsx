@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { MobileNavDropdown } from "@/components/layout/mobile/MobileNavDropdown";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
@@ -105,41 +105,41 @@ export function Header() {
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Icons - Icon only */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop Auth Text Links */}
+          <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <div 
-                  className="cursor-pointer transition-colors" 
+              <div className="flex items-center gap-3">
+                <span 
+                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleDashboardClick}
                   title="Dashboard"
                 >
-                  <User className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
-                </div>
-                <div 
-                  className="cursor-pointer transition-colors" 
+                  Dashboard
+                </span>
+                <span 
+                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleLogout}
                   title="Sign Out"
                 >
-                  <LogOut className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
-                </div>
+                  Sign Out
+                </span>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <div 
-                  className="cursor-pointer transition-colors" 
+              <div className="flex items-center gap-3">
+                <span 
+                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/signup")}
                   title="Sign Up"
                 >
-                  <UserPlus className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
-                </div>
-                <div 
-                  className="cursor-pointer transition-colors" 
+                  Sign Up
+                </span>
+                <span 
+                  className="text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/login")}
                   title="Login"
                 >
-                  <LogIn className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
-                </div>
+                  Login
+                </span>
               </div>
             )}
           </div>
