@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/ui/page-header';
 import { TourMerchAssignment } from '@/components/admin/TourMerchAssignment';
-import { AdminLayout } from '@/layouts/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -54,7 +53,7 @@ export default function TourMerchPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <div className="container mx-auto px-4 py-6">
         <div className="space-y-6">
           <PageHeader
             title="Tour Merch Assignment"
@@ -67,13 +66,13 @@ export default function TourMerchPage() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (!event) {
     return (
-      <AdminLayout>
+      <div className="container mx-auto px-4 py-6">
         <div className="space-y-6">
           <PageHeader
             title="Tour Merch Assignment"
@@ -92,12 +91,12 @@ export default function TourMerchPage() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   return (
-    <AdminLayout>
+    <div className="container mx-auto px-4 py-6">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button 
@@ -137,6 +136,6 @@ export default function TourMerchPage() {
           venueType={event.event_details?.venueType || 'general'}
         />
       </div>
-    </AdminLayout>
+    </div>
   );
 }

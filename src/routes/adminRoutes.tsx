@@ -1,6 +1,5 @@
 
 import { Routes, Route } from "react-router-dom";
-import { AdminLayout } from "@/components/admin/AdminLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminMembersPage from "@/pages/admin/MembersPage";
 import AdminCalendarPage from "@/pages/admin/AdminCalendarPage";
@@ -16,8 +15,8 @@ import HeroSlidesPage from "@/pages/admin/HeroSlidesPage";
 
 export const AdminRoutes = () => {
   return (
-    <Routes>
-      <Route path="/" element={<AdminLayout />}>
+    <div className="container mx-auto px-4 py-6">
+      <Routes>
         <Route index element={<AdminDashboard />} />
         <Route path="members" element={<AdminMembersPage />} />
         <Route path="calendar" element={<AdminCalendarPage />} />
@@ -30,7 +29,7 @@ export const AdminRoutes = () => {
         <Route path="sheet-music" element={<SheetMusicLibraryPage />} />
         <Route path="reader-import" element={<ReaderImportPage />} />
         <Route path="hero-slides" element={<HeroSlidesPage />} />
-      </Route>
-    </Routes>
+      </Routes>
+    </div>
   );
 };
