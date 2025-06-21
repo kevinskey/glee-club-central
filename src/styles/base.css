@@ -4,19 +4,19 @@
 @layer base {
   :root {
     --background: 0 0% 100%;  /* Pure white */
-    --foreground: 0 0% 8%;   /* Near black for text */
+    --foreground: 210 100% 20%;   /* Navy blue instead of near black */
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 210 100% 20%;  /* Navy blue */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 210 100% 20%;  /* Navy blue */
 
     --primary: 220 100% 60%;  /* Apple blue */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;   /* Light gray */
-    --secondary-foreground: 0 0% 8%;
+    --secondary-foreground: 210 100% 20%;  /* Navy blue */
 
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
@@ -41,19 +41,19 @@
 
   .dark {
     --background: 0 0% 98%;   /* Very light gray instead of black */
-    --foreground: 0 0% 15%;   /* Dark gray for text */
+    --foreground: 0 0% 100%;   /* White text for dark mode */
 
     --card: 0 0% 96%;         /* Light gray cards */
-    --card-foreground: 0 0% 15%;
+    --card-foreground: 0 0% 100%;  /* White text */
 
     --popover: 0 0% 96%;
-    --popover-foreground: 0 0% 15%;
+    --popover-foreground: 0 0% 100%;  /* White text */
 
     --primary: 220 100% 60%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 92%;    /* Slightly darker light gray */
-    --secondary-foreground: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;  /* White text */
 
     --muted: 0 0% 92%;
     --muted-foreground: 0 0% 35%;

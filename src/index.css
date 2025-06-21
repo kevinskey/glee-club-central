@@ -18,15 +18,15 @@
 @layer base {
   :root {
     --background: 0 0% 98%;  /* Light gray instead of pure white */
-    --foreground: 240 10% 15%;  /* Dark gray instead of black */
+    --foreground: 210 100% 20%;  /* Navy blue instead of dark gray */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card-foreground: 210 100% 20%;  /* Navy blue */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover-foreground: 210 100% 20%;  /* Navy blue */
     --primary: 208 100% 40%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary-foreground: 210 100% 20%;  /* Navy blue */
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
     --accent: 208 100% 40%;
@@ -47,21 +47,21 @@
     --glee-blue: 208 100% 40%;
     --glee-blue-foreground: 0 0% 98%;
     --glee-white: 0 0% 100%;
-    --glee-black: 0 0% 15%;  /* Softer black */
+    --glee-black: 210 100% 20%;  /* Navy blue instead of soft black */
     --glee-gray: 0 0% 53%;
   }
 
   .dark {
     --background: 0 0% 95%;  /* Light gray instead of dark */
-    --foreground: 240 10% 20%;  /* Dark gray instead of white */
+    --foreground: 0 0% 100%;  /* White text in dark mode */
     --card: 0 0% 98%;  /* Very light gray cards */
-    --card-foreground: 240 10% 20%;
+    --card-foreground: 0 0% 100%;  /* White text */
     --popover: 0 0% 98%;
-    --popover-foreground: 240 10% 20%;
+    --popover-foreground: 0 0% 100%;  /* White text */
     --primary: 208 100% 45%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3.7% 88%;  /* Light gray */
-    --secondary-foreground: 240 10% 20%;
+    --secondary-foreground: 0 0% 100%;  /* White text */
     --muted: 240 3.7% 88%;
     --muted-foreground: 240 5% 45%;
     --accent: 208 100% 45%;
