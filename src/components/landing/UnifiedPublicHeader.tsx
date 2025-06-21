@@ -92,23 +92,23 @@ export function UnifiedPublicHeader() {
   
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md w-full">
-      <div className="w-full max-w-full mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+      <div className="w-full max-w-none mx-auto flex h-14 items-center justify-between px-2 sm:px-4 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         {/* Logo Section */}
         <div className="flex-shrink-0 min-w-0">
           <Link to="/" className="font-bold flex items-center hover:text-primary transition-colors group min-w-0">
             <Icons.logo className="h-7 w-7 flex-shrink-0" />
             <div className="ml-2 min-w-0">
-              <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-[#003366] dark:text-white font-bold font-playfair truncate">
+              <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-800 dark:text-white font-bold font-playfair truncate">
                 GleeWorld
               </div>
-              <div className="text-xs sm:text-sm lg:text-base text-[#003366] dark:text-white font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
+              <div className="text-xs sm:text-sm lg:text-base text-gray-700 dark:text-gray-200 font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
                 Spelman College
               </div>
             </div>
             {/* Event Indicator - Mobile only - Fixed positioning */}
             {upcomingEvents.length > 0 && (
               <div className="ml-2 sm:hidden relative">
-                <Bell className="h-4 w-4 text-[#003366] dark:text-white" />
+                <Bell className="h-4 w-4 text-gray-800 dark:text-white" />
                 <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
               </div>
             )}
@@ -117,13 +117,13 @@ export function UnifiedPublicHeader() {
         
         {/* Desktop Navigation - Hidden on iPad */}
         <nav className="hidden xl:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center mx-4">
-          <Link to="/" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Home
           </Link>
-          <Link to="/about" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/about" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             About
           </Link>
-          <Link to="/calendar" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
+          <Link to="/calendar" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap px-2 py-1">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -132,17 +132,17 @@ export function UnifiedPublicHeader() {
           <a 
             href="#" 
             onClick={handleReaderClick}
-            className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1"
+            className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <a href="https://studio.gleeworld.org" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Studio
           </a>
-          <Link to="/store" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/store" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Store
           </Link>
-          <Link to="/contact" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
+          <Link to="/contact" className="text-sm lg:text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Contact
           </Link>
         </nav>
@@ -151,7 +151,7 @@ export function UnifiedPublicHeader() {
         <div className="hidden md:flex xl:hidden items-center flex-1 justify-center mx-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
+              <Button variant="ghost" className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
                 Navigation
                 <ChevronDown className="ml-1 h-4 w-4" />
                 {upcomingEvents.length > 0 && (
@@ -214,14 +214,14 @@ export function UnifiedPublicHeader() {
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleDashboardClick}
                   title="Dashboard"
                 >
                   <User className="w-5 h-5" />
                 </div>
                 <div 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleLogout}
                   title="Sign Out"
                 >
@@ -231,14 +231,14 @@ export function UnifiedPublicHeader() {
             ) : (
               <div className="flex items-center gap-3">
                 <div 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleSignUpClick}
                   title="Sign Up"
                 >
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
+                  className="w-5 h-5 text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleLoginClick}
                   title="Login"
                 >
@@ -252,7 +252,7 @@ export function UnifiedPublicHeader() {
           <div className="hidden md:flex xl:hidden items-center">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white">
+                <Button variant="ghost" size="icon" className="text-gray-800 dark:text-white">
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -292,7 +292,7 @@ export function UnifiedPublicHeader() {
           <div className="md:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white relative">
+                <Button variant="ghost" size="icon" className="text-gray-800 dark:text-white relative">
                   <Menu className="h-6 w-6" />
                   {upcomingEvents.length > 0 && (
                     <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -306,8 +306,8 @@ export function UnifiedPublicHeader() {
                     <div className="flex items-center gap-3">
                       <Icons.logo className="h-10 w-10" />
                       <div>
-                        <div className="font-bold text-lg text-[#003366] dark:text-white font-playfair">GleeWorld</div>
-                        <div className="text-sm text-[#003366] dark:text-white font-medium">Spelman College</div>
+                        <div className="font-bold text-lg text-gray-800 dark:text-white font-playfair">GleeWorld</div>
+                        <div className="text-sm text-gray-700 dark:text-gray-200 font-medium">Spelman College</div>
                       </div>
                     </div>
                   </div>
@@ -316,14 +316,14 @@ export function UnifiedPublicHeader() {
                   {isAuthenticated && (
                     <div className="px-6 py-4 bg-orange-50 dark:bg-orange-900/20 border-b border-orange-100 dark:border-orange-800">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-[#003366] flex items-center justify-center text-white font-medium">
+                        <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-medium">
                           {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium text-[#003366] dark:text-white">
+                          <div className="font-medium text-gray-800 dark:text-white">
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
-                          <div className="text-sm text-[#003366] dark:text-white">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             {isUserAdmin ? 'Administrator' : 'Member'}
                           </div>
                         </div>
@@ -338,7 +338,7 @@ export function UnifiedPublicHeader() {
                         <Button
                           key={link.label}
                           variant="ghost"
-                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 relative"
+                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-800 dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 relative"
                           onClick={() => {
                             if (link.onClick) {
                               link.onClick(new Event('click') as any);
@@ -365,7 +365,7 @@ export function UnifiedPublicHeader() {
                         <div className="space-y-1">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-800 dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
                             onClick={handleDashboardClick}
                           >
                             <User className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -373,7 +373,7 @@ export function UnifiedPublicHeader() {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-800 dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
                             onClick={handleLogout}
                           >
                             <LogOut className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -384,7 +384,7 @@ export function UnifiedPublicHeader() {
                         <div className="space-y-1">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-800 dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
                             onClick={handleSignUpClick}
                           >
                             <UserPlus className="w-5 h-5 mr-3 flex-shrink-0" />
@@ -392,7 +392,7 @@ export function UnifiedPublicHeader() {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-[#003366] dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-800 dark:text-white hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
                             onClick={handleLoginClick}
                           >
                             <LogIn className="w-5 h-5 mr-3 flex-shrink-0" />
