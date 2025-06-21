@@ -22,7 +22,7 @@ const defaultSpacingSettings: SpacingSettings = {
   rightPadding: 0,
   topMargin: 0,
   bottomMargin: 0,
-  minHeight: 60,
+  minHeight: 100,
   maxHeight: 100
 };
 
@@ -82,36 +82,22 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="relative w-full h-[60vh] md:h-[80vh] lg:h-screen overflow-hidden bg-gray-200 animate-pulse">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-gray-500">Loading slides...</div>
-        </div>
+      <div className="fixed inset-0 w-screen h-screen bg-gray-200 animate-pulse flex items-center justify-center">
+        <div className="text-gray-500">Loading slides...</div>
       </div>
     );
   }
 
-  // Calculate dynamic styles based on spacing settings
-  const containerStyle = {
-    minHeight: `${spacingSettings.minHeight}vh`,
-    maxHeight: `${spacingSettings.maxHeight}vh`,
-    marginTop: `${spacingSettings.topMargin}px`,
-    marginBottom: `${spacingSettings.bottomMargin}px`,
-    paddingTop: `${spacingSettings.topPadding}px`,
-    paddingBottom: `${spacingSettings.bottomPadding}px`,
-    paddingLeft: `${spacingSettings.leftPadding}px`,
-    paddingRight: `${spacingSettings.rightPadding}px`,
-  };
-
   return (
-    <div className="relative w-full overflow-hidden" style={containerStyle}>
-      <Carousel className="h-full" opts={{ loop: true }} showArrows>
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden">
+      <Carousel className="w-full h-full" opts={{ loop: true }} showArrows>
         <CarouselContent className="h-full">
           {displaySlides.map((slide, idx) => (
-            <CarouselItem key={slide.id} className="relative h-full">
+            <CarouselItem key={slide.id} className="relative w-full h-full">
               {slide.media_type === 'video' && slide.youtube_url ? (
                 <iframe
                   src={slide.youtube_url}
-                  className="w-full h-full"
+                  className="w-full h-full object-cover"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
