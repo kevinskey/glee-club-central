@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Globe } from "lucide-react";
@@ -23,7 +22,7 @@ export const Icons = {
         src={logoSrc}
         alt="Spelman College Glee Club Logo" 
         className={cn("h-7 w-auto", props.className)}
-        style={{ filter: 'hue-rotate(220deg) saturate(1.2) brightness(0.4)' }}
+        style={{ filter: 'hue-rotate(220deg) saturate(1.5) brightness(0.3)' }}
         {...props} 
       />
     );
