@@ -22,7 +22,6 @@ import ViewSheetMusicPage from "./pages/sheet-music/ViewSheetMusicPage";
 import PracticePage from "./pages/practice/PracticePage";
 import MembersPage from "./pages/MembersPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import ReaderPage from "./pages/ReaderPage";
 import MediaPage from "./pages/MediaPage";
 import { AdminRoutes } from "./routes/adminRoutes";
 import { adminRoutesV2 } from "./routes/adminRoutesV2";
@@ -53,10 +52,6 @@ const router = createBrowserRouter([
       {
         path: "media",
         element: <MediaPage />,
-      },
-      {
-        path: "reader",
-        element: <ReaderPage />,
       },
       {
         path: "login",
