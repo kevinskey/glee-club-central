@@ -29,10 +29,12 @@ function App() {
             {isAdminRoute ? (
               <AdminLayout />
             ) : (
-              <>
+              <div className="min-h-screen bg-background">
                 <UnifiedPublicHeader />
-                <Outlet />
-              </>
+                <main>
+                  <Outlet />
+                </main>
+              </div>
             )}
             <Toaster />
           </div>
