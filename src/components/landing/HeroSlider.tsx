@@ -76,23 +76,37 @@ export function HeroSlider() {
     <section className="relative w-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
       {/* Background Image or Video */}
       {heroSlide.media_type === 'video' && heroSlide.youtube_url ? (
-        <iframe
-          src={heroSlide.youtube_url}
-          className="absolute inset-0 w-full h-full object-cover"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="absolute inset-0 w-full h-full">
+          <iframe
+            src={heroSlide.youtube_url}
+            className="w-full h-full border-0"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              objectFit: 'cover'
+            }}
+          />
+        </div>
       ) : (
-        <img 
-          src={heroSlide.media?.file_url || fallbackImages[0]} 
-          alt={heroSlide.title || 'Hero Image'} 
-          className="absolute inset-0 w-full h-full object-cover" 
-          onError={(e) => {
-            console.error('Hero image failed to load:', heroSlide.media?.file_url);
-            e.currentTarget.src = fallbackImages[0];
-          }}
-        />
+        <div className="absolute inset-0 w-full h-full">
+          <img 
+            src={heroSlide.media?.file_url || fallbackImages[0]} 
+            alt={heroSlide.title || 'Hero Image'} 
+            className="w-full h-full object-cover object-center" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
+            onError={(e) => {
+              console.error('Hero image failed to load:', heroSlide.media?.file_url);
+              e.currentTarget.src = fallbackImages[0];
+            }}
+          />
+        </div>
       )}
       
       {/* Overlay */}
