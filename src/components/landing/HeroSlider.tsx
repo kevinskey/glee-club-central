@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from "react";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 interface SpacingSettings {
   topPadding: number;
@@ -30,31 +29,6 @@ export function HeroSlider() {
   const { visibleSlides, loading } = useHeroSlides('homepage-main');
   const [spacingSettings, setSpacingSettings] = useState<SpacingSettings>(defaultSpacingSettings);
 
-  // Load spacing settings
-  useEffect(() => {
-    const loadSpacingSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('hero_settings')
-          .select('spacing_settings')
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error loading spacing settings:', error);
-          return;
-        }
-
-        if (data?.spacing_settings) {
-          setSpacingSettings({ ...defaultSpacingSettings, ...data.spacing_settings });
-        }
-      } catch (error) {
-        console.error('Error loading spacing settings:', error);
-      }
-    };
-
-    loadSpacingSettings();
-  }, []);
-
   // Fallback images if no slides are configured
   const fallbackImages = [
     "/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png",
@@ -62,102 +36,104 @@ export function HeroSlider() {
     "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png",
   ];
 
-  const displaySlides = visibleSlides.length > 0 ? visibleSlides : fallbackImages.map((src, index) => ({
-    id: `fallback-${index}`,
-    title: `Slide ${index + 1}`,
-    description: '',
+  // Get the first visible slide or fallback
+  const heroSlide = visibleSlides.length > 0 ? visibleSlides[0] : {
+    id: 'fallback',
+    title: 'Spelman College Glee Club',
+    description: 'To Amaze and Inspire',
     media_id: '',
-    slide_order: index,
+    slide_order: 0,
     visible: true,
     section_id: 'homepage-main',
     created_at: '',
     updated_at: '',
     media: { 
-      id: `fallback-${index}`,
-      file_url: src,
-      title: `Fallback Image ${index + 1}`,
+      id: 'fallback',
+      file_url: fallbackImages[0],
+      title: 'Fallback Image',
       file_type: 'image/png'
-    }
-  }));
+    },
+    button_text: 'Learn More',
+    button_link: '/about'
+  };
 
-  console.log('HeroSlider: Displaying slides:', displaySlides.map(slide => ({
-    id: slide.id,
-    title: slide.title,
-    media_url: slide.media?.file_url,
-    youtube_url: slide.youtube_url
-  })));
+  console.log('Hero: Displaying slide:', {
+    id: heroSlide.id,
+    title: heroSlide.title,
+    media_url: heroSlide.media?.file_url,
+    youtube_url: heroSlide.youtube_url
+  });
 
   if (loading) {
     return (
       <div className="w-screen h-screen bg-gray-200 animate-pulse flex items-center justify-center">
-        <div className="text-gray-500">Loading slides...</div>
+        <div className="text-gray-500">Loading hero...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
-      <Carousel className="w-full h-full" opts={{ loop: true }}>
-        <CarouselContent className="h-full">
-          {displaySlides.map((slide, idx) => (
-            <CarouselItem key={slide.id} className="relative w-full h-full">
-              {slide.media_type === 'video' && slide.youtube_url ? (
-                <iframe
-                  src={slide.youtube_url}
-                  className="w-full h-full object-cover"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              ) : (
-                <img 
-                  src={slide.media?.file_url || fallbackImages[0]} 
-                  alt={slide.title || `Slide ${idx + 1}`} 
-                  className="w-full h-full object-cover" 
-                  onError={(e) => {
-                    console.error('Image failed to load:', slide.media?.file_url);
-                    e.currentTarget.src = fallbackImages[0];
-                  }}
-                />
-              )}
-              
-              {/* Text Overlay */}
-              {(slide.title || slide.description || slide.button_text) && (
-                <div className={`absolute inset-0 bg-black/30 flex items-center ${
-                  slide.text_position === 'top' ? 'justify-start pt-16' :
-                  slide.text_position === 'bottom' ? 'justify-end pb-16' :
-                  'justify-center'
-                }`}>
-                  <div className={`text-white px-4 max-w-4xl ${
-                    slide.text_alignment === 'left' ? 'text-left' :
-                    slide.text_alignment === 'right' ? 'text-right' :
-                    'text-center'
-                  }`}>
-                    {slide.show_title !== false && slide.title && (
-                      <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
-                        {slide.title}
-                      </h2>
-                    )}
-                    {slide.description && (
-                      <p className="text-lg md:text-xl lg:text-2xl mb-6 drop-shadow-lg">
-                        {slide.description}
-                      </p>
-                    )}
-                    {slide.button_text && slide.button_link && (
-                      <a
-                        href={slide.button_link}
-                        className="inline-block bg-white text-black px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                      >
-                        {slide.button_text}
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
-    </div>
+    <section className="relative w-screen h-screen overflow-hidden">
+      {/* Background Image or Video */}
+      {heroSlide.media_type === 'video' && heroSlide.youtube_url ? (
+        <iframe
+          src={heroSlide.youtube_url}
+          className="absolute inset-0 w-full h-full object-cover"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      ) : (
+        <img 
+          src={heroSlide.media?.file_url || fallbackImages[0]} 
+          alt={heroSlide.title || 'Hero Image'} 
+          className="absolute inset-0 w-full h-full object-cover" 
+          onError={(e) => {
+            console.error('Hero image failed to load:', heroSlide.media?.file_url);
+            e.currentTarget.src = fallbackImages[0];
+          }}
+        />
+      )}
+      
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/30" />
+      
+      {/* Content */}
+      {(heroSlide.title || heroSlide.description || heroSlide.button_text) && (
+        <div className={`absolute inset-0 flex items-center ${
+          heroSlide.text_position === 'top' ? 'justify-start pt-16' :
+          heroSlide.text_position === 'bottom' ? 'justify-end pb-16' :
+          'justify-center'
+        }`}>
+          <div className={`text-white px-4 max-w-4xl ${
+            heroSlide.text_alignment === 'left' ? 'text-left' :
+            heroSlide.text_alignment === 'right' ? 'text-right' :
+            'text-center'
+          }`}>
+            {heroSlide.show_title !== false && heroSlide.title && (
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 drop-shadow-lg">
+                {heroSlide.title}
+              </h1>
+            )}
+            {heroSlide.description && (
+              <p className="text-xl md:text-2xl lg:text-3xl mb-8 drop-shadow-lg max-w-3xl">
+                {heroSlide.description}
+              </p>
+            )}
+            {heroSlide.button_text && heroSlide.button_link && (
+              <Button
+                asChild
+                size="lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-4 text-lg"
+              >
+                <a href={heroSlide.button_link}>
+                  {heroSlide.button_text}
+                </a>
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
