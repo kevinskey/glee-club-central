@@ -109,29 +109,37 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-2">
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                <User 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                <div 
+                  className="cursor-pointer transition-colors" 
                   onClick={handleDashboardClick}
                   title="Dashboard"
-                />
-                <LogOut 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                >
+                  <User className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
+                </div>
+                <div 
+                  className="cursor-pointer transition-colors" 
                   onClick={handleLogout}
                   title="Sign Out"
-                />
+                >
+                  <LogOut className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <UserPlus 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                <div 
+                  className="cursor-pointer transition-colors" 
                   onClick={() => navigate("/signup")}
                   title="Sign Up"
-                />
-                <LogIn 
-                  className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                >
+                  <UserPlus className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
+                </div>
+                <div 
+                  className="cursor-pointer transition-colors" 
                   onClick={() => navigate("/login")}
                   title="Login"
-                />
+                >
+                  <LogIn className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400" />
+                </div>
               </div>
             )}
           </div>
