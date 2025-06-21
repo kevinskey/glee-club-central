@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AppContent from "./AppContent";
-import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 
 const queryClient = new QueryClient({
@@ -32,12 +30,7 @@ function App() {
                 <Outlet />
               </AdminLayout>
             ) : (
-              <>
-                <UnifiedPublicHeader />
-                <AppContent>
-                  <Outlet />
-                </AppContent>
-              </>
+              <Outlet />
             )}
             <Toaster />
           </div>

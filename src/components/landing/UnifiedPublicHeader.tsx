@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield, ChevronDown } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus, Menu, Home, Info, Calendar, Music, Store, Contact, Shield } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
@@ -12,13 +13,6 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export function UnifiedPublicHeader() {
   const navigate = useNavigate();
@@ -107,7 +101,7 @@ export function UnifiedPublicHeader() {
           </Link>
         </div>
         
-        {/* Desktop Navigation - Fixed spacing and layout */}
+        {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center mx-8">
           <Link to="/" className="text-base font-medium text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors">
             Home
@@ -138,70 +132,13 @@ export function UnifiedPublicHeader() {
             Contact
           </Link>
         </nav>
-
-        {/* iPad Dropdown Navigation - Visible only on tablet */}
-        <div className="hidden md:flex lg:hidden items-center flex-1 justify-center mx-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-gray-800 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
-                Navigation
-                <ChevronDown className="ml-1 h-4 w-4" />
-                {upcomingEvents.length > 0 && (
-                  <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="center" 
-              className="w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
-            >
-              <DropdownMenuItem onClick={() => handleNavClick("/")}>
-                <Home className="mr-2 h-4 w-4" />
-                Home
-              </DropdownMenuItem>
-              {isAuthenticated && isUserAdmin && (
-                <DropdownMenuItem onClick={() => handleNavClick("/admin")}>
-                  <Shield className="mr-2 h-4 w-4" />
-                  Admin Panel
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={() => handleNavClick("/about")}>
-                <Info className="mr-2 h-4 w-4" />
-                About
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick("/calendar")} className="relative">
-                <Calendar className="mr-2 h-4 w-4" />
-                Events
-                {upcomingEvents.length > 0 && (
-                  <div className="ml-auto h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleReaderClick}>
-                <Music className="mr-2 h-4 w-4" />
-                Reader
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.open("https://studio.gleeworld.org", "_blank")}>
-                <Music className="mr-2 h-4 w-4" />
-                Studio
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick("/store")}>
-                <Store className="mr-2 h-4 w-4" />
-                Store
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavClick("/contact")}>
-                <Contact className="mr-2 h-4 w-4" />
-                Contact
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
         
         {/* Right Side Actions */}
         <div className="flex items-center gap-4 flex-shrink-0">
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth - Text Links */}
+          {/* Desktop Auth */}
           <div className="hidden lg:flex items-center gap-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-4">
@@ -239,49 +176,9 @@ export function UnifiedPublicHeader() {
               </div>
             )}
           </div>
-
-          {/* iPad Auth Dropdown - Visible only on tablet */}
-          <div className="hidden md:flex lg:hidden items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-800 dark:text-white">
-                  <User className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
-              >
-                {isAuthenticated ? (
-                  <>
-                    <DropdownMenuItem onClick={handleDashboardClick}>
-                      <User className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem onClick={handleSignUpClick}>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Sign Up
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLoginClick}>
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Sign In
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
           
-          {/* Mobile Hamburger Menu - Only on small screens */}
-          <div className="md:hidden flex-shrink-0">
+          {/* Mobile Menu - Only on mobile screens */}
+          <div className="lg:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="text-gray-800 dark:text-white relative">
