@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 import { AddSlideModal } from '@/components/admin/AddSlideModal';
 import { SliderSpacingControls } from '@/components/admin/SliderSpacingControls';
+import { EditSlideModal } from '@/components/admin/EditSlideModal';
 import { toast } from 'sonner';
 
 export default function HeroSlidesPage() {
@@ -19,6 +19,8 @@ export default function HeroSlidesPage() {
   const { mediaFiles, isLoading: mediaLoading } = useMediaLibrary();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showAddSlideModal, setShowAddSlideModal] = useState(false);
+  const [showEditSlideModal, setShowEditSlideModal] = useState(false);
+  const [selectedSlide, setSelectedSlide] = useState(null);
 
   const handleVisibilityToggle = async (slideId: string, visible: boolean) => {
     await updateSlideVisibility(slideId, visible);
@@ -45,6 +47,16 @@ export default function HeroSlidesPage() {
 
   const handleSlideAdded = () => {
     fetchHeroSlides();
+  };
+
+  const handleEditSlide = (slide) => {
+    setSelectedSlide(slide);
+    setShowEditSlideModal(true);
+  };
+
+  const handleSlideUpdated = () => {
+    fetchHeroSlides();
+    setSelectedSlide(null);
   };
 
   if (loading) {
@@ -230,7 +242,11 @@ export default function HeroSlidesPage() {
 
                           {/* Edit/Delete */}
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="sm">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditSlide(slide)}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
@@ -265,6 +281,14 @@ export default function HeroSlidesPage() {
         open={showAddSlideModal}
         onOpenChange={setShowAddSlideModal}
         onSlideAdded={handleSlideAdded}
+      />
+
+      {/* Edit Slide Modal */}
+      <EditSlideModal
+        open={showEditSlideModal}
+        onOpenChange={setShowEditSlideModal}
+        onSlideUpdated={handleSlideUpdated}
+        slide={selectedSlide}
       />
     </div>
   );
