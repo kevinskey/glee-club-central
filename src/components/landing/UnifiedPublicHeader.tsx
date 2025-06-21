@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -83,7 +84,7 @@ export function UnifiedPublicHeader() {
               <div className="text-sm sm:text-base lg:text-lg xl:text-xl text-[#003366] dark:text-white font-bold font-playfair truncate">
                 GleeWorld
               </div>
-              <div className="text-xs sm:text-sm lg:text-base text-[#003366]/70 dark:text-white/70 font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
+              <div className="text-xs sm:text-sm lg:text-base text-[#003366] dark:text-white font-medium -mt-1 hidden sm:block lg:hidden xl:block truncate">
                 Spelman College
               </div>
             </div>
@@ -130,14 +131,14 @@ export function UnifiedPublicHeader() {
         </nav>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0 pr-2">
+        <div className="flex items-center gap-3 flex-shrink-0 pr-4">
           {/* Theme Toggle */}
           <ThemeToggle />
           
           {/* Desktop Auth Icons - Just icons */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={handleDashboardClick}
@@ -154,7 +155,7 @@ export function UnifiedPublicHeader() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div 
                   className="w-5 h-5 text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors"
                   onClick={() => navigate("/signup")}
@@ -192,7 +193,7 @@ export function UnifiedPublicHeader() {
                       <Icons.logo className="h-10 w-10" />
                       <div>
                         <div className="font-bold text-lg text-[#003366] dark:text-white font-playfair">GleeWorld</div>
-                        <div className="text-sm text-[#003366]/70 dark:text-white/70 font-medium">Spelman College</div>
+                        <div className="text-sm text-[#003366] dark:text-white font-medium">Spelman College</div>
                       </div>
                     </div>
                   </div>
@@ -208,7 +209,7 @@ export function UnifiedPublicHeader() {
                           <div className="font-medium text-[#003366] dark:text-white">
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
-                          <div className="text-sm text-[#003366]/70 dark:text-white/70">
+                          <div className="text-sm text-[#003366] dark:text-white">
                             {isUserAdmin ? 'Administrator' : 'Member'}
                           </div>
                         </div>
