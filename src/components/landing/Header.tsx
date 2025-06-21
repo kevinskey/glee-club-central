@@ -67,13 +67,13 @@ export function Header() {
         
         {/* Desktop Navigation - Improved spacing */}
         <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-1 justify-center">
-          <Link to="/" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <Link to="/" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Home
           </Link>
-          <Link to="/about" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <Link to="/about" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             About
           </Link>
-          <Link to="/calendar" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap">
+          <Link to="/calendar" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative whitespace-nowrap">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-1 -right-1 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
@@ -84,20 +84,20 @@ export function Header() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleReaderClick}
-            className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap"
+            className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Studio
           </a>
-          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <a href="https://merch.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Merch
           </a>
-          <Link to="/store" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <Link to="/store" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Store
           </Link>
-          <Link to="/contact" className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <Link to="/contact" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
             Contact
           </Link>
         </nav>
@@ -112,14 +112,14 @@ export function Header() {
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <span 
-                  className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                  className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleDashboardClick}
                   title="Dashboard"
                 >
                   Dashboard
                 </span>
                 <span 
-                  className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                  className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={handleLogout}
                   title="Sign Out"
                 >
@@ -129,14 +129,14 @@ export function Header() {
             ) : (
               <div className="flex items-center gap-3">
                 <span 
-                  className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                  className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/signup")}
                   title="Sign Up"
                 >
                   Sign Up
                 </span>
                 <span 
-                  className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
+                  className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 cursor-pointer transition-colors" 
                   onClick={() => navigate("/login")}
                   title="Login"
                 >

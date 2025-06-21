@@ -58,7 +58,7 @@ export function MobileNavigationMenu({ onItemClick }: MobileNavigationMenuProps)
               asChild
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 justify-start"
+              className="flex items-center gap-2 justify-start text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
               onClick={handleClick}
             >
               <a href={item.href} target="_blank" rel="noopener noreferrer">
@@ -77,7 +77,7 @@ export function MobileNavigationMenu({ onItemClick }: MobileNavigationMenuProps)
             size="sm"
             className={cn(
               "flex items-center gap-2 justify-start",
-              isActive && "bg-orange-500 hover:bg-orange-600 text-white"
+              isActive ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
             )}
             onClick={handleClick}
           >
@@ -104,7 +104,7 @@ export function MobileNavigationMenu({ onItemClick }: MobileNavigationMenuProps)
                 size="sm"
                 className={cn(
                   "flex items-center gap-2 justify-start",
-                  isActive && "bg-orange-500 hover:bg-orange-600 text-white"
+                  isActive ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
                 )}
                 onClick={handleClick}
               >

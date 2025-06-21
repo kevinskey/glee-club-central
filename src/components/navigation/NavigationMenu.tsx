@@ -48,7 +48,7 @@ export function NavigationMenu() {
               asChild
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
             >
               <a href={item.href} target="_blank" rel="noopener noreferrer">
                 <Icon className="h-4 w-4" />
@@ -66,7 +66,7 @@ export function NavigationMenu() {
             size="sm"
             className={cn(
               "flex items-center gap-2",
-              isActive && "bg-orange-500 hover:bg-orange-600 text-white"
+              isActive ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
             )}
           >
             <Link to={item.href}>
@@ -89,7 +89,7 @@ export function NavigationMenu() {
             size="sm"
             className={cn(
               "flex items-center gap-2",
-              isActive && "bg-orange-500 hover:bg-orange-600 text-white"
+              isActive ? "bg-orange-500 hover:bg-orange-600 text-white" : "text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400"
             )}
           >
             <Link to={item.href}>
