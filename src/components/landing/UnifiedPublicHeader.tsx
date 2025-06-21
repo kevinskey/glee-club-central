@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield } from "lucide-react";
+import { LogIn, User, LogOut, UserPlus, Bell, Menu, X, Home, Info, Calendar, Music, Store, Contact, Shield, ChevronDown } from "lucide-react";
 import { Icons } from "@/components/Icons";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useSSOAuth } from '@/hooks/useSSOAuth';
@@ -13,6 +13,13 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function UnifiedPublicHeader() {
   const navigate = useNavigate();
@@ -98,8 +105,8 @@ export function UnifiedPublicHeader() {
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center mx-4">
+        {/* Desktop Navigation - Hidden on iPad */}
+        <nav className="hidden xl:flex items-center space-x-1 lg:space-x-2 xl:space-x-3 flex-1 justify-center mx-4">
           <Link to="/" className="text-sm lg:text-base font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap px-2 py-1">
             Home
           </Link>
@@ -129,14 +136,71 @@ export function UnifiedPublicHeader() {
             Contact
           </Link>
         </nav>
+
+        {/* iPad Dropdown Navigation - Visible only on iPad */}
+        <div className="hidden md:flex xl:hidden items-center flex-1 justify-center mx-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 transition-colors relative">
+                Navigation
+                <ChevronDown className="ml-1 h-4 w-4" />
+                {upcomingEvents.length > 0 && (
+                  <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              align="center" 
+              className="w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
+            >
+              <DropdownMenuItem onClick={() => handleNavClick("/")}>
+                <Home className="mr-2 h-4 w-4" />
+                Home
+              </DropdownMenuItem>
+              {isAuthenticated && isUserAdmin && (
+                <DropdownMenuItem onClick={() => handleNavClick("/admin")}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  Admin Panel
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => handleNavClick("/about")}>
+                <Info className="mr-2 h-4 w-4" />
+                About
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick("/calendar")} className="relative">
+                <Calendar className="mr-2 h-4 w-4" />
+                Events
+                {upcomingEvents.length > 0 && (
+                  <div className="ml-auto h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleReaderClick}>
+                <Music className="mr-2 h-4 w-4" />
+                Reader
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => window.open("https://studio.gleeworld.org", "_blank")}>
+                <Music className="mr-2 h-4 w-4" />
+                Studio
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick("/store")}>
+                <Store className="mr-2 h-4 w-4" />
+                Store
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavClick("/contact")}>
+                <Contact className="mr-2 h-4 w-4" />
+                Contact
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         
         {/* Right Side Actions */}
         <div className="flex items-center gap-3 flex-shrink-0 pr-4">
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Icons - Just icons */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop Auth Icons - Just icons - Hidden on iPad */}
+          <div className="hidden xl:flex items-center gap-3">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div 
@@ -173,8 +237,48 @@ export function UnifiedPublicHeader() {
               </div>
             )}
           </div>
+
+          {/* iPad Auth Dropdown - Visible only on iPad */}
+          <div className="hidden md:flex xl:hidden items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-[#003366] dark:text-white">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                align="end" 
+                className="w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50"
+              >
+                {isAuthenticated ? (
+                  <>
+                    <DropdownMenuItem onClick={handleDashboardClick}>
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={() => navigate("/signup")}>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Sign Up
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/login")}>
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign In
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           
-          {/* Mobile Hamburger Menu */}
+          {/* Mobile Hamburger Menu - Only on small screens */}
           <div className="md:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
