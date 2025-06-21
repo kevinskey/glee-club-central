@@ -102,48 +102,48 @@ export function Header() {
         </nav>
         
         {/* Right Side Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Theme Toggle */}
           <ThemeToggle />
           
-          {/* Desktop Auth Buttons - Improved spacing and responsiveness */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop Auth Buttons - Made more readable */}
+          <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost"
                   onClick={handleDashboardClick}
-                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
+                  className="h-9 px-4 text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
                 >
-                  <User className="w-5 h-5 xl:mr-2" />
-                  <span className="hidden xl:inline">Dashboard</span>
+                  <User className="w-4 h-4" />
+                  Dashboard
                 </Button>
                 <Button 
                   variant="ghost"
                   onClick={handleLogout}
-                  className="text-xs xl:text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 px-2 xl:px-3"
+                  className="h-9 px-4 text-sm font-medium text-[#003366] dark:text-white hover:text-orange-500 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
                 >
-                  <LogOut className="w-5 h-5 xl:mr-2" />
-                  <span className="hidden xl:inline">Sign Out</span>
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/signup")}
-                  className="text-xs xl:text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium px-2 xl:px-3"
+                  className="h-9 px-4 text-sm bg-white dark:bg-gray-800 border-2 border-[#003366] text-[#003366] dark:text-[#003366] hover:bg-[#003366] hover:text-white dark:hover:bg-[#003366] dark:hover:text-white font-medium flex items-center gap-2"
                 >
-                  <UserPlus className="w-5 h-5 xl:mr-2" />
-                  <span className="hidden xl:inline">Sign Up</span>
+                  <UserPlus className="w-4 h-4" />
+                  Sign Up
                 </Button>
                 <Button 
                   variant="default"
                   onClick={() => navigate("/login")}
-                  className="text-xs xl:text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium px-2 xl:px-3"
+                  className="h-9 px-4 text-sm bg-[#003366] hover:bg-[#003366]/90 text-white font-medium flex items-center gap-2"
                 >
-                  <LogIn className="w-5 h-5 xl:mr-2" />
-                  <span className="hidden xl:inline">Login</span>
+                  <LogIn className="w-4 h-4" />
+                  Login
                 </Button>
               </div>
             )}
