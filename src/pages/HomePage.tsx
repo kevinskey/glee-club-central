@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState } from "react";
-import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 import { Footer } from "@/components/landing/Footer";
 import { HomePageContent } from "@/components/landing/HomePageContent";
 import { HeroSlider } from "@/components/landing/HeroSlider";
@@ -48,9 +47,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - will be sticky on its own */}
-      <UnifiedPublicHeader />
-      
       {/* Main content */}
       <main className="relative">
         <HeroSlider />

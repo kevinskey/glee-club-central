@@ -1,6 +1,5 @@
 
 import React from "react";
-import { UnifiedPublicHeader } from "./UnifiedPublicHeader";
 import { OptimizedNewsTicker } from "./news/OptimizedNewsTicker";
 import { Footer } from "./Footer";
 
@@ -18,7 +17,6 @@ export function PublicPageWrapper({
   return (
     <div className={`min-h-screen bg-background ${className}`}>
       {showTopSlider && <OptimizedNewsTicker autoHide={false} />}
-      <UnifiedPublicHeader />
       <main className="flex-1">
         {children}
       </main>
