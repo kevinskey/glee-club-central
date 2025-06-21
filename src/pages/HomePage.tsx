@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { UnifiedPublicHeader } from "@/components/landing/UnifiedPublicHeader";
 import { Footer } from "@/components/landing/Footer";
 import { HomePageContent } from "@/components/landing/HomePageContent";
+import { HeroSlider } from "@/components/landing/HeroSlider";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
@@ -49,6 +50,7 @@ export default function HomePage() {
       
       {/* Main content */}
       <main className="relative">
+        <HeroSlider />
         {/* Rest of homepage content */}
         <div className="bg-background">
           <HomePageContent
