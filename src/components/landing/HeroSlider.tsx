@@ -83,7 +83,7 @@ export function HeroSlider() {
     if (displaySlides.length > 1) {
       const timer = setInterval(() => {
         setCurrentSlideIndex((prev) => (prev + 1) % displaySlides.length);
-      }, 5000);
+      }, 7000);
       return () => clearInterval(timer);
     }
   }, [displaySlides.length]);
