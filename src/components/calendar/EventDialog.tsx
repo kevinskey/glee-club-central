@@ -72,7 +72,7 @@ export function EventDialog({
   if (event && !isCreating) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-[90%] max-w-[90%] md:max-w-[50%] mx-auto">
           <DialogHeader>
             <DialogTitle>{event.title}</DialogTitle>
           </DialogHeader>
@@ -116,7 +116,7 @@ export function EventDialog({
   // If creating a new event
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[90%] max-w-[90%] md:max-w-[50%] mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
         </DialogHeader>
@@ -131,7 +131,7 @@ export function EventDialog({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start_time">Start Time</Label>
               <Input

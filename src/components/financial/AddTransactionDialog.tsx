@@ -103,7 +103,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[90%] max-w-[90%] md:max-w-[50%] mx-auto">
         <DialogHeader>
           <DialogTitle>Add Financial Transaction</DialogTitle>
           <DialogDescription>

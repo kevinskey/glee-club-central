@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -93,7 +92,7 @@ export const AddBudgetDialog: React.FC<AddBudgetDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[90%] max-w-[90%] md:max-w-[50%] mx-auto">
         <DialogHeader>
           <DialogTitle>Add Budget Category</DialogTitle>
           <DialogDescription>
