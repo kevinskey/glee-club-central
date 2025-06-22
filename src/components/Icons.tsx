@@ -18,12 +18,11 @@ export const Icons = {
       : "/lovable-uploads/8fa96710-a03a-4033-9ee0-032306d74daa.png"; // Light mode logo
     
     return (
-      <img 
+      <img
         src={logoSrc}
-        alt="Spelman College Glee Club Logo" 
+        alt="Spelman College Glee Club Logo"
         className={cn("h-7 w-auto", props.className)}
-        style={{ filter: 'hue-rotate(220deg) saturate(1.5) brightness(0.3)' }}
-        {...props} 
+        {...props}
       />
     );
   },
