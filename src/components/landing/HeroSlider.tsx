@@ -162,7 +162,7 @@ export function HeroSlider() {
           <img 
             src={mediaSource.url}
             alt={currentSlide.title || 'Hero Image'} 
-            className="w-full h-full object-cover object-center" 
+            className="w-full h-full object-contain md:object-cover object-center" 
             onError={(e) => {
               console.error('Hero image failed to load:', mediaSource.url);
               // Try fallback image
