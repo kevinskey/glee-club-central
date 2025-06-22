@@ -1117,6 +1117,42 @@ export type Database = {
           },
         ]
       }
+      karaoke_tracks: {
+        Row: {
+          artist: string
+          created_at: string
+          duration: string | null
+          file_path: string
+          file_url: string
+          id: string
+          title: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          artist?: string
+          created_at?: string
+          duration?: string | null
+          file_path: string
+          file_url: string
+          id?: string
+          title: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          artist?: string
+          created_at?: string
+          duration?: string | null
+          file_path?: string
+          file_url?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           created_at: string
@@ -3633,6 +3669,10 @@ export type Database = {
           playlist_name: string
           tracks: Json
         }[]
+      }
+      get_current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>

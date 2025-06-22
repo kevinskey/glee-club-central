@@ -88,7 +88,12 @@ export function Header() {
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
+          <a 
+            href="https://mystudio.gleeworld.org" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap"
+          >
             Studio
           </a>
           <a href="https://merch.gleeworld.org" className="text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-orange-500 dark:hover:text-orange-400 transition-colors whitespace-nowrap">
