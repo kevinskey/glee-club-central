@@ -26,7 +26,7 @@ const defaultSpacingSettings: SpacingSettings = {
 };
 
 export function HeroSlider() {
-  const { visibleSlides, loading } = useHeroSlides('homepage-main');
+  const { visibleSlides, loading, error } = useHeroSlides('homepage-main');
   const [spacingSettings, setSpacingSettings] = useState<SpacingSettings>(defaultSpacingSettings);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -37,8 +37,10 @@ export function HeroSlider() {
     "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png",
   ];
 
-  // Use visible slides from database, or fallback slides
-  const slides = visibleSlides.length > 0 ? visibleSlides : [
+  // Only use fallback if there are truly no visible slides and we're not loading
+  const shouldUseFallback = !loading && visibleSlides.length === 0;
+  
+  const slides = shouldUseFallback ? [
     {
       id: 'fallback-1',
       title: 'Spelman College Glee Club',
@@ -58,7 +60,7 @@ export function HeroSlider() {
       button_text: 'Learn More',
       button_link: '/about'
     }
-  ];
+  ] : visibleSlides;
 
   const currentSlide = slides[currentSlideIndex];
 
@@ -72,7 +74,18 @@ export function HeroSlider() {
     }
   }, [slides.length]);
 
-  console.log('Hero: Displaying slides:', {
+  // Reset slide index if slides change
+  useEffect(() => {
+    if (currentSlideIndex >= slides.length) {
+      setCurrentSlideIndex(0);
+    }
+  }, [slides.length, currentSlideIndex]);
+
+  console.log('Hero Slider Debug:', {
+    loading,
+    error,
+    visibleSlidesCount: visibleSlides.length,
+    shouldUseFallback,
     totalSlides: slides.length,
     currentIndex: currentSlideIndex,
     currentSlide: currentSlide?.title,
@@ -83,7 +96,19 @@ export function HeroSlider() {
   if (loading) {
     return (
       <div className="w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
-        <div className="text-gray-500">Loading hero...</div>
+        <div className="text-gray-500">Loading hero slides...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    console.error('Hero slider error:', error);
+  }
+
+  if (!currentSlide) {
+    return (
+      <div className="w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 flex items-center justify-center">
+        <div className="text-gray-500">No slides available</div>
       </div>
     );
   }
@@ -124,6 +149,9 @@ export function HeroSlider() {
         </div>
       )}
       
+      {/* Dark overlay for better text readability */}
+      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      
       {/* Content */}
       {(currentSlide.title || currentSlide.description || currentSlide.button_text) && (
         <div className={`absolute inset-0 flex items-center ${
@@ -158,6 +186,31 @@ export function HeroSlider() {
               </Button>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Slide indicators if multiple slides */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentSlideIndex ? 'bg-white' : 'bg-white/50'
+              }`}
+              onClick={() => setCurrentSlideIndex(index)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Debug info in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs">
+          <div>Slides: {slides.length}</div>
+          <div>Current: {currentSlideIndex + 1}</div>
+          <div>Visible DB: {visibleSlides.length}</div>
+          <div>Fallback: {shouldUseFallback ? 'Yes' : 'No'}</div>
         </div>
       )}
     </section>
