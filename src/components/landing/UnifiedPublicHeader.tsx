@@ -84,17 +84,17 @@ export function UnifiedPublicHeader() {
   ];
   
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md w-full">
-      <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 lg:px-8 bg-white/95 dark:bg-gray-800/95 shadow-sm border border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-50 backdrop-blur-md w-full bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-700">
+      <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Logo Section */}
         <div className="flex-shrink-0">
           <Link to="/" className="font-bold flex items-center hover:text-[#0072CE] transition-colors group">
-            <Icons.logo className="h-10 w-10 flex-shrink-0" />
+            <Icons.logo className="h-12 w-12 flex-shrink-0" />
             <div className="ml-3">
-              <div className="text-lg text-gray-900 dark:text-white font-bold font-playfair">
+              <div className="text-xl font-bold font-playfair text-gray-900 dark:text-white">
                 GleeWorld
               </div>
-              <div className="text-sm text-gray-700 dark:text-gray-300 font-medium -mt-1 hidden sm:block">
+              <div className="text-sm font-medium -mt-1 hidden sm:block text-gray-700 dark:text-gray-300">
                 Spelman College
               </div>
             </div>
@@ -183,8 +183,8 @@ export function UnifiedPublicHeader() {
           <div className="lg:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-gray-900 dark:text-gray-100 relative h-10 w-10">
-                  <Menu className="h-7 w-7" />
+                <Button variant="ghost" size="icon" className="text-gray-900 dark:text-gray-100 relative h-12 w-12">
+                  <Menu className="h-8 w-8" />
                   {upcomingEvents.length > 0 && (
                     <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[#0072CE] rounded-full animate-pulse"></div>
                   )}
@@ -195,9 +195,9 @@ export function UnifiedPublicHeader() {
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
                     <div className="flex items-center gap-3">
-                      <Icons.logo className="h-12 w-12" />
+                      <Icons.logo className="h-14 w-14" />
                       <div>
-                        <div className="font-bold text-lg text-gray-900 dark:text-white font-playfair">GleeWorld</div>
+                        <div className="font-bold text-xl text-gray-900 dark:text-white font-playfair">GleeWorld</div>
                         <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">Spelman College</div>
                       </div>
                     </div>
@@ -241,7 +241,7 @@ export function UnifiedPublicHeader() {
                             }
                           }}
                         >
-                          <link.icon className="w-6 h-6 mr-3 flex-shrink-0" />
+                          <link.icon className="w-7 h-7 mr-3 flex-shrink-0" />
                           <span className="flex-1">{link.label}</span>
                           {link.hasNotification && (
                             <div className="h-2 w-2 bg-[#0072CE] rounded-full animate-pulse ml-2"></div>
@@ -259,7 +259,7 @@ export function UnifiedPublicHeader() {
                             className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleDashboardClick}
                           >
-                            <User className="w-6 h-6 mr-3 flex-shrink-0" />
+                            <User className="w-7 h-7 mr-3 flex-shrink-0" />
                             Dashboard
                           </Button>
                           <Button
@@ -267,7 +267,7 @@ export function UnifiedPublicHeader() {
                             className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
                             onClick={handleLogout}
                           >
-                            <LogOut className="w-6 h-6 mr-3 flex-shrink-0" />
+                            <LogOut className="w-7 h-7 mr-3 flex-shrink-0" />
                             Sign Out
                           </Button>
                         </div>
@@ -278,7 +278,7 @@ export function UnifiedPublicHeader() {
                             className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleSignUpClick}
                           >
-                            <UserPlus className="w-6 h-6 mr-3 flex-shrink-0" />
+                            <UserPlus className="w-7 h-7 mr-3 flex-shrink-0" />
                             Sign Up
                           </Button>
                           <Button
@@ -286,7 +286,7 @@ export function UnifiedPublicHeader() {
                             className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleLoginClick}
                           >
-                            <LogIn className="w-6 h-6 mr-3 flex-shrink-0" />
+                            <LogIn className="w-7 h-7 mr-3 flex-shrink-0" />
                             Sign In
                           </Button>
                         </div>
