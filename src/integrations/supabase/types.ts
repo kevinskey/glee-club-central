@@ -2251,6 +2251,62 @@ export type Database = {
         }
         Relationships: []
       }
+      recordings: {
+        Row: {
+          backing_track_artist: string | null
+          backing_track_id: string | null
+          backing_track_title: string | null
+          created_at: string
+          description: string | null
+          duration: number | null
+          file_path: string
+          file_url: string
+          id: string
+          recording_type: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          backing_track_artist?: string | null
+          backing_track_id?: string | null
+          backing_track_title?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path: string
+          file_url: string
+          id?: string
+          recording_type?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          backing_track_artist?: string | null
+          backing_track_id?: string | null
+          backing_track_title?: string | null
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          file_path?: string
+          file_url?: string
+          id?: string
+          recording_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recordings_backing_track_id_fkey"
+            columns: ["backing_track_id"]
+            isOneToOne: false
+            referencedRelation: "karaoke_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           granted: boolean

@@ -59,7 +59,7 @@ const MobileHeaderComponent: React.FC<MobileHeaderProps> = ({ onMenuClick }) => 
 
   return (
     <>
-      <header className="mobile-header fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 h-14 flex items-center justify-between px-4">
+      <header className="mobile-header contain-layout top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700 h-14 flex items-center justify-between px-4">
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="sm" onClick={onMenuClick}>
