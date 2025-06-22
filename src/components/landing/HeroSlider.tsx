@@ -64,6 +64,13 @@ export function HeroSlider() {
 
   const currentSlide = slides[currentSlideIndex];
 
+  // Check if current slide has any text content
+  const hasTextContent = currentSlide && (
+    (currentSlide.show_title !== false && currentSlide.title) ||
+    currentSlide.description ||
+    currentSlide.button_text
+  );
+
   // Auto-advance slides
   useEffect(() => {
     if (slides.length > 1) {
@@ -90,7 +97,8 @@ export function HeroSlider() {
     currentIndex: currentSlideIndex,
     currentSlide: currentSlide?.title,
     media_url: currentSlide?.media?.file_url,
-    youtube_url: currentSlide?.youtube_url
+    youtube_url: currentSlide?.youtube_url,
+    hasTextContent
   });
 
   if (loading) {
@@ -141,11 +149,13 @@ export function HeroSlider() {
         </div>
       )}
       
-      {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      {/* Conditional dark overlay for better text readability */}
+      {hasTextContent && (
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+      )}
       
       {/* Content */}
-      {(currentSlide.title || currentSlide.description || currentSlide.button_text) && (
+      {hasTextContent && (
         <div className={`absolute inset-0 flex items-center ${
           currentSlide.text_position === 'top' ? 'justify-start pt-8 sm:pt-12 md:pt-16 lg:pt-20' :
           currentSlide.text_position === 'bottom' ? 'justify-end pb-8 sm:pb-12 md:pb-16 lg:pb-20' :
@@ -203,6 +213,7 @@ export function HeroSlider() {
           <div>Current: {currentSlideIndex + 1}</div>
           <div>Visible DB: {visibleSlides.length}</div>
           <div>Fallback: {shouldUseFallback ? 'Yes' : 'No'}</div>
+          <div>Has Text: {hasTextContent ? 'Yes' : 'No'}</div>
         </div>
       )}
     </section>
