@@ -124,9 +124,6 @@ export function HeroSlider() {
         </div>
       )}
       
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/30" />
-      
       {/* Content */}
       {(currentSlide.title || currentSlide.description || currentSlide.button_text) && (
         <div className={`absolute inset-0 flex items-center ${
