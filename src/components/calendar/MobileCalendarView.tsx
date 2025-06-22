@@ -72,7 +72,7 @@ export function MobileCalendarView() {
       {/* Header */}
       <div className="dashboard-mobile-section">
         <div className="flex items-center justify-between mb-4">
-          <MobileResponsiveText as="h1" size="2xl" weight="bold">
+          <MobileResponsiveText as="h1" size="h3" weight="bold">
             Calendar
           </MobileResponsiveText>
           <div className="flex gap-2">
@@ -105,7 +105,7 @@ export function MobileCalendarView() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <MobileResponsiveText size="lg" weight="medium">
+          <MobileResponsiveText size="body-large" weight="medium">
             {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
           </MobileResponsiveText>
           <Button
@@ -139,10 +139,10 @@ export function MobileCalendarView() {
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <MobileResponsiveText size="sm" weight="medium">
+                        <MobileResponsiveText size="body-small" weight="medium">
                           {format(date, 'EEEE')}
                         </MobileResponsiveText>
-                        <MobileResponsiveText size="lg" weight="bold" className={isCurrentDay ? 'text-primary' : ''}>
+                        <MobileResponsiveText size="body-large" weight="bold" className={isCurrentDay ? 'text-primary' : ''}>
                           {format(date, 'd')}
                         </MobileResponsiveText>
                       </div>
@@ -186,7 +186,7 @@ export function MobileCalendarView() {
                   
                   {events.length === 0 && (
                     <CardContent className="pt-0">
-                      <MobileResponsiveText size="sm" className="text-muted-foreground text-center">
+                      <MobileResponsiveText size="body-small" className="text-muted-foreground text-center">
                         No events scheduled
                       </MobileResponsiveText>
                     </CardContent>
@@ -254,7 +254,7 @@ export function MobileCalendarView() {
               ) : (
                 <div className="text-center py-8">
                   <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <MobileResponsiveText size="sm" className="text-muted-foreground">
+                  <MobileResponsiveText size="body-small" className="text-muted-foreground">
                     No events scheduled for this day
                   </MobileResponsiveText>
                 </div>
