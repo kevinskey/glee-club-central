@@ -40,17 +40,17 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
 
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between p-2 border-b">
+      <div className="flex items-center justify-between p-3 border-b">
         <Button 
           variant="outline" 
           size="icon" 
           onClick={prevMonth}
           aria-label="Previous month"
-          className={cn("h-8 w-8", isMobile && "h-10 w-10")}
+          className={cn("h-10 w-10", isMobile && "h-12 w-12")}
         >
-          <ChevronLeft className={cn("h-4 w-4", isMobile && "h-5 w-5")} />
+          <ChevronLeft className={cn("h-5 w-5", isMobile && "h-6 w-6")} />
         </Button>
-        <h2 className={cn("font-semibold", isMobile ? "text-lg" : "text-xl")}>
+        <h2 className={cn("font-semibold", isMobile ? "text-xl" : "text-2xl")}>
           {format(currentMonth, isMobile ? "MMM yyyy" : "MMMM yyyy")}
         </h2>
         <Button 
@@ -58,9 +58,9 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
           size="icon" 
           onClick={nextMonth}
           aria-label="Next month"
-          className={cn("h-8 w-8", isMobile && "h-10 w-10")}
+          className={cn("h-10 w-10", isMobile && "h-12 w-12")}
         >
-          <ChevronRight className={cn("h-4 w-4", isMobile && "h-5 w-5")} />
+          <ChevronRight className={cn("h-5 w-5", isMobile && "h-6 w-6")} />
         </Button>
       </div>
     );
@@ -73,8 +73,8 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
     for (let i = 0; i < 7; i++) {
       days.push(
         <div key={i} className={cn(
-          "text-center font-medium text-muted-foreground py-2 border-b",
-          isMobile ? "text-xs" : "text-sm"
+          "text-center font-medium text-muted-foreground py-3 border-b",
+          isMobile ? "text-sm" : "text-base"
         )}>
           {daysOfWeek[i]}
         </div>
@@ -93,7 +93,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
     const rows = [];
     let days = [];
     let day = startDate;
-    const cellHeight = isMobile ? "h-16" : "h-32";
+    const cellHeight = isMobile ? "h-20" : "h-36";
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
@@ -109,29 +109,29 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
             key={day.toString()}
             className={cn(
               cellHeight,
-              "border border-gray-200 dark:border-gray-700 p-1 relative cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800",
+              "border border-gray-200 dark:border-gray-700 p-2 relative cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800",
               !isSameMonth(day, monthStart) && "bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500",
               isSameDay(day, selectedDate) && "bg-blue-50 dark:bg-blue-900/20 border-blue-500",
               isSameDay(day, new Date()) && "bg-yellow-50 dark:bg-yellow-900/20"
             )}
             onClick={() => onDateClick(cloneDay)}
           >
-            <span className={cn("font-medium", isMobile ? "text-sm" : "text-base")}>
+            <span className={cn("font-medium", isMobile ? "text-base" : "text-lg")}>
               {formattedDate}
             </span>
-            <div className={cn("overflow-hidden", isMobile ? "mt-0.5" : "mt-1")}>
+            <div className={cn("overflow-hidden", isMobile ? "mt-1" : "mt-2")}>
               {dayEvents.slice(0, maxEventsToShow).map(event => (
                 <div 
                   key={event.id} 
                   className={cn(
-                    "text-xs p-0.5 mb-0.5 rounded truncate cursor-pointer transition-opacity hover:opacity-80",
+                    "p-1 mb-1 rounded truncate cursor-pointer transition-opacity hover:opacity-80",
                     event.type === "concert" && "bg-purple-500 text-white",
                     event.type === "rehearsal" && "bg-blue-500 text-white",
                     event.type === "sectional" && "bg-green-500 text-white",
                     event.type === "special" && "bg-amber-500 text-white",
                     event.type === "tour" && "bg-red-500 text-white",
                     (!event.type || event.type === "event") && "bg-gray-500 text-white",
-                    isMobile && "text-xs leading-tight"
+                    isMobile ? "text-xs leading-tight" : "text-sm"
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -150,7 +150,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
                 </div>
               ))}
               {dayEvents.length > maxEventsToShow && (
-                <div className="text-xs text-center text-muted-foreground font-medium">
+                <div className={cn("text-center text-muted-foreground font-medium", isMobile ? "text-xs" : "text-sm")}>
                   +{dayEvents.length - maxEventsToShow} more
                 </div>
               )}
