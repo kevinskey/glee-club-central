@@ -113,7 +113,7 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full h-[200px] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero slides...</div>
       </div>
     );
@@ -125,7 +125,7 @@ export function HeroSlider() {
 
   if (!currentSlide) {
     return (
-      <div className="w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] bg-gray-200 flex items-center justify-center">
+      <div className="w-full h-[200px] bg-gray-200 flex items-center justify-center">
         <div className="text-gray-500">No slides available</div>
       </div>
     );
@@ -144,7 +144,7 @@ export function HeroSlider() {
   const mediaSource = getMediaSource();
 
   return (
-    <section className="relative w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden">
+    <section className="relative w-full h-[200px] overflow-hidden">
       {/* Background Image or Video */}
       {mediaSource.type === 'video' ? (
         <div className="absolute inset-0 w-full h-full">
