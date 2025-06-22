@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -168,23 +169,38 @@ export function AddSlideModal({
           {formData.media_type === "image" ? (
             <div className="space-y-2">
               <Label>Background Image</Label>
-              <Select
-                value={formData.media_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, media_id: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an image" />
-                </SelectTrigger>
-                <SelectContent>
-                  {imageFiles.map((file) => (
-                    <SelectItem key={file.id} value={file.id}>
-                      {file.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-64 overflow-y-auto border rounded-lg p-3">
+                {imageFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`relative cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:border-primary/50 ${
+                      formData.media_id === file.id
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setFormData({ ...formData, media_id: file.id })}
+                  >
+                    <img
+                      src={file.file_url}
+                      alt={file.title}
+                      className="w-full h-20 object-cover"
+                    />
+                    <div className="p-1">
+                      <p className="text-xs text-gray-600 truncate">{file.title}</p>
+                    </div>
+                    {formData.media_id === file.id && (
+                      <div className="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {imageFiles.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  No images available. Upload images to the media library first.
+                </p>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
