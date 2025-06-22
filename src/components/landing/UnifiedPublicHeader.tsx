@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -84,7 +83,7 @@ export function UnifiedPublicHeader() {
   ];
   
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md w-full bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-[100] backdrop-blur-md w-full bg-white/95 dark:bg-gray-900/95 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Logo Section */}
         <div className="flex-shrink-0">
@@ -190,7 +189,7 @@ export function UnifiedPublicHeader() {
                   )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+              <SheetContent side="right" className="w-80 p-0 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 z-[200]">
                 <div className="flex flex-col h-full">
                   {/* Header */}
                   <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
