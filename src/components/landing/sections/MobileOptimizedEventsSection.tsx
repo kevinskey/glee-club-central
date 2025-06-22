@@ -40,7 +40,7 @@ export function MobileOptimizedEventsSection({
   if (loading) {
     return (
       <section className={sectionClasses}>
-        <div className="w-full max-w-full px-0">
+        <div className="w-full max-w-full">
           <div className="px-4">
             <EventsSectionHeader showHeader={showHeader} />
           </div>
@@ -53,7 +53,7 @@ export function MobileOptimizedEventsSection({
   if (error) {
     return (
       <section className={sectionClasses}>
-        <div className="w-full max-w-full px-0">
+        <div className="w-full max-w-full">
           <div className="px-4">
             <EventsErrorState />
           </div>
@@ -65,7 +65,7 @@ export function MobileOptimizedEventsSection({
   if (upcomingEvents.length === 0) {
     return (
       <section className={sectionClasses}>
-        <div className="w-full max-w-full px-0">
+        <div className="w-full max-w-full">
           <div className="px-4">
             <EventsSectionHeader showHeader={showHeader} />
             <EventsEmptyState />
@@ -77,7 +77,7 @@ export function MobileOptimizedEventsSection({
 
   return (
     <section className={sectionClasses}>
-      <div className="w-full max-w-full px-0">
+      <div className="w-full max-w-full">
         <div className="px-4">
           <EventsSectionHeader showHeader={showHeader} />
         </div>
