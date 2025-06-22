@@ -93,7 +93,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
     const rows = [];
     let days = [];
     let day = startDate;
-    const cellHeight = isMobile ? "h-16" : "h-24";
+    const cellHeight = isMobile ? "h-16" : "h-32";
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
@@ -102,7 +102,7 @@ const MonthlyCalendar: React.FC<MonthlyCalendarProps> = ({ className, onEventCli
         
         // Find events for this day using real event data
         const dayEvents = transformedEvents.filter(event => isSameDay(event.date, cloneDay));
-        const maxEventsToShow = isMobile ? 1 : 2;
+        const maxEventsToShow = isMobile ? 1 : 3;
         
         days.push(
           <div
