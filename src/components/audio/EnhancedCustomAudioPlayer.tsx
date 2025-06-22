@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -347,12 +348,12 @@ export function EnhancedCustomAudioPlayer({ className = "" }: EnhancedCustomAudi
                 variant="default"
                 size="lg"
                 onClick={togglePlayPause}
-                className="bg-blue-600 hover:bg-blue-700 text-white h-14 w-14 rounded-full"
+                className="bg-blue-600 hover:bg-blue-700 text-white h-16 w-16 rounded-full"
               >
                 {isPlaying ? (
-                  <Pause className="h-7 w-7" />
+                  <Pause className="h-8 w-8" />
                 ) : (
-                  <Play className="h-7 w-7 ml-1" />
+                  <Play className="h-8 w-8 ml-1" />
                 )}
               </Button>
 
