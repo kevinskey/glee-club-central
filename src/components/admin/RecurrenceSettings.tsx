@@ -57,10 +57,10 @@ export function RecurrenceSettings({
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50">
+    <div className="space-y-4 p-4 border border-gray-300 rounded-lg bg-white dark:bg-gray-50 dark:border-gray-400">
       <div className="flex items-center space-x-2">
-        <Repeat className="h-4 w-4 text-blue-600" />
-        <Label className="font-medium">Recurring Event Settings</Label>
+        <Repeat className="h-4 w-4 text-glee-spelman" />
+        <Label className="font-medium text-gray-900 dark:text-gray-800">Recurring Event Settings</Label>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -69,14 +69,14 @@ export function RecurrenceSettings({
           checked={isRecurring}
           onCheckedChange={onIsRecurringChange}
         />
-        <Label htmlFor="is_recurring">Make this a recurring event</Label>
+        <Label htmlFor="is_recurring" className="text-gray-800 dark:text-gray-700">Make this a recurring event</Label>
       </div>
 
       {isRecurring && (
-        <div className="space-y-4 pl-6 border-l-2 border-blue-200">
+        <div className="space-y-4 pl-6 border-l-2 border-glee-spelman">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="recurrence_pattern">Repeat Pattern</Label>
+              <Label htmlFor="recurrence_pattern" className="text-gray-800 dark:text-gray-700">Repeat Pattern</Label>
               <Select value={pattern} onValueChange={onPatternChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select pattern" />
@@ -91,7 +91,7 @@ export function RecurrenceSettings({
             </div>
 
             <div>
-              <Label htmlFor="recurrence_interval">Every</Label>
+              <Label htmlFor="recurrence_interval" className="text-gray-800 dark:text-gray-700">Every</Label>
               <div className="flex items-center space-x-2">
                 <Input
                   id="recurrence_interval"
@@ -102,7 +102,7 @@ export function RecurrenceSettings({
                   onChange={(e) => onIntervalChange(parseInt(e.target.value) || 1)}
                   className="w-20"
                 />
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-gray-600 dark:text-gray-500">
                   {pattern === 'daily' && (interval === 1 ? 'day' : 'days')}
                   {pattern === 'weekly' && (interval === 1 ? 'week' : 'weeks')}
                   {pattern === 'monthly' && (interval === 1 ? 'month' : 'months')}
@@ -113,7 +113,7 @@ export function RecurrenceSettings({
           </div>
 
           <div>
-            <Label className="text-sm font-medium">End Recurrence</Label>
+            <Label className="text-sm font-medium text-gray-800 dark:text-gray-700">End Recurrence</Label>
             <div className="space-y-3 mt-2">
               <div className="flex items-center space-x-2">
                 <input
@@ -124,7 +124,7 @@ export function RecurrenceSettings({
                   onChange={() => handleEndTypeChange('never')}
                   className="h-4 w-4"
                 />
-                <Label htmlFor="end_never" className="text-sm">Never</Label>
+                <Label htmlFor="end_never" className="text-sm text-gray-800 dark:text-gray-700">Never</Label>
               </div>
 
               <div className="flex items-center space-x-2">
@@ -136,10 +136,10 @@ export function RecurrenceSettings({
                   onChange={() => handleEndTypeChange('date')}
                   className="h-4 w-4"
                 />
-                <Label htmlFor="end_date" className="text-sm">On</Label>
+                <Label htmlFor="end_date" className="text-sm text-gray-800 dark:text-gray-700">On</Label>
                 {endType === 'date' && (
                   <div className="flex items-center space-x-2">
-                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <Calendar className="h-4 w-4 text-gray-600" />
                     <Input
                       type="date"
                       value={endDate}
@@ -159,7 +159,7 @@ export function RecurrenceSettings({
                   onChange={() => handleEndTypeChange('count')}
                   className="h-4 w-4"
                 />
-                <Label htmlFor="end_count" className="text-sm">After</Label>
+                <Label htmlFor="end_count" className="text-sm text-gray-800 dark:text-gray-700">After</Label>
                 {endType === 'count' && (
                   <div className="flex items-center space-x-2">
                     <Input
@@ -170,19 +170,19 @@ export function RecurrenceSettings({
                       onChange={(e) => onCountChange(parseInt(e.target.value) || null)}
                       className="w-20"
                     />
-                    <span className="text-sm text-muted-foreground">occurrences</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-500">occurrences</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+          <div className="bg-blue-50 border border-blue-300 rounded-lg p-3 text-sm text-blue-900 dark:bg-blue-100 dark:border-blue-400">
             <div className="flex items-start gap-2">
-              <Clock className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <Clock className="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-700" />
               <div>
-                <p className="font-medium">Recurring Event Preview</p>
-                <p>
+                <p className="font-medium text-blue-900">Recurring Event Preview</p>
+                <p className="text-blue-800">
                   This event will repeat every {interval} {pattern === 'daily' && (interval === 1 ? 'day' : 'days')}
                   {pattern === 'weekly' && (interval === 1 ? 'week' : 'weeks')}
                   {pattern === 'monthly' && (interval === 1 ? 'month' : 'months')}
