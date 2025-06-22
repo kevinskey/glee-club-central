@@ -37,10 +37,13 @@ export function HeroSlider() {
     "/lovable-uploads/312fd1a4-7f46-4000-8711-320383aa565a.png",
   ];
 
-  // Only use fallback if there are truly no visible slides and we're not loading
-  const shouldUseFallback = !loading && visibleSlides.length === 0;
+  // Determine which slides to use - prioritize database slides over fallback
+  const actualSlides = visibleSlides.length > 0 ? visibleSlides : [];
   
-  const slides = shouldUseFallback ? [
+  // Only use fallback if there are no visible slides from database AND we're not loading
+  const shouldUseFallback = !loading && actualSlides.length === 0;
+  
+  const displaySlides = shouldUseFallback ? [
     {
       id: 'fallback-1',
       title: 'Spelman College Glee Club',
@@ -58,11 +61,16 @@ export function HeroSlider() {
         file_type: 'image/png'
       },
       button_text: 'Learn More',
-      button_link: '/about'
+      button_link: '/about',
+      show_title: true,
+      text_position: 'center',
+      text_alignment: 'center'
     }
-  ] : visibleSlides;
+  ] : actualSlides;
 
-  const currentSlide = slides[currentSlideIndex];
+  // Ensure currentSlideIndex is valid
+  const validSlideIndex = Math.min(currentSlideIndex, displaySlides.length - 1);
+  const currentSlide = displaySlides[validSlideIndex];
 
   // Check if current slide has any text content
   const hasTextContent = currentSlide && (
@@ -73,28 +81,30 @@ export function HeroSlider() {
 
   // Auto-advance slides
   useEffect(() => {
-    if (slides.length > 1) {
+    if (displaySlides.length > 1) {
       const timer = setInterval(() => {
-        setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+        setCurrentSlideIndex((prev) => (prev + 1) % displaySlides.length);
       }, 5000);
       return () => clearInterval(timer);
     }
-  }, [slides.length]);
+  }, [displaySlides.length]);
 
   // Reset slide index if slides change
   useEffect(() => {
-    if (currentSlideIndex >= slides.length) {
+    if (currentSlideIndex >= displaySlides.length) {
       setCurrentSlideIndex(0);
     }
-  }, [slides.length, currentSlideIndex]);
+  }, [displaySlides.length, currentSlideIndex]);
 
   console.log('Hero Slider Debug:', {
     loading,
     error,
     visibleSlidesCount: visibleSlides.length,
+    actualSlidesCount: actualSlides.length,
     shouldUseFallback,
-    totalSlides: slides.length,
+    displaySlidesCount: displaySlides.length,
     currentIndex: currentSlideIndex,
+    validIndex: validSlideIndex,
     currentSlide: currentSlide?.title,
     media_url: currentSlide?.media?.file_url,
     youtube_url: currentSlide?.youtube_url,
@@ -121,13 +131,25 @@ export function HeroSlider() {
     );
   }
 
+  // Determine the background media source
+  const getMediaSource = () => {
+    if (currentSlide.media_type === 'video' && currentSlide.youtube_url) {
+      return { type: 'video', url: currentSlide.youtube_url };
+    }
+    
+    const imageUrl = currentSlide.media?.file_url || fallbackImages[0];
+    return { type: 'image', url: imageUrl };
+  };
+
+  const mediaSource = getMediaSource();
+
   return (
     <section className="relative w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden">
       {/* Background Image or Video */}
-      {currentSlide.media_type === 'video' && currentSlide.youtube_url ? (
+      {mediaSource.type === 'video' ? (
         <div className="absolute inset-0 w-full h-full">
           <iframe
-            src={currentSlide.youtube_url}
+            src={mediaSource.url}
             className="w-full h-full border-0"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -138,12 +160,15 @@ export function HeroSlider() {
       ) : (
         <div className="absolute inset-0 w-full h-full">
           <img 
-            src={currentSlide.media?.file_url || fallbackImages[0]} 
+            src={mediaSource.url}
             alt={currentSlide.title || 'Hero Image'} 
             className="w-full h-full object-cover object-center" 
             onError={(e) => {
-              console.error('Hero image failed to load:', currentSlide.media?.file_url);
-              e.currentTarget.src = fallbackImages[0];
+              console.error('Hero image failed to load:', mediaSource.url);
+              // Try fallback image
+              if (e.currentTarget.src !== fallbackImages[0]) {
+                e.currentTarget.src = fallbackImages[0];
+              }
             }}
           />
         </div>
@@ -192,13 +217,13 @@ export function HeroSlider() {
       )}
 
       {/* Slide indicators if multiple slides */}
-      {slides.length > 1 && (
+      {displaySlides.length > 1 && (
         <div className="absolute bottom-6 md:bottom-8 lg:bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3">
-          {slides.map((_, index) => (
+          {displaySlides.map((_, index) => (
             <button
               key={index}
               className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
-                index === currentSlideIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
+                index === validSlideIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
               }`}
               onClick={() => setCurrentSlideIndex(index)}
             />
@@ -209,11 +234,12 @@ export function HeroSlider() {
       {/* Debug info in development */}
       {process.env.NODE_ENV === 'development' && (
         <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs">
-          <div>Slides: {slides.length}</div>
-          <div>Current: {currentSlideIndex + 1}</div>
-          <div>Visible DB: {visibleSlides.length}</div>
+          <div>DB Slides: {visibleSlides.length}</div>
+          <div>Display: {displaySlides.length}</div>
+          <div>Current: {validSlideIndex + 1}</div>
           <div>Fallback: {shouldUseFallback ? 'Yes' : 'No'}</div>
           <div>Has Text: {hasTextContent ? 'Yes' : 'No'}</div>
+          <div>Media: {mediaSource.type}</div>
         </div>
       )}
     </section>
