@@ -88,13 +88,13 @@ export function UnifiedPublicHeader() {
       <div className="w-full max-w-7xl mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Logo Section */}
         <div className="flex-shrink-0">
-          <Link to="/" className="font-bold flex items-center hover:text-[#0072CE] transition-colors group">
+          <Link to="/" className="font-bold flex items-center hover:opacity-80 transition-opacity group">
             <Icons.logo className="h-12 w-12 flex-shrink-0" />
             <div className="ml-3">
-              <div className="text-xl font-bold font-playfair text-foreground">
+              <div className="text-xl font-bold font-playfair text-gray-900 dark:text-white">
                 GleeWorld
               </div>
-              <div className="text-sm font-medium -mt-1 hidden sm:block text-muted-foreground">
+              <div className="text-sm font-medium -mt-1 hidden sm:block text-gray-600 dark:text-gray-300">
                 Spelman College
               </div>
             </div>
@@ -103,13 +103,13 @@ export function UnifiedPublicHeader() {
         
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-center mx-8">
-          <Link to="/" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+          <Link to="/" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
             Home
           </Link>
-          <Link to="/about" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+          <Link to="/about" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
             About
           </Link>
-          <Link to="/calendar" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors relative">
+          <Link to="/calendar" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors relative">
             Events
             {upcomingEvents.length > 0 && (
               <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[#0072CE] rounded-full animate-pulse"></div>
@@ -120,17 +120,17 @@ export function UnifiedPublicHeader() {
             target="_blank"
             rel="noopener noreferrer"
             onClick={handleReaderClick}
-            className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors"
+            className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors"
           >
             Reader
           </a>
-          <a href="https://studio.gleeworld.org" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+          <a href="https://studio.gleeworld.org" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
             Studio
           </a>
-          <Link to="/store" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+          <Link to="/store" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
             Store
           </Link>
-          <Link to="/contact" className="text-base font-medium text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
+          <Link to="/contact" className="text-base font-medium text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-colors">
             Contact
           </Link>
         </nav>
@@ -147,14 +147,14 @@ export function UnifiedPublicHeader() {
                 <Button
                   variant="ghost"
                   onClick={handleDashboardClick}
-                  className="text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
+                  className="text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
                 >
                   Dashboard
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
-                  className="text-foreground hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   Sign Out
                 </Button>
@@ -164,14 +164,14 @@ export function UnifiedPublicHeader() {
                 <Button
                   variant="ghost"
                   onClick={handleSignUpClick}
-                  className="text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
+                  className="text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
                 >
                   Sign Up
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={handleLoginClick}
-                  className="text-foreground hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
+                  className="text-gray-900 dark:text-white hover:text-[#0072CE] dark:hover:text-[#0072CE] hover:bg-[#0072CE]/10"
                 >
                   Login
                 </Button>
@@ -183,7 +183,7 @@ export function UnifiedPublicHeader() {
           <div className="lg:hidden flex-shrink-0">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-foreground relative h-12 w-12">
+                <Button variant="ghost" size="icon" className="text-gray-900 dark:text-white relative h-12 w-12">
                   <Menu className="h-8 w-8" />
                   {upcomingEvents.length > 0 && (
                     <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[#0072CE] rounded-full animate-pulse"></div>
@@ -197,8 +197,8 @@ export function UnifiedPublicHeader() {
                     <div className="flex items-center gap-3">
                       <Icons.logo className="h-14 w-14" />
                       <div>
-                        <div className="font-bold text-xl text-foreground font-playfair">GleeWorld</div>
-                        <div className="text-sm text-muted-foreground font-medium">Spelman College</div>
+                        <div className="font-bold text-xl text-gray-900 dark:text-white font-playfair">GleeWorld</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300 font-medium">Spelman College</div>
                       </div>
                     </div>
                   </div>
@@ -211,10 +211,10 @@ export function UnifiedPublicHeader() {
                           {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium text-foreground">
+                          <div className="font-medium text-gray-900 dark:text-white">
                             {profile?.first_name ? `${profile.first_name} ${profile.last_name}` : user?.email}
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             {isUserAdmin ? 'Administrator' : 'Member'}
                           </div>
                         </div>
@@ -229,7 +229,7 @@ export function UnifiedPublicHeader() {
                         <Button
                           key={link.label}
                           variant="ghost"
-                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-foreground hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200 relative"
+                          className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200 relative"
                           onClick={() => {
                             if (link.onClick) {
                               link.onClick(new Event('click') as any);
@@ -256,7 +256,7 @@ export function UnifiedPublicHeader() {
                         <div className="space-y-1">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-foreground hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleDashboardClick}
                           >
                             <User className="w-7 h-7 mr-3 flex-shrink-0" />
@@ -264,7 +264,7 @@ export function UnifiedPublicHeader() {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-foreground hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
                             onClick={handleLogout}
                           >
                             <LogOut className="w-7 h-7 mr-3 flex-shrink-0" />
@@ -275,7 +275,7 @@ export function UnifiedPublicHeader() {
                         <div className="space-y-1">
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-foreground hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleSignUpClick}
                           >
                             <UserPlus className="w-7 h-7 mr-3 flex-shrink-0" />
@@ -283,7 +283,7 @@ export function UnifiedPublicHeader() {
                           </Button>
                           <Button
                             variant="ghost"
-                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-foreground hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
+                            className="w-full justify-start h-12 px-4 rounded-xl text-left font-medium text-gray-900 dark:text-white hover:bg-[#0072CE]/10 dark:hover:bg-[#0072CE]/20 hover:text-[#0072CE] dark:hover:text-[#0072CE] transition-all duration-200"
                             onClick={handleLoginClick}
                           >
                             <LogIn className="w-7 h-7 mr-3 flex-shrink-0" />
