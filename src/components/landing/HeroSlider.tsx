@@ -95,7 +95,7 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero slides...</div>
       </div>
     );
@@ -107,14 +107,14 @@ export function HeroSlider() {
 
   if (!currentSlide) {
     return (
-      <div className="w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] bg-gray-200 flex items-center justify-center">
+      <div className="w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] bg-gray-200 flex items-center justify-center">
         <div className="text-gray-500">No slides available</div>
       </div>
     );
   }
 
   return (
-    <section className="relative w-full min-h-[215px] sm:min-h-[500px] md:min-h-[600px] lg:min-h-[700px] overflow-hidden">
+    <section className="relative w-full h-[400px] md:h-[600px] lg:h-[700px] xl:h-[800px] overflow-hidden">
       {/* Background Image or Video */}
       {currentSlide.media_type === 'video' && currentSlide.youtube_url ? (
         <div className="absolute inset-0 w-full h-full">
@@ -124,11 +124,7 @@ export function HeroSlider() {
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            style={{ 
-              width: '100%', 
-              height: '100%',
-              objectFit: 'cover'
-            }}
+            title={currentSlide.title}
           />
         </div>
       ) : (
@@ -137,10 +133,6 @@ export function HeroSlider() {
             src={currentSlide.media?.file_url || fallbackImages[0]} 
             alt={currentSlide.title || 'Hero Image'} 
             className="w-full h-full object-cover object-center" 
-            style={{
-              width: '100%',
-              height: '100%'
-            }}
             onError={(e) => {
               console.error('Hero image failed to load:', currentSlide.media?.file_url);
               e.currentTarget.src = fallbackImages[0];
@@ -155,22 +147,22 @@ export function HeroSlider() {
       {/* Content */}
       {(currentSlide.title || currentSlide.description || currentSlide.button_text) && (
         <div className={`absolute inset-0 flex items-center ${
-          currentSlide.text_position === 'top' ? 'justify-start pt-8 sm:pt-12 md:pt-16' :
-          currentSlide.text_position === 'bottom' ? 'justify-end pb-8 sm:pb-12 md:pb-16' :
+          currentSlide.text_position === 'top' ? 'justify-start pt-8 sm:pt-12 md:pt-16 lg:pt-20' :
+          currentSlide.text_position === 'bottom' ? 'justify-end pb-8 sm:pb-12 md:pb-16 lg:pb-20' :
           'justify-center'
         }`}>
-          <div className={`text-white px-4 sm:px-6 md:px-8 max-w-4xl w-full ${
+          <div className={`text-white px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 max-w-6xl w-full ${
             currentSlide.text_alignment === 'left' ? 'text-left' :
             currentSlide.text_alignment === 'right' ? 'text-right' :
             'text-center'
           }`}>
             {currentSlide.show_title !== false && currentSlide.title && (
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 md:mb-6 drop-shadow-lg">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 drop-shadow-lg leading-tight">
                 {currentSlide.title}
               </h1>
             )}
             {currentSlide.description && (
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 md:mb-8 drop-shadow-lg max-w-3xl mx-auto">
+              <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-6 sm:mb-8 md:mb-10 drop-shadow-lg max-w-4xl mx-auto leading-relaxed">
                 {currentSlide.description}
               </p>
             )}
@@ -178,7 +170,7 @@ export function HeroSlider() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-4 md:py-5 text-base sm:text-lg md:text-xl lg:text-2xl"
               >
                 <a href={currentSlide.button_link}>
                   {currentSlide.button_text}
@@ -191,12 +183,12 @@ export function HeroSlider() {
 
       {/* Slide indicators if multiple slides */}
       {slides.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-6 md:bottom-8 lg:bottom-10 left-1/2 transform -translate-x-1/2 flex space-x-3">
           {slides.map((_, index) => (
             <button
               key={index}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlideIndex ? 'bg-white' : 'bg-white/50'
+              className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-all duration-300 ${
+                index === currentSlideIndex ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
               }`}
               onClick={() => setCurrentSlideIndex(index)}
             />
