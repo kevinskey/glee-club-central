@@ -22,6 +22,13 @@ export interface CalendarEvent {
   allow_google_map_link: boolean;
   created_by?: string;
   created_at: string;
+  // Recurrence fields
+  is_recurring?: boolean;
+  recurrence_pattern?: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+  recurrence_interval?: number;
+  recurrence_end_date?: string | null;
+  recurrence_count?: number | null;
+  parent_event_id?: string | null;
 }
 
 export interface Holiday {

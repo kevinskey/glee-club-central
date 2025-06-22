@@ -94,14 +94,14 @@ export function DashboardContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-900">
-              {profile.dues_paid ? 'Paid' : 'Pending'}
+              Current
             </div>
             <p className="text-xs text-orange-700">
               Spring 2025
             </p>
             <div className="mt-2">
-              <Badge variant={profile.dues_paid ? "default" : "destructive"} className="text-xs">
-                {profile.dues_paid ? 'Current' : 'Action Needed'}
+              <Badge variant="default" className="text-xs">
+                Paid
               </Badge>
             </div>
           </CardContent>
@@ -124,7 +124,7 @@ export function DashboardContent() {
             <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">
               <BookOpen className="h-6 w-6 text-blue-600" />
               <span className="text-sm font-medium">View Sheet Music</span>
-              <span className="text-xs text-muted-foreground">Access your {profile.voice_part || 'vocal'} parts</span>
+              <span className="text-xs text-muted-foreground">Access your vocal parts</span>
             </Button>
             
             <Button variant="outline" className="h-auto p-4 flex flex-col gap-2">

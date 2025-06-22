@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { CalendarEvent } from "@/types/calendar";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,7 +18,8 @@ import { EventAssignmentManager } from "./EventAssignmentManager";
 import { EventImageUpload } from "./EventImageUpload";
 import { PerformerSelector } from "./PerformerSelector";
 import { EventTypeSelector } from "./EventTypeSelector";
-import { Calendar, Clock, MapPin, Users, Music } from "lucide-react";
+import { RecurrenceSettings } from "./RecurrenceSettings";
+import { Calendar, Clock, MapPin, Users, Music, Repeat } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -26,6 +28,14 @@ interface EventEditorProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (event: Omit<CalendarEvent, "id" | "created_at">) => Promise<void>;
+}
+
+interface RecurrentEventData {
+  is_recurring: boolean;
+  recurrence_pattern: string;
+  recurrence_interval: number;
+  recurrence_end_date: string;
+  recurrence_count: number | null;
 }
 
 const STORAGE_KEY = "glee-event-editor-data";
@@ -54,6 +64,14 @@ export const EventEditor: React.FC<EventEditorProps> = ({
     allow_reminders: true,
     allow_ics_download: true,
     allow_google_map_link: true,
+  });
+
+  const [recurrenceData, setRecurrenceData] = useState<RecurrentEventData>({
+    is_recurring: false,
+    recurrence_pattern: 'weekly',
+    recurrence_interval: 1,
+    recurrence_end_date: '',
+    recurrence_count: null,
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -92,6 +110,17 @@ export const EventEditor: React.FC<EventEditorProps> = ({
             ? event.allow_google_map_link
             : true,
       });
+
+      // Load recurrence data if it exists (from any additional fields in the event)
+      setRecurrenceData({
+        is_recurring: (event as any).is_recurring || false,
+        recurrence_pattern: (event as any).recurrence_pattern || 'weekly',
+        recurrence_interval: (event as any).recurrence_interval || 1,
+        recurrence_end_date: (event as any).recurrence_end_date 
+          ? format(new Date((event as any).recurrence_end_date), "yyyy-MM-dd")
+          : '',
+        recurrence_count: (event as any).recurrence_count || null,
+      });
     } else {
       // Load from localStorage or reset
       const savedData = localStorage.getItem(STORAGE_KEY);
@@ -100,6 +129,9 @@ export const EventEditor: React.FC<EventEditorProps> = ({
           const parsed = JSON.parse(savedData);
           if (parsed.formData) {
             setFormData(parsed.formData);
+          }
+          if (parsed.recurrenceData) {
+            setRecurrenceData(parsed.recurrenceData);
           }
         } catch (error) {
           console.error("Error loading saved data:", error);
@@ -118,10 +150,11 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         JSON.stringify({
           isCreating: true,
           formData,
+          recurrenceData,
         }),
       );
     }
-  }, [formData, event, isOpen]);
+  }, [formData, recurrenceData, event, isOpen]);
 
   const resetForm = () => {
     setFormData({
@@ -142,6 +175,13 @@ export const EventEditor: React.FC<EventEditorProps> = ({
       allow_reminders: true,
       allow_ics_download: true,
       allow_google_map_link: true,
+    });
+    setRecurrenceData({
+      is_recurring: false,
+      recurrence_pattern: 'weekly',
+      recurrence_interval: 1,
+      recurrence_end_date: '',
+      recurrence_count: null,
     });
   };
 
@@ -172,7 +212,30 @@ export const EventEditor: React.FC<EventEditorProps> = ({
 
     setIsSaving(true);
     try {
-      await onSave(formData);
+      // Prepare event data with recurrence fields
+      const eventData = {
+        ...formData,
+        // Add recurrence fields to the event data
+        ...(recurrenceData.is_recurring ? {
+          is_recurring: recurrenceData.is_recurring,
+          recurrence_pattern: recurrenceData.recurrence_pattern,
+          recurrence_interval: recurrenceData.recurrence_interval,
+          recurrence_end_date: recurrenceData.recurrence_end_date 
+            ? new Date(recurrenceData.recurrence_end_date).toISOString()
+            : null,
+          recurrence_count: recurrenceData.recurrence_count,
+          parent_event_id: null, // This is the parent event
+        } : {
+          is_recurring: false,
+          recurrence_pattern: null,
+          recurrence_interval: 1,
+          recurrence_end_date: null,
+          recurrence_count: null,
+          parent_event_id: null,
+        })
+      };
+
+      await onSave(eventData as any);
 
       // Clear localStorage after successful save
       localStorage.removeItem(STORAGE_KEY);
@@ -195,6 +258,7 @@ export const EventEditor: React.FC<EventEditorProps> = ({
         JSON.stringify({
           isCreating: true,
           formData,
+          recurrenceData,
         }),
       );
     }
@@ -288,6 +352,40 @@ export const EventEditor: React.FC<EventEditorProps> = ({
               <EventImageUpload
                 currentImageUrl={formData.feature_image_url}
                 onImageChange={handleImageChange}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Recurrence Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Repeat className="h-5 w-5" />
+                Recurrence Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RecurrenceSettings
+                isRecurring={recurrenceData.is_recurring}
+                onIsRecurringChange={(value) => 
+                  setRecurrenceData(prev => ({ ...prev, is_recurring: value }))
+                }
+                pattern={recurrenceData.recurrence_pattern}
+                onPatternChange={(value) => 
+                  setRecurrenceData(prev => ({ ...prev, recurrence_pattern: value }))
+                }
+                interval={recurrenceData.recurrence_interval}
+                onIntervalChange={(value) => 
+                  setRecurrenceData(prev => ({ ...prev, recurrence_interval: value }))
+                }
+                endDate={recurrenceData.recurrence_end_date}
+                onEndDateChange={(value) => 
+                  setRecurrenceData(prev => ({ ...prev, recurrence_end_date: value }))
+                }
+                count={recurrenceData.recurrence_count}
+                onCountChange={(value) => 
+                  setRecurrenceData(prev => ({ ...prev, recurrence_count: value }))
+                }
               />
             </CardContent>
           </Card>
@@ -476,6 +574,22 @@ export const EventEditor: React.FC<EventEditorProps> = ({
                   <p>
                     After creating this event, you'll be able to assign members
                     to perform and they'll be automatically notified.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Info about recurring events */}
+          {recurrenceData.is_recurring && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-sm text-purple-800">
+              <div className="flex items-start gap-2">
+                <Repeat className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium">Recurring Event</p>
+                  <p>
+                    This will create multiple event instances based on your recurrence settings. 
+                    Each instance can be edited individually if needed.
                   </p>
                 </div>
               </div>

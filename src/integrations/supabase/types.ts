@@ -673,8 +673,14 @@ export type Database = {
           image_url: string | null
           is_private: boolean | null
           is_public: boolean | null
+          is_recurring: boolean | null
           location_map_url: string | null
           location_name: string | null
+          parent_event_id: string | null
+          recurrence_count: number | null
+          recurrence_end_date: string | null
+          recurrence_interval: number | null
+          recurrence_pattern: string | null
           short_description: string | null
           start_time: string
           title: string
@@ -700,8 +706,14 @@ export type Database = {
           image_url?: string | null
           is_private?: boolean | null
           is_public?: boolean | null
+          is_recurring?: boolean | null
           location_map_url?: string | null
           location_name?: string | null
+          parent_event_id?: string | null
+          recurrence_count?: number | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_pattern?: string | null
           short_description?: string | null
           start_time: string
           title: string
@@ -727,13 +739,27 @@ export type Database = {
           image_url?: string | null
           is_private?: boolean | null
           is_public?: boolean | null
+          is_recurring?: boolean | null
           location_map_url?: string | null
           location_name?: string | null
+          parent_event_id?: string | null
+          recurrence_count?: number | null
+          recurrence_end_date?: string | null
+          recurrence_interval?: number | null
+          recurrence_pattern?: string | null
           short_description?: string | null
           start_time?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fan_tags: {
         Row: {
@@ -3576,6 +3602,10 @@ export type Database = {
       current_user_is_super_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      generate_recurring_events: {
+        Args: { p_parent_event_id: string; p_max_instances?: number }
+        Returns: undefined
       }
       get_all_users: {
         Args: Record<PropertyKey, never>
