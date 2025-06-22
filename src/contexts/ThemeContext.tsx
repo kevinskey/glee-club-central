@@ -24,20 +24,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
-    
+
     const root = document.documentElement;
-    
+
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
-    
+
     // Ensure consistent background
-    document.body.style.backgroundColor = theme === 'dark' 
-      ? 'hsl(222.2 84% 4.9%)' 
+    document.body.style.backgroundColor = theme === 'dark'
+      ? 'hsl(222.2 84% 4.9%)'
       : 'hsl(0 0% 100%)';
-    
+
+    // Update theme-color meta tag for mobile browsers
+    const metaTheme = document.querySelector(
+      'meta[name="theme-color"]'
+    ) as HTMLMetaElement | null;
+    if (metaTheme) {
+      metaTheme.content = theme === 'dark' ? '#000000' : '#ffffff';
+    }
+
   }, [theme]);
 
   const toggleTheme = () => {
