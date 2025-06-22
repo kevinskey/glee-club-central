@@ -17,7 +17,7 @@ interface DesktopEventsGridProps {
 
 export function DesktopEventsGrid({ events }: DesktopEventsGridProps) {
   return (
-    <div className="hidden md:grid md:grid-cols-2 gap-6">
+    <div className="hidden md:grid md:grid-cols-1 lg:grid-cols-2 gap-6">
       {events.map((event) => (
         <div key={event.id} className="group">
           <EventCard event={event} isMobile={false} />

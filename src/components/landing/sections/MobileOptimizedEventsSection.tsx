@@ -40,8 +40,10 @@ export function MobileOptimizedEventsSection({
   if (loading) {
     return (
       <section className={sectionClasses}>
-        <div className="container mx-auto px-4">
-          <EventsSectionHeader showHeader={showHeader} />
+        <div className="w-full max-w-full px-0">
+          <div className="px-4">
+            <EventsSectionHeader showHeader={showHeader} />
+          </div>
           <EventsLoadingState />
         </div>
       </section>
@@ -51,8 +53,10 @@ export function MobileOptimizedEventsSection({
   if (error) {
     return (
       <section className={sectionClasses}>
-        <div className="container mx-auto px-4">
-          <EventsErrorState />
+        <div className="w-full max-w-full px-0">
+          <div className="px-4">
+            <EventsErrorState />
+          </div>
         </div>
       </section>
     );
@@ -61,9 +65,11 @@ export function MobileOptimizedEventsSection({
   if (upcomingEvents.length === 0) {
     return (
       <section className={sectionClasses}>
-        <div className="container mx-auto px-4">
-          <EventsSectionHeader showHeader={showHeader} />
-          <EventsEmptyState />
+        <div className="w-full max-w-full px-0">
+          <div className="px-4">
+            <EventsSectionHeader showHeader={showHeader} />
+            <EventsEmptyState />
+          </div>
         </div>
       </section>
     );
@@ -71,20 +77,25 @@ export function MobileOptimizedEventsSection({
 
   return (
     <section className={sectionClasses}>
-      <div className="container mx-auto px-4">
-        <EventsSectionHeader showHeader={showHeader} />
+      <div className="w-full max-w-full px-0">
+        <div className="px-4">
+          <EventsSectionHeader showHeader={showHeader} />
+        </div>
         
         <MobileEventsGrid events={upcomingEvents} />
-        <DesktopEventsGrid events={upcomingEvents} />
         
-        {upcomingEvents.length >= maxEvents && (
-          <div className="text-center mt-6 md:mt-8">
-            <Button variant="outline" size="sm" className="mobile-button">
-              View All Events
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        )}
+        <div className="px-4">
+          <DesktopEventsGrid events={upcomingEvents} />
+          
+          {upcomingEvents.length >= maxEvents && (
+            <div className="text-center mt-6 md:mt-8">
+              <Button variant="outline" size="sm" className="mobile-button">
+                View All Events
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

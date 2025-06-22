@@ -20,14 +20,14 @@ interface EventCardProps {
 export function EventCard({ event, isMobile = false }: EventCardProps) {
   const cardClasses = isMobile 
     ? "flex-shrink-0 w-80 snap-start hover:shadow-lg transition-all duration-300"
-    : "hover:shadow-lg transition-shadow";
+    : "w-full hover:shadow-lg transition-shadow";
 
   return (
     <Card className={cardClasses}>
       <div className="relative">
         {/* Event Image */}
         {event.feature_image_url && (
-          <div className={`w-full overflow-hidden rounded-t-lg ${isMobile ? 'h-32' : 'h-40'}`}>
+          <div className={`w-full overflow-hidden rounded-t-lg ${isMobile ? 'h-32' : 'h-48'}`}>
             <img
               src={event.feature_image_url}
               alt={event.title}
