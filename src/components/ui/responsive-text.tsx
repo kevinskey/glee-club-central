@@ -1,6 +1,6 @@
 
 import React from "react";
-import { cn } from "@/lib/utils";
+import { UnifiedText } from "@/components/ui/unified-text";
 
 interface ResponsiveTextProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ interface ResponsiveTextProps {
 
 export function ResponsiveText({
   children,
-  as: Component = "p",
+  as = "p",
   size = "base",
   className,
   align,
@@ -22,18 +22,18 @@ export function ResponsiveText({
   pretty = false,
   ...props
 }: ResponsiveTextProps) {
-  // Define text size classes that scale appropriately across screen sizes
-  const sizeClasses = {
-    xs: "text-xs",
-    sm: "text-xs sm:text-sm",
-    base: "text-sm sm:text-base",
-    lg: "text-base sm:text-lg",
-    xl: "text-lg sm:text-xl",
-    "2xl": "text-xl sm:text-2xl",
-    "3xl": "text-2xl md:text-3xl",
-    "4xl": "text-3xl sm:text-4xl md:text-5xl",
-    "5xl": "text-4xl sm:text-5xl md:text-6xl",
-  };
+  // Map legacy sizes to new variant system
+  const sizeToVariant = {
+    xs: 'small',
+    sm: 'body-small',
+    base: 'body',
+    lg: 'body-large',
+    xl: 'h5',
+    '2xl': 'h4',
+    '3xl': 'h3',
+    '4xl': 'h2',
+    '5xl': 'h1'
+  } as const;
 
   const alignClasses = {
     left: "text-left",
@@ -41,19 +41,22 @@ export function ResponsiveText({
     right: "text-right",
   };
 
+  const additionalClasses = [
+    align && alignClasses[align],
+    balance && "text-balance",
+    pretty && "text-pretty",
+    className
+  ].filter(Boolean).join(' ');
+
   return (
-    <Component
-      className={cn(
-        sizeClasses[size],
-        align && alignClasses[align],
-        balance && "text-balance",
-        pretty && "text-pretty",
-        className
-      )}
+    <UnifiedText
+      as={as}
+      variant={sizeToVariant[size]}
+      className={additionalClasses}
       {...props}
     >
       {children}
-    </Component>
+    </UnifiedText>
   );
 }
 

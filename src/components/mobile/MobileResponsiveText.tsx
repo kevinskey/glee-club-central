@@ -1,33 +1,36 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { UnifiedText } from '@/components/ui/unified-text';
 
 interface MobileResponsiveTextProps {
   children: React.ReactNode;
   as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span';
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  size?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'body' | 'body-large' | 'body-small' | 'small' | 'caption';
   className?: string;
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
 
 export function MobileResponsiveText({ 
   children, 
-  as: Component = 'p',
-  size = 'base',
+  as = 'p',
+  size = 'body',
   className,
   weight = 'normal'
 }: MobileResponsiveTextProps) {
-  const sizeClasses = {
-    xs: 'text-xs sm:text-sm',
-    sm: 'text-sm sm:text-base',
-    base: 'text-base sm:text-lg',
-    lg: 'text-lg sm:text-xl',
-    xl: 'text-xl sm:text-2xl',
-    '2xl': 'text-2xl sm:text-3xl md:text-4xl',
-    '3xl': 'text-3xl sm:text-4xl md:text-5xl',
-    '4xl': 'text-4xl sm:text-5xl md:text-6xl',
-    '5xl': 'text-5xl sm:text-6xl md:text-7xl'
-  };
+  // Map old size system to new variant system
+  const variantMap = {
+    'xs': 'small',
+    'sm': 'body-small', 
+    'base': 'body',
+    'lg': 'body-large',
+    'xl': 'h5',
+    '2xl': 'h4',
+    '3xl': 'h3',
+    '4xl': 'h2',
+    '5xl': 'h1'
+  } as const;
+
+  const variant = variantMap[size as keyof typeof variantMap] || size;
 
   const weightClasses = {
     normal: 'font-normal',
@@ -37,13 +40,12 @@ export function MobileResponsiveText({
   };
 
   return (
-    <Component className={cn(
-      sizeClasses[size],
-      weightClasses[weight],
-      'leading-tight',
-      className
-    )}>
+    <UnifiedText
+      as={as}
+      variant={variant as any}
+      className={`${weightClasses[weight]} ${className || ''}`}
+    >
       {children}
-    </Component>
+    </UnifiedText>
   );
 }
