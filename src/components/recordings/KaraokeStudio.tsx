@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, Square, Music2, Save, Play, Pause, Rewind, Volume2, Volume1, VolumeX } from "lucide-react";
+import { Mic, Square, Music2, Save, Play, Pause, Rewind, Volume2, Volume1, VolumeX, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BackingTrackSelector } from "./BackingTrackSelector";
@@ -36,6 +36,8 @@ export function KaraokeStudio() {
   const [countdownValue, setCountdownValue] = useState(0);
   const [isShowingSaveForm, setIsShowingSaveForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [audioDelay, setAudioDelay] = useState(0); // Audio delay in milliseconds for Bluetooth compensation
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   
   // Custom hooks
   const { isRecording, startRecording, stopRecording } = useAudioRecorder();
@@ -134,22 +136,34 @@ export function KaraokeStudio() {
     }, 1000);
   };
   
-  // Actually start recording after countdown
+  // Actually start recording after countdown with delay compensation
   const startActualRecording = async () => {
     try {
-      // Start playing backing track if selected
-      if (selectedTrack && backingTrackRef.current) {
-        backingTrackRef.current.currentTime = 0;
-        backingTrackRef.current.volume = backingVolume;
-        backingTrackRef.current.play()
-          .catch(err => {
-            console.error("Error playing backing track:", err);
-            toast.error("Could not play backing track. Please try again.");
-          });
-      }
-      
-      // Start recording
+      // Start recording first to capture the delay
       const stream = await startRecording();
+      
+      // Apply audio delay compensation for backing track
+      const delayMs = audioDelay;
+      
+      const startBackingTrack = () => {
+        if (selectedTrack && backingTrackRef.current) {
+          backingTrackRef.current.currentTime = 0;
+          backingTrackRef.current.volume = backingVolume;
+          backingTrackRef.current.play()
+            .catch(err => {
+              console.error("Error playing backing track:", err);
+              toast.error("Could not play backing track. Please try again.");
+            });
+        }
+      };
+      
+      // Start backing track with delay compensation
+      if (delayMs > 0) {
+        setTimeout(startBackingTrack, delayMs);
+        toast.info(`Backing track will start in ${delayMs}ms to compensate for audio delay`);
+      } else {
+        startBackingTrack();
+      }
       
       // Only proceed if we have a valid stream
       if (stream && canvasRef.current && audioContextRef.current) {
@@ -232,12 +246,14 @@ export function KaraokeStudio() {
       const response = await fetch(recordingUrl);
       const audioBlob = await response.blob();
       
-      // Save to Supabase
+      // Save to Supabase with delay compensation info
+      const notes = recordingNotes + (audioDelay > 0 ? `\n\nAudio delay compensation: ${audioDelay}ms` : '');
+      
       const result = await saveMixedRecording(
         audioBlob,
         recordingName,
         selectedTrack?.id,
-        recordingNotes,
+        notes,
         vocalVolume,
         backingVolume
       );
@@ -265,11 +281,19 @@ export function KaraokeStudio() {
     } else {
       recordingPlayerRef.current.play().catch(console.error);
       
-      // If backing track exists, play it in sync
+      // If backing track exists, play it in sync with delay compensation
       if (selectedTrack && backingTrackRef.current && !isRecording) {
-        backingTrackRef.current.currentTime = 0;
-        backingTrackRef.current.volume = backingVolume;
-        backingTrackRef.current.play().catch(console.error);
+        const startBackingTrack = () => {
+          backingTrackRef.current!.currentTime = 0;
+          backingTrackRef.current!.volume = backingVolume;
+          backingTrackRef.current!.play().catch(console.error);
+        };
+        
+        if (audioDelay > 0) {
+          setTimeout(startBackingTrack, audioDelay);
+        } else {
+          startBackingTrack();
+        }
       }
     }
     
@@ -332,6 +356,47 @@ export function KaraokeStudio() {
             />
           </div>
           
+          {/* Advanced Settings Toggle */}
+          <div className="mb-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+              className="flex items-center gap-2"
+            >
+              <Headphones className="h-4 w-4" />
+              {showAdvancedSettings ? 'Hide' : 'Show'} Bluetooth Settings
+            </Button>
+          </div>
+          
+          {/* Advanced Audio Settings */}
+          {showAdvancedSettings && (
+            <div className="mb-6 p-4 bg-muted rounded-lg space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Headphones className="h-4 w-4" />
+                    Bluetooth Audio Delay Compensation
+                  </Label>
+                  <span className="text-xs text-muted-foreground">
+                    {audioDelay}ms
+                  </span>
+                </div>
+                <Slider 
+                  value={[audioDelay]} 
+                  onValueChange={(values) => setAudioDelay(values[0])}
+                  min={0}
+                  max={500}
+                  step={10}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Compensates for Bluetooth headphone delay. Start with 150-250ms for most Bluetooth devices.
+                  This delays the backing track to sync with your vocal recording.
+                </p>
+              </div>
+            </div>
+          )}
+          
           {/* Hidden backing track audio element */}
           {selectedTrack && (
             <audio 
@@ -367,7 +432,7 @@ export function KaraokeStudio() {
               {isRecording ? (
                 <span className="flex items-center justify-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                  Recording
+                  Recording {audioDelay > 0 && `(${audioDelay}ms delay compensation)`}
                 </span>
               ) : selectedTrack ? (
                 <span className="flex items-center justify-center gap-1">
