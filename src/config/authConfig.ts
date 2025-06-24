@@ -1,8 +1,8 @@
-export const ADMIN_EMAILS: string[] = (import.meta.env.VITE_ADMIN_EMAILS as string | undefined || '')
-  .split(',')
-  .map(e => e.trim())
-  .filter(Boolean);
 
-export const isAdminEmail = (email?: string | null): boolean => {
-  return !!email && ADMIN_EMAILS.includes(email);
+// Admin configuration
+export const ADMIN_EMAILS = ['kevinskey@mac.com'];
+
+export const isAdminEmail = (email?: string): boolean => {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
 };

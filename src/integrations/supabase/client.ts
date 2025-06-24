@@ -9,7 +9,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'glee-world@1.0.0'
+    }
   }
 })
 
-console.log('Supabase client initialized successfully')
+console.log('Supabase client initialized with enhanced auth configuration')
