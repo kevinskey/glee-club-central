@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { Button } from "@/components/ui/button";
@@ -67,9 +68,27 @@ export function HeroSlider() {
     }
   ] : actualSlides;
 
-  // Ensure currentSlideIndex is valid
-  const validSlideIndex = Math.min(currentSlideIndex, displaySlides.length - 1);
+  // Reset slide index when slides change to prevent accessing invalid indices
+  useEffect(() => {
+    if (displaySlides.length > 0 && currentSlideIndex >= displaySlides.length) {
+      console.log('Resetting slide index due to slides change:', {
+        currentIndex: currentSlideIndex,
+        slidesLength: displaySlides.length
+      });
+      setCurrentSlideIndex(0);
+    }
+  }, [displaySlides.length, currentSlideIndex]);
+
+  // Ensure currentSlideIndex is always valid and get current slide safely
+  const validSlideIndex = Math.max(0, Math.min(currentSlideIndex, displaySlides.length - 1));
   const currentSlide = displaySlides[validSlideIndex];
+
+  // Sync the actual index with the valid index if they differ
+  useEffect(() => {
+    if (validSlideIndex !== currentSlideIndex && displaySlides.length > 0) {
+      setCurrentSlideIndex(validSlideIndex);
+    }
+  }, [validSlideIndex, currentSlideIndex, displaySlides.length]);
 
   // Check if current slide has any text content
   const hasTextContent = currentSlide && (
@@ -82,18 +101,15 @@ export function HeroSlider() {
   useEffect(() => {
     if (displaySlides.length > 1) {
       const timer = setInterval(() => {
-        setCurrentSlideIndex((prev) => (prev + 1) % displaySlides.length);
+        setCurrentSlideIndex((prev) => {
+          const nextIndex = (prev + 1) % displaySlides.length;
+          console.log('Auto-advancing slide:', { from: prev, to: nextIndex, totalSlides: displaySlides.length });
+          return nextIndex;
+        });
       }, 7000);
       return () => clearInterval(timer);
     }
   }, [displaySlides.length]);
-
-  // Reset slide index if slides change
-  useEffect(() => {
-    if (currentSlideIndex >= displaySlides.length) {
-      setCurrentSlideIndex(0);
-    }
-  }, [displaySlides.length, currentSlideIndex]);
 
   console.log('Hero Slider Debug:', {
     loading,
@@ -120,6 +136,17 @@ export function HeroSlider() {
 
   if (error) {
     console.error('Hero slider error:', error);
+  }
+
+  // Additional safety check - if no current slide despite having slides, force reset
+  if (!currentSlide && displaySlides.length > 0) {
+    console.warn('No current slide found despite having slides, forcing reset');
+    setCurrentSlideIndex(0);
+    return (
+      <div className="w-full h-[200px] md:h-[400px] lg:h-[600px] bg-gray-200 animate-pulse flex items-center justify-center">
+        <div className="text-gray-500">Loading slides...</div>
+      </div>
+    );
   }
 
   if (!currentSlide) {
@@ -224,6 +251,7 @@ export function HeroSlider() {
           <div>Fallback: {shouldUseFallback ? 'Yes' : 'No'}</div>
           <div>Has Text: {hasTextContent ? 'Yes' : 'No'}</div>
           <div>Media: {mediaSource.type}</div>
+          <div>Index Valid: {validSlideIndex === currentSlideIndex ? 'Yes' : 'No'}</div>
         </div>
       )}
     </section>
