@@ -5,13 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Plus, Upload, MoveUp, MoveDown, Edit, Trash2, Settings } from 'lucide-react';
+import { Eye, EyeOff, Plus, Upload, MoveUp, MoveDown, Edit, Trash2, Settings, AlertCircle } from 'lucide-react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { useMediaLibrary } from '@/hooks/useMediaLibrary';
 import { UploadMediaModal } from '@/components/UploadMediaModal';
 import { AddSlideModal } from '@/components/admin/AddSlideModal';
 import { SliderSpacingControls } from '@/components/admin/SliderSpacingControls';
 import { EditSlideModal } from '@/components/admin/EditSlideModal';
+import { HeroSlideSetup } from '@/components/admin/HeroSlideSetup';
 import { toast } from 'sonner';
 
 export default function HeroSlidesPage() {
@@ -21,6 +22,9 @@ export default function HeroSlidesPage() {
   const [showAddSlideModal, setShowAddSlideModal] = useState(false);
   const [showEditSlideModal, setShowEditSlideModal] = useState(false);
   const [selectedSlide, setSelectedSlide] = useState(null);
+
+  const visibleSlides = slides.filter(s => s.visible);
+  const isUsingFallback = visibleSlides.length === 0;
 
   const handleVisibilityToggle = async (slideId: string, visible: boolean) => {
     await updateSlideVisibility(slideId, visible);
@@ -99,14 +103,37 @@ export default function HeroSlidesPage() {
         }
       />
 
-      <Tabs defaultValue="slides" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      {/* Fallback Warning */}
+      {isUsingFallback && (
+        <Card className="mb-6 border-orange-200 bg-orange-50">
+          <CardContent className="flex items-center gap-3 pt-6">
+            <AlertCircle className="h-5 w-5 text-orange-600" />
+            <div>
+              <p className="font-medium text-orange-900">Using Fallback Images</p>
+              <p className="text-sm text-orange-700">
+                Your homepage is currently showing fallback images because no hero slides are active.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs defaultValue="setup" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="setup">
+            {isUsingFallback && <AlertCircle className="h-4 w-4 mr-2 text-orange-500" />}
+            Quick Setup
+          </TabsTrigger>
           <TabsTrigger value="slides">Slides Management</TabsTrigger>
           <TabsTrigger value="spacing">
             <Settings className="h-4 w-4 mr-2" />
             Spacing Controls
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="setup" className="mt-6">
+          <HeroSlideSetup />
+        </TabsContent>
 
         <TabsContent value="slides" className="mt-6">
           {/* Slides Overview */}
