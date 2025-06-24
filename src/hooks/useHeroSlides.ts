@@ -30,7 +30,7 @@ export interface HeroSlide {
 
 export const useHeroSlides = (sectionId: string = 'homepage-main') => {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [loading, setLoading] = useState(false); // Changed from true to false
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchHeroSlides = async () => {
@@ -41,6 +41,7 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
       if (!supabase) {
         console.warn('useHeroSlides: Supabase not configured');
         setSlides([]);
+        setLoading(false);
         return;
       }
 
@@ -60,7 +61,8 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
 
       if (fetchError) {
         console.error('Error fetching hero slides:', fetchError);
-        setSlides([]); // Set empty array instead of throwing
+        setError(fetchError.message);
+        setSlides([]);
         return;
       }
 
@@ -78,8 +80,7 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
     } catch (err) {
       console.error('Error fetching hero slides:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch hero slides');
-      setSlides([]); // Ensure we have an empty array on error
-      toast.error('Failed to load hero slides');
+      setSlides([]);
     } finally {
       setLoading(false);
     }
