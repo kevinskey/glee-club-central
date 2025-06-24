@@ -5,12 +5,12 @@ import { User } from './types';
 import { toast } from 'sonner';
 
 interface UseUserUpdateResponse {
-  updateUser: (userId: string, userData: Partial<User>) => Promise<boolean>;
+  updateUser: (userId: string, userData: Partial<User & { email_update_requested?: boolean }>) => Promise<boolean>;
   updateUserStatus: (userId: string, status: string) => Promise<boolean>;
 }
 
 export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateResponse => {
-  const updateUser = useCallback(async (userId: string, userData: Partial<User>) => {
+  const updateUser = useCallback(async (userId: string, userData: Partial<User & { email_update_requested?: boolean }>) => {
     try {
       console.log(`🔄 Updating user ${userId} with data:`, userData);
       
@@ -19,7 +19,30 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         return true;
       }
       
-      // Prepare the update object with only valid database fields
+      // Handle email updates separately through Supabase Auth
+      if (userData.email && userData.email_update_requested) {
+        console.log('📧 Updating user email through Supabase Auth...');
+        try {
+          const { error: emailError } = await supabase.auth.updateUser({
+            email: userData.email
+          });
+          
+          if (emailError) {
+            console.error('❌ Email update failed:', emailError);
+            toast.error(`Failed to update email: ${emailError.message}`);
+            return false;
+          }
+          
+          console.log('✅ Email update initiated - user will receive confirmation email');
+          toast.success('Email update initiated - user will receive a confirmation email');
+        } catch (err) {
+          console.error('💥 Email update error:', err);
+          toast.error('Failed to update email');
+          return false;
+        }
+      }
+      
+      // Prepare the update object with only valid database fields (excluding email)
       const updateData: Record<string, any> = {};
       
       // Handle standard profile fields that exist in the database
@@ -80,14 +103,14 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
       console.log("📝 Prepared update data for database:", updateData);
       
       if (Object.keys(updateData).length === 0) {
-        console.log("ℹ️ No valid fields to update");
+        console.log("ℹ️ No profile fields to update");
         return true;
       }
       
       // Add updated_at timestamp
       updateData.updated_at = new Date().toISOString();
       
-      console.log("🚀 Sending update to Supabase...");
+      console.log("🚀 Sending profile update to Supabase...");
       
       const { data, error } = await supabase
         .from('profiles')
@@ -96,19 +119,22 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         .select();
 
       if (error) {
-        console.error('❌ Supabase error updating user:', error);
+        console.error('❌ Supabase error updating user profile:', error);
         console.error('❌ Error details:', {
           message: error.message,
           details: error.details,
           hint: error.hint,
           code: error.code
         });
-        toast.error(`Failed to update user: ${error.message}`);
+        toast.error(`Failed to update profile: ${error.message}`);
         return false;
       }
 
-      console.log('✅ User updated successfully:', data);
-      toast.success('User updated successfully');
+      console.log('✅ User profile updated successfully:', data);
+      
+      if (!userData.email_update_requested) {
+        toast.success('User updated successfully');
+      }
 
       // Refresh users list if provided
       if (refreshUsers) {

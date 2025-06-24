@@ -25,6 +25,7 @@ export const userFormSchema = z.object({
   design_history_ids: z.array(z.string()).default([]).optional(),
   current_cart_id: z.string().optional(),
   role_tags: z.array(z.string()).default([]).optional(),
+  email_update_requested: z.boolean().default(false).optional(),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

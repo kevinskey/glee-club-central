@@ -19,6 +19,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { UserFormValues } from './form/userFormSchema';
+import { toast } from 'sonner';
 
 interface EditUserDialogProps {
   isOpen: boolean;
@@ -75,6 +76,8 @@ export function EditUserDialog({
     skip_email_confirmation: true
   });
 
+  const [emailUpdateRequested, setEmailUpdateRequested] = useState(false);
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -92,6 +95,7 @@ export function EditUserDialog({
         is_admin: user.is_super_admin || user.is_admin || false,
         skip_email_confirmation: true
       });
+      setEmailUpdateRequested(false);
     }
   }, [user]);
 
@@ -103,11 +107,13 @@ export function EditUserDialog({
     // Validate required fields
     if (!formData.first_name?.trim()) {
       console.error('First name is required');
+      toast.error('First name is required');
       return;
     }
     
     if (!formData.last_name?.trim()) {
       console.error('Last name is required');
+      toast.error('Last name is required');
       return;
     }
 
@@ -120,13 +126,16 @@ export function EditUserDialog({
       class_year: formData.class_year?.trim() || undefined,
       notes: formData.notes?.trim() || undefined,
       // Only include voice_part if it's actually selected
-      voice_part: formData.voice_part || undefined
+      voice_part: formData.voice_part || undefined,
+      // Include email update flag
+      email_update_requested: emailUpdateRequested
     };
 
     console.log('Clean data being sent:', cleanData);
 
     try {
       await onSave(cleanData);
+      setEmailUpdateRequested(false);
     } catch (error) {
       console.error('Error in form submission:', error);
     }
@@ -138,6 +147,16 @@ export function EditUserDialog({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleEmailChange = (value: string) => {
+    handleFieldChange('email', value);
+    // Mark that an email update was requested if the email changed
+    if (value !== user?.email) {
+      setEmailUpdateRequested(true);
+    } else {
+      setEmailUpdateRequested(false);
+    }
   };
 
   if (!user) return null;
@@ -182,12 +201,13 @@ export function EditUserDialog({
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleFieldChange('email', e.target.value)}
-                  disabled
+                  onChange={(e) => handleEmailChange(e.target.value)}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Email updates require special handling
-                </p>
+                {emailUpdateRequested && (
+                  <p className="text-xs text-amber-600">
+                    ⚠️ Email change requested - user will need to confirm via email
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
