@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, MapPin, Clock } from 'lucide-react';
 import { useCalendarEvents } from '@/hooks/useCalendarEvents';
-import { EventsLoadingState } from './sections/events/EventsLoadingState';
+import { EventsLoadingState } from '../sections/events/EventsLoadingState';
 
 const getEventTypeColor = (type: string) => {
   switch (type) {
