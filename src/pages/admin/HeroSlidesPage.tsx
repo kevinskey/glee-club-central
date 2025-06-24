@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
@@ -178,7 +179,7 @@ export default function HeroSlidesPage() {
             </div>
           </div>
 
-          {/* Slides List */}
+          {/* All Slides List - No Pagination */}
           <div className="space-y-4">
             {slides.length === 0 ? (
               <Card>
