@@ -1,48 +1,56 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { 
+import React, { useState, useEffect } from 'react';
+import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { UnifiedUser } from "@/hooks/user/useUnifiedUserManagement";
-import { formatPhoneNumber } from "@/utils/formatters";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { UserFormValues, userFormSchema } from "@/components/members/form/userFormSchema";
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ShoppingCart, CreditCard, Users, Crown, Calendar } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { UserFormValues } from './form/userFormSchema';
 
 interface EditUserDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: UserFormValues) => Promise<void>;
   isSubmitting: boolean;
-  user: UnifiedUser | null;
+  user: any;
 }
+
+// These values must match exactly what's in the database constraint
+const VOICE_PARTS = [
+  { value: 'soprano_1', label: 'Soprano 1' },
+  { value: 'soprano_2', label: 'Soprano 2' },
+  { value: 'alto_1', label: 'Alto 1' },
+  { value: 'alto_2', label: 'Alto 2' },
+  { value: 'tenor', label: 'Tenor' },
+  { value: 'bass', label: 'Bass' },
+  { value: 'director', label: 'Director' }
+];
+
+const ROLES = [
+  { value: 'member', label: 'Member' },
+  { value: 'section_leader', label: 'Section Leader' },
+  { value: 'admin', label: 'Admin' }
+];
+
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'alumni', label: 'Alumni' }
+];
 
 export function EditUserDialog({
   isOpen,
@@ -51,472 +59,290 @@ export function EditUserDialog({
   isSubmitting,
   user
 }: EditUserDialogProps) {
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
-    defaultValues: {
-      first_name: user?.first_name || '',
-      last_name: user?.last_name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      voice_part: (user?.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
-      status: (user?.status as "active" | "pending" | "inactive" | "alumni") || 'active',
-      role: (user?.role as "admin" | "member" | "section_leader") || 'member',
-      class_year: user?.class_year || '',
-      notes: user?.notes || '',
-      dues_paid: user?.dues_paid || false,
-      is_admin: user?.is_super_admin || false,
-      title: (user as any)?.title || 'none',
-      join_date: (user as any)?.join_date || '',
-      ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
-      account_balance: (user as any)?.account_balance || 0,
-      default_shipping_address: (user as any)?.default_shipping_address || ''
-    }
+  const [formData, setFormData] = useState<UserFormValues>({
+    email: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    voice_part: undefined,
+    role: 'member',
+    status: 'active',
+    class_year: '',
+    notes: '',
+    join_date: '',
+    dues_paid: false,
+    is_admin: false,
+    skip_email_confirmation: true
   });
 
-  React.useEffect(() => {
-    if (user && isOpen) {
-      form.reset({
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        email: user.email || '',
         first_name: user.first_name || '',
         last_name: user.last_name || '',
-        email: user.email || '',
         phone: user.phone || '',
-        voice_part: (user.voice_part as "soprano_1" | "soprano_2" | "alto_1" | "alto_2" | "tenor" | "bass" | "director" | null) || null,
-        status: (user.status as "active" | "pending" | "inactive" | "alumni") || 'active',
-        role: (user.role as "admin" | "member" | "section_leader") || 'member',
+        voice_part: user.voice_part || undefined,
+        role: user.role || 'member',
+        status: user.status || 'active',
         class_year: user.class_year || '',
         notes: user.notes || '',
+        join_date: user.join_date || '',
         dues_paid: user.dues_paid || false,
-        is_admin: user.is_super_admin || false,
-        title: (user as any)?.title || 'none',
-        join_date: (user as any)?.join_date || '',
-        ecommerce_enabled: (user as any)?.ecommerce_enabled || false,
-        account_balance: (user as any)?.account_balance || 0,
-        default_shipping_address: (user as any)?.default_shipping_address || ''
+        is_admin: user.is_super_admin || user.is_admin || false,
+        skip_email_confirmation: true
       });
     }
-  }, [user, isOpen, form]);
+  }, [user]);
 
-  const onSubmit = async (data: UserFormValues) => {
-    await onSave(data);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log('Submitting form data:', formData);
+    
+    // Validate required fields
+    if (!formData.first_name?.trim()) {
+      console.error('First name is required');
+      return;
+    }
+    
+    if (!formData.last_name?.trim()) {
+      console.error('Last name is required');
+      return;
+    }
+
+    // Clean up the data before sending
+    const cleanData = {
+      ...formData,
+      first_name: formData.first_name.trim(),
+      last_name: formData.last_name.trim(),
+      phone: formData.phone?.trim() || undefined,
+      class_year: formData.class_year?.trim() || undefined,
+      notes: formData.notes?.trim() || undefined,
+      // Only include voice_part if it's actually selected
+      voice_part: formData.voice_part || undefined
+    };
+
+    console.log('Clean data being sent:', cleanData);
+
+    try {
+      await onSave(cleanData);
+    } catch (error) {
+      console.error('Error in form submission:', error);
+    }
+  };
+
+  const handleFieldChange = (field: keyof UserFormValues, value: any) => {
+    console.log(`Updating field ${field} with value:`, value);
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   if (!user) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Edit Member Details
-          </DialogTitle>
-          <DialogDescription>
-            Update member information for {user.first_name} {user.last_name}
-          </DialogDescription>
+          <DialogTitle>Edit Member Details</DialogTitle>
         </DialogHeader>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Basic Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Basic Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="first_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="last_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Basic Information</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name *</Label>
+                <Input
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={(e) => handleFieldChange('first_name', e.target.value)}
+                  required
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="tel" 
-                        {...field} 
-                        onChange={(e) => {
-                          field.onChange(formatPhoneNumber(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            {/* Choir Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Choir Information</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="voice_part"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Voice Part</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select voice part" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="soprano_1">Soprano 1</SelectItem>
-                          <SelectItem value="soprano_2">Soprano 2</SelectItem>
-                          <SelectItem value="alto_1">Alto 1</SelectItem>
-                          <SelectItem value="alto_2">Alto 2</SelectItem>
-                          <SelectItem value="tenor">Tenor</SelectItem>
-                          <SelectItem value="bass">Bass</SelectItem>
-                          <SelectItem value="director">Director</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="class_year"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Class Year</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 2025" {...field} value={field.value || ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name *</Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={(e) => handleFieldChange('last_name', e.target.value)}
+                  required
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Membership Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="inactive">Inactive</SelectItem>
-                          <SelectItem value="alumni">Alumni</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => handleFieldChange('email', e.target.value)}
+                  disabled
                 />
-
-                <FormField
-                  control={form.control}
-                  name="join_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Join Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} value={field.value || ''} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                <p className="text-xs text-muted-foreground">
+                  Email updates require special handling
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={formData.phone}
+                  onChange={(e) => handleFieldChange('phone', e.target.value)}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="dues_paid"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Dues Paid
-                      </FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Member has paid their dues for this period
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
             </div>
+          </div>
 
-            <Separator />
-
-            {/* Leadership & Executive Board Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Crown className="h-5 w-5" />
-                Leadership & Executive Board
-              </h3>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select role" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="member">Member</SelectItem>
-                          <SelectItem value="section_leader">Section Leader</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Executive Title</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || "none"}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select executive title" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">No Title</SelectItem>
-                          <SelectItem value="President">President</SelectItem>
-                          <SelectItem value="Vice President">Vice President</SelectItem>
-                          <SelectItem value="Secretary">Secretary</SelectItem>
-                          <SelectItem value="Treasurer">Treasurer</SelectItem>
-                          <SelectItem value="Chief of Staff">Chief of Staff</SelectItem>
-                          <SelectItem value="Historian">Historian</SelectItem>
-                          <SelectItem value="Librarian">Librarian</SelectItem>
-                          <SelectItem value="Wardrobe Manager">Wardrobe Manager</SelectItem>
-                          <SelectItem value="Social Chair">Social Chair</SelectItem>
-                          <SelectItem value="Publicity Chair">Publicity Chair</SelectItem>
-                          <SelectItem value="Chaplain">Chaplain</SelectItem>
-                          <SelectItem value="Business Manager">Business Manager</SelectItem>
-                          <SelectItem value="Assistant Director">Assistant Director</SelectItem>
-                          <SelectItem value="Director">Director</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="is_admin"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Administrator Privileges
-                      </FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Grants full administrative access to the system
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            {/* E-commerce Settings */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                E-commerce Settings
-              </h3>
-              
-              <FormField
-                control={form.control}
-                name="ecommerce_enabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>
-                        Enable E-commerce Access
-                      </FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Allows access to design studio and store features
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="account_balance"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Account Balance ($)
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0"
-                        placeholder="0.00"
-                        {...field}
-                        value={field.value || 0}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="default_shipping_address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Default Shipping Address</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        value={field.value || ''} 
-                        rows={3}
-                        placeholder="Enter default shipping address..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <Separator />
-
-            {/* Additional Notes */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Additional Information</h3>
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes (optional)</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        value={field.value || ''} 
-                        rows={3}
-                        placeholder="Any additional notes about this member..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => onOpenChange(false)} 
-                disabled={isSubmitting}
+          {/* Music Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Music Information</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="voice_part">Voice Part</Label>
+              <Select 
+                value={formData.voice_part || ''} 
+                onValueChange={(value) => handleFieldChange('voice_part', value === '' ? undefined : value)}
               >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select voice part" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {VOICE_PARTS.map((part) => (
+                    <SelectItem key={part.value} value={part.value}>
+                      {part.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div>
+                <Label>Dues Paid</Label>
+                <p className="text-sm text-muted-foreground">
+                  Has this member paid their dues?
+                </p>
+              </div>
+              <Switch
+                checked={formData.dues_paid}
+                onCheckedChange={(checked) => handleFieldChange('dues_paid', checked)}
+              />
+            </div>
+          </div>
+
+          {/* Administrative */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Administrative</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select value={formData.role} onValueChange={(value) => handleFieldChange('role', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROLES.map((role) => (
+                      <SelectItem key={role.value} value={role.value}>
+                        {role.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select value={formData.status} onValueChange={(value) => handleFieldChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="class_year">Class Year</Label>
+                <Input
+                  id="class_year"
+                  value={formData.class_year}
+                  onChange={(e) => handleFieldChange('class_year', e.target.value)}
+                  placeholder="e.g., 2025"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="join_date">Join Date</Label>
+                <Input
+                  id="join_date"
+                  type="date"
+                  value={formData.join_date}
+                  onChange={(e) => handleFieldChange('join_date', e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div>
+                <Label>Admin Privileges</Label>
+                <p className="text-sm text-muted-foreground">
+                  Grant administrative access
+                </p>
+              </div>
+              <Switch
+                checked={formData.is_admin}
+                onCheckedChange={(checked) => handleFieldChange('is_admin', checked)}
+              />
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => handleFieldChange('notes', e.target.value)}
+              placeholder="Additional notes about this member..."
+              rows={3}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-glee-spelman hover:bg-glee-spelman/90"
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );
 }
-
-export default EditUserDialog;
