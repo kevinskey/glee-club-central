@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Footer } from "@/components/landing/Footer";
 import { HomePageContent } from "@/components/landing/HomePageContent";
-import { HeroSlider } from "@/components/landing/HeroSlider";
+import { HeroSystem } from "@/components/hero/HeroSystem";
 import { HomePageLoader } from "@/components/landing/HomePageLoader";
 import { useHomePageData } from "@/hooks/useHomePageData";
 import { useAnalyticsTracking } from "@/hooks/useAnalyticsTracking";
@@ -21,23 +21,20 @@ export default function HomePage() {
   useEffect(() => {
     console.log('HomePage: Component mounted');
     
-    // Reduce initial loading time and don't wait for all data
     const timer = setTimeout(() => {
       console.log('HomePage: Initial loading complete');
       setIsInitialLoading(false);
       
-      // Track homepage feature usage after initial load
       trackFeatureUsage('homepage_loaded', {
         eventsCount: upcomingEvents.length,
         productsCount: storeProducts.length,
         tracksCount: audioTracks.length
       });
-    }, 500); // Reduced from 1000ms to 500ms
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [upcomingEvents.length, storeProducts.length, audioTracks.length, trackFeatureUsage]);
 
-  // Show loader only during very initial page load
   if (isInitialLoading) {
     console.log('HomePage: Showing loader');
     return <HomePageLoader />;
@@ -47,13 +44,16 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Main content */}
       <main className="relative">
-        <HeroSlider />
-        {/* Rest of homepage content */}
+        <HeroSystem 
+          sectionId="homepage-main"
+          autoAdvance={true}
+          interval={7000}
+        />
+        
         <div className="bg-background">
           <HomePageContent
-            heroImages={[]} // No hero images needed anymore
+            heroImages={[]}
             upcomingEvents={upcomingEvents}
             storeProducts={storeProducts}
             audioTracks={audioTracks}
@@ -61,7 +61,6 @@ export default function HomePage() {
         </div>
       </main>
       
-      {/* Footer */}
       <Footer />
     </div>
   );
