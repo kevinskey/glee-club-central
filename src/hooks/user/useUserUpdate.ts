@@ -56,7 +56,8 @@ export const useUserUpdate = (refreshUsers?: () => Promise<any>): UseUserUpdateR
         updateData.phone = userData.phone?.trim() || null;
       }
       if (userData.voice_part !== undefined) {
-        updateData.voice_part = userData.voice_part;
+        // Handle voice_part properly - if it's null/undefined, explicitly set to null
+        updateData.voice_part = userData.voice_part || null;
       }
       if (userData.status !== undefined) {
         updateData.status = userData.status;

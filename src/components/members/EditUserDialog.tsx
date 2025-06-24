@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -125,8 +124,8 @@ export function EditUserDialog({
       phone: formData.phone?.trim() || undefined,
       class_year: formData.class_year?.trim() || undefined,
       notes: formData.notes?.trim() || undefined,
-      // Only include voice_part if it's actually selected
-      voice_part: formData.voice_part || undefined,
+      // Ensure voice_part is null if not selected, not undefined
+      voice_part: formData.voice_part || null,
       // Include email update flag
       email_update_requested: emailUpdateRequested
     };
@@ -157,6 +156,12 @@ export function EditUserDialog({
     } else {
       setEmailUpdateRequested(false);
     }
+  };
+
+  const handleVoicePartChange = (value: string) => {
+    // Convert "none" back to undefined, keep valid voice parts as-is
+    const voicePart = value === 'none' ? undefined : value;
+    handleFieldChange('voice_part', voicePart);
   };
 
   if (!user) return null;
@@ -228,7 +233,7 @@ export function EditUserDialog({
               <Label htmlFor="voice_part">Voice Part</Label>
               <Select 
                 value={formData.voice_part || 'none'} 
-                onValueChange={(value) => handleFieldChange('voice_part', value === 'none' ? undefined : value)}
+                onValueChange={handleVoicePartChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
