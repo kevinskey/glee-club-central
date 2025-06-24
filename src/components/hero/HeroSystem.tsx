@@ -20,7 +20,7 @@ export function HeroSystem({
   const { visibleSlides, loading, error } = useHeroSlides(sectionId);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Fallback configuration
+  // Fallback configuration with all required properties
   const fallbackSlide = {
     id: 'fallback',
     title: 'Spelman College Glee Club',
@@ -41,7 +41,9 @@ export function HeroSystem({
     button_link: '/about',
     show_title: true,
     text_position: 'center',
-    text_alignment: 'center'
+    text_alignment: 'center',
+    media_type: 'image' as const,
+    youtube_url: null
   };
 
   const displaySlides = visibleSlides.length > 0 ? visibleSlides : [fallbackSlide];
