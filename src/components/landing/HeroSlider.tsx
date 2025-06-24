@@ -56,13 +56,6 @@ export function HeroSlider() {
     }
   }, [displaySlides.length, currentSlideIndex]);
 
-  // Sync the actual index with the valid index if they differ
-  useEffect(() => {
-    if (validSlideIndex !== currentSlideIndex && displaySlides.length > 0) {
-      setCurrentSlideIndex(validSlideIndex);
-    }
-  }, [validSlideIndex, currentSlideIndex, displaySlides.length]);
-
   // Auto-advance slides
   useEffect(() => {
     if (displaySlides.length > 1) {
@@ -75,26 +68,26 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <div className="w-full h-[60vh] bg-gray-200 animate-pulse flex items-center justify-center">
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 animate-pulse flex items-center justify-center">
         <div className="text-gray-500">Loading hero slides...</div>
-      </div>
+      </section>
     );
   }
 
   if (error) {
     console.error('Hero slider error:', error);
     return (
-      <div className="w-full h-[60vh] bg-gray-100 flex items-center justify-center">
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-100 flex items-center justify-center">
         <div className="text-gray-500">Unable to load hero content</div>
-      </div>
+      </section>
     );
   }
 
   if (!currentSlide) {
     return (
-      <div className="w-full h-[60vh] bg-gray-200 flex items-center justify-center">
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 flex items-center justify-center">
         <div className="text-gray-500">No slides available</div>
-      </div>
+      </section>
     );
   }
 
@@ -143,18 +136,21 @@ export function HeroSlider() {
                 e.currentTarget.src = fallbackImages[0];
               }
             }}
+            onLoad={() => {
+              console.log('Hero image loaded successfully:', mediaSource.url);
+            }}
           />
         </div>
       )}
       
       {/* Conditional dark overlay for better text readability */}
       {hasTextContent && (
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
       )}
       
       {/* Content */}
       {hasTextContent && (
-        <div className={`absolute inset-0 flex items-center ${
+        <div className={`absolute inset-0 flex items-center z-10 ${
           currentSlide.text_position === 'top' ? 'justify-start pt-16' :
           currentSlide.text_position === 'bottom' ? 'justify-end pb-16' :
           'justify-center'
@@ -178,7 +174,7 @@ export function HeroSlider() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-4 text-lg"
+                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-4 text-lg shadow-lg"
               >
                 <a href={currentSlide.button_link}>
                   {currentSlide.button_text}
@@ -191,13 +187,13 @@ export function HeroSlider() {
 
       {/* Slide indicators */}
       {displaySlides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
           {displaySlides.map((_, index) => (
             <button
               key={index}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
                 index === validSlideIndex 
-                  ? 'bg-white scale-125' 
+                  ? 'bg-white scale-125 shadow-lg' 
                   : 'bg-white/50 hover:bg-white/75'
               }`}
               onClick={() => setCurrentSlideIndex(index)}

@@ -35,6 +35,7 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
 
   const fetchHeroSlides = async () => {
     try {
+      console.log('🎬 Fetching hero slides for section:', sectionId);
       setLoading(true);
       setError(null);
 
@@ -49,7 +50,7 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
         .from('hero_slides')
         .select(`
           *,
-          media_library!inner(
+          media_library(
             id,
             file_url,
             title,
@@ -60,11 +61,13 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
         .order('slide_order', { ascending: true });
 
       if (fetchError) {
-        console.error('Error fetching hero slides:', fetchError);
+        console.error('❌ Error fetching hero slides:', fetchError);
         setError(fetchError.message);
         setSlides([]);
         return;
       }
+
+      console.log('✅ Hero slides fetched:', data?.length || 0, 'slides');
 
       const formattedSlides = data?.map(slide => ({
         ...slide,
@@ -76,9 +79,10 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
         } : undefined
       })) || [];
 
+      console.log('📊 Formatted slides:', formattedSlides);
       setSlides(formattedSlides);
     } catch (err) {
-      console.error('Error fetching hero slides:', err);
+      console.error('💥 Error fetching hero slides:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch hero slides');
       setSlides([]);
     } finally {
@@ -88,6 +92,8 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
 
   const updateSlideVisibility = async (slideId: string, visible: boolean) => {
     try {
+      console.log(`🔄 Updating slide ${slideId} visibility to:`, visible);
+      
       const { error } = await supabase
         .from('hero_slides')
         .update({ visible })
@@ -100,14 +106,17 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
       ));
 
       toast.success(`Slide ${visible ? 'shown' : 'hidden'} successfully`);
+      console.log('✅ Slide visibility updated');
     } catch (err) {
-      console.error('Error updating slide visibility:', err);
+      console.error('❌ Error updating slide visibility:', err);
       toast.error('Failed to update slide visibility');
     }
   };
 
   const updateSlideOrder = async (slideId: string, newOrder: number) => {
     try {
+      console.log(`🔄 Updating slide ${slideId} order to:`, newOrder);
+      
       const { error } = await supabase
         .from('hero_slides')
         .update({ slide_order: newOrder })
@@ -117,15 +126,26 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
 
       await fetchHeroSlides(); // Refresh to get updated order
       toast.success('Slide order updated successfully');
+      console.log('✅ Slide order updated');
     } catch (err) {
-      console.error('Error updating slide order:', err);
+      console.error('❌ Error updating slide order:', err);
       toast.error('Failed to update slide order');
     }
   };
 
   useEffect(() => {
+    console.log('🚀 useHeroSlides: Initializing for section:', sectionId);
     fetchHeroSlides();
   }, [sectionId]);
+
+  const visibleSlides = slides.filter(slide => slide.visible);
+  
+  console.log('📈 Hook state:', {
+    totalSlides: slides.length,
+    visibleSlides: visibleSlides.length,
+    loading,
+    error
+  });
 
   return {
     slides,
@@ -134,7 +154,7 @@ export const useHeroSlides = (sectionId: string = 'homepage-main') => {
     fetchHeroSlides,
     updateSlideVisibility,
     updateSlideOrder,
-    visibleSlides: slides.filter(slide => slide.visible),
+    visibleSlides,
     totalSlides: slides.length
   };
 };
