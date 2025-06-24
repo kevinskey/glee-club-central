@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useHeroSlides } from "@/hooks/useHeroSlides";
 import { Button } from "@/components/ui/button";
