@@ -10,75 +10,9 @@ import { useProfile } from "@/contexts/ProfileContext";
 export default function AttendancePage() {
   const { profile } = useProfile();
 
-  // Sample attendance data - in a real app, this would come from your database
-  const attendanceRecords = [
-    {
-      id: "1",
-      event: "Weekly Rehearsal",
-      date: "2025-05-01",
-      status: "present",
-      notes: null,
-    },
-    {
-      id: "2",
-      event: "Sectional Practice",
-      date: "2025-04-28",
-      status: "present",
-      notes: null,
-    },
-    {
-      id: "3",
-      event: "Special Rehearsal",
-      date: "2025-04-25",
-      status: "excused",
-      notes: "Family emergency",
-    },
-    {
-      id: "4",
-      event: "Weekly Rehearsal",
-      date: "2025-04-24",
-      status: "late",
-      notes: "10 minutes late",
-    },
-    {
-      id: "5",
-      event: "Spring Concert",
-      date: "2025-04-15",
-      status: "present",
-      notes: null,
-    },
-    {
-      id: "6",
-      event: "Weekly Rehearsal",
-      date: "2025-04-17",
-      status: "absent",
-      notes: "No notification provided",
-    },
-  ];
-
-  const upcomingEvents = [
-    {
-      id: "1",
-      event: "Weekly Rehearsal",
-      date: "2025-05-08",
-      time: "6:00 PM - 8:00 PM",
-      location: "Music Building, Room 101",
-    },
-    {
-      id: "2",
-      event: "Sectional Practice",
-      date: "2025-05-10",
-      time: "2:00 PM - 3:30 PM",
-      location: "Practice Room 203",
-    },
-    {
-      id: "3",
-      event: "Performance Prep",
-      date: "2025-05-14",
-      time: "6:00 PM - 9:00 PM",
-      location: "Auditorium",
-    },
-  ];
+  // TODO: Replace with actual attendance data from database
+  const attendanceRecords: any[] = [];
+  const upcomingEvents: any[] = [];
 
   // Calculate attendance statistics
   const totalEvents = attendanceRecords.length;
@@ -153,26 +87,34 @@ export default function AttendancePage() {
             <CardDescription>Record of your past attendance</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendanceRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>{formatDate(record.date)}</TableCell>
-                    <TableCell>{record.event}</TableCell>
-                    <TableCell>{getStatusBadge(record.status)}</TableCell>
-                    <TableCell>{record.notes || "-"}</TableCell>
+            {attendanceRecords.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckCircle className="mx-auto h-10 w-10 mb-2 opacity-30" />
+                <p>No attendance records yet</p>
+                <p className="text-sm">Your attendance will appear here once events are tracked</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Event</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Notes</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {attendanceRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell>{formatDate(record.date)}</TableCell>
+                      <TableCell>{record.event}</TableCell>
+                      <TableCell>{getStatusBadge(record.status)}</TableCell>
+                      <TableCell>{record.notes || "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -182,27 +124,35 @@ export default function AttendancePage() {
             <CardDescription>Events you're expected to attend</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="border rounded-md p-4">
-                  <h3 className="font-medium">{event.event}</h3>
-                  <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      <span>{formatDate(event.date)}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="mr-2 h-4 w-4" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      <span>{event.location}</span>
+            {upcomingEvents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="mx-auto h-10 w-10 mb-2 opacity-30" />
+                <p>No upcoming events</p>
+                <p className="text-sm">Check back later for scheduled events</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {upcomingEvents.map((event) => (
+                  <div key={event.id} className="border rounded-md p-4">
+                    <h3 className="font-medium">{event.event}</h3>
+                    <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4" />
+                        <span>{formatDate(event.date)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4" />
+                        <span>{event.time}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        <span>{event.location}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

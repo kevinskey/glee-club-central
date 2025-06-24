@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -45,16 +46,16 @@ export default function AdminFinancesPage() {
   useEffect(() => {
     const loadFinancialData = async () => {
       setLoading(true);
-      // Mock data - in real app this would come from API
+      // TODO: Replace with actual API call to fetch financial data
       await new Promise(resolve => setTimeout(resolve, 1000));
       setFinancialData({
-        totalRevenue: 15750,
-        totalExpenses: 8420,
-        netIncome: 7330,
-        duesCollected: 12600,
-        outstandingDues: 3150,
-        membersPaid: 42,
-        totalMembers: 45
+        totalRevenue: 0,
+        totalExpenses: 0,
+        netIncome: 0,
+        duesCollected: 0,
+        outstandingDues: 0,
+        membersPaid: 0,
+        totalMembers: 0
       });
       setLoading(false);
     };
@@ -134,7 +135,7 @@ export default function AdminFinancesPage() {
               <CardContent>
                 <div className="text-2xl font-bold">${financialData.totalRevenue.toLocaleString()}</div>
                 <p className="text-xs text-gray-700 dark:text-gray-300">
-                  +12% from last semester
+                  No data available
                 </p>
               </CardContent>
             </Card>
@@ -188,28 +189,10 @@ export default function AdminFinancesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div>
-                    <p className="font-medium">Dues Payment - Jane Smith</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Dec 1, 2023</p>
-                  </div>
-                  <Badge variant="default">+$300</Badge>
-                </div>
-                <div className="flex items-center justify-between border-b pb-2">
-                  <div>
-                    <p className="font-medium">Concert Hall Rental</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Nov 28, 2023</p>
-                  </div>
-                  <Badge variant="destructive">-$1,200</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">Uniform Purchase</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Nov 25, 2023</p>
-                  </div>
-                  <Badge variant="destructive">-$450</Badge>
-                </div>
+              <div className="text-center py-8 text-muted-foreground">
+                <DollarSign className="mx-auto h-10 w-10 mb-2 opacity-30" />
+                <p>No transactions recorded yet</p>
+                <p className="text-sm">Financial transactions will appear here once recorded</p>
               </div>
             </CardContent>
           </Card>
