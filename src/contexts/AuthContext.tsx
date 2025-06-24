@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Create a basic profile if none exists
         const fallbackProfile: Profile = {
           id: userId,
+          email: user?.email || '',
           first_name: 'User',
           last_name: '',
           role: isAdminEmail(user?.email) ? 'admin' : 'member',
@@ -80,7 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       console.log('✅ Profile fetched successfully:', data);
-      return data;
+      // Ensure email is included in the returned profile
+      return {
+        ...data,
+        email: user?.email || data.email || ''
+      };
     } catch (err) {
       console.error('💥 Error in fetchProfile:', err);
       return null;
