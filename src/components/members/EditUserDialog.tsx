@@ -207,14 +207,14 @@ export function EditUserDialog({
             <div className="space-y-2">
               <Label htmlFor="voice_part">Voice Part</Label>
               <Select 
-                value={formData.voice_part || ''} 
-                onValueChange={(value) => handleFieldChange('voice_part', value === '' ? undefined : value)}
+                value={formData.voice_part || 'none'} 
+                onValueChange={(value) => handleFieldChange('voice_part', value === 'none' ? undefined : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice part" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {VOICE_PARTS.map((part) => (
                     <SelectItem key={part.value} value={part.value}>
                       {part.label}
