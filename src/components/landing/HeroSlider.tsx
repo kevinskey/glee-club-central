@@ -68,8 +68,8 @@ export function HeroSlider() {
 
   if (loading) {
     return (
-      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 animate-pulse flex items-center justify-center">
-        <div className="text-gray-500">Loading hero slides...</div>
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-muted animate-pulse flex items-center justify-center">
+        <div className="text-muted-foreground">Loading hero slides...</div>
       </section>
     );
   }
@@ -77,16 +77,16 @@ export function HeroSlider() {
   if (error) {
     console.error('Hero slider error:', error);
     return (
-      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">Unable to load hero content</div>
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-muted flex items-center justify-center">
+        <div className="text-muted-foreground">Unable to load hero content</div>
       </section>
     );
   }
 
   if (!currentSlide) {
     return (
-      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-gray-200 flex items-center justify-center">
-        <div className="text-gray-500">No slides available</div>
+      <section className="relative w-full h-[60vh] md:h-[70vh] lg:h-[80vh] bg-muted flex items-center justify-center">
+        <div className="text-muted-foreground">No slides available</div>
       </section>
     );
   }
@@ -143,12 +143,12 @@ export function HeroSlider() {
         </div>
       )}
       
-      {/* Conditional dark overlay for better text readability */}
+      {/* Enhanced overlay for better text readability in both light and dark modes */}
       {hasTextContent && (
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="absolute inset-0 bg-black/50 dark:bg-black/60"></div>
       )}
       
-      {/* Content */}
+      {/* Content with improved contrast */}
       {hasTextContent && (
         <div className={`absolute inset-0 flex items-center z-10 ${
           currentSlide.text_position === 'top' ? 'justify-start pt-16' :
@@ -161,12 +161,12 @@ export function HeroSlider() {
             'text-center'
           }`}>
             {currentSlide.show_title !== false && currentSlide.title && (
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-lg leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 drop-shadow-2xl leading-tight text-white">
                 {currentSlide.title}
               </h1>
             )}
             {currentSlide.description && (
-              <p className="text-lg md:text-2xl lg:text-3xl mb-8 drop-shadow-lg max-w-4xl mx-auto leading-relaxed">
+              <p className="text-lg md:text-2xl lg:text-3xl mb-8 drop-shadow-xl max-w-4xl mx-auto leading-relaxed text-white/95">
                 {currentSlide.description}
               </p>
             )}
@@ -174,7 +174,7 @@ export function HeroSlider() {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-black hover:bg-gray-100 font-semibold px-8 py-4 text-lg shadow-lg"
+                className="bg-white text-black hover:bg-white/90 dark:bg-white dark:text-black dark:hover:bg-white/90 font-semibold px-8 py-4 text-lg shadow-xl"
               >
                 <a href={currentSlide.button_link}>
                   {currentSlide.button_text}

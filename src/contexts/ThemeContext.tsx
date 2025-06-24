@@ -12,19 +12,26 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check localStorage first, then system preference
-    const stored = localStorage.getItem('theme') as Theme;
-    if (stored && (stored === 'light' || stored === 'dark')) {
-      return stored;
-    }
-    
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const [theme, setTheme] = useState<Theme>('light'); // Default to light mode
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('theme', theme);
+    // Only check localStorage after component mounts to avoid hydration issues
+    const stored = localStorage.getItem('theme') as Theme;
+    if (stored && (stored === 'light' || stored === 'dark')) {
+      setTheme(stored);
+    } else {
+      // Check system preference only if no stored preference
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setTheme(systemPrefersDark ? 'dark' : 'light');
+    }
+    setIsInitialized(true);
+  }, []);
 
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    localStorage.setItem('theme', theme);
     const root = document.documentElement;
 
     if (theme === 'dark') {
@@ -33,20 +40,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove('dark');
     }
 
-    // Ensure consistent background
-    document.body.style.backgroundColor = theme === 'dark'
-      ? 'hsl(222.2 84% 4.9%)'
-      : 'hsl(0 0% 100%)';
+    // Ensure consistent background colors
+    document.body.className = theme === 'dark' 
+      ? 'dark bg-background text-foreground' 
+      : 'bg-background text-foreground';
 
     // Update theme-color meta tag for mobile browsers
-    const metaTheme = document.querySelector(
-      'meta[name="theme-color"]'
-    ) as HTMLMetaElement | null;
+    const metaTheme = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
     if (metaTheme) {
-      metaTheme.content = theme === 'dark' ? '#000000' : '#ffffff';
+      metaTheme.content = theme === 'dark' ? '#0f172a' : '#ffffff';
     }
-
-  }, [theme]);
+  }, [theme, isInitialized]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
