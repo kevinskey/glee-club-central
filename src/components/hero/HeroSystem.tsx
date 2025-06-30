@@ -33,7 +33,7 @@ export function HeroSystem({
     updated_at: '',
     media: { 
       id: 'fallback',
-      file_url: '/lovable-uploads/10bab1e7-0f4e-402f-ab65-feb4710b5eaf.png',
+      file_url: '/lovable-uploads/1536a1d1-51f6-4121-8f53-423d37672f2e.png',
       title: 'Spelman Glee Club',
       file_type: 'image/png'
     },
