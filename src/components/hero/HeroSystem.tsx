@@ -177,24 +177,6 @@ export function HeroSystem({
           </div>
         </>
       )}
-
-      {/* Slide Indicators */}
-      {displaySlides.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
-          {displaySlides.map((_, index) => (
-            <button
-              key={index}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentIndex 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/50 hover:bg-white/75'
-              }`}
-              onClick={() => setCurrentIndex(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 }
