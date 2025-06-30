@@ -19,7 +19,7 @@
   body {
     @apply text-foreground bg-background;
     font-family: inherit;
-    font-size: 1rem;
+    font-size: 1.125rem;
     line-height: 1.6;
     letter-spacing: -0.003em;
   }
@@ -85,10 +85,10 @@
     margin-bottom: 0.5rem;
   }
   
-  /* Unified Body Text System */
+  /* Unified Body Text System - Increased default size */
   p, .text-body {
     font-family: "Inter", sans-serif;
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 400;
     line-height: 1.6;
     letter-spacing: -0.003em;
@@ -98,7 +98,7 @@
   
   .text-body-large {
     font-family: "Inter", sans-serif;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 400;
     line-height: 1.55;
     letter-spacing: -0.005em;
@@ -107,7 +107,7 @@
   
   .text-body-small {
     font-family: "Inter", sans-serif;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: -0.002em;
@@ -117,7 +117,7 @@
   /* Unified Label and Small Text System */
   label, .text-label {
     font-family: "Inter", sans-serif;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 500;
     line-height: 1.4;
     letter-spacing: -0.002em;
@@ -126,7 +126,7 @@
   
   .text-small {
     font-family: "Inter", sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.4;
     letter-spacing: 0;
@@ -145,21 +145,21 @@
   /* Unified Button Text System */
   button, .btn, [role="button"] {
     font-family: "Inter", sans-serif;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 500;
     line-height: 1.2;
     letter-spacing: -0.002em;
   }
   
   .text-button-large {
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.2;
     letter-spacing: -0.003em;
   }
   
   .text-button-small {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.2;
     letter-spacing: 0;
@@ -168,7 +168,7 @@
   /* Form Elements */
   input, textarea, select {
     font-family: "Inter", sans-serif;
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 400;
     line-height: 1.4;
     letter-spacing: -0.002em;
@@ -226,12 +226,12 @@
     }
     
     p, .text-body {
-      font-size: 0.875rem;
+      font-size: 1rem;
       line-height: 1.6;
     }
     
     .text-body-large {
-      font-size: 1rem;
+      font-size: 1.125rem;
     }
   }
 }
