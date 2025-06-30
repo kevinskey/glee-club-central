@@ -23,7 +23,7 @@ export default function AboutPage() {
                 <CardTitle>Our Mission</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
+                <p className="text-body leading-relaxed">
                   The Spelman College Glee Club is dedicated to excellence in choral music performance 
                   and the development of young women as artists and leaders.
                 </p>
@@ -35,7 +35,7 @@ export default function AboutPage() {
                 <CardTitle>Our History</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">
+                <p className="text-body leading-relaxed">
                   Founded in the tradition of excellence that defines Spelman College, 
                   our Glee Club has been inspiring audiences for decades.
                 </p>
