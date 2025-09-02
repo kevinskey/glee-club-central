@@ -10,6 +10,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AttendancePage from "./pages/AttendancePage";
 import StorePage from "./pages/StorePage";
 import AutoProductGeneratorPage from "./pages/AutoProductGeneratorPage";
+import WritingGraderPage from "./pages/WritingGraderPage";
 import RoleDashboardPage from "./pages/RoleDashboardPage";
 import ExecutiveDashboard from "./pages/dashboard/ExecutiveDashboard";
 import TreasurerDashboard from "./pages/dashboard/TreasurerDashboard";
@@ -116,6 +117,10 @@ const router = createBrowserRouter([
       {
         path: "auto-generator",
         element: <AutoProductGeneratorPage />,
+      },
+      {
+        path: "writing-grader",
+        element: <WritingGraderPage />,
       },
       {
         path: "sheet-music",
